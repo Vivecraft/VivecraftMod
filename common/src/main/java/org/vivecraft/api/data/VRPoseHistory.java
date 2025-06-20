@@ -51,7 +51,7 @@ public interface VRPoseHistory {
      * @return The aforementioned net movement. Note that this will return zero change on all axes if only zero ticks
      * can be looked back. Will be null if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
-     * {@code bodyPart} is supplied.
+     *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */
     @Nullable
@@ -66,7 +66,7 @@ public interface VRPoseHistory {
      * @return The aforementioned average velocity on each axis. Note that this will return zero velocity on all axes
      * if only zero ticks can be looked back. Will be null if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
-     * {@code bodyPart} is supplied.
+     *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */
     @Nullable
@@ -81,7 +81,7 @@ public interface VRPoseHistory {
      * @return The aforementioned average speed on each axis. Note that this will return zero speed if only zero ticks
      * can be looked back. Will be 0 if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
-     * {@code bodyPart} is supplied.
+     *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */
     double averageSpeed(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;
@@ -95,7 +95,7 @@ public interface VRPoseHistory {
      * @return The aforementioned average position. Note that this will return the current position if only zero ticks
      * can be looked back. Will be null if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
-     * {@code bodyPart} is supplied.
+     *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */
     @Nullable

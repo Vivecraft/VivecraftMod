@@ -38,7 +38,7 @@ public class BackpackTracker implements Tracker {
         } else if (player.isSleeping()) {
             return false;
         } else {
-            return !this.dh.bowTracker.isDrawing;
+            return !this.dh.bowTracker.isDrawing();
         }
     }
 

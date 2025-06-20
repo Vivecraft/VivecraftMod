@@ -916,7 +916,7 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      */
     public static void renderPhysicalKeyboard(float partialTick) {
-        if (DATA_HOLDER.bowTracker.isDrawing) return;
+        if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         Profiler.get().push("renderPhysicalKeyboard");
 
@@ -1058,7 +1058,7 @@ public class VREffectsHelper {
      * @param depthAlways if the depth test should be disabled
      */
     public static void renderGuiLayer(float partialTick, boolean depthAlways) {
-        if (DATA_HOLDER.bowTracker.isDrawing) return;
+        if (DATA_HOLDER.bowTracker.isDrawing()) return;
         if (MC.screen == null && MC.options.hideGui) return;
         if (RadialHandler.isShowing()) return;
 
@@ -1121,7 +1121,7 @@ public class VREffectsHelper {
     public static void render2D(
         float partialTick, RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways)
     {
-        if (DATA_HOLDER.bowTracker.isDrawing) return;
+        if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         Profiler.get().push("render2D");
 

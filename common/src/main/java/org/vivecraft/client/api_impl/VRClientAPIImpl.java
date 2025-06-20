@@ -10,7 +10,6 @@ import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
 
 import javax.annotation.Nullable;

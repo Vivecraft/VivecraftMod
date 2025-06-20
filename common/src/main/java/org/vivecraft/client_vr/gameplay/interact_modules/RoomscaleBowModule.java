@@ -1,19 +1,27 @@
 package org.vivecraft.client_vr.gameplay.interact_modules;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api.client.HeldInteractModule;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
+import org.vivecraft.common.network.packet.c2s.DrawPayloadC2S;
 
+/**
+ * the bow interact module handles the key presses and sending of use packets for the {@link BowTracker}
+ */
 public class RoomscaleBowModule implements HeldInteractModule {
 
     private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "roomscale_bow");
 
     private final ClientDataHolderVR dh;
+    private final boolean[] isPressed = new boolean[2];
 
     public RoomscaleBowModule(ClientDataHolderVR dh) {
         this.dh = dh;
@@ -34,13 +42,39 @@ public class RoomscaleBowModule implements HeldInteractModule {
     }
 
     @Override
+    public void reset(LocalPlayer player, InteractionHand hand) {
+        this.isPressed[hand.ordinal()] = false;
+    }
+
+    public boolean isPressed() {
+        return this.isPressed[0] || this.isPressed[1];
+    }
+
+    @Override
     public boolean onPress(LocalPlayer player, InteractionHand hand) {
-        // we don't do anything, we just block other modules from doing stuff
+        // start drawing
+        this.isPressed[hand.ordinal()] = true;
+        // call useItem with the hand that has the bow
+        boolean bowInMain = BowTracker.isHoldingBow(player, InteractionHand.MAIN_HAND);
+        Minecraft.getInstance().gameMode.useItem(player,
+            bowInMain ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
         return false;
     }
 
     @Override
     public void onRelease(@Nullable LocalPlayer player, InteractionHand hand) {
-        // we don't do anything, we just block other modules from doing stuff
+        // fire!
+        int arrowHand = hand == InteractionHand.MAIN_HAND ? 0 : 1;
+        int bowHand = 1 - arrowHand;
+        this.dh.vr.triggerHapticPulse(arrowHand, 500);
+        this.dh.vr.triggerHapticPulse(bowHand, 3000);
+        ClientNetworking.sendServerPacket(new DrawPayloadC2S(this.dh.bowTracker.getDrawPercent()));
+        ClientNetworking.sendActiveBodyPart(arrowHand == 0 ? VRBodyPart.MAIN_HAND : VRBodyPart.OFF_HAND, true);
+
+        Minecraft.getInstance().gameMode.releaseUsingItem(player);
+
+        // reset to 0, in case user switches modes.
+        ClientNetworking.sendServerPacket(new DrawPayloadC2S(0.0F));
+        ClientNetworking.resetActiveBodyPart();
     }
 }

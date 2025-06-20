@@ -14,17 +14,13 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.api.client.Tracker;
-import org.vivecraft.api.data.VRBodyPart;
-import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ScaleHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.packet.c2s.DrawPayloadC2S;
 import org.vivecraft.common.utils.MathUtils;
 
 public class BowTracker implements Tracker, ItemInUseTracker {
@@ -33,9 +29,8 @@ public class BowTracker implements Tracker, ItemInUseTracker {
 
     // when the arrow was started drawing, to handle charged shots
     public long startDrawTime;
-    public boolean isDrawing;
+    private boolean wasDrawing;
 
-    private boolean pressed;
     private boolean canDraw;
     private float currentDraw;
     private float maxDraw;
@@ -63,11 +58,15 @@ public class BowTracker implements Tracker, ItemInUseTracker {
     }
 
     public boolean isNotched() {
-        return this.canDraw || this.isDrawing;
+        return this.canDraw || this.isDrawing();
     }
 
     public boolean isCharged() {
         return Util.getMillis() - this.startDrawTime >= MAX_DRAW_MILLIS;
+    }
+
+    public boolean isDrawing() {
+        return this.dh.interactTracker.bowModule.isPressed();
     }
 
     public static boolean isBow(ItemStack itemStack) {
@@ -93,7 +92,7 @@ public class BowTracker implements Tracker, ItemInUseTracker {
 
     @Override
     public boolean itemInUse(LocalPlayer player) {
-        return this.isDrawing;
+        return this.isDrawing();
     }
 
     @Override
@@ -107,13 +106,13 @@ public class BowTracker implements Tracker, ItemInUseTracker {
         } else if (player.isSleeping()) {
             return false;
         } else {
-            return isHoldingBow(player, InteractionHand.MAIN_HAND) || isHoldingBow(player, InteractionHand.OFF_HAND);
+            return isHoldingBowEither(player);
         }
     }
 
     @Override
     public void reset(LocalPlayer player) {
-        this.isDrawing = false;
+        this.wasDrawing = false;
         this.canDraw = false;
     }
 
@@ -129,7 +128,6 @@ public class BowTracker implements Tracker, ItemInUseTracker {
         if (this.dh.vrSettings.seated) {
             this.aim = vrData.getController(0).getCustomVector(MathUtils.FORWARD);
         } else {
-            boolean lastPressed = this.pressed;
             boolean lastCanDraw = this.canDraw;
 
             this.maxDraw = this.mc.player.getBbHeight() * 0.22F;
@@ -165,8 +163,6 @@ public class BowTracker implements Tracker, ItemInUseTracker {
 
             double controllersDot = Math.toDegrees(Math.acos(bowAim.dot(arrowAim)));
 
-            this.pressed = VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.values()[arrowHand]);
-
             float notchDistThreshold = 0.15F * vrData.worldScale;
             boolean main = isHoldingBow(player, InteractionHand.MAIN_HAND);
 
@@ -195,58 +191,33 @@ public class BowTracker implements Tracker, ItemInUseTracker {
                 notchDist <= notchDistThreshold &&
                 controllersDot <= NOTCH_DOT_THRESHOLD)
             {
-                // can draw
-                if (!this.canDraw) {
-                    this.startDrawTime = Util.getMillis();
-                }
-
                 this.canDraw = true;
                 this.tsNotch = (float) Util.getMillis();
 
-                if (!this.isDrawing) {
+                if (!this.isDrawing()) {
+                    // set client side so that it renders correctly
                     ((PlayerExtension) player).vivecraft$setItemInUseClient(bow, hand);
                     ((PlayerExtension) player).vivecraft$setItemInUseRemainingClient(stage0);
                     // Minecraft.getInstance().physicalGuiManager.preClickAction();
                 }
-            } else if (!this.isDrawing && (float) Util.getMillis() - this.tsNotch > 500.0F) {
+            } else if (!this.isDrawing() && (float) Util.getMillis() - this.tsNotch > 500.0F) {
                 this.canDraw = false;
-
-                ((PlayerExtension) player).vivecraft$setItemInUseClient(ItemStack.EMPTY, hand); // client draw only
+                // remove client side so that it renders correctly
+                ((PlayerExtension) player).vivecraft$setItemInUseClient(ItemStack.EMPTY, hand);
             }
 
-            if (!this.isDrawing && this.canDraw && this.pressed && !lastPressed) {
-                // draw
-                this.isDrawing = true;
-                // Minecraft.getInstance().physicalGuiManager.preClickAction();
-                this.mc.gameMode.useItem(player, hand); // server
+            // start counting when we started drawing
+            if (this.isDrawing() && !this.wasDrawing) {
+                this.startDrawTime = Util.getMillis();
             }
 
-            if (this.isDrawing && !this.pressed && lastPressed && this.getDrawPercent() > 0.0F) {
-                // fire!
-                this.dh.vr.triggerHapticPulse(arrowHand, 500);
-                this.dh.vr.triggerHapticPulse(bowHand, 3000);
-                ClientNetworking.sendServerPacket(new DrawPayloadC2S(this.getDrawPercent()));
-                ClientNetworking.sendActiveBodyPart(arrowHand == 0 ? VRBodyPart.MAIN_HAND : VRBodyPart.OFF_HAND, true);
-
-                this.mc.gameMode.releaseUsingItem(player);
-
-                // reset to 0, in case user switches modes.
-                ClientNetworking.sendServerPacket(new DrawPayloadC2S(0.0F));
-                ClientNetworking.resetActiveBodyPart();
-                this.isDrawing = false;
-            }
-
-            if (!this.pressed) {
-                this.isDrawing = false;
-            }
-
-            if (!this.isDrawing && this.canDraw && !lastCanDraw) {
+            if (!this.isDrawing() && this.canDraw && !lastCanDraw) {
                 // notch
                 this.dh.vr.triggerHapticPulse(arrowHand, 800);
                 this.dh.vr.triggerHapticPulse(bowHand, 800);
             }
 
-            if (this.isDrawing) {
+            if (this.isDrawing()) {
                 this.currentDraw = (controllersDist - notchDistThreshold) / vrData.worldScale;
 
                 if (this.currentDraw > this.maxDraw) {
@@ -259,7 +230,8 @@ public class BowTracker implements Tracker, ItemInUseTracker {
                     hapStrength = (int) (this.getDrawPercent() * 500.0F) + 700;
                 }
 
-                ((PlayerExtension) player).vivecraft$setItemInUseClient(bow, hand); // client draw only
+                // set client side so that it renders correctly
+                ((PlayerExtension) player).vivecraft$setItemInUseClient(bow, hand);
 
                 double drawPercent = this.getDrawPercent();
 
@@ -282,6 +254,7 @@ public class BowTracker implements Tracker, ItemInUseTracker {
                 }
 
                 if (this.isCharged() && this.hapCounter % 4 == 0) {
+                    // TODO: this should probably be on tick, and framerate independent
                     this.dh.vr.triggerHapticPulse(bowHand, 200);
                 }
 
@@ -291,6 +264,8 @@ public class BowTracker implements Tracker, ItemInUseTracker {
                 this.hapCounter = 0;
                 this.lastHapStep = 0;
             }
+
+            this.wasDrawing = this.isDrawing();
         }
     }
 }
