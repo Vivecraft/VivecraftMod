@@ -316,7 +316,7 @@ public class VRPlayer {
 
         this.dh.menuHandOff = MethodHolder.isInMenuRoom() || this.mc.screen != null || KeyboardHandler.SHOWING;
         this.dh.menuHandMain = this.dh.menuHandOff ||
-            (this.dh.interactTracker.hotbarModule.hotbar >= 0 && this.dh.vrSettings.vrTouchHotbar);
+            (this.dh.hotbarModule.hotbar >= 0 && this.dh.vrSettings.vrTouchHotbar);
     }
 
     public void postRender(float partialTick) {}
@@ -639,7 +639,7 @@ public class VRPlayer {
             } else if (this.dh.vrSettings.aimDevice != VRSettings.AimDevice.HMD) {
                 out = new Vec3(data.getController(c).getDirection());
             }
-        } else if (itemStack.getItem() == Items.BUCKET && this.dh.interactTracker.blockModule.bukkit[c] &&
+        } else if (itemStack.getItem() == Items.BUCKET && this.dh.blockModule.bukkit[c] &&
             ClientNetworking.LAST_SENT_BODY_PART.ordinal() == c && ClientNetworking.IS_LAST_BODY_PART_AIM)
         {
             out = entity.getEyePosition(1.0F)

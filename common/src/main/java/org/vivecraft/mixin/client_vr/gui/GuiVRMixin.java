@@ -124,15 +124,14 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Inject(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Ljava/util/function/Function;Lnet/minecraft/resources/ResourceLocation;IIII)V", ordinal = 1, shift = At.Shift.AFTER))
     private void vivecraft$hotbarContextIndicator(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
-        if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().interactTracker.hotbarModule.hotbar >= 0 &&
-            ClientDataHolderVR.getInstance().interactTracker.hotbarModule.hotbar < 9 &&
-            this.getCameraPlayer().getInventory().selected !=
-                ClientDataHolderVR.getInstance().interactTracker.hotbarModule.hotbar &&
+        if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
+            ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
+            this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = guiGraphics.guiWidth() / 2;
             guiGraphics.blitSprite(RenderType::guiTextured, HOTBAR_SELECTION_SPRITE,
-                middle - 91 - 1 + ClientDataHolderVR.getInstance().interactTracker.hotbarModule.hotbar * 20,
+                middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
                 guiGraphics.guiHeight() - 22 - 1, 24, 23, ARGB.color(0, 255, 0));
         }
     }
@@ -168,7 +167,7 @@ public abstract class GuiVRMixin implements GuiExtension {
         int y, int width, int height, Operation<Void> original)
     {
         boolean changeColor =
-            VRState.VR_RUNNING && ClientDataHolderVR.getInstance().interactTracker.hotbarModule.hotbar == 9 &&
+            VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar == 9 &&
                 ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player);
 
         if (changeColor) {

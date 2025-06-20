@@ -505,8 +505,8 @@ public abstract class MCVR {
      * processes the interactive hotbar
      */
     protected void processHotbar() {
-        int previousSlot = this.dh.interactTracker.hotbarModule.hotbar;
-        this.dh.interactTracker.hotbarModule.hotbar = -1;
+        int previousSlot = this.dh.hotbarModule.hotbar;
+        this.dh.hotbarModule.hotbar = -1;
 
         if (this.mc.player == null) return;
         // this shouldn't happen, it's final
@@ -579,8 +579,8 @@ public abstract class MCVR {
         }
 
         // all that maths for this.
-        this.dh.interactTracker.hotbarModule.hotbar = box;
-        if (previousSlot != this.dh.interactTracker.hotbarModule.hotbar) {
+        this.dh.hotbarModule.hotbar = box;
+        if (previousSlot != this.dh.hotbarModule.hotbar) {
             triggerHapticPulse(0, 750);
         }
     }

@@ -5,10 +5,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
-import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.gameplay.interact_modules.*;
 import org.vivecraft.client_vr.gameplay.trackers.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.MCVR;
@@ -17,7 +17,9 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 
 public class ClientDataHolderVR {
@@ -47,10 +49,6 @@ public class ClientDataHolderVR {
     private final List<Tracker> trackers = new ArrayList<>();
     // list of all trackers that control holding item usage
     private final List<ItemInUseTracker> itemInUseTrackers = new ArrayList<>();
-    // list of all registered interact modules
-    private final Queue<InteractModule> interactModules = new PriorityQueue<>(
-        (a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
-            Integer.compare(a.getPriority(), b.getPriority()));
 
     // our trackers
     public final BackpackTracker backpackTracker;
@@ -70,6 +68,14 @@ public class ClientDataHolderVR {
     public final TeleportTracker teleportTracker;
     public final TelescopeTracker telescopeTracker;
     public final VehicleTracker vehicleTracker;
+
+    // our interact modules
+    public final InteractiveHotbarModule hotbarModule;
+    public final RoomscaleBowModule bowModule;
+    public final ThirdPersonCameraModule thirdCamModule;
+    public final ScreenshotCameraModule screenCamModule;
+    public final EntityInteractionModule entityModule;
+    public final BlockInteractionModule blockModule;
 
     public VRSettings vrSettings;
     public boolean grabScreenShot = false;
@@ -129,6 +135,18 @@ public class ClientDataHolderVR {
         this.teleportTracker = createTracker(TeleportTracker::new);
         this.telescopeTracker = createTracker(TelescopeTracker::new);
         this.vehicleTracker = createTracker(VehicleTracker::new);
+
+        this.hotbarModule = new InteractiveHotbarModule();
+        this.bowModule = new RoomscaleBowModule(this);
+        this.thirdCamModule = new ThirdPersonCameraModule(this);
+        this.screenCamModule = new ScreenshotCameraModule(this);
+
+        this.entityModule = new EntityInteractionModule(Minecraft.getInstance(), this);
+        this.blockModule = new BlockInteractionModule(Minecraft.getInstance(), this);
+
+        this.interactTracker.registerPriorityModules(this.hotbarModule, this.bowModule, this.thirdCamModule,
+            this.screenCamModule);
+        this.interactTracker.registerModules(this.entityModule, this.blockModule);
     }
 
     public static ClientDataHolderVR getInstance() {
@@ -156,7 +174,7 @@ public class ClientDataHolderVR {
      * @param <T>         Class of the tracker
      * @return created tracker instance
      */
-    public <T extends Tracker> T createTracker(BiFunction<Minecraft, ClientDataHolderVR, T> constructor) {
+    private <T extends Tracker> T createTracker(BiFunction<Minecraft, ClientDataHolderVR, T> constructor) {
         T tracker = constructor.apply(Minecraft.getInstance(), this);
         registerTracker(tracker);
         return tracker;
@@ -168,7 +186,8 @@ public class ClientDataHolderVR {
      * @param tracker tracker to register
      * @throws IllegalArgumentException if the tracker is already registered
      */
-    public void registerTracker(Tracker tracker) throws IllegalArgumentException {
+    // synchronized, since this could be called from multiple threads during startup
+    public synchronized void registerTracker(Tracker tracker) throws IllegalArgumentException {
         if (this.trackers.contains(tracker)) {
             throw new IllegalArgumentException("Tracker is already added and should not be added again!");
         }
@@ -176,23 +195,6 @@ public class ClientDataHolderVR {
         if (tracker instanceof ItemInUseTracker itemInUseTracker) {
             this.itemInUseTrackers.add(itemInUseTracker);
         }
-    }
-
-    /**
-     * registers a interact module
-     *
-     * @param module module to register
-     * @throws IllegalArgumentException if the module is already registered
-     */
-    public void registerInteractModule(InteractModule module) throws IllegalArgumentException {
-        if (this.interactModules.contains(module) ||
-            this.interactModules.stream().anyMatch(m -> m.getId().equals(module.getId())))
-        {
-            throw new IllegalArgumentException(
-                "InteractModule '" + module.getId() + "' is already added and should not be added again!");
-        }
-        this.interactModules.add(module);
-        this.interactTracker.setModules(this.interactModules);
     }
 
     /**

@@ -146,7 +146,7 @@ public final class VRClientAPIImpl implements VRClientAPI {
 
     @Override
     public void registerInteractModule(InteractModule module) {
-        ClientDataHolderVR.getInstance().registerInteractModule(module);
+        ClientDataHolderVR.getInstance().interactTracker.registerModules(module);
     }
 
     @Override

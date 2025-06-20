@@ -45,6 +45,12 @@ public class BlockInteractionModule implements InteractModule {
     }
 
     @Override
+    public int getPriority() {
+        // block interaction should be after entities
+        return 1500;
+    }
+
+    @Override
     public void reset(LocalPlayer player, InteractionHand hand) {
         this.inBlockHit[hand.ordinal()] = null;
         this.bukkit[hand.ordinal()] = false;

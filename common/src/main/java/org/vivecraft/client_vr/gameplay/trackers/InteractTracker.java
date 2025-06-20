@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import com.google.common.collect.Streams;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -9,29 +10,24 @@ import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.interact_modules.*;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class InteractTracker implements Tracker {
 
-    public final InteractiveHotbarModule hotbarModule;
-    public final RoomscaleBowModule bowModule;
-    public final ThirdPersonCameraModule thirdCamModule;
-    public final ScreenshotCameraModule screenCamModule;
+    // list of registered interact modules
+    private final Queue<InteractModule> apiModules = new PriorityQueue<>(
+        (a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
+            Integer.compare(a.getPriority(), b.getPriority()));
 
-    public final EntityInteractionModule entityModule;
-    public final BlockInteractionModule blockModule;
+    // list of registered priority interact modules
+    private final Queue<InteractModule> priorityModules = new PriorityQueue<>(
+        (a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
+            Integer.compare(a.getPriority(), b.getPriority()));
 
-    private final List<InteractModule> preAPIModules;
-    private final List<InteractModule> postAPIModules;
-
-    private List<InteractModule> modules;
+    private final List<InteractModule> modules = new ArrayList<>();
     private final InteractModule[] activeModules = new InteractModule[2];
     private final boolean[] pressed = new boolean[2];
 
@@ -41,26 +37,42 @@ public class InteractTracker implements Tracker {
     public InteractTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;
         this.dh = dh;
-
-        this.hotbarModule = new InteractiveHotbarModule();
-        this.bowModule = new RoomscaleBowModule(dh);
-        this.thirdCamModule = new ThirdPersonCameraModule(dh);
-        this.screenCamModule = new ScreenshotCameraModule(dh);
-
-        this.entityModule = new EntityInteractionModule(mc, dh);
-        this.blockModule = new BlockInteractionModule(mc, dh);
-
-        this.preAPIModules = List.of(this.hotbarModule, this.bowModule, this.thirdCamModule, this.screenCamModule);
-        this.postAPIModules = List.of(this.entityModule, this.blockModule);
-
-        setModules(Collections.emptyList());
     }
 
-    public void setModules(Collection<InteractModule> modules) {
-        this.modules = new ArrayList<>(this.preAPIModules.size() + modules.size() + this.postAPIModules.size());
-        this.modules.addAll(this.preAPIModules);
-        this.modules.addAll(modules);
-        this.modules.addAll(this.postAPIModules);
+    /**
+     * registers interact modules, and ads them sorted based on their priority
+     *
+     * @param modules modules to register
+     * @throws IllegalArgumentException if a module is already registered
+     */
+    public void registerModules(InteractModule... modules) {
+        registerModules(this.apiModules, modules);
+    }
+
+    /**
+     * registers interact modules, and ads them to the priority list sorted based on their priority
+     *
+     * @param modules modules to register
+     * @throws IllegalArgumentException if a module is already registered
+     */
+    public void registerPriorityModules(InteractModule... modules) {
+        registerModules(this.priorityModules, modules);
+    }
+
+    // synchronized, since this could be called from multiple threads during startup
+    private synchronized void registerModules(Collection<InteractModule> target, InteractModule... modules) {
+        for (InteractModule module : modules) {
+            if (Streams.concat(this.modules.stream(), target.stream())
+                .anyMatch(m -> m.equals(module) || m.getId().equals(module.getId())))
+            {
+                throw new IllegalArgumentException(
+                    "InteractModule '" + module.getId() + "' is already added and should not be added again!");
+            }
+            target.add(module);
+        }
+        this.modules.clear();
+        this.modules.addAll(this.priorityModules);
+        this.modules.addAll(this.apiModules);
     }
 
     @Override
@@ -76,7 +88,7 @@ public class InteractTracker implements Tracker {
         } else if (this.dh.vrSettings.seated) {
             return false;
         } else {
-            return !player.isBlocking() || this.hotbarModule.hotbar >= 0;
+            return !player.isBlocking() || this.dh.hotbarModule.hotbar >= 0;
         }
     }
 

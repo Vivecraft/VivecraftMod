@@ -66,7 +66,7 @@ public class BowTracker implements Tracker, ItemInUseTracker {
     }
 
     public boolean isDrawing() {
-        return this.dh.interactTracker.bowModule.isPressed();
+        return this.dh.bowModule.isPressed();
     }
 
     public static boolean isBow(ItemStack itemStack) {

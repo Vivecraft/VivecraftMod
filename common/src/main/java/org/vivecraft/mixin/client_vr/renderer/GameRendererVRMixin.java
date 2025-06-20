@@ -241,7 +241,7 @@ public abstract class GameRendererVRMixin
     @Inject(method = "shouldRenderBlockOutline", at = @At("HEAD"), cancellable = true)
     private void vivecraft$shouldDrawBlockOutline(CallbackInfoReturnable<Boolean> cir) {
         if (!RenderPassType.isVanilla()) {
-            if (vivecraft$DATA_HOLDER.interactTracker.blockModule.isActive(0)) {
+            if (vivecraft$DATA_HOLDER.blockModule.isActive(0)) {
                 // no block outline when the main arm has interaction
                 cir.setReturnValue(false);
             } else if (vivecraft$DATA_HOLDER.teleportTracker.isAiming() ||

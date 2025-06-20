@@ -53,7 +53,7 @@ public class VRWidgetHelper {
                 float scale = 0.35F;
 
                 // bigger when interact ready
-                if (DATA_HOLDER.interactTracker.thirdCamModule.isActive() && !VRHotkeys.isMovingThirdPersonCam()) {
+                if (DATA_HOLDER.thirdCamModule.isActive() && !VRHotkeys.isMovingThirdPersonCam()) {
                     scale *= 1.03F;
                 }
 
@@ -81,7 +81,7 @@ public class VRWidgetHelper {
             float scale = 0.25F;
 
             // bigger when interact ready
-            if (DATA_HOLDER.interactTracker.screenCamModule.isActive() && !DATA_HOLDER.cameraTracker.isMoving()) {
+            if (DATA_HOLDER.screenCamModule.isActive() && !DATA_HOLDER.cameraTracker.isMoving()) {
                 scale *= 1.03F;
             }
 

@@ -22,6 +22,12 @@ public class InteractiveHotbarModule implements InteractModule {
     }
 
     @Override
+    public int getPriority() {
+        // hotbar first
+        return 0;
+    }
+
+    @Override
     public boolean isActive(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         // interactive hotbar is priority 1
         return hand == InteractionHand.MAIN_HAND && this.hotbar >= 0;
