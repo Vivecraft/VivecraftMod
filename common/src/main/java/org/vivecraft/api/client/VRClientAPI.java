@@ -26,22 +26,22 @@ public interface VRClientAPI {
     }
 
     /**
-     * Registers the tracker to the list of all trackers to be run for the local player. See the documentation for
+     * Registers the given trackers to the list of all trackers to be run for the local player. See the documentation for
      * {@link Tracker} for more information on what a tracker is.
      *
-     * @param tracker Tracker to register.
+     * @param tracker Trackers to register.
      * @since 1.3.0
      */
-    void registerTracker(Tracker tracker);
+    void registerTracker(Tracker... tracker);
 
     /**
-     * Registers the interact module to the list of all interact modules to be run for the local player.
+     * Registers the given interact modules to the list of all interact modules to be run for the local player.
      * See the documentation for {@link InteractModule} for more information on what an interact modules is.
      *
-     * @param module InteractModule to register.
+     * @param module InteractModules to register.
      * @since 1.3.0
      */
-    void registerInteractModule(InteractModule module);
+    void registerInteractModule(InteractModule... module);
 
     /**
      * Gets the VR pose representing the player in the room after the most recent poll of VR hardware.

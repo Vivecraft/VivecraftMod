@@ -31,6 +31,12 @@ public class ThirdPersonCameraModule implements HeldInteractModule {
     }
 
     @Override
+    public int getPriority() {
+        // after bow, but before default priority stuff
+        return 750;
+    }
+
+    @Override
     public boolean isActive(@Nullable LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         if (this.dh.vrSettings.mixedRealityRenderCameraModel &&
             (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||

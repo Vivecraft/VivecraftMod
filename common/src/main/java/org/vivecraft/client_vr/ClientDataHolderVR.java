@@ -136,17 +136,16 @@ public class ClientDataHolderVR {
         this.telescopeTracker = createTracker(TelescopeTracker::new);
         this.vehicleTracker = createTracker(VehicleTracker::new);
 
+        // create interact modules
         this.hotbarModule = new InteractiveHotbarModule();
         this.bowModule = new BowModule(this);
         this.thirdCamModule = new ThirdPersonCameraModule(this);
         this.screenCamModule = new ScreenshotCameraModule(this);
-
         this.entityModule = new EntityInteractionModule(Minecraft.getInstance(), this);
         this.blockModule = new BlockInteractionModule(Minecraft.getInstance(), this);
 
-        this.interactTracker.registerPriorityModules(this.hotbarModule, this.bowModule, this.thirdCamModule,
-            this.screenCamModule);
-        this.interactTracker.registerModules(this.entityModule, this.blockModule);
+        this.interactTracker.registerModules(this.hotbarModule, this.bowModule, this.thirdCamModule,
+            this.screenCamModule, this.entityModule, this.blockModule);
     }
 
     public static ClientDataHolderVR getInstance() {
@@ -181,19 +180,21 @@ public class ClientDataHolderVR {
     }
 
     /**
-     * registers a tracker
+     * registers trackers
      *
-     * @param tracker tracker to register
-     * @throws IllegalArgumentException if the tracker is already registered
+     * @param trackers trackers to register
+     * @throws IllegalArgumentException if s tracker is already registered
      */
     // synchronized, since this could be called from multiple threads during startup
-    public synchronized void registerTracker(Tracker tracker) throws IllegalArgumentException {
-        if (this.trackers.contains(tracker)) {
-            throw new IllegalArgumentException("Tracker is already added and should not be added again!");
-        }
-        this.trackers.add(tracker);
-        if (tracker instanceof ItemInUseTracker itemInUseTracker) {
-            this.itemInUseTrackers.add(itemInUseTracker);
+    public synchronized void registerTracker(Tracker... trackers) throws IllegalArgumentException {
+        for (Tracker tracker : trackers) {
+            if (this.trackers.contains(tracker)) {
+                throw new IllegalArgumentException("Tracker is already added and should not be added again!");
+            }
+            this.trackers.add(tracker);
+            if (tracker instanceof ItemInUseTracker itemInUseTracker) {
+                this.itemInUseTrackers.add(itemInUseTracker);
+            }
         }
     }
 

@@ -24,6 +24,7 @@ public interface InteractModule {
      * The priority value of a module determines when its {@link #isActive} method is called compared to other modules.
      * Modules are only processed until a modules returns {@code true} on {@link #isActive}, modules after that are not checked.
      * A lower priority value means it is processed earlier.
+     * Can be any Integer, negative values are also allowed. Vivecraft itself uses values ranging from 0-1500.
      *
      * @return priority value of this module
      * @since 1.3.0

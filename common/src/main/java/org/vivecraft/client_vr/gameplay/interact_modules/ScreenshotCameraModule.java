@@ -28,6 +28,12 @@ public class ScreenshotCameraModule implements HeldInteractModule {
     }
 
     @Override
+    public int getPriority() {
+        // after bow, but before default priority stuff
+        return 750;
+    }
+
+    @Override
     public boolean isActive(@Nullable LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         if (this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode()) {
             VRData.VRDevicePose camData = this.dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.CAMERA);

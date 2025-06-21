@@ -13,17 +13,15 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class InteractTracker implements Tracker {
 
-    // list of registered interact modules
+    // sorted list of registered interact modules
     private final Queue<InteractModule> apiModules = new PriorityQueue<>(
-        (a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
-            Integer.compare(a.getPriority(), b.getPriority()));
-
-    // list of registered priority interact modules
-    private final Queue<InteractModule> priorityModules = new PriorityQueue<>(
         (a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
             Integer.compare(a.getPriority(), b.getPriority()));
 
@@ -45,33 +43,18 @@ public class InteractTracker implements Tracker {
      * @param modules modules to register
      * @throws IllegalArgumentException if a module is already registered
      */
-    public void registerModules(InteractModule... modules) {
-        registerModules(this.apiModules, modules);
-    }
-
-    /**
-     * registers interact modules, and ads them to the priority list sorted based on their priority
-     *
-     * @param modules modules to register
-     * @throws IllegalArgumentException if a module is already registered
-     */
-    public void registerPriorityModules(InteractModule... modules) {
-        registerModules(this.priorityModules, modules);
-    }
-
     // synchronized, since this could be called from multiple threads during startup
-    private synchronized void registerModules(Collection<InteractModule> target, InteractModule... modules) {
+    public synchronized void registerModules(InteractModule... modules) {
         for (InteractModule module : modules) {
-            if (Streams.concat(this.modules.stream(), target.stream())
+            if (Streams.concat(this.modules.stream(), this.apiModules.stream())
                 .anyMatch(m -> m.equals(module) || m.getId().equals(module.getId())))
             {
                 throw new IllegalArgumentException(
                     "InteractModule '" + module.getId() + "' is already added and should not be added again!");
             }
-            target.add(module);
+            this.apiModules.add(module);
         }
         this.modules.clear();
-        this.modules.addAll(this.priorityModules);
         this.modules.addAll(this.apiModules);
     }
 
