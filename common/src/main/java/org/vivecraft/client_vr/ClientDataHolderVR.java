@@ -71,7 +71,7 @@ public class ClientDataHolderVR {
 
     // our interact modules
     public final InteractiveHotbarModule hotbarModule;
-    public final RoomscaleBowModule bowModule;
+    public final BowModule bowModule;
     public final ThirdPersonCameraModule thirdCamModule;
     public final ScreenshotCameraModule screenCamModule;
     public final EntityInteractionModule entityModule;
@@ -137,7 +137,7 @@ public class ClientDataHolderVR {
         this.vehicleTracker = createTracker(VehicleTracker::new);
 
         this.hotbarModule = new InteractiveHotbarModule();
-        this.bowModule = new RoomscaleBowModule(this);
+        this.bowModule = new BowModule(this);
         this.thirdCamModule = new ThirdPersonCameraModule(this);
         this.screenCamModule = new ScreenshotCameraModule(this);
 

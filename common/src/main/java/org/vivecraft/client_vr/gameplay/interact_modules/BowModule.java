@@ -16,14 +16,14 @@ import org.vivecraft.common.network.packet.c2s.DrawPayloadC2S;
 /**
  * the bow interact module handles the key presses and sending of use packets for the {@link BowTracker}
  */
-public class RoomscaleBowModule implements HeldInteractModule {
+public class BowModule implements HeldInteractModule {
 
     private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "roomscale_bow");
 
     private final ClientDataHolderVR dh;
     private final boolean[] isPressed = new boolean[2];
 
-    public RoomscaleBowModule(ClientDataHolderVR dh) {
+    public BowModule(ClientDataHolderVR dh) {
         this.dh = dh;
     }
 
