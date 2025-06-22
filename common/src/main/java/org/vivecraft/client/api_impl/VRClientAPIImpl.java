@@ -1,8 +1,7 @@
 package org.vivecraft.client.api_impl;
 
-import org.vivecraft.api.client.InteractModule;
-import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.VRClientAPI;
+import org.vivecraft.api.client.VivecraftRegistrationEvent;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
@@ -13,6 +12,9 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public final class VRClientAPIImpl implements VRClientAPI {
 
@@ -20,8 +22,10 @@ public final class VRClientAPIImpl implements VRClientAPI {
 
     private final VRPoseHistoryImpl poseHistory = new VRPoseHistoryImpl();
 
-    private VRClientAPIImpl() {
-    }
+    private final List<Consumer<VivecraftRegistrationEvent>> registrationHandlers = new ArrayList<>();
+    private boolean registrationClosed = false;
+
+    private VRClientAPIImpl() {}
 
     public void clearPoseHistory() {
         this.poseHistory.clear();
@@ -29,6 +33,13 @@ public final class VRClientAPIImpl implements VRClientAPI {
 
     public void addPoseToHistory(VRPose pose) {
         this.poseHistory.addPose(pose);
+    }
+
+    public void processRegistrationEvent() {
+        synchronized (this.registrationHandlers) {
+            this.registrationClosed = true;
+            this.registrationHandlers.forEach(event -> event.accept(VivecraftRegistrationEventImpl.INSTANCE));
+        }
     }
 
     @Nullable
@@ -140,13 +151,13 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
-    public void registerTracker(Tracker... tracker) {
-        ClientDataHolderVR.getInstance().registerTracker(tracker);
-    }
-
-    @Override
-    public void registerInteractModule(InteractModule... module) {
-        ClientDataHolderVR.getInstance().interactTracker.registerModules(module);
+    public void addRegistrationHandler(Consumer<VivecraftRegistrationEvent> handler) {
+        synchronized (this.registrationHandlers) {
+            if (this.registrationClosed) {
+                throw new IllegalStateException("Registration handlers were already processed, this needs to be called before the game loop starts!");
+            }
+            this.registrationHandlers.add(handler);
+        }
     }
 
     @Override

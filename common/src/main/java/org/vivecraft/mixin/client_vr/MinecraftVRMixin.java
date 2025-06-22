@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.framework.screens.ChangeableParentScreen;
 import org.vivecraft.client.gui.screens.ErrorScreen;
@@ -184,6 +185,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             // the game crashed probably not because of us, so keep the vr choice
             VRState.destroyVR(false);
         } catch (Exception ignored) {}
+    }
+
+    @Inject(method = "run", at = @At("HEAD"))
+    private void vivecraft$processAPIRegistrationEvent(CallbackInfo ci) {
+        VRClientAPIImpl.INSTANCE.processRegistrationEvent();
     }
 
     @Inject(method = "runTick", at = @At("HEAD"))

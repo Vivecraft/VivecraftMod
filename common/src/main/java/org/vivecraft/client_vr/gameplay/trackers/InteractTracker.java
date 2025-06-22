@@ -15,16 +15,10 @@ import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 public class InteractTracker implements Tracker {
 
     // sorted list of registered interact modules
-    private final Queue<InteractModule> apiModules = new PriorityQueue<>(
-        (a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
-            Integer.compare(a.getPriority(), b.getPriority()));
-
     private final List<InteractModule> modules = new ArrayList<>();
     private final InteractModule[] activeModules = new InteractModule[2];
     private final boolean[] pressed = new boolean[2];
@@ -43,19 +37,16 @@ public class InteractTracker implements Tracker {
      * @param modules modules to register
      * @throws IllegalArgumentException if a module is already registered
      */
-    // synchronized, since this could be called from multiple threads during startup
-    public synchronized void registerModules(InteractModule... modules) {
+    public void registerModules(InteractModule... modules) {
         for (InteractModule module : modules) {
-            if (Streams.concat(this.modules.stream(), this.apiModules.stream())
-                .anyMatch(m -> m.equals(module) || m.getId().equals(module.getId())))
-            {
+            if (this.modules.stream().anyMatch(m -> m.equals(module) || m.getId().equals(module.getId()))) {
                 throw new IllegalArgumentException(
                     "InteractModule '" + module.getId() + "' is already added and should not be added again!");
             }
-            this.apiModules.add(module);
+            this.modules.add(module);
         }
-        this.modules.clear();
-        this.modules.addAll(this.apiModules);
+        this.modules.sort((a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
+            Integer.compare(a.getPriority(), b.getPriority()));
     }
 
     @Override

@@ -185,8 +185,7 @@ public class ClientDataHolderVR {
      * @param trackers trackers to register
      * @throws IllegalArgumentException if s tracker is already registered
      */
-    // synchronized, since this could be called from multiple threads during startup
-    public synchronized void registerTracker(Tracker... trackers) throws IllegalArgumentException {
+    public void registerTracker(Tracker... trackers) throws IllegalArgumentException {
         for (Tracker tracker : trackers) {
             if (this.trackers.contains(tracker)) {
                 throw new IllegalArgumentException("Tracker is already added and should not be added again!");

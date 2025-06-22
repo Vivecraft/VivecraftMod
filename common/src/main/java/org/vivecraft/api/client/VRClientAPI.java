@@ -8,6 +8,7 @@ import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
 
 import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 /**
  * The main interface for interacting with the local player using Vivecraft from client code. For rendering, one should use
@@ -26,22 +27,16 @@ public interface VRClientAPI {
     }
 
     /**
-     * Registers the given trackers to the list of all trackers to be run for the local player. See the documentation for
-     * {@link Tracker} for more information on what a tracker is.
+     * Registers a handler, which consumes a {@link VivecraftRegistrationEvent}.
+     * With this one can register custom  {@link Tracker} and {@link InteractModule} for the local player.
+     * <br>
+     * Needs to be called before the game loop starts.
      *
-     * @param tracker Trackers to register.
+     * @param handler handler to add.
+     * @throws IllegalStateException When called after the handlers were already processed.
      * @since 1.3.0
      */
-    void registerTracker(Tracker... tracker);
-
-    /**
-     * Registers the given interact modules to the list of all interact modules to be run for the local player.
-     * See the documentation for {@link InteractModule} for more information on what an interact modules is.
-     *
-     * @param module InteractModules to register.
-     * @since 1.3.0
-     */
-    void registerInteractModule(InteractModule... module);
+    void addRegistrationHandler(Consumer<VivecraftRegistrationEvent> handler) throws IllegalStateException;
 
     /**
      * Gets the VR pose representing the player in the room after the most recent poll of VR hardware.
