@@ -1,4 +1,4 @@
-package org.vivecraft.client.fabric;
+package org.vivecraft.fabric.client;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

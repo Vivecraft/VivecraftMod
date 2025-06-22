@@ -5,7 +5,7 @@ import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.EnumGetMethod;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.util.Mth;
-import org.vivecraft.common.TooltipUtil;
+import org.vivecraft.common.utils.TooltipUtil;
 
 import java.util.*;
 import java.util.function.Predicate;

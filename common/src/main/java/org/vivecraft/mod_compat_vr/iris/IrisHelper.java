@@ -3,10 +3,11 @@ package org.vivecraft.mod_compat_vr.iris;
 import net.irisshaders.iris.api.v0.IrisApi;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.common.utils.ClassUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +49,7 @@ public class IrisHelper {
     public static boolean SLOW_MODE = false;
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus");
+        return Xloader.isModLoaded("iris") || Xloader.isModLoaded("oculus");
     }
 
     /**
@@ -197,19 +198,19 @@ public class IrisHelper {
             return !INIT_FAILED;
         }
         try {
-            Class<?> iris = getClassWithAlternative(
+            Class<?> iris = ClassUtils.getClassWithAlternative(
                 "net.coderbot.iris.Iris",
                 "net.irisshaders.iris.Iris");
             Iris_reload = iris.getMethod("reload");
             Iris_getPipelineManager = iris.getMethod("getPipelineManager");
 
-            Class<?> pipelineManager = getClassWithAlternative(
+            Class<?> pipelineManager = ClassUtils.getClassWithAlternative(
                 "net.coderbot.iris.pipeline.PipelineManager",
                 "net.irisshaders.iris.pipeline.PipelineManager");
 
             PipelineManager_getPipeline = pipelineManager.getMethod("getPipeline");
 
-            Class<?> worldRenderingPipeline = getClassWithAlternative(
+            Class<?> worldRenderingPipeline = ClassUtils.getClassWithAlternative(
                 "net.coderbot.iris.pipeline.WorldRenderingPipeline",
                 "net.irisshaders.iris.pipeline.WorldRenderingPipeline");
 
@@ -218,14 +219,14 @@ public class IrisHelper {
 
             try {
                 // not all iris versions have ssbos so try them separately
-                IrisRenderingPipeline = getClassWithAlternative(
+                IrisRenderingPipeline = ClassUtils.getClassWithAlternative(
                     "net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline",
                     "net.irisshaders.iris.pipeline.IrisRenderingPipeline");
                 IrisRenderingPipeline_shaderStorageBufferHolder = IrisRenderingPipeline.getDeclaredField(
                     "shaderStorageBufferHolder");
                 IrisRenderingPipeline_shaderStorageBufferHolder.setAccessible(true);
 
-                Class<?> shaderStorageBufferHolder = getClassWithAlternative(
+                Class<?> shaderStorageBufferHolder = ClassUtils.getClassWithAlternative(
                     "net.coderbot.iris.gl.buffer.ShaderStorageBufferHolder",
                     "net.irisshaders.iris.gl.buffer.ShaderStorageBufferHolder");
                 ShaderStorageBufferHolder_setupBuffers = shaderStorageBufferHolder.getMethod("setupBuffers");
@@ -234,7 +235,7 @@ public class IrisHelper {
             }
 
             // distant horizon compat
-            if (Xplat.isModLoaded("distanthorizons")) {
+            if (Xloader.isModLoaded("distanthorizons")) {
                 try {
                     Class<?> OverrideInjector = Class.forName(
                         "com.seibel.distanthorizons.coreapi.DependencyInjection.OverrideInjector");
@@ -278,21 +279,5 @@ public class IrisHelper {
 
         INITIALIZED = true;
         return !INIT_FAILED;
-    }
-
-    /**
-     * does a class Lookup with an alternative, for convenience, since iris changed packages
-     *
-     * @param class1 first option
-     * @param class2 alternative option
-     * @return found class
-     * @throws ClassNotFoundException if neither class exists
-     */
-    private static Class<?> getClassWithAlternative(String class1, String class2) throws ClassNotFoundException {
-        try {
-            return Class.forName(class1);
-        } catch (ClassNotFoundException e) {
-            return Class.forName(class2);
-        }
     }
 }

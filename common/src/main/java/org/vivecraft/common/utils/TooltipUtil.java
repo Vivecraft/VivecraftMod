@@ -1,8 +1,8 @@
-package org.vivecraft.common;
+package org.vivecraft.common.utils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.locale.Language;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -74,7 +74,7 @@ public class TooltipUtil {
                 }
             }
         }
-        if (!Xplat.isDedicatedServer()) {
+        if (!Xloader.isDedicatedServer()) {
             tooltip += getClientOnlyTooltip();
         }
 

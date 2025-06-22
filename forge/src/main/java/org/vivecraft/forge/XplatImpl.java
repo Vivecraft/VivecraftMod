@@ -1,73 +1,32 @@
-package org.vivecraft.client.neoforge;
+package org.vivecraft.forge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.fml.loading.LoadingModList;
-import net.neoforged.neoforge.client.settings.KeyModifier;
-import net.neoforged.neoforge.client.textures.FluidSpriteCache;
-import net.neoforged.neoforge.common.util.FakePlayer;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraftforge.network.NetworkDirection;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xplat;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
-import org.vivecraft.neoforge.packet.VivecraftPayloadBiDir;
-
-import java.nio.file.Path;
 
 public class XplatImpl implements Xplat {
 
-    public static void init() {}
-
-    public static boolean isModLoaded(String name) {
-        return LoadingModList.get().getModFileById(name) != null;
-    }
-
-    public static Path getConfigPath(String fileName) {
-        return FMLPaths.CONFIGDIR.get().resolve(fileName);
-    }
-
-    public static boolean isDedicatedServer() {
-        return FMLEnvironment.dist == Dist.DEDICATED_SERVER;
-    }
-
-    public static ModLoader getModloader() {
-        return ModLoader.NEOFORGE;
-    }
-
-    public static String getModVersion() {
-        if (isModLoadedSuccess()) {
-            return LoadingModList.get().getModFileById("vivecraft").versionString();
-        }
-        return "no version";
-    }
-
-    public static boolean isModLoadedSuccess() {
-        return LoadingModList.get().getModFileById("vivecraft") != null;
-    }
-
     public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
-        // TODO there is no stencil support yet
-        //renderTarget.enableStencil();
+        renderTarget.enableStencil();
         return true;
-    }
-
-    public static Path getJarPath() {
-        return LoadingModList.get().getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
     }
 
     public static String getUseMethodName() {
@@ -77,7 +36,7 @@ public class XplatImpl implements Xplat {
     public static TextureAtlasSprite[] getFluidTextures(
         BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
     {
-        return FluidSpriteCache.getFluidSprites(level, pos, fluidStateIn);
+        return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
     }
 
     public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
@@ -89,15 +48,19 @@ public class XplatImpl implements Xplat {
     }
 
     public static boolean serverAcceptsPacket(ClientPacketListener connection, ResourceLocation id) {
-        return connection.hasChannel(id);
+        return true;
     }
 
     public static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
-        return new ServerboundCustomPayloadPacket(new VivecraftPayloadBiDir(payload));
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        payload.write(buffer);
+        return NetworkDirection.PLAY_TO_SERVER.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
     }
 
     public static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
-        return new ClientboundCustomPayloadPacket(new VivecraftPayloadBiDir(payload));
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        payload.write(buffer);
+        return NetworkDirection.PLAY_TO_CLIENT.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
     }
 
     public static boolean hasKeyModifier(KeyMapping keyMapping) {
@@ -123,6 +86,8 @@ public class XplatImpl implements Xplat {
     }
 
     public static boolean isFakePlayer(ServerPlayer player) {
-        return player instanceof FakePlayer;
+        // TODO check if forge reimplemented it, it was removed with 1.20.3
+        // return player instanceof FakePlayer;
+        return false;
     }
 }

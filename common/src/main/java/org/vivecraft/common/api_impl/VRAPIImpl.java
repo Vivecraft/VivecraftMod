@@ -2,12 +2,12 @@ package org.vivecraft.common.api_impl;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.vivecraft.Xplat;
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client.ClientVRPlayers;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
 import org.vivecraft.server.ServerNetworking;

@@ -663,7 +663,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @WrapWithCondition(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startUseItem()V"))
     private boolean vivecraft$noUseWithRoomscaleBow(Minecraft instance) {
-        return !ClientDataHolderVR.getInstance().bowTracker.isActive(this.player);
+        return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().bowTracker.isActive(this.player);
     }
 
     @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V"))

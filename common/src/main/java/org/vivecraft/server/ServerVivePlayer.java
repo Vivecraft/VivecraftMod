@@ -24,6 +24,8 @@ public class ServerVivePlayer {
     public float worldScale = 1.0F;
     public float heightScale = 1.0F;
     public VRBodyPart activeBodyPart = VRBodyPart.MAIN_HAND;
+    // when a player mines a block too fast, the destroy is delayed, need to keep track of the bodypart that actually destroyed it
+    public VRBodyPart delayedDestroyBodyPart = null;
     public boolean useBodyPartForAim = false;
     public boolean crawling;
     // if the player has VR active

@@ -1,13 +1,11 @@
-package org.vivecraft.client.fabric;
+package org.vivecraft.fabric;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -23,58 +21,16 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.Xplat;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 import org.vivecraft.fabric.mixin.world.level.biome.BiomeAccessor;
 
-import java.nio.file.Path;
-
 public class XplatImpl implements Xplat {
-
-    private static ModLoader currentModloader = ModLoader.FABRIC;
-
-    public static void init() {
-        // check client brand, if we are running on quilt
-        if (ClientBrandRetriever.getClientModName().contains("quilt")) {
-            currentModloader = ModLoader.QUILT;
-        }
-    }
-
-    public static boolean isModLoaded(String name) {
-        return FabricLoader.getInstance().isModLoaded(name);
-    }
-
-    public static Path getConfigPath(String fileName) {
-        return FabricLoader.getInstance().getConfigDir().resolve(fileName);
-    }
-
-    public static boolean isDedicatedServer() {
-        return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER);
-    }
-
-    public static Xplat.ModLoader getModloader() {
-        return currentModloader;
-    }
-
-    public static String getModVersion() {
-        if (isModLoadedSuccess()) {
-            return FabricLoader.getInstance().getModContainer("vivecraft").get().getMetadata().getVersion()
-                .getFriendlyString();
-        }
-        return "no version";
-    }
-
-    public static boolean isModLoadedSuccess() {
-        return FabricLoader.getInstance().isModLoaded("vivecraft");
-    }
 
     public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         return false;
-    }
-
-    public static Path getJarPath() {
-        return FabricLoader.getInstance().getModContainer("vivecraft").get().getRootPaths().get(0);
     }
 
     public static String getUseMethodName() {
@@ -92,7 +48,7 @@ public class XplatImpl implements Xplat {
     public static TextureAtlasSprite[] getFluidTextures(
         BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
     {
-        if (isModLoaded("fabric-rendering-fluids-v1")) {
+        if (Xloader.isModLoaded("fabric-rendering-fluids-v1")) {
             return FluidRenderHandlerRegistry.INSTANCE.get(fluidStateIn.getType())
                 .getFluidSprites(level, pos, fluidStateIn);
         } else {
@@ -146,6 +102,6 @@ public class XplatImpl implements Xplat {
     }
 
     public static boolean isFakePlayer(ServerPlayer player) {
-        return isModLoaded("fabric-events-interaction-v0") && player instanceof FakePlayer;
+        return Xloader.isModLoaded("fabric-events-interaction-v0") && player instanceof FakePlayer;
     }
 }

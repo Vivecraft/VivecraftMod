@@ -1,4 +1,4 @@
-package org.vivecraft.client;
+package org.vivecraft;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.architectury.injectables.annotations.ExpectPlatform;
@@ -17,8 +17,6 @@ import net.minecraft.world.level.material.FluidState;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
-import java.nio.file.Path;
-
 public interface Xplat {
     /**
      * This must be a <b>public static</b> method. The platform-implemented solution must be placed under a
@@ -32,77 +30,6 @@ public interface Xplat {
      * <a href="https://plugins.jetbrains.com/plugin/16210-architectury">You should also get the IntelliJ plugin to help with @ExpectPlatform.</a>
      */
 
-    enum ModLoader {
-        FABRIC("fabric"),
-        FORGE("forge"),
-        NEOFORGE("neoforge"),
-        QUILT("quilt");
-
-        public final String name;
-
-        ModLoader(String name) {
-            this.name = name;
-        }
-    }
-
-    /**
-     * initializes stuff needed for the Xplat to work correctly
-     */
-    @ExpectPlatform
-    static void init() {}
-
-    /**
-     * @param name modId to check
-     * @return if the mod {@code name} is loaded
-     */
-    @ExpectPlatform
-    static boolean isModLoaded(String name) {
-        return false;
-    }
-
-    /**
-     * asks the mod loader for the config folder, and resolves the given file there
-     *
-     * @param file file to get the path for
-     * @return Path of {@code file} in the config folder
-     */
-    @ExpectPlatform
-    static Path getConfigPath(String file) {
-        throw new AssertionError();
-    }
-
-    /**
-     * @return true if this is a dedicated server
-     */
-    @ExpectPlatform
-    static boolean isDedicatedServer() {
-        return false;
-    }
-
-    /**
-     * @return mod loader enum that the game is running on
-     */
-    @ExpectPlatform
-    static ModLoader getModloader() {
-        throw new AssertionError();
-    }
-
-    /**
-     * @return version number of the vivecraft mod
-     */
-    @ExpectPlatform
-    static String getModVersion() {
-        return "";
-    }
-
-    /**
-     * @return returns true, if the mod loader loaded everything without errors
-     */
-    @ExpectPlatform
-    static boolean isModLoadedSuccess() {
-        return false;
-    }
-
     /**
      * asks the mod loader to enable the stencil for the given RenderTarget
      *
@@ -112,14 +39,6 @@ public interface Xplat {
     @ExpectPlatform
     static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         return false;
-    }
-
-    /**
-     * @return path to access files inside the mod jar
-     */
-    @ExpectPlatform
-    static Path getJarPath() {
-        throw new AssertionError();
     }
 
     /**

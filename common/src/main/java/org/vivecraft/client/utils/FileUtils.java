@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.*;
@@ -105,7 +105,7 @@ public class FileUtils {
      * @return if a file was unpacked
      */
     public static boolean unpackFile(String sourceFile, String targetFile, boolean required) {
-        return unpackFile(Xplat.getJarPath().resolve(sourceFile), new File(targetFile), required);
+        return unpackFile(Xloader.getJarPath().resolve(sourceFile), new File(targetFile), required);
     }
 
     /**
@@ -122,7 +122,7 @@ public class FileUtils {
 
         boolean didExtractSomething = false;
 
-        try (Stream<Path> natives = Files.list(Xplat.getJarPath().resolve(source))) {
+        try (Stream<Path> natives = Files.list(Xloader.getJarPath().resolve(source))) {
             for (Path file : natives.collect(Collectors.toCollection(ArrayList::new))) {
                 didExtractSomething |= unpackFile(file, new File(target + "/" + file.getFileName()), false);
             }

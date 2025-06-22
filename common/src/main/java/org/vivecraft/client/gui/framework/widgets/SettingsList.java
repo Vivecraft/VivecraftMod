@@ -21,7 +21,7 @@ import org.vivecraft.client.gui.widgets.TextOnlyButton;
 import org.vivecraft.client.utils.StringSimilarity;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.TooltipUtil;
+import org.vivecraft.common.utils.TooltipUtil;
 import org.vivecraft.server.config.ConfigBuilder;
 
 import javax.annotation.Nullable;

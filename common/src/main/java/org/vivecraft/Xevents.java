@@ -1,4 +1,4 @@
-package org.vivecraft.client;
+package org.vivecraft;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;

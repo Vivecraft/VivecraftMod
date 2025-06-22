@@ -87,6 +87,13 @@ public class VehicleTracker implements Tracker {
             return MathUtils.subtractToVector3f(con.getPosition(), entity.position())
                 .add(con.getDirection().mul(0.3F))
                 .normalize();
+        } else if (entity != null && entity.isControlledByLocalInstance()) {
+            // for other entities always set it, for mod compatibility
+            if (dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
+                return dataHolder.vrPlayer.vrdata_world_pre.hmd.getDirection();
+            } else {
+                return dataHolder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
+            }
         }
 
         // ignore other vehicles

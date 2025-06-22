@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.fabric;
 
 import org.spongepowered.asm.mixin.Mixins;
 
