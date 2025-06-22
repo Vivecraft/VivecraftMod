@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.HappyGhast;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
@@ -67,6 +68,12 @@ public class VehicleTracker extends Tracker {
                 } else {
                     return dataHolder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
                 }
+            }
+        } else if (entity instanceof HappyGhast && entity.isLocalInstanceAuthoritative()){
+            if (dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
+                return dataHolder.vrPlayer.vrdata_world_pre.hmd.getDirection();
+            } else {
+                return dataHolder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
             }
         } else if (entity instanceof Mob mob && mob.isLocalInstanceAuthoritative()) {
             // pigs and striders
