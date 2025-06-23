@@ -10,14 +10,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.ItemInUseTracker;
-import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ItemTags;
 
-public class TelescopeTracker implements Tracker, ItemInUseTracker {
+public class TelescopeTracker implements ItemInUseTracker {
     public static final ResourceLocation SCOPE_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
         "spyglass_in_hand");
     private static final float LENS_DIST_MAX = 0.05F;

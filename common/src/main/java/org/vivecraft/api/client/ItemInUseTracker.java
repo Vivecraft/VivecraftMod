@@ -8,7 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
  *
  * @since 1.3.0
  */
-public interface ItemInUseTracker {
+public interface ItemInUseTracker extends Tracker {
 
     /**
      * Called for the client player, to check if this tracker is currently causing the item to be used to not release
