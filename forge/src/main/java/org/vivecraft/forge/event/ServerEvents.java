@@ -53,7 +53,7 @@ public class ServerEvents {
                 Language.getInstance().getLanguageData().putAll(langMap);
                 ForgeI18n.loadLanguageData(Language.getInstance().getLanguageData());
             } catch (Exception exception) {
-                ServerNetworking.LOGGER.warn("failed ot load vivecraft lang file", exception);
+                ServerNetworking.LOGGER.error("Vivecraft: failed to load vivecraft lang file", exception);
             }
         }
         ServerConfig.init(null);

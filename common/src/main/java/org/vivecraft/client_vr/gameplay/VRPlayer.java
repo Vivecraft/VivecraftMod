@@ -214,7 +214,7 @@ public class VRPlayer {
                     actualWorldScale > worldScaleOverride.getValueMax() * 1.01F)
                 {
                     VRSettings.LOGGER.info(
-                        "VIVECRAFT: disconnected user from server. runtime IPD: {}, measured IPD: {}, runtime worldscale: {}",
+                        "Vivecraft: disconnected user from server. runtime IPD: {}, measured IPD: {}, runtime worldscale: {}",
                         queriedIPD, measuredIPD, runtimeWorldScale);
                     this.mc.level.disconnect();
                     this.mc.disconnect(new DisconnectedScreen(new JoinMultiplayerScreen(new TitleScreen()),

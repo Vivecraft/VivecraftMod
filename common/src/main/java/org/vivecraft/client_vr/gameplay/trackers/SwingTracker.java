@@ -33,6 +33,7 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.data.BlockTags;
 import org.vivecraft.data.ItemTags;
 import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
@@ -52,6 +53,7 @@ public class SwingTracker implements Tracker {
 
     public final Vec3[] miningPoint = new Vec3[4];
     public final Vec3[] attackingPoint = new Vec3[4];
+    public final Vec3[] weaponTip = new Vec3[4];
     public final Vector3fHistory[] tipHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
     public boolean[] canAct = new boolean[4];
     public int disableSwing = 3;
@@ -220,15 +222,25 @@ public class SwingTracker implements Tracker {
                     }
                 }
 
+                Vec3 lastAttackPoint = this.attackingPoint[i];
+                Vec3 lastWeaponTip = this.weaponTip[i];
                 this.attackingPoint[i] = this.constrain(handPos, this.miningPoint[i]);
 
                 Vector3f weaponEntityEnd = handDirection.mul(weaponLength + entityReachAdd, new Vector3f());
-                Vec3 weaponTip = handPos.add(weaponEntityEnd.x, weaponEntityEnd.y, weaponEntityEnd.z);
+                this.weaponTip[i] = handPos.add(weaponEntityEnd.x, weaponEntityEnd.y, weaponEntityEnd.z);
                 // no hitting through blocks
-                weaponTip = this.constrain(handPos, weaponTip);
+                this.weaponTip[i] = this.constrain(handPos, this.weaponTip[i]);
 
                 AABB weaponBB = new AABB(handPos, this.attackingPoint[i]);
-                AABB weaponTipBB = new AABB(handPos, weaponTip);
+                AABB weaponTipBB = new AABB(handPos, this.weaponTip[i]);
+
+                // make sure the last attack point is also in, for better collision on fast swings
+                if (lastAttackPoint != null) {
+                    weaponBB = Utils.includePoint(weaponBB, lastAttackPoint);
+                }
+                if (lastWeaponTip != null) {
+                    weaponTipBB = Utils.includePoint(weaponTipBB, lastWeaponTip);
+                }
 
                 List<Entity> mobs = this.mc.level.getEntities(this.mc.player, weaponTipBB);
                 if (this.dh.vrSettings.reducedPlayerReach) {
@@ -298,7 +310,7 @@ public class SwingTracker implements Tracker {
                         ClipContext.Fluid.NONE, this.mc.player));
 
                 if (!blockstate.isAir() && blockHit.getType() == HitResult.Type.BLOCK &&
-                    this.lastWeaponEndAir[i].length() != 0.0D)
+                    this.lastWeaponEndAir[i].lengthSqr() != 0.0D)
                 {
 
                     this.lastWeaponSolid[i] = true;

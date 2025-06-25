@@ -71,4 +71,17 @@ public class Utils {
         }
         return null;
     }
+
+    /**
+     * creates a new AABB, so that the given {@code point} is also inside
+     *
+     * @param aabb  AABB to modify
+     * @param point point to include
+     * @return extended AABB do include the original {@code aabb} and the given {@code point}
+     */
+    public static AABB includePoint(AABB aabb, Vec3 point) {
+        return new AABB(
+            Math.min(aabb.minX, point.x), Math.min(aabb.minY, point.y), Math.min(aabb.minZ, point.z),
+            Math.max(aabb.maxX, point.x), Math.max(aabb.maxY, point.y), Math.max(aabb.maxZ, point.z));
+    }
 }
