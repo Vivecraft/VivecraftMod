@@ -6,17 +6,17 @@ public interface VivecraftRegistrationEvent {
      * Registers the given trackers to the list of all trackers to be run for the local player. See the documentation for
      * {@link Tracker} for more information on what a tracker is.
      *
-     * @param tracker Trackers to register.
+     * @param trackers Trackers to register.
      * @since 1.3.0
      */
-    void registerTracker(Tracker... tracker);
+    void registerTrackers(Tracker... trackers);
 
     /**
      * Registers the given interact modules to the list of all interact modules to be run for the local player.
      * See the documentation for {@link InteractModule} for more information on what an interact modules is.
      *
-     * @param module InteractModules to register.
+     * @param modules InteractModules to register.
      * @since 1.3.0
      */
-    void registerInteractModule(InteractModule... module);
+    void registerInteractModules(InteractModule... modules);
 }

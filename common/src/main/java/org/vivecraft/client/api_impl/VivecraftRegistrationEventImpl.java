@@ -12,12 +12,12 @@ public final class VivecraftRegistrationEventImpl implements VivecraftRegistrati
     private VivecraftRegistrationEventImpl() {}
 
     @Override
-    public void registerTracker(Tracker... tracker) {
-        ClientDataHolderVR.getInstance().registerTracker(tracker);
+    public void registerTrackers(Tracker... trackers) {
+        ClientDataHolderVR.getInstance().registerTracker(trackers);
     }
 
     @Override
-    public void registerInteractModule(InteractModule... module) {
-        ClientDataHolderVR.getInstance().interactTracker.registerModules(module);
+    public void registerInteractModules(InteractModule... modules) {
+        ClientDataHolderVR.getInstance().interactTracker.registerModules(modules);
     }
 }
