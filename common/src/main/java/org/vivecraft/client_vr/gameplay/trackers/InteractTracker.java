@@ -1,22 +1,21 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import com.google.common.collect.Streams;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.HeldInteractModule;
 import org.vivecraft.api.client.InteractModule;
-import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.interact_modules.DebugRenderModule;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class InteractTracker implements Tracker {
+public class InteractTracker implements DebugRenderTracker {
 
     // sorted list of registered interact modules
     private final List<InteractModule> modules = new ArrayList<>();
@@ -159,6 +158,15 @@ public class InteractTracker implements Tracker {
                     }
                     this.dh.vr.triggerHapticPulse(c, 750);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void renderDebug() {
+        for (InteractModule module : this.modules) {
+            if (module instanceof DebugRenderModule debugModule) {
+                debugModule.renderDebug(isActiveModule(module));
             }
         }
     }

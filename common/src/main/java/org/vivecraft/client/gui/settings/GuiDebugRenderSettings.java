@@ -22,6 +22,8 @@ public class GuiDebugRenderSettings extends GuiListScreen {
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_PLAYER_AXES));
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_TRACKERS));
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.MAIN_PLAYER_DATA));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_GAMEPLAY_TRACKER));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.GAMEPLAY_TRACKER_TO_RENDER));
 
         return entries;
     }

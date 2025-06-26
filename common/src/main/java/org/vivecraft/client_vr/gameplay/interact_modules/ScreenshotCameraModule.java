@@ -10,13 +10,19 @@ import org.vivecraft.api.client.HeldInteractModule;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.common.utils.MathUtils;
 
-public class ScreenshotCameraModule implements HeldInteractModule {
+public class ScreenshotCameraModule implements DebugRenderModule, HeldInteractModule {
 
     private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "screenshot_camera");
 
+    private static final float INTERACT_DIST = 0.11F;
+
     private final ClientDataHolderVR dh;
+
+    // stored for the debug view
+    private Vec3 camPos;
 
     public ScreenshotCameraModule(ClientDataHolderVR dh) {
         this.dh = dh;
@@ -37,14 +43,13 @@ public class ScreenshotCameraModule implements HeldInteractModule {
     public boolean isActive(@Nullable LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         if (this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode()) {
             VRData.VRDevicePose camData = this.dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.CAMERA);
-            Vec3 camPos = camData.getPosition();
 
             Vector3f offset = camData.getCustomVector(MathUtils.BACK)
                 .mul(0.08F * this.dh.vrPlayer.vrdata_world_pre.worldScale);
 
-            camPos = camPos.subtract(offset.x, offset.y, offset.z);
+            this.camPos = camData.getPosition().subtract(offset.x, offset.y, offset.z);
 
-            return handPosition.distanceTo(camPos) < 0.11F * this.dh.vrPlayer.vrdata_world_pre.worldScale;
+            return handPosition.distanceTo(this.camPos) < INTERACT_DIST * this.dh.vrPlayer.vrdata_world_pre.worldScale;
         }
         return false;
     }
@@ -66,5 +71,16 @@ public class ScreenshotCameraModule implements HeldInteractModule {
 
     public boolean isActive() {
         return this.dh.interactTracker.isActiveModule(this);
+    }
+
+    @Override
+    public void renderDebug(boolean isActive) {
+        if (this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode() && this.camPos != null) {
+            VRData world = this.dh.vrPlayer.getVRDataWorld();
+            // no origin offset, since the camera is world relative
+            DebugRenderHelper.renderSphere(
+                MathUtils.subtractToVector3f(this.camPos, world.getEye(this.dh.currentPass).getPosition()),
+                INTERACT_DIST * world.worldScale, isActive ? MathUtils.GREEN : MathUtils.RED);
+        }
     }
 }

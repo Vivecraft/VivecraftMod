@@ -22,15 +22,17 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-import org.vivecraft.api.client.Tracker;
+import org.joml.Vector3fc;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.Vector3fHistory;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
@@ -39,9 +41,10 @@ import org.vivecraft.data.ItemTags;
 import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-public class SwingTracker implements Tracker {
+public class SwingTracker implements DebugRenderTracker {
     private static final int[] CONTROLLER_AND_FEET = new int[]{MCVR.MAIN_CONTROLLER, MCVR.OFFHAND_CONTROLLER, MCVR.RIGHT_FOOT_TRACKER, MCVR.LEFT_FOOT_TRACKER};
     private static final VRBodyPart[] BODYPARTS = new VRBodyPart[]{VRBodyPart.MAIN_HAND, VRBodyPart.OFF_HAND, VRBodyPart.RIGHT_FOOT, VRBodyPart.LEFT_FOOT};
     private static final float SPEED_THRESH = 3.0F;
@@ -57,6 +60,11 @@ public class SwingTracker implements Tracker {
     public final Vector3fHistory[] tipHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
     public boolean[] canAct = new boolean[4];
     public int disableSwing = 3;
+
+    // debug render stuff
+    private final AABB[] lastAttackAABB = new AABB[4];
+    private final Vec3[] lastBlockHit = new Vec3[4];
+    private final List<Vec3>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
 
     protected Minecraft mc;
     protected ClientDataHolderVR dh;
@@ -241,6 +249,7 @@ public class SwingTracker implements Tracker {
                 if (lastWeaponTip != null) {
                     weaponTipBB = Utils.includePoint(weaponTipBB, lastWeaponTip);
                 }
+                this.lastAttackAABB[i] = weaponTipBB;
 
                 List<Entity> mobs = this.mc.level.getEntities(this.mc.player, weaponTipBB);
                 if (this.dh.vrSettings.reducedPlayerReach) {
@@ -324,6 +333,7 @@ public class SwingTracker implements Tracker {
                         );
 
                     if (blockHit.getType() == HitResult.Type.BLOCK && sameBlock && this.canAct[i] && !protectedBlock) {
+                        this.lastBlockHit[i] = blockHit.getLocation();
                         int totalHits = 3;
                         // roomscale door punching
                         if (this.dh.vrSettings.doorHitting &&
@@ -424,6 +434,7 @@ public class SwingTracker implements Tracker {
                     // reset
                     this.lastWeaponEndAir[i] = this.miningPoint[i];
                     this.lastWeaponSolid[i] = false;
+                    this.lastBlockHit[i] = null;
                 }
             }
         }
@@ -555,5 +566,60 @@ public class SwingTracker implements Tracker {
         }
 
         return fade;
+    }
+
+    @Override
+    public void renderDebug() {
+        int trackers = 2;
+
+        if (this.dh.vrSettings.feetCollision && this.dh.vrPlayer.vrdata_world_pre.fbtMode != FBTMode.ARMS_ONLY) {
+            trackers = 4;
+        }
+
+        VRData world = this.dh.vrPlayer.getVRDataWorld();
+        // for world relative
+        Vec3 camWorld = world.getEye(this.dh.currentPass).getPosition();
+        // for player relative
+        Vec3 cam = camWorld.add(this.dh.vrPlayer.vrdata_world_pre.origin).subtract(world.origin);
+
+        for (int i = 0; i < trackers; i++) {
+            Vector3fc failColor =
+                this.tipHistory[i].averageSpeed(0.33D) > SPEED_THRESH * (this.mc.player.isCreative() ? 1.5F : 1F) ?
+                    MathUtils.ORANGE : MathUtils.RED;
+            if (this.miningPoint[i] != null) {
+                if (this.previousMiningPoints[i].isEmpty() ||
+                    !this.previousMiningPoints[i].getLast().equals(this.miningPoint[i]))
+                {
+                    this.previousMiningPoints[i].addLast(this.miningPoint[i]);
+                    if (this.previousMiningPoints[i].size() > 5) {
+                        this.previousMiningPoints[i].removeFirst();
+                    }
+                }
+
+                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.miningPoint[i], cam), 0.025F,
+                    this.canAct[i] ? MathUtils.GREEN : failColor);
+                if (!this.previousMiningPoints[i].isEmpty()) {
+                    DebugRenderHelper.renderLine(this.canAct[i] ? MathUtils.GREEN : failColor, cam,
+                        this.previousMiningPoints[i]);
+                }
+            }
+            if (this.lastBlockHit[i] != null) {
+                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.lastBlockHit[i], camWorld), 0.025F,
+                    MathUtils.GREEN);
+            }
+
+            if (this.lastAttackAABB[i] != null) {
+                DebugRenderHelper.renderAABB(this.lastAttackAABB[i].move(-cam.x, -cam.y, -cam.z),
+                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
+            }
+            if (this.weaponTip[i] != null) {
+                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.weaponTip[i], cam), 0.025F,
+                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
+            }
+            for (Entity entity : this.lastHitEntities[i]) {
+                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(entity.getBoundingBox().getCenter(), camWorld),
+                    (float) entity.getBoundingBox().getSize() / 2F, MathUtils.GREEN);
+            }
+        }
     }
 }
