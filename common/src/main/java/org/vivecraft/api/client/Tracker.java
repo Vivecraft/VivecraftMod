@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 /**
  * A tracker is an object that is run for the local player during the game tick or before rendering a frame only if
- * they are in VR. Using trackers are one of the cleanest ways to interact with Vivecraft's data; it's how Vivecraft
+ * they are in VR. Using trackers is one of the cleanest ways to interact with Vivecraft's data, it's how Vivecraft
  * itself does. Trackers should generally use {@link VRClientAPI#getPreTickWorldPose()}, as this provides
  * the most up-to-date data, and other methods such as {@link VRClientAPI#getPostTickWorldPose()} or
  * {@link VRAPI#getVRPose(Player)} may not have data available when the tracker is run.
@@ -20,7 +20,7 @@ public interface Tracker {
     /**
      * Whether the tracker is active for the local player.
      *
-     * @param player Player being checked if they are active for this tracker instances. Will be {@code null} when not in a world.
+     * @param player Player being checked if they are active for this tracker instance. Will be {@code null} when not in a world.
      * @return true if the tracker is active for the specified player.
      * @since 1.3.0
      */
@@ -35,8 +35,10 @@ public interface Tracker {
     void doProcess(@Nullable LocalPlayer player);
 
     /**
-     * The ticking type for this tracker.<br>
-     * If this is {@link TrackerTickType#PER_FRAME}, the tracker is called once with the local player per frame before the frame is rendered.<br>
+     * The ticking type for this tracker.
+     * <br>
+     * If this is {@link TrackerTickType#PER_FRAME}, the tracker is called once with the local player per frame before the frame is rendered.
+     * <br>
      * If this is {@link TrackerTickType#PER_TICK}, the tracker is called once with the local player per game tick during the tick.
      *
      * @return The ticking type this tracker should use.

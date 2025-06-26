@@ -35,11 +35,11 @@ public interface VRAPI {
     boolean isVRPlayer(Player player);
 
     /**
-     * Returns the VR pose for the given player. Will return null if the player isn't in VR,
+     * Returns the VR pose for the given player. Will return {@code null} if the player isn't in VR,
      * or if being called from the client and the client has yet to receive any data for the player.
      *
      * @param player Player to get the VR pose of.
-     * @return The VR pose for a player, or null if the player isn't in VR or no data has been received for said player.
+     * @return The VR pose for a player, or {@code null} if the player isn't in VR or no data has been received for said player.
      * @since 1.3.0
      */
     @Nullable
@@ -52,7 +52,7 @@ public interface VRAPI {
      * Note that due to the inherent latency of networking, historical VR data retrieved either by the server or by
      * the client for a client other than the local player may be unideal.
      *
-     * @return The history of VR poses for the player. Will be null if the player isn't in VR or if VR-specific data
+     * @return The history of VR poses for the player. Will be {@code null} if the player isn't in VR or if VR-specific data
      * hasn't been received.
      * @since 1.3.0
      */

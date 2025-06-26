@@ -11,11 +11,11 @@ public enum FBTMode {
      */
     ARMS_ONLY,
     /**
-     * head, hands, waist, and feet trackers are available.
+     * Head, hands, waist, and feet trackers are available.
      */
     ARMS_LEGS,
     /**
-     * head, hands, waist, feet, elbow, and knee trackers are available.
+     * Head, hands, waist, feet, elbow, and knee trackers are available.
      */
     WITH_JOINTS;
 

@@ -3,8 +3,7 @@ package org.vivecraft.api.client;
 import net.minecraft.client.player.LocalPlayer;
 
 /**
- * An interface that should be implemented by {@link Tracker}s if they want to take advantage of
- * {@link #itemInUse(LocalPlayer)}.
+ * A type of {@link Tracker} which can prevent the vanilla use key from being released, with {@link #itemInUse(LocalPlayer)}.
  *
  * @since 1.3.0
  */

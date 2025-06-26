@@ -41,7 +41,7 @@ public interface VRClientAPI {
     /**
      * Gets the VR pose representing the player in the room after the most recent poll of VR hardware.
      *
-     * @return The most up-to-date VR pose representing the player in the room, or null if the local player isn't in VR.
+     * @return The most up-to-date VR pose representing the player in the room, or {@code null} if the local player isn't in VR.
      * @since 1.3.0
      */
     @Nullable
@@ -51,7 +51,7 @@ public interface VRClientAPI {
      * Gets the VR pose representing the player in the room after the game tick.
      * Note that this pose is gathered AFTER mod loaders' post-tick events.
      *
-     * @return The VR pose representing the player in the room post-tick, or null if the local player isn't in VR.
+     * @return The VR pose representing the player in the room post-tick, or {@code null} if the local player isn't in VR.
      * @since 1.3.0
      */
     @Nullable
@@ -62,7 +62,7 @@ public interface VRClientAPI {
      * which {@link VRPose} method to use, you very likely want to use this one.
      * Note that this pose is gathered BEFORE mod loaders' pre-tick events.
      *
-     * @return The VR pose representing the player in world space pre-tick, or null if the local player isn't in VR.
+     * @return The VR pose representing the player in world space pre-tick, or {@code null} if the local player isn't in VR.
      * @since 1.3.0
      */
     @Nullable
@@ -73,7 +73,7 @@ public interface VRClientAPI {
      * This is the pose sent to the server, and also used to calculate the pose in {@link #getWorldRenderPose()}.
      * Note that this pose is gathered AFTER mod loaders' post-tick events.
      *
-     * @return The VR pose representing the player in Minecraft space post-tick, or null if the local player isn't in VR.
+     * @return The VR pose representing the player in Minecraft space post-tick, or {@code null} if the local player isn't in VR.
      * @since 1.3.0
      */
     @Nullable
@@ -82,7 +82,7 @@ public interface VRClientAPI {
     /**
      * Gets the VR pose representing the player in Minecraft world coordinates interpolated for rendering.
      *
-     * @return The VR pose representing the player in Minecraft space post-tick interpolated for rendering, or null if
+     * @return The VR pose representing the player in Minecraft space post-tick interpolated for rendering, or {@code null} if
      * the local player isn't in VR.
      * @since 1.3.0
      */
@@ -165,7 +165,7 @@ public interface VRClientAPI {
      * Returns the history of VR poses for the local player. If one wants historical VR poses for other players and/or
      * on the server, use {@link VRAPI#getHistoricalVRPoses(net.minecraft.world.entity.player.Player)} instead.
      *
-     * @return The history of VR poses for the player. Will be null if the player isn't in VR.
+     * @return The history of VR poses for the player. Will be {@code null} if the player isn't in VR.
      * @since 1.3.0
      */
     @Nullable

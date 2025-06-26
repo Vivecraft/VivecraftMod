@@ -16,7 +16,7 @@ public interface VRPose {
      * Gets the pose data for a body part.
      *
      * @param vrBodyPart The body part to get the pose data for.
-     * @return The specified body part's pose data, or null if that body part is not available with the current FBTMode, which can be checked with {@link #getFBTMode}.
+     * @return The specified body part's pose data, or {@code null} if that body part is not available with the current FBTMode, which can be checked with {@link #getFBTMode}.
      * @since 1.3.0
      */
     @Nullable
