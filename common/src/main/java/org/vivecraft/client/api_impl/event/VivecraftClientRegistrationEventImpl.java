@@ -1,15 +1,15 @@
-package org.vivecraft.client.api_impl;
+package org.vivecraft.client.api_impl.event;
 
 import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.api.client.Tracker;
-import org.vivecraft.api.client.VivecraftRegistrationEvent;
+import org.vivecraft.api.client.event.VivecraftClientRegistrationEvent;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public final class VivecraftRegistrationEventImpl implements VivecraftRegistrationEvent {
+public final class VivecraftClientRegistrationEventImpl implements VivecraftClientRegistrationEvent {
 
-    public static final VivecraftRegistrationEventImpl INSTANCE = new VivecraftRegistrationEventImpl();
+    public static final VivecraftClientRegistrationEventImpl INSTANCE = new VivecraftClientRegistrationEventImpl();
 
-    private VivecraftRegistrationEventImpl() {}
+    private VivecraftClientRegistrationEventImpl() {}
 
     @Override
     public void registerTrackers(Tracker... trackers) {

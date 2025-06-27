@@ -1,11 +1,12 @@
 package org.vivecraft.client.api_impl;
 
 import org.vivecraft.api.client.VRClientAPI;
-import org.vivecraft.api.client.VivecraftRegistrationEvent;
+import org.vivecraft.api.client.event.VivecraftClientRegistrationEvent;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
+import org.vivecraft.client.api_impl.event.VivecraftClientRegistrationEventImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -22,7 +23,7 @@ public final class VRClientAPIImpl implements VRClientAPI {
 
     private final VRPoseHistoryImpl poseHistory = new VRPoseHistoryImpl();
 
-    private final List<Consumer<VivecraftRegistrationEvent>> registrationHandlers = new ArrayList<>();
+    private final List<Consumer<VivecraftClientRegistrationEvent>> registrationHandlers = new ArrayList<>();
     private boolean registrationClosed = false;
 
     private VRClientAPIImpl() {}
@@ -38,7 +39,7 @@ public final class VRClientAPIImpl implements VRClientAPI {
     public void processRegistrationEvent() {
         synchronized (this.registrationHandlers) {
             this.registrationClosed = true;
-            this.registrationHandlers.forEach(event -> event.accept(VivecraftRegistrationEventImpl.INSTANCE));
+            this.registrationHandlers.forEach(event -> event.accept(VivecraftClientRegistrationEventImpl.INSTANCE));
         }
     }
 
@@ -151,7 +152,7 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
-    public void addRegistrationHandler(Consumer<VivecraftRegistrationEvent> handler) {
+    public void addClientRegistrationHandler(Consumer<VivecraftClientRegistrationEvent> handler) {
         synchronized (this.registrationHandlers) {
             if (this.registrationClosed) {
                 throw new IllegalStateException(

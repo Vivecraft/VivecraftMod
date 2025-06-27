@@ -1,6 +1,7 @@
 package org.vivecraft.api.client;
 
 import org.vivecraft.api.VRAPI;
+import org.vivecraft.api.client.event.VivecraftClientRegistrationEvent;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
@@ -30,7 +31,7 @@ public interface VRClientAPI {
     }
 
     /**
-     * Registers a handler, which consumes a {@link VivecraftRegistrationEvent}.
+     * Registers a handler, which consumes a {@link VivecraftClientRegistrationEvent}.
      * With this one can register custom  {@link Tracker} and {@link InteractModule} for the local player.
      * <br>
      * Needs to be called before the game loop starts.
@@ -39,7 +40,7 @@ public interface VRClientAPI {
      * @throws IllegalStateException When called after the handlers were already processed.
      * @since 1.3.0
      */
-    void addRegistrationHandler(Consumer<VivecraftRegistrationEvent> handler) throws IllegalStateException;
+    void addClientRegistrationHandler(Consumer<VivecraftClientRegistrationEvent> handler) throws IllegalStateException;
 
     /**
      * Gets the VR pose representing the player in the room after the most recent poll of VR hardware.
