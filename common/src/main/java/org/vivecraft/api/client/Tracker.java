@@ -20,15 +20,6 @@ import javax.annotation.Nullable;
 public interface Tracker {
 
     /**
-     * Whether the tracker is active for the local player.
-     *
-     * @param player Player being checked if they are active for this tracker instance. Will be {@code null} when not in a world.
-     * @return true if the tracker is active for the specified player.
-     * @since 1.3.0
-     */
-    boolean isActive(@Nullable LocalPlayer player);
-
-    /**
      * The process type for this tracker. Determines when and how frequently it is Processed. See {@link ProcessType} for
      * possible options.
      *
@@ -36,6 +27,15 @@ public interface Tracker {
      * @since 1.3.0
      */
     ProcessType processType();
+
+    /**
+     * Whether the tracker is active for the local player.
+     *
+     * @param player Player being checked if they are active for this tracker instance. Will be {@code null} when not in a world.
+     * @return true if the tracker is active for the specified player.
+     * @since 1.3.0
+     */
+    boolean isActive(@Nullable LocalPlayer player);
 
     /**
      * Called for the local player, whether the tracker is active or not. This is called before
