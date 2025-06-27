@@ -29,11 +29,8 @@ public interface Tracker {
     boolean isActive(@Nullable LocalPlayer player);
 
     /**
-     * The process type for this tracker.
-     * <br>
-     * If this is {@link ProcessType#PER_FRAME}, the tracker is called once with the local player per frame before the frame is rendered.
-     * <br>
-     * If this is {@link ProcessType#PER_TICK}, the tracker is called once with the local player per game tick during the tick.
+     * The process type for this tracker. Determines when and how frequently it is Processed. See {@link ProcessType} for
+     * possible options.
      *
      * @return The process type this tracker should use.
      * @since 1.3.0
@@ -50,7 +47,7 @@ public interface Tracker {
     default void idleProcess(@Nullable LocalPlayer player) {}
 
     /**
-     * Called for the client player if this tracker is active, which is when {@link #isActive(LocalPlayer)} returns true.
+     * Called for the local player if this tracker is active, which is when {@link #isActive(LocalPlayer)} returns true.
      *
      * @param player Player to run this tracker for, which is the local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
      * @since 1.3.0
