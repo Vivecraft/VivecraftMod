@@ -13,7 +13,8 @@ import javax.annotation.Nullable;
  * InteractModules are hand agnostic and are processed on tick.
  * <br>
  * They are sorted by the priority value provided by {@link #getPriority} and their ID on a priority tie.
- * Modules are processed in that fixed sorted order per hand and the first one that returns {@code true} on {@link #isActive} gets the keybind for that hand.
+ * Modules are processed in that fixed sorted order per hand and the first one that returns {@code true} on
+ * {@link #isActive} gets the keybind for that hand.
  * {@link #isActive} on modules after the active one will <strong>not</strong> be called for that hand.
  *
  * @since 1.3.0

@@ -35,7 +35,7 @@ public class SneakTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.sneakOverride = false;
     }
 

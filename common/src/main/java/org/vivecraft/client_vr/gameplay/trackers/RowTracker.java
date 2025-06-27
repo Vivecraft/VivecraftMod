@@ -53,7 +53,7 @@ public class RowTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.LOar = 0.0F;
         this.ROar = 0.0F;
         this.FOar = 0.0F;

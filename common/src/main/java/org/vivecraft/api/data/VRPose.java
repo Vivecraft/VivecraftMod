@@ -33,25 +33,25 @@ public interface VRPose {
     }
 
     /**
-     * Gets whether the player at the time of this pose's creation is seated.
+     * Gets whether the player was in seated mode when the pose got created.
      *
-     * @return Whether the player at the time of this pose's creation is seated.
+     * @return Whether the player was in seated mode when the pose got created.
      * @since 1.3.0
      */
     boolean isSeated();
 
     /**
-     * Gets whether the player at the time of this pose's creation is using left-handed mode.
+     * Gets whether the player was using left-handed mode when the pose got created.
      *
-     * @return Whether the player at the time of this pose's creation is using left-handed mode.
+     * @return Whether the player was using left-handed mode when the pose got created.
      * @since 1.3.0
      */
     boolean isLeftHanded();
 
     /**
-     * Gets the full-body tracking mode at the time of this pose's creation.
+     * Gets the full-body tracking mode the player was using when the pose got created.
      *
-     * @return The full-body tracking mode the player was using at the time of this pose's creation.
+     * @return The full-body tracking mode the player was using when the pose got created.
      * @since 1.3.0
      */
     FBTMode getFBTMode();

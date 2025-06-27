@@ -17,10 +17,10 @@ import java.util.List;
 public interface VRPoseHistory {
 
     /**
-     * Gets the current number of ticks of history currently held. The number returned by this method will never be
-     * higher than 200, the maximum amount of past ticks of data Vivecraft holds, however it can be lower than 200.
+     * Gets the number of ticks, historical data is currently available for. The number returned by this method will
+     * never be higher than 200, the maximum number of ticks Vivecraft holds data for, however, it can be lower than 200.
      *
-     * @return The number of ticks worth of history currently held.
+     * @return The number of ticks, historical data is currently available for.
      * @since 1.3.0
      */
     int ticksOfHistory();
@@ -35,11 +35,11 @@ public interface VRPoseHistory {
     List<VRPose> getAllHistoricalData();
 
     /**
-     * Gets the pose history {@code ticksBack} ticks back, or {@code null} if such data isn't available.
+     * Gets the pose from {@code ticksBack} ticks back, or {@code null} if such data isn't available.
      *
-     * @param ticksBack Ticks back to retrieve data.
-     * @return A {@link VRPose} instance from index ticks ago, or {@code null} if that data isn't available.
-     * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200].
+     * @param ticksBack Ticks back to retrieve data from.
+     * @return A {@link VRPose} instance from {@code ticksBack} ticks ago, or {@code null} if that data isn't available.
+     * @throws IllegalArgumentException Thrown when {@code ticksBack} is outside the range [0,200].
      * @since 1.3.0
      */
     VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException;
@@ -52,7 +52,7 @@ public interface VRPoseHistory {
      * @param maxTicksBack The maximum number of ticks back to compare the most recent data with.
      * @return The aforementioned net movement. Note that this will return zero change on all axes if only zero ticks
      * can be looked back. Will be {@code null} if the body part requested isn't available.
-     * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
+     * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */
@@ -67,7 +67,7 @@ public interface VRPoseHistory {
      * @param maxTicksBack The maximum number of ticks back to calculate velocity with.
      * @return The aforementioned average velocity on each axis. Note that this will return zero velocity on all axes
      * if only zero ticks can be looked back. Will be {@code null} if the body part requested isn't available.
-     * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
+     * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */
@@ -81,8 +81,8 @@ public interface VRPoseHistory {
      * @param bodyPart     The body part to get the average speed for.
      * @param maxTicksBack The maximum number of ticks back to calculate speed with.
      * @return The aforementioned average speed on each axis. Note that this will return zero speed if only zero ticks
-     * can be looked back. Will be 0 if the body part requested isn't available.
-     * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
+     * can be looked back, or if the body part requested isn't available.
+     * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */
@@ -90,13 +90,13 @@ public interface VRPoseHistory {
 
     /**
      * Gets the average position between the most recent pose in this instance and the oldest position that can be
-     * retrieved, going no farther back than maxTicksBack.
+     * retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the average position for.
-     * @param maxTicksBack The maximum number of ticks back to calculate velocity with.
+     * @param maxTicksBack The maximum number of ticks back to calculate the position with.
      * @return The aforementioned average position. Note that this will return the current position if only zero ticks
      * can be looked back. Will be {@code null} if the body part requested isn't available.
-     * @throws IllegalArgumentException Thrown when maxTicksBack is outside the range [0,200] or an invalid
+     * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
      * @since 1.3.0
      */

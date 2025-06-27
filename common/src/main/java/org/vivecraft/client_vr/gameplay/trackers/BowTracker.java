@@ -111,7 +111,7 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.wasDrawing = false;
         this.canDraw = false;
     }

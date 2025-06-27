@@ -66,7 +66,7 @@ public class InteractTracker implements DebugRenderTracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         for (int c = 0; c < 2; c++) {
             this.reset(player, c);
         }

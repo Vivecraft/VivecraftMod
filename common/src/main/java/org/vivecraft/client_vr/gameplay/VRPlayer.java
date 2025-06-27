@@ -309,7 +309,7 @@ public class VRPlayer {
                 if (tracker.isActive(this.mc.player)) {
                     tracker.activeProcess(this.mc.player);
                 } else {
-                    tracker.reset(this.mc.player);
+                    tracker.inactiveProcess(this.mc.player);
                 }
             }
         }
@@ -406,7 +406,7 @@ public class VRPlayer {
                 if (tracker.isActive(player)) {
                     tracker.activeProcess(player);
                 } else {
-                    tracker.reset(player);
+                    tracker.inactiveProcess(player);
                 }
             }
         }

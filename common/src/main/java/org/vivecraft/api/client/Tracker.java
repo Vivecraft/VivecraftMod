@@ -29,14 +29,6 @@ public interface Tracker {
     boolean isActive(@Nullable LocalPlayer player);
 
     /**
-     * Called for the client player if this tracker is active, which is when {@link #isActive(LocalPlayer)} returns true.
-     *
-     * @param player Player to run this tracker for, which is the local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
-     * @since 1.3.0
-     */
-    void activeProcess(@Nullable LocalPlayer player);
-
-    /**
      * The process type for this tracker.
      * <br>
      * If this is {@link ProcessType#PER_FRAME}, the tracker is called once with the local player per frame before the frame is rendered.
@@ -49,16 +41,8 @@ public interface Tracker {
     ProcessType processType();
 
     /**
-     * Called to reset this tracker's state. This is called whenever {@link #isActive(LocalPlayer)} returns false.
-     *
-     * @param player The local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
-     * @since 1.3.0
-     */
-    default void reset(@Nullable LocalPlayer player) {}
-
-    /**
-     * Called for the local player, whether the tracker is active or not for them. This runs before
-     * {@link #isActive(LocalPlayer)} or {@link #reset(LocalPlayer)}.
+     * Called for the local player, whether the tracker is active or not. This is called before
+     * {@link #activeProcess(LocalPlayer)} or {@link #inactiveProcess(LocalPlayer)} is called.
      *
      * @param player Player to do an idle process for. Will be {@code null} when not in a world.
      * @since 1.3.0
@@ -66,11 +50,34 @@ public interface Tracker {
     default void idleProcess(@Nullable LocalPlayer player) {}
 
     /**
+     * Called for the client player if this tracker is active, which is when {@link #isActive(LocalPlayer)} returns true.
+     *
+     * @param player Player to run this tracker for, which is the local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
+     * @since 1.3.0
+     */
+    void activeProcess(@Nullable LocalPlayer player);
+
+    /**
+     * Called to reset this tracker's state. This is called whenever {@link #isActive(LocalPlayer)} returns false.
+     *
+     * @param player The local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
+     * @since 1.3.0
+     */
+    default void inactiveProcess(@Nullable LocalPlayer player) {}
+
+    /**
      * The process type used for processing trackers.
      *
      * @since 1.3.0
      */
     enum ProcessType {
-        PER_FRAME, PER_TICK
+        /**
+         * processed every frame, before rendering starts
+         */
+        PER_FRAME,
+        /**
+         * processed every tick, during the local player tick
+         */
+        PER_TICK
     }
 }

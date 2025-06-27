@@ -49,7 +49,7 @@ public class RunTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.speed = 0.0F;
     }
 

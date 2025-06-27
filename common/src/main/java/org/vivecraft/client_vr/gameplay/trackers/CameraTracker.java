@@ -47,7 +47,7 @@ public class CameraTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.visible = false;
         this.quickMode = false;
         this.stopMoving();

@@ -42,7 +42,7 @@ public class CrawlTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.crawling = false;
         this.crawlsteresis = false;
         this.updateState(player);

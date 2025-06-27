@@ -17,7 +17,7 @@ import org.vivecraft.api.client.data.RenderPass;
 public interface VRRenderingAPI {
 
     /**
-     * Gets the API instance to use for interacting with Vivecraft for rendering.
+     * Gets the API instance for interacting with Vivecraft for rendering.
      *
      * @return The Vivecraft API instance for interacting with Vivecraft's rendering API.
      * @since 1.3.0

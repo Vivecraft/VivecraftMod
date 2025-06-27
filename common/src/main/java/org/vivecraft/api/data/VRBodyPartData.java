@@ -12,7 +12,7 @@ import org.joml.Quaternionfc;
 public interface VRBodyPartData {
 
     /**
-     * Gets the position for this body part.
+     * Gets the world space position for this body part.
      *
      * @return The position of this body part in Minecraft world coordinates.
      * @since 1.3.0

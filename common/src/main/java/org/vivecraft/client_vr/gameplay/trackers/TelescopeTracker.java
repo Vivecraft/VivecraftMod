@@ -47,7 +47,7 @@ public class TelescopeTracker implements ItemInUseTracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.viewing[0] = false;
         this.viewing[1] = false;
     }

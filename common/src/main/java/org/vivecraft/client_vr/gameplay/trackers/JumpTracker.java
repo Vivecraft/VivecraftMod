@@ -104,7 +104,7 @@ public class JumpTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.c1Latched = false;
         this.c0Latched = false;
     }

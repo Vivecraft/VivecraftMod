@@ -55,7 +55,7 @@ public class HorseTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         if (this.horse != null) {
             this.horse.setNoAi(false);
         }

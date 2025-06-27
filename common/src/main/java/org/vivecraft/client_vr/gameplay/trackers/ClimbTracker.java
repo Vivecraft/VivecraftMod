@@ -182,7 +182,7 @@ public class ClimbTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.latchStartController = -1;
         this.latched[0] = false;
         this.latched[1] = false;

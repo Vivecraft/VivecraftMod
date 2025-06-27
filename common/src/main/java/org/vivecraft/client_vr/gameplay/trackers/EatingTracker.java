@@ -68,7 +68,7 @@ public class EatingTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.eating[0] = false;
         this.eating[1] = false;
         this.foodPos[0] = null;

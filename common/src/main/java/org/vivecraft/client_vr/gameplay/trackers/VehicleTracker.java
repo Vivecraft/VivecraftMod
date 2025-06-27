@@ -48,7 +48,7 @@ public class VehicleTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.minecartStupidityCounter = 2;
         this.isRiding = false;
     }

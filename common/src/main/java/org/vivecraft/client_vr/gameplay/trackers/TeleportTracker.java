@@ -75,7 +75,7 @@ public class TeleportTracker implements Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.movementTeleportDestination = Vec3.ZERO;
         this.movementTeleportArcSteps = 0;
         this.movementTeleportProgress = 0.0D;

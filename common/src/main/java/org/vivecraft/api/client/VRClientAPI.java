@@ -19,8 +19,8 @@ import java.util.function.Consumer;
 public interface VRClientAPI {
 
     /**
-     * Gets the API instance to use for interacting with Vivecraft from the client-side for interactions not related
-     * to rendering.
+     * Gets the API instance for interacting with Vivecraft from the client-side, for interactions not related to
+     * rendering.
      *
      * @return The Vivecraft API instance for interacting with Vivecraft's client API.
      * @since 1.3.0
@@ -130,16 +130,18 @@ public interface VRClientAPI {
 
     /**
      * Get whether the local player is currently configured to be in seated mode when in VR.
+     * This doesn't check if VR is active/enabled, it just checks the user setting.
      *
-     * @return Whether the local player is currently in seated mode.
+     * @return Whether the local player is currently in seated mode when in VR.
      * @since 1.3.0
      */
     boolean isSeated();
 
     /**
      * Get whether the local player is currently configured to use left-handed mode when in VR.
+     * This doesn't check if VR is active/enabled, it just checks the user setting.
      *
-     * @return Whether the local player is playing with left-handed controls.
+     * @return Whether the local player is playing with left-handed controls when in VR.
      * @since 1.3.0
      */
     boolean isLeftHanded();
