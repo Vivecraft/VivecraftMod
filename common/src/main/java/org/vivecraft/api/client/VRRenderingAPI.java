@@ -80,6 +80,7 @@ public interface VRRenderingAPI {
      * @param hand   The hand to set the Matrix4f to.
      * @param matrix The Matrix4f to be set.
      * @since 1.3.0
+     * @since Minecraft 1.20.5
      */
     void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix);
 }
