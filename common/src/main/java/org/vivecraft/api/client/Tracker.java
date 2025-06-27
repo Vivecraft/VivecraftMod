@@ -39,7 +39,8 @@ public interface Tracker {
 
     /**
      * Called for the local player, whether the tracker is active or not. This is called before
-     * {@link #activeProcess(LocalPlayer)} or {@link #inactiveProcess(LocalPlayer)} is called.
+     * {@link #activeProcess(LocalPlayer)}, {@link #inactiveProcess(LocalPlayer)}, or
+     * {@link #isActive(LocalPlayer)} are called.
      *
      * @param player Player to do an idle process for. Will be {@code null} when not in a world.
      * @since 1.3.0
