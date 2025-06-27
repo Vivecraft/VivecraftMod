@@ -43,12 +43,12 @@ public class BackpackTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         VRPlayer provider = this.dh.vrPlayer;
         Vec3 hmdPos = provider.vrdata_room_pre.getHeadRear();
 

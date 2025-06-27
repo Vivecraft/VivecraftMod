@@ -53,12 +53,12 @@ public class TelescopeTracker implements ItemInUseTracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         for (int c = 0; c < 2; c++) {
             if (isTelescope(player.getItemInHand(InteractionHand.values()[c]))) {
                 if (isViewing(c)) {

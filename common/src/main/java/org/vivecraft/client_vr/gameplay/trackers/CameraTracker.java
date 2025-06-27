@@ -54,12 +54,12 @@ public class CameraTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_FRAME;
+    public ProcessType processType() {
+        return ProcessType.PER_FRAME;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         if (this.startControllerPose != null) {
             VRData.VRDevicePose controllerPose = this.dh.vrPlayer.vrdata_world_render.getController(
                 this.startController);

@@ -62,12 +62,12 @@ public class HorseTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         this.horse = (Horse) player.getVehicle();
         this.horse.setNoAi(true);
         float absYaw = (this.horse.getYRot() + 360.0F) % 360.0F;

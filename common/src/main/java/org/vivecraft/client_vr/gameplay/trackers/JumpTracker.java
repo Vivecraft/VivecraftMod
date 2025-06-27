@@ -96,7 +96,7 @@ public class JumpTracker implements Tracker {
     }
 
     @Override
-    public void idleTick(LocalPlayer player) {
+    public void idleProcess(LocalPlayer player) {
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(hasClimbeyJumpEquipped(player) &&
             (this.isActive(player) ||
                 (ClimbTracker.hasClimbeyClimbEquipped(player) && this.dh.climbTracker.isGrabbingLadder())
@@ -110,12 +110,12 @@ public class JumpTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         boolean climbeyEquipped = hasClimbeyJumpEquipped(player);
 
         if (climbeyEquipped) {

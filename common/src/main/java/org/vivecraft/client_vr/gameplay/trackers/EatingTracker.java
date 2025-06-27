@@ -76,12 +76,12 @@ public class EatingTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         VRData room_pre = this.dh.vrPlayer.vrdata_room_pre;
         Vector3f hmdPos = room_pre.hmd.getPositionF();
         Vector3f mouthPos = room_pre.hmd.getCustomVector(new Vector3f(0.0F, -MOUTH_TO_EYE_DISTANCE, 0.0F))

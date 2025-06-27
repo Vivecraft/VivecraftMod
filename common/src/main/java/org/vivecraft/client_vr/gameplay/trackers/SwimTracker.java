@@ -43,12 +43,12 @@ public class SwimTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         // swim
         Vec3 controllerR = this.dh.vrPlayer.vrdata_world_pre.getController(0).getPosition();
         Vec3 controllerL = this.dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();

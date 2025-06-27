@@ -40,12 +40,12 @@ public class SneakTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         if (!this.mc.isPaused() && this.dh.sneakTracker.sneakCounter > 0) {
             this.dh.sneakTracker.sneakCounter--;
         }

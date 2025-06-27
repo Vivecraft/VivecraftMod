@@ -304,10 +304,10 @@ public class VRPlayer {
             interpolatedWorldRotation_Radians);
 
         for (Tracker tracker : ClientDataHolderVR.getInstance().getTrackers()) {
-            if (tracker.tickType() == Tracker.TrackerTickType.PER_FRAME) {
-                tracker.idleTick(this.mc.player);
+            if (tracker.processType() == Tracker.ProcessType.PER_FRAME) {
+                tracker.idleProcess(this.mc.player);
                 if (tracker.isActive(this.mc.player)) {
-                    tracker.doProcess(this.mc.player);
+                    tracker.activeProcess(this.mc.player);
                 } else {
                     tracker.reset(this.mc.player);
                 }
@@ -401,10 +401,10 @@ public class VRPlayer {
 
         this.doPlayerMoveInRoom(player);
         for (Tracker tracker : this.dh.getTrackers()) {
-            if (tracker.tickType() == Tracker.TrackerTickType.PER_TICK) {
-                tracker.idleTick(player);
+            if (tracker.processType() == Tracker.ProcessType.PER_TICK) {
+                tracker.idleProcess(player);
                 if (tracker.isActive(player)) {
-                    tracker.doProcess(player);
+                    tracker.activeProcess(player);
                 } else {
                     tracker.reset(player);
                 }

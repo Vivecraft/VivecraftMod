@@ -161,7 +161,7 @@ public class ClimbTracker implements Tracker {
     }
 
     @Override
-    public void idleTick(LocalPlayer player) {
+    public void idleProcess(LocalPlayer player) {
         if (!this.isActive(player)) {
             this.wasLatched[0] = false;
             this.wasLatched[1] = false;
@@ -190,12 +190,12 @@ public class ClimbTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         boolean[] button = new boolean[2];
         boolean[] allowed = new boolean[2];
         Vec3[] controllerPos = new Vec3[2];

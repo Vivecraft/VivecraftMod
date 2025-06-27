@@ -117,12 +117,12 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_FRAME;
+    public ProcessType processType() {
+        return ProcessType.PER_FRAME;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         VRData vrData = this.dh.vrPlayer.getVRDataWorld();
         boolean lastCanDraw = this.canDraw;
 

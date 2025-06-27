@@ -9,9 +9,11 @@ import javax.annotation.Nullable;
 /**
  * A tracker is an object that is run for the local player during the game tick or before rendering a frame only if
  * they are in VR. Using trackers is one of the cleanest ways to interact with Vivecraft's data, it's how Vivecraft
- * itself does. Trackers should generally use {@link VRClientAPI#getPreTickWorldPose()}, as this provides
- * the most up-to-date data, and other methods such as {@link VRClientAPI#getPostTickWorldPose()} or
- * {@link VRAPI#getVRPose(Player)} may not have data available when the tracker is run.
+ * itself does. Trackers should generally use {@link VRClientAPI#getPreTickWorldPose()} when using the
+ * {@link ProcessType#PER_TICK} process type and {@link VRClientAPI#getWorldRenderPose()} when using the
+ * {@link ProcessType#PER_FRAME} process type, as this provides the most up-to-date data and relevant data. Furthermore,
+ * other methods such as {@link VRClientAPI#getPostTickWorldPose()} or {@link VRAPI#getVRPose(Player)} may not have
+ * data available when the tracker is run.
  *
  * @since 1.3.0
  */
@@ -32,19 +34,19 @@ public interface Tracker {
      * @param player Player to run this tracker for, which is the local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
      * @since 1.3.0
      */
-    void doProcess(@Nullable LocalPlayer player);
+    void activeProcess(@Nullable LocalPlayer player);
 
     /**
-     * The ticking type for this tracker.
+     * The process type for this tracker.
      * <br>
-     * If this is {@link TrackerTickType#PER_FRAME}, the tracker is called once with the local player per frame before the frame is rendered.
+     * If this is {@link ProcessType#PER_FRAME}, the tracker is called once with the local player per frame before the frame is rendered.
      * <br>
-     * If this is {@link TrackerTickType#PER_TICK}, the tracker is called once with the local player per game tick during the tick.
+     * If this is {@link ProcessType#PER_TICK}, the tracker is called once with the local player per game tick during the tick.
      *
-     * @return The ticking type this tracker should use.
+     * @return The process type this tracker should use.
      * @since 1.3.0
      */
-    TrackerTickType tickType();
+    ProcessType processType();
 
     /**
      * Called to reset this tracker's state. This is called whenever {@link #isActive(LocalPlayer)} returns false.
@@ -58,17 +60,17 @@ public interface Tracker {
      * Called for the local player, whether the tracker is active or not for them. This runs before
      * {@link #isActive(LocalPlayer)} or {@link #reset(LocalPlayer)}.
      *
-     * @param player Player to do an idle tick for. Will be {@code null} when not in a world.
+     * @param player Player to do an idle process for. Will be {@code null} when not in a world.
      * @since 1.3.0
      */
-    default void idleTick(@Nullable LocalPlayer player) {}
+    default void idleProcess(@Nullable LocalPlayer player) {}
 
     /**
-     * The timing type used for ticking trackers.
+     * The process type used for processing trackers.
      *
      * @since 1.3.0
      */
-    enum TrackerTickType {
+    enum ProcessType {
         PER_FRAME, PER_TICK
     }
 }

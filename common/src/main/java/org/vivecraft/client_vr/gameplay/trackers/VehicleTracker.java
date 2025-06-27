@@ -54,8 +54,8 @@ public class VehicleTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     public double getVehicleFloor(Entity vehicle, double original) {
@@ -101,7 +101,7 @@ public class VehicleTracker implements Tracker {
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         if (!this.mc.isPaused()) {
             // do vehicle rotation, which rotates around a different point.
             if (this.dismountCooldown > 0) {

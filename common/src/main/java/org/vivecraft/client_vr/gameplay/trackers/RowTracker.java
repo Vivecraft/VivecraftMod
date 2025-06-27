@@ -60,12 +60,12 @@ public class RowTracker implements Tracker {
     }
 
     @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         float c0Move = this.dh.vr.controllerHistory[0].averageSpeed(0.5D);
         float c1Move = this.dh.vr.controllerHistory[1].averageSpeed(0.5D);
 
