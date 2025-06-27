@@ -45,7 +45,7 @@ public interface VRPoseHistory {
     VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException;
 
     /**
-     * Gets the net movement between the most recent pose in this instance and the oldest position that can be
+     * Gets the net movement between the most recent VRPose in this instance and the oldest VRPose that can be
      * retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the net movement for.
@@ -60,7 +60,7 @@ public interface VRPoseHistory {
     Vec3 netMovement(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;
 
     /**
-     * Gets the average velocity in blocks/tick between the most recent pose in this instance and the oldest position
+     * Gets the average velocity in blocks/tick between the most recent VRPose in this instance and the oldest VRPose
      * that can be retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the average velocity for.
@@ -75,7 +75,7 @@ public interface VRPoseHistory {
     Vec3 averageVelocity(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;
 
     /**
-     * Gets the average speed in blocks/tick between the most recent pose in this instance and the oldest position
+     * Gets the average speed in blocks/tick between the most recent VRPose in this instance and the oldest VRPose
      * that can be retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the average speed for.
@@ -89,7 +89,7 @@ public interface VRPoseHistory {
     double averageSpeed(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;
 
     /**
-     * Gets the average position between the most recent pose in this instance and the oldest position that can be
+     * Gets the average position between the most recent VRPose in this instance and the oldest VRPose that can be
      * retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the average position for.
