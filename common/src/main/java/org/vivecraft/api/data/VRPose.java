@@ -23,36 +23,44 @@ public interface VRPose {
     VRBodyPartData getBodyPartData(VRBodyPart vrBodyPart);
 
     /**
-     * @return Body part pose data for the HMD.
+     * Gets the body part pose data for the head.
+     *
+     * @return Body part pose data for the head.
      * @since 1.3.0
      */
-    default VRBodyPartData getHMD() {
+    default VRBodyPartData getHead() {
         return getBodyPartData(VRBodyPart.HEAD);
     }
 
     /**
-     * @return Whether the player is currently in seated mode.
+     * Gets whether the player at the time of this pose's creation is seated.
+     *
+     * @return Whether the player at the time of this pose's creation is seated.
      * @since 1.3.0
      */
     boolean isSeated();
 
     /**
-     * @return Whether the player is playing with left-handed controls.
+     * Gets whether the player at the time of this pose's creation is using left-handed mode.
+     *
+     * @return Whether the player at the time of this pose's creation is using left-handed mode.
      * @since 1.3.0
      */
     boolean isLeftHanded();
 
     /**
-     * @return The full-body tracking mode currently in-use.
+     * Gets the full-body tracking mode at the time of this pose's creation.
+     *
+     * @return The full-body tracking mode the player was using at the time of this pose's creation.
      * @since 1.3.0
      */
     FBTMode getFBTMode();
 
     /**
-     * Gets the pose for a given hand.
+     * Gets the body part data for a given hand.
      *
      * @param hand The interaction hand to get hand data for.
-     * @return The specified hand's pose data.
+     * @return The specified hand's body part data.
      * @since 1.3.0
      */
     default VRBodyPartData getHand(InteractionHand hand) {
@@ -60,9 +68,9 @@ public interface VRPose {
     }
 
     /**
-     * Gets the pose for the main-hand.
+     * Gets the body part data for the main-hand.
      *
-     * @return The main-hand's pose data.
+     * @return The main-hand's body part data.
      * @since 1.3.0
      */
     default VRBodyPartData getMainHand() {
@@ -70,9 +78,9 @@ public interface VRPose {
     }
 
     /**
-     * Gets the pose for the off-hand.
+     * Gets the body part data for the off-hand.
      *
-     * @return The off-hand's pose data.
+     * @return The off-hand's body part data.
      * @since 1.3.0
      */
     default VRBodyPartData getOffHand() {

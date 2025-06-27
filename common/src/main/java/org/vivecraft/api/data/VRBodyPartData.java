@@ -12,37 +12,49 @@ import org.joml.Quaternionfc;
 public interface VRBodyPartData {
 
     /**
-     * @return The position of the body part in Minecraft world coordinates.
+     * Gets the position for this body part.
+     *
+     * @return The position of this body part in Minecraft world coordinates.
      * @since 1.3.0
      */
     Vec3 getPos();
 
     /**
-     * @return The forward direction of the body part.
+     * Gets the forward direction this body part is facing.
+     *
+     * @return The forward direction of this body part.
      * @since 1.3.0
      */
     Vec3 getDir();
 
     /**
-     * @return The pitch of the body part in radians.
+     * Gets the pitch of this body part.
+     *
+     * @return The pitch of this body part in radians.
      * @since 1.3.0
      */
     double getPitch();
 
     /**
-     * @return The yaw of the body part in radians.
+     * Gets the yaw of this body part.
+     *
+     * @return The yaw of this body part in radians.
      * @since 1.3.0
      */
     double getYaw();
 
     /**
-     * @return The roll of the body part in radians.
+     * Gets the roll of this body part.
+     *
+     * @return The roll of this body part in radians.
      * @since 1.3.0
      */
     double getRoll();
 
     /**
-     * @return The quaternion representing the rotation of the body part.
+     * Gets the quaternion representing the rotation of this body part.
+     *
+     * @return The quaternion representing the rotation of this body part.
      * @since 1.3.0
      */
     Quaternionfc getRotation();

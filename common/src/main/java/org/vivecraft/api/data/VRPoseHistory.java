@@ -17,8 +17,10 @@ import java.util.List;
 public interface VRPoseHistory {
 
     /**
-     * @return The amount of ticks worth of history currently held. The number returned by this method will never be
+     * Gets the current amount of ticks of history currently held. The number returned by this method will never be
      * higher than 200, the maximum amount of past ticks of data Vivecraft holds, however it can be lower than 200.
+     *
+     * @return The amount of ticks worth of history currently held.
      * @since 1.3.0
      */
     int ticksOfHistory();

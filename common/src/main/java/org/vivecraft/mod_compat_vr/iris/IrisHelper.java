@@ -4,7 +4,7 @@ import net.irisshaders.iris.api.v0.IrisApi;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.vivecraft.Xloader;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.ClassUtils;

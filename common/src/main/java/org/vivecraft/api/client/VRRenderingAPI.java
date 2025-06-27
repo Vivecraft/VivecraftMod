@@ -6,7 +6,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.api_impl.VRRenderingAPIImpl;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 
 /**
  * The main interface for interacting with Vivecraft from rendering code. For other client-side code, one should use
@@ -17,6 +17,8 @@ import org.vivecraft.client_vr.render.RenderPass;
 public interface VRRenderingAPI {
 
     /**
+     * Gets the API instance to use for interacting with Vivecraft for rendering.
+     *
      * @return The Vivecraft API instance for interacting with Vivecraft's rendering API.
      * @since 1.3.0
      */
@@ -25,18 +27,26 @@ public interface VRRenderingAPI {
     }
 
     /**
+     * Gets whether the current render pass is a vanilla render pass. This method's return value is only valid if this
+     * method was called while rendering.
+     *
      * @return Whether the current render pass is a vanilla render pass.
      * @since 1.3.0
      */
     boolean isVanillaRenderPass();
 
     /**
+     * Gets the current render pass. This method's return value is only valid if this method was called while rendering.
+     *
      * @return The current render pass Vivecraft is performing.
      * @since 1.3.0
      */
     RenderPass getCurrentRenderPass();
 
     /**
+     * Returns if the current render pass is the first render pass for this render cycle. This method's return value is
+     * only valid if this method was called while rendering.
+     *
      * @return Whether the current render pass is the first one performed for this render cycle.
      * @since 1.3.0
      */
@@ -67,8 +77,8 @@ public interface VRRenderingAPI {
      * Sets the provided {@link Matrix4f} to render at the position of and with the rotation of the provided
      * {@link InteractionHand}, this assumes the given {@code matrix} to be an identity.
      *
-     * @param hand   The hand to set the PoseStack to.
-     * @param matrix The PoseStack to be set.
+     * @param hand   The hand to set the Matrix4f to.
+     * @param matrix The Matrix4f to be set.
      * @since 1.3.0
      */
     void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix);

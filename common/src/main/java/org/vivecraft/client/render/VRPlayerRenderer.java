@@ -16,7 +16,7 @@ import org.vivecraft.client.render.armor.VRArmorLayer;
 import org.vivecraft.client.render.armor.VRArmorModel_WithArms;
 import org.vivecraft.client.render.armor.VRArmorModel_WithArmsLegs;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 
 public class VRPlayerRenderer extends PlayerRenderer {
     // Vanilla model

@@ -11,14 +11,17 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 /**
- * The main interface for interacting with the local player using Vivecraft from client code. For rendering, one should use
- * {@link VRRenderingAPI}.
+ * The main interface for interacting with the local player using Vivecraft from client code. For rendering, one should
+ * use {@link VRRenderingAPI}.
  *
  * @since 1.3.0
  */
 public interface VRClientAPI {
 
     /**
+     * Gets the API instance to use for interacting with Vivecraft from the client-side for interactions not related
+     * to rendering.
+     *
      * @return The Vivecraft API instance for interacting with Vivecraft's client API.
      * @since 1.3.0
      */
@@ -126,36 +129,50 @@ public interface VRClientAPI {
     }
 
     /**
+     * Get whether the local player is currently configured to be in seated mode when in VR.
+     *
      * @return Whether the local player is currently in seated mode.
      * @since 1.3.0
      */
     boolean isSeated();
 
     /**
+     * Get whether the local player is currently configured to use left-handed mode when in VR.
+     *
      * @return Whether the local player is playing with left-handed controls.
      * @since 1.3.0
      */
     boolean isLeftHanded();
 
     /**
+     * Gets the mode used for full-body tracking for the local player. Will return a sane default value if the
+     * local player isn't in VR.
+     *
      * @return The full-body tracking mode currently in-use or some default value if the local player is not in VR.
      * @since 1.3.0
      */
     FBTMode getFBTMode();
 
     /**
+     * Get whether VR support is currently initialized. This is NOT the same as whether the local player is actively in
+     * VR, which can instead be checked with {@link #isVRActive()}.
+     *
      * @return Whether VR support is initialized.
      * @since 1.3.0
      */
     boolean isVRInitialized();
 
     /**
+     * Get whether the client is actively in VR.
+     *
      * @return Whether the client is actively in VR.
      * @since 1.3.0
      */
     boolean isVRActive();
 
     /**
+     * Get the currently active world scale.
+     *
      * @return The currently active world scale.
      * @since 1.3.0
      */

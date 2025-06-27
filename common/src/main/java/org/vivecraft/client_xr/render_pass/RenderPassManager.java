@@ -4,7 +4,7 @@ import com.mojang.blaze3d.pipeline.MainTarget;
 import net.minecraft.client.Minecraft;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 
 public class RenderPassManager {
     private static final Minecraft MC = Minecraft.getInstance();

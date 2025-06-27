@@ -12,7 +12,7 @@ import org.joml.Vector3f;
 import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ItemTags;
 

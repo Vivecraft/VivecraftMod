@@ -9,7 +9,7 @@ import org.joml.Vector3f;
 import org.vivecraft.api.client.HeldInteractModule;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.common.utils.MathUtils;
 
