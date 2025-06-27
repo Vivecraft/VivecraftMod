@@ -154,7 +154,8 @@ public final class VRClientAPIImpl implements VRClientAPI {
     public void addRegistrationHandler(Consumer<VivecraftRegistrationEvent> handler) {
         synchronized (this.registrationHandlers) {
             if (this.registrationClosed) {
-                throw new IllegalStateException("Registration handlers were already processed, this needs to be called before the game loop starts!");
+                throw new IllegalStateException(
+                    "Registration handlers were already processed, this needs to be called before the game loop starts!");
             }
             this.registrationHandlers.add(handler);
         }

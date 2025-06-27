@@ -1,6 +1,7 @@
 package org.vivecraft.api.data;
 
 import net.minecraft.world.InteractionHand;
+import org.vivecraft.api.client.VRClientAPI;
 
 /**
  * Corresponds to the different tracked device roles that are supported by Vivecraft.
@@ -8,6 +9,12 @@ import net.minecraft.world.InteractionHand;
  * @since 1.3.0
  */
 public enum VRBodyPart {
+    /**
+     * Main hand of the player, this is the hand the player points with. Which one that is can be identified with
+     * {@link VRPose#isLeftHanded()} or {@link VRClientAPI#isLeftHanded()} for the local player
+     *
+     * @since 1.3.0
+     */
     MAIN_HAND,
     OFF_HAND,
     RIGHT_FOOT,
@@ -17,10 +24,18 @@ public enum VRBodyPart {
     LEFT_KNEE,
     RIGHT_ELBOW,
     LEFT_ELBOW,
+    /**
+     * corresponds to the player's headset, so it is at their eye position
+     *
+     * @since 1.3.0
+     */
     HEAD;
 
     /**
-     * @return the opposite limb
+     * Gets the VRBodyPart which is the same type but on the opposite side of the body. VRBodyParts that don't have an
+     * opposite counterpart will return itself.
+     *
+     * @return the opposite VRBodyPart
      * @since 1.3.0
      */
     public VRBodyPart opposite() {
@@ -64,6 +79,8 @@ public enum VRBodyPart {
     }
 
     /**
+     * Checks if {@code this} VRBodyPart is a foot
+     *
      * @return Whether this body part is a foot.
      * @since 1.3.0
      */
@@ -72,6 +89,8 @@ public enum VRBodyPart {
     }
 
     /**
+     * Checks if {@code this} VRBodyPart is a hand
+     *
      * @return Whether this body part is a hand.
      * @since 1.3.0
      */

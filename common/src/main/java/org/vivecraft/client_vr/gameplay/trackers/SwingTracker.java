@@ -617,7 +617,8 @@ public class SwingTracker implements DebugRenderTracker {
                     this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
             }
             for (Entity entity : this.lastHitEntities[i]) {
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(entity.getBoundingBox().getCenter(), camWorld),
+                DebugRenderHelper.renderCube(
+                    MathUtils.subtractToVector3f(entity.getBoundingBox().getCenter(), camWorld),
                     (float) entity.getBoundingBox().getSize() / 2F, MathUtils.GREEN);
             }
         }

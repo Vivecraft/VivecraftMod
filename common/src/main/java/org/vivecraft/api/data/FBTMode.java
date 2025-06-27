@@ -8,16 +8,19 @@ package org.vivecraft.api.data;
 public enum FBTMode {
     /**
      * Only head and hands are available.
+     *
      * @since 1.3.0
      */
     ARMS_ONLY,
     /**
      * Head, hands, waist, and feet trackers are available.
+     *
      * @since 1.3.0
      */
     ARMS_LEGS,
     /**
      * Head, hands, waist, feet, elbow, and knee trackers are available.
+     *
      * @since 1.3.0
      */
     WITH_JOINTS;

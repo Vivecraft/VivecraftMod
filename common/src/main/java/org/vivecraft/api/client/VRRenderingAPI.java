@@ -4,9 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.api_impl.VRRenderingAPIImpl;
-import org.vivecraft.api.client.data.RenderPass;
 
 /**
  * The main interface for interacting with Vivecraft from rendering code. For other client-side code, one should use

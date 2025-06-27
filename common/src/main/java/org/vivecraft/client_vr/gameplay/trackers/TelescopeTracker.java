@@ -10,9 +10,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.ItemInUseTracker;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ItemTags;
 
