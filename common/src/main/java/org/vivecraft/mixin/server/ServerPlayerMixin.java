@@ -34,7 +34,6 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.Xplat;
 import org.vivecraft.mixin.world.entity.PlayerMixin;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
@@ -90,7 +89,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         double xOffset, double yOffset, double zOffset, double speed, Operation<Integer> original)
     {
         ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
-        if (!Xplat.isFakePlayer((ServerPlayer) (Object) this) && serverVivePlayer != null && serverVivePlayer.isVR()) {
+        if (serverVivePlayer != null && serverVivePlayer.isVR()) {
             Vec3 aim = serverVivePlayer.getAimDir(false);
             float yaw = (float) Math.atan2(-aim.x, aim.z);
 
@@ -143,9 +142,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         @Local ItemEntity item)
     {
         ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
-        if (!Xplat.isFakePlayer((ServerPlayer) (Object) this) && !dropAround && serverVivePlayer != null &&
-            serverVivePlayer.isVR())
-        {
+        if (!dropAround && serverVivePlayer != null && serverVivePlayer.isVR()) {
             // spawn item from players hand
             Vec3 pos = serverVivePlayer.getAimPos(false);
             Vec3 aim = serverVivePlayer.getAimDir(false);

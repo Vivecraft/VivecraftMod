@@ -2,7 +2,6 @@ package org.vivecraft.common.api_impl;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import org.vivecraft.Xplat;
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
@@ -51,7 +50,7 @@ public final class VRAPIImpl implements VRAPI {
     @Override
     public boolean isVRPlayer(Player player) {
         if (player instanceof ServerPlayer serverPlayer) {
-            return !Xplat.isFakePlayer(serverPlayer) && ServerVRPlayers.isVRPlayer(serverPlayer);
+            return ServerVRPlayers.isVRPlayer(serverPlayer);
         } else {
             return ClientVRPlayers.getInstance().isVRPlayer(player);
         }
@@ -74,10 +73,10 @@ public final class VRAPIImpl implements VRAPI {
     public VRPoseHistory getHistoricalVRPoses(Player player) {
         if (player.isLocalPlayer()) {
             return VRClientAPIImpl.INSTANCE.getHistoricalVRPoses();
-        } else if (player instanceof ServerPlayer serverPlayer && Xplat.isFakePlayer(serverPlayer)) {
-            return null;
-        } else {
+        } else if (isVRPlayer(player)) {
             return getMap(player.level().isClientSide).get(player.getUUID());
+        } else {
+            return null;
         }
     }
 
