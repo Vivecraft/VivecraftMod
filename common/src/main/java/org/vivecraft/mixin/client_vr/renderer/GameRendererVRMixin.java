@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
 
-import com.google.common.collect.Streams;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
@@ -17,10 +16,8 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
-import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -45,7 +42,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.Xevents;
-import org.vivecraft.client.gui.pip.GuiFBTPlayerRenderer;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
@@ -62,10 +58,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 
-import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 // higher priority to apply before iris modelview alteration
 @Mixin(value = GameRenderer.class, priority = 900)
@@ -140,19 +133,9 @@ public abstract class GameRendererVRMixin
     @Final
     private PerspectiveProjectionMatrixBuffer levelProjectionMatrixBuffer;
 
-    @Shadow
-    @Final
-    private RenderBuffers renderBuffers;
-
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     private Camera vivecraft$replaceCamera() {
         return new XRCamera();
-    }
-
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/List;)V"))
-    private List<PictureInPictureRenderer<?>> vivecraft$addFBTPLayerRenderer(List<PictureInPictureRenderer<?>> pips) {
-        return Streams.concat(pips.stream(), Stream.of(new GuiFBTPlayerRenderer(this.renderBuffers.bufferSource())))
-            .collect(Collectors.toList());
     }
 
     @WrapMethod(method = "pick(F)V")

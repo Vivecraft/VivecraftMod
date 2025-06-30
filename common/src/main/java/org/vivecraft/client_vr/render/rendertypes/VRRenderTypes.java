@@ -17,7 +17,8 @@ public class VRRenderTypes {
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_translucent_vr", 1536, true, true,
-            depthAlways ? VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT : VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT,
+            depthAlways ? VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT :
+                VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT,
             RenderType.CompositeState.builder()
                 .setTextureState(getTextureState(gpuTexture))
                 .setLightmapState(RenderStateShard.LIGHTMAP)
@@ -34,7 +35,8 @@ public class VRRenderTypes {
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_CUTOUT_NO_CARDINAL_LIGHT = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_cutout_vr", 1536, true, false,
-            depthAlways ? VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT : VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT,
+            depthAlways ? VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT :
+                VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT,
             RenderType.CompositeState.builder()
                 .setTextureState(getTextureState(gpuTexture))
                 .setLightmapState(RenderStateShard.LIGHTMAP)

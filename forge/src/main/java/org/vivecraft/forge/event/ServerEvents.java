@@ -6,7 +6,7 @@ import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.vivecraft.client.Xplat;
 
-@Mod.EventBusSubscriber(value = Dist.DEDICATED_SERVER, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(value = Dist.DEDICATED_SERVER)
 public class ServerEvents {
     @SubscribeEvent
     public static void crashWithForgeExtension(ServerAboutToStartEvent event) {

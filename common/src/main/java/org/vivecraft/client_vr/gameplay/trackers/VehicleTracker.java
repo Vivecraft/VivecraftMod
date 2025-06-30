@@ -69,7 +69,7 @@ public class VehicleTracker extends Tracker {
                     return dataHolder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
                 }
             }
-        } else if (entity instanceof HappyGhast && entity.isLocalInstanceAuthoritative()){
+        } else if (entity instanceof HappyGhast && entity.isLocalInstanceAuthoritative()) {
             if (dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
                 return dataHolder.vrPlayer.vrdata_world_pre.hmd.getDirection();
             } else {

@@ -10,13 +10,14 @@ import org.joml.Quaternionfc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.extensions.GuiGraphicsExtension;
+import org.vivecraft.client.gui.pip.state.GuiFBTPlayerState;
 import org.vivecraft.client.gui.widgets.MultilineComponent;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
 
 public class FBTCalibrationScreen extends Screen {
 
@@ -172,9 +173,9 @@ public class FBTCalibrationScreen extends Screen {
                 48, 16, 0xFFFFFFFF);
 
             // submit player pip
-            ((GuiGraphicsExtension) guiGraphics).vivecraft$submitFBTRenderState(this.rightHandAtPosition,
-                this.leftHandAtPosition, new Vector3f(this.rightHand), new Vector3f(this.leftHand), 0, 0,
-                guiGraphics.guiWidth(), guiGraphics.guiHeight());
+            ((GuiGraphicsAccessor) guiGraphics).getGuiRenderState().submitPicturesInPictureState(
+                new GuiFBTPlayerState(this.rightHandAtPosition, this.leftHandAtPosition, new Vector3f(this.rightHand),
+                    new Vector3f(this.leftHand), 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
 
             if (VRState.VR_RUNNING) {
                 ClientDataHolderVR.getInstance().vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract)

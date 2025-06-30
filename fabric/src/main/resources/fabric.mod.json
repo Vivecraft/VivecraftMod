@@ -50,7 +50,7 @@
   ],
   "depends": {
     "fabricloader": ">=0.16.1",
-    "minecraft": ["1.21.6"],
+    "minecraft": ["1.21.6","1.21.7"],
     "java": ">=21"
   },
   "breaks": {

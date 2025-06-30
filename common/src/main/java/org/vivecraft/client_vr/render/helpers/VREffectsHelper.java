@@ -802,8 +802,8 @@ public class VREffectsHelper {
         }
 
         // totem of undying
-        ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer().renderItemActivationAnimation(new PoseStack(),
-            partialTick);
+        ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
+            .renderItemActivationAnimation(new PoseStack(), partialTick);
     }
 
     /**
@@ -982,7 +982,8 @@ public class VREffectsHelper {
             {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityTranslucentNoCardinalLight(framebuffer.getColorTextureView(), depthAlways), false);
+                    VRRenderTypes.entityTranslucentNoCardinalLight(framebuffer.getColorTextureView(), depthAlways),
+                    false);
             } else {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,

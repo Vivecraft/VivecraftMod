@@ -12,7 +12,7 @@ public class GuiRenderHelper {
 
 
     public static GuiGraphics getGuiGraphics() {
-        GuiRenderState guiRenderState = ((GameRendererAccessor)Minecraft.getInstance().gameRenderer).getGuiRenderState();
+        GuiRenderState guiRenderState = ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).getGuiRenderState();
         guiRenderState.reset();
         return new GuiGraphics(Minecraft.getInstance(), guiRenderState);
     }
@@ -24,7 +24,7 @@ public class GuiRenderHelper {
     }
 
     public static void finish() {
-        GuiRenderer guiRenderer = ((GameRendererAccessor)Minecraft.getInstance().gameRenderer).getGuiRenderer();
+        GuiRenderer guiRenderer = ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).getGuiRenderer();
         guiRenderer.render(((GameRendererAccessor) Minecraft.getInstance().gameRenderer).getFogRenderer()
             .getBuffer(FogRenderer.FogMode.NONE));
         guiRenderer.incrementFrameNumber();

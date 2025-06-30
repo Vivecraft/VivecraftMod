@@ -107,7 +107,7 @@ public class VRShaders {
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS).build();
 
     public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
-        RenderPipelines.GUI_TEXTURED_SNIPPET)
+            RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/gui_textured_always_vr")
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
@@ -149,7 +149,8 @@ public class VRShaders {
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withBlend(BlendFunction.TRANSLUCENT).build();
 
-    public static final RenderPipeline ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+    public static final RenderPipeline ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
+            ENTITY_SNIPPET)
         .withLocation("pipeline/entity_translucent_always_no_cardinal_light_vr")
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
@@ -161,7 +162,8 @@ public class VRShaders {
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F).build();
 
-    public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+    public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
+            ENTITY_SNIPPET)
         .withLocation("pipeline/entity_cutout_no_cull_always_no_cardinal_light_vr")
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)

@@ -345,7 +345,8 @@ public class ServerNetworking {
     private static void sendPacketToTrackingPlayers(
         ServerVivePlayer vivePlayer, Function<Integer, Packet<?>> packetProvider)
     {
-        Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(vivePlayer.player.getServer());
+        Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(
+            vivePlayer.player.getServer());
         for (var trackedPlayer : getTrackingPlayers(vivePlayer.player)) {
             if (!vivePlayers.containsKey(trackedPlayer.getPlayer().getUUID()) ||
                 trackedPlayer.getPlayer() == vivePlayer.player)
