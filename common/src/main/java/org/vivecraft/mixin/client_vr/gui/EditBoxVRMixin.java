@@ -68,13 +68,7 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
     @Inject(method = "setFocused", at = @At("HEAD"))
     private void vivecraft$autoOpenKeyboard(boolean focused, CallbackInfo ci) {
         if (VRState.VR_RUNNING && focused && !(Minecraft.getInstance().screen instanceof InBedChatScreen)) {
-            if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.ON ||
-                (Minecraft.getInstance().screen instanceof ChatScreen &&
-                    ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.CHAT
-                ))
-            {
-                KeyboardHandler.setOverlayShowing(true);
-            }
+            KeyboardHandler.showOverlayIfAuto(Minecraft.getInstance().screen instanceof ChatScreen);
         }
     }
 

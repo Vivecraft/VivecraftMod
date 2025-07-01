@@ -192,12 +192,49 @@ public interface VRClientAPI {
     VRPoseHistory getHistoricalVRPoses();
 
     /**
-     * Opens or closes Vivecraft's keyboard. Will fail silently if the user isn't in VR or if the keyboard's new state
-     * is the same as the old.
+     * Opens Vivecraft's keyboard, doing nothing if the keyboard is already opened or the provided
+     * {@code openKeyboardContext} doesn't result in the keyboard opening. Will silently fail if the player isn't in VR.
      *
-     * @param isNowOpen Whether the keyboard should now be open. If false, the keyboard will attempt to close.
-     * @return Whether the keyboard is currently showing after attempting to open/close it.
+     * @param openKeyboardContext The context to use for opening the keyboard.
+     * @return Whether the keyboard is showing after this method was called.
      * @since 1.3.0
      */
-    boolean setKeyboardState(boolean isNowOpen);
+    boolean openKeyboard(OpenKeyboardContext openKeyboardContext);
+
+    /**
+     * Closes Vivecraft's keyboard, doing nothing if the keyboard is already opened or the provided
+     * {@code closeKeyboardContext} doesn't result in the keyboard closing. Will silently fail if the player isn't in
+     * VR.
+     *
+     * @param closeKeyboardContext The context to use for closing the keyboard.
+     * @return Whether the keyboard is showing after this method was called.
+     * @since 1.3.0
+     */
+    boolean closeKeyboard(CloseKeyboardContext closeKeyboardContext);
+
+    enum OpenKeyboardContext {
+        /**
+         * Will open the keyboard no matter the situation.
+         */
+        FORCE,
+        /**
+         * Will open the keyboard only if the user has configured to open the keyboard when a text box is focused.
+         */
+        INITIAL_FOCUS,
+        /**
+         * Will open the keyboard only if the user has configured to open the keyboard when chat is focused.
+         */
+        INITIAL_FOCUS_CHAT
+    }
+
+    enum CloseKeyboardContext {
+        /**
+         * Will close the keyboard no matter the situation.
+         */
+        FORCE,
+        /**
+         * Will close the keyboard if the user has configured to close the keyboard when an action has been completed.
+         */
+        ACTION_COMPLETE
+    }
 }

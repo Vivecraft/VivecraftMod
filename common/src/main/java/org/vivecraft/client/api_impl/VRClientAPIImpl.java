@@ -152,6 +152,26 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
+    public boolean openKeyboard(OpenKeyboardContext openKeyboardContext) {
+        if (!isVRActive()) return false;
+        if (openKeyboardContext == OpenKeyboardContext.FORCE) {
+            return KeyboardHandler.setOverlayShowing(true);
+        } else {
+            return KeyboardHandler.showOverlayIfAuto(openKeyboardContext == OpenKeyboardContext.INITIAL_FOCUS_CHAT);
+        }
+    }
+
+    @Override
+    public boolean closeKeyboard(CloseKeyboardContext closeKeyboardContext) {
+        if (!isVRActive()) return false;
+        if (closeKeyboardContext == CloseKeyboardContext.FORCE || ClientDataHolderVR.getInstance().vrSettings.autoCloseKeyboard) {
+            return KeyboardHandler.setOverlayShowing(false);
+        } else {
+            return KeyboardHandler.SHOWING;
+        }
+    }
+
+    @Override
     public void addClientRegistrationHandler(Consumer<VivecraftClientRegistrationEvent> handler) {
         synchronized (this.registrationHandlers) {
             if (this.registrationClosed) {
@@ -160,13 +180,5 @@ public final class VRClientAPIImpl implements VRClientAPI {
             }
             this.registrationHandlers.add(handler);
         }
-    }
-
-    @Override
-    public boolean setKeyboardState(boolean isNowOpen) {
-        if (isVRActive()) {
-            return KeyboardHandler.setOverlayShowing(isNowOpen);
-        }
-        return false;
     }
 }
