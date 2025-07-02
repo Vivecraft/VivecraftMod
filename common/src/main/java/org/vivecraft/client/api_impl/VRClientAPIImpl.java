@@ -1,6 +1,8 @@
 package org.vivecraft.client.api_impl;
 
 import org.vivecraft.api.client.VRClientAPI;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.api.client.event.VivecraftClientRegistrationEvent;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
@@ -152,23 +154,13 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
-    public boolean openKeyboard(OpenKeyboardContext openKeyboardContext) {
-        if (!isVRActive()) return false;
-        if (openKeyboardContext == OpenKeyboardContext.FORCE) {
-            return KeyboardHandler.setOverlayShowing(true);
-        } else {
-            return KeyboardHandler.showOverlayIfAuto(openKeyboardContext == OpenKeyboardContext.INITIAL_FOCUS_CHAT);
-        }
+    public boolean openKeyboard(OpenKeyboardContext context) {
+        return isVRActive() && KeyboardHandler.showOverlay(context);
     }
 
     @Override
-    public boolean closeKeyboard(CloseKeyboardContext closeKeyboardContext) {
-        if (!isVRActive()) return false;
-        if (closeKeyboardContext == CloseKeyboardContext.FORCE || ClientDataHolderVR.getInstance().vrSettings.autoCloseKeyboard) {
-            return KeyboardHandler.setOverlayShowing(false);
-        } else {
-            return KeyboardHandler.SHOWING;
-        }
+    public boolean closeKeyboard(CloseKeyboardContext context) {
+        return isVRActive() && KeyboardHandler.hideOverlay(context);
     }
 
     @Override

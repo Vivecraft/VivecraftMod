@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -35,7 +36,7 @@ public class KeyboardHandlerVRMixin {
     {
         if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
             if (org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.SHOWING) {
-                org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
+                org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
 
                 // close chat with the keyboard
                 if (this.minecraft.screen instanceof ChatScreen) {

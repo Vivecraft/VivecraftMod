@@ -7,6 +7,8 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.GuiKeyboard;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
@@ -35,10 +37,20 @@ public class KeyboardHandler {
     private static boolean LAST_PRESSED_CLICK_R;
     private static boolean LAST_PRESSED_SHIFT;
 
-    public static boolean showOverlayIfAuto(boolean isChat) {
-        if ((DH.vrSettings.autoOpenKeyboard != VRSettings.AutoOpenKeyboard.OFF && isChat) ||
-            (DH.vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.ON)) {
-            return setOverlayShowing(true);
+    public static boolean showOverlay(OpenKeyboardContext context) {
+        if (context == OpenKeyboardContext.FORCE || DH.vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.ON ||
+            (context == OpenKeyboardContext.FOCUS_CHAT &&
+                DH.vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.CHAT
+            ))
+        {
+            setOverlayShowing(true);
+        }
+        return SHOWING;
+    }
+
+    public static boolean hideOverlay(CloseKeyboardContext context) {
+        if (context == CloseKeyboardContext.FORCE || DH.vrSettings.autoCloseKeyboard) {
+            setOverlayShowing(false);
         }
         return SHOWING;
     }

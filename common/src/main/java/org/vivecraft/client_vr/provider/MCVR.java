@@ -16,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
@@ -1051,7 +1052,7 @@ public abstract class MCVR {
 
         // close keyboard with ESC
         if (KeyboardHandler.SHOWING && this.mc.screen == null && MOD.keyMenuButton.consumeClick()) {
-            KeyboardHandler.setOverlayShowing(false);
+            KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
         }
 
         // radial menu
@@ -1078,7 +1079,7 @@ public abstract class MCVR {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
             }
 
-            KeyboardHandler.setOverlayShowing(false);
+            KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
         }
 
         // player list

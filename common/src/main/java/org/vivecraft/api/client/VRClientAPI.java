@@ -1,6 +1,8 @@
 package org.vivecraft.api.client;
 
 import org.vivecraft.api.VRAPI;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.api.client.event.VivecraftClientRegistrationEvent;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
@@ -211,30 +213,4 @@ public interface VRClientAPI {
      * @since 1.3.0
      */
     boolean closeKeyboard(CloseKeyboardContext closeKeyboardContext);
-
-    enum OpenKeyboardContext {
-        /**
-         * Will open the keyboard no matter the situation.
-         */
-        FORCE,
-        /**
-         * Will open the keyboard only if the user has configured to open the keyboard when a text box is focused.
-         */
-        INITIAL_FOCUS,
-        /**
-         * Will open the keyboard only if the user has configured to open the keyboard when chat is focused.
-         */
-        INITIAL_FOCUS_CHAT
-    }
-
-    enum CloseKeyboardContext {
-        /**
-         * Will close the keyboard no matter the situation.
-         */
-        FORCE,
-        /**
-         * Will close the keyboard if the user has configured to close the keyboard when an action has been completed.
-         */
-        ACTION_COMPLETE
-    }
 }
