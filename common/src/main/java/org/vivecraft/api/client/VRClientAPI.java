@@ -45,6 +45,23 @@ public interface VRClientAPI {
     void addClientRegistrationHandler(Consumer<VivecraftClientRegistrationEvent> handler) throws IllegalStateException;
 
     /**
+     * Get whether VR support is currently initialized. This is NOT the same as whether the local player is actively in
+     * VR, which can instead be checked with {@link #isVRActive()}.
+     *
+     * @return Whether VR support is initialized.
+     * @since 1.3.0
+     */
+    boolean isVRInitialized();
+
+    /**
+     * Get whether the client is actively in VR.
+     *
+     * @return Whether the client is actively in VR.
+     * @since 1.3.0
+     */
+    boolean isVRActive();
+
+    /**
      * Gets the VR pose representing the player in the room after the most recent poll of VR hardware.
      *
      * @return The most up-to-date VR pose representing the player in the room, or {@code null} if the local player isn't in VR.
@@ -157,23 +174,6 @@ public interface VRClientAPI {
      * @since 1.3.0
      */
     FBTMode getFBTMode();
-
-    /**
-     * Get whether VR support is currently initialized. This is NOT the same as whether the local player is actively in
-     * VR, which can instead be checked with {@link #isVRActive()}.
-     *
-     * @return Whether VR support is initialized.
-     * @since 1.3.0
-     */
-    boolean isVRInitialized();
-
-    /**
-     * Get whether the client is actively in VR.
-     *
-     * @return Whether the client is actively in VR.
-     * @since 1.3.0
-     */
-    boolean isVRActive();
 
     /**
      * Get the currently active world scale.
