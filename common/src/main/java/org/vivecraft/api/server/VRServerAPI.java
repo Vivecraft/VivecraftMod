@@ -13,7 +13,7 @@ import org.vivecraft.server.api_impl.VRServerAPIImpl;
 public interface VRServerAPI {
 
     /**
-     * @return The Vivecraft API instance for interacting with Vivecraft's common API.
+     * @return The Vivecraft API instance for interacting with Vivecraft's server API.
      * @since 1.3.0
      */
     static VRServerAPI instance() {
@@ -39,13 +39,13 @@ public interface VRServerAPI {
      * @param delay     An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0 here. This starts counting when the client receives the packet.
      * @since 1.3.0
      */
-    void triggerHapticPulse(
+    void sendHapticPulse(
         ServerPlayer player, VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay);
 
     /**
-     * Sends a haptic pulse (vibration/rumble) at full strength with 160 Hz  for the specified VRBodyPart, if possible, to the given player.
+     * Sends a haptic pulse (vibration/rumble) at full strength with 160 Hz for the specified VRBodyPart, if possible, to the given player.
      * <br>
-     * If one wants more control over the used parameters one should use {@link #triggerHapticPulse(ServerPlayer, VRBodyPart, float, float, float, float)} instead.
+     * If one wants more control over the used parameters one should use {@link #sendHapticPulse(ServerPlayer, VRBodyPart, float, float, float, float)} instead.
      * <br>
      * To directly trigger a haptic pulse for the local player, use {@link VRClientAPI#triggerHapticPulse}
      * This function silently fails if called for players not in VR or players who are in seated mode.
@@ -57,7 +57,7 @@ public interface VRServerAPI {
      *                 very short pulses.
      * @since 1.3.0
      */
-    default void triggerHapticPulse(ServerPlayer player, VRBodyPart bodyPart, float duration) {
-        triggerHapticPulse(player, bodyPart, duration, 160F, 1F, 0F);
+    default void sendHapticPulse(ServerPlayer player, VRBodyPart bodyPart, float duration) {
+        sendHapticPulse(player, bodyPart, duration, 160F, 1F, 0F);
     }
 }

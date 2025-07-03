@@ -11,7 +11,7 @@ public class VRServerAPIImpl implements VRServerAPI {
     public static final VRServerAPIImpl INSTANCE = new VRServerAPIImpl();
 
     @Override
-    public void triggerHapticPulse(
+    public void sendHapticPulse(
         ServerPlayer player, VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay)
     {
         if (VRAPIImpl.INSTANCE.isVRPlayer(player)) {
