@@ -45,6 +45,27 @@ public final class VRClientAPIImpl implements VRClientAPI {
         }
     }
 
+    @Override
+    public void addClientRegistrationHandler(Consumer<VivecraftClientRegistrationEvent> handler) {
+        synchronized (this.registrationHandlers) {
+            if (this.registrationClosed) {
+                throw new IllegalStateException(
+                    "Registration handlers were already processed, this needs to be called before the game loop starts!");
+            }
+            this.registrationHandlers.add(handler);
+        }
+    }
+
+    @Override
+    public boolean isVRInitialized() {
+        return VRState.VR_INITIALIZED;
+    }
+
+    @Override
+    public boolean isVRActive() {
+        return VRState.VR_RUNNING;
+    }
+
     @Nullable
     @Override
     public VRPose getLatestRoomPose() {
@@ -91,6 +112,15 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
+    @Nullable
+    public VRPoseHistory getHistoricalVRPoses() {
+        if (!isVRActive()) {
+            return null;
+        }
+        return this.poseHistory;
+    }
+
+    @Override
     public void triggerHapticPulse(VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay) {
         if (amplitude < 0F || amplitude > 1F) {
             throw new IllegalArgumentException("The amplitude of a haptic pulse must be between 0 and 1.");
@@ -126,31 +156,12 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
-    public boolean isVRInitialized() {
-        return VRState.VR_INITIALIZED;
-    }
-
-    @Override
-    public boolean isVRActive() {
-        return VRState.VR_RUNNING;
-    }
-
-    @Override
     public float getWorldScale() {
         if (isVRActive()) {
             return ClientDataHolderVR.getInstance().vrPlayer.worldScale;
         } else {
             return 1f;
         }
-    }
-
-    @Override
-    @Nullable
-    public VRPoseHistory getHistoricalVRPoses() {
-        if (!isVRActive()) {
-            return null;
-        }
-        return this.poseHistory;
     }
 
     @Override
@@ -161,16 +172,5 @@ public final class VRClientAPIImpl implements VRClientAPI {
     @Override
     public boolean closeKeyboard(CloseKeyboardContext context) {
         return isVRActive() && KeyboardHandler.hideOverlay(context);
-    }
-
-    @Override
-    public void addClientRegistrationHandler(Consumer<VivecraftClientRegistrationEvent> handler) {
-        synchronized (this.registrationHandlers) {
-            if (this.registrationClosed) {
-                throw new IllegalStateException(
-                    "Registration handlers were already processed, this needs to be called before the game loop starts!");
-            }
-            this.registrationHandlers.add(handler);
-        }
     }
 }

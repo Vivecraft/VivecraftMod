@@ -113,6 +113,16 @@ public interface VRClientAPI {
     VRPose getWorldRenderPose();
 
     /**
+     * Returns the history of VR poses for the local player. If one wants historical VR poses for other players and/or
+     * on the server, use {@link VRAPI#getHistoricalVRPoses(net.minecraft.world.entity.player.Player)} instead.
+     *
+     * @return The history of VR poses for the player. Will be {@code null} if the player isn't in VR.
+     * @since 1.3.0
+     */
+    @Nullable
+    VRPoseHistory getHistoricalVRPoses();
+
+    /**
      * Causes a haptic pulse (vibration/rumble) for the specified VRBodyPart, if possible.
      * This function silently fails if called for players not in VR or players who are in seated mode.
      *
@@ -182,16 +192,6 @@ public interface VRClientAPI {
      * @since 1.3.0
      */
     float getWorldScale();
-
-    /**
-     * Returns the history of VR poses for the local player. If one wants historical VR poses for other players and/or
-     * on the server, use {@link VRAPI#getHistoricalVRPoses(net.minecraft.world.entity.player.Player)} instead.
-     *
-     * @return The history of VR poses for the player. Will be {@code null} if the player isn't in VR.
-     * @since 1.3.0
-     */
-    @Nullable
-    VRPoseHistory getHistoricalVRPoses();
 
     /**
      * Opens Vivecraft's keyboard, doing nothing if the keyboard is already opened or the provided
