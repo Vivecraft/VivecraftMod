@@ -14,8 +14,8 @@ public class CrawlTracker implements Tracker {
     private boolean wasCrawling;
     public boolean crawling;
     public boolean crawlsteresis;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public CrawlTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

@@ -15,8 +15,9 @@ public class SwimTracker implements Tracker {
 
     private Vector3f motion = new Vector3f();
     private double lastDist;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public SwimTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

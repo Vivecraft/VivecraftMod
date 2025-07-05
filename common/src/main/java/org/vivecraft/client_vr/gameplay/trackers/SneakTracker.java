@@ -9,8 +9,9 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 public class SneakTracker implements Tracker {
     public boolean sneakOverride = false;
     public int sneakCounter = 0;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public SneakTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

@@ -22,8 +22,8 @@ public class RowTracker implements Tracker {
 
     private final Vec3[] lastUWPs = new Vec3[2];
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public RowTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

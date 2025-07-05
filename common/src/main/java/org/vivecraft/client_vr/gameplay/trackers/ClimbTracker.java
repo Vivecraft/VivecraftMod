@@ -62,8 +62,8 @@ public class ClimbTracker implements Tracker {
     private final AABB fullBB = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     private final Random rand = new Random();
     private boolean unsetFlag;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public ClimbTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

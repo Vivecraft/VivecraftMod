@@ -26,8 +26,8 @@ public class TelescopeTracker implements ItemInUseTracker {
 
     private final boolean[] viewing = new boolean[2];
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public TelescopeTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

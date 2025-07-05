@@ -15,8 +15,8 @@ import org.vivecraft.common.utils.MathUtils;
 public class BackpackTracker implements Tracker {
     public boolean[] wasIn = new boolean[2];
     public int previousSlot = 0;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public BackpackTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

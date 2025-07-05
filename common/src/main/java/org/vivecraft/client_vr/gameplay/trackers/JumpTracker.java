@@ -27,8 +27,8 @@ public class JumpTracker implements Tracker {
     public Vec3[] latchStartPlayer = new Vec3[]{Vec3.ZERO, Vec3.ZERO};
     private boolean c0Latched = false;
     private boolean c1Latched = false;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public JumpTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

@@ -41,8 +41,8 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
     private int hapCounter = 0;
     private int lastHapStep = 0;
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public BowTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

@@ -66,8 +66,8 @@ public class SwingTracker implements DebugRenderTracker {
     private final Vec3[] lastBlockHit = new Vec3[4];
     private final List<Vec3>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public SwingTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

@@ -26,8 +26,8 @@ public class EatingTracker implements ItemInUseTracker, DebugRenderTracker {
     private final boolean[] eating = new boolean[2];
     private long eatStart;
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public EatingTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

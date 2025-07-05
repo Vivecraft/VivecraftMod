@@ -27,8 +27,8 @@ public class CameraTracker implements Tracker {
     private Vec3 startPosition;
     private Quaternionf startRotation;
     private boolean quickMode;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public CameraTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

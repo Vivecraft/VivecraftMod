@@ -26,8 +26,8 @@ public class HorseTracker implements Tracker {
     private Horse horse = null;
     private final ModelInfo info = new ModelInfo();
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public HorseTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

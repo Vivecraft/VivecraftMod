@@ -10,8 +10,9 @@ import org.vivecraft.client_vr.settings.VRSettings;
 public class RunTracker implements Tracker {
     private double direction = 0.0D;
     private float speed = 0.0F;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public RunTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

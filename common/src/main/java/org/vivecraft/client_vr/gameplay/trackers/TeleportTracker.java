@@ -40,8 +40,9 @@ public class TeleportTracker implements Tracker {
     public int movementTeleportArcSteps = 0;
     public double lastTeleportArcDisplayOffset = 0.0D;
     public VRMovementStyle vrMovementStyle;
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public TeleportTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

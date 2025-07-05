@@ -22,8 +22,8 @@ public class InteractTracker implements DebugRenderTracker {
     private final InteractModule[] activeModules = new InteractModule[2];
     private final boolean[] pressed = new boolean[2];
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public InteractTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;

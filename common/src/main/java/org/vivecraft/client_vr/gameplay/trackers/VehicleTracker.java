@@ -28,8 +28,8 @@ public class VehicleTracker implements Tracker {
     private int minecartStupidityCounter;
     private boolean isRiding = false;
 
-    protected Minecraft mc;
-    protected ClientDataHolderVR dh;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public VehicleTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;
