@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.Xplat;
 import org.vivecraft.common.network.packet.s2c.DamageDirectionPayloadS2C;
 import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mixin.world.entity.PlayerMixin;

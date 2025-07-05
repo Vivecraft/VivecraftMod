@@ -73,7 +73,12 @@ public class VRState {
 
             dh.vrPlayer = new VRPlayer();
 
-            Haptics.connect();
+            if (Xloader.isModLoaded("hapticcraft")) {
+                VRSettings.LOGGER.info(
+                    "Vivecraft: Not activating bHaptics integration, because the official 'HapticCraft' is loaded!");
+            } else {
+                Haptics.connect();
+            }
 
             dh.menuWorldRenderer = new MenuWorldRenderer();
 
@@ -148,6 +153,9 @@ public class VRState {
             dh.menuWorldRenderer.completeDestroy();
             dh.menuWorldRenderer = null;
         }
+
+        Haptics.disconnect();
+
         VR_ENABLED = false;
         VR_INITIALIZED = false;
         VR_RUNNING = false;

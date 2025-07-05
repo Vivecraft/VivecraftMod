@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.bodylink.Haptics;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
-public class HapticTracker extends Tracker {
+public class HapticTracker implements Tracker {
 
     private static final int HUNGER_THRESHOLD = 15;
     private static final double MAX_EXPLOSION_DIST = 5;
@@ -39,8 +40,12 @@ public class HapticTracker extends Tracker {
     private Vector3fc lastHitDirection = null;
     private float lastVanillaHurtYaw = 0f;
 
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
+
     public HapticTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
         this.modules.add(new RainModule());
     }
 
@@ -50,7 +55,12 @@ public class HapticTracker extends Tracker {
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         //TODO Find better place for this
         RiggedBody.getInstance().updatePose(this.dh.vrPlayer.getVRDataWorld());
 

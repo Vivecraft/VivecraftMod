@@ -10,6 +10,7 @@ import org.joml.Vector3fc;
 import org.vivecraft.client.utils.FileUtils;
 import org.vivecraft.client_vr.settings.VRSettings;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -214,6 +215,21 @@ public class Haptics {
             VRSettings.LOGGER.info("Vivecraft: BHaptics library loaded");
         } catch (Throwable e) {
             VRSettings.LOGGER.error("Vivecraft: BHaptics library not found", e);
+        }
+    }
+
+    public static void disconnect() {
+        if (B_HAPTICS_PLAYER != null) {
+            // need to use reflection to disable auto reconnect after manual disconnect
+            try {
+                Field retryConnect = HapticPlayerImpl.class.getDeclaredField("retryConnect");
+                retryConnect.setAccessible(true);
+                retryConnect.set(B_HAPTICS_PLAYER, false);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: Error disconnecting bHaptics", e);
+            }
+            B_HAPTICS_PLAYER.dispose();
+            B_HAPTICS_PLAYER = null;
         }
     }
 
