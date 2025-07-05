@@ -1,6 +1,5 @@
 package org.vivecraft.client.utils;
 
-import com.google.common.base.Charsets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -67,7 +66,7 @@ public class FileUtils {
 
             if (resource.isPresent()) {
                 try (InputStream is = resource.get().open()) {
-                    return IOUtils.toString(is, Charsets.UTF_8);
+                    return IOUtils.toString(is, StandardCharsets.UTF_8);
                 }
             }
         } catch (Exception exception) {
