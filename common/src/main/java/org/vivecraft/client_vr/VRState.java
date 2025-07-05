@@ -4,13 +4,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
@@ -72,10 +72,6 @@ public class VRState {
             RenderPassManager.setVanillaRenderPass();
 
             dh.vrPlayer = new VRPlayer();
-            for (Tracker t : dh.getTrackers()) {
-                dh.vrPlayer.registerTracker(t);
-            }
-            dh.vrPlayer.registerTracker(dh.hapticTracker);
 
             Haptics.connect();
 
@@ -160,12 +156,13 @@ public class VRState {
             dh.vrSettings.saveOptions();
 
             // fixes an issue with DH shaders where the depth texture gets stuck
-            if (Xplat.isModLoaded("distanthorizons")) {
+            if (Xloader.isModLoaded("distanthorizons")) {
                 ShadersHelper.maybeReloadShaders();
             }
 
             // this reloads any PostChain, at least in vanilla
             Minecraft.getInstance().levelRenderer.onResourceManagerReload(Minecraft.getInstance().getResourceManager());
         }
+        VRClientAPIImpl.INSTANCE.clearPoseHistory();
     }
 }

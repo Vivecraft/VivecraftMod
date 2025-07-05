@@ -2,9 +2,9 @@ package org.vivecraft.mod_compat_vr.shaders;
 
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.tuple.Triple;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;

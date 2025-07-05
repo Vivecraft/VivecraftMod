@@ -1,12 +1,12 @@
 package org.vivecraft.mod_compat_vr.resolutioncontrol;
 
 import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 
 public class ResolutionControlHelper {
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("resolutioncontrol");
+        return Xloader.isModLoaded("resolutioncontrol");
     }
 
     /**

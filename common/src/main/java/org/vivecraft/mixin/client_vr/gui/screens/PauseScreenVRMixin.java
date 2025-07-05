@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -65,10 +66,10 @@ public abstract class PauseScreenVRMixin extends Screen {
                 (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(98).build());
         } else {
             GridLayout gridWidgetChat_Social = new GridLayout();
-            gridWidgetChat_Social.defaultCellSetting().paddingRight(1);
             GridLayout.RowHelper rowHelperChat_Social = gridWidgetChat_Social.createRowHelper(2);
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
-                (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(48).build());
+                    (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(48).build(),
+                LayoutSettings.defaults().paddingRight(2));
 
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.social"),
                 (p) -> this.minecraft.setScreen(new SocialInteractionsScreen())).width(48).build());
@@ -86,13 +87,12 @@ public abstract class PauseScreenVRMixin extends Screen {
             return;
         }
         GridLayout gridWidgetOverlay_Profiler = new GridLayout();
-        gridWidgetOverlay_Profiler.defaultCellSetting().paddingRight(1);
         GridLayout.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"),
             (p) -> {
                 this.minecraft.gui.getDebugOverlay().toggleOverlay();
                 this.minecraft.setScreen(null);
-            }).width(48).build());
+            }).width(48).build(), LayoutSettings.defaults().paddingRight(2));
 
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.profiler"),
             (p) -> {

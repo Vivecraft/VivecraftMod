@@ -12,7 +12,7 @@ import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -25,7 +25,7 @@ import java.util.Map;
 public class ServerEvents {
     @SubscribeEvent
     public static void crashWithForgeExtension(ServerAboutToStartEvent event) {
-        if (Xplat.isModLoaded("vivecraftforgeextensions")) {
+        if (Xloader.isModLoaded("vivecraftforgeextensions")) {
             throw new RuntimeException(
                 "The vivecraft mod cannot be used together with the 'Vivecraft Forge Extension'.\nThe Vivecraft Mod implements all features the forge extension has.\nRemove the 'Vivecraft Forge Extension' to resolve this error");
         }
@@ -53,7 +53,7 @@ public class ServerEvents {
                 Language.getInstance().getLanguageData().putAll(langMap);
                 ForgeI18n.loadLanguageData(Language.getInstance().getLanguageData());
             } catch (Exception exception) {
-                ServerNetworking.LOGGER.warn("failed ot load vivecraft lang file", exception);
+                ServerNetworking.LOGGER.error("Vivecraft: failed to load vivecraft lang file", exception);
             }
         }
         ServerConfig.init(null);

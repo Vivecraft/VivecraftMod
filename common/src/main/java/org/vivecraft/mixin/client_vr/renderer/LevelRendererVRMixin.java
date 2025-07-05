@@ -40,7 +40,7 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
-import org.vivecraft.client_vr.gameplay.trackers.InteractTracker;
+import org.vivecraft.client_vr.gameplay.interact_modules.BlockInteractionModule;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -228,15 +228,13 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             OptifineHelper.beginOutlineShader();
         }
 
-        InteractTracker interactTracker = ClientDataHolderVR.getInstance().interactTracker;
+        BlockInteractionModule blockModule = ClientDataHolderVR.getInstance().blockModule;
 
         for (int c = 0; c < 2; c++) {
-            if (interactTracker.isInteractActive(c) &&
-                (interactTracker.inBlockHit[c] != null || interactTracker.bukkit[c]))
-            {
-                BlockPos blockpos = interactTracker.inBlockHit[c] != null ?
-                    interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(
-                    ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+            if (blockModule.isActive(c)) {
+                BlockPos blockpos = blockModule.inBlockHit[c] != null ? blockModule.inBlockHit[c].getBlockPos() :
+                    BlockPos.containing(
+                        ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                 BlockState blockstate = this.level.getBlockState(blockpos);
                 if (sort == ItemBlockRenderTypes.getChunkRenderType(blockstate).sortOnUpload()) {
                     this.renderHitOutline(poseStack,

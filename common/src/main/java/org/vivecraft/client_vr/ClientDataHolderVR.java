@@ -2,14 +2,18 @@ package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
+import org.vivecraft.api.client.ItemInUseTracker;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.gameplay.interact_modules.*;
 import org.vivecraft.client_vr.gameplay.trackers.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -43,6 +47,8 @@ public class ClientDataHolderVR {
 
     // list of all registered trackers
     private final List<Tracker> trackers = new ArrayList<>();
+    // list of all trackers that control holding item usage
+    private final List<ItemInUseTracker> itemInUseTrackers = new ArrayList<>();
 
     // our trackers
     public final BackpackTracker backpackTracker;
@@ -63,6 +69,14 @@ public class ClientDataHolderVR {
     public final TelescopeTracker telescopeTracker;
     public final VehicleTracker vehicleTracker;
     public final HapticTracker hapticTracker;
+
+    // our interact modules
+    public final InteractiveHotbarModule hotbarModule;
+    public final BowModule bowModule;
+    public final ThirdPersonCameraModule thirdCamModule;
+    public final ScreenshotCameraModule screenCamModule;
+    public final EntityInteractionModule entityModule;
+    public final BlockInteractionModule blockModule;
 
     public VRSettings vrSettings;
     public boolean grabScreenShot = false;
@@ -123,6 +137,17 @@ public class ClientDataHolderVR {
         this.telescopeTracker = createTracker(TelescopeTracker::new);
         this.vehicleTracker = createTracker(VehicleTracker::new);
         this.hapticTracker = createTracker(HapticTracker::new);
+
+        // create interact modules
+        this.hotbarModule = new InteractiveHotbarModule();
+        this.bowModule = new BowModule(this);
+        this.thirdCamModule = new ThirdPersonCameraModule(this);
+        this.screenCamModule = new ScreenshotCameraModule(this);
+        this.entityModule = new EntityInteractionModule(Minecraft.getInstance(), this);
+        this.blockModule = new BlockInteractionModule(Minecraft.getInstance(), this);
+
+        this.interactTracker.registerModules(this.hotbarModule, this.bowModule, this.thirdCamModule,
+            this.screenCamModule, this.entityModule, this.blockModule);
     }
 
     public static ClientDataHolderVR getInstance() {
@@ -150,23 +175,28 @@ public class ClientDataHolderVR {
      * @param <T>         Class of the tracker
      * @return created tracker instance
      */
-    public <T extends Tracker> T createTracker(BiFunction<Minecraft, ClientDataHolderVR, T> constructor) {
+    private <T extends Tracker> T createTracker(BiFunction<Minecraft, ClientDataHolderVR, T> constructor) {
         T tracker = constructor.apply(Minecraft.getInstance(), this);
         registerTracker(tracker);
         return tracker;
     }
 
     /**
-     * registers a tracker
+     * registers trackers
      *
-     * @param tracker tracker to register
-     * @throws IllegalArgumentException if the tracker is already registered
+     * @param trackers trackers to register
+     * @throws IllegalArgumentException if s tracker is already registered
      */
-    public void registerTracker(Tracker tracker) throws IllegalArgumentException {
-        if (this.trackers.contains(tracker)) {
-            throw new IllegalArgumentException("Tracker is already added and should not be added again!");
+    public void registerTracker(Tracker... trackers) throws IllegalArgumentException {
+        for (Tracker tracker : trackers) {
+            if (this.trackers.contains(tracker)) {
+                throw new IllegalArgumentException("Tracker is already added and should not be added again!");
+            }
+            this.trackers.add(tracker);
+            if (tracker instanceof ItemInUseTracker itemInUseTracker) {
+                this.itemInUseTrackers.add(itemInUseTracker);
+            }
         }
-        this.trackers.add(tracker);
     }
 
     /**
@@ -174,5 +204,13 @@ public class ClientDataHolderVR {
      */
     public List<Tracker> getTrackers() {
         return Collections.unmodifiableList(this.trackers);
+    }
+
+    /**
+     * @param player Current local player.
+     * @return Whether some tracker is currently using an item.
+     */
+    public boolean isTrackerUsingItem(LocalPlayer player) {
+        return this.itemInUseTrackers.stream().anyMatch(tracker -> tracker.itemInUse(player));
     }
 }

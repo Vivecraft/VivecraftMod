@@ -4,19 +4,23 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.utils.MathUtils;
 
-public class SwimTracker extends Tracker {
+public class SwimTracker implements Tracker {
     private static final float FRICTION = 0.9F;
     private static final float RISE_SPEED = 0.005F;
     private static final float SWIM_SPEED = 1.3F;
 
     private Vector3f motion = new Vector3f();
     private double lastDist;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public SwimTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -39,7 +43,12 @@ public class SwimTracker extends Tracker {
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         // swim
         Vec3 controllerR = this.dh.vrPlayer.vrdata_world_pre.getController(0).getPosition();
         Vec3 controllerL = this.dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();

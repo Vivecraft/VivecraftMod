@@ -7,10 +7,10 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.SparkParticleExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.RenderPass;
 
 import java.util.UUID;
 import java.util.stream.Stream;

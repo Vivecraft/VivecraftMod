@@ -16,6 +16,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -28,7 +29,7 @@ import org.vivecraft.data.BlockTags;
 
 import java.util.Random;
 
-public class TeleportTracker extends Tracker {
+public class TeleportTracker implements Tracker {
     private float teleportEnergy;
     private Vec3 movementTeleportDestination = Vec3.ZERO;
     private Direction movementTeleportDestinationSideHit;
@@ -39,9 +40,12 @@ public class TeleportTracker extends Tracker {
     public int movementTeleportArcSteps = 0;
     public double lastTeleportArcDisplayOffset = 0.0D;
     public VRMovementStyle vrMovementStyle;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public TeleportTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
         this.vrMovementStyle = new VRMovementStyle();
     }
 
@@ -71,14 +75,19 @@ public class TeleportTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.movementTeleportDestination = Vec3.ZERO;
         this.movementTeleportArcSteps = 0;
         this.movementTeleportProgress = 0.0D;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         Random random = new Random();
 
         if (this.teleportEnergy < 100.0F) {
@@ -302,7 +311,7 @@ public class TeleportTracker extends Tracker {
 
                 this.checkAndSetTeleportDestination(player, start, blockhitresult);
 
-                Vec3 diff = this.mc.player.position().subtract(this.movementTeleportDestination);
+                Vec3 diff = player.position().subtract(this.movementTeleportDestination);
 
                 double yDiff = diff.y;
                 this.movementTeleportDistance = diff.length();

@@ -6,12 +6,13 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 
-public class HorseTracker extends Tracker {
+public class HorseTracker implements Tracker {
     private static final double BOOST_TRIGGER = 1.4D;
     private static final double PULL_TRIGGER = 0.8D;
     private static final int MAX_SPEED_LEVEL = 3;
@@ -25,8 +26,12 @@ public class HorseTracker extends Tracker {
     private Horse horse = null;
     private final ModelInfo info = new ModelInfo();
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public HorseTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -50,14 +55,19 @@ public class HorseTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         if (this.horse != null) {
             this.horse.setNoAi(false);
         }
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         this.horse = (Horse) player.getVehicle();
         this.horse.setNoAi(true);
         float absYaw = (this.horse.getYRot() + 360.0F) % 360.0F;

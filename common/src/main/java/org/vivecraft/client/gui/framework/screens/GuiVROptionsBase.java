@@ -17,7 +17,7 @@ import org.vivecraft.client.gui.framework.widgets.GuiVROptionSlider;
 import org.vivecraft.client.gui.settings.GuiAllSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.TooltipUtil;
+import org.vivecraft.common.utils.TooltipUtil;
 
 import java.util.ArrayList;
 

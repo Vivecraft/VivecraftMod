@@ -2,15 +2,19 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 
-public class SneakTracker extends Tracker {
+public class SneakTracker implements Tracker {
     public boolean sneakOverride = false;
     public int sneakCounter = 0;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public SneakTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -31,12 +35,17 @@ public class SneakTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.sneakOverride = false;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         if (!this.mc.isPaused() && this.dh.sneakTracker.sneakCounter > 0) {
             this.dh.sneakTracker.sneakCounter--;
         }

@@ -16,11 +16,11 @@ import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.BodyPart;
 
 import java.util.function.Supplier;
 
@@ -74,9 +74,9 @@ public class MultiPlayerGameModeVRMixin {
                 yRot = ClientNetworking.OVERRIDDEN_YAW;
                 xRot = ClientNetworking.OVERRIDDEN_PITCH;
             } else {
-                BodyPart bp = ClientNetworking.IS_LAST_BODY_PART_AIM ? ClientNetworking.LAST_SENT_BODY_PART :
-                    ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ? BodyPart.HEAD :
-                        BodyPart.MAIN_HAND;
+                VRBodyPart bp = ClientNetworking.IS_LAST_BODY_PART_AIM ? ClientNetworking.LAST_SENT_BODY_PART :
+                    ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ?
+                        VRBodyPart.HEAD : VRBodyPart.MAIN_HAND;
                 Vector3f dir = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(bp)
                     .getDirection();
                 yRot = (float) Math.toDegrees(Math.atan2(-dir.x, dir.z));
@@ -91,12 +91,12 @@ public class MultiPlayerGameModeVRMixin {
         if (VRState.VR_RUNNING && ClientNetworking.SERVER_ALLOWS_DUAL_WIELDING) {
             // check if main or offhand items match the started item, we want to limit abuse of this,
             // but still make both items work
-            BodyPart lastBodyPart = ClientNetworking.LAST_SENT_BODY_PART;
+            VRBodyPart lastBodyPart = ClientNetworking.LAST_SENT_BODY_PART;
 
-            ClientNetworking.LAST_SENT_BODY_PART = BodyPart.MAIN_HAND;
+            ClientNetworking.LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
             boolean sameItem = original.call(pos);
 
-            ClientNetworking.LAST_SENT_BODY_PART = BodyPart.OFF_HAND;
+            ClientNetworking.LAST_SENT_BODY_PART = VRBodyPart.OFF_HAND;
             sameItem |= original.call(pos);
 
             ClientNetworking.LAST_SENT_BODY_PART = lastBodyPart;

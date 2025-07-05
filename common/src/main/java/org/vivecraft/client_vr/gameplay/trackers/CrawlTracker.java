@@ -3,19 +3,23 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Pose;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ScaleHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.network.packet.c2s.CrawlPayloadC2S;
 
-public class CrawlTracker extends Tracker {
+public class CrawlTracker implements Tracker {
     private boolean wasCrawling;
     public boolean crawling;
     public boolean crawlsteresis;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public CrawlTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -38,14 +42,19 @@ public class CrawlTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.crawling = false;
         this.crawlsteresis = false;
         this.updateState(player);
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         float scaledWorldScale = this.dh.vrPlayer.worldScale /
             ScaleHelper.getEntityEyeHeightScale(player, ClientUtils.getCurrentPartialTick());
         this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * scaledWorldScale + 0.1F <

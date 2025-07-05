@@ -40,14 +40,14 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client.Xevents;
+import org.vivecraft.Xevents;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
@@ -241,11 +241,7 @@ public abstract class GameRendererVRMixin
     @Inject(method = "shouldRenderBlockOutline", at = @At("HEAD"), cancellable = true)
     private void vivecraft$shouldDrawBlockOutline(CallbackInfoReturnable<Boolean> cir) {
         if (!RenderPassType.isVanilla()) {
-            if (vivecraft$DATA_HOLDER.interactTracker.isInteractActive(0) &&
-                (vivecraft$DATA_HOLDER.interactTracker.inBlockHit[0] != null ||
-                    vivecraft$DATA_HOLDER.interactTracker.bukkit[0]
-                ))
-            {
+            if (vivecraft$DATA_HOLDER.blockModule.isActive(0)) {
                 // no block outline when the main arm has interaction
                 cir.setReturnValue(false);
             } else if (vivecraft$DATA_HOLDER.teleportTracker.isAiming() ||

@@ -23,6 +23,12 @@ public class MathUtils {
     public static final Vec3 UP_D = new Vec3(0.0, 1.0, 0.0);
     public static final Vec3 DOWN_D = new Vec3(0.0, -1.0, 0.0);
 
+    public static final Vector3fc RED = LEFT;
+    public static final Vector3fc GREEN = UP;
+    public static final Vector3fc BLUE = FORWARD;
+    public static final Vector3fc ORANGE = new Vector3f(1.0F, 0.75F, 0.0F);
+    public static final Vector3fc DARK_GRAY = new Vector3f(0.25F);
+
     public static final Matrix4fc IDENTITY = new Matrix4f();
 
     /**
@@ -34,6 +40,31 @@ public class MathUtils {
      */
     public static Vector3f subtractToVector3f(Vec3 a, Vec3 b) {
         return new Vector3f((float) (a.x - b.x), (float) (a.y - b.y), (float) (a.z - b.z));
+    }
+
+    /**
+     * Converts a {@link Vector3fc} to a {@link Vec3}.
+     *
+     * @param v The original Vector3fc.
+     * @return The Vec3.
+     */
+    public static Vec3 toMcVec3(Vector3fc v) {
+        return new Vec3(v.x(), v.y(), v.z());
+    }
+
+    /**
+     * Calculates a perpendicular/normal vector to the given vector. There is no guarantee in which direction it will look
+     *
+     * @param vec Vector to get the perpendicular/normal vector for
+     * @return the perpendicular/normal vector
+     */
+    public static Vector3f getPerpendicularVec(Vector3fc vec) {
+        // check if the vector is parallel, then we can't use up
+        if (Math.abs(vec.dot(UP)) / vec.length() != 1F) {
+            return vec.cross(UP, new Vector3f()).normalize();
+        } else {
+            return vec.cross(LEFT, new Vector3f()).normalize();
+        }
     }
 
     public static double lerpMod(double from, double to, double percent, double mod) {

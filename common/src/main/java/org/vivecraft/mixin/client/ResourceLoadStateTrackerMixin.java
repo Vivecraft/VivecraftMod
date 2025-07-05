@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -26,7 +26,6 @@ public abstract class ResourceLoadStateTrackerMixin {
         if (this.reloadState != null &&
             this.reloadState.reloadReason == ResourceLoadStateTracker.ReloadReason.INITIAL)
         {
-            Xplat.init();
             // init vr after first resource loading
             try {
                 if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled &&
@@ -42,6 +41,9 @@ public abstract class ResourceLoadStateTrackerMixin {
                 VRSettings.LOGGER.error("Vivecraft: Failed to initialize VR", exception);
             }
         }
+
+        // register api trackers/interacts
+        VRClientAPIImpl.INSTANCE.processRegistrationEvent();
     }
 
     @Inject(method = "startReload", at = @At("HEAD"))

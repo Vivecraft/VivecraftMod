@@ -5,6 +5,8 @@ import org.vivecraft.common.network.packet.PayloadIdentifier;
 
 /**
  * indicates that the server supports roomscale crawling
+ *
+ * @param allowed if dual wielding is allowed
  */
 public record DualWieldingPayloadS2C(boolean allowed) implements VivecraftPayloadS2C {
 

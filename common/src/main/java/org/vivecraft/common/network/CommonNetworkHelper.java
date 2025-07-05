@@ -18,8 +18,10 @@ public class CommonNetworkHelper {
     public static final int NETWORK_VERSION_DUAL_WIELDING = 2;
     // adds the head as a valid active BodyPart, and adds a useForAim flag
     public static final int NETWORK_VERSION_HEAD_AIM = 3;
+    // allows sending haptic events to the client
+    public static final int NETWORK_VERSION_HAPTIC_PACKET = 4;
     // adds packets to send/receive damage directions
-    public static final int NETWORK_VERSION_DAMAGE_DIRECTION = 4;
+    public static final int NETWORK_VERSION_DAMAGE_DIRECTION = 5;
 
     // maximum supported network version
     public static final int MAX_SUPPORTED_NETWORK_VERSION = NETWORK_VERSION_DAMAGE_DIRECTION;

@@ -4,13 +4,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.api.data.VRBodyPartData;
+import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.BodyPart;
-import org.vivecraft.common.network.FBTMode;
+import org.vivecraft.common.api_impl.data.VRBodyPartDataImpl;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.utils.MathUtils;
 
 import javax.annotation.Nullable;
@@ -63,6 +67,9 @@ public class VRData {
     public float rotation_radians;
     // pose positions get scaled by that
     public float worldScale;
+
+    // API pose object representing the data of this object
+    private VRPose vrPose;
 
     public VRData(Vec3 origin, float walkMul, float worldScale, float rotation) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
@@ -270,7 +277,7 @@ public class VRData {
      * @return the device pose for the specified BodyPart, if the device is not available {@code null} is returned
      */
     @Nullable
-    public VRDevicePose getBodyPart(BodyPart bodyPart) {
+    public VRDevicePose getBodyPart(VRBodyPart bodyPart) {
         return switch (bodyPart) {
             case MAIN_HAND -> this.c0;
             case OFF_HAND -> this.c1;
@@ -408,6 +415,35 @@ public class VRData {
             case CAMERA -> this.cam;
             default -> this.hmd;
         };
+    }
+
+    /**
+     * @return this data in a manner better-suited for the API
+     */
+    public VRPose asVRPose() {
+        if (this.vrPose == null) {
+            this.vrPose = new VRPoseImpl(
+                this.hmd.asVRBodyPart(),
+                this.c0.asVRBodyPart(),
+                this.c1.asVRBodyPart(),
+                getDataIfAvailable(this.foot_right, this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_FOOT)),
+                getDataIfAvailable(this.foot_left, this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_FOOT)),
+                getDataIfAvailable(this.waist, this.fbtMode.bodyPartAvailable(VRBodyPart.WAIST)),
+                getDataIfAvailable(this.knee_right, this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_KNEE)),
+                getDataIfAvailable(this.knee_left, this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_KNEE)),
+                getDataIfAvailable(this.elbow_right, this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_ELBOW)),
+                getDataIfAvailable(this.elbow_left, this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_ELBOW)),
+                ClientDataHolderVR.getInstance().vrSettings.seated,
+                ClientDataHolderVR.getInstance().vrSettings.reverseHands,
+                this.fbtMode
+            );
+        }
+        return this.vrPose;
+    }
+
+    @Nullable
+    private static VRBodyPartData getDataIfAvailable(VRDevicePose pose, boolean partAvailable) {
+        return partAvailable ? pose.asVRBodyPart() : null;
     }
 
     @Override
@@ -552,6 +588,14 @@ public class VRData {
          */
         public Matrix4f getMatrix() {
             return new Matrix4f().rotationY(VRData.this.rotation_radians).mul(this.matrix);
+        }
+
+        public VRBodyPartData asVRBodyPart() {
+            return new VRBodyPartDataImpl(
+                getPosition(),
+                new Vec3(getDirection()),
+                new Quaternionf().setFromUnnormalized(getMatrix())
+            );
         }
 
         @Override

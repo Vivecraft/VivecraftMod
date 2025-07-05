@@ -20,13 +20,13 @@
   "environment": "*",
   "entrypoints": {
     "mm:early_risers": [
-      "org.vivecraft.VivecraftEarlyEntryForOptifabric"
+      "org.vivecraft.fabric.VivecraftEarlyEntryForOptifabric"
     ],
     "main": [
       "org.vivecraft.fabric.VivecraftMod"
     ],
     "modmenu": [
-      "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
+      "org.vivecraft.fabric.client.VivecraftModMenuApiImpl"
     ]
   },
   "mixins": [

@@ -8,11 +8,12 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.utils.MathUtils;
 
-public class CameraTracker extends Tracker {
+public class CameraTracker implements Tracker {
     public static final ResourceLocation CAMERA_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft", "camera");
     public static final ResourceLocation CAMERA_DISPLAY_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
         "camera_display");
@@ -26,9 +27,12 @@ public class CameraTracker extends Tracker {
     private Vec3 startPosition;
     private Quaternionf startRotation;
     private boolean quickMode;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public CameraTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -43,7 +47,19 @@ public class CameraTracker extends Tracker {
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
+        this.visible = false;
+        this.quickMode = false;
+        this.stopMoving();
+    }
+
+    @Override
+    public ProcessType processType() {
+        return ProcessType.PER_FRAME;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         if (this.startControllerPose != null) {
             VRData.VRDevicePose controllerPose = this.dh.vrPlayer.vrdata_world_render.getController(
                 this.startController);
@@ -72,18 +88,6 @@ public class CameraTracker extends Tracker {
         {
             this.visible = false;
         }
-    }
-
-    @Override
-    public void reset(LocalPlayer player) {
-        this.visible = false;
-        this.quickMode = false;
-        this.stopMoving();
-    }
-
-    @Override
-    public EntryPoint getEntryPoint() {
-        return EntryPoint.SPECIAL_ITEMS; // smoother camera movement
     }
 
     public boolean isVisible() {

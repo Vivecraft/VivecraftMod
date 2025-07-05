@@ -8,10 +8,11 @@ import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.utils.MathUtils;
 
-public class RowTracker extends Tracker {
+public class RowTracker implements Tracker {
     private static final double TRANSMISSION_EFFICIENCY = 0.9D;
 
     public double[] forces = new double[]{0.0D, 0.0D};
@@ -21,11 +22,14 @@ public class RowTracker extends Tracker {
 
     private final Vec3[] lastUWPs = new Vec3[2];
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public RowTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
-    @Override
     public boolean isActive(LocalPlayer player) {
         if (this.dh.vrSettings.seated) {
             return false;
@@ -49,14 +53,19 @@ public class RowTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.LOar = 0.0F;
         this.ROar = 0.0F;
         this.FOar = 0.0F;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         float c0Move = this.dh.vr.controllerHistory[0].averageSpeed(0.5D);
         float c1Move = this.dh.vr.controllerHistory[1].averageSpeed(0.5D);
 

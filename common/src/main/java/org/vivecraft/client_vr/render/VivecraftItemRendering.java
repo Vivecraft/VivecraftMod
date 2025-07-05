@@ -71,7 +71,7 @@ public class VivecraftItemRendering {
             itemTransformType = VivecraftItemTransformType.Bow_Seated;
 
             if (DH.bowTracker.isActive((LocalPlayer) player)) {
-                if (DH.bowTracker.isDrawing) {
+                if (DH.bowTracker.isDrawing()) {
                     itemTransformType = VivecraftItemTransformType.Bow_Roomscale_Drawing;
                 } else {
                     itemTransformType = VivecraftItemTransformType.Bow_Roomscale;

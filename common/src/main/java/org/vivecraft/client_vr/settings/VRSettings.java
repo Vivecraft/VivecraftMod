@@ -21,7 +21,8 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.render.VRPlayerRenderer;
 import org.vivecraft.client.render.armor.VRArmorLayer;
 import org.vivecraft.client.utils.ClientUtils;
@@ -32,6 +33,7 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client_vr.gameplay.trackers.DebugRenderTracker;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.common.utils.math.AngleOrder;
@@ -354,6 +356,8 @@ public class VRSettings {
     public boolean vehicleRotation = true;
     @SettingField(VrOptions.ANALOG_MOVEMENT)
     public boolean analogMovement = true;
+    @SettingField(VrOptions.DIGITAL_MOVEMENT_DEADZONE)
+    public float digitalMovementDeadzone = 0.5F;
     @SettingField(VrOptions.AUTO_SPRINT)
     public boolean autoSprint = true;
     @SettingField(VrOptions.AUTO_SPRINT_THRESHOLD)
@@ -445,6 +449,10 @@ public class VRSettings {
     public boolean renderVrPlayerAxes = false;
     @SettingField(VrOptions.RENDER_DEBUG_TRACKERS)
     public boolean renderTrackerPositions = false;
+    @SettingField(VrOptions.RENDER_DEBUG_GAMEPLAY_TRACKER)
+    public boolean renderGameplayTrackers = false;
+    @SettingField(VrOptions.GAMEPLAY_TRACKER_TO_RENDER)
+    public String gameplayTrackerToRender = "";
 
     //
 
@@ -629,7 +637,7 @@ public class VRSettings {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public VRSettings() {
-        this.vrCfgFile = Xplat.getConfigPath("vivecraft-client-config.json").toFile();
+        this.vrCfgFile = Xloader.getConfigPath("vivecraft-client-config.json").toFile();
 
         // Need to do this in the instance because array sizes aren't known until instantiation
         initializeFieldInfo();
@@ -2102,6 +2110,7 @@ public class VRSettings {
         SEATED_HUD_XHAIR(false, true, "vivecraft.options.crosshair", "vivecraft.options.hmd"), // HUD Follows
         BACKPACK_SWITCH(false, true), // Backpack Switching
         ANALOG_MOVEMENT(false, true), // Analog Movement
+        DIGITAL_MOVEMENT_DEADZONE(true, false, 0.0f, 1f, 0.05f, -1), // analog to digital deadzone
         AUTO_SPRINT(false, true), // Auto-sprint
         AUTO_SPRINT_THRESHOLD(true, false, 0.5f, 1f, 0.01f, 2), // Auto-sprint Threshold
         THIRDPERSON_ITEMTRANSFORMS(false, true), // 3rd person items
@@ -2226,8 +2235,28 @@ public class VRSettings {
         RENDER_DEBUG_HEAD_HITBOX(false, true), // renders entities head hit boxes
         RENDER_DEBUG_DEVICE_AXES(false, true), // renders axes for the local devices
         RENDER_DEBUG_PLAYER_AXES(false, true), // renders axes for all client vr players
-        RENDER_DEBUG_TRACKERS(false, true) // renders a cube at the tracker position;
-        ;
+        RENDER_DEBUG_TRACKERS(false, true), // renders a cube at the tracker position;
+        RENDER_DEBUG_GAMEPLAY_TRACKER(false, true), // if gameplay trackers should show their state
+        GAMEPLAY_TRACKER_TO_RENDER(false, false) { // which gameplay tracker should be shown
+
+            @Override
+            Object setOptionValue(Object value) {
+                List<Tracker> t = ClientDataHolderVR.getInstance().getTrackers().stream()
+                    .filter(d -> d instanceof DebugRenderTracker)
+                    .sorted(Comparator.comparing(d -> d.getClass().getSimpleName())).toList();
+                Tracker cur = t.stream().filter(d -> d.getClass().getName().equals(value)).findFirst().orElse(null);
+                return t.indexOf(cur) + 1 >= t.size() ? "" : t.get(t.indexOf(cur) + 1).getClass().getName();
+            }
+
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                if (((String) value).isEmpty()) {
+                    return prefix + I18n.get("vivecraft.options.all");
+                }
+                String s = ((String) value);
+                return prefix + s.substring(s.lastIndexOf(".") + 1);
+            }
+        };
         private final boolean enumFloat;
         private final boolean enumBoolean;
         private final float valueStep;

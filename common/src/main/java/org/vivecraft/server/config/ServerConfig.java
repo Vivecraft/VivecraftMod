@@ -10,7 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.server.ServerNetworking;
 
 import java.util.Arrays;
@@ -19,6 +19,7 @@ import java.util.List;
 public class ServerConfig {
 
     // config keys
+    // general
     public static ConfigBuilder.BooleanValue DEBUG;
     public static ConfigBuilder.BooleanValue DEBUG_PARTICLES;
     public static ConfigBuilder.BooleanValue DEBUG_PARTICLES_HEAD;
@@ -31,6 +32,7 @@ public class ServerConfig {
     public static ConfigBuilder.BooleanValue VR_FUN;
     public static ConfigBuilder.BooleanValue SEND_DATA_TO_OWNER;
 
+    // messages
     public static ConfigBuilder.BooleanValue MESSAGES_ENABLED;
     public static ConfigBuilder.StringValue MESSAGES_WELCOME_VR;
     public static ConfigBuilder.StringValue MESSAGES_WELCOME_NONVR;
@@ -48,16 +50,20 @@ public class ServerConfig {
     public static ConfigBuilder.StringValue MESSAGES_KICK_VIVE_ONLY;
     public static ConfigBuilder.StringValue MESSAGES_KICK_VR_ONLY;
 
+    // vrChanges
     public static ConfigBuilder.BooleanValue DUAL_WIELDING;
     public static ConfigBuilder.DoubleValue BOOTS_ARMOR_DAMAGE;
     public static ConfigBuilder.DoubleValue CREEPER_SWELL_DISTANCE;
     public static ConfigBuilder.DoubleValue PROJECTILE_INACCURACY_MULTIPLIER;
+    public static ConfigBuilder.BooleanValue ALLOW_FASTER_BLOCK_BREAKING;
+    // bow
     public static ConfigBuilder.DoubleValue BOW_STANDING_MULTIPLIER;
     public static ConfigBuilder.DoubleValue BOW_SEATED_MULTIPLIER;
     public static ConfigBuilder.DoubleValue BOW_STANDING_HEADSHOT_MULTIPLIER;
     public static ConfigBuilder.DoubleValue BOW_SEATED_HEADSHOT_MULTIPLIER;
     public static ConfigBuilder.DoubleValue BOW_VANILLA_HEADSHOT_MULTIPLIER;
 
+    // pvp
     public static ConfigBuilder.BooleanValue PVP_VR_VS_VR;
     public static ConfigBuilder.BooleanValue PVP_SEATEDVR_VS_SEATEDVR;
     public static ConfigBuilder.BooleanValue PVP_VR_VS_NONVR;
@@ -65,25 +71,31 @@ public class ServerConfig {
     public static ConfigBuilder.BooleanValue PVP_VR_VS_SEATEDVR;
     public static ConfigBuilder.BooleanValue PVP_NOTIFY_BLOCKED_DAMAGE;
 
+    // climbey
     public static ConfigBuilder.BooleanValue CLIMBEY_ENABLED;
     public static ConfigBuilder.EnumValue<ClimbeyBlockmode> CLIMBEY_BLOCKMODE;
     public static ConfigBuilder.ListValue<String> CLIMBEY_BLOCKLIST;
 
+    // crawling
     public static ConfigBuilder.BooleanValue CRAWLING_ENABLED;
 
+    // teleport
     public static ConfigBuilder.BooleanValue TELEPORT_ENABLED;
     public static ConfigBuilder.BooleanValue TELEPORT_LIMITED_SURVIVAL;
     public static ConfigBuilder.IntValue TELEPORT_UP_LIMIT;
     public static ConfigBuilder.IntValue TELEPORT_DOWN_LIMIT;
     public static ConfigBuilder.IntValue TELEPORT_HORIZONTAL_LIMIT;
 
+    // worldscale
     public static ConfigBuilder.BooleanValue WORLDSCALE_LIMITED;
     public static ConfigBuilder.DoubleValue WORLDSCALE_MAX;
     public static ConfigBuilder.DoubleValue WORLDSCALE_MIN;
 
+    // settingOverrides
     public static ConfigBuilder.BooleanValue FORCE_THIRD_PERSON_ITEMS;
     public static ConfigBuilder.BooleanValue FORCE_THIRD_PERSON_ITEMS_CUSTOM;
 
+    // vr switching
     public static ConfigBuilder.BooleanValue VR_SWITCHING_ENABLED;
 
     private static CommentedFileConfig CONFIG;
@@ -100,7 +112,7 @@ public class ServerConfig {
             CONFIG.close();
         }
         CONFIG = CommentedFileConfig
-            .builder(Xplat.getConfigPath("vivecraft-server-config.toml"))
+            .builder(Xloader.getConfigPath("vivecraft-server-config.toml"))
             .autosave()
             .sync()
             .concurrent()
@@ -235,6 +247,9 @@ public class ServerConfig {
         PROJECTILE_INACCURACY_MULTIPLIER = BUILDER
             .push("projectileInaccuracyMultiplier")
             .defineInRange(1.0, 0.0, 1.0);
+        ALLOW_FASTER_BLOCK_BREAKING = BUILDER
+            .push("allowFasterBlockBreaking")
+            .define(true);
 
         BUILDER
             .push("bow");

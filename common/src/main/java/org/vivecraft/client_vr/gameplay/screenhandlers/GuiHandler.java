@@ -22,6 +22,8 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
@@ -32,7 +34,6 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -391,8 +392,8 @@ public class GuiHandler {
             GUI_ROTATION_ROOM = null;
             GUI_SCALE = 1.0F;
 
-            if (KeyboardHandler.KEYBOARD_FOR_GUI && DH.vrSettings.autoCloseKeyboard) {
-                KeyboardHandler.setOverlayShowing(false);
+            if (KeyboardHandler.KEYBOARD_FOR_GUI) {
+                KeyboardHandler.hideOverlay(CloseKeyboardContext.ACTION_COMPLETE);
             }
         } else {
             RadialHandler.setOverlayShowing(false, null);

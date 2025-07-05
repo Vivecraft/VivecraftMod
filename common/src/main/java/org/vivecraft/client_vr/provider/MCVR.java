@@ -16,6 +16,9 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.LangHelper;
@@ -32,7 +35,6 @@ import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -209,6 +211,24 @@ public abstract class MCVR {
      */
     public void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {
         this.triggerHapticPulse(controller, durationSeconds, frequency, amplitude, 0.0F);
+    }
+
+    /**
+     * triggers a haptic pulse on the give BodyPart, if possible, after the specified delay
+     *
+     * @param bodyPart        BodyPart to trigger on
+     * @param durationSeconds duration in seconds
+     * @param frequency       frequency in Hz
+     * @param amplitude       strength 0.0 - 1.0
+     * @param delaySeconds    delay for when to trigger in seconds
+     */
+    public void triggerHapticPulse(
+        VRBodyPart bodyPart, float durationSeconds, float frequency, float amplitude, float delaySeconds)
+    {
+        // only hands right now
+        if (!bodyPart.isHand()) return;
+        this.triggerHapticPulse(bodyPart == VRBodyPart.MAIN_HAND ? ControllerType.RIGHT : ControllerType.LEFT,
+            durationSeconds, frequency, amplitude, delaySeconds);
     }
 
     /**
@@ -486,8 +506,8 @@ public abstract class MCVR {
      * processes the interactive hotbar
      */
     protected void processHotbar() {
-        int previousSlot = this.dh.interactTracker.hotbar;
-        this.dh.interactTracker.hotbar = -1;
+        int previousSlot = this.dh.hotbarModule.hotbar;
+        this.dh.hotbarModule.hotbar = -1;
 
         if (this.mc.player == null) return;
         // this shouldn't happen, it's final
@@ -560,8 +580,8 @@ public abstract class MCVR {
         }
 
         // all that maths for this.
-        this.dh.interactTracker.hotbar = box;
-        if (previousSlot != this.dh.interactTracker.hotbar) {
+        this.dh.hotbarModule.hotbar = box;
+        if (previousSlot != this.dh.hotbarModule.hotbar) {
             triggerHapticPulse(0, 750);
         }
     }
@@ -1032,7 +1052,7 @@ public abstract class MCVR {
 
         // close keyboard with ESC
         if (KeyboardHandler.SHOWING && this.mc.screen == null && MOD.keyMenuButton.consumeClick()) {
-            KeyboardHandler.setOverlayShowing(false);
+            KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
         }
 
         // radial menu
@@ -1059,7 +1079,7 @@ public abstract class MCVR {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
             }
 
-            KeyboardHandler.setOverlayShowing(false);
+            KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
         }
 
         // player list
@@ -1157,16 +1177,22 @@ public abstract class MCVR {
                 forward = this.movement.y;
 
                 if (!this.dh.vrSettings.analogMovement) {
-                    this.movement.x = MathUtils.axisToDigital(this.movement.x, 0.5F);
-                    this.movement.y = MathUtils.axisToDigital(this.movement.y, 0.5F);
+                    this.movement.x = MathUtils.axisToDigital(this.movement.x,
+                        this.dh.vrSettings.digitalMovementDeadzone);
+                    this.movement.y = MathUtils.axisToDigital(this.movement.y,
+                        this.dh.vrSettings.digitalMovementDeadzone);
                 }
 
                 if (this.isMovement) {
                     // just assuming all this below is needed for compatibility.
-                    this.getInputAction(this.mc.options.keyUp).setPressed(this.movement.y > 0F);
-                    this.getInputAction(this.mc.options.keyDown).setPressed(this.movement.y < 0F);
-                    this.getInputAction(this.mc.options.keyRight).setPressed(this.movement.x > 0F);
-                    this.getInputAction(this.mc.options.keyLeft).setPressed(this.movement.x < 0F);
+                    this.getInputAction(this.mc.options.keyUp)
+                        .setPressed(this.movement.y > this.dh.vrSettings.digitalMovementDeadzone);
+                    this.getInputAction(this.mc.options.keyDown)
+                        .setPressed(this.movement.y < -this.dh.vrSettings.digitalMovementDeadzone);
+                    this.getInputAction(this.mc.options.keyRight)
+                        .setPressed(this.movement.x > this.dh.vrSettings.digitalMovementDeadzone);
+                    this.getInputAction(this.mc.options.keyLeft)
+                        .setPressed(this.movement.x < -this.dh.vrSettings.digitalMovementDeadzone);
 
                     if (this.dh.vrSettings.autoSprint && !this.mc.player.isMovingSlowly()) {
                         // Sprint only works for walk forwards obviously

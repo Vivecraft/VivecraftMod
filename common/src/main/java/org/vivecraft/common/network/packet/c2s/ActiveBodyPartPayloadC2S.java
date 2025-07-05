@@ -1,8 +1,8 @@
 package org.vivecraft.common.network.packet.c2s;
 
 import net.minecraft.network.FriendlyByteBuf;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 
@@ -12,7 +12,7 @@ import org.vivecraft.common.network.packet.PayloadIdentifier;
  * @param bodyPart  the active BodyPart
  * @param useForAim when set, will use this BodyPart for aim when using items, when unset, the server can stil decide to use it for aiming in certain situations
  */
-public record ActiveBodyPartPayloadC2S(BodyPart bodyPart, boolean useForAim) implements VivecraftPayloadC2S {
+public record ActiveBodyPartPayloadC2S(VRBodyPart bodyPart, boolean useForAim) implements VivecraftPayloadC2S {
 
     @Override
     public PayloadIdentifier payloadId() {
@@ -29,7 +29,7 @@ public record ActiveBodyPartPayloadC2S(BodyPart bodyPart, boolean useForAim) imp
     }
 
     public static ActiveBodyPartPayloadC2S read(FriendlyByteBuf buffer) {
-        BodyPart bodyPart = BodyPart.values()[buffer.readByte()];
+        VRBodyPart bodyPart = VRBodyPart.values()[buffer.readByte()];
         boolean useForAim = false;
         if (buffer.readableBytes() > 0) {
             useForAim = buffer.readBoolean();

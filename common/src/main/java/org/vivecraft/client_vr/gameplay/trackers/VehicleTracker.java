@@ -10,13 +10,14 @@ import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ItemTags;
 
-public class VehicleTracker extends Tracker {
+public class VehicleTracker implements Tracker {
     private float PreMount_World_Rotation;
     public Vec3 Premount_Pos_Room = Vec3.ZERO;
     public float vehicleInitialRotation = 0.0F;
@@ -27,8 +28,12 @@ public class VehicleTracker extends Tracker {
     private int minecartStupidityCounter;
     private boolean isRiding = false;
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public VehicleTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -43,9 +48,14 @@ public class VehicleTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.minecartStupidityCounter = 2;
         this.isRiding = false;
+    }
+
+    @Override
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     public double getVehicleFloor(Entity vehicle, double original) {
@@ -77,6 +87,13 @@ public class VehicleTracker extends Tracker {
             return MathUtils.subtractToVector3f(con.getPosition(), entity.position())
                 .add(con.getDirection().mul(0.3F))
                 .normalize();
+        } else if (entity != null && entity.isControlledByLocalInstance()) {
+            // for other entities always set it, for mod compatibility
+            if (dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
+                return dataHolder.vrPlayer.vrdata_world_pre.hmd.getDirection();
+            } else {
+                return dataHolder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
+            }
         }
 
         // ignore other vehicles
@@ -84,7 +101,7 @@ public class VehicleTracker extends Tracker {
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         if (!this.mc.isPaused()) {
             // do vehicle rotation, which rotates around a different point.
             if (this.dismountCooldown > 0) {

@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 
@@ -16,7 +17,7 @@ public abstract class reiTextFieldWidgetMixin implements ContainerEventHandler {
     @Inject(method = "setFocused", at = @At("HEAD"), remap = false)
     private void vivecraft$openKeyboard(boolean focused, CallbackInfo ci) {
         if (VRState.VR_RUNNING && focused) {
-            KeyboardHandler.setOverlayShowing(true);
+            KeyboardHandler.showOverlay(OpenKeyboardContext.FORCE);
         }
     }
 }

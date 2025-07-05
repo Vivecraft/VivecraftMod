@@ -20,11 +20,11 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -53,7 +53,7 @@ public class VRWidgetHelper {
                 float scale = 0.35F;
 
                 // bigger when interact ready
-                if (DATA_HOLDER.interactTracker.isInCamera() && !VRHotkeys.isMovingThirdPersonCam()) {
+                if (DATA_HOLDER.thirdCamModule.isActive() && !VRHotkeys.isMovingThirdPersonCam()) {
                     scale *= 1.03F;
                 }
 
@@ -81,7 +81,7 @@ public class VRWidgetHelper {
             float scale = 0.25F;
 
             // bigger when interact ready
-            if (DATA_HOLDER.interactTracker.isInHandheldCamera() && !DATA_HOLDER.cameraTracker.isMoving()) {
+            if (DATA_HOLDER.screenCamModule.isActive() && !DATA_HOLDER.cameraTracker.isMoving()) {
                 scale *= 1.03F;
             }
 

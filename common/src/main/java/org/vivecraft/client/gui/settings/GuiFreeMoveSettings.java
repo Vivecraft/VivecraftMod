@@ -15,7 +15,8 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.MOVEMENT_MULTIPLIER,
         VRSettings.VrOptions.AUTO_SPRINT,
         VRSettings.VrOptions.AUTO_SPRINT_THRESHOLD,
-        VRSettings.VrOptions.ANALOG_MOVEMENT
+        VRSettings.VrOptions.ANALOG_MOVEMENT,
+        VRSettings.VrOptions.DIGITAL_MOVEMENT_DEADZONE
     };
     private static final VRSettings.VrOptions[] SEATED_SETTINGS = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.SEATED_HMD,
