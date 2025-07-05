@@ -117,6 +117,8 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
 
     @Inject(at = @At("TAIL"), method = "handleExplosion")
     public void vivecraft$handleExplosion(ClientboundExplodePacket clientboundExplodePacket, CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().hapticTracker.handleExplode(clientboundExplodePacket.center());
+        if (VRState.VR_INITIALIZED) {
+            ClientDataHolderVR.getInstance().hapticTracker.handleExplode(clientboundExplodePacket.center());
+        }
     }
 }
