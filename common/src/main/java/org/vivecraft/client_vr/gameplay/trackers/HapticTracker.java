@@ -135,15 +135,7 @@ public class HapticTracker implements Tracker {
             new BlockPos(blockpos.getX(), (int) player.getBoundingBox().maxY, blockpos.getZ()));
     }
 
-    public void handleExplode(Vec3 explosionPos) {
-        double explosionDist = explosionPos.subtract(this.mc.player.position()).length();
-        if (explosionDist < MAX_EXPLOSION_DIST) {
-            double distFactor = 1.0 - (explosionDist / MAX_EXPLOSION_DIST);
-            Haptics.getAnimation(Haptics.Animations.explosion).playSingle(true, null, distFactor);
-        }
-    }
-
-    public void handleHit(DamageSource damageSrc, float damageAmount) {
+    private void handleHit(DamageSource damageSrc, float damageAmount) {
         Vector3fc dmgVec = null;
         if (damageSrc != null) {
             // use the damage source if available
@@ -178,12 +170,25 @@ public class HapticTracker implements Tracker {
         }
     }
 
+    // handlers called from outside
+    public void handleExplode(Vec3 explosionPos) {
+        if (this.isActive(this.mc.player)) {
+            double explosionDist = explosionPos.subtract(this.mc.player.position()).length();
+            if (explosionDist < MAX_EXPLOSION_DIST) {
+                double distFactor = 1.0 - (explosionDist / MAX_EXPLOSION_DIST);
+                Haptics.getAnimation(Haptics.Animations.explosion).playSingle(true, null, distFactor);
+            }
+        }
+    }
+
     public void handleEat(ItemStack itemStack) {
-        if (itemStack.get(DataComponents.FOOD) != null && itemStack.get(DataComponents.CONSUMABLE) != null) {
-            if (itemStack.get(DataComponents.CONSUMABLE).onConsumeEffects().isEmpty()) {
-                Haptics.getAnimation(Haptics.Animations.consume).playSingle(true, null);
-            } else {
-                Haptics.getAnimation(Haptics.Animations.consume_effect).playSingle(true, null);
+        if (this.isActive(this.mc.player)) {
+            if (itemStack.get(DataComponents.FOOD) != null && itemStack.get(DataComponents.CONSUMABLE) != null) {
+                if (itemStack.get(DataComponents.CONSUMABLE).onConsumeEffects().isEmpty()) {
+                    Haptics.getAnimation(Haptics.Animations.consume).playSingle(true, null);
+                } else {
+                    Haptics.getAnimation(Haptics.Animations.consume_effect).playSingle(true, null);
+                }
             }
         }
     }
