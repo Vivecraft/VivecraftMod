@@ -24,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -95,14 +96,17 @@ public class VREffectsHelper {
      * BlockState and BlockPos of the blocking block
      */
     public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 pos, double dist) {
-        if (MC.level == null) {
+        // Use player's level, since Immersive Portals likes to set Minecraft#level to be the level the player isn't
+        // necessarily in.
+        Level level = MC.player != null && !MC.player.isRemoved() ? MC.player.level() : MC.level;
+        if (level == null) {
             return null;
         } else {
             AABB aabb = new AABB(pos.subtract(dist, dist, dist), pos.add(dist, dist, dist));
             Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) ->
-                MC.level.getBlockState(bp).isSolidRender());
+                level.getBlockState(bp).isSolidRender());
             Optional<BlockPos> optional = stream.findFirst();
-            return optional.map(blockPos -> Triple.of(1.0F, MC.level.getBlockState(blockPos), blockPos)).orElse(null);
+            return optional.map(blockPos -> Triple.of(1.0F, level.getBlockState(blockPos), blockPos)).orElse(null);
         }
     }
 
