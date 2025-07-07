@@ -28,21 +28,21 @@ public class Haptics {
 
     public enum Animations {
 
-        explosion(1),
-        fire(2, 2500),
-        potion_positive(0),
-        potion_negative(0),
-        low_health(1, 1500),
-        hunger(1, 2000),
-        critical_health(1, 1000),
-        generic_hit(3),
-        bottom_hit(1),
-        top_hit(1),
-        all_around_hit(1),
-        zombie_hit(3),
-        rain(1, 1500),
-        consume(1),
-        consume_effect(1);
+        EXPLOSION(1),
+        FIRE(2, 2500),
+        POTION_POSITIVE(0),
+        POTION_NEGATIVE(0),
+        LOW_HEALTH(1, 1500),
+        HUNGER(1, 2000),
+        CRITICAL_HEALTH(1, 1000),
+        GENERIC_HIT(3),
+        BOTTOM_HIT(1),
+        TOP_HIT(1),
+        ALL_AROUND_HIT(1),
+        ZOMBIE_HIT(3),
+        RAIN(1, 1500),
+        CONSUME(1),
+        CONSUME_EFFECT(1);
 
         public final int variants;
         public final long durationMillis;
@@ -167,7 +167,7 @@ public class Haptics {
 
         for (Animations animation : Animations.values()) {
             for (int i = 0; i < animation.variants; i++) {
-                String fullId = animation.name() + "_" + i;
+                String fullId = animation.name().toLowerCase() + "_" + i;
                 String content = FileUtils.loadAssetToString("tact/" + fullId + ".tact", false);
                 if (content == null) {
                     VRSettings.LOGGER.warn("Vivecraft: Missing .tact file {}.tact", fullId);
@@ -177,7 +177,7 @@ public class Haptics {
             }
 
             HapticAnimation hp = new HapticAnimation();
-            hp.baseId = animation.name();
+            hp.baseId = animation.name().toLowerCase();
             hp.variations = animation.variants;
             hp.durationMillis = animation.durationMillis;
             REG_ANIMATIONS.put(animation, hp);
@@ -249,6 +249,6 @@ public class Haptics {
     }
 
     public enum DeviceType {
-        None, X40
+        NONE, X40
     }
 }

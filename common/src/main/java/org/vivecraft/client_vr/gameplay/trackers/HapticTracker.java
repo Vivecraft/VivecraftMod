@@ -74,13 +74,13 @@ public class HapticTracker implements Tracker {
         float thresholdLowHealth = 5;
         float thresholdCriticalHealth = 2;
 
-        Haptics.setLoopState(Haptics.Animations.fire, player.isOnFire());
-        Haptics.setLoopState(Haptics.Animations.potion_positive, hasPotionPositive(player));
-        Haptics.setLoopState(Haptics.Animations.potion_negative, hasPotionNegative(player));
-        Haptics.setLoopState(Haptics.Animations.low_health,
+        Haptics.setLoopState(Haptics.Animations.FIRE, player.isOnFire());
+        Haptics.setLoopState(Haptics.Animations.POTION_POSITIVE, hasPotionPositive(player));
+        Haptics.setLoopState(Haptics.Animations.POTION_NEGATIVE, hasPotionNegative(player));
+        Haptics.setLoopState(Haptics.Animations.LOW_HEALTH,
             player.getHealth() < thresholdLowHealth && !(player.getHealth() < thresholdCriticalHealth));
-        Haptics.setLoopState(Haptics.Animations.critical_health, player.getHealth() < thresholdCriticalHealth);
-        Haptics.setLoopState(Haptics.Animations.rain, isInRain(player));
+        Haptics.setLoopState(Haptics.Animations.CRITICAL_HEALTH, player.getHealth() < thresholdCriticalHealth);
+        Haptics.setLoopState(Haptics.Animations.RAIN, isInRain(player));
 
         for (HapticsModule module : this.modules) {
             if (module.enabled) {
@@ -107,7 +107,7 @@ public class HapticTracker implements Tracker {
         if (food < HUNGER_THRESHOLD) {
             float foodPerc = (float) food / 20;
             if (this.random.nextInt(20 * 3 + (int) (foodPerc * 30 * 20)) == 0) {
-                Haptics.getAnimation(Haptics.Animations.hunger).playSingle(false, null);
+                Haptics.getAnimation(Haptics.Animations.HUNGER).playSingle(false, null);
             }
         }
     }
@@ -158,15 +158,15 @@ public class HapticTracker implements Tracker {
         this.lastHitDirection = null;
         if (dmgVec != null && !MathUtils.isZero(dmgVec)) {
             if (dmgVec.y() == 1F) {
-                Haptics.getAnimation(Haptics.Animations.top_hit).playSingle(true, null);
+                Haptics.getAnimation(Haptics.Animations.TOP_HIT).playSingle(true, null);
             } else if (dmgVec.y() == -1F) {
-                Haptics.getAnimation(Haptics.Animations.bottom_hit).playSingle(true, null);
+                Haptics.getAnimation(Haptics.Animations.BOTTOM_HIT).playSingle(true, null);
             } else {
                 dmgVec = dmgVec.rotateY(this.dh.vrPlayer.getVRDataWorld().getBodyYawRad() + Mth.PI, new Vector3f());
-                Haptics.getAnimation(Haptics.Animations.generic_hit).playSingle(true, dmgVec);
+                Haptics.getAnimation(Haptics.Animations.GENERIC_HIT).playSingle(true, dmgVec);
             }
         } else {
-            Haptics.getAnimation(Haptics.Animations.all_around_hit).playSingle(true, null);
+            Haptics.getAnimation(Haptics.Animations.ALL_AROUND_HIT).playSingle(true, null);
         }
     }
 
@@ -176,7 +176,7 @@ public class HapticTracker implements Tracker {
             double explosionDist = explosionPos.subtract(this.mc.player.position()).length();
             if (explosionDist < MAX_EXPLOSION_DIST) {
                 double distFactor = 1.0 - (explosionDist / MAX_EXPLOSION_DIST);
-                Haptics.getAnimation(Haptics.Animations.explosion).playSingle(true, null, distFactor);
+                Haptics.getAnimation(Haptics.Animations.EXPLOSION).playSingle(true, null, distFactor);
             }
         }
     }
@@ -185,9 +185,9 @@ public class HapticTracker implements Tracker {
         if (this.isActive(this.mc.player)) {
             if (itemStack.get(DataComponents.FOOD) != null && itemStack.get(DataComponents.CONSUMABLE) != null) {
                 if (itemStack.get(DataComponents.CONSUMABLE).onConsumeEffects().isEmpty()) {
-                    Haptics.getAnimation(Haptics.Animations.consume).playSingle(true, null);
+                    Haptics.getAnimation(Haptics.Animations.CONSUME).playSingle(true, null);
                 } else {
-                    Haptics.getAnimation(Haptics.Animations.consume_effect).playSingle(true, null);
+                    Haptics.getAnimation(Haptics.Animations.CONSUME_EFFECT).playSingle(true, null);
                 }
             }
         }
