@@ -16,13 +16,37 @@ public enum VRBodyPart {
      * @since 1.3.0
      */
     MAIN_HAND,
+    /**
+     * @since 1.3.0
+     */
     OFF_HAND,
+    /**
+     * @since 1.3.0
+     */
     RIGHT_FOOT,
+    /**
+     * @since 1.3.0
+     */
     LEFT_FOOT,
+    /**
+     * @since 1.3.0
+     */
     WAIST,
+    /**
+     * @since 1.3.0
+     */
     RIGHT_KNEE,
+    /**
+     * @since 1.3.0
+     */
     LEFT_KNEE,
+    /**
+     * @since 1.3.0
+     */
     RIGHT_ELBOW,
+    /**
+     * @since 1.3.0
+     */
     LEFT_ELBOW,
     /**
      * corresponds to the player's headset, so it is at their eye position

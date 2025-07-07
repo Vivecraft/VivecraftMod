@@ -94,7 +94,7 @@ public class ClientDataHolderVR {
 
     public int tickCounter;
 
-    public VRFirstPersonArmSwing swingType = VRFirstPersonArmSwing.Attack;
+    public VRFirstPersonArmSwing swingType = VRFirstPersonArmSwing.ATTACK;
 
     // showed chat notifications
     public boolean showedUpdateNotification;

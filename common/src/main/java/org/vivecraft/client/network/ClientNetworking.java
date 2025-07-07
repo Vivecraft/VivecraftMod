@@ -37,6 +37,7 @@ public class ClientNetworking {
     public static boolean DISPLAYED_CHAT_MESSAGE = false;
     public static boolean DISPLAYED_CHAT_WARNING = false;
     public static boolean DISPLAYED_HEAD_AIM_WARNING = false;
+    public static boolean DISPLAYED_VR_CHANGES = false;
     public static boolean ABLE_TO_DISPLAY_CHAT_WARNINGS = false;
 
     public static int CHAT_WARNING_TIMER = -1;
@@ -54,6 +55,8 @@ public class ClientNetworking {
     public static boolean SERVER_ALLOWS_VR_SWITCHING = false;
     public static boolean SERVER_ALLOWS_DUAL_WIELDING = false;
 
+    public static Map<String, String> SERVER_VR_CHANGES_LIST;
+
     // assume a legacy server by default, to not send invalid packets
     public static int USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
     private static float WORLDSCALE_LAST = 0.0F;
@@ -66,6 +69,9 @@ public class ClientNetworking {
 
     public static boolean NEEDS_RESET = true;
 
+    /**
+     * server settings that should be reset on each dimension change/respawn
+     */
     public static void resetServerSettings() {
         WORLDSCALE_LAST = 0.0F;
         HEIGHT_LAST = 0.0F;
@@ -89,6 +95,17 @@ public class ClientNetworking {
         }
         // clear server overrides
         ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
+    }
+
+    /**
+     * server settings that should be reset only when connecting to a new server
+     */
+    public static void resetOnceServerSettings() {
+        DISPLAYED_CHAT_MESSAGE = false;
+        DISPLAYED_CHAT_WARNING = false;
+        DISPLAYED_HEAD_AIM_WARNING = false;
+        DISPLAYED_VR_CHANGES = false;
+        SERVER_VR_CHANGES_LIST = null;
     }
 
     public static void sendVersionInfo() {
@@ -288,14 +305,8 @@ public class ClientNetworking {
                 VR_SWITCHING_WARNING = true;
                 HEAD_AIM_WARNING = true;
 
-                if (!ClientNetworking.DISPLAYED_CHAT_MESSAGE &&
-                    (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS ||
-                        (dataholder.vrSettings.showServerPluginMessage ==
-                            VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()
-                        )
-                    ))
-                {
-                    ClientNetworking.DISPLAYED_CHAT_MESSAGE = true;
+                if (!DISPLAYED_CHAT_MESSAGE && dataholder.vrSettings.showServerPluginMessage.getAsBoolean()) {
+                    DISPLAYED_CHAT_MESSAGE = true;
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.serverplugin",
                         ((VersionPayloadS2C) s2cPayload).version()));
                 }
@@ -311,10 +322,10 @@ public class ClientNetworking {
                     ClientVRPlayers.getInstance().disableVR(packet.playerID());
                 }
             }
-            case REQUESTDATA -> ClientNetworking.SERVER_WANTS_DATA = true;
+            case REQUESTDATA -> SERVER_WANTS_DATA = true;
             case CLIMBING -> {
                 ClimbingPayloadS2C packet = (ClimbingPayloadS2C) s2cPayload;
-                ClientNetworking.SERVER_ALLOWS_CLIMBEY = packet.allowed();
+                SERVER_ALLOWS_CLIMBEY = packet.allowed();
                 dataholder.climbTracker.serverBlockmode = packet.blockmode();
                 dataholder.climbTracker.blocklist.clear();
 
@@ -328,7 +339,7 @@ public class ClientNetworking {
                     }
                 }
             }
-            case TELEPORT -> ClientNetworking.SERVER_SUPPORTS_DIRECT_TELEPORT = true;
+            case TELEPORT -> SERVER_SUPPORTS_DIRECT_TELEPORT = true;
             case UBERPACKET -> {
                 UberPacketPayloadS2C packet = (UberPacketPayloadS2C) s2cPayload;
                 ClientVRPlayers.getInstance()
@@ -373,23 +384,23 @@ public class ClientNetworking {
                     }
                 }
             }
-            case CRAWL -> ClientNetworking.SERVER_ALLOWS_CRAWLING = true;
+            case CRAWL -> SERVER_ALLOWS_CRAWLING = true;
             case NETWORK_VERSION -> {
-                ClientNetworking.USED_NETWORK_VERSION = ((NetworkVersionPayloadS2C) s2cPayload).version();
+                USED_NETWORK_VERSION = ((NetworkVersionPayloadS2C) s2cPayload).version();
 
-                if (ClientNetworking.USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM) {
+                if (USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM) {
                     HEAD_AIM_WARNING = false;
                 }
             }
             case VR_SWITCHING -> {
-                ClientNetworking.SERVER_ALLOWS_VR_SWITCHING = ((VRSwitchingPayloadS2C) s2cPayload).allowed();
-                if (!ClientNetworking.SERVER_ALLOWS_VR_SWITCHING) {
+                SERVER_ALLOWS_VR_SWITCHING = ((VRSwitchingPayloadS2C) s2cPayload).allowed();
+                if (!SERVER_ALLOWS_VR_SWITCHING) {
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
                 }
                 VR_SWITCHING_WARNING = false;
             }
-            case DUAL_WIELDING ->
-                ClientNetworking.SERVER_ALLOWS_DUAL_WIELDING = ((DualWieldingPayloadS2C) s2cPayload).allowed();
+            case DUAL_WIELDING -> SERVER_ALLOWS_DUAL_WIELDING = ((DualWieldingPayloadS2C) s2cPayload).allowed();
+            case SERVER_VR_CHANGES -> SERVER_VR_CHANGES_LIST = ((ServerVrChangesS2CPacket) s2cPayload).changes();
             case HAPTIC -> {
                 if (VRState.VR_RUNNING) {
                     HapticPayloadS2C haptic = ((HapticPayloadS2C) s2cPayload);

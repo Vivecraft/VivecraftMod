@@ -153,7 +153,7 @@ public class InteractTracker implements DebugRenderTracker {
                 if (this.activeModules[c].onPress(this.mc.player, hand)) {
                     if (this.activeModules[c].swingsArm()) {
                         // swing arm on success
-                        this.dh.swingType = VRFirstPersonArmSwing.Interact;
+                        this.dh.swingType = VRFirstPersonArmSwing.INTERACT;
                         this.mc.player.swing(hand);
                     }
                     this.dh.vr.triggerHapticPulse(c, 750);

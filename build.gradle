@@ -71,6 +71,19 @@ subprojects {
         // after remap, copy the final jar to the main /build/libs folder
         finalizedBy copyJarToMain
     }
+
+    javadoc {
+        if (project.name != "common") {
+            enabled = false
+        }
+        destinationDir = file("../build/javadoc")
+        include 'org/vivecraft/api/**'
+        options.windowTitle("Vivecraft API")
+        title = "Vivecraft API"
+        options.locale("en_US")
+        // also force en_us for the java runtime, because of a java bug
+        options.jFlags("-Duser.country=US", "-Duser.language=en")
+    }
 }
 
 allprojects {

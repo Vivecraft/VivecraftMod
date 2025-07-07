@@ -56,6 +56,8 @@ public class ServerConfig {
     public static ConfigBuilder.DoubleValue CREEPER_SWELL_DISTANCE;
     public static ConfigBuilder.DoubleValue PROJECTILE_INACCURACY_MULTIPLIER;
     public static ConfigBuilder.BooleanValue ALLOW_FASTER_BLOCK_BREAKING;
+    public static ConfigBuilder.BooleanValue ALLOW_ROOMSCALE_SHIELD_BLOCKING;
+    public static ConfigBuilder.BooleanValue ALLOW_ATTACKS_WHILE_BLOCKING;
     // bow
     public static ConfigBuilder.DoubleValue BOW_STANDING_MULTIPLIER;
     public static ConfigBuilder.DoubleValue BOW_SEATED_MULTIPLIER;
@@ -249,6 +251,12 @@ public class ServerConfig {
             .defineInRange(1.0, 0.0, 1.0);
         ALLOW_FASTER_BLOCK_BREAKING = BUILDER
             .push("allowFasterBlockBreaking")
+            .define(true);
+        ALLOW_ROOMSCALE_SHIELD_BLOCKING = BUILDER
+            .push("allowRoomscaleShieldBlocking")
+            .define(true);
+        ALLOW_ATTACKS_WHILE_BLOCKING = BUILDER
+            .push("allowAttacksWhileBlocking")
             .define(true);
 
         BUILDER

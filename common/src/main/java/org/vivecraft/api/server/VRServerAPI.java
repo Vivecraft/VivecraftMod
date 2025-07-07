@@ -13,6 +13,8 @@ import org.vivecraft.server.api_impl.VRServerAPIImpl;
 public interface VRServerAPI {
 
     /**
+     * Gets API instance for interacting with Vivecraft's server API
+     *
      * @return The Vivecraft API instance for interacting with Vivecraft's server API.
      * @since 1.3.0
      */

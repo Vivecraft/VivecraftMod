@@ -35,9 +35,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     private void vivecraft$init(CallbackInfo ci) {
         if (ClientNetworking.NEEDS_RESET) {
             ClientNetworking.resetServerSettings();
-            ClientNetworking.DISPLAYED_CHAT_MESSAGE = false;
-            ClientNetworking.DISPLAYED_CHAT_WARNING = false;
-            ClientNetworking.DISPLAYED_HEAD_AIM_WARNING = false;
+            ClientNetworking.resetOnceServerSettings();
             ClientNetworking.NEEDS_RESET = false;
         }
     }
@@ -72,9 +70,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     @Inject(method = "close", at = @At("TAIL"))
     private void vivecraft$cleanup(CallbackInfo ci) {
         ClientNetworking.resetServerSettings();
-        ClientNetworking.DISPLAYED_CHAT_MESSAGE = false;
-        ClientNetworking.DISPLAYED_CHAT_WARNING = false;
-        ClientNetworking.DISPLAYED_HEAD_AIM_WARNING = false;
+        ClientNetworking.resetOnceServerSettings();
         ClientNetworking.NEEDS_RESET = true;
     }
 

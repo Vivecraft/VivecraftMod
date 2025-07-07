@@ -22,5 +22,6 @@ public enum PayloadIdentifier {
     VR_PLAYER_STATE,
     DUAL_WIELDING,
     HAPTIC,
+    SERVER_VR_CHANGES,
     DAMAGE_DIRECTION
 }

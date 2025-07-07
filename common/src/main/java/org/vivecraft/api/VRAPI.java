@@ -15,6 +15,8 @@ import javax.annotation.Nullable;
 public interface VRAPI {
 
     /**
+     * Gets API instance for interacting with Vivecraft's common API
+     *
      * @return The Vivecraft API instance for interacting with Vivecraft's common API.
      * @since 1.3.0
      */
@@ -49,6 +51,7 @@ public interface VRAPI {
      * Note that due to the inherent latency of networking, historical VR data retrieved either by the server or by
      * the client for a client other than the local player may be unideal.
      *
+     * @param player Player to get the VR pose history of.
      * @return The history of VR poses for the player. Will be {@code null} if the player isn't in VR or if VR-specific data
      * hasn't been received.
      * @since 1.3.0

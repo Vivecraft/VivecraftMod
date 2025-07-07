@@ -31,6 +31,7 @@ import org.vivecraft.common.network.packet.s2c.*;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.mixin.server.TrackedEntityAccessor;
 import org.vivecraft.server.config.ClimbeyBlockmode;
+import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
 
 import java.util.*;
@@ -169,6 +170,19 @@ public class ServerNetworking {
 
                 if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING) {
                     packetConsumer.accept(new DualWieldingPayloadS2C(ServerConfig.DUAL_WIELDING.get()));
+                }
+
+                // send vr changes settings, to inform the client what is non default
+                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_SERVER_VR_CHANGES) {
+                    Map<String, String> settings = new HashMap<>();
+                    for (ConfigBuilder.ConfigValue<?> config : ServerConfig.getConfigValues()) {
+                        if (config.getPath().startsWith("vrChanges") && !config.isDefault()) {
+                            settings.put(config.getPath(), String.valueOf(config.get()));
+                        }
+                    }
+                    if (!settings.isEmpty()) {
+                        packetConsumer.accept(new ServerVrChangesS2CPacket(settings));
+                    }
                 }
 
                 packetConsumer.accept(new NetworkVersionPayloadS2C(vivePlayer.networkVersion));

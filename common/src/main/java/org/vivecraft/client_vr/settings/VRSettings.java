@@ -46,6 +46,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -156,10 +157,25 @@ public class VRSettings {
         NULLVR
     }
 
-    public enum ChatServerPluginMessage implements OptionEnum<ChatServerPluginMessage> {
-        ALWAYS,
-        SERVER_ONLY,
-        NEVER
+    public enum ChatServerMessage implements OptionEnum<ChatServerMessage>, BooleanSupplier {
+        ALWAYS {
+            @Override
+            public boolean getAsBoolean() {
+                return true;
+            }
+        },
+        SERVER_ONLY {
+            @Override
+            public boolean getAsBoolean() {
+                return !Minecraft.getInstance().isLocalServer();
+            }
+        },
+        NEVER {
+            @Override
+            public boolean getAsBoolean() {
+                return false;
+            }
+        }
     }
 
     public enum UpdateType implements OptionEnum<UpdateType> {
@@ -575,9 +591,11 @@ public class VRSettings {
     @SettingField(VrOptions.UPDATE_TYPE)
     public UpdateType updateType = UpdateType.RELEASE;
     @SettingField(VrOptions.SHOW_PLUGIN)
-    public ChatServerPluginMessage showServerPluginMessage = ChatServerPluginMessage.SERVER_ONLY;
+    public ChatServerMessage showServerPluginMessage = ChatServerMessage.SERVER_ONLY;
     @SettingField(VrOptions.SHOW_PLUGIN_MISSING)
     public boolean showServerPluginMissingMessageAlways = true;
+    @SettingField(VrOptions.SHOW_SERVER_VR_CHANGES)
+    public ChatServerMessage showServerVrChangesMessage = ChatServerMessage.SERVER_ONLY;
     @SettingField(VrOptions.CHAT_MESSAGE_STENCIL)
     public boolean showChatMessageStencil = true;
     @SettingField(value = VrOptions.VR_ENABLED, config = "vrEnabled")
@@ -1529,6 +1547,7 @@ public class VRSettings {
         SHOW_PLUGIN(false, true),
         SHOW_PLUGIN_MISSING(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         CHAT_MESSAGE_STENCIL(false, true), // warning for other mod using stencil
+        SHOW_SERVER_VR_CHANGES(false, true), // message when server changes some behaviour settings
         AUTO_OPEN_KEYBOARD(false, true), // Always Open Keyboard
         AUTO_CLOSE_KEYBOARD(false, true), // Close Keyboard on Screenchange
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
