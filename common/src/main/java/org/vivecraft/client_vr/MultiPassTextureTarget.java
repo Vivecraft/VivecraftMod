@@ -134,7 +134,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.vrTargets == null) {
             return super.getColorTexture();
         }
-        return callOnTargetTexture(RenderTarget::getColorTexture);
+        return callOnTargetRet(RenderTarget::getColorTexture);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.vrTargets == null) {
             return super.getDepthTexture();
         }
-        return callOnTargetTexture(RenderTarget::getDepthTexture);
+        return callOnTargetRet(RenderTarget::getDepthTexture);
     }
 
     private void callOnAllTarget(Consumer<TextureTarget> consumer) {
@@ -164,7 +164,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         consumer.accept(current);
     }
 
-    private GpuTexture callOnTargetTexture(Function<TextureTarget, GpuTexture> function) {
+    private <T> T callOnTargetRet(Function<TextureTarget, T> function) {
         TextureTarget current = getCurrent();
         if (current != this.last) {
             setLast(current);
