@@ -9,7 +9,7 @@ layout(std140) uniform MixedRealityUbo {
     mat4 projectionMatrix;
     mat4 viewMatrix;
 
-    // these are vec4s beacuse of ubo shenanigans
+// these are vec4s beacuse of ubo shenanigans
     vec4 keyColor;
     vec4 hmdViewPosition;
     vec4 hmdPlaneNormal;

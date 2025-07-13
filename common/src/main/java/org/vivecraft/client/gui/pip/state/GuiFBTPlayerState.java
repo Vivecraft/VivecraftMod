@@ -10,9 +10,11 @@ public record GuiFBTPlayerState(boolean rightReady, boolean leftReady, Vector3fc
                                 ScreenRectangle bounds) implements PictureInPictureRenderState
 {
     public GuiFBTPlayerState(
-        boolean rightReady, boolean leftReady, Vector3fc right, Vector3fc left, float yRot, int x0, int y0, int x1, int y1)
+        boolean rightReady, boolean leftReady, Vector3fc right, Vector3fc left, float yRot, int x0, int y0, int x1,
+        int y1)
     {
-        this(rightReady, leftReady, right, left, yRot, x0, y0, x1, y1, 1, new ScreenRectangle(x0, y0, x1 - x0, y1 - y0));
+        this(rightReady, leftReady, right, left, yRot, x0, y0, x1, y1, 1,
+            new ScreenRectangle(x0, y0, x1 - x0, y1 - y0));
     }
 
     @Override

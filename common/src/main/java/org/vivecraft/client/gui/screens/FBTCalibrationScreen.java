@@ -1,6 +1,5 @@
 package org.vivecraft.client.gui.screens;
 
-import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
