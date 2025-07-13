@@ -272,8 +272,8 @@ public class VREffectsHelper {
      */
     public static void renderMenuPanorama(Matrix4fStack poseStack) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-            MC.getMainRenderTarget().getColorTexture(), ARGB.opaque(0),
-            MC.getMainRenderTarget().getDepthTexture(), 1F);
+            MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
+            MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
@@ -422,8 +422,8 @@ public class VREffectsHelper {
      */
     public static void renderJrbuddasAwesomeMainMenuRoomNew(Matrix4fStack poseStack) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-            MC.getMainRenderTarget().getColorTexture(), ARGB.opaque(0),
-            MC.getMainRenderTarget().getDepthTexture(), 1F);
+            MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
+            MC.getMainRenderTarget().getDepthTexture(), 1.0);
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
         int repeat = 4; // texture wraps per meter
@@ -523,9 +523,7 @@ public class VREffectsHelper {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         // transfer the rotation
-        //poseStack.pushMatrix().identity();
-        //RenderSystem.getModelViewStack().mul(poseStack, poseStack);
-        RenderSystem.getModelViewStack().pushMatrix().mul(poseStack);//.identity();
+        RenderSystem.getModelViewStack().pushMatrix().mul(poseStack);
         poseStack = RenderSystem.getModelViewStack();
 
         try {
@@ -592,7 +590,6 @@ public class VREffectsHelper {
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         } finally {
             // reset stacks
-            //poseStack.popMatrix();
             RenderSystem.getModelViewStack().popMatrix();
         }
     }
@@ -625,7 +622,7 @@ public class VREffectsHelper {
         RenderTarget mainTarget = MC.mainRenderTarget;
 
         RenderSystem.getDevice().createCommandEncoder()
-            .clearColorTexture(extTargets.vivecraft$getOccluded().get().getColorTexture(), 0);
+            .clearColorTexture(extTargets.vivecraft$getOccluded().get().getColorTexture(), 0x00000000);
         extTargets.vivecraft$getOccluded().get().copyDepthFrom(mainTarget);
         MC.mainRenderTarget = extTargets.vivecraft$getOccluded().get();
 
@@ -635,8 +632,8 @@ public class VREffectsHelper {
 
         // switch to VR UnOccluded buffer, no depth copy
         RenderSystem.getDevice().createCommandEncoder()
-            .clearColorAndDepthTextures(extTargets.vivecraft$getUnoccluded().get().getColorTexture(), 0,
-                extTargets.vivecraft$getUnoccluded().get().getDepthTexture(), 1F);
+            .clearColorAndDepthTextures(extTargets.vivecraft$getUnoccluded().get().getColorTexture(), 0x00000000,
+                extTargets.vivecraft$getUnoccluded().get().getDepthTexture(), 1.0);
         MC.mainRenderTarget = extTargets.vivecraft$getUnoccluded().get();
 
         if (!shouldOccludeGui()) {
@@ -653,7 +650,7 @@ public class VREffectsHelper {
 
         // switch to VR hands buffer
         RenderSystem.getDevice().createCommandEncoder()
-            .clearColorTexture(extTargets.vivecraft$getHands().get().getColorTexture(), 0);
+            .clearColorTexture(extTargets.vivecraft$getHands().get().getColorTexture(), 0x00000000);
         extTargets.vivecraft$getHands().get().copyDepthFrom(mainTarget);
         MC.mainRenderTarget = extTargets.vivecraft$getHands().get();
 
@@ -950,8 +947,6 @@ public class VREffectsHelper {
     private static void renderScreen(
         RenderTarget framebuffer, boolean depthAlways, boolean noFog, Vec3 pos, Matrix4f matrix)
     {
-        // disable culling to show the screen from both sides
-
         // cache fog distance
         FogParameters oldFog = RenderSystem.getShaderFog();
         float[] color = new float[]{1.0F, 1.0F, 1.0F, 1.0F};

@@ -24,14 +24,14 @@ public class GlDeviceMixin implements GlDeviceExtension {
      */
     @Override
     public GpuTexture vivecraft$createFixedIdTexture(
-        @Nullable Supplier<String> labelSup, TextureFormat textureFormat, int width,
+        @Nullable Supplier<String> labelSupplier, TextureFormat textureFormat, int width,
         int height, int mipmapLevels, int texId)
     {
         if (mipmapLevels < 1) {
             throw new IllegalArgumentException("mipLevels must be at least 1");
         } else {
             GlStateManager.clearGlErrors();
-            String label = this.debugLabels.exists() && labelSup != null ? labelSup.get() : null;
+            String label = this.debugLabels.exists() && labelSupplier != null ? labelSupplier.get() : null;
             if (label == null) {
                 label = String.valueOf(texId);
             }

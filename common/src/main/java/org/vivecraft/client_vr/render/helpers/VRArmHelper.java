@@ -129,7 +129,7 @@ public class VRArmHelper {
                 Mth.floor(color.getZ() * lightPercent));
         }
 
-        RenderType renderType = VRRenderTypes.debugQuads(depthAlways);
+        RenderType renderType = VRRenderTypes.debugQuads(depthAlways && c == 0);
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
         RenderHelper.renderBox(consumer, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha, modelView);

@@ -260,7 +260,9 @@ public abstract class VRRenderer {
                     0.0F)
                 .setColor(0, 0, 0, 255);
         }
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
+
+        // need to end all, because of iris batching
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
     }
 
     /**
@@ -286,8 +288,8 @@ public abstract class VRRenderer {
                     0.0F)
                 .setColor(0, 0, 0, 255);
         }
-
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
+        // need to end all, because of iris batching
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
     }
 
     /**

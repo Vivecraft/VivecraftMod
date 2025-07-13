@@ -11,6 +11,6 @@ public interface GlDeviceExtension {
      * additional method to create a texture with a predefined id
      */
     GpuTexture vivecraft$createFixedIdTexture(
-        @Nullable Supplier<String> supplier, TextureFormat textureFormat, int width, int height, int mipmapLevels,
+        @Nullable Supplier<String> labelSupplier, TextureFormat textureFormat, int width, int height, int mipmapLevels,
         int texId);
 }
