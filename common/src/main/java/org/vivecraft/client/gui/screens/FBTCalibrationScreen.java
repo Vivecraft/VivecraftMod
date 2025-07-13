@@ -1,5 +1,6 @@
 package org.vivecraft.client.gui.screens;
 
+import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -173,9 +174,14 @@ public class FBTCalibrationScreen extends Screen {
                 48, 16, 0xFFFFFFFF);
 
             // submit player pip
+            float yRot = 0;
+            if (VRState.VR_RUNNING) {
+                yRot = this.yaw - ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getYawRad();
+            }
+
             ((GuiGraphicsAccessor) guiGraphics).getGuiRenderState().submitPicturesInPictureState(
                 new GuiFBTPlayerState(this.rightHandAtPosition, this.leftHandAtPosition, new Vector3f(this.rightHand),
-                    new Vector3f(this.leftHand), 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
+                    new Vector3f(this.leftHand), yRot, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
 
             if (VRState.VR_RUNNING) {
                 ClientDataHolderVR.getInstance().vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract)

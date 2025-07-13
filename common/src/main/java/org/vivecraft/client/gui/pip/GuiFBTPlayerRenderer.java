@@ -34,7 +34,8 @@ public class GuiFBTPlayerRenderer extends PictureInPictureRenderer<GuiFBTPlayerS
         poseStack.pushPose();
         poseStack.translate(-0.5, -32, 0);
         poseStack.scale(4, -4, 4);
-        poseStack.mulPose(Axis.YP.rotation(Mth.PI));
+        poseStack.mulPose(Axis.YP.rotation(Mth.PI + fbtState.yRot()));
+
         // body overlay
         RenderType renderType = VRRenderTypes.debugQuads(true);
         VertexConsumer builder = this.bufferSource.getBuffer(renderType);

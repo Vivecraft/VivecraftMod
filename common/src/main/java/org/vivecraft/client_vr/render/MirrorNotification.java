@@ -44,7 +44,7 @@ public class MirrorNotification {
         if (System.currentTimeMillis() < MIRROR_NOTIFY_START + MIRROR_NOTIFY_LEN) {
             int screenX = MC.mainRenderTarget.width;
 
-            // override the gui scale, tobe in absolute size
+            // override the gui scale, to be in absolute size
             int backupGuiScale = GuiHandler.GUI_SCALE_FACTOR;
             GuiHandler.GUI_SCALE_FACTOR = 1;
 
