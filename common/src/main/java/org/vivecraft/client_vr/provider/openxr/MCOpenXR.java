@@ -25,6 +25,7 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.openxr.control.WrappedBindings;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -70,6 +71,8 @@ public class MCOpenXR extends MCVR {
     public boolean shouldRender = true;
     public long[] haptics = new long[2];
     public String systemName;
+
+    public Map<String, Long> mappedBindings = new HashMap<>();
 
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
@@ -1017,12 +1020,12 @@ public class MCOpenXR extends MCVR {
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
             long actionSet = makeActionSet(this.instance, vrinputactionset.name, vrinputactionset.localizedName, 0);
             this.actionSetHandles.put(vrinputactionset, actionSet);
-        }
 
-        for (VRInputAction vrinputaction : this.inputActions.values()) {
-            long action = createAction(vrinputaction.name, vrinputaction.name, vrinputaction.type,
-                new XrActionSet(this.actionSetHandles.get(vrinputaction.actionSet), this.instance), BOTH_HANDS);
-            vrinputaction.setHandle(action);
+            for (WrappedBindings binding: WrappedBindings.quest2Bindings()) {
+                long action = createAction(vrinputactionset.name() + "/" + binding.path(), binding.path(), binding.type(),
+                    new XrActionSet(actionSet, this.instance), BOTH_HANDS);
+                mappedBindings.put(binding.path(), action);
+            }
         }
 
         setupControllers();
@@ -1058,6 +1061,8 @@ public class MCOpenXR extends MCVR {
                 for (int i = 0; i < defaultBindings.length; i++) {
                     Pair<String, String> pair = defaultBindings[i];
                     VRInputAction binding = this.getInputActionByName(pair.getLeft());
+                    long handle = this.mappedBindings.get(pair.getRight());
+                    binding.setHandle(handle);
                     if (binding.handle == 0L) {
                         VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", pair.getLeft(), pair.getRight());
                         continue;
