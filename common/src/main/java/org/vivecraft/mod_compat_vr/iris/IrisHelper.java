@@ -3,7 +3,6 @@ package org.vivecraft.mod_compat_vr.iris;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.api.v0.IrisProgram;
-import net.minecraft.client.renderer.RenderType;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.vivecraft.client.Xplat;
@@ -28,9 +27,6 @@ public class IrisHelper {
     private static Field ImmediateState_skipExtension;
     private static Method ImmediateState_skipExtension_set;
     private static Method ImmediateState_skipExtension_get;
-
-    private static Method BlendingStateHolder_getTransparencyType;
-    private static Method BlendingStateHolder_setTransparencyType;
 
     // for iris/dh compat
     private static boolean DH_PRESENT = false;
@@ -200,17 +196,6 @@ public class IrisHelper {
         return false;
     }
 
-    public static void copyBlendingState(RenderType source, RenderType target) {
-        if (init()) {
-            try {
-                BlendingStateHolder_setTransparencyType.invoke(target,
-                    BlendingStateHolder_getTransparencyType.invoke(source));
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                VRSettings.LOGGER.error("Vivecraft: couldn't set iris blend state:", e);
-            }
-        }
-    }
-
     /**
      * initializes all Reflections
      *
@@ -246,12 +231,6 @@ public class IrisHelper {
                 .getMethod("set", Object.class);
             ImmediateState_skipExtension_get = ImmediateState_skipExtension.get(null).getClass()
                 .getMethod("get");
-
-
-            Class<?> blendState = Class.forName("net.irisshaders.batchedentityrendering.impl.BlendingStateHolder");
-            Class<?> transparencyType = Class.forName("net.irisshaders.batchedentityrendering.impl.TransparencyType");
-            BlendingStateHolder_getTransparencyType = blendState.getMethod("getTransparencyType");
-            BlendingStateHolder_setTransparencyType = blendState.getMethod("setTransparencyType", transparencyType);
 
             // distant horizon compat
             if (Xplat.isModLoaded("distanthorizons")) {
