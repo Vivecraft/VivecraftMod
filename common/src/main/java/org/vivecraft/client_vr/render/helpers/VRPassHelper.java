@@ -108,11 +108,6 @@ public class VRPassHelper {
         Profiler.get().push("gui cursor");
         // draw cursor on Gui Layer
         if (MC.screen != null || !MC.mouseHandler.isMouseGrabbed()) {
-            /*Matrix4fStack poseStack = RenderSystem.getModelViewStack();
-            poseStack.pushMatrix();
-            poseStack.identity();
-            poseStack.translate(0.0f, 0.0f, -11000.0f);*/
-
             int x = (int) (
                 MC.mouseHandler.xpos() * (double) MC.getWindow().getGuiScaledWidth() /
                     (double) MC.getWindow().getScreenWidth()
@@ -123,8 +118,6 @@ public class VRPassHelper {
             );
             RenderHelper.drawMouseMenuQuad(GuiRenderHelper.getGuiGraphics(), x, y);
             GuiRenderHelper.finish();
-
-            //poseStack.popMatrix();
         }
 
         // pop pose that we pushed before the gui
