@@ -229,7 +229,7 @@ public class FBTCalibrationScreen extends Screen {
             }
 
             // body overlay
-            renderType = VRRenderTypes.debugQuads(true);
+            renderType = VRRenderTypes.quads(true);
             builder = this.minecraft.renderBuffers().bufferSource().getBuffer(renderType);
 
             // legs

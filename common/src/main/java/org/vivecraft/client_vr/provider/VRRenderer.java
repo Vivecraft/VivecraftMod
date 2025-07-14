@@ -242,7 +242,7 @@ public abstract class VRRenderer {
      * @param height height of the circle in screen pixels
      */
     private void drawCircle(float width, float height) {
-        RenderType renderType = VRRenderTypes.debugTriangleFanAlways();
+        RenderType renderType = VRRenderTypes.triangleFanAlways();
         VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
         final float edges = 32.0F;
@@ -276,7 +276,7 @@ public abstract class VRRenderer {
             return;
         }
 
-        RenderType renderType = VRRenderTypes.debugTrianglesAlways();
+        RenderType renderType = VRRenderTypes.trianglesAlways();
         VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
         RenderSystem.setShaderTexture(0, RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE));

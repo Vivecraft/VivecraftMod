@@ -34,7 +34,6 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
-import org.vivecraft.client_vr.render.rendertypes.ShaderLightRenderType;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -358,9 +357,8 @@ public class RenderHelper {
         float sizeY = sizeX * displayHeight / displayWidth;
 
         Vector3f normal = new Matrix3f(matrix).transform(new Vector3f(0, 0, 1)).normalize();
-        RenderType wrapped = new ShaderLightRenderType(renderType, normal);
 
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(wrapped);
+        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
         consumer.addVertex(matrix, -sizeX, -sizeY, 0)
             .setColor(color[0], color[1], color[2], color[3])
@@ -383,7 +381,7 @@ public class RenderHelper {
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
             .setNormal(normal.x, normal.y, normal.z);
 
-        MC.renderBuffers().bufferSource().endBatch(wrapped);
+        MC.renderBuffers().bufferSource().endBatch(renderType);
     }
 
     /**
@@ -404,7 +402,7 @@ public class RenderHelper {
         Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, Matrix4f matrix,
         boolean depthAlways)
     {
-        RenderType renderType = VRRenderTypes.debugQuads(depthAlways);
+        RenderType renderType = VRRenderTypes.quads(depthAlways);
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
         Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))

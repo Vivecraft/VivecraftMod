@@ -174,7 +174,7 @@ public class VRWidgetHelper {
                 null, null, 0);
 
         if (!ITEM_STACK_RENDER_STATE.isEmpty() && !ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList().isEmpty()) {
-            RenderType renderType = VRRenderTypes.entitySolid(displaySupFunc.get());
+            RenderType renderType = VRRenderTypes.entitySolidNoCardinalLight(displaySupFunc.get());
             consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
             // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen

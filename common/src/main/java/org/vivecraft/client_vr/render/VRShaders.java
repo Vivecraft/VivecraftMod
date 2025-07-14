@@ -145,12 +145,13 @@ public class VRShaders {
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     private static final RenderPipeline.Snippet ENTITY_SNIPPET = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withSampler("Sampler1")
         .withCull(false).buildSnippet();
 
     public static final RenderPipeline CROSSHAIR_WORLD = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation("pipeline/crosshair_world_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
             SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA)).build();
 
@@ -160,30 +161,58 @@ public class VRShaders {
         .withLocation("pipeline/crosshair_world_always_vr")
         .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
             SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA))
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
-    public static final RenderPipeline ENTITY_TRANSLUCENT_ALWAYS = RenderPipeline.builder(ENTITY_SNIPPET)
-        .withLocation("pipeline/entity_translucent_always_vr")
+    public static final RenderPipeline ENTITY_SOLID_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_solid_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING").build();
+
+    public static final RenderPipeline ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_translucent_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withBlend(BlendFunction.TRANSLUCENT).build();
+
+    public static final RenderPipeline ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
+            ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_translucent_always_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withBlend(BlendFunction.TRANSLUCENT)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
-    public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_ALWAYS = RenderPipeline.builder(ENTITY_SNIPPET)
-        .withLocation("pipeline/entity_cutout_no_cull_always_vr")
+    public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_cutout_no_cull_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F).build();
+
+    public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
+            ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_cutout_no_cull_always_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
-    public static final RenderPipeline DEBUG_QUADS_ALWAYS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-        .withLocation("pipeline/debug_quads_always_vr")
+    public static final RenderPipeline QUADS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+        .withLocation("pipeline/quads_vr")
+        .withCull(false)
+        .build();
+
+    public static final RenderPipeline QUADS_ALWAYS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+        .withLocation("pipeline/quads_always_vr")
         .withCull(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
-    public static final RenderPipeline DEBUG_TRIANGLES_ALWAYS = RenderPipeline.builder(
+    public static final RenderPipeline TRIANGLES_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/debug_triangles_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
         .withCull(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
-    public static final RenderPipeline DEBUG_TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
+    public static final RenderPipeline TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/debug_triangle_fan_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_FAN)
@@ -200,8 +229,8 @@ public class VRShaders {
         .withCull(false).build();
 
     public static final Set<RenderPipeline> DEPTH_ALWAYS_PIPELINES = new HashSet<>(
-        Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS, ENTITY_CUTOUT_NO_CULL_ALWAYS, DEBUG_QUADS_ALWAYS,
-            DEBUG_TRIANGLES_ALWAYS));
+        Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT,
+            ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
 
     private VRShaders() {}
 }

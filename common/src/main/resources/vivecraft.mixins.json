@@ -7,7 +7,6 @@
     "client.ResourceLoadStateTrackerMixin",
     "client.blaze3d.BufferBuilderMixin",
     "client.blaze3d.ByteBufferBuilderAccessor",
-    "client.blaze3d.RenderSystemAccessor",
     "client.blaze3d.RenderTargetMixin",
     "client.blaze3d.opengl.GlDeviceMixin",
     "client.gui.screens.JoinMultiplayerScreenMixin",
