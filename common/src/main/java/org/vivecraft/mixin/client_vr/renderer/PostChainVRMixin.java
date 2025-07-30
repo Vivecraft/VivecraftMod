@@ -3,13 +3,12 @@ package org.vivecraft.mixin.client_vr.renderer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.PostPass;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -17,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MultiPassList;
 import org.vivecraft.client_vr.MultiPassRenderTarget;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -27,14 +27,23 @@ import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 
 import java.io.IOException;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 @Mixin(PostChain.class)
-public class PostChainVRMixin {
+public abstract class PostChainVRMixin {
 
     @Shadow
     @Final
     private RenderTarget screenTarget;
+
+    @Shadow
+    @Final
+    @Mutable
+    private List<PostPass> passes;
+
+    @Accessor
+    public abstract List<PostPass> getPasses();
 
     @Unique
     private final EnumMap<RenderPass, PostChain> vivecraft$VRPostChains = new EnumMap<>(RenderPass.class);
@@ -59,6 +68,13 @@ public class PostChainVRMixin {
                     new PostChain(textureManager, resourceProvider, WorldRenderPass.getByRenderPass(pass).target,
                         name));
             }
+
+            EnumMap<RenderPass, List<PostPass>> vrPasses = new EnumMap<>(RenderPass.class);
+            for (Map.Entry<RenderPass, PostChain> entry : this.vivecraft$VRPostChains.entrySet()) {
+                vrPasses.put(entry.getKey(), ((PostChainVRMixin) (Object) entry.getValue()).getPasses());
+            }
+
+            this.passes = new MultiPassList<>(this.passes, vrPasses);
         }
     }
 
@@ -93,9 +109,18 @@ public class PostChainVRMixin {
     @Inject(method = "resize", at = @At("TAIL"))
     private void vivecraft$resizeVRChains(CallbackInfo ci) {
         for (Map.Entry<RenderPass, PostChain> entry : this.vivecraft$VRPostChains.entrySet()) {
-            RenderTarget target = entry.getKey() == RenderPass.GUI ? GuiHandler.GUI_FRAMEBUFFER :
-                WorldRenderPass.getByRenderPass(entry.getKey()).target;
-            entry.getValue().resize(target.width, target.height);
+            RenderTarget target = null;
+            if (entry.getKey() == RenderPass.GUI) {
+                target = GuiHandler.GUI_FRAMEBUFFER;
+            } else {
+                WorldRenderPass pass = WorldRenderPass.getByRenderPass(entry.getKey());
+                if (pass != null) {
+                    target = pass.target;
+                }
+            }
+            if (target != null) {
+                entry.getValue().resize(target.width, target.height);
+            }
         }
     }
 
