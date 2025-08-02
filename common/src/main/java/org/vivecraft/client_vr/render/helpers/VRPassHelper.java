@@ -40,7 +40,7 @@ public class VRPassHelper {
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
         // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
-        Minecraft.getInstance().levelRenderer.endFrame();
+        MC.levelRenderer.endFrame();
 
         RenderHelper.checkGLError("post game render " + eye);
 
