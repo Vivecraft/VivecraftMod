@@ -234,7 +234,7 @@ public class MenuWorldRenderer {
 
         this.fogRenderer.setFog(FogRenderer.FogMode.WORLD);
 
-        //renderSky(poseStack, eyePosition);
+        renderSky(poseStack, eyePosition);
 
         renderChunkLayer(ChunkSectionLayerGroup.OPAQUE);
 
