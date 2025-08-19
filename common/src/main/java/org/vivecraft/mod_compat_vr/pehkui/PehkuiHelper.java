@@ -1,13 +1,13 @@
 package org.vivecraft.mod_compat_vr.pehkui;
 
 import net.minecraft.world.entity.Entity;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import virtuoel.pehkui.util.ScaleUtils;
 
 public class PehkuiHelper {
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("pehkui");
+        return Xloader.isModLoaded("pehkui");
     }
 
     /**

@@ -113,6 +113,12 @@ public abstract class PlayerRendererMixin extends LivingEntityRendererMixin<Abst
                 vivecraft$addLayerClone(renderLayer, renderExtension.vivecraft$getSkinMapVRArms().get(modelType));
                 vivecraft$addLayerClone(renderLayer, renderExtension.vivecraft$getSkinMapVRLegs().get(modelType));
             } else {
+                if (!constructor.canAccess(null)) {
+                    // make sure the target class is accessible or this will error
+                    VRSettings.LOGGER.warn("Vivecraft: layer constructor of '{}' was private, making it accessible",
+                        renderLayer.getClass());
+                    constructor.setAccessible(true);
+                }
                 // make a new instance with the vr model as parent
                 vivecraft$addLayerConstructor(renderLayer, constructor, type,
                     renderExtension.vivecraft$getSkinMapVRVanilla().get(modelType));

@@ -1,0 +1,166 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "weaponmod:katana.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.netherite",
+      "required": false
+    },
+
+    {
+      "id": "weaponmod:battleaxe.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.netherite",
+      "required": false
+    },
+
+    {
+      "id": "weaponmod:knife.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.netherite",
+      "required": false
+    },
+
+    {
+      "id": "weaponmod:warhammer.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.netherite",
+      "required": false
+    },
+
+    {
+      "id": "weaponmod:spear.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.netherite",
+      "required": false
+    },
+
+    {
+      "id": "weaponmod:halberd.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.netherite",
+      "required": false
+    },
+    {
+      "id": "weaponmod:javelin",
+      "required": false
+    },
+    {
+      "id": "weaponmod:firerod",
+      "required": false
+    },
+    {
+      "id": "weaponmod:crossbow",
+      "required": false
+    }
+  ]
+}

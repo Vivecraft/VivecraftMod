@@ -6,6 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerPlayerConnection;
@@ -18,11 +19,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.Xplat;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.common.CommonDataHolder;
-import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 import org.vivecraft.common.network.packet.c2s.*;
@@ -30,6 +32,7 @@ import org.vivecraft.common.network.packet.s2c.*;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.mixin.server.TrackedEntityAccessor;
 import org.vivecraft.server.config.ClimbeyBlockmode;
+import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
 
 import java.util.*;
@@ -127,47 +130,52 @@ public class ServerNetworking {
                     packetConsumer.accept(getClimbeyServerPayload());
                 }
 
-                if (ServerConfig.TELEPORT_ENABLED.get()) {
-                    packetConsumer.accept(new TeleportPayloadS2C());
+                // always send in new versions to allow disabling of teleports
+                if (ServerConfig.TELEPORT_ENABLED.get() ||
+                    vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_OPTION_TOGGLE)
+                {
+                    packetConsumer.accept(
+                        new TeleportPayloadS2C(ServerConfig.TELEPORT_ENABLED.get(), vivePlayer.networkVersion));
                 }
+
                 if (ServerConfig.TELEPORT_LIMITED_SURVIVAL.get()) {
-                    packetConsumer.accept(new SettingOverridePayloadS2C(Map.of(
-                        "limitedTeleport", "true",
-                        "teleportLimitUp", String.valueOf(ServerConfig.TELEPORT_UP_LIMIT.get()),
-                        "teleportLimitDown", String.valueOf(ServerConfig.TELEPORT_DOWN_LIMIT.get()),
-                        "teleportLimitHoriz", String.valueOf(ServerConfig.TELEPORT_HORIZONTAL_LIMIT.get())
-                    )));
+                    packetConsumer.accept(getSurvivalTeleportOverridePayload());
                 }
 
                 if (ServerConfig.WORLDSCALE_LIMITED.get()) {
-                    packetConsumer.accept(new SettingOverridePayloadS2C(Map.of(
-                        "worldScale.min", String.valueOf(ServerConfig.WORLDSCALE_MIN.get()),
-                        "worldScale.max", String.valueOf(ServerConfig.WORLDSCALE_MAX.get())
-                    )));
+                    packetConsumer.accept(getWorldScaleOverridePayload());
                 }
 
                 if (ServerConfig.FORCE_THIRD_PERSON_ITEMS.get()) {
-                    packetConsumer.accept(new SettingOverridePayloadS2C(Map.of(
-                        "thirdPersonItems", "true"
-                    )));
+                    packetConsumer.accept(getThirdPersonItemsOverridePayload());
                 }
 
                 if (ServerConfig.FORCE_THIRD_PERSON_ITEMS_CUSTOM.get()) {
-                    packetConsumer.accept(new SettingOverridePayloadS2C(Map.of(
-                        "thirdPersonItemsCustom", "true"
-                    )));
+                    packetConsumer.accept(getThirdPersonItemsCustomOverridePayload());
                 }
 
                 if (ServerConfig.CRAWLING_ENABLED.get()) {
-                    packetConsumer.accept(new CrawlPayloadS2C());
+                    packetConsumer.accept(new CrawlPayloadS2C(true, vivePlayer.networkVersion));
                 }
 
                 // send if hotswitching is allowed
-                packetConsumer.accept(
-                    new VRSwitchingPayloadS2C(ServerConfig.VR_SWITCHING_ENABLED.get() && !ServerConfig.VR_ONLY.get()));
+                packetConsumer.accept(getVRSwitchingPayload());
 
                 if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING) {
                     packetConsumer.accept(new DualWieldingPayloadS2C(ServerConfig.DUAL_WIELDING.get()));
+                }
+
+                // send vr changes settings, to inform the client what is non default
+                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_SERVER_VR_CHANGES) {
+                    Map<String, String> settings = new HashMap<>();
+                    for (ConfigBuilder.ConfigValue<?> config : ServerConfig.getConfigValues()) {
+                        if (config.getPath().startsWith("vrChanges") && !config.isDefault()) {
+                            settings.put(config.getPath(), String.valueOf(config.get()));
+                        }
+                    }
+                    if (!settings.isEmpty()) {
+                        packetConsumer.accept(new ServerVrChangesS2CPacket(settings));
+                    }
                 }
 
                 packetConsumer.accept(new NetworkVersionPayloadS2C(vivePlayer.networkVersion));
@@ -185,7 +193,7 @@ public class ServerNetworking {
                 }
             }
             case DRAW -> vivePlayer.draw = ((DrawPayloadC2S) c2sPayload).draw();
-            case VR_PLAYER_STATE -> vivePlayer.vrPlayerState = ((VRPlayerStatePayloadC2S) c2sPayload).playerState();
+            case VR_PLAYER_STATE -> vivePlayer.setVrPlayerState(((VRPlayerStatePayloadC2S) c2sPayload).playerState());
             case WORLDSCALE -> vivePlayer.worldScale = ((WorldScalePayloadC2S) c2sPayload).worldScale();
             case HEIGHT -> vivePlayer.heightScale = ((HeightPayloadC2S) c2sPayload).heightScale();
             case TELEPORT -> {
@@ -197,8 +205,12 @@ public class ServerNetworking {
                 player.connection.aboveGroundTickCount = 0;
             }
             case ACTIVEHAND -> {
-                BodyPart newBodyPart =
-                    vivePlayer.isSeated() ? BodyPart.MAIN_HAND : ((ActiveBodyPartPayloadC2S) c2sPayload).bodyPart();
+                ActiveBodyPartPayloadC2S activeBodypart = (ActiveBodyPartPayloadC2S) c2sPayload;
+                VRBodyPart newBodyPart = activeBodypart.bodyPart();
+                if (vivePlayer.isSeated() && newBodyPart != VRBodyPart.HEAD) {
+                    newBodyPart = VRBodyPart.MAIN_HAND;
+                }
+                vivePlayer.useBodyPartForAim = activeBodypart.useForAim();
                 if (vivePlayer.activeBodyPart != newBodyPart) {
                     // handle equipment changes
                     ItemStack oldItem = player.getItemBySlot(EquipmentSlot.MAINHAND);
@@ -235,6 +247,7 @@ public class ServerNetworking {
                     player.setPose(Pose.SWIMMING);
                 }
             }
+            case DAMAGE_DIRECTION -> vivePlayer.wantsDamageDirection = true;
             // legacy support
             case CONTROLLER0DATA, CONTROLLER1DATA, HEADDATA -> {
                 Map<PayloadIdentifier, VivecraftPayloadC2S> playerData;
@@ -254,7 +267,7 @@ public class ServerNetworking {
                     LegacyHeadDataPayloadC2S headData = (LegacyHeadDataPayloadC2S) playerData
                         .get(PayloadIdentifier.HEADDATA);
 
-                    vivePlayer.vrPlayerState = new VrPlayerState(
+                    vivePlayer.setVrPlayerState(new VrPlayerState(
                         headData.seated(), // isSeated
                         headData.hmdPose(), // head pose
                         controller0Data.leftHanded(), // leftHanded 0
@@ -264,7 +277,7 @@ public class ServerNetworking {
                         FBTMode.ARMS_ONLY, null,
                         null, null,
                         null, null,
-                        null, null);
+                        null, null));
 
                     LEGACY_DATA_MAP.remove(player.getUUID());
                 }
@@ -292,7 +305,114 @@ public class ServerNetworking {
                 } catch (ResourceLocationException ignore) {}
             }
         }
-        return new ClimbingPayloadS2C(true, ServerConfig.CLIMBEY_BLOCKMODE.get(), blocks);
+        return new ClimbingPayloadS2C(ServerConfig.CLIMBEY_ENABLED.get(), ServerConfig.CLIMBEY_BLOCKMODE.get(), blocks);
+    }
+
+    /**
+     * @return VR switching payload for the current settings
+     */
+    public static VivecraftPayloadS2C getVRSwitchingPayload() {
+        return new VRSwitchingPayloadS2C(ServerConfig.VR_SWITCHING_ENABLED.get() && !ServerConfig.VR_ONLY.get());
+    }
+
+    /**
+     * @return Survival TP override payload for the current settings
+     */
+    public static VivecraftPayloadS2C getSurvivalTeleportOverridePayload() {
+        return new SettingOverridePayloadS2C(Map.of(
+            "limitedTeleport", "true",
+            "teleportLimitUp", String.valueOf(ServerConfig.TELEPORT_UP_LIMIT.get()),
+            "teleportLimitDown", String.valueOf(ServerConfig.TELEPORT_DOWN_LIMIT.get()),
+            "teleportLimitHoriz", String.valueOf(ServerConfig.TELEPORT_HORIZONTAL_LIMIT.get())
+        ), !ServerConfig.TELEPORT_LIMITED_SURVIVAL.get());
+    }
+
+    /**
+     * @return world scale override payload for the current settings
+     */
+    public static VivecraftPayloadS2C getWorldScaleOverridePayload() {
+        return new SettingOverridePayloadS2C(Map.of(
+            "worldScale.min", String.valueOf(ServerConfig.WORLDSCALE_MIN.get()),
+            "worldScale.max", String.valueOf(ServerConfig.WORLDSCALE_MAX.get())
+        ), !ServerConfig.WORLDSCALE_LIMITED.get());
+    }
+
+    /**
+     * @return third person transforms override payload for the current settings
+     */
+    public static VivecraftPayloadS2C getThirdPersonItemsOverridePayload() {
+        return new SettingOverridePayloadS2C(Map.of(
+            "thirdPersonItems", "true"
+        ), !ServerConfig.FORCE_THIRD_PERSON_ITEMS.get());
+    }
+
+    /**
+     * @return custom third person transforms override payload for the current settings
+     */
+    public static VivecraftPayloadS2C getThirdPersonItemsCustomOverridePayload() {
+        return new SettingOverridePayloadS2C(Map.of(
+            "thirdPersonItemsCustom", "true"
+        ), !ServerConfig.FORCE_THIRD_PERSON_ITEMS_CUSTOM.get());
+    }
+
+    /**
+     * Sends an update packet for the given {@code config} to all ServerVivePlayer on the {@code server}
+     *
+     * @param server server to get the vive players from
+     * @param config ConfigValue to send an update for
+     */
+    public static void sendUpdatePacketToAll(MinecraftServer server, ConfigBuilder.ConfigValue<?> config) {
+        Function<ServerVivePlayer, VivecraftPayloadS2C> function = config.getPacketFunction();
+        if (function != null) {
+            for (ServerVivePlayer vivePlayer : ServerVRPlayers.getPlayersWithVivecraft(server).values()) {
+                VivecraftPayloadS2C payload = function.apply(vivePlayer);
+                // old clients cannot clear server overrides, crawl or tp
+                if (vivePlayer.networkVersion < CommonNetworkHelper.NETWORK_VERSION_OPTION_TOGGLE &&
+                    ((payload instanceof SettingOverridePayloadS2C override && override.clear()) ||
+                        (payload instanceof CrawlPayloadS2C crawl && !crawl.allowed()) ||
+                        (payload instanceof TeleportPayloadS2C tp && !tp.allowed())
+                    ))
+                {
+                    continue;
+                }
+                vivePlayer.player.connection.send(Xplat.getS2CPacket(payload));
+            }
+        }
+    }
+
+    /**
+     * kicks any players that are not allowed based on the current vive/vr only settings, and sends if vr switching is allowed
+     *
+     * @param server server to get the vive players from
+     */
+    public static void updateViveVROnly(MinecraftServer server) {
+        // get all players
+        // need to make a copy, since kicking a player causes a concurrent modification exception
+        for (ServerPlayer player : new ArrayList<>(server.getPlayerList().getPlayers())) {
+            // this could technically cause a race condition, where a player didn't send the vivecraft packet yet and
+            // gets kicked because of that, but that should be neglectable, since server settings don't change that often
+            ServerUtil.kickIfNotAllowed(player);
+        }
+
+        // update if vr switching is allowed
+        for (ServerVivePlayer vivePlayer : ServerVRPlayers.getPlayersWithVivecraft(server).values()) {
+            vivePlayer.player.connection.send(Xplat.getS2CPacket(getVRSwitchingPayload()));
+        }
+    }
+
+    /**
+     * sends a haptic event to the given player if they are in VR, to be processed on the client
+     */
+    public static void sendHapticToClient(
+        ServerPlayer player, VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay)
+    {
+        ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
+        if (vivePlayer != null && vivePlayer.isVR() &&
+            vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_HAPTIC_PACKET)
+        {
+            vivePlayer.player.connection.send(
+                Xplat.getS2CPacket(new HapticPayloadS2C(bodyPart, duration, frequency, amplitude, delay)));
+        }
     }
 
     /**
@@ -303,10 +423,10 @@ public class ServerNetworking {
     public static void sendVrPlayerStateToClients(ServerVivePlayer vivePlayer) {
         // create the packets here, to try to avoid unnecessary memory copies when creating multiple packets
         Packet<?> legacyPacket = Xplat.getS2CPacket(
-            new UberPacketPayloadS2C(vivePlayer.player.getUUID(), new VrPlayerState(vivePlayer.vrPlayerState, 0),
+            new UberPacketPayloadS2C(vivePlayer.player.getUUID(), new VrPlayerState(vivePlayer.vrPlayerState(), 0),
                 vivePlayer.worldScale, vivePlayer.heightScale));
         Packet<?> newPacket = Xplat.getS2CPacket(
-            new UberPacketPayloadS2C(vivePlayer.player.getUUID(), vivePlayer.vrPlayerState, vivePlayer.worldScale,
+            new UberPacketPayloadS2C(vivePlayer.player.getUUID(), vivePlayer.vrPlayerState(), vivePlayer.worldScale,
                 vivePlayer.heightScale));
 
         sendPacketToTrackingPlayers(vivePlayer, (version) -> version < 1 ? legacyPacket : newPacket);
@@ -354,8 +474,8 @@ public class ServerNetworking {
             }
             trackedPlayer.send(packetProvider.apply(vivePlayer.networkVersion));
         }
-        if (ServerConfig.SEND_DATA_TO_OWNER.get() || Xplat.isModLoaded("replaymod") ||
-            Xplat.isModLoaded("reforgedplaymod") || Xplat.isModLoaded("flashback"))
+        if (ServerConfig.SEND_DATA_TO_OWNER.get() || Xloader.isModLoaded("replaymod") ||
+            Xloader.isModLoaded("reforgedplaymod") || Xloader.isModLoaded("flashback"))
         {
             // force on when a replay mod is loaded
             vivePlayer.player.connection.send(packetProvider.apply(vivePlayer.networkVersion));

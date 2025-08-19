@@ -47,7 +47,7 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -135,6 +135,8 @@ public class MenuWorldRenderer {
 
     private static boolean FIRST_RENDER_DONE;
 
+    private boolean rendering = false;
+
     public MenuWorldRenderer() {
         this.mc = Minecraft.getInstance();
 
@@ -195,6 +197,7 @@ public class MenuWorldRenderer {
     }
 
     public void render(Matrix4fStack poseStack) {
+        this.rendering = true;
 
         // temporarily disable fabulous to render the menu world
         GraphicsStatus current = this.mc.options.graphicsMode().get();
@@ -252,6 +255,7 @@ public class MenuWorldRenderer {
         poseStack.popMatrix();
         turnOffLightLayer();
         this.mc.options.graphicsMode().set(current);
+        this.rendering = false;
     }
 
     private void renderChunkLayer(RenderType layer) {
@@ -285,6 +289,10 @@ public class MenuWorldRenderer {
         }
     }
 
+    public boolean isRendering() {
+        return this.rendering;
+    }
+
     public void prepare() {
         if (this.vertexBuffers == null && !this.building) {
             VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Building geometry...");
@@ -301,7 +309,7 @@ public class MenuWorldRenderer {
             if (IrisHelper.isLoaded() && IrisHelper.isShaderActive() && IrisHelper.hasIssuesWithMenuWorld()) {
                 VRSettings.LOGGER.info("Vivecraft: Temporarily disabling shaders to build Menuworld.");
                 this.reenableShaders = true;
-                this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldshaderdisable"));
+                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.menuworldshaderdisable"));
                 IrisHelper.setShadersActive(false);
             }
 
@@ -620,6 +628,7 @@ public class MenuWorldRenderer {
         if (this.endSkyVBO != null) {
             this.endSkyVBO.close();
         }
+        this.lightMap.destroyBuffers();
         this.ready = false;
     }
 

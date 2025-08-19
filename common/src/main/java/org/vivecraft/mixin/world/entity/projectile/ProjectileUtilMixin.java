@@ -18,7 +18,8 @@ public class ProjectileUtilMixin {
         if (instance instanceof ServerPlayer serverPlayer) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-                return serverVivePlayer.getAimDir();
+                // can be shot with the offhand
+                return serverVivePlayer.getAimDir(true);
             }
         }
         return original.call(instance, partialTick);

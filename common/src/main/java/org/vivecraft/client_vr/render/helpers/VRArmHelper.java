@@ -15,11 +15,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -38,7 +38,7 @@ public class VRArmHelper {
      * @return if first person hands should be rendered in the current RenderPass
      */
     public static boolean shouldRenderHands() {
-        if (ClientDataHolderVR.VIEW_ONLY) {
+        if (DATA_HOLDER.viewOnly) {
             return false;
         } else if (DATA_HOLDER.currentPass == RenderPass.THIRD) {
             return DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY;
@@ -61,13 +61,13 @@ public class VRArmHelper {
     {
         if (!renderMain && !renderOff) return;
         Profiler.get().push("hands");
-        ClientDataHolderVR.IS_FP_HAND = true;
+        DATA_HOLDER.isFpHand = true;
 
         VREffectsHelper.removeNausea(partialTick);
 
         if (renderMain) {
             // set main hand active, for the attack cooldown transparency
-            ClientDataHolderVR.IS_MAIN_HAND = true;
+            DATA_HOLDER.isMainHand = true;
 
             if (menuHandMain) {
                 renderMainMenuHand(0, false);
@@ -75,7 +75,7 @@ public class VRArmHelper {
                 renderVRHand_Main(partialTick);
             }
 
-            ClientDataHolderVR.IS_MAIN_HAND = false;
+            DATA_HOLDER.isMainHand = false;
         }
 
         if (renderOff) {
@@ -88,7 +88,7 @@ public class VRArmHelper {
 
         VREffectsHelper.reAddNausea();
 
-        ClientDataHolderVR.IS_FP_HAND = false;
+        DATA_HOLDER.isFpHand = false;
         Profiler.get().pop();
     }
 
@@ -382,8 +382,7 @@ public class VRArmHelper {
 
             double segmentProgress = 1.0D / (double) segments;
 
-            Vec3 cameraPosition = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass,
-                DATA_HOLDER.vrPlayer.getVRDataWorld());
+            Vec3 cameraPosition = MC.gameRenderer.getMainCamera().getPosition();
 
             // arc
             for (int i = 0; i < segments; i++) {

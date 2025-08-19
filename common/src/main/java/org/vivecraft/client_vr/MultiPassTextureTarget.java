@@ -4,7 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 
@@ -81,7 +81,7 @@ public class MultiPassTextureTarget extends TextureTarget {
             return;
         }
         // this one should be called on all TextureTargets
-        callOnAllTarget(TextureTarget::destroyBuffers);
+        callOnAllTargets(TextureTarget::destroyBuffers);
     }
 
     @Override
@@ -145,7 +145,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         return callOnTargetRet(RenderTarget::getDepthTexture);
     }
 
-    private void callOnAllTarget(Consumer<TextureTarget> consumer) {
+    private void callOnAllTargets(Consumer<TextureTarget> consumer) {
         this.isVanilla = true;
         consumer.accept(this.vanilla);
         this.isVanilla = false;

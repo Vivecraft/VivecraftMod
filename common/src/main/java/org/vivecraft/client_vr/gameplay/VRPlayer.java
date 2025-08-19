@@ -23,7 +23,10 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ScaleHelper;
@@ -35,15 +38,11 @@ import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.client_vr.gameplay.trackers.VehicleTracker;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.data.ItemTags;
-
-import java.util.ArrayList;
+import org.vivecraft.data.ViveItemTags;
 
 public class VRPlayer {
     private final Minecraft mc = Minecraft.getInstance();
@@ -62,14 +61,9 @@ public class VRPlayer {
     public VRData vrdata_world_post;
     // interpolate here between post and pre
     public VRData vrdata_world_render;
-
-    private final ArrayList<Tracker> trackers = new ArrayList<>();
     public float worldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private float rawWorldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
-    public boolean teleportWarning = false;
-    public boolean vrSwitchWarning = false;
-    public int chatWarningTimer = -1;
     public Vec3 roomOrigin = Vec3.ZERO;
 
     // based on a heuristic of which locomotion type was last used
@@ -82,10 +76,6 @@ public class VRPlayer {
     public int roomScaleMovementDelay = 0;
     private boolean initDone = false;
     public boolean onTick;
-
-    public void registerTracker(Tracker tracker) {
-        this.trackers.add(tracker);
-    }
 
     public VRPlayer() {
         this.vrdata_room_pre = new VRData(
@@ -224,7 +214,7 @@ public class VRPlayer {
                     actualWorldScale > worldScaleOverride.getValueMax() * 1.01F)
                 {
                     VRSettings.LOGGER.info(
-                        "VIVECRAFT: disconnected user from server. runtime IPD: {}, measured IPD: {}, runtime worldscale: {}",
+                        "Vivecraft: disconnected user from server. runtime IPD: {}, measured IPD: {}, runtime worldscale: {}",
                         queriedIPD, measuredIPD, runtimeWorldScale);
                     this.mc.level.disconnect();
                     this.mc.disconnect(new DisconnectedScreen(new JoinMultiplayerScreen(new TitleScreen()),
@@ -242,6 +232,13 @@ public class VRPlayer {
 
         if (this.dh.vrSettings.seated && !MethodHolder.isInMenuRoom()) {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
+        }
+
+        // Gather VRPose history if we're in a non-paused world.
+        if (this.mc.level != null &&
+            (this.mc.getSingleplayerServer() == null || !this.mc.getSingleplayerServer().isPaused()))
+        {
+            VRClientAPIImpl.INSTANCE.addPoseToHistory(this.vrdata_world_pre.asVRPose());
         }
     }
 
@@ -306,22 +303,20 @@ public class VRPlayer {
             interpolatedWorldScale,
             interpolatedWorldRotation_Radians);
 
-        // handle special items
-        for (Tracker tracker : this.trackers) {
-            if (tracker.getEntryPoint() == Tracker.EntryPoint.SPECIAL_ITEMS) {
-                tracker.idleTick(this.mc.player);
-
+        for (Tracker tracker : ClientDataHolderVR.getInstance().getTrackers()) {
+            if (tracker.processType() == Tracker.ProcessType.PER_FRAME) {
+                tracker.idleProcess(this.mc.player);
                 if (tracker.isActive(this.mc.player)) {
-                    tracker.doProcess(this.mc.player);
+                    tracker.activeProcess(this.mc.player);
                 } else {
-                    tracker.reset(this.mc.player);
+                    tracker.inactiveProcess(this.mc.player);
                 }
             }
         }
 
         this.dh.menuHandOff = MethodHolder.isInMenuRoom() || this.mc.screen != null || KeyboardHandler.SHOWING;
-        this.dh.menuHandMain =
-            this.dh.menuHandOff || (this.dh.interactTracker.hotbar >= 0 && this.dh.vrSettings.vrTouchHotbar);
+        this.dh.menuHandMain = this.dh.menuHandOff ||
+            (this.dh.hotbarModule.hotbar >= 0 && this.dh.vrSettings.vrTouchHotbar);
     }
 
     public void postRender(float partialTick) {}
@@ -405,15 +400,13 @@ public class VRPlayer {
         }
 
         this.doPlayerMoveInRoom(player);
-
-        for (Tracker tracker : this.trackers) {
-            if (tracker.getEntryPoint() == Tracker.EntryPoint.LIVING_UPDATE) {
-                tracker.idleTick(player);
-
+        for (Tracker tracker : this.dh.getTrackers()) {
+            if (tracker.processType() == Tracker.ProcessType.PER_TICK) {
+                tracker.idleProcess(player);
                 if (tracker.isActive(player)) {
-                    tracker.doProcess(player);
+                    tracker.activeProcess(player);
                 } else {
-                    tracker.reset(player);
+                    tracker.inactiveProcess(player);
                 }
             }
         }
@@ -437,10 +430,6 @@ public class VRPlayer {
                 }
             }
         }
-    }
-
-    public boolean isTrackerUsingItem(LocalPlayer player) {
-        return this.trackers.stream().anyMatch(tracker -> tracker.itemInUse(player));
     }
 
     public void doPlayerMoveInRoom(LocalPlayer player) {
@@ -633,20 +622,26 @@ public class VRPlayer {
             itemStack.getItem() instanceof SpawnEggItem ||
             itemStack.getItem() instanceof PotionItem ||
             itemStack.getItem() instanceof BowItem ||
+            itemStack.getItem() instanceof FishingRodItem ||
+            itemStack.getItem() instanceof WindChargeItem ||
+            // crossbows actually don't work with this; they use the head rotation to aim, which is only updated on tick
             (itemStack.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(itemStack)) ||
-            itemStack.is(ItemTags.VIVECRAFT_THROW_ITEMS)
+            itemStack.is(ViveItemTags.VIVECRAFT_THROW_ITEMS)
         )
         {
             // use r_hand aim
 
             VRData data = this.dh.vrPlayer.vrdata_world_pre;
-            out = new Vec3(data.getController(c).getDirection());
             Vector3fc aim = this.dh.bowTracker.getAimVector();
 
             if (this.dh.bowTracker.isNotched() && aim != null && aim.lengthSquared() > 0.0F) {
                 out = new Vec3(-aim.x(), -aim.y(), -aim.z());
+            } else if (this.dh.vrSettings.aimDevice != VRSettings.AimDevice.HMD) {
+                out = new Vec3(data.getController(c).getDirection());
             }
-        } else if (itemStack.getItem() == Items.BUCKET && this.dh.interactTracker.bukkit[c]) {
+        } else if (itemStack.getItem() == Items.BUCKET && this.dh.blockModule.bukkit[c] &&
+            ClientNetworking.getActiveBodyPart().ordinal() == c && ClientNetworking.IS_LAST_BODY_PART_AIM)
+        {
             out = entity.getEyePosition(1.0F)
                 .subtract(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition())
                 .normalize().reverse(); // backwards
@@ -762,7 +757,8 @@ public class VRPlayer {
      * However, when free move is forced in standing mode, teleport is outright disabled.
      */
     public boolean isTeleportEnabled() {
-        boolean enabled = !VRServerPerms.INSTANCE.noTeleportClient || this.teleportOverride;
+        boolean enabled = (!VRServerPerms.INSTANCE.noTeleportClient || this.teleportOverride) &&
+            ClientNetworking.SERVER_ALLOWS_DIRECT_TELEPORT;
 
         if (this.dh.vrSettings.seated) {
             return enabled;

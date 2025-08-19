@@ -3,8 +3,9 @@ package org.vivecraft.mod_compat_vr.sodium;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.joml.Vector2f;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.ClassUtils;
 import org.vivecraft.mod_compat_vr.sodium.extensions.ModelCuboidExtension;
 
 import java.lang.reflect.Field;
@@ -41,7 +42,7 @@ public class SodiumHelper {
     private static Field ModelCuboid$Quad_textures;
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium") || Xplat.isModLoaded("embeddium");
+        return Xloader.isModLoaded("sodium") || Xloader.isModLoaded("rubidium") || Xloader.isModLoaded("embeddium");
     }
 
     /**
@@ -165,7 +166,7 @@ public class SodiumHelper {
             return !INIT_FAILED;
         }
         try {
-            Class<?> spriteUtil = getClassWithAlternative(
+            Class<?> spriteUtil = ClassUtils.getClassWithAlternative(
                 "me.jellysquid.mods.sodium.client.render.texture.SpriteUtil",
                 "net.caffeinemc.mods.sodium.client.render.texture.SpriteUtil"
             );
@@ -174,7 +175,7 @@ public class SodiumHelper {
 
             try {
                 // model
-                Class<?> ModelCuboid = getClassWithAlternative(
+                Class<?> ModelCuboid = ClassUtils.getClassWithAlternative(
                     "me.jellysquid.mods.sodium.client.render.immediate.model.ModelCuboid",
                     "net.caffeinemc.mods.sodium.client.render.immediate.model.ModelCuboid"
                 );
@@ -190,7 +191,7 @@ public class SodiumHelper {
                     HAS_MODELCUBOID_CUBES = true;
                 }
                 try {
-                    Class<?> ModelCuboid$Quad = getClassWithAlternative(
+                    Class<?> ModelCuboid$Quad = ClassUtils.getClassWithAlternative(
                         "me.jellysquid.mods.sodium.client.render.immediate.model.ModelCuboid$Quad",
                         "net.caffeinemc.mods.sodium.client.render.immediate.model.ModelCuboid$Quad"
                     );
@@ -224,21 +225,5 @@ public class SodiumHelper {
         }
         INITIALIZED = true;
         return !INIT_FAILED;
-    }
-
-    /**
-     * does a class Lookup with an alternative, for convenience, since iris changed packages
-     *
-     * @param class1 first option
-     * @param class2 alternative option
-     * @return found class
-     * @throws ClassNotFoundException if neither class exists
-     */
-    private static Class<?> getClassWithAlternative(String class1, String class2) throws ClassNotFoundException {
-        try {
-            return Class.forName(class1);
-        } catch (ClassNotFoundException e) {
-            return Class.forName(class2);
-        }
     }
 }

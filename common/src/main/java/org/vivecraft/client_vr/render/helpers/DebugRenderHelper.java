@@ -11,22 +11,26 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.gameplay.trackers.DebugRenderTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.DeviceSource;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.utils.MathUtils;
 
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,17 +39,14 @@ public class DebugRenderHelper {
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
     private static final Minecraft MC = Minecraft.getInstance();
 
-    private static final Vector3fc RED = new Vector3f(1F, 0F, 0F);
-    private static final Vector3fc GREEN = new Vector3f(0F, 1F, 0F);
-    private static final Vector3fc BLUE = new Vector3f(0F, 0F, 1F);
-    private static final Vector3fc DARK_GRAY = new Vector3f(0.25F);
-
     /**
      * renders debug stuff
      *
      * @param partialTick current partial tick
      */
     public static void renderDebug(float partialTick) {
+        // make sure this is on, sometimes it is off
+        RenderSystem.enableDepthTest();
         if (DATA_HOLDER.vrSettings.renderDeviceAxes) {
             renderDeviceAxes(DATA_HOLDER.vrPlayer.getVRDataWorld());
         }
@@ -61,6 +62,17 @@ public class DebugRenderHelper {
             }
             renderTackerPositions(showNames);
         }
+
+        if (DATA_HOLDER.vrSettings.renderGameplayTrackers) {
+            DATA_HOLDER.getTrackers().stream()
+                .filter(t -> DATA_HOLDER.vrSettings.gameplayTrackerToRender.isEmpty() ||
+                    t.getClass().getName().equals(DATA_HOLDER.vrSettings.gameplayTrackerToRender))
+                .forEach(t -> {
+                    if (t instanceof DebugRenderTracker debugTracker && t.isActive(MC.player)) {
+                        debugTracker.renderDebug();
+                    }
+                });
+        }
     }
 
     /**
@@ -72,8 +84,7 @@ public class DebugRenderHelper {
         if (MC.player != null) {
             VertexConsumer consumer = null;
             RenderType renderType = RenderType.debugLineStrip(2F);
-            Vec3 camPos = RenderHelper
-                .getSmoothCameraPosition(DATA_HOLDER.currentPass, DATA_HOLDER.vrPlayer.getVRDataWorld());
+            Vec3 camPos = MC.gameRenderer.getMainCamera().getPosition();
 
             for (Player p : MC.player.level().players()) {
                 if (ClientVRPlayers.getInstance().isVRPlayer(p)) {
@@ -178,7 +189,7 @@ public class DebugRenderHelper {
      */
     private static void renderTackerPositions(boolean showNames) {
         VRData data = DATA_HOLDER.vrPlayer.getVRDataWorld();
-        Vec3 camPos = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass, data);
+        Vec3 camPos = data.getEye(DATA_HOLDER.currentPass).getPosition();
         Quaternionf orientation = data.getEye(DATA_HOLDER.currentPass).getMatrix()
             .getNormalizedRotation(new Quaternionf())
             .rotateY(Mth.PI);
@@ -206,14 +217,14 @@ public class DebugRenderHelper {
                 if (tracker.getMiddle() >= 0) {
                     addNamedCube(pos, orientation, Component.translatable("vivecraft.formatting.name_value",
                             Component.literal(tracker.getLeft().source.toString()), labels[tracker.getMiddle()]), 0.05F,
-                        DARK_GRAY);
+                        MathUtils.DARK_GRAY);
                 } else {
                     addNamedCube(pos, orientation, Component.translatable("vivecraft.formatting.name_value",
                         Component.literal(tracker.getLeft().source.toString() + tracker.getLeft().deviceIndex),
-                        Component.translatable("vivecraft.messages.tracker.unknown")), 0.05F, DARK_GRAY);
+                        Component.translatable("vivecraft.messages.tracker.unknown")), 0.05F, MathUtils.DARK_GRAY);
                 }
             } else {
-                addCube(pos, 0.05F, DARK_GRAY);
+                renderCube(pos, 0.05F, MathUtils.DARK_GRAY);
             }
         }
         MC.renderBuffers().bufferSource().endLastBatch();
@@ -250,8 +261,8 @@ public class DebugRenderHelper {
     private static void addAxes(
         VertexConsumer consumer, VRData data, VRData.VRDevicePose pose)
     {
-        Vector3f position = pose.getPosition()
-            .subtract(RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass, data)).toVector3f();
+        Vector3f position = pose.getPosition().subtract(data.getEye(DATA_HOLDER.currentPass).getPosition())
+            .toVector3f();
 
         float scale = 0.25F * DATA_HOLDER.vrPlayer.worldScale;
 
@@ -305,7 +316,7 @@ public class DebugRenderHelper {
     }
 
     /**
-     * adds a line from {@code position} in direction {@code dir}, with the given {@code color}
+     * adds a line from {@code position} in direction {@code dir}, with the given {@code color}, to the given {@code bufferBuilder}
      *
      * @param consumer VertexConsumer to use, needs to be in DEBUG_LINE_STRIP and POSITION_COLOR mode
      * @param position line start position
@@ -325,6 +336,76 @@ public class DebugRenderHelper {
     }
 
     /**
+     * renders a camera relative line
+     *
+     * @param color  color of the line
+     * @param points list of points the line should follow, at least 2
+     */
+    public static void renderLine(Vector3fc color, Vector3fc... points) {
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+        for (Vector3fc point : points) {
+            bufferBuilder.addVertex(point.x(), point.y(), point.z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+        }
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+    }
+
+    /**
+     * renders a camera relative multi segment line
+     *
+     * @param points list of points the line should follow, at least 2, boolean of the pair indicates a line split
+     * @param color  color of the line
+     */
+    public static void renderLine(List<Pair<Vector3fc, Boolean>> points, Vector3fc color) {
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+        Pair<Vector3fc, Boolean> prev = null;
+
+        for (Pair<Vector3fc, Boolean> point : points) {
+            if (point.getRight() && prev != null) {
+                // reset line
+                bufferBuilder.addVertex(prev.getLeft().x(), prev.getLeft().y(), prev.getLeft().z())
+                    .setColor(color.x(), color.y(), color.z(), 0.0F);
+                bufferBuilder.addVertex(point.getLeft().x(), point.getLeft().y(), point.getLeft().z())
+                    .setColor(color.x(), color.y(), color.z(), 0.0F);
+            }
+
+            bufferBuilder.addVertex(point.getLeft().x(), point.getLeft().y(), point.getLeft().z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            prev = point;
+        }
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+    }
+
+    /**
+     * renders a camera relative line, with a list of world space positions, and a camera position
+     *
+     * @param color  color of the line
+     * @param camPos position of the camera
+     * @param points list of points the line should follow
+     */
+    public static void renderLine(Vector3fc color, Vec3 camPos, Iterable<Vec3> points) {
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+        for (Vec3 point : points) {
+            bufferBuilder.addVertex((float) (point.x() - camPos.x()), (float) (point.y() - camPos.y()),
+                    (float) (point.z() - camPos.z()))
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+        }
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+    }
+
+    /**
      * Renders a cube with text lable above it
      *
      * @param cubePos position to render the cube at, camera relative
@@ -336,7 +417,7 @@ public class DebugRenderHelper {
     private static void addNamedCube(
         Vector3fc cubePos, Quaternionf rot, Component label, float size, Vector3fc color)
     {
-        addCube(cubePos, size, color);
+        renderCube(cubePos, size, color);
 
         if (label != null) {
             renderTextAtRelativePosition(cubePos.x(), cubePos.y(), cubePos.z(), rot, label);
@@ -363,7 +444,7 @@ public class DebugRenderHelper {
      */
     public static void renderTextAtPosition(PoseStack poseStack, Vec3 position, String text) {
         VRData data = DATA_HOLDER.vrPlayer.getVRDataWorld();
-        Vec3 camPos = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass, data);
+        Vec3 camPos = data.getEye(DATA_HOLDER.currentPass).getPosition();
         Quaternionf rot = data.getEye(DATA_HOLDER.currentPass).getMatrix()
             .getNormalizedRotation(new Quaternionf())
             .rotateY(Mth.PI);
@@ -416,7 +497,7 @@ public class DebugRenderHelper {
      * @param size     cube size
      * @param color    cube color
      */
-    private static void addCube(Vector3fc position, float size, Vector3fc color) {
+    public static void renderCube(Vector3fc position, float size, Vector3fc color) {
         RenderSystem.setShaderTexture(0, RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE));
 
         RenderType renderType = RenderType.debugQuads();
@@ -428,5 +509,196 @@ public class DebugRenderHelper {
         RenderHelper.renderBox(consumer, start, end, size, size, iColor, (byte) 255, new Matrix4f());
 
         MC.renderBuffers().bufferSource().endBatch(renderType);
+    }
+
+    /**
+     * adds a circle to the given {@code bufferBuilder}
+     *
+     * @param bufferBuilder BufferBuilder to add the circle to
+     * @param center        center to render the circle at, world camera relative
+     * @param forward       world direction the circle points at
+     * @param radius        circle
+     * @param color         circle color
+     */
+    public static void addCircle(
+        BufferBuilder bufferBuilder, Vector3fc center, Vector3fc forward, float radius, Vector3fc color)
+    {
+        Vector3f offset = MathUtils.getPerpendicularVec(forward).mul(radius);
+
+        bufferBuilder.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+            .setColor(color.x(), color.y(), color.z(), 0.0F);
+
+        for (int i = 0; i <= 20; i++) {
+            bufferBuilder.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            if (i != 20) {
+                offset.rotateAxis(Mth.TWO_PI / 20F, forward.x(), forward.y(), forward.z());
+            }
+        }
+
+        bufferBuilder.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+            .setColor(color.x(), color.y(), color.z(), 0.0F);
+    }
+
+    /**
+     * Renders a camera facing circle
+     *
+     * @param center  center to render the circle at, world camera relative
+     * @param forward direction the camera faces, world direction
+     * @param radius  circle radius
+     * @param color   circle color
+     */
+    public static void renderCircle(
+        Vector3fc center, Vector3fc forward, float radius, Vector3fc color)
+    {
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+        addCircle(bufferBuilder, center, forward, radius, color);
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+    }
+
+    /**
+     * Renders a sphere made out of 4 circles, a camera facing one and 3 axis aligned ones
+     *
+     * @param center center to render the sphere at, world camera relative
+     * @param radius sphere radius
+     * @param color  sphere color
+     */
+    public static void renderSphere(Vector3fc center, float radius, Vector3fc color) {
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+        addCircle(bufferBuilder, center, MathUtils.LEFT, radius, color);
+        addCircle(bufferBuilder, center, MathUtils.FORWARD, radius, color);
+        addCircle(bufferBuilder, center, MathUtils.UP, radius, color);
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+    }
+
+    /**
+     * Renders a cone made out of a circle and 4 lines
+     *
+     * @param tip    tip position of the cone, world camera relative
+     * @param dir    direction the cone base points at, world space
+     * @param angle  radius of the cone
+     * @param length length of the cone
+     * @param color  sphere color
+     */
+    public static void renderCone(Vector3fc tip, Vector3fc dir, float angle, float length, Vector3fc color) {
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+        Vector3f center = dir.normalize(new Vector3f()).mul(length).add(tip);
+        float radius = length * (float) Math.tan(Math.toRadians(angle));
+        addCircle(bufferBuilder, center, dir, radius, color);
+
+        Vector3f offset = MathUtils.getPerpendicularVec(dir).mul(radius);
+        for (int i = 0; i < 2; i++) {
+            bufferBuilder.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+                .setColor(color.x(), color.y(), color.z(), 0.0F);
+            bufferBuilder.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            bufferBuilder.addVertex(tip.x(), tip.y(), tip.z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            bufferBuilder.addVertex(center.x() - offset.x(), center.y() - offset.y(), center.z() - offset.z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            bufferBuilder.addVertex(center.x() - offset.x(), center.y() - offset.y(), center.z() - offset.z())
+                .setColor(color.x(), color.y(), color.z(), 0.0F);
+            offset.rotateAxis(Mth.HALF_PI, dir.x(), dir.y(), dir.z());
+        }
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+    }
+
+    /**
+     * Renders a cylinder made out of 2 circles and 4 lines
+     *
+     * @param bottom bottom position of the cylinder, world camera relative
+     * @param topDir vector from the bottom center to the top center, world space
+     * @param radius radius of the cylinder
+     * @param color  sphere color
+     */
+    public static void renderCylinder(Vector3fc bottom, Vector3fc topDir, float radius, Vector3fc color) {
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+        Vector3f dir = topDir.normalize(new Vector3f());
+
+        addCircle(bufferBuilder, bottom, dir, radius, color);
+        addCircle(bufferBuilder, bottom.add(topDir, new Vector3f()), dir, radius, color);
+
+        Vector3f offset = MathUtils.getPerpendicularVec(topDir).mul(radius);
+        for (int i = 0; i < 4; i++) {
+            Vector3f bot = bottom.add(offset, new Vector3f());
+            Vector3f top = bot.add(topDir, new Vector3f());
+
+            bufferBuilder.addVertex(bot.x(), bot.y(), bot.z())
+                .setColor(color.x(), color.y(), color.z(), 0.0F);
+            bufferBuilder.addVertex(bot.x(), bot.y(), bot.z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            bufferBuilder.addVertex(top.x(), top.y(), top.z())
+                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            bufferBuilder.addVertex(top.x(), top.y(), top.z())
+                .setColor(color.x(), color.y(), color.z(), 0.0F);
+            offset.rotateAxis(Mth.HALF_PI, dir.x(), dir.y(), dir.z());
+        }
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+    }
+
+    /**
+     * renders the outline of the given camera relative AABB
+     *
+     * @param aabb  AABB to render
+     * @param color color to render the AABB in
+     */
+    public static void renderAABB(AABB aabb, Vector3fc color) {
+        renderCubeOutline(
+            new Vector3f((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ),
+            new Vector3f((float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ),
+            new Vector3f((float) aabb.minX, (float) aabb.maxY, (float) aabb.maxZ),
+            new Vector3f((float) aabb.minX, (float) aabb.minY, (float) aabb.maxZ),
+            new Vector3f((float) aabb.maxX, (float) aabb.minY, (float) aabb.minZ),
+            new Vector3f((float) aabb.maxX, (float) aabb.maxY, (float) aabb.minZ),
+            new Vector3f((float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ),
+            new Vector3f((float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ),
+            color);
+    }
+
+    /**
+     * renders the outline of the cube, defined by the 8 camera relative corner points.
+     * corner points are expected to be in the order of v0-v3 being one side in clockwise order, and v4-v7 being the other
+     * side in clockwise order
+     *
+     * @param color color to render the cube in
+     */
+    public static void renderCubeOutline(
+        Vector3fc v0, Vector3fc v1, Vector3fc v2, Vector3fc v3, Vector3fc v4, Vector3fc v5, Vector3fc v6, Vector3fc v7,
+        Vector3fc color)
+    {
+        renderLine(
+            List.of(Pair.of(v0, false),
+                Pair.of(v1, false),
+                Pair.of(v2, false),
+                Pair.of(v3, false),
+                Pair.of(v0, false),
+                Pair.of(v4, false),
+                Pair.of(v5, false),
+                Pair.of(v6, false),
+                Pair.of(v7, false),
+                Pair.of(v4, false),
+                Pair.of(v1, true),
+                Pair.of(v5, false),
+                Pair.of(v2, true),
+                Pair.of(v6, false),
+                Pair.of(v3, true),
+                Pair.of(v7, false)),
+            color);
     }
 }

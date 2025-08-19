@@ -43,10 +43,8 @@ public abstract class AbstractArrowMixin extends Entity {
         if (owner instanceof ServerPlayer player) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-                Vec3 aimPos = serverVivePlayer.getBodyPartPos(serverVivePlayer.activeBodyPart);
-                Vec3 aimDir = serverVivePlayer.getAimDir();
-
-                this.setPos(aimPos.x + aimDir.x, aimPos.y + aimDir.y, aimPos.z + aimDir.z);
+                // can be shot with the offhand
+                this.setPos(serverVivePlayer.getAimPos(true));
             }
         }
     }

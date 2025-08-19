@@ -13,6 +13,9 @@ import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.extensions.SparkParticleExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ModelUtils;
@@ -25,7 +28,9 @@ import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.common.network.FBTMode;
+import org.vivecraft.common.api_impl.VRAPIImpl;
+import org.vivecraft.common.api_impl.data.VRBodyPartDataImpl;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.utils.MathUtils;
 
@@ -119,6 +124,7 @@ public class ClientVRPlayers {
         this.vivePlayers.remove(player);
         this.vivePlayersLast.remove(player);
         this.vivePlayersReceived.remove(player);
+        VRAPIImpl.INSTANCE.clearPoseHistory(player, true);
     }
 
     public void update(
@@ -189,6 +195,13 @@ public class ClientVRPlayers {
             rotInfo.leftElbowQuat = vrPlayerState.leftElbow().orientation();
         }
 
+        if (!localPlayer) {
+            Player otherPlayer = this.mc.level.getPlayerByUUID(uuid);
+            if (otherPlayer != null) {
+                VRAPIImpl.INSTANCE.addPoseToHistory(uuid, rotInfo.asVRPose(otherPlayer.position()), true);
+            }
+        }
+
         this.vivePlayersReceived.put(uuid, rotInfo);
     }
 
@@ -214,6 +227,7 @@ public class ClientVRPlayers {
                     iterator.remove();
                     this.vivePlayersLast.remove(uuid);
                     this.vivePlayersReceived.remove(uuid);
+                    VRAPIImpl.INSTANCE.clearPoseHistory(uuid, true);
                 }
             }
 
@@ -543,6 +557,9 @@ public class ClientVRPlayers {
         public Vector3fc leftElbowPos;
         public Quaternionfc leftElbowQuat;
 
+        // API pose object representing the data of this object
+        private VRPose vrPose;
+
         /**
          * IMPORTANT!!! when changing this, also change {@link VRData#getBodyYawRad()}
          */
@@ -565,5 +582,47 @@ public class ClientVRPlayers {
             }
             return (float) Math.atan2(-dir.x, dir.z);
         }
+
+        public VRPose asVRPose(Vec3 playerPos) {
+            if (this.vrPose == null) {
+                this.vrPose = new VRPoseImpl(
+                    makeBodyPartData(this.headPos, this.headRot, this.headQuat, playerPos),
+                    makeBodyPartData(this.mainHandPos, this.mainHandRot, this.mainHandQuat, playerPos),
+                    makeBodyPartData(this.offHandPos, this.offHandRot, this.offHandQuat, playerPos),
+                    makeBodyPartData(this.rightFootPos, this.rightFootQuat, playerPos,
+                        this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_FOOT)),
+                    makeBodyPartData(this.leftFootPos, this.leftFootQuat, playerPos,
+                        this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_FOOT)),
+                    makeBodyPartData(this.waistPos, this.waistQuat, playerPos,
+                        this.fbtMode.bodyPartAvailable(VRBodyPart.WAIST)),
+                    makeBodyPartData(this.rightKneePos, this.rightKneeQuat, playerPos,
+                        this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_KNEE)),
+                    makeBodyPartData(this.leftKneePos, this.leftKneeQuat, playerPos,
+                        this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_KNEE)),
+                    makeBodyPartData(this.rightElbowPos, this.rightElbowQuat, playerPos,
+                        this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_ELBOW)),
+                    makeBodyPartData(this.leftElbowPos, this.leftElbowQuat, playerPos,
+                        this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_ELBOW)),
+                    this.seated,
+                    this.leftHanded,
+                    this.fbtMode
+                );
+            }
+            return this.vrPose;
+        }
+    }
+
+    private static VRBodyPartDataImpl makeBodyPartData(
+        Vector3fc pos, Vector3fc rot, Quaternionfc quat, Vec3 playerPos)
+    {
+        return new VRBodyPartDataImpl(MathUtils.toMcVec3(pos).add(playerPos), MathUtils.toMcVec3(rot), quat);
+    }
+
+    private static VRBodyPartDataImpl makeBodyPartData(
+        Vector3fc pos, Quaternionfc quat, Vec3 playerPos, boolean partAvailable)
+    {
+        return partAvailable
+            ? makeBodyPartData(pos, quat.transform(MathUtils.BACK, new Vector3f()), quat, playerPos)
+            : null;
     }
 }

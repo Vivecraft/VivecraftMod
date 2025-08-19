@@ -73,7 +73,7 @@ public class MirrorNotification {
             final int COLUMN_GAP = 12;
 
             for (String line : wrapped) {
-                guiGraphics.drawString(MC.font, line, 1, column, 0xFFFFFF);
+                guiGraphics.drawString(MC.font, line, 1, column, 0xFFFFFFFF);
                 column += COLUMN_GAP;
             }
             guiGraphics.flush();

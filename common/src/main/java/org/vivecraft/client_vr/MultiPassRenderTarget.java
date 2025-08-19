@@ -3,7 +3,7 @@ package org.vivecraft.client_vr;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 import java.util.EnumMap;
@@ -39,10 +39,7 @@ public class MultiPassRenderTarget extends RenderTarget {
     @Override
     public void destroyBuffers() {
         // this one should be called on all RenderTargets
-        this.mainTarget.destroyBuffers();
-        for (RenderTarget renderTarget : this.vrTargets.values()) {
-            renderTarget.destroyBuffers();
-        }
+        callOnAllTargets(RenderTarget::destroyBuffers);
     }
 
     @Override
@@ -82,18 +79,28 @@ public class MultiPassRenderTarget extends RenderTarget {
     }
 
     private void callOnTarget(Consumer<RenderTarget> consumer) {
-        if (RenderPassType.isVanilla()) {
-            consumer.accept(this.mainTarget);
-        } else {
-            consumer.accept(this.vrTargets.get(ClientDataHolderVR.getInstance().currentPass));
-        }
+        consumer.accept(getCurrent());
     }
 
     private <T> T callOnTargetRet(Function<RenderTarget, T> function) {
+        return function.apply(getCurrent());
+    }
+
+    private void callOnAllTargets(Consumer<RenderTarget> consumer) {
+        consumer.accept(this.mainTarget);
+        for (RenderTarget target : this.vrTargets.values()) {
+            consumer.accept(target);
+        }
+    }
+
+    /**
+     * @return the RenderTarget that should be rendered to now
+     */
+    private RenderTarget getCurrent() {
         if (RenderPassType.isVanilla()) {
-            return function.apply(this.mainTarget);
+            return this.mainTarget;
         } else {
-            return function.apply(this.vrTargets.get(ClientDataHolderVR.getInstance().currentPass));
+            return this.vrTargets.get(ClientDataHolderVR.getInstance().currentPass);
         }
     }
 }

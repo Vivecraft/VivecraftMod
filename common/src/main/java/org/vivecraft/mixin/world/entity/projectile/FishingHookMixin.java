@@ -33,8 +33,9 @@ public abstract class FishingHookMixin extends Entity {
         if (instance instanceof ServerPlayer serverPlayer) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-                controllerDir.set(serverVivePlayer.getBodyPartDir(serverVivePlayer.activeBodyPart));
-                controllerPos.set(serverVivePlayer.getBodyPartPos(serverVivePlayer.activeBodyPart));
+                // fishing rods can be shot with the offhand
+                controllerDir.set(serverVivePlayer.getAimDir(true));
+                controllerPos.set(serverVivePlayer.getAimPos(true));
 
                 return -(float) Math.toDegrees(Math.asin(controllerDir.get().y / controllerDir.get().length()));
             }

@@ -1,11 +1,15 @@
 package org.vivecraft.mixin.world.entity;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -16,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.vivecraft.mixin.server.ServerPlayerMixin;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
@@ -23,7 +28,13 @@ import org.vivecraft.server.ServerVivePlayer;
 public abstract class LivingEntityMixin extends Entity {
 
     @Shadow
+    protected ItemStack useItem;
+
+    @Shadow
     public abstract ItemStack getItemBySlot(EquipmentSlot slot);
+
+    @Shadow
+    public abstract boolean isBlocking();
 
     public LivingEntityMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
@@ -87,5 +98,26 @@ public abstract class LivingEntityMixin extends Entity {
         LivingEntity instance, Operation<Double> original, @Share("hmdPos") LocalRef<Vec3> hmdPos)
     {
         return hmdPos.get() != null ? hmdPos.get().z : original.call(instance);
+    }
+
+    /**
+     * dummy to be overridden in {@link ServerPlayerMixin}
+     */
+    @ModifyExpressionValue(method = "isDamageSourceBlocked", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getItemBlockingWith()Lnet/minecraft/world/item/ItemStack;"))
+    protected ItemStack vivecraft$roomscaleShieldBlockingItem(
+        ItemStack original, @Local(argsOnly = true) DamageSource damageSource,
+        @Share("roomscaleBlocked") LocalBooleanRef roomscaleBlocked)
+    {
+        return original;
+    }
+
+    /**
+     * part of {@link #vivecraft$roomscaleShieldBlockingItem}
+     */
+    @ModifyReturnValue(method = "isDamageSourceBlocked", at = @At(value = "RETURN", ordinal = 0))
+    private boolean vivecraft$roomscaleShieldIsBlocked(
+        boolean blocked, @Share("roomscaleBlocked") LocalBooleanRef roomscaleBlocked)
+    {
+        return blocked || roomscaleBlocked.get();
     }
 }

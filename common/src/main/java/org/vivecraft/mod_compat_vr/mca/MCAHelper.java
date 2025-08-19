@@ -2,7 +2,7 @@ package org.vivecraft.mod_compat_vr.mca;
 
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Vector3f;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +20,7 @@ public class MCAHelper {
     private static Method VillagerLike_getHorizontalScaleFactor;
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("mca");
+        return Xloader.isModLoaded("mca");
     }
 
     public static void undoPlayerScale(LivingEntity player, Vector3f pos) {
@@ -58,10 +58,10 @@ public class MCAHelper {
             return !INIT_FAILED;
         } else {
             try {
-                MCAClient_playerData = Class.forName(Xplat.getModloader().name + ".net.mca.MCAClient")
+                MCAClient_playerData = Class.forName(Xloader.getModloader().name + ".net.mca.MCAClient")
                     .getField("playerData");
 
-                Class<?> VillagerLike = Class.forName(Xplat.getModloader().name + ".net.mca.entity.VillagerLike");
+                Class<?> VillagerLike = Class.forName(Xloader.getModloader().name + ".net.mca.entity.VillagerLike");
 
                 VillagerLike_getRawScaleFactor = VillagerLike.getMethod("getRawScaleFactor");
                 VillagerLike_getHorizontalScaleFactor = VillagerLike.getMethod("getHorizontalScaleFactor");
