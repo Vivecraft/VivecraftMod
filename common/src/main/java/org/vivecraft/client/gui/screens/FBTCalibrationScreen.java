@@ -195,7 +195,7 @@ public class FBTCalibrationScreen extends Screen {
         Vector3f hmdPosAvg = dataHolder.vr.hmdPivotHistory.averagePosition(0.5D);
 
         float height = hmdPosAvg.y / AutoCalibration.DEFAULT_HEIGHT;
-        float scale = height * 0.9375F * dataHolder.vrPlayer.getVRDataWorld().worldScale;
+        float scale = height * 0.9375F;
 
         int main = dataHolder.vrSettings.reverseHands ? 1 : 0;
 

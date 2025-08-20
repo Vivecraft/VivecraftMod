@@ -452,6 +452,8 @@ public class VRSettings {
     public float playerModelBodyScale = 1.0F;
     @SettingField(VrOptions.PLAYER_MODEL_LEGS_SCALE)
     public float playerModelLegScale = 1.0F;
+    @SettingField(VrOptions.APPLY_PLAYER_WORLDSCALE)
+    public boolean applyPlayerWorldscale = false;
     @SettingField(VrOptions.MENU_WORLD_SELECTION)
     public MenuWorld menuWorldSelection = MenuWorld.BOTH;
     @SettingField(VrOptions.MENU_WORLD_FALLBACK)
@@ -2175,6 +2177,7 @@ public class VRSettings {
         PLAYER_LIMBS_LIMIT(false, true), // doesn't split connected limbs when over length
         PLAYER_WALK_ANIM(false, true), // if the walk animation should show on top of fbt
         PLAYER_ARM_ANIM(false, true), // if the player arm should swing with attacks, item using
+        APPLY_PLAYER_WORLDSCALE(false, true), // scales other player models with their worldscale
         OSC_TRACKER_PORT(true, true, 0, 65535, 1, 0) { // port to receive ocs data
 
             @Override

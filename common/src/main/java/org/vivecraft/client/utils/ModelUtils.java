@@ -121,7 +121,7 @@ public class ModelUtils {
      * @param position      Position to convert
      * @param rotInfo       player VR info
      * @param bodyYaw       players Y rotation
-     * @param useWorldScale when set will cancel out the worldScale, instead of entity scale
+     * @param useWorldScale when set will cancel out the whole worldScale, instead of just the entity scale
      * @param out           Vector3f to store the result in
      */
     public static void worldToModel(
@@ -134,12 +134,13 @@ public class ModelUtils {
             out.y += 1F;
         }
 
+        // worldscale includes entity scale
         if (useWorldScale) {
-            // the main player has the entity scale in its world scale
             out.div(rotInfo.worldScale);
         } else {
             out.div(((EntityRenderStateExtension) renderState).vivecraft$getTotalScale());
         }
+
         if (MCAHelper.isLoaded()) {
             // TODO MCA isn't updated yet so no clue how to do this
             // MCAHelper.undoPlayerScale(player, out);
@@ -184,7 +185,7 @@ public class ModelUtils {
      * @param rotInfo       player VR info
      * @param bodyYaw       players Y rotation
      * @param applyScale    if the woldScale/entity scale should be applied
-     * @param useWorldScale when set will apply the worldScale, instead of entity scale
+     * @param useWorldScale when set will apply the whole worldScale, instead of just the entity scale
      * @param out           Vector3f to store the result in
      * @return {@code out} vector
      */
@@ -207,7 +208,7 @@ public class ModelUtils {
      * @param rotInfo       player VR info
      * @param bodyYaw       players Y rotation
      * @param applyScale    if the woldScale/entity scale should be applied
-     * @param useWorldScale when set will apply the worldScale, instead of entity scale
+     * @param useWorldScale when set will apply the whole worldScale, instead of just the entity scale
      * @param out           Vector3f to store the result in
      * @return {@code out} vector
      */
@@ -227,8 +228,8 @@ public class ModelUtils {
         }
 
         if (applyScale) {
+            // worldscale includes entity scale
             if (useWorldScale) {
-                // the main player has the entity scale in its world scale
                 out.mul(rotInfo.worldScale);
             } else {
                 out.mul(((EntityRenderStateExtension) renderState).vivecraft$getTotalScale());
@@ -247,7 +248,7 @@ public class ModelUtils {
      * @param targetRot     target rotation the {@code part} should respect
      * @param rotInfo       players data
      * @param bodyYaw       players Y rotation
-     * @param useWorldScale when set will apply the worldScale, instead of entity scale
+     * @param useWorldScale when set will cancel out the whole worldScale, instead of just the entity scale
      * @param tempVDir      Vector3f object to work with, contains the direction after the call, in model space
      * @param tempVUp       second Vector3f object to work with, contains the up direction after the call
      * @param tempM         Matrix3f object to work with, contains the rotation after the call
@@ -397,7 +398,7 @@ public class ModelUtils {
      * @param jointPos      available joint position, can be {@code null}
      * @param renderState   RenderState of the player the {@code jointPos} is from
      * @param rotInfo       player VR info
-     * @param useWorldScale when set will cancel out the worldScale, instead of entity scale
+     * @param useWorldScale when set will cancel out the whole worldScale, instead of just the entity scale
      * @param tempV         Vector3f object to work with, contains the joint direction after the call
      * @param tempV2        Vector3f object to work with
      */
