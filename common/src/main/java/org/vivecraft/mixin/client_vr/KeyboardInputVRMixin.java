@@ -9,8 +9,6 @@ import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.Vec2;
-import org.joml.Vector2fc;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -58,9 +56,7 @@ public class KeyboardInputVRMixin extends ClientInput {
         if (MCVR.get().isMovement && ClientDataHolderVR.getInstance().vrSettings.analogMovement &&
             !(CreateHelper.isLoaded() && CreateHelper.blocksMovement()))
         {
-            this.forwardImpulse = MCVR.get().movement.y;
-            this.leftImpulse = -MCVR.get().movement.x;
+            this.moveVector = new Vec2(-MCVR.get().movement.x, MCVR.get().movement.y);
         }
-        this.moveVector = new Vec2(x, y);
     }
 }

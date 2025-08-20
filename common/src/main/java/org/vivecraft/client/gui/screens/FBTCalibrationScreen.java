@@ -190,8 +190,8 @@ public class FBTCalibrationScreen extends Screen {
             Vec3i color = this.leftHandAtPosition && this.rightHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE;
 
             // body overlay
-            renderType = VRRenderTypes.quads(true);
-            builder = this.minecraft.renderBuffers().bufferSource().getBuffer(renderType);
+            RenderType renderType = VRRenderTypes.quads(true);
+            VertexConsumer builder = this.minecraft.renderBuffers().bufferSource().getBuffer(renderType);
 
             // legs
             RenderHelper.renderBox(builder, new Vec3(2, 0, 0), new Vec3(2, 12, 0),

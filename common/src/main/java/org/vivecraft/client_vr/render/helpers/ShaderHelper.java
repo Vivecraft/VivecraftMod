@@ -344,7 +344,7 @@ public class ShaderHelper {
             renderPass.setUniform(VRShaders.MIXED_REALITY_VIEW_MATRIX_UNIFORM, viewMatrix);
 
             renderPass.setUniform(VRShaders.MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM,
-                (float) camPlayer.x, (float) camPlayer.y, (float) camPlayer.z);
+                camPlayer.x, camPlayer.y, camPlayer.z);
             renderPass.setUniform(VRShaders.MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM,
                 -cameraLook.x, 0.0F, -cameraLook.z);
 

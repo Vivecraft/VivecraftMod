@@ -29,7 +29,7 @@ public class IsUsingItemVRMixin {
         }
     }
 
-    @ModifyReturnValue(method = "get", at = @At(value = "RETURN", ordinal = 1))
+    @ModifyReturnValue(method = {"get", "method_65638"}, at = @At(value = "RETURN", ordinal = 1), remap = false)
     private boolean vivecraft$roomscaleBowNotch(
         boolean usingItem, @Local(argsOnly = true) ItemStack itemStack,
         @Local(argsOnly = true) LivingEntity livingEntity)

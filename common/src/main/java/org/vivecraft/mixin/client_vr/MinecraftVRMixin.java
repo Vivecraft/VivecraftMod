@@ -312,10 +312,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             RenderHelper.checkGLError("post-mirror");
             original.call(this.mainRenderTarget);
             RenderPassManager.setGUIRenderPass();
-        } else if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
-            // show message that the game is connecting to the vr runtime
-            RenderHelper.drawVRConnectingMessage();
         } else {
+            if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
+                // show message that the game is connecting to the vr runtime
+                RenderHelper.drawVRConnectingMessage();
+            }
             original.call(instance);
         }
     }
@@ -531,8 +532,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         Component.translatable("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
                                 new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                Component.translatable("vivecraft.messages.click")))
+                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
                     ClientNetworking.SERVER_VR_CHANGES_LIST = null;
                     ClientNetworking.DISPLAYED_VR_CHANGES = true;

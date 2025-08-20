@@ -9,6 +9,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
@@ -55,10 +56,10 @@ public class VivecraftItemRendering {
                 if (modelName != null) {
                     ItemModel model = Minecraft.getInstance().getModelManager().getItemModel(modelName);
                     if (model instanceof BlockModelWrapperExtension blockModel && blockModel.vivecraft$isGenerated()) {
-                        return VivecraftItemTransformType.Block_Item;
+                        return VivecraftItemTransformType.BLOCK_ITEM;
                     }
                 }
-                itemTransformType = VivecraftItemTransformType.Block_3D;
+                itemTransformType = VivecraftItemTransformType.BLOCK_3D;
             }
         } else if (item instanceof MapItem || itemStack.is(ViveItemTags.VIVECRAFT_MAPS)) {
             itemTransformType = VivecraftItemTransformType.MAP;
@@ -80,7 +81,7 @@ public class VivecraftItemRendering {
             itemTransformType = VivecraftItemTransformType.ROTATED_TOOL;
         } else if (item instanceof MaceItem || itemStack.is(ViveItemTags.VIVECRAFT_MACES)) {
             itemTransformType = VivecraftItemTransformType.MACE;
-        } else if (item instanceof SwordItem || itemStack.is(ViveItemTags.VIVECRAFT_SWORDS)) {
+        } else if (itemStack.is(ItemTags.SWORDS) || itemStack.is(ViveItemTags.VIVECRAFT_SWORDS)) {
             itemTransformType = VivecraftItemTransformType.SWORD;
         } else if (item instanceof ShieldItem || itemStack.is(ViveItemTags.VIVECRAFT_SHIELDS)) {
             itemTransformType = VivecraftItemTransformType.SHIELD;

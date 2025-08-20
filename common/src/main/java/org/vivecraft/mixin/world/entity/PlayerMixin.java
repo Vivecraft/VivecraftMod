@@ -1,18 +1,14 @@
 package org.vivecraft.mixin.world.entity;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemCooldowns;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,23 +51,5 @@ public abstract class PlayerMixin extends LivingEntityMixin {
     @ModifyArg(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     protected float vivecraft$damageModifier(float damage) {
         return damage;
-    }
-
-    /**
-     * dummy to be overridden in {@link ServerPlayerMixin}
-     */
-    @WrapMethod(method = "hurtCurrentlyUsedShield")
-    protected void vivecraft$roomscaleShieldItemDamage(float damageAmount, Operation<Void> original) {
-        original.call(damageAmount);
-    }
-
-    /**
-     * dummy to be overridden in {@link ServerPlayerMixin}
-     *
-     * @return
-     */
-    @ModifyExpressionValue(method = "hurtCurrentlyUsedShield", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getUsedItemHand()Lnet/minecraft/world/InteractionHand;"))
-    protected InteractionHand vivecraft$roomscaleShieldHand(InteractionHand original) {
-        return original;
     }
 }

@@ -155,10 +155,10 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
     @Override
     public boolean onPress(LocalPlayer player, InteractionHand hand) {
-        if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().selected != this.hotbar &&
+        if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().getSelectedSlot() != this.hotbar &&
             hand == InteractionHand.MAIN_HAND)
         {
-            player.getInventory().selected = this.hotbar;
+            player.getInventory().setSelectedSlot(this.hotbar);
             return true;
         } else if (this.hotbar == 9 && hand == InteractionHand.MAIN_HAND) {
             player.connection.send(

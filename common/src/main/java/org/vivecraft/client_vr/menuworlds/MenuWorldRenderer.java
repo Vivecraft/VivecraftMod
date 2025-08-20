@@ -628,7 +628,7 @@ public class MenuWorldRenderer {
         if (this.endSkyVBO != null) {
             this.endSkyVBO.close();
         }
-        this.lightMap.destroyBuffers();
+        this.lightMap.close();
         this.ready = false;
     }
 

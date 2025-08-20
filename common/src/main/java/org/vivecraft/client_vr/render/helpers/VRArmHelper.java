@@ -347,7 +347,7 @@ public class VRArmHelper {
             // to make shaders work
             RenderSystem.setShaderTexture(0, RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE));
 
-            RenderType renderType = RenderType.debugQuads();
+            RenderType renderType = VRRenderTypes.quads(false);
             VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
             double VOffset = DATA_HOLDER.teleportTracker.lastTeleportArcDisplayOffset;

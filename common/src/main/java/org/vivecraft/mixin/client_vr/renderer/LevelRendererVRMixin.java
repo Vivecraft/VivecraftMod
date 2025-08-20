@@ -15,7 +15,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
-import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -189,10 +188,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             if (ext.vivecraft$getHands() != null) {
                 this.targets.replace(LevelTargetBundleExtension.HANDS_TARGET_ID,
                     framePass.readsAndWrites(ext.vivecraft$getHands()));
-            }
-            // fix vanilla bug https://bugs.mojang.com/browse/MC-278096, is fixed in 1.21.5
-            if (this.targets.clouds != null && this.minecraft.options.getCloudsType() == CloudStatus.OFF) {
-                this.targets.clouds = framePass.readsAndWrites(this.targets.clouds);
             }
         }
     }

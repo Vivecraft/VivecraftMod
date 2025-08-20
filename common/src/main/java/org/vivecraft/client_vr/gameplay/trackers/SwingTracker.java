@@ -190,13 +190,13 @@ public class SwingTracker implements DebugRenderTracker {
                 boolean isSword = false;
 
                 if (this.dh.vrSettings.onlySwordCollision &&
-                    !(item instanceof SwordItem || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)))
+                    !(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)))
                 {
                     // only swords can hit
                     continue;
                 }
 
-                if (!(item instanceof SwordItem || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)) &&
+                if (!(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)) &&
                     !(item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS)))
                 {
                     if (isTool(itemstack)) {

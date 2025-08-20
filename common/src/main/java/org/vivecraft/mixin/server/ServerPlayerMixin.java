@@ -3,7 +3,7 @@ package org.vivecraft.mixin.server;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
@@ -24,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
@@ -153,19 +152,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
     @Unique
     private ItemStack vivecraft$roomscaleShieldItem;
 
-    @Unique
-    private InteractionHand vivecraft$roomscaleShieldHand;
-
     /**
-     * inject into {@link LivingEntity#isDamageSourceBlocked}
+     * inject into {@link LivingEntity#applyItemBlocking}
      */
     @Override
     protected ItemStack vivecraft$roomscaleShieldBlockingItem(
-        ItemStack original, DamageSource damageSource, LocalBooleanRef roomscaleBlocked)
+        ItemStack original, DamageSource damageSource, LocalDoubleRef roomscaleBlockAngle)
     {
         // in case it wasn't reset the last time, since isDamageSourceBlocked is not just called from the serverHurt
         this.vivecraft$roomscaleShieldItem = null;
-        this.vivecraft$roomscaleShieldHand = null;
 
         ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
         // only when VR and not already blocking, and if it is a directional damage
@@ -184,7 +179,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                 InteractionHand hand = InteractionHand.values()[i];
                 ItemStack stack = this.getItemBySlot(LivingEntity.getSlotForHand(hand));
                 // check for shield and do not bypass item cooldowns
-                if (stack != null && stack.getItem().getUseAnimation(stack) == ItemUseAnimation.BLOCK &&
+                if (stack != null && stack.get(DataComponents.BLOCKS_ATTACKS) != null &&
                     !this.getCooldowns().isOnCooldown(stack))
                 {
                     // check if it blocks
@@ -198,21 +193,20 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                         sideDir);
 
                     // 0.5 = 120° blocking cone
-                    boolean isBlocked;
+                    double angle = 0;
                     if (isProjectile) {
                         // direction to hand
                         Vec3 dmgDir = dmgPos.subtract(
                             serverVivePlayer.getBodyPartPos(VRBodyPart.fromInteractionHand(hand))).normalize();
-                        isBlocked = shieldDir.dot(dmgDir) > 0.5;
+                        angle = shieldDir.dot(dmgDir);
                     } else {
                         // horizontal direction to the player
                         Vec3 dmgDir = dmgPos.subtract(this.position()).horizontal().normalize();
-                        isBlocked = shieldDir.horizontal().normalize().dot(dmgDir) > 0.5;
+                        angle = shieldDir.horizontal().normalize().dot(dmgDir);
                     }
-                    if (isBlocked) {
-                        roomscaleBlocked.set(true);
+                    if (angle > 0.5) {
+                        roomscaleBlockAngle.set(angle);
                         this.vivecraft$roomscaleShieldItem = stack;
-                        this.vivecraft$roomscaleShieldHand = hand;
                         return stack;
                     }
                 }
@@ -222,30 +216,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
     }
 
     /**
-     * inject into {@link Player#hurtCurrentlyUsedShield}
+     * inject into {@link LivingEntity#hurtServer}
      */
     @Override
-    protected void vivecraft$roomscaleShieldItemDamage(float damageAmount, Operation<Void> original) {
-        ItemStack backup;
+    protected ItemStack vivecraft$roomscaleShieldActualBlockingItem(ItemStack original) {
         if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldItem != null) {
-            backup = this.useItem;
-            this.useItem = this.vivecraft$roomscaleShieldItem;
-            original.call(damageAmount);
-            this.useItem = backup;
-            this.vivecraft$roomscaleShieldItem = null;
-            this.vivecraft$roomscaleShieldHand = null;
+            return this.vivecraft$roomscaleShieldItem;
         } else {
-            original.call(damageAmount);
+            return original;
         }
-    }
-
-    /**
-     * inject into {@link Player#hurtCurrentlyUsedShield}
-     */
-    @Override
-    protected InteractionHand vivecraft$roomscaleShieldHand(InteractionHand original) {
-        return ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldHand != null ?
-            this.vivecraft$roomscaleShieldHand : original;
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
@@ -258,11 +237,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         }
     }
 
-    @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN")
-    )
+    @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
     private ItemEntity vivecraft$dropVive(ItemEntity item, @Local(argsOnly = true, ordinal = 0) boolean dropAround) {
         ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
-        if (!dropAround && serverVivePlayer != null && serverVivePlayer.isVR()) {
+        if (item != null && !dropAround && serverVivePlayer != null && serverVivePlayer.isVR()) {
             // spawn item from players hand
             Vec3 pos = serverVivePlayer.getAimPos(false);
             Vec3 aim = serverVivePlayer.getAimDir(false);

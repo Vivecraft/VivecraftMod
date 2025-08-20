@@ -621,9 +621,6 @@ public class VREffectsHelper {
         // switch to VR Occluded buffer, and copy main depth for occlusion
         LevelTargetBundleExtension extTargets = (LevelTargetBundleExtension) targets;
 
-        // remember the original buffer
-        RenderTarget mainTarget = MC.mainRenderTarget;
-
         RenderSystem.getDevice().createCommandEncoder()
             .clearColorTexture(extTargets.vivecraft$getOccluded().get().getColorTexture(), 0x00000000);
         extTargets.vivecraft$getOccluded().get().copyDepthFrom(mainTarget);

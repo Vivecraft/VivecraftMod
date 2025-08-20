@@ -74,7 +74,7 @@ public class VehicleTracker implements Tracker {
             if (player.zza > 0) {
                 return getFreeMoveDirection();
             }
-        } else if (entity != null && entity.isControlledByLocalInstance()) {
+        } else if (entity != null && entity.isLocalInstanceAuthoritative()) {
             int c = getControllerWithFoodStick(player);
             if (entity instanceof Mob && c != -1) {
                 // pigs and striders

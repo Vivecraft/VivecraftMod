@@ -36,7 +36,6 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
-import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 
@@ -248,7 +247,8 @@ public class RenderHelper {
      */
     public static void drawVRConnectingMessage() {
         // clear depth, because text that was already there would be over ours
-        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT);
+        RenderSystem.getDevice().createCommandEncoder()
+            .clearDepthTexture(MC.getMainRenderTarget().getDepthTexture(), 1.0);
         // setup modelview for screen rendering
         Matrix4fStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushMatrix();
@@ -290,7 +290,7 @@ public class RenderHelper {
     }
 
     /**
-     * draws a quad with the PositionTex shader, to be used when <b>not</b> in a world
+     * draws a quad with the PositionTex shader, ignoring depth, to be used when <b>not</b> in a world
      *
      * @param displayWidth  texture width
      * @param displayHeight texture height

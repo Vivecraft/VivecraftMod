@@ -42,11 +42,9 @@ public class VRTextureTarget extends RenderTarget {
         if (texId >= 0) {
             // hardcoded opengl here
             if (RenderSystem.getDevice() instanceof GlDevice glDevice) {
-                this.colorTexture = ((GlDeviceExtension) glDevice).vivecraft$createFixedIdTexture(() -> this.label,
-                    TextureFormat.RGBA8, width, height, mipmaps ? Math.max(Mth.log2(width), Mth.log2(height)) : 1,
-                    texId);
-    }
-
+                this.colorTexture = ((GlDeviceExtension) glDevice).vivecraft$createFixedIdTexture(
+                    () -> this.label + " / Color", TextureFormat.RGBA8, width, height,
+                    mipmaps ? Math.max(Mth.log2(width), Mth.log2(height)) : 1, texId);
                 this.colorTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
                 this.setFilterMode(linearFilter ? FilterMode.LINEAR : FilterMode.NEAREST);
             } else {
@@ -55,16 +53,18 @@ public class VRTextureTarget extends RenderTarget {
         } else {
             this.resize(width, height);
         }
+    }
+
     @Override
     public void createBuffers(int width, int height) {
         super.createBuffers(width, height);
 
         if (((RenderTargetExtension) this).vivecraft$hasMipmaps()) {
             if (this.anisotropicFiltering) {
-                OpenGLHelper.enableAnisotropicFiltering(this);
+                OpenGLHelper.enableAnisotropicFiltering(this.colorTexture);
             }
             // generate mipmaps so they are initialized
-            OpenGLHelper.genMipmaps(this);
+            OpenGLHelper.genMipmaps(this.colorTexture);
         }
     }
 

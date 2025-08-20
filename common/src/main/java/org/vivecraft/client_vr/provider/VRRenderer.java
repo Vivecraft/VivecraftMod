@@ -13,7 +13,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
@@ -609,7 +608,8 @@ public abstract class VRRenderer {
             RenderHelper.checkGLError("Start Init");
 
             // intel drivers have issues with opengl interop on windows so throw an error
-            if (Util.getPlatform() == Util.OS.WINDOWS && GlUtil.getRenderer().toLowerCase().contains("intel") &&
+            if (Util.getPlatform() == Util.OS.WINDOWS &&
+                RenderSystem.getDevice().getRenderer().toLowerCase().contains("intel") &&
                 dataholder.vrSettings.blockIntelWindows)
             {
                 StringBuilder gpus = new StringBuilder();
@@ -782,7 +782,7 @@ public abstract class VRRenderer {
             VRSettings.LOGGER.info("Vivecraft: {}", this.telescopeFramebufferR);
 
             RenderSystem.getDevice().createCommandEncoder()
-                .clearColorAndDepthTextures(this.telescopeFramebufferR.getColorTexture(), ARGB.color(0, 0, 0, 255),
+                .clearColorAndDepthTextures(this.telescopeFramebufferR.getColorTexture(), 0xFF000000,
                     this.telescopeFramebufferR.getDepthTexture(), 1F);
             RenderHelper.checkGLError("TelescopeR framebuffer setup");
 
@@ -793,7 +793,7 @@ public abstract class VRRenderer {
             WorldRenderPass.LEFT_TELESCOPE = new WorldRenderPass(this.telescopeFramebufferL);
             VRSettings.LOGGER.info("Vivecraft: {}", this.telescopeFramebufferL);
             RenderSystem.getDevice().createCommandEncoder()
-                .clearColorAndDepthTextures(this.telescopeFramebufferL.getColorTexture(), ARGB.color(0, 0, 0, 255),
+                .clearColorAndDepthTextures(this.telescopeFramebufferL.getColorTexture(), 0xFF000000,
                     this.telescopeFramebufferL.getDepthTexture(), 1F);
             RenderSystem.getDevice().createCommandEncoder()
                 .clearColorTexture(this.telescopeFramebufferR.getColorTexture(), 0);

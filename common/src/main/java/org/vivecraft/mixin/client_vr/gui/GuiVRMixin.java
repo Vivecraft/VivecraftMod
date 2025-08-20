@@ -124,7 +124,8 @@ public abstract class GuiVRMixin implements GuiExtension {
     private void vivecraft$hotbarContextIndicator(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
-            this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
+            this.getCameraPlayer().getInventory().getSelectedSlot() !=
+                ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = guiGraphics.guiWidth() / 2;

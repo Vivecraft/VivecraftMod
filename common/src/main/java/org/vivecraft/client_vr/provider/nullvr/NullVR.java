@@ -35,7 +35,6 @@ public class NullVR extends MCVR {
     protected static final int HEAD_TRACKER = CAMERA_TRACKER;
 
     private BodyPart currentBodyPart = BodyPart.HEAD;
-    private boolean syncBodyparts = true;
     private FBTMode fbtMode = FBTMode.ARMS_ONLY;
     // when on, moves arms/legs on both sides, when off, moves only the right one
     private boolean syncBodyparts = true;
