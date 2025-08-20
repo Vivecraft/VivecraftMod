@@ -49,6 +49,7 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
@@ -58,6 +59,7 @@ import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.function.Predicate;
 
@@ -226,9 +228,20 @@ public abstract class GameRendererVRMixin
             }
 
             aspect = switch (vivecraft$DATA_HOLDER.currentPass) {
-                case THIRD ->
-                    vivecraft$DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ?
-                        vivecraft$DATA_HOLDER.vrSettings.mixedRealityAspectRatio : aspect;
+                case THIRD, CENTER -> {
+                    if (vivecraft$DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+                        yield vivecraft$DATA_HOLDER.vrSettings.mixedRealityAspectRatio;
+                    } else {
+                        if (ShadersHelper.needsSameSizeBuffers()) {
+                            // in this case the default aspect is wrong, since it has the aspect of the vr view
+                            WindowExtension window = (WindowExtension) (Object) this.minecraft.getWindow();
+                            yield (float) window.vivecraft$getActualScreenWidth() /
+                                window.vivecraft$getActualScreenHeight();
+                        } else {
+                            yield aspect;
+                        }
+                    }
+                }
                 case CAMERA -> (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth /
                     (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight;
                 case SCOPEL, SCOPER -> 1.0F;

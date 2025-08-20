@@ -36,6 +36,7 @@ import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.List;
 
@@ -397,7 +398,7 @@ public class RenderHelper {
 
         Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))
             .yRot(Mth.DEG_TO_RAD * -yaw);
-        RenderSystem.setShaderTexture(0, getGpuTexture(RenderHelper.WHITE_TEXTURE));
+        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
         consumer.addVertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
             .setColor(r, g, b, a);

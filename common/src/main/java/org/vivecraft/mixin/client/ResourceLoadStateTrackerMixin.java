@@ -3,6 +3,7 @@ package org.vivecraft.mixin.client;
 import net.minecraft.client.ResourceLoadStateTracker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -19,6 +20,9 @@ public abstract class ResourceLoadStateTrackerMixin {
     @Shadow
     @Nullable
     private ResourceLoadStateTracker.ReloadState reloadState;
+
+    @Unique
+    private boolean vivecraft$canceledMenuWorldBuilding = false;
 
     @Inject(method = "finishReload", at = @At("TAIL"))
     private void vivecraft$initializeVR(CallbackInfo ci) {
@@ -38,12 +42,20 @@ public abstract class ResourceLoadStateTrackerMixin {
             // register api trackers/interacts
             VRClientAPIImpl.INSTANCE.processRegistrationEvent();
         }
+        if (this.vivecraft$canceledMenuWorldBuilding) {
+            this.vivecraft$canceledMenuWorldBuilding = false;
+            if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
+                ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
+                ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
+            }
+        }
     }
 
     @Inject(method = "startReload", at = @At("HEAD"))
     private void vivecraft$cancelMenuWorld(CallbackInfo ci) {
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
             ClientDataHolderVR.getInstance().menuWorldRenderer.cancelBuilding();
+            this.vivecraft$canceledMenuWorldBuilding = true;
         }
     }
 }

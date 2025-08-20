@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.Util;
@@ -103,7 +102,7 @@ public class VRArmHelper {
         RenderHelper.setupRenderingAtController(c, modelView);
 
         if (MC.getOverlay() == null) {
-            RenderSystem.setShaderTexture(0, RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE));
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
         }
 
         Vec3i color = new Vec3i(64, 64, 64);
@@ -345,7 +344,7 @@ public class VRArmHelper {
             // TODO SHADERS use a shader with lightmaps
 
             // to make shaders work
-            RenderSystem.setShaderTexture(0, RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE));
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
             RenderType renderType = VRRenderTypes.quads(false);
             VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);

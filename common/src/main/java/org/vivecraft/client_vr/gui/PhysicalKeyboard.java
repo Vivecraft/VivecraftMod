@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -27,6 +26,7 @@ import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.OptionEnum;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.RGBAColor;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -560,7 +560,7 @@ public class PhysicalKeyboard {
         }
 
         // Draw all the key boxes
-        RenderSystem.setShaderTexture(0, RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE));
+        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
         this.mc.renderBuffers().bufferSource().endBatch(renderType);
 
         // Build all the text

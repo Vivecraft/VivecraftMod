@@ -1,13 +1,17 @@
 package org.vivecraft.mod_compat_vr.shaders;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -39,6 +43,19 @@ public class ShadersHelper {
      */
     public static int ShaderLight() {
         return isShaderActive() ? 8 : 4;
+    }
+
+    /**
+     * binds the given texture to texture slot 0, only if shaders are active
+     *
+     * @param resourceLocation ResourceLocation of the texture to bind
+     */
+    public static void bindTexture(ResourceLocation resourceLocation) {
+        if (isShaderActive()) {
+            GpuTextureView view = RenderHelper.getGpuTexture(resourceLocation);
+            RenderSystem.setShaderTexture(0, view);
+            OpenGLHelper.bindTexture(0, view);
+        }
     }
 
     /**
@@ -151,10 +168,8 @@ public class ShadersHelper {
         BiConsumer<RenderPipeline, String> consumer = null;
         if (IrisHelper.isLoaded()) {
             consumer = IrisHelper::registerPipeline;
-        } else if (OptifineHelper.isOptifineLoaded()) {
-            // TODO 1.21.5+ check how optifine handles this, once it is done
-            consumer = null;
         }
+        // optifine does this still automatically, based on the shader name of the pipeline
         if (consumer != null) {
             consumer.accept(VRShaders.CROSSHAIR_WORLD, "ENTITIES");
             consumer.accept(VRShaders.CROSSHAIR_WORLD_ALWAYS, "ENTITIES");

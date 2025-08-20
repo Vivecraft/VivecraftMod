@@ -278,7 +278,7 @@ public abstract class VRRenderer {
         RenderType renderType = VRRenderTypes.trianglesAlways();
         VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
-        RenderSystem.setShaderTexture(0, RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE));
+        ShadersHelper.bindTexture(RenderHelper.BLACK_TEXTURE);
 
         for (int i = 0; i < verts.length; i += 2) {
             builder.addVertex(
@@ -558,8 +558,8 @@ public abstract class VRRenderer {
                     WorldRenderPass.MIXED_REALITY.resize(mirrorSize.getA(), mirrorSize.getB());
                 }
                 this.mirrorFramebuffer.resize(
-                    ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth(),
-                    ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight());
+                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
+                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()));
             }
 
             // telescopes
