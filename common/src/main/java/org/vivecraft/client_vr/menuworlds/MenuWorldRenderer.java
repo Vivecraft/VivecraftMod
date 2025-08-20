@@ -371,6 +371,10 @@ public class MenuWorldRenderer {
                     "Vivecraft: OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?", e);
                 destroy();
                 return;
+            } catch (NullPointerException e) {
+                VRSettings.LOGGER.error("Vivecraft: Something canceled menu world building while preparing", e);
+                destroy();
+                return;
             }
 
             this.buildStartTime = ClientUtils.milliTime();

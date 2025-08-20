@@ -53,7 +53,9 @@ public abstract class ResourceLoadStateTrackerMixin {
 
     @Inject(method = "startReload", at = @At("HEAD"))
     private void vivecraft$cancelMenuWorld(CallbackInfo ci) {
-        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
+        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
+            ClientDataHolderVR.getInstance().menuWorldRenderer.isBuilding())
+        {
             ClientDataHolderVR.getInstance().menuWorldRenderer.cancelBuilding();
             this.vivecraft$canceledMenuWorldBuilding = true;
         }
