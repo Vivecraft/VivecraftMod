@@ -143,7 +143,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.vrTargets == null) {
             return super.getColorTextureView();
         }
-        return callOnTargetTexture(RenderTarget::getColorTextureView);
+        return callOnTargetRet(RenderTarget::getColorTextureView);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.vrTargets == null) {
             return super.getDepthTextureView();
         }
-        return callOnTargetTexture(RenderTarget::getDepthTextureView);
+        return callOnTargetRet(RenderTarget::getDepthTextureView);
     }
 
     private void callOnAllTargets(Consumer<TextureTarget> consumer) {

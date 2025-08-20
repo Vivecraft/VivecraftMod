@@ -159,7 +159,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         GridLayout.RowHelper instance, LayoutElement child, Operation<LayoutElement> original)
     {
         Optional<? extends Holder<Dialog>> optional = this.getCustomAdditions();
-        if (VRState.VR_ENABLED && !ModMenuHelper.shouldOffsetButtons() && optional.isPresent()) {
+        if (VRState.VR_INITIALIZED && !ModMenuHelper.shouldOffsetButtons() && optional.isPresent()) {
             return original.call(instance, Button.builder((optional.get().value()).common().computeExternalTitle(),
                     (button) -> this.minecraft.player.connection.showDialog(optional.get(), this)).width(98)
                 .tooltip(CUSTOM_OPTIONS_TOOLTIP).build());

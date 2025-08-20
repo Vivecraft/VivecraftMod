@@ -71,12 +71,6 @@ public class VRRenderTypes {
                 .build())
             .createCompositeState(false));
 
-    private static final Function<ResourceLocation, RenderType> CROSSHAIR_MENU = Util.memoize(
-        resourceLocation -> RenderType.create("crosshair_menu_vr", 1536, false, false,
-            VRShaders.CROSSHAIR_MENU, RenderType.CompositeState.builder()
-                .setTextureState(getTextureState(resourceLocation))
-                .createCompositeState(false)));
-
     private static final BiFunction<ResourceLocation, Boolean, RenderType> CROSSHAIR_WORLD = Util.memoize(
         (resourceLocation, depthAlways) -> RenderType.create("crosshair_world_vr", 1536, false, false,
             depthAlways ? VRShaders.CROSSHAIR_WORLD_ALWAYS : VRShaders.CROSSHAIR_WORLD,
@@ -117,10 +111,6 @@ public class VRRenderTypes {
 
     private static RenderStateShard.EmptyTextureStateShard getTextureState(ResourceLocation resourceLocation) {
         return new RenderStateShard.TextureStateShard(resourceLocation, false);
-    }
-
-    public static RenderType crosshairMenu(ResourceLocation resourceLocation) {
-        return CROSSHAIR_MENU.apply(resourceLocation);
     }
 
     public static RenderType crosshairWorld(ResourceLocation resourceLocation, boolean depthAlways) {

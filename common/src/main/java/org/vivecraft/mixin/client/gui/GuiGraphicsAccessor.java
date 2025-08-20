@@ -9,5 +9,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface GuiGraphicsAccessor {
 
     @Accessor
+    Runnable getDeferredTooltip();
+
+    @Accessor
     GuiRenderState getGuiRenderState();
 }

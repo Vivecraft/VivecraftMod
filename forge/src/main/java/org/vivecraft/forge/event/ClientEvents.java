@@ -16,7 +16,7 @@ import org.vivecraft.client_vr.ReloadListener;
 import org.vivecraft.forge.Vivecraft;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = Vivecraft.MODID)
-public class ClientModEvents {
+public class ClientEvents {
     public static void registerConfigScreen(FMLJavaModLoadingContext context) {
         context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
             () -> new ConfigScreenHandler.ConfigScreenFactory((mc, screen) -> new VivecraftMainSettings(screen)));

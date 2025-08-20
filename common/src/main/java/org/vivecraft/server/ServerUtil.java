@@ -104,7 +104,7 @@ public class ServerUtil {
             ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
 
             boolean isOpAndAllowed = ServerConfig.ALLOW_OP.get() &&
-                player.server.getPlayerList().isOp(player.getGameProfile());
+                player.getServer().getPlayerList().isOp(player.getGameProfile());
 
             // kick non VR players
             if (!isOpAndAllowed && ServerConfig.VR_ONLY.get() && (vivePlayer == null || !vivePlayer.isVR())) {

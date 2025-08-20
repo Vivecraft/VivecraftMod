@@ -9,6 +9,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
+import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
 
 import java.util.List;
 
@@ -105,7 +106,9 @@ public abstract class GuiListScreen extends Screen {
         } else if (this.list.getHovered() != null) {
             entry = this.list.getHovered();
         }
-        if (entry != null && this.list.isEntryVisible(entry) && this.deferredTooltipRendering == null) {
+        if (entry != null && this.list.isEntryVisible(entry) &&
+            ((GuiGraphicsAccessor) guiGraphics).getDeferredTooltip() == null)
+        {
             TooltipRenderer.renderTooltip(guiGraphics, entry.getTooltip(),
                 this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)), this.list.getItemHeight());
         }

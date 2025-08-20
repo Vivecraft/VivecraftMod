@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import org.vivecraft.client.utils.TextUtils;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
 
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 
 public class MirrorNotification {
 
-    private static final ClientDataHolderVR DH = ClientDataHolderVR.getInstance();
     private static final Minecraft MC = Minecraft.getInstance();
 
     private static long MIRROR_NOTIFY_START;

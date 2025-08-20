@@ -270,9 +270,7 @@ public abstract class VRRenderer {
      * draws the stencil provided by the VR runtime
      */
     private void drawMask() {
-        Minecraft mc = Minecraft.getInstance();
-        ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-        float[] verts = getStencilMask(dh.currentPass);
+        float[] verts = getStencilMask(ClientDataHolderVR.getInstance().currentPass);
         if (verts == null) {
             return;
         }
@@ -797,8 +795,6 @@ public abstract class VRRenderer {
             RenderSystem.getDevice().createCommandEncoder()
                 .clearColorAndDepthTextures(this.telescopeFramebufferL.getColorTexture(), 0xFF000000,
                     this.telescopeFramebufferL.getDepthTexture(), 1F);
-            RenderSystem.getDevice().createCommandEncoder()
-                .clearColorTexture(this.telescopeFramebufferR.getColorTexture(), 0);
             RenderHelper.checkGLError("TelescopeL framebuffer setup");
 
             Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);

@@ -228,21 +228,8 @@ public class RenderHelper {
         // clear depth, because text that was already there would be over ours
         RenderSystem.getDevice().createCommandEncoder()
             .clearDepthTexture(MC.getMainRenderTarget().getDepthTexture(), 1.0);
-        // setup modelview for screen rendering
-        Matrix4fStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushMatrix();
-        poseStack.identity();
-        poseStack.translate(0.0F, 0.0F, -11000.0F);
 
-        // setup projection
-        float guiScale = (float) MC.getWindow().getGuiScale();
-        Matrix4f guiProjection = (new Matrix4f()).setOrtho(
-            0.0F, MC.getMainRenderTarget().width / guiScale,
-            MC.getMainRenderTarget().height / guiScale, 0.0F,
-            1000.0F, 21000.0F);
-        RenderSystem.setProjectionMatrix(guiProjection, ProjectionType.ORTHOGRAPHIC);
-
-        GuiGraphics guiGraphics = new GuiGraphics(MC, MC.renderBuffers().bufferSource());
+        GuiGraphics guiGraphics = GuiRenderHelper.getGuiGraphics();
 
         int width = 200;
         List<FormattedCharSequence> formattedChars = MC.font.split(
@@ -263,9 +250,8 @@ public class RenderHelper {
             guiGraphics.drawCenteredString(MC.font, formattedChars.get(line), guiGraphics.guiWidth() / 2,
                 y + 5 + line * 12, 0xFFFFFFFF);
         }
-        guiGraphics.flush();
 
-        poseStack.popMatrix();
+        GuiRenderHelper.finish();
     }
 
     /**

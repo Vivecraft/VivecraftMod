@@ -3,6 +3,7 @@ package org.vivecraft.client_vr;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -63,8 +64,8 @@ public class MultiPassRenderTarget extends RenderTarget {
     }
 
     @Override
-    public void blitAndBlendToTexture(GpuTexture gpuTexture) {
-        callOnTarget(r -> r.blitAndBlendToTexture(gpuTexture));
+    public void blitAndBlendToTexture(GpuTextureView gpuTextureView) {
+        callOnTarget(r -> r.blitAndBlendToTexture(gpuTextureView));
     }
 
     @Override
@@ -73,9 +74,19 @@ public class MultiPassRenderTarget extends RenderTarget {
     }
 
     @Override
+    public GpuTextureView getColorTextureView() {
+        return callOnTargetRet(RenderTarget::getColorTextureView);
+    }
+
+    @Override
     public GpuTexture getDepthTexture() {
         return
             callOnTargetRet(RenderTarget::getDepthTexture);
+    }
+
+    @Override
+    public GpuTextureView getDepthTextureView() {
+        return callOnTargetRet(RenderTarget::getDepthTextureView);
     }
 
     private void callOnTarget(Consumer<RenderTarget> consumer) {

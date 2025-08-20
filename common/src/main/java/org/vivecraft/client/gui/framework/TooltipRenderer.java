@@ -2,6 +2,8 @@ package org.vivecraft.client.gui.framework;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
@@ -39,12 +41,14 @@ public class TooltipRenderer {
 
             // if tooltip is not too low, draw below button, else above
             if (widgetY + widgetHeight + formattedText.size() * (mc.font.lineHeight + 1) + 14 < mc.screen.height) {
-                guiGraphics.renderTooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH),
-                    tooltipCenter - TOOLTIP_HALF_WIDTH - 12, widgetY + widgetHeight + 14);
+                guiGraphics.renderTooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
+                        .map(ClientTooltipComponent::create).toList(), tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
+                    widgetY + widgetHeight + 14, DefaultTooltipPositioner.INSTANCE, null);
             } else {
-                guiGraphics.renderTooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH),
-                    tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
-                    widgetY - formattedText.size() * (mc.font.lineHeight + 1) + 9);
+                guiGraphics.renderTooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
+                        .map(ClientTooltipComponent::create).toList(), tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
+                    widgetY - formattedText.size() * (mc.font.lineHeight + 1) + 9, DefaultTooltipPositioner.INSTANCE,
+                    null);
             }
         }
     }

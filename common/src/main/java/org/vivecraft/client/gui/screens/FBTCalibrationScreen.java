@@ -10,8 +10,9 @@ import org.joml.Quaternionfc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.gui.framework.widgets.MultilineComponent;
 import org.vivecraft.client.gui.pip.state.GuiFBTPlayerState;
-import org.vivecraft.client.gui.widgets.MultilineComponent;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -20,10 +21,6 @@ import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
 
 public class FBTCalibrationScreen extends Screen {
-
-    private static final Vec3i COLOR_INACTIVE = new Vec3i(128, 64, 64);
-    private static final Vec3i COLOR_ACTIVE = new Vec3i(64, 128, 64);
-    private static final byte ALPHA = (byte) 200;
 
     private final Screen parent;
 
@@ -182,8 +179,6 @@ public class FBTCalibrationScreen extends Screen {
             ((GuiGraphicsAccessor) guiGraphics).getGuiRenderState().submitPicturesInPictureState(
                 new GuiFBTPlayerState(this.rightHandAtPosition, this.leftHandAtPosition, new Vector3f(this.rightHand),
                     new Vector3f(this.leftHand), yRot, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
-
-            }
         }
     }
 

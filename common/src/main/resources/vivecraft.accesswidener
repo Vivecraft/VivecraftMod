@@ -74,9 +74,6 @@ accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/
 # to render crosshair
 accessible field net/minecraft/client/gui/Gui CROSSHAIR_SPRITE Lnet/minecraft/resources/ResourceLocation;
 
-# to check for an active tooltip
-accessible field net/minecraft/client/gui/screens/Screen deferredTooltipRendering Lnet/minecraft/client/gui/screens/Screen$DeferredTooltipRendering;
-
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
