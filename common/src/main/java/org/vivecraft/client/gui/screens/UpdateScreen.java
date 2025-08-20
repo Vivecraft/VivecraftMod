@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import org.vivecraft.client.gui.widgets.TextScrollWidget;
+import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.UpdateChecker;
 
 

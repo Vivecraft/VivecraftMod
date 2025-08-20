@@ -1,7 +1,9 @@
 package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import org.vivecraft.client_vr.render.RenderPass;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 import java.util.EnumMap;
@@ -26,7 +28,6 @@ public class MultiPassRenderTarget extends RenderTarget {
         this.height = mainTarget.height;
         this.viewWidth = mainTarget.viewWidth;
         this.viewHeight = mainTarget.viewHeight;
-        //this.frameBufferId = mainTarget.frameBufferId;
         this.filterMode = mainTarget.filterMode;
     }
 
@@ -38,10 +39,7 @@ public class MultiPassRenderTarget extends RenderTarget {
     @Override
     public void destroyBuffers() {
         // this one should be called on all RenderTargets
-        this.mainTarget.destroyBuffers();
-        for (RenderTarget renderTarget : this.vrTargets.values()) {
-            renderTarget.destroyBuffers();
-        }
+        callOnAllTargets(RenderTarget::destroyBuffers);
     }
 
     @Override
@@ -53,80 +51,56 @@ public class MultiPassRenderTarget extends RenderTarget {
     public void createBuffers(int width, int height) {
         callOnTarget(r -> r.createBuffers(width, height));
     }
-/*
+
     @Override
-    public void setFilterMode(int filterMode) {
+    public void setFilterMode(FilterMode filterMode) {
         callOnTarget(r -> r.setFilterMode(filterMode));
     }
 
     @Override
-    public void checkStatus() {
-        callOnTarget(RenderTarget::checkStatus);
+    public void blitToScreen() {
+        callOnTarget(RenderTarget::blitToScreen);
     }
 
     @Override
-    public void bindRead() {
-        callOnTarget(RenderTarget::bindRead);
+    public void blitAndBlendToTexture(GpuTexture gpuTexture) {
+        callOnTarget(r -> r.blitAndBlendToTexture(gpuTexture));
     }
 
     @Override
-    public void unbindRead() {
-        callOnTarget(RenderTarget::unbindRead);
+    public GpuTexture getColorTexture() {
+        return callOnTargetRet(RenderTarget::getColorTexture);
     }
 
     @Override
-    public void bindWrite(boolean setViewport) {
-        callOnTarget(r -> r.bindWrite(setViewport));
+    public GpuTexture getDepthTexture() {
+        return
+            callOnTargetRet(RenderTarget::getDepthTexture);
     }
-
-    @Override
-    public void unbindWrite() {
-        callOnTarget(RenderTarget::unbindWrite);
-    }
-
-    @Override
-    public void setClearColor(float red, float green, float blue, float alpha) {
-        callOnTarget(r -> r.setClearColor(red, green, blue, alpha));
-    }
-
-    @Override
-    public void blitToScreen(int width, int height) {
-        callOnTarget(r -> r.blitToScreen(width, height));
-    }
-
-    @Override
-    public void blitAndBlendToScreen(int width, int height) {
-        callOnTarget(r -> r.blitAndBlendToScreen(width, height));
-    }
-
-    @Override
-    public void clear() {
-        callOnTarget(RenderTarget::clear);
-    }
-
-    @Override
-    public int getColorTextureId() {
-        return callOnTargetInt(RenderTarget::getColorTextureId);
-    }
-
-    @Override
-    public int getDepthTextureId() {
-        return callOnTargetInt(RenderTarget::getDepthTextureId);
-    }*/
 
     private void callOnTarget(Consumer<RenderTarget> consumer) {
-        if (RenderPassType.isVanilla()) {
-            consumer.accept(this.mainTarget);
-        } else {
-            consumer.accept(this.vrTargets.get(ClientDataHolderVR.getInstance().currentPass));
+        consumer.accept(getCurrent());
+    }
+
+    private <T> T callOnTargetRet(Function<RenderTarget, T> function) {
+        return function.apply(getCurrent());
+    }
+
+    private void callOnAllTargets(Consumer<RenderTarget> consumer) {
+        consumer.accept(this.mainTarget);
+        for (RenderTarget target : this.vrTargets.values()) {
+            consumer.accept(target);
         }
     }
 
-    private int callOnTargetInt(Function<RenderTarget, Integer> function) {
+    /**
+     * @return the RenderTarget that should be rendered to now
+     */
+    private RenderTarget getCurrent() {
         if (RenderPassType.isVanilla()) {
-            return function.apply(this.mainTarget);
+            return this.mainTarget;
         } else {
-            return function.apply(this.vrTargets.get(ClientDataHolderVR.getInstance().currentPass));
+            return this.vrTargets.get(ClientDataHolderVR.getInstance().currentPass);
         }
     }
 }

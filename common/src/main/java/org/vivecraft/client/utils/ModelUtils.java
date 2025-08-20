@@ -274,6 +274,29 @@ public class ModelUtils {
     }
 
     /**
+     * sets the matrix {@code tempM} so that it points in {@code dir}, using local {@code targetRot} to get the up dir
+     *
+     * @param targetRot target rotation the {@code tempM} should respect, in world space
+     * @param bodyYaw   players Y rotation
+     * @param dir       the direction the matrix should point at, in model space
+     * @param tempVUp   Vector3f object to work with, contains the up direction after the call
+     * @param tempM     Matrix3f object to work with, contains the rotation after the call
+     */
+    public static void pointAtModelWithLocal(
+        Quaternionfc targetRot, float bodyYaw, Vector3fc dir, Vector3f tempVUp, Matrix3f tempM)
+    {
+
+        // get the up vector the ModelPart should face
+        targetRot.transform(MathUtils.RIGHT, tempVUp);
+        worldToModelDirection(tempVUp, bodyYaw, tempVUp);
+
+        dir.cross(tempVUp, tempVUp);
+
+        // rotate model
+        pointAtModel(dir, tempVUp, tempM);
+    }
+
+    /**
      * sets the matrix {@code tempM} so that the ModelPart {@code part} points at the given model space point, while facing forward
      *
      * @param part     ModelPart to use as the pivot point
@@ -449,7 +472,7 @@ public class ModelUtils {
         // zero it always, since it's supposed to have the offset at the end
         tempV.zero();
         if (attackTime > 0.0F) {
-            if (!isMainPlayer || ClientDataHolderVR.getInstance().swingType == VRFirstPersonArmSwing.Attack) {
+            if (!isMainPlayer || ClientDataHolderVR.getInstance().swingType == VRFirstPersonArmSwing.ATTACK) {
                 // arm swing animation
                 float rotation;
                 if (attackTime > 0.5F) {
@@ -461,7 +484,7 @@ public class ModelUtils {
                 tempM.rotateX(rotation * 30.0F * Mth.DEG_TO_RAD);
             } else {
                 switch (ClientDataHolderVR.getInstance().swingType) {
-                    case Use -> {
+                    case USE -> {
                         // hand forward animation
                         float movement;
                         if (attackTime > 0.25F) {
@@ -471,7 +494,7 @@ public class ModelUtils {
                         }
                         tempM.transform(MathUtils.DOWN, tempV).mul((1F + movement) * 1.6F);
                     }
-                    case Interact -> {
+                    case INTERACT -> {
                         // arm rotation animation
                         float rotation;
                         if (attackTime > 0.5F) {

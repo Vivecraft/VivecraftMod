@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(GuardianRenderer.class)
@@ -22,7 +21,7 @@ public abstract class GuardianRendererVRMixin {
     {
         if (!RenderPassType.isVanilla() && livingEntity == Minecraft.getInstance().getCameraEntity()) {
             cir.setReturnValue(
-                ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition()
+                ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().hmd.getPosition()
                     .subtract(0.0D, 0.3F * ClientDataHolderVR.getInstance().vrPlayer.worldScale, 0.0D));
         }
     }

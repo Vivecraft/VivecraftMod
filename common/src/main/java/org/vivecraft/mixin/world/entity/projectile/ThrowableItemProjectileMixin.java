@@ -7,7 +7,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,15 +22,14 @@ public abstract class ThrowableItemProjectileMixin extends Entity {
     }
 
     @Inject(method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;)V", at = @At("TAIL"))
-    private void vivecraft$satToHandPos(
+    private void vivecraft$setToHandPos(
         EntityType entityType, LivingEntity shooter, Level level, ItemStack item, CallbackInfo ci)
     {
         if (shooter instanceof ServerPlayer player) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-                Vec3 pos = serverVivePlayer.getBodyPartPos(serverVivePlayer.activeBodyPart);
-                Vec3 dir = serverVivePlayer.getBodyPartDir(serverVivePlayer.activeBodyPart).scale(0.6F);
-                this.setPos(pos.x + dir.x, pos.y + dir.y, pos.z + dir.z);
+                // can be shot with the offhand
+                this.setPos(serverVivePlayer.getAimPos(true));
             }
         }
     }

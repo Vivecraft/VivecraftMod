@@ -12,16 +12,16 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ModelUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.mca.MCAHelper;
@@ -345,8 +345,12 @@ public class VRPlayerModel extends PlayerModel {
                 float offset = (rotInfo.leftHanded ? -1F : 1f) * (model.slim ? 0.016F : 0.032F) * Mth.PI * armScale;
 
                 // main hand
-                ModelUtils.pointModelAtLocal(renderState, mainHand, rotInfo.mainHandPos, rotInfo.mainHandQuat,
-                    rotInfo, bodyYaw, isMainPlayer, tempV, tempV2, tempM);
+                ModelUtils.worldToModel(renderState, rotInfo.mainHandPos, rotInfo, bodyYaw, isMainPlayer, tempV);
+                tempV.sub(mainHand.x, mainHand.y, mainHand.z);
+                // move shoulders up when having the arms up, since the rotation point is slightly offset
+                mainHand.y -= 2F * Math.max(0F, -tempV.y / tempV.length());
+
+                ModelUtils.pointAtModelWithLocal(rotInfo.mainHandQuat, bodyYaw, tempV, tempV2, tempM);
 
                 float controllerDist = tempV.length();
 
@@ -372,8 +376,12 @@ public class VRPlayerModel extends PlayerModel {
                 ModelUtils.setRotation(mainHand, tempM, tempV);
 
                 // offhand
-                ModelUtils.pointModelAtLocal(renderState, offHand, rotInfo.offHandPos, rotInfo.offHandQuat,
-                    rotInfo, bodyYaw, isMainPlayer, tempV, tempV2, tempM);
+                ModelUtils.worldToModel(renderState, rotInfo.offHandPos, rotInfo, bodyYaw, isMainPlayer, tempV);
+                tempV.sub(offHand.x, offHand.y, offHand.z);
+                // move shoulders up when having the arms up, since the rotation point is slightly offset
+                offHand.y -= 2F * Math.max(0F, -tempV.y / tempV.length());
+
+                ModelUtils.pointAtModelWithLocal(rotInfo.offHandQuat, bodyYaw, tempV, tempV2, tempM);
 
                 controllerDist = tempV.length();
 

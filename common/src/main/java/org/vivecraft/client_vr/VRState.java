@@ -4,12 +4,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.utils.TextUtils;
+import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
@@ -41,8 +42,18 @@ public class VRState {
      */
     public static boolean VR_RUNNING = false;
 
+    /**
+     * frame delay flag, to show the connecting message
+     */
+    private static boolean FRAME_DELAY = false;
+
     public static void initializeVR() {
         if (VR_INITIALIZED) {
+            return;
+        }
+        if (!FRAME_DELAY) {
+            // delay one frame, to show the connecting message
+            FRAME_DELAY = true;
             return;
         }
         try {
@@ -72,8 +83,12 @@ public class VRState {
             RenderPassManager.setVanillaRenderPass();
 
             dh.vrPlayer = new VRPlayer();
-            for (Tracker t : dh.getTrackers()) {
-                dh.vrPlayer.registerTracker(t);
+
+            if (Xloader.isModLoaded("hapticcraft")) {
+                VRSettings.LOGGER.info(
+                    "Vivecraft: Not activating bHaptics integration, because the official 'HapticCraft' is loaded!");
+            } else {
+                Haptics.connect();
             }
 
             dh.menuWorldRenderer = new MenuWorldRenderer();
@@ -152,22 +167,32 @@ public class VRState {
             dh.menuWorldRenderer = null;
         }
 
+        Haptics.disconnect();
+
         VRShaders.close();
 
         VR_ENABLED = false;
         VR_INITIALIZED = false;
         VR_RUNNING = false;
+        FRAME_DELAY = false;
         if (disableVRSetting) {
             dh.vrSettings.vrEnabled = false;
             dh.vrSettings.saveOptions();
 
             // fixes an issue with DH shaders where the depth texture gets stuck
-            if (Xplat.isModLoaded("distanthorizons")) {
+            if (Xloader.isModLoaded("distanthorizons")) {
                 ShadersHelper.maybeReloadShaders();
             }
 
-            // this reloads any PostChain, at least in vanilla
-            Minecraft.getInstance().levelRenderer.onResourceManagerReload(Minecraft.getInstance().getResourceManager());
+            if (ClientDataHolderVR.getInstance().vrSettings.fullReloadOnInit) {
+                // do a full reload
+                Minecraft.getInstance().reloadResourcePacks();
+            } else {
+                // regenerates the outline target
+                Minecraft.getInstance().levelRenderer.onResourceManagerReload(
+                    Minecraft.getInstance().getResourceManager());
+            }
         }
+        VRClientAPIImpl.INSTANCE.clearPoseHistory();
     }
 }

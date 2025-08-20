@@ -3,9 +3,9 @@ package org.vivecraft.mod_compat_vr.shaders;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.tuple.Triple;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.utils.MathUtils;
@@ -152,20 +152,23 @@ public class ShadersHelper {
         if (IrisHelper.isLoaded()) {
             consumer = IrisHelper::registerPipeline;
         } else if (OptifineHelper.isOptifineLoaded()) {
+            // TODO 1.21.5+ check how optifine handles this, once it is done
             consumer = null;
         }
         if (consumer != null) {
             consumer.accept(VRShaders.CROSSHAIR_WORLD, "ENTITIES");
             consumer.accept(VRShaders.CROSSHAIR_WORLD_ALWAYS, "ENTITIES");
+
             consumer.accept(VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
             consumer.accept(VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
             consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT, "ENTITIES");
             consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES");
             consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, "ENTITIES");
+
             consumer.accept(VRShaders.QUADS, "BASIC");
             consumer.accept(VRShaders.QUADS_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.DEBUG_TRIANGLES_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.DEBUG_TRIANGLE_FAN_ALWAYS, "BASIC");
+            consumer.accept(VRShaders.TRIANGLES_ALWAYS, "BASIC");
+            consumer.accept(VRShaders.TRIANGLE_FAN_ALWAYS, "BASIC");
             consumer.accept(VRShaders.TEXT_NO_CULL, "ENTITIES_TRANSLUCENT");
         }
     }

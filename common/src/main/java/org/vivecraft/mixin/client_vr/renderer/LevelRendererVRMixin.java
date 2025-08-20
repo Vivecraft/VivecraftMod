@@ -8,13 +8,13 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
-import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -34,13 +34,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MultiPassTextureTarget;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
-import org.vivecraft.client_vr.gameplay.trackers.InteractTracker;
+import org.vivecraft.client_vr.gameplay.interact_modules.BlockInteractionModule;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -87,7 +88,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Inject(method = "onResourceManagerReload", at = @At("TAIL"))
     private void vivecraft$reinitVR(ResourceManager resourceManager, CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
-            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
+            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffersMaybe("Resource Reload");
         }
     }
 
@@ -188,10 +189,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
                 this.targets.replace(LevelTargetBundleExtension.HANDS_TARGET_ID,
                     framePass.readsAndWrites(ext.vivecraft$getHands()));
             }
-            // fix vanilla bug https://bugs.mojang.com/browse/MC-278096, is fixed in 1.21.5
-            if (this.targets.clouds != null && this.minecraft.options.getCloudsType() == CloudStatus.OFF) {
-                this.targets.clouds = framePass.readsAndWrites(this.targets.clouds);
-            }
         }
     }
 
@@ -228,15 +225,13 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             OptifineHelper.beginOutlineShader();
         }
 
-        InteractTracker interactTracker = ClientDataHolderVR.getInstance().interactTracker;
+        BlockInteractionModule blockModule = ClientDataHolderVR.getInstance().blockModule;
 
         for (int c = 0; c < 2; c++) {
-            if (interactTracker.isInteractActive(c) &&
-                (interactTracker.inBlockHit[c] != null || interactTracker.bukkit[c]))
-            {
-                BlockPos blockpos = interactTracker.inBlockHit[c] != null ?
-                    interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(
-                    ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+            if (blockModule.isActive(c)) {
+                BlockPos blockpos = blockModule.inBlockHit[c] != null ? blockModule.inBlockHit[c].getBlockPos() :
+                    BlockPos.containing(
+                        ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                 BlockState blockstate = this.level.getBlockState(blockpos);
                 if (sort == ItemBlockRenderTypes.getChunkRenderType(blockstate).sortOnUpload()) {
                     this.renderHitOutline(poseStack,
@@ -340,6 +335,15 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
                 LevelTargetBundleExtension.VR_TARGETS);
         } else {
             return original.call(instance, id, externalTargets);
+        }
+    }
+
+    @Inject(method = "getCloudsTarget", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$getCloudsTarget(CallbackInfoReturnable<RenderTarget> cir) {
+        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
+            ClientDataHolderVR.getInstance().menuWorldRenderer.isRendering())
+        {
+            cir.setReturnValue(null);
         }
     }
 

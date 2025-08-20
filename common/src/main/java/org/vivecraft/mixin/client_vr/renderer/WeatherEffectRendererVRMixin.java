@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(WeatherEffectRenderer.class)
@@ -22,8 +22,7 @@ public class WeatherEffectRendererVRMixin {
             ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT
         ))
         {
-            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER)
-                .getPosition();
+            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.hmd.getPosition();
         } else {
             return cameraPos;
         }
@@ -35,8 +34,7 @@ public class WeatherEffectRendererVRMixin {
             ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT
         ))
         {
-            centerPos.set(
-                ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition());
+            centerPos.set(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.hmd.getPosition());
         }
     }
 

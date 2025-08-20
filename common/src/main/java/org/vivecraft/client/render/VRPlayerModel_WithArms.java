@@ -310,14 +310,17 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
     {
         // position lower
         ModelUtils.worldToModel(renderState, lowerPos, this.rotInfo, this.bodyYaw, this.isMainPlayer, this.tempV);
-        float armLength = 12F;
+        float armLength = 10F;
         if (arm != null) {
-            // reduce arm length to the side, since the model shoulders don't align with human shoulders
+            // increase arm length to the front, feels better, since human shoulders can move forward
             this.tempV.normalize(this.tempV2);
-            armLength -= 2F * this.tempV2.x * this.tempV2.x;
+            armLength += 2F * this.tempV2.z * this.tempV2.z;
         }
         // limit length to 12, no limb stretching, for now
-        float length = this.tempV.distance(upper.x, upper.y, upper.z);
+        this.tempV.sub(upper.x, upper.y, upper.z, this.tempV2);
+        float length = this.tempV2.length();
+        // move shoulders up when having the arms up, since the rotation point is slightly offset
+        upper.y -= 2F * Math.min(1F, length / armLength) * Math.max(0F, -this.tempV2.y / length);
         if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsLimit && length > armLength) {
             this.tempV.sub(upper.x, upper.y, upper.z);
             this.tempV.normalize().mul(armLength);

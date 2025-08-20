@@ -538,7 +538,7 @@ public class PhysicalKeyboard {
         float textScale = 0.002F * this.scale;
 
         // Start building vertices for key boxes
-        RenderType renderType = VRRenderTypes.debugQuads(true);
+        RenderType renderType = VRRenderTypes.quads(true);
         VertexConsumer buf = this.mc.renderBuffers().bufferSource().getBuffer(renderType);
 
         for (KeyButton key : this.keys) {

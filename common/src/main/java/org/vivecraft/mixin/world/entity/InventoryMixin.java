@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
@@ -37,7 +37,7 @@ public class InventoryMixin {
 
     @Unique
     private ItemStack vivecraft$activeItem(ItemStack original) {
-        BodyPart bodyPart = null;
+        VRBodyPart bodyPart = null;
         // server side
         if (this.player instanceof ServerPlayer serverPlayer && ServerConfig.DUAL_WIELDING.get()) {
             if (ServerVRPlayers.isVRPlayer(serverPlayer)) {
@@ -50,13 +50,13 @@ public class InventoryMixin {
         }
         // client side
         else if (this.player.isLocalPlayer() && VRState.VR_RUNNING && ClientNetworking.SERVER_ALLOWS_DUAL_WIELDING) {
-            bodyPart = ClientNetworking.LAST_SENT_BODY_PART;
+            bodyPart = ClientNetworking.getActiveBodyPart();
         }
 
         if (bodyPart != null) {
-            if (bodyPart == BodyPart.OFF_HAND) {
+            if (bodyPart == VRBodyPart.OFF_HAND) {
                 return this.equipment.get(EquipmentSlot.OFFHAND);
-            } else if (bodyPart != BodyPart.MAIN_HAND) {
+            } else if (bodyPart != VRBodyPart.MAIN_HAND && bodyPart != VRBodyPart.HEAD) {
                 // feet
                 return ItemStack.EMPTY;
             }

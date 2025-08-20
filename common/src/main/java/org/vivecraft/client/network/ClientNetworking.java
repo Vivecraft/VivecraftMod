@@ -12,8 +12,11 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.Xplat;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.ClientVRPlayers;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -21,50 +24,74 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
-import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class ClientNetworking {
 
     public static boolean DISPLAYED_CHAT_MESSAGE = false;
     public static boolean DISPLAYED_CHAT_WARNING = false;
+    public static boolean DISPLAYED_HEAD_AIM_WARNING = false;
+    public static boolean DISPLAYED_VR_CHANGES = false;
+    public static boolean ABLE_TO_DISPLAY_CHAT_WARNINGS = false;
+    public static boolean SHOW_NO_TELEPORT_MESSAGE = false;
+
+    public static int CHAT_WARNING_TIMER = -1;
+    public static boolean TELEPORT_WARNING = false;
+    public static boolean VR_SWITCHING_WARNING = false;
+    public static boolean HEAD_AIM_WARNING = false;
+    public static boolean REQUESTED_DAMAGE_DIRECTION = false;
 
     public static boolean SERVER_HAS_VIVECRAFT = false;
 
     public static boolean SERVER_WANTS_DATA = false;
     public static boolean SERVER_SUPPORTS_DIRECT_TELEPORT = false;
+    public static boolean SERVER_ALLOWS_DIRECT_TELEPORT = true;
     public static boolean SERVER_ALLOWS_CLIMBEY = false;
     public static boolean SERVER_ALLOWS_CRAWLING = false;
     public static boolean SERVER_ALLOWS_VR_SWITCHING = false;
     public static boolean SERVER_ALLOWS_DUAL_WIELDING = false;
+    public static boolean SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING = false;
+
+    public static Map<String, String> SERVER_VR_CHANGES_LIST;
 
     // assume a legacy server by default, to not send invalid packets
     public static int USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
     private static float WORLDSCALE_LAST = 0.0F;
     private static float HEIGHT_LAST = 0.0F;
-    private static float CAPTURED_YAW;
-    private static float CAPTURED_PITCH;
-    private static boolean OVERRIDE_ACTIVE;
-    public static BodyPart LAST_SENT_BODY_PART = BodyPart.MAIN_HAND;
+    public static float OVERRIDDEN_YAW;
+    public static float OVERRIDDEN_PITCH;
+    public static boolean OVERRIDE_ACTIVE;
+    private static VRBodyPart LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
+    public static VRBodyPart BODY_PART_CLIENT_OVERRIDE = null;
+    public static boolean IS_LAST_BODY_PART_AIM = false;
 
     public static boolean NEEDS_RESET = true;
 
+    /**
+     * server settings that should be reset on each dimension change/respawn
+     */
     public static void resetServerSettings() {
         WORLDSCALE_LAST = 0.0F;
         HEIGHT_LAST = 0.0F;
         SERVER_HAS_VIVECRAFT = false;
         SERVER_WANTS_DATA = false;
         SERVER_SUPPORTS_DIRECT_TELEPORT = false;
+        SERVER_ALLOWS_DIRECT_TELEPORT = true;
         SERVER_ALLOWS_CLIMBEY = false;
         SERVER_ALLOWS_CRAWLING = false;
         SERVER_ALLOWS_VR_SWITCHING = false;
         SERVER_ALLOWS_DUAL_WIELDING = false;
+        SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING = false;
         USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
+        LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
+        BODY_PART_CLIENT_OVERRIDE = null;
+        IS_LAST_BODY_PART_AIM = false;
 
         // clear VR player data
         ClientVRPlayers.clear();
@@ -75,6 +102,18 @@ public class ClientNetworking {
         }
         // clear server overrides
         ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
+    }
+
+    /**
+     * server settings that should be reset only when connecting to a new server
+     */
+    public static void resetOnceServerSettings() {
+        DISPLAYED_CHAT_MESSAGE = false;
+        DISPLAYED_CHAT_WARNING = false;
+        DISPLAYED_HEAD_AIM_WARNING = false;
+        DISPLAYED_VR_CHANGES = false;
+        SERVER_VR_CHANGES_LIST = null;
+        SHOW_NO_TELEPORT_MESSAGE = false;
     }
 
     public static void sendVersionInfo() {
@@ -194,20 +233,57 @@ public class ClientNetworking {
             VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT).getInt();
     }
 
-    public static void sendActiveHand(InteractionHand hand) {
-        if (SERVER_WANTS_DATA) {
-            sendActiveBodyPart(hand == InteractionHand.MAIN_HAND ? BodyPart.MAIN_HAND : BodyPart.OFF_HAND);
+    /**
+     * resets the active hand to the main hand
+     */
+    public static void resetActiveBodyPart() {
+        sendActiveBodyPart(VRBodyPart.MAIN_HAND, false);
+    }
+
+    /**
+     * sets the active BodyPart to the given {@code hand}, accounts for head aim when the hand is not used as aim
+     *
+     * @param hand      Hand to set active
+     * @param useForAim if this hand should be used to aim
+     */
+    public static void sendActiveHand(InteractionHand hand, boolean useForAim) {
+        if (!useForAim && ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD) {
+            sendActiveBodyPart(VRBodyPart.HEAD, true);
+        } else {
+            sendActiveBodyPart(VRBodyPart.fromInteractionHand(hand), useForAim);
         }
     }
 
-    public static void sendActiveBodyPart(BodyPart bodyPart) {
+    /**
+     * sets the active BodyPart to the given {@code bodyPart}
+     *
+     * @param bodyPart  BodyPart to set active
+     * @param useForAim if this bodyPart should be used to aim
+     */
+    public static void sendActiveBodyPart(VRBodyPart bodyPart, boolean useForAim) {
         if (SERVER_WANTS_DATA) {
+            if ((USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM && bodyPart == VRBodyPart.HEAD) ||
+                (USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
+                    !bodyPart.availableInMode(FBTMode.ARMS_ONLY)
+                ))
+            {
+                // old plugins only support main and offhand
+                bodyPart = VRBodyPart.MAIN_HAND;
+            }
             // only send if the hand is different from last time, don't need to spam packets
             if (bodyPart != LAST_SENT_BODY_PART) {
-                sendServerPacket(new ActiveBodyPartPayloadC2S(bodyPart));
-                LAST_SENT_BODY_PART = bodyPart;
+                sendServerPacket(new ActiveBodyPartPayloadC2S(bodyPart, useForAim));
             }
         }
+        LAST_SENT_BODY_PART = bodyPart;
+        IS_LAST_BODY_PART_AIM = useForAim;
+    }
+
+    /**
+     * @return the active VRBodyPart, accounting for a client only override
+     */
+    public static VRBodyPart getActiveBodyPart() {
+        return BODY_PART_CLIENT_OVERRIDE != null ? BODY_PART_CLIENT_OVERRIDE : LAST_SENT_BODY_PART;
     }
 
     public static void overridePose(LocalPlayer player) {
@@ -216,56 +292,42 @@ public class ClientNetworking {
         }
     }
 
-    public static void overrideLook(Player player, Vec3 view) {
+    public static void overrideLook(Player player, Supplier<Vec3> viewSupplier) {
         if (SERVER_WANTS_DATA) return; // shouldn't be needed, don't tease the anti-cheat.
 
-        CAPTURED_PITCH = player.getXRot();
-        CAPTURED_YAW = player.getYRot();
-        float pitch = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
-        float yaw = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
+        Vec3 view = viewSupplier.get();
+        OVERRIDDEN_PITCH = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
+        OVERRIDDEN_YAW = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
         ((LocalPlayer) player).connection.send(
-            new ServerboundMovePlayerPacket.Rot(yaw, pitch, player.onGround(), player.horizontalCollision));
+            new ServerboundMovePlayerPacket.Rot(OVERRIDDEN_YAW, OVERRIDDEN_PITCH, player.onGround(),
+                player.horizontalCollision));
         OVERRIDE_ACTIVE = true;
     }
 
-    public static void restoreLook(Player player) {
-        if (!SERVER_WANTS_DATA) {
-            if (OVERRIDE_ACTIVE) {
-                ((LocalPlayer) player).connection.send(
-                    new ServerboundMovePlayerPacket.Rot(CAPTURED_YAW, CAPTURED_PITCH, player.onGround(),
-                        player.horizontalCollision));
-                OVERRIDE_ACTIVE = false;
-            }
-        }
+    public static void restoreLook() {
+        OVERRIDE_ACTIVE = false;
     }
 
     public static void handlePacket(VivecraftPayloadS2C s2cPayload) {
         if (s2cPayload instanceof UnknownPayloadS2C) return;
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        Minecraft mc = Minecraft.getInstance();
         switch (s2cPayload.payloadId()) {
             case VERSION -> {
                 SERVER_HAS_VIVECRAFT = true;
                 VRServerPerms.INSTANCE.setTeleportSupported(true);
-                if (VRState.VR_INITIALIZED) {
-                    dataholder.vrPlayer.teleportWarning = false;
-                    dataholder.vrPlayer.vrSwitchWarning = true;
-                }
-                if (!ClientNetworking.DISPLAYED_CHAT_MESSAGE &&
-                    (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS ||
-                        (dataholder.vrSettings.showServerPluginMessage ==
-                            VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()
-                        )
-                    ))
-                {
-                    ClientNetworking.DISPLAYED_CHAT_MESSAGE = true;
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin",
+                TELEPORT_WARNING = false;
+                VR_SWITCHING_WARNING = true;
+                HEAD_AIM_WARNING = true;
+
+                if (!DISPLAYED_CHAT_MESSAGE && dataholder.vrSettings.showServerPluginMessage.getAsBoolean()) {
+                    DISPLAYED_CHAT_MESSAGE = true;
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.serverplugin",
                         ((VersionPayloadS2C) s2cPayload).version()));
                 }
-                if (VRState.VR_ENABLED && dataholder.vrSettings.manualCalibration == -1.0F &&
+                if (VRState.VR_INITIALIZED && dataholder.vrSettings.manualCalibration == -1.0F &&
                     !dataholder.vrSettings.seated)
                 {
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.calibrateheight"));
                 }
             }
             case IS_VR_ACTIVE -> {
@@ -274,10 +336,10 @@ public class ClientNetworking {
                     ClientVRPlayers.getInstance().disableVR(packet.playerID());
                 }
             }
-            case REQUESTDATA -> ClientNetworking.SERVER_WANTS_DATA = true;
+            case REQUESTDATA -> SERVER_WANTS_DATA = true;
             case CLIMBING -> {
                 ClimbingPayloadS2C packet = (ClimbingPayloadS2C) s2cPayload;
-                ClientNetworking.SERVER_ALLOWS_CLIMBEY = packet.allowed();
+                SERVER_ALLOWS_CLIMBEY = packet.allowed();
                 dataholder.climbTracker.serverBlockmode = packet.blockmode();
                 dataholder.climbTracker.blocklist.clear();
 
@@ -291,20 +353,36 @@ public class ClientNetworking {
                     }
                 }
             }
-            case TELEPORT -> ClientNetworking.SERVER_SUPPORTS_DIRECT_TELEPORT = true;
+            case TELEPORT -> {
+                SERVER_SUPPORTS_DIRECT_TELEPORT = true;
+                SERVER_ALLOWS_DIRECT_TELEPORT = ((TeleportPayloadS2C) s2cPayload).allowed();
+                if (!SERVER_ALLOWS_DIRECT_TELEPORT && VRState.VR_INITIALIZED) {
+                    dataholder.vrPlayer.setTeleportOverride(false);
+                    SHOW_NO_TELEPORT_MESSAGE = true;
+                }
+            }
             case UBERPACKET -> {
                 UberPacketPayloadS2C packet = (UberPacketPayloadS2C) s2cPayload;
                 ClientVRPlayers.getInstance()
                     .update(packet.playerID(), packet.state(), packet.worldScale(), packet.heightScale());
             }
             case SETTING_OVERRIDE -> {
-                for (Map.Entry<String, String> override : ((SettingOverridePayloadS2C) s2cPayload).overrides()
-                    .entrySet()) {
+                SettingOverridePayloadS2C overridePayload = (SettingOverridePayloadS2C) s2cPayload;
+                for (Map.Entry<String, String> override : overridePayload.overrides().entrySet()) {
                     String[] split = override.getKey().split("\\.", 2);
 
                     if (dataholder.vrSettings.overrides.hasSetting(split[0])) {
                         VRSettings.ServerOverrides.Setting setting = dataholder.vrSettings.overrides.getSetting(
                             split[0]);
+                        if (overridePayload.clear()) {
+                            setting.resetValue();
+                            if (setting.isFloat()) {
+                                setting.resetValueMin();
+                                setting.resetValueMax();
+                            }
+                            VRSettings.LOGGER.info("Vivecraft: Server setting override cleared: {}", override.getKey());
+                            continue;
+                        }
 
                         try {
                             if (split.length > 1) {
@@ -335,22 +413,46 @@ public class ClientNetworking {
                         }
                     }
                 }
-            }
-            case CRAWL -> ClientNetworking.SERVER_ALLOWS_CRAWLING = true;
-            case NETWORK_VERSION ->
-                ClientNetworking.USED_NETWORK_VERSION = ((NetworkVersionPayloadS2C) s2cPayload).version();
-            case VR_SWITCHING -> {
-                ClientNetworking.SERVER_ALLOWS_VR_SWITCHING = ((VRSwitchingPayloadS2C) s2cPayload).allowed();
-                if (VRState.VR_INITIALIZED) {
-                    if (!ClientNetworking.SERVER_ALLOWS_VR_SWITCHING) {
-                        Minecraft.getInstance().gui.getChat()
-                            .addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
-                    }
-                    dataholder.vrPlayer.vrSwitchWarning = false;
+                if (Minecraft.getInstance().screen != null) {
+                    // reinit screen, since overrides affect some option availability
+                    Minecraft.getInstance().screen.init(Minecraft.getInstance(),
+                        Minecraft.getInstance().getWindow().getGuiScaledWidth(),
+                        Minecraft.getInstance().getWindow().getGuiScaledHeight());
                 }
             }
-            case DUAL_WIELDING ->
-                ClientNetworking.SERVER_ALLOWS_DUAL_WIELDING = ((DualWieldingPayloadS2C) s2cPayload).allowed();
+            case CRAWL -> SERVER_ALLOWS_CRAWLING = true;
+            case NETWORK_VERSION -> {
+                USED_NETWORK_VERSION = ((NetworkVersionPayloadS2C) s2cPayload).version();
+
+                if (USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM) {
+                    HEAD_AIM_WARNING = false;
+                }
+            }
+            case VR_SWITCHING -> {
+                SERVER_ALLOWS_VR_SWITCHING = ((VRSwitchingPayloadS2C) s2cPayload).allowed();
+                if (!SERVER_ALLOWS_VR_SWITCHING) {
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
+                }
+                VR_SWITCHING_WARNING = false;
+            }
+            case DUAL_WIELDING -> SERVER_ALLOWS_DUAL_WIELDING = ((DualWieldingPayloadS2C) s2cPayload).allowed();
+            case SERVER_VR_CHANGES -> SERVER_VR_CHANGES_LIST = ((ServerVrChangesS2CPacket) s2cPayload).changes();
+            case HAPTIC -> {
+                if (VRState.VR_RUNNING) {
+                    HapticPayloadS2C haptic = ((HapticPayloadS2C) s2cPayload);
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(
+                        haptic.bodyPart(),
+                        haptic.duration(),
+                        haptic.frequency(),
+                        haptic.amplitude(),
+                        haptic.delay()
+                    );
+                }
+            }
+            case DAMAGE_DIRECTION ->
+                dataholder.hapticTracker.setLastHitDirection(((DamageDirectionPayloadS2C) s2cPayload).damageDir());
+            case ATTACK_WHILE_BLOCKING ->
+                SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING = ((AttackWhileBlockingPayloadS2C) s2cPayload).allowed();
         }
     }
 }

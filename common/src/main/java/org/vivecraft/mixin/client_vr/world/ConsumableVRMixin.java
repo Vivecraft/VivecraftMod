@@ -26,11 +26,12 @@ public class ConsumableVRMixin {
             if (itemStack.is(Items.POTION) && itemStack.getHoverName().getString().equals("DRINK ME")) {
                 ClientDataHolderVR.getInstance().vrPlayer.wfMode = -0.05;
                 ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
-            } else if (itemStack.get(DataComponents.FOOD) != null &&
-                itemStack.getHoverName().getString().equals("EAT ME"))
-            {
-                ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
-                ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
+            } else if (itemStack.get(DataComponents.FOOD) != null) {
+                ClientDataHolderVR.getInstance().hapticTracker.handleEat(itemStack);
+                if (itemStack.getHoverName().getString().equals("EAT ME")) {
+                    ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
+                    ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
+                }
             }
         }
     }

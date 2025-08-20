@@ -8,6 +8,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
+import org.vivecraft.server.config.ServerConfig;
 
 import java.util.List;
 
@@ -47,5 +48,7 @@ public class ReloadListener implements ResourceManagerReloadListener {
                 VRSettings.LOGGER.error("Vivecraft: error reloading Menuworld:", e);
             }
         }
+        // reinit on reload to update the language
+        ServerConfig.init(null);
     }
 }

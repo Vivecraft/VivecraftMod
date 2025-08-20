@@ -6,10 +6,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 import javax.annotation.Nullable;
 
@@ -26,21 +25,18 @@ public abstract class ResourceLoadStateTrackerMixin {
         if (this.reloadState != null &&
             this.reloadState.reloadReason == ResourceLoadStateTracker.ReloadReason.INITIAL)
         {
-            Xplat.init();
             // init vr after first resource loading
-            try {
-                if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled &&
-                    ClientDataHolderVR.getInstance().vrSettings.rememberVr)
-                {
-                    VRState.VR_ENABLED = true;
-                    VRState.initializeVR();
-                } else {
-                    ClientDataHolderVR.getInstance().vrSettings.vrEnabled = false;
-                    ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                }
-            } catch (Exception exception) {
-                VRSettings.LOGGER.error("Vivecraft: Failed to initialize VR", exception);
+            if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled &&
+                ClientDataHolderVR.getInstance().vrSettings.rememberVr)
+            {
+                VRState.VR_ENABLED = true;
+            } else {
+                ClientDataHolderVR.getInstance().vrSettings.vrEnabled = false;
+                ClientDataHolderVR.getInstance().vrSettings.saveOptions();
             }
+
+            // register api trackers/interacts
+            VRClientAPIImpl.INSTANCE.processRegistrationEvent();
         }
     }
 

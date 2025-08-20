@@ -13,7 +13,6 @@
     "client.gui.screens.JoinMultiplayerScreenMixin",
     "client.gui.screens.ScreenMixin",
     "client.gui.screens.TitleScreenMixin",
-    "client.main.MainMixin",
     "client.model.PlayerCapeModelMixin",
     "client.model.PlayerModelMixin",
     "client.multiplayer.ClientLevelMixin",
@@ -109,6 +108,7 @@
     "server.ServerGamePacketListenerImplMixin",
     "server.ServerPlayerMixin",
     "server.TrackedEntityAccessor",
+    "server.level.ServerPlayerGameModeMixin",
     "server.players.PlayerListMixin",
     "world.entity.InventoryMixin",
     "world.entity.LivingEntityMixin",
@@ -117,12 +117,15 @@
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
     "world.entity.monster.EndermanMixin",
     "world.entity.projectile.AbstractArrowMixin",
+    "world.entity.projectile.AbstractWindChargeMixin",
     "world.entity.projectile.FishingHookMixin",
     "world.entity.projectile.ProjectileDeflectionMixin",
     "world.entity.projectile.ProjectileMixin",
     "world.entity.projectile.ProjectileUtilMixin",
     "world.entity.projectile.ThrowableItemProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
-    "world.item.CrossbowItemMixin"
+    "world.item.CrossbowItemMixin",
+    "world.item.ItemMixin",
+    "world.level.block.FenceGateBlockServerMixin"
   ]
 }

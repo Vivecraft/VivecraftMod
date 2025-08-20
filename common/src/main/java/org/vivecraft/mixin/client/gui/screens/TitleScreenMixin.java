@@ -79,7 +79,10 @@ public abstract class TitleScreenMixin extends Screen {
     private void vivecraft$renderToolTip(
         GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
     {
-        this.vivecraft$updateButton.visible = UpdateChecker.HAS_UPDATE;
+        // some mods cancel the title screen init
+        if (this.vivecraft$updateButton != null) {
+            this.vivecraft$updateButton.visible = UpdateChecker.HAS_UPDATE;
+        }
 
         if (VRState.VR_INITIALIZED && !VRState.VR_RUNNING) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");

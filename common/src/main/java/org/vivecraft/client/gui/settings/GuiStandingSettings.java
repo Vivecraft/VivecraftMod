@@ -1,8 +1,8 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionEntry;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiStandingSettings extends GuiVROptionsBase {
@@ -13,6 +13,7 @@ public class GuiStandingSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_INCREMENT),
         new VROptionEntry(VRSettings.VrOptions.BCB_ON),
         new VROptionEntry(VRSettings.VrOptions.ALLOW_STANDING_ORIGIN_OFFSET),
+        new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_X_SENSITIVITY),
         new VROptionEntry(VRSettings.VrOptions.FORCE_STANDING_FREE_MOVE, true),
         new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
         new VROptionEntry("vivecraft.options.screen.teleport.button", (button, mousePos) -> {

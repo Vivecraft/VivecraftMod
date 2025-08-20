@@ -179,14 +179,14 @@ public class VRShaders {
         .withCull(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
-    public static final RenderPipeline DEBUG_TRIANGLES_ALWAYS = RenderPipeline.builder(
+    public static final RenderPipeline TRIANGLES_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/debug_triangles_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
         .withCull(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
-    public static final RenderPipeline DEBUG_TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
+    public static final RenderPipeline TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/debug_triangle_fan_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_FAN)
@@ -204,7 +204,7 @@ public class VRShaders {
 
     public static final Set<RenderPipeline> DEPTH_ALWAYS_PIPELINES = new HashSet<>(
         Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT,
-            ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, DEBUG_TRIANGLES_ALWAYS));
+            ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
 
     private VRShaders() {}
 

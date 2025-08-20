@@ -9,12 +9,13 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.block.BaseTorchBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.TorchBlock;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -25,7 +26,7 @@ import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.data.ItemTags;
+import org.vivecraft.data.ViveItemTags;
 
 public class VivecraftItemRendering {
     private static final ClientDataHolderVR DH = ClientDataHolderVR.getInstance();
@@ -38,66 +39,70 @@ public class VivecraftItemRendering {
      * @return ItemTransformType that specifies how the item should be rendered
      */
     public static VivecraftItemTransformType getTransformType(ItemStack itemStack, AbstractClientPlayer player) {
-        VivecraftItemTransformType itemTransformType = VivecraftItemTransformType.Item;
+        VivecraftItemTransformType itemTransformType = VivecraftItemTransformType.ITEM;
         Item item = itemStack.getItem();
 
         if (itemStack.getUseAnimation() == ItemUseAnimation.EAT ||
             itemStack.getUseAnimation() == ItemUseAnimation.DRINK)
         {
-            itemTransformType = VivecraftItemTransformType.Noms;
+            itemTransformType = VivecraftItemTransformType.NOMS;
         } else if (item instanceof BlockItem) {
             Block block = ((BlockItem) item).getBlock();
 
-            if (block instanceof TorchBlock) {
-                itemTransformType = VivecraftItemTransformType.Block_Stick;
+            if (block instanceof BaseTorchBlock) {
+                itemTransformType = VivecraftItemTransformType.BLOCK_STICK;
             } else {
                 ResourceLocation modelName = itemStack.get(DataComponents.ITEM_MODEL);
                 if (modelName != null) {
                     ItemModel model = Minecraft.getInstance().getModelManager().getItemModel(modelName);
                     if (model instanceof BlockModelWrapperExtension blockModel && blockModel.vivecraft$isGenerated()) {
-                        return VivecraftItemTransformType.Block_Item;
+                        return VivecraftItemTransformType.BLOCK_ITEM;
                     }
                 }
-                itemTransformType = VivecraftItemTransformType.Block_3D;
+                itemTransformType = VivecraftItemTransformType.BLOCK_3D;
             }
-        } else if (item instanceof MapItem || itemStack.is(ItemTags.VIVECRAFT_MAPS)) {
-            itemTransformType = VivecraftItemTransformType.Map;
+        } else if (item instanceof MapItem || itemStack.is(ViveItemTags.VIVECRAFT_MAPS)) {
+            itemTransformType = VivecraftItemTransformType.MAP;
         } else if (itemStack.getUseAnimation() == ItemUseAnimation.BOW &&
-            !itemStack.is(ItemTags.VIVECRAFT_BOW_EXCLUSION))
+            !itemStack.is(ViveItemTags.VIVECRAFT_BOW_EXCLUSION))
         {
-            itemTransformType = VivecraftItemTransformType.Bow_Seated;
+            itemTransformType = VivecraftItemTransformType.BOW_SEATED;
 
             if (DH.bowTracker.isActive((LocalPlayer) player)) {
-                if (DH.bowTracker.isDrawing) {
-                    itemTransformType = VivecraftItemTransformType.Bow_Roomscale_Drawing;
+                if (DH.bowTracker.isDrawing()) {
+                    itemTransformType = VivecraftItemTransformType.BOW_ROOMSCALE_DRAWING;
                 } else {
-                    itemTransformType = VivecraftItemTransformType.Bow_Roomscale;
+                    itemTransformType = VivecraftItemTransformType.BOW_ROOMSCALE;
                 }
             }
         } else if (itemStack.getUseAnimation() == ItemUseAnimation.TOOT_HORN) {
-            itemTransformType = VivecraftItemTransformType.Horn;
-        } else if (item instanceof MaceItem || itemStack.is(ItemTags.VIVECRAFT_MACES)) {
-            itemTransformType = VivecraftItemTransformType.Mace;
-        } else if (itemStack.is(net.minecraft.tags.ItemTags.SWORDS) || itemStack.is(ItemTags.VIVECRAFT_SWORDS)) {
-            itemTransformType = VivecraftItemTransformType.Sword;
-        } else if (item instanceof ShieldItem || itemStack.is(ItemTags.VIVECRAFT_SHIELDS)) {
-            itemTransformType = VivecraftItemTransformType.Shield;
-        } else if (item instanceof TridentItem || itemStack.is(ItemTags.VIVECRAFT_SPEARS)) {
-            itemTransformType = VivecraftItemTransformType.Spear;
-        } else if (item instanceof CrossbowItem || itemStack.is(ItemTags.VIVECRAFT_CROSSBOWS)) {
-            itemTransformType = VivecraftItemTransformType.Crossbow;
-        } else if (item instanceof CompassItem || item == Items.CLOCK || itemStack.is(ItemTags.VIVECRAFT_COMPASSES)) {
-            itemTransformType = VivecraftItemTransformType.Compass;
+            itemTransformType = VivecraftItemTransformType.HORN;
+        } else if (itemStack.is(ViveItemTags.VIVECRAFT_ROTATED_TOOLS)) {
+            itemTransformType = VivecraftItemTransformType.ROTATED_TOOL;
+        } else if (item instanceof MaceItem || itemStack.is(ViveItemTags.VIVECRAFT_MACES)) {
+            itemTransformType = VivecraftItemTransformType.MACE;
+        } else if (itemStack.is(ItemTags.SWORDS) || itemStack.is(ViveItemTags.VIVECRAFT_SWORDS)) {
+            itemTransformType = VivecraftItemTransformType.SWORD;
+        } else if (item instanceof ShieldItem || itemStack.is(ViveItemTags.VIVECRAFT_SHIELDS)) {
+            itemTransformType = VivecraftItemTransformType.SHIELD;
+        } else if (item instanceof TridentItem || itemStack.is(ViveItemTags.VIVECRAFT_SPEARS)) {
+            itemTransformType = VivecraftItemTransformType.SPEAR;
+        } else if (item instanceof CrossbowItem || itemStack.is(ViveItemTags.VIVECRAFT_CROSSBOWS)) {
+            itemTransformType = VivecraftItemTransformType.CROSSBOW;
+        } else if (item instanceof CompassItem || item == Items.CLOCK ||
+            itemStack.is(ViveItemTags.VIVECRAFT_COMPASSES))
+        {
+            itemTransformType = VivecraftItemTransformType.COMPASS;
         } else if (SwingTracker.isTool(itemStack)) {
-            itemTransformType = VivecraftItemTransformType.Tool;
+            itemTransformType = VivecraftItemTransformType.TOOL;
 
             if (item instanceof FoodOnAStickItem || item instanceof FishingRodItem ||
-                itemStack.is(ItemTags.VIVECRAFT_FISHING_RODS))
+                itemStack.is(ViveItemTags.VIVECRAFT_FISHING_RODS))
             {
-                itemTransformType = VivecraftItemTransformType.Tool_Rod;
+                itemTransformType = VivecraftItemTransformType.TOOL_ROD;
             }
         } else if (TelescopeTracker.isTelescope(itemStack)) {
-            itemTransformType = VivecraftItemTransformType.Telescope;
+            itemTransformType = VivecraftItemTransformType.TELESCOPE;
         }
         return itemTransformType;
     }
@@ -170,12 +175,12 @@ public class VivecraftItemRendering {
         rotation.mul(Axis.XP.rotationDegrees(-110.0F + gunAngle));
 
         switch (itemTransformType) {
-            case Bow_Seated -> {
+            case BOW_SEATED -> {
                 rotation.mul(Axis.XP.rotationDegrees(90.0F - gunAngle));
                 translateY += -0.1F;
                 translateZ += 0.1F;
             }
-            case Bow_Roomscale -> {
+            case BOW_ROOMSCALE -> {
                 preRotation.set(rotation);
                 rotation.identity();
                 translateX -= 0.0225F;
@@ -183,7 +188,7 @@ public class VivecraftItemRendering {
                 translateZ += 0.025F + 0.03F * gunAngle / 40.0F;
                 scale = 1.0F;
             }
-            case Bow_Roomscale_Drawing -> {
+            case BOW_ROOMSCALE_DRAWING -> {
                 // here there be dragons
                 // reset
                 rotation.identity();
@@ -259,21 +264,21 @@ public class VivecraftItemRendering {
                 translateY += 0.1225F;
                 translateZ += 0.16F;
             }
-            case Crossbow -> {
+            case CROSSBOW -> {
                 rotation = Axis.YP.rotationDegrees(10.0F);
                 translateX += 0.01F;
                 translateZ -= 0.02F;
                 translateY -= 0.02F;
                 scale = 0.5F;
             }
-            case Map -> {
+            case MAP -> {
                 rotation = Axis.XP.rotationDegrees(-45.0F);
                 translateX = 0.0F;
                 translateY = 0.16F;
                 translateZ = -0.075f;
                 scale = 0.75F;
             }
-            case Noms -> {
+            case NOMS -> {
                 rotation = Axis.ZP.rotationDegrees(180.0F);
                 rotation.mul(Axis.XP.rotationDegrees(-135.0F));
                 translateX += 0.08F;
@@ -281,36 +286,36 @@ public class VivecraftItemRendering {
                 translateZ += 0.02F + 0.006F * Mth.sin(player.getUseItemRemainingTicks());
                 scale = 0.4F;
             }
-            case Item, Block_Item -> {
+            case ITEM, BLOCK_ITEM -> {
                 rotation = Axis.ZP.rotationDegrees(180.0F);
                 rotation.mul(Axis.XP.rotationDegrees(-135.0F));
                 translateX += 0.08F;
                 translateZ += -0.08F;
                 scale = 0.4F;
             }
-            case Compass -> {
+            case COMPASS -> {
                 rotation = Axis.YP.rotationDegrees(90.0F);
                 rotation.mul(Axis.XP.rotationDegrees(25.0F));
                 scale = 0.4F;
             }
-            case Block_3D -> {
+            case BLOCK_3D -> {
                 translateX += 0.05F;
                 translateZ -= 0.1F;
-                rotation.mul(Axis.XP.rotationDegrees(90));
+                rotation.mul(Axis.XP.rotationDegrees(90 - gunAngle));
                 scale = 0.3F;
             }
-            case Block_Stick -> {
+            case BLOCK_STICK -> {
                 rotation = Axis.XP.rotationDegrees(-45.0F + gunAngle);
                 translateY += -0.105F + 0.06F * gunAngle / 40.0F;
                 translateZ -= 0.1F;
             }
-            case Horn -> {
+            case HORN -> {
                 rotation = Axis.XP.rotationDegrees(-45.0F + gunAngle);
                 translateY += -0.105F + 0.06F * gunAngle / 40.0F;
                 translateZ -= 0.1F;
                 scale = 0.3F;
             }
-            case Shield -> {
+            case SHIELD -> {
                 int side = mainHand ? 1 : -1;
                 if (DH.vrSettings.reverseHands) {
                     side *= -1;
@@ -354,7 +359,7 @@ public class VivecraftItemRendering {
                 }
                 rotation.mul(Axis.YP.rotationDegrees(side * -90.0F));
             }
-            case Spear -> {
+            case SPEAR -> {
                 rotation.identity();
                 translateX -= 0.135F;
                 translateZ += 0.575F;
@@ -410,20 +415,25 @@ public class VivecraftItemRendering {
                 rotation.mul(Axis.XP.rotationDegrees(-65.0F));
                 translateZ += -0.75F + progress / 10.0F * 0.25F;
             }
-            case Tool_Rod -> {
+            case TOOL_ROD -> {
                 rotation.mul(Axis.XP.rotationDegrees(40.0F));
                 translateY += -0.02F + gunAngle / 40.0F * 0.1F;
                 translateX += 0.05F;
                 translateZ -= 0.15F;
                 scale = 0.8F;
             }
-            case Tool -> {
-                if (itemStack.getItem() instanceof ArrowItem || itemStack.is(ItemTags.VIVECRAFT_ARROWS)) {
+            case ROTATED_TOOL -> {
+                rotation.mul(Axis.XP.rotationDegrees(90.0F));
+                translateY += -0.125F + gunAngle / 40.0F * 0.1F;
+                translateZ -= 0.1F;
+            }
+            case TOOL -> {
+                if (itemStack.getItem() instanceof ArrowItem || itemStack.is(ViveItemTags.VIVECRAFT_ARROWS)) {
                     preRotation = Axis.ZP.rotationDegrees(-180.0F);
                     rotation.mul(Axis.XP.rotationDegrees(-gunAngle));
                 }
             }
-            case Telescope -> {
+            case TELESCOPE -> {
                 preRotation.identity();
                 rotation.identity();
                 scale *= 0.625F;
@@ -431,7 +441,7 @@ public class VivecraftItemRendering {
                 translateY = 0.0F;
                 translateZ = -0.1F * scale;
             }
-            case Mace -> {
+            case MACE -> {
                 preRotation = Axis.XP.rotationDegrees(gunAngle);
                 rotation = rotation.mul(Axis.XP.rotationDegrees(-gunAngle));
                 translateX = 0.0F;
@@ -450,24 +460,25 @@ public class VivecraftItemRendering {
     }
 
     public enum VivecraftItemTransformType {
-        Item,
-        Block_3D,
-        Block_Stick,
-        Block_Item,
-        Shield,
-        Sword,
-        Tool,
-        Tool_Rod,
-        Bow_Seated,
-        Bow_Roomscale,
-        Bow_Roomscale_Drawing,
-        Spear,
-        Map,
-        Noms,
-        Crossbow,
-        Telescope,
-        Compass,
-        Horn,
-        Mace
+        ITEM,
+        BLOCK_3D,
+        BLOCK_STICK,
+        BLOCK_ITEM,
+        SHIELD,
+        SWORD,
+        TOOL,
+        TOOL_ROD,
+        BOW_SEATED,
+        BOW_ROOMSCALE,
+        BOW_ROOMSCALE_DRAWING,
+        SPEAR,
+        MAP,
+        NOMS,
+        CROSSBOW,
+        TELESCOPE,
+        COMPASS,
+        HORN,
+        MACE,
+        ROTATED_TOOL
     }
 }
