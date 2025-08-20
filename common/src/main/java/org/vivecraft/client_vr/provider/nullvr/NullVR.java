@@ -182,6 +182,8 @@ public class NullVR extends MCVR {
 
             Profiler.get().popPush("hmdSampling");
             this.hmdSampling();
+
+            Profiler.get().pop();
         }
     }
 
