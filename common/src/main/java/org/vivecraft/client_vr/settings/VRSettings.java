@@ -1645,7 +1645,15 @@ public class VRSettings {
         VR_SETTINGS_BUTTON_POSITION(false, true, "vivecraft.options.left",
             "vivecraft.options.right"), // setting button position
         MODIFY_PAUSE_MENU(false, true), // if the pause menu should be altered
-        FULL_RELOAD_ON_INIT(false, true), // causes a full resource reload on reinit
+        FULL_RELOAD_ON_INIT(false, true) { // causes a full resource reload on reinit
+
+            @Override
+            void onOptionChange() {
+                if (VRState.VR_INITIALIZED) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Reload on init changed");
+                }
+            }
+        },
         SEARCH_TYPE(false, true, "vivecraft.options.searchtype.fuzzy", "vivecraft.options.searchtype.exact"),
         // HMD/render
         FSAA(false, true) { // Lanczos Scaler
