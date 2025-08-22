@@ -22,7 +22,6 @@ import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.StencilHelper;
-import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.WindowExtension;
@@ -34,6 +33,7 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.resolutioncontrol.ResolutionControlHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
@@ -848,15 +848,9 @@ public abstract class VRRenderer {
                 }
             }
 
-            try {
-                minecraft.mainRenderTarget = this.framebufferVrRender;
-                minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
-            } catch (Exception exception) {
-                VRSettings.LOGGER.error("Vivecraft: Shader creation failed:", exception);
-                throw new RenderConfigException(
-                    Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
-                    TextUtils.throwableToComponent(exception));
-            }
+            RenderPassManager.setWorldRenderPass(WorldRenderPass.STEREO_XR);
+            // update post effect chain
+            minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
 
             if (minecraft.screen != null) {
                 int w = minecraft.getWindow().getGuiScaledWidth();
