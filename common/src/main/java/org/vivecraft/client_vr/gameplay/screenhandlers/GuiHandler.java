@@ -107,9 +107,9 @@ public class GuiHandler {
     public static Vector3f GUI_POS_ROOM = null;
     public static Matrix4f GUI_ROTATION_ROOM = null;
 
-    public static Vec3 GUI_POS_WORLD = Vec3.ZERO;
+    public static Vector3f GUI_RENDER_POS_ROOM = null;
     public static Vector3f GUI_OFFSET_LOCAL = new Vector3f();
-    public static Matrix4f GUI_ROTATION_WORLD = new Matrix4f();
+    public static Matrix4f GUI_RENDER_ROTATION_ROOM = new Matrix4f();
 
     public static Matrix4f GUI_ROTATION_PLAYER_MODEL = new Matrix4f();
     public static Vec3 GUI_POS_PLAYER_MODEL = Vec3.ZERO;
@@ -689,9 +689,10 @@ public class GuiHandler {
         poseMatrix.scale(thescale, thescale, thescale);
 
         GUI_SCALE_APPLIED = thescale;
-        GUI_POS_WORLD = guipos;
-        GUI_ROTATION_WORLD.set(guirot);
         GUI_OFFSET_LOCAL.set(guilocal);
+
+        GUI_RENDER_POS_ROOM = VRPlayer.worldToRoomPos(guipos, DH.vrPlayer.vrdata_world_render);
+        GUI_RENDER_ROTATION_ROOM.rotationY(-DH.vrPlayer.vrdata_world_render.rotation_radians).mul(guirot);
 
         Profiler.get().pop();
 
