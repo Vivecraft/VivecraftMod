@@ -162,6 +162,8 @@ public class VRState {
             dh.vrRenderer.destroy();
             dh.vrRenderer = null;
         }
+        // there are no other renderpasses anymore
+        RenderPassManager.setVanillaRenderPass();
         if (dh.menuWorldRenderer != null) {
             dh.menuWorldRenderer.completeDestroy();
             dh.menuWorldRenderer = null;
