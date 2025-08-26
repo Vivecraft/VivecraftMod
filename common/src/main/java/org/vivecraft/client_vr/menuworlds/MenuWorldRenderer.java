@@ -1274,17 +1274,17 @@ public class MenuWorldRenderer {
                 float distance = starPoint.lengthSquared();
                 if (distance <= 0.010000001F || distance >= 1.0F) continue;
 
-                starPoint = starPoint.normalize(starDistance);
+                starPoint.normalize(starDistance);
                 float starRotation = (float) (randomSource.nextDouble() * Math.PI * 2.0);
 
-                Quaternionf quaternionf = new Quaternionf()
-                    .rotateTo(new Vector3f(0.0F, 0.0F, -1.0F), starPoint)
-                    .rotateZ(starRotation);
+                Matrix3f rotation = new Matrix3f()
+                    .rotateTowards(starPoint.negate(new Vector3f()), new Vector3f(0.0f, 1.0f, 0.0f))
+                    .rotateZ(-starRotation);
 
-                bufferBuilder.addVertex(starPoint.add(new Vector3f(starSize, -starSize, 0.0F).rotate(quaternionf)));
-                bufferBuilder.addVertex(starPoint.add(new Vector3f(starSize, starSize, 0.0F).rotate(quaternionf)));
-                bufferBuilder.addVertex(starPoint.add(new Vector3f(-starSize, starSize, 0.0F).rotate(quaternionf)));
-                bufferBuilder.addVertex(starPoint.add(new Vector3f(-starSize, -starSize, 0.0F).rotate(quaternionf)));
+                bufferBuilder.addVertex(new Vector3f(starSize, -starSize, 0.0f).mul(rotation).add(starPoint));
+                bufferBuilder.addVertex(new Vector3f(starSize, starSize, 0.0f).mul(rotation).add(starPoint));
+                bufferBuilder.addVertex(new Vector3f(-starSize, starSize, 0.0f).mul(rotation).add(starPoint));
+                bufferBuilder.addVertex(new Vector3f(-starSize, -starSize, 0.0f).mul(rotation).add(starPoint));
             }
             try (MeshData meshData = bufferBuilder.buildOrThrow()) {
                 this.starIndexCount = meshData.drawState().indexCount();
