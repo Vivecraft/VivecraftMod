@@ -255,9 +255,7 @@ public class DebugRenderHelper {
      * @param data     VRData to get camera position from
      * @param pose     VRDevicePose to ge the orientation and position from.
      */
-    private static void addAxes(
-        VertexConsumer consumer, VRData data, VRData.VRDevicePose pose)
-    {
+    private static void addAxes(VertexConsumer consumer, VRData data, VRData.VRDevicePose pose) {
         Vector3f position = pose.getPosition().subtract(data.getEye(DATA_HOLDER.currentPass).getPosition())
             .toVector3f();
 
@@ -280,9 +278,7 @@ public class DebugRenderHelper {
      * @param devicePos device position, relative to the player
      * @param rot       device rotation
      */
-    private static void addAxes(
-        VertexConsumer consumer, Vector3fc playerPos, Vector3fc devicePos, Quaternionfc rot)
-    {
+    private static void addAxes(VertexConsumer consumer, Vector3fc playerPos, Vector3fc devicePos, Quaternionfc rot) {
         addAxes(consumer, playerPos, devicePos, rot.transform(MathUtils.BACK, new Vector3f()), rot);
     }
 
@@ -296,8 +292,7 @@ public class DebugRenderHelper {
      * @param rot       device rotation
      */
     private static void addAxes(
-        VertexConsumer consumer, Vector3fc playerPos, Vector3fc devicePos, Vector3fc dir,
-        Quaternionfc rot)
+        VertexConsumer consumer, Vector3fc playerPos, Vector3fc devicePos, Vector3fc dir, Quaternionfc rot)
     {
         Vector3f position = playerPos.add(devicePos, new Vector3f());
 
@@ -320,8 +315,7 @@ public class DebugRenderHelper {
      * @param dir      line end, relative to {@code position}
      * @param color    line color
      */
-    private static void addLine(VertexConsumer consumer, Vector3fc position, Vector3fc dir, Vector3fc color)
-    {
+    private static void addLine(VertexConsumer consumer, Vector3fc position, Vector3fc dir, Vector3fc color) {
         consumer.addVertex(position.x(), position.y(), position.z())
             .setColor(color.x(), color.y(), color.z(), 0.0F);
         consumer.addVertex(position.x(), position.y(), position.z())
@@ -453,9 +447,7 @@ public class DebugRenderHelper {
      * @param rot  rotation the text should look at
      * @param text text to render
      */
-    public static void renderTextAtRelativePosition(
-        float x, float y, float z, Quaternionf rot, String text)
-    {
+    public static void renderTextAtRelativePosition(float x, float y, float z, Quaternionf rot, String text) {
         renderTextAtRelativePosition(x, y, z, rot, Component.literal(text));
     }
 
@@ -468,9 +460,7 @@ public class DebugRenderHelper {
      * @param rot  rotation the text should look at
      * @param text text to render
      */
-    public static void renderTextAtRelativePosition(
-        float x, float y, float z, Quaternionf rot, Component text)
-    {
+    public static void renderTextAtRelativePosition(float x, float y, float z, Quaternionf rot, Component text) {
         Matrix4f matrix = new Matrix4f();
         matrix.translate(x, y + 0.05F, z);
         matrix.rotate(rot);
@@ -539,9 +529,7 @@ public class DebugRenderHelper {
      * @param radius  circle radius
      * @param color   circle color
      */
-    public static void renderCircle(
-        Vector3fc center, Vector3fc forward, float radius, Vector3fc color)
-    {
+    public static void renderCircle(Vector3fc center, Vector3fc forward, float radius, Vector3fc color) {
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
 
         addCircle(vertexConsumer, center, forward, radius, color);

@@ -459,7 +459,7 @@ public class ShaderHelper {
             }
         }
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance()
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_PIPELINE.getVertexFormat());
 
         // position quad
@@ -468,12 +468,12 @@ public class ShaderHelper {
         float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().viewWidth * 2F;
         float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().viewHeight * 2F;
 
-        bufferbuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, yMin);
-        bufferbuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, yMin);
-        bufferbuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, yMax);
-        bufferbuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, yMax);
+        bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, yMin);
+        bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, yMin);
+        bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, yMax);
+        bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, yMax);
 
-        try (MeshData meshData = bufferbuilder.buildOrThrow()) {
+        try (MeshData meshData = bufferBuilder.buildOrThrow()) {
             GpuBuffer gpuBuffer = VRShaders.BLIT_VR_PIPELINE.getVertexFormat()
                 .uploadImmediateVertexBuffer(meshData.vertexBuffer());
 
