@@ -156,7 +156,7 @@ public class MenuWorldRenderer {
             16, 16, 1, 1);
         this.lightMap.setTextureFilter(FilterMode.LINEAR, false);
         this.lightMapView = RenderSystem.getDevice().createTextureView(this.lightMap);
-        RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.lightMap, -1);
+        RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.lightMap, 0xFFFFFFFF);
         this.lightMapUbo = new MappableRingBuffer(() -> "Menuworld Lightmap UBO",
             GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
             new Std140SizeCalculator().putFloat().putFloat().putFloat().putInt().putFloat().putFloat().putFloat()

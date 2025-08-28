@@ -51,7 +51,7 @@ public class MirrorNotification {
 
             if (MIRROR_NOTIFY_CLEAR) {
                 RenderSystem.getDevice().createCommandEncoder()
-                    .clearColorTexture(MC.mainRenderTarget.getColorTexture(), 0);
+                    .clearColorTexture(MC.mainRenderTarget.getColorTexture(), 0xFF000000);
             }
 
             final int TEXT_WORDWRAP_LEN = screenX / 22;

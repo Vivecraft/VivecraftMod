@@ -738,6 +738,7 @@ public abstract class VRRenderer {
                 .withSize(
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()))
+                .withClearColor(0F, 0F, 0F, 1F)
                 .build();
 
             GuiHandler.updateResolution();
@@ -777,24 +778,19 @@ public abstract class VRRenderer {
             this.telescopeFramebufferR = VRTextureTarget.builder("TelescopeR")
                 .withSize(telescopeSize.getA(), telescopeSize.getB())
                 .withDepth()
+                .withClearColor(0F, 0F, 0F, 1F)
                 .build();
             WorldRenderPass.RIGHT_TELESCOPE = new WorldRenderPass(this.telescopeFramebufferR);
             VRSettings.LOGGER.info("Vivecraft: {}", this.telescopeFramebufferR);
-
-            RenderSystem.getDevice().createCommandEncoder()
-                .clearColorAndDepthTextures(this.telescopeFramebufferR.getColorTexture(), 0xFF000000,
-                    this.telescopeFramebufferR.getDepthTexture(), 1F);
             RenderHelper.checkGLError("TelescopeR framebuffer setup");
 
             this.telescopeFramebufferL = VRTextureTarget.builder("TelescopeL")
                 .withSize(telescopeSize.getA(), telescopeSize.getB())
                 .withDepth()
+                .withClearColor(0F, 0F, 0F, 1F)
                 .build();
             WorldRenderPass.LEFT_TELESCOPE = new WorldRenderPass(this.telescopeFramebufferL);
             VRSettings.LOGGER.info("Vivecraft: {}", this.telescopeFramebufferL);
-            RenderSystem.getDevice().createCommandEncoder()
-                .clearColorAndDepthTextures(this.telescopeFramebufferL.getColorTexture(), 0xFF000000,
-                    this.telescopeFramebufferL.getDepthTexture(), 1F);
             RenderHelper.checkGLError("TelescopeL framebuffer setup");
 
             Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);

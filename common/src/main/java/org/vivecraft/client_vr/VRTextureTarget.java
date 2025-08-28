@@ -7,11 +7,16 @@ import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
 import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.GlDeviceExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
+
+import javax.annotation.Nullable;
 
 /**
  * extension of a regular RenderTarget that sets Vivecraft features on creation
@@ -20,15 +25,19 @@ public class VRTextureTarget extends RenderTarget {
 
     public boolean anisotropicFiltering;
 
+    @Nullable
+    private final Vector4fc clearColor;
+
     private VRTextureTarget(
         String name, int width, int height, boolean useDepth, int texId, boolean linearFilter, boolean mipmaps,
-        boolean anisotropicFiltering, boolean useStencil)
+        boolean anisotropicFiltering, boolean useStencil, @Nullable Vector4fc clearColor)
     {
         super(name, useDepth);
         RenderSystem.assertOnRenderThread();
         ((RenderTargetExtension) this).vivecraft$setLinearFilter(linearFilter);
         ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
         this.anisotropicFiltering = anisotropicFiltering;
+        this.clearColor = clearColor;
 
         // need to set this first, because the forge/neoforge stencil enabled does a resize
         this.viewWidth = width;
@@ -62,6 +71,18 @@ public class VRTextureTarget extends RenderTarget {
     @Override
     public void createBuffers(int width, int height) {
         super.createBuffers(width, height);
+
+        if (this.clearColor != null) {
+            if (this.useDepth) {
+                RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(this.colorTexture,
+                    ARGB.colorFromFloat(this.clearColor.w(), this.clearColor.x(), this.clearColor.y(),
+                        this.clearColor.z()), this.depthTexture, 1.0);
+            } else {
+                RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.colorTexture,
+                    ARGB.colorFromFloat(this.clearColor.w(), this.clearColor.x(), this.clearColor.y(),
+                        this.clearColor.z()));
+            }
+        }
 
         if (((RenderTargetExtension) this).vivecraft$hasMipmaps()) {
             if (this.anisotropicFiltering) {
@@ -105,6 +126,8 @@ public class VRTextureTarget extends RenderTarget {
 
         private boolean stencil;
 
+        private Vector4f clearColor;
+
         private Builder(String name) {
             this.name = name;
         }
@@ -145,6 +168,11 @@ public class VRTextureTarget extends RenderTarget {
             return this;
         }
 
+        public Builder withClearColor(float red, float green, float blue, float alpha) {
+            this.clearColor = new Vector4f(red, green, blue, alpha);
+            return this;
+        }
+
         public VRTextureTarget build() {
             if (this.width <= 0 || this.height <= 0) {
                 throw new IllegalArgumentException("Width and height must be greater than 0");
@@ -157,7 +185,8 @@ public class VRTextureTarget extends RenderTarget {
                 this.linearFilter,
                 this.mipmaps,
                 this.anisotropicFiltering,
-                this.stencil);
+                this.stencil,
+                this.clearColor);
         }
     }
 }
