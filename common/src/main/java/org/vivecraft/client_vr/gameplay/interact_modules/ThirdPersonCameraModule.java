@@ -4,7 +4,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.HeldInteractModule;
 import org.vivecraft.api.client.data.RenderPass;
@@ -14,6 +13,8 @@ import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+
+import javax.annotation.Nullable;
 
 public class ThirdPersonCameraModule implements DebugRenderModule, HeldInteractModule {
 

@@ -5,13 +5,14 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api.client.HeldInteractModule;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.common.network.packet.c2s.DrawPayloadC2S;
+
+import javax.annotation.Nullable;
 
 /**
  * the bow interact module handles the key presses and sending of use packets for the {@link BowTracker}

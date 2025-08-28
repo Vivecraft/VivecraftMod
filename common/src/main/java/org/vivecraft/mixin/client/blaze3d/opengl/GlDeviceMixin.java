@@ -4,13 +4,13 @@ import com.mojang.blaze3d.GpuOutOfMemoryException;
 import com.mojang.blaze3d.opengl.*;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL30C;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.vivecraft.client.extensions.GlDeviceExtension;
 
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 @Mixin(GlDevice.class)
