@@ -844,7 +844,7 @@ public abstract class VRRenderer {
                 }
             }
 
-            RenderPassManager.setWorldRenderPass(WorldRenderPass.STEREO_XR);
+            RenderPassManager.setGUIRenderPass();
             // update post effect chain
             minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
 
