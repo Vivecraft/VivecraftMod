@@ -812,9 +812,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(this.player, false, false);
             }
             // release mouse when switching to standing
-            if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
+            if (!ClientDataHolderVR.getInstance().vrSettings.seated || this.screen != null || this.level == null) {
                 InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
                     this.mouseHandler.xpos(), this.mouseHandler.ypos());
+                this.mouseHandler.onMove(this.window.getWindow(), this.mouseHandler.xpos(), this.mouseHandler.ypos());
             }
         } else {
             // VR got disabled
@@ -838,16 +839,20 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 this.gameRenderer.checkEntityPostEffect(
                     this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
             }
+
+            // scale vr mouse position to the window position
+            double mouseX = this.mouseHandler.xpos() / (double) GuiHandler.GUI_WIDTH * this.window.getScreenWidth();
+            double mouseY = this.mouseHandler.ypos() / (double) GuiHandler.GUI_HEIGHT * this.window.getScreenHeight();
+
             if (this.screen != null || this.level == null) {
                 // release mouse
+                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseX, mouseY);
+                this.mouseHandler.onMove(this.window.getWindow(), mouseX, mouseY);
                 this.mouseHandler.releaseMouse();
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
-                    this.mouseHandler.xpos(), this.mouseHandler.ypos());
             } else {
                 // grab mouse when in a menu
+                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_DISABLED, mouseX, mouseY);
                 this.mouseHandler.grabMouse();
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_DISABLED,
-                    this.mouseHandler.xpos(), this.mouseHandler.ypos());
             }
         }
 
