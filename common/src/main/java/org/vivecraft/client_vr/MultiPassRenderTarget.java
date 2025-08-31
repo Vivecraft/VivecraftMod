@@ -7,7 +7,6 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-import java.util.EnumMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -17,9 +16,9 @@ import java.util.function.Function;
 public class MultiPassRenderTarget extends RenderTarget {
 
     private final RenderTarget mainTarget;
-    private final EnumMap<RenderPass, RenderTarget> vrTargets;
+    private final Function<RenderPass, RenderTarget> vrTargets;
 
-    public MultiPassRenderTarget(String name, RenderTarget mainTarget, EnumMap<RenderPass, RenderTarget> vrTargets) {
+    public MultiPassRenderTarget(String name, RenderTarget mainTarget, Function<RenderPass, RenderTarget> vrTargets) {
         super(name, mainTarget.useDepth);
         this.mainTarget = mainTarget;
         this.vrTargets = vrTargets;
@@ -99,8 +98,11 @@ public class MultiPassRenderTarget extends RenderTarget {
 
     private void callOnAllTargets(Consumer<RenderTarget> consumer) {
         consumer.accept(this.mainTarget);
-        for (RenderTarget target : this.vrTargets.values()) {
-            consumer.accept(target);
+        for (RenderPass pass : RenderPass.values()) {
+            RenderTarget target = this.vrTargets.apply(pass);
+            if (target != null) {
+                consumer.accept(target);
+            }
         }
     }
 
@@ -111,7 +113,9 @@ public class MultiPassRenderTarget extends RenderTarget {
         if (RenderPassType.isVanilla()) {
             return this.mainTarget;
         } else {
-            return this.vrTargets.get(ClientDataHolderVR.getInstance().currentPass);
+            // return the vanilla target if the pass one is null
+            RenderTarget target = this.vrTargets.apply(ClientDataHolderVR.getInstance().currentPass);
+            return target != null ? target : this.mainTarget;
         }
     }
 }
