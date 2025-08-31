@@ -180,6 +180,8 @@ public class NullVR extends MCVR {
                 }
             }
 
+            Profiler.get().popPush("processInputs");
+            this.processInputs();
             Profiler.get().popPush("hmdSampling");
             this.hmdSampling();
 
@@ -188,7 +190,9 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public void processInputs() {}
+    public void processInputs() {
+        this.ignorePressesNextFrame = false;
+    }
 
     @Override
     protected ControllerType findActiveBindingControllerType(KeyMapping keyMapping) {
