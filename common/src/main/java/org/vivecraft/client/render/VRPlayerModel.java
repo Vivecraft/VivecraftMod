@@ -499,6 +499,7 @@ public class VRPlayerModel extends PlayerModel {
             vrModel.rotInfo = rotInfo;
             vrModel.mainArm = mainArm;
             vrModel.attackArm = attackArm;
+            vrModel.attackTime = renderState.attackTime;
             vrModel.bodyYaw = bodyYaw;
             vrModel.laying = laying;
             vrModel.layAmount = layAmount;
