@@ -5,12 +5,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.material.FogType;
-import org.joml.Matrix4f;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.common.utils.MathUtils;
 
 /**
  * an extension of the Camera, to correctly set up the camera position for the current pass
@@ -41,15 +39,9 @@ public class XRCamera extends Camera {
 
         VRData.VRDevicePose eye = dataholder.vrPlayer.getVRDataWorld().getEye(renderpass);
         this.setPosition(eye.getPosition());
-        this.xRot = -eye.getPitch();
-        this.yRot = eye.getYaw();
-        this.getLookVector().set(eye.getDirection());
-
-        Matrix4f rotation = eye.getMatrix();
-        rotation.transformDirection(MathUtils.UP, this.getUpVector());
-        rotation.transformDirection(MathUtils.RIGHT, this.getLeftVector());
-
-        this.rotation().setFromNormalized(rotation);
+        // we cannot set the rotation to the full matrix, because particles would rotate with the head
+        // instead of being world up oriented
+        this.setRotation(eye.getYaw(), -eye.getPitch());
     }
 
     /**

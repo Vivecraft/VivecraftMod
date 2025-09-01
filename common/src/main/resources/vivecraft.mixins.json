@@ -87,6 +87,7 @@
     "client_vr.renderer.item.BlockModelWrapper$UnbakedVRMixin",
     "client_vr.renderer.item.BlockModelWrapperVRMixin",
     "client_vr.renderer.item.properties.conditional.IsUsingItemVRMixin",
+    "client_vr.sounds.SoundEngineVRMixin",
     "client_vr.tutorial.MovementTutorialStepInstanceVRMixin",
     "client_vr.tutorial.OpenInventoryTutorialStepVRMixin",
     "client_vr.tutorial.PunchTreeTutorialStepInstanceVRMixin",
