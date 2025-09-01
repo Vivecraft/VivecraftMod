@@ -53,6 +53,16 @@ public interface VRRenderingAPI {
     boolean isFirstRenderPass();
 
     /**
+     * Returns the camera rotation for the given {@link RenderPass}
+     * For Gui, Mirror or Vanilla passes this returns the regular camera rotation
+     *
+     * @param pass RenderPass to get the camera rotation for
+     * @return The camera rotation for the given RenderPass
+     * @since 1.3.0
+     */
+    Matrix4f getRenderPassMatrix(RenderPass pass);
+
+    /**
      * Gets the position that the provided {@link InteractionHand} renders at. Unlike
      * {@link VRPose#getHand(InteractionHand)} from {@link VRClientAPI#getWorldRenderPose()},
      * this returns a reasonable, default value for seated mode.

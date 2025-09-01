@@ -140,12 +140,9 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
             this.vivecraft$vrPipelinesCurrentDimension = this.vivecraft$vrPipelinesPerDimension.get(newDimension);
 
             if (!RenderPassType.isVanilla()) {
-                if (ClientDataHolderVR.getInstance().currentPass != null) {
-                    this.pipeline = this.vivecraft$vrPipelinesCurrentDimension.get(
-                        ClientDataHolderVR.getInstance().currentPass);
-                } else {
-                    this.pipeline = this.vivecraft$vrPipelinesCurrentDimension.get(RenderPass.LEFT);
-                }
+                this.pipeline = this.vivecraft$vrPipelinesCurrentDimension.getOrDefault(
+                    ClientDataHolderVR.getInstance().currentPass,
+                    this.vivecraft$vrPipelinesCurrentDimension.get(RenderPass.LEFT));
             }
         }
         IrisHelper.swapSSBOs(this.pipeline, ClientDataHolderVR.getInstance().currentPass);

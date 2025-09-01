@@ -65,7 +65,13 @@ public enum RenderPass {
      *
      * @since 1.3.0
      */
-    MIRROR;
+    MIRROR,
+    /**
+     * Renders the Vanilla view
+     *
+     * @since 1.3.0
+     */
+    VANILLA;
 
     /**
      * Returns whether the provided RenderPass is rendered from the player's perspective.

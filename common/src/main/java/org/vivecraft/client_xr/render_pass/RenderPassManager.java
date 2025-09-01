@@ -55,7 +55,7 @@ public class RenderPassManager {
      * resets back to the vanilla RenderPass
      */
     public static void setVanillaRenderPass() {
-        ClientDataHolderVR.getInstance().currentPass = null;
+        ClientDataHolderVR.getInstance().currentPass = RenderPass.VANILLA;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.VANILLA;
         MC.mainRenderTarget = INSTANCE.vanillaRenderTarget;

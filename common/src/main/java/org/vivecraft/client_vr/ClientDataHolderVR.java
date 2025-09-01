@@ -83,7 +83,7 @@ public class ClientDataHolderVR {
     public Screen cachedScreen = null;
     public long frameIndex = 0L;
 
-    public RenderPass currentPass;
+    public RenderPass currentPass = RenderPass.VANILLA;
     public boolean isFirstPass;
 
     // if the main/offhand should be rendered as menu hands
