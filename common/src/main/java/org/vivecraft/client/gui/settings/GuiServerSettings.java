@@ -27,7 +27,7 @@ public class GuiServerSettings extends GuiListScreen {
             this.addRenderableWidget(new MultilineComponent(this.width / 2, this.height / 2, this.list.getRowWidth(),
                 Component.translatable("vivecraft.messages.serversettingsnotavailable"), true,
                 this.minecraft.font).withBackground());
-            this.list.active = false;
+            this.list.setActive(false);
             if (this.searchBox != null) {
                 this.searchBox.active = false;
             }

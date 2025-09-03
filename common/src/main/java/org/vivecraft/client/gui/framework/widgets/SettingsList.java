@@ -54,6 +54,16 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         this.replaceEntriesFlatten(this.allEntries);
     }
 
+    /**
+     * sets this and all child's parent to {@code active}
+     *
+     * @param active if the list should be interactable
+     */
+    public void setActive(boolean active) {
+        this.active = active;
+        this.allEntries.forEach(entry -> entry.setParentActive(active));
+    }
+
     private void replaceEntriesFlatten(List<SettingsList.BaseEntry> entries) {
         this.replaceEntriesFlatten(entries.stream());
     }
@@ -266,6 +276,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         public List<BaseEntry> getEntries() {
             return Stream.concat(Stream.of(this),
                 this.activeChildren.stream().flatMap(child -> child.getEntries().stream())).toList();
+        }
+
+        @Override
+        public void setParentActive(boolean active) {
+            super.setParentActive(active);
+            this.allChildren.forEach(child -> child.setParentActive(active));
         }
     }
 
@@ -538,6 +554,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         protected final Component name;
         private final Supplier<String> tooltip;
         private boolean active = true;
+        private boolean parentActive = true;
 
         public BaseEntry(Component name, Supplier<String> tooltipSupplier) {
             this.name = name;
@@ -570,15 +587,19 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         protected int textColor() {
-            return this.active ? 0xFFFFFFFF : 0xFFA0A0A0;
+            return this.isActive() ? 0xFFFFFFFF : 0xFFA0A0A0;
         }
 
         public boolean isActive() {
-            return this.active;
+            return this.active && this.parentActive;
         }
 
         public void setActive(boolean active) {
             this.active = active;
+        }
+
+        public void setParentActive(boolean active) {
+            this.parentActive = active;
         }
 
         /**
