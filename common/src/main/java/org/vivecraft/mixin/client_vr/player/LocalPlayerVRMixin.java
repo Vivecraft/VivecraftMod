@@ -142,6 +142,10 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         if (!VRState.VR_RUNNING || !vivecraft$isLocalPlayer(this) ||
             Minecraft.getInstance().getCameraEntity() != (Object) this)
         {
+            AttributeInstance attribute = this.getAttribute(Attributes.STEP_HEIGHT);
+            if (attribute != null && attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
+                attribute.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
+            }
             return;
         }
         // stuckSpeedMultiplier gets zeroed in the super call.
@@ -175,23 +179,23 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                 double oldZ = this.getZ();
                 super.move(type, pos);
 
-                AttributeInstance attributeInstance = this.getAttribute(Attributes.STEP_HEIGHT);
-                if (attributeInstance != null) {
+                AttributeInstance attribute = this.getAttribute(Attributes.STEP_HEIGHT);
+                if (attribute != null) {
                     if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
                         if (this.getBlockJumpFactor() == 1.0F) {
-                            if (attributeInstance.getModifier(ViveModifiers.WALK_UP_BLOCKS) == null) {
-                                attributeInstance.addTransientModifier(
+                            if (!attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
+                                attribute.addTransientModifier(
                                     new AttributeModifier(ViveModifiers.WALK_UP_BLOCKS, 0.4F,
                                         AttributeModifier.Operation.ADD_VALUE));
                             }
                         } else {
-                            if (attributeInstance.getModifier(ViveModifiers.WALK_UP_BLOCKS) != null) {
-                                attributeInstance.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
+                            if (attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
+                                attribute.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
                             }
                         }
                     } else {
-                        if (attributeInstance.getModifier(ViveModifiers.WALK_UP_BLOCKS) != null) {
-                            attributeInstance.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
+                        if (attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
+                            attribute.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
                         }
                         this.updateAutoJump((float) (this.getX() - oldX), (float) (this.getZ() - oldZ));
                     }
