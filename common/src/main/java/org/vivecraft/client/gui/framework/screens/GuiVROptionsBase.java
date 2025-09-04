@@ -73,6 +73,19 @@ public abstract class GuiVROptionsBase extends Screen {
                 .pos(this.width / 2 - 155, this.height - 30)
                 .size(150, 20)
                 .build());
+
+        // sort children from top left to bottom right, to fix tab navigation
+        this.children().sort((a, b) -> {
+            if (a instanceof AbstractWidget wA && b instanceof AbstractWidget wB) {
+                if (wA.getY() < wB.getY() || (wA.getY() == wB.getY() && wA.getX() < wB.getX())) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            } else {
+                return 0;
+            }
+        });
     }
 
     protected boolean onDoneClicked() {
