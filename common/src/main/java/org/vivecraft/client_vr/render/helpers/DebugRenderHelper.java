@@ -93,10 +93,10 @@ public class DebugRenderHelper {
                         consumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
                     }
 
-                    Vector3f playerPos = p.getPosition(partialTick).subtract(camPos).toVector3f();
+                    Vector3f playerPos = MathUtils.subtractToVector3f(p.getPosition(partialTick), camPos);
                     if (p == MC.player) {
-                        playerPos = ((GameRendererExtension) MC.gameRenderer).vivecraft$getRvePos(partialTick)
-                            .subtract(camPos).toVector3f();
+                        playerPos = MathUtils.subtractToVector3f(
+                            ((GameRendererExtension) MC.gameRenderer).vivecraft$getRvePos(partialTick), camPos);
                     }
 
                     if (p != MC.player || DATA_HOLDER.currentPass == RenderPass.THIRD) {
@@ -253,11 +253,11 @@ public class DebugRenderHelper {
      *
      * @param consumer VertexConsumer to use, needs to be in DEBUG_LINE_STRIP and POSITION_COLOR mode
      * @param data     VRData to get camera position from
-     * @param pose     VRDevicePose to ge the orientation and position from.
+     * @param pose     VRDevicePose to get the orientation and position from.
      */
     private static void addAxes(VertexConsumer consumer, VRData data, VRData.VRDevicePose pose) {
-        Vector3f position = pose.getPosition().subtract(data.getEye(DATA_HOLDER.currentPass).getPosition())
-            .toVector3f();
+        Vector3f position = MathUtils.subtractToVector3f(pose.getPosition(),
+            data.getEye(DATA_HOLDER.currentPass).getPosition());
 
         float scale = 0.25F * DATA_HOLDER.vrPlayer.worldScale;
 

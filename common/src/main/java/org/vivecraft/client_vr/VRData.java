@@ -331,8 +331,8 @@ public class VRData {
 
             Vec3 headPos = this.hmd.getPosition();
 
-            Vector3f c1Pos = this.c1.getPosition().subtract(headPos).toVector3f();
-            Vector3f c0Pos = this.c0.getPosition().subtract(headPos).toVector3f();
+            Vector3f c1Pos = MathUtils.subtractToVector3f(this.c1.getPosition(), headPos);
+            Vector3f c0Pos = MathUtils.subtractToVector3f(this.c0.getPosition(), headPos);
             Vector3f head = this.hmd.getDirection();
 
             return MathUtils.bodyYawRad(c0Pos, c1Pos, head);
