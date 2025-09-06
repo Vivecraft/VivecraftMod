@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -116,7 +117,13 @@ public class TextScrollWidget extends AbstractWidget {
         } else if (this.isMouseOver(mouseX, mouseY)) {
             Style style = getMouseoverStyle(mouseX, mouseY);
             if (style != null && style.getClickEvent() != null) {
-                Minecraft.getInstance().screen.handleComponentClicked(style);
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.player != null) {
+                    mc.screen.handleComponentClicked(style);
+                } else {
+                    // skip the ingame click events and directly call the general ones
+                    Screen.defaultHandleClickEvent(style.getClickEvent(), mc, mc.screen);
+                }
             }
         }
     }

@@ -74,6 +74,9 @@ accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/
 # to render crosshair
 accessible field net/minecraft/client/gui/Gui CROSSHAIR_SPRITE Lnet/minecraft/resources/ResourceLocation;
 
+# to handle click events outside a level
+accessible method net/minecraft/client/gui/screens/Screen defaultHandleClickEvent (Lnet/minecraft/network/chat/ClickEvent;Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;)V
+
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
@@ -92,7 +95,7 @@ accessible method net/minecraft/world/item/BrushItem spawnDustParticles (Lnet/mi
 # do not kick climbing players
 accessible field net/minecraft/server/network/ServerGamePacketListenerImpl aboveGroundTickCount I
 
-# to render the camera widget with dispaly
+# to render the camera widget with display
 accessible field net/minecraft/client/renderer/item/ItemStackRenderState layers [Lnet/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState;
 
 # for custom rendertypes / to create custom END shader
