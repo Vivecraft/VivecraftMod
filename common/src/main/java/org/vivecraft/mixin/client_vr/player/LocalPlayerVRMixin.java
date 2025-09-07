@@ -74,6 +74,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     @Shadow
     public abstract InteractionHand getUsedItemHand();
 
+    @Shadow
+    public abstract boolean isUsingItem();
+
     @Inject(method = "startRiding", at = @At("TAIL"))
     private void vivecraft$startRidingTracker(Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> cir) {
         if (VRState.VR_INITIALIZED && vivecraft$isLocalPlayer(this)) {
@@ -257,7 +260,8 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     @Override
     protected void vivecraft$beforeReleaseUsingItem(CallbackInfo ci) {
         if (VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) {
-            ClientNetworking.sendActiveHand(this.getUsedItemHand(), false);
+            ClientNetworking.sendActiveHand(this.isUsingItem() ? this.getUsedItemHand() : InteractionHand.MAIN_HAND,
+                false);
         }
     }
 
