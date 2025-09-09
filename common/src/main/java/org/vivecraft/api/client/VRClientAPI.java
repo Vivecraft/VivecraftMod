@@ -116,7 +116,8 @@ public interface VRClientAPI {
      * Returns the history of VR poses for the local player. If one wants historical VR poses for other players and/or
      * on the server, use {@link VRAPI#getHistoricalVRPoses(net.minecraft.world.entity.player.Player)} instead.
      *
-     * @return The history of VR poses for the player. Will be {@code null} if the player isn't in VR.
+     * @return The history of VR poses for the player. Will be {@code null} if the player isn't in VR or no pose data
+     * is available yet.
      * @since 1.3.0
      */
     @Nullable

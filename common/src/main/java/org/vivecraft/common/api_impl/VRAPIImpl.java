@@ -43,6 +43,7 @@ public final class VRAPIImpl implements VRAPI {
     public void clearAllPoseHistories() {
         this.clientPoseHistories.clear();
         this.serverPoseHistories.clear();
+        VRClientAPIImpl.INSTANCE.clearPoseHistory();
     }
 
     @Override

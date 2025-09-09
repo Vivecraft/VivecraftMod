@@ -1,7 +1,6 @@
 package org.vivecraft.common.api_impl.data;
 
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
@@ -30,6 +29,10 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
 
     public void clear() {
         this.dataQueue.clear();
+    }
+
+    public boolean isEmpty() {
+        return this.dataQueue.isEmpty();
     }
 
     @Override
@@ -124,8 +127,8 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     public Vec3 averagePosition(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException {
         checkPartNonNull(bodyPart);
         checkTicksBack(maxTicksBack);
-        if (this.dataQueue.size() <= 1) {
-            return VRClientAPI.instance().getPreTickWorldPose().getBodyPartData(bodyPart).getPos();
+        if (this.dataQueue.isEmpty()) {
+            return null;
         }
         maxTicksBack = getNumTicksBack(maxTicksBack);
         List<Vec3> positions = new ArrayList<>(maxTicksBack);
