@@ -27,6 +27,7 @@ import org.vivecraft.common.utils.Utils;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
+import org.vivecraft.server.config.enums.HeadshotIndicator;
 
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowMixin extends Entity {
@@ -66,23 +67,27 @@ public abstract class AbstractArrowMixin extends Entity {
                     multiplier = ServerConfig.BOW_VANILLA_HEADSHOT_MULTIPLIER.get();
                 }
 
-                if (multiplier > 1.0) {
-                    // send headshot particles
-                    ((ServerLevel) this.level()).sendParticles(
-                        owner,
-                        ParticleTypes.CRIT,
-                        true, // always render the hit particles on the client
-                        true, // always render the hit particles on the client
-                        hitPos.x, hitPos.y, hitPos.z,
-                        5,
-                        -this.getDeltaMovement().x, -this.getDeltaMovement().y, -this.getDeltaMovement().z,
-                        0.1);
-                    // send sound effect
-                    owner.connection.send(
-                        new ClientboundSoundPacket(
-                            BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.ITEM_BREAK.value()),
-                            SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7f, 0.5f,
-                            owner.level().random.nextLong()));
+                if (multiplier > 1.0 && ServerConfig.BOW_HEADSHOT_INDICATOR.get() != HeadshotIndicator.NONE) {
+                    if (ServerConfig.BOW_HEADSHOT_INDICATOR.get() != HeadshotIndicator.AUDIO) {
+                        // send headshot particles
+                        ((ServerLevel) this.level()).sendParticles(
+                            owner,
+                            ParticleTypes.CRIT,
+                            true, // always render the hit particles on the client
+                            true, // always render the hit particles on the client
+                            hitPos.x, hitPos.y, hitPos.z,
+                            5,
+                            -this.getDeltaMovement().x, -this.getDeltaMovement().y, -this.getDeltaMovement().z,
+                            0.1);
+                    }
+                    if (ServerConfig.BOW_HEADSHOT_INDICATOR.get() != HeadshotIndicator.VISUAL) {
+                        // send sound effect
+                        owner.connection.send(
+                            new ClientboundSoundPacket(
+                                BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.ITEM_BREAK.value()),
+                                SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7f, 0.5f,
+                                owner.level().random.nextLong()));
+                    }
                 }
             }
             // if headshots are disabled, still use the regular multiplier

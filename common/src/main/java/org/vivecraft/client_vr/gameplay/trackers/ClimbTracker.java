@@ -27,7 +27,7 @@ import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.common.network.packet.c2s.ClimbingPayloadC2S;
 import org.vivecraft.data.ViveBlockTags;
-import org.vivecraft.server.config.ClimbeyBlockmode;
+import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 
 import java.util.*;
 

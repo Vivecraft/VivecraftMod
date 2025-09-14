@@ -735,6 +735,11 @@
   "vivecraft.serverSettings.vrChanges.bow.standingHeadshotMultiplier": "Standing VR Bow Headshot Multiplier",
   "vivecraft.serverSettings.vrChanges.bow.seatedHeadshotMultiplier": "Seated VR Bow Headshot Multiplier",
   "vivecraft.serverSettings.vrChanges.bow.vanillaHeadshotMultiplier": "NonVR Bow Headshot Multiplier",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator": "Headshot Indicator",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.NONE": "None",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.AUDIO": "Audio",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.VISUAL": "Visual",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.BOTH": "Both",
 
   "vivecraft.serverSettings.pvp": "PVP Settings",
   "vivecraft.serverSettings.pvp.notifyBlockedDamage": "Send Damage Negated Notification",
@@ -819,6 +824,7 @@
   "vivecraft.serverSettings.vrChanges.bow.standingHeadshotMultiplier.tooltip": "Headshot damage multiplier for VR players in standing mode.\n Set to 1.0 to disable.",
   "vivecraft.serverSettings.vrChanges.bow.seatedHeadshotMultiplier.tooltip": "Headshot damage multiplier for VR players in seated mode.\n Set to 1.0 to disable.",
   "vivecraft.serverSettings.vrChanges.bow.vanillaHeadshotMultiplier.tooltip": "Headshot damage multiplier for Vanilla/NonVR players.\n Set to 1.0 to disable.",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.tooltip": "Indicator to notify players that they got a headshot. Options are:\n \"NONE\": No indicator.\n \"AUDIO\": Plays a sound near the shooter.\n \"VISUAL\": Spawns particles at the hit location.\n \"BOTH\": Both Audio and Visual indicators.",
 
   "vivecraft.serverSettings.pvp.notifyBlockedDamage.tooltip": "Notifies the player that tried to cause damage, that it was blocked from the server.",
   "vivecraft.serverSettings.pvp.VRvsVR.tooltip": "Allows Standing VR players to damage each other.",

@@ -1,4 +1,4 @@
-package org.vivecraft.server.config;
+package org.vivecraft.server.config.enums;
 
 public enum ClimbeyBlockmode {
     DISABLED,

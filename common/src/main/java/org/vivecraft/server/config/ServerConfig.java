@@ -16,6 +16,8 @@ import org.vivecraft.common.network.packet.s2c.CrawlPayloadS2C;
 import org.vivecraft.common.network.packet.s2c.DualWieldingPayloadS2C;
 import org.vivecraft.common.network.packet.s2c.TeleportPayloadS2C;
 import org.vivecraft.server.ServerNetworking;
+import org.vivecraft.server.config.enums.ClimbeyBlockmode;
+import org.vivecraft.server.config.enums.HeadshotIndicator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,6 +70,7 @@ public class ServerConfig {
     public static ConfigBuilder.DoubleValue BOW_STANDING_HEADSHOT_MULTIPLIER;
     public static ConfigBuilder.DoubleValue BOW_SEATED_HEADSHOT_MULTIPLIER;
     public static ConfigBuilder.DoubleValue BOW_VANILLA_HEADSHOT_MULTIPLIER;
+    public static ConfigBuilder.EnumValue<HeadshotIndicator> BOW_HEADSHOT_INDICATOR;
 
     // pvp
     public static ConfigBuilder.BooleanValue PVP_VR_VS_VR;
@@ -285,6 +288,9 @@ public class ServerConfig {
         BOW_VANILLA_HEADSHOT_MULTIPLIER = BUILDER
             .push("vanillaHeadshotMultiplier")
             .defineInRange(1.0, 1.0, 10.0);
+        BOW_HEADSHOT_INDICATOR = BUILDER
+            .push("headshotIndicator")
+            .defineEnum(HeadshotIndicator.BOTH, HeadshotIndicator.class);
         // end bow
         BUILDER.pop();
         // end vrChanges

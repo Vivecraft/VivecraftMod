@@ -31,9 +31,9 @@ import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.mixin.server.TrackedEntityAccessor;
-import org.vivecraft.server.config.ClimbeyBlockmode;
 import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
+import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 
 import java.util.*;
 import java.util.function.Consumer;

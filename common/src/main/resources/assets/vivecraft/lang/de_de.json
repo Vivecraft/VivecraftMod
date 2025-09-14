@@ -733,6 +733,11 @@
   "vivecraft.serverSettings.vrChanges.bow.standingHeadshotMultiplier": "Stehend VR Bogen Kopfschussmultiplikator",
   "vivecraft.serverSettings.vrChanges.bow.seatedHeadshotMultiplier": "Sitzend VR Bogen Kopfschussmultiplikator",
   "vivecraft.serverSettings.vrChanges.bow.vanillaHeadshotMultiplier": "NonVR Bogen Kopfschussmultiplikator",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator": "Kopfschussindikator",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.NONE": "Keiner",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.AUDIO": "Audio",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.VISUAL": "Visuell",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.BOTH": "Beide",
 
   "vivecraft.serverSettings.pvp": "PVP Einstellungen",
   "vivecraft.serverSettings.pvp.notifyBlockedDamage": "Sende Schaden vereitelt Nachricht",
@@ -817,6 +822,7 @@
   "vivecraft.serverSettings.vrChanges.bow.standingHeadshotMultiplier.tooltip": "Kopfschuss Schadensmultiplikator für VR Spieler im stehenden Modus.\n Zum Deaktivieren auf 1.0 setzen.",
   "vivecraft.serverSettings.vrChanges.bow.seatedHeadshotMultiplier.tooltip": "Kopfschuss Schadensmultiplikator für VR Spieler im sitzenden Modus.\n Zum Deaktivieren auf 1.0 setzen.",
   "vivecraft.serverSettings.vrChanges.bow.vanillaHeadshotMultiplier.tooltip": "Kopfschuss Schadensmultiplikator für Vanilla/NonVR Spieler.\n Zum Deaktivieren auf 1.0 setzen.",
+  "vivecraft.serverSettings.vrChanges.bow.headshotIndicator.tooltip": "Indikator um Spielern darauf hinzuweisen, dass sie eine Kopfschuss gemacht haben. Optionen sind:\n \"NONE\": Kein Indikator.\n \"AUDIO\": Spielt einen Ton beim Schützen ab.\n \"VISUAL\": Erzeugt Partikel an der Einschussstelle.\n \"BOTH\": Audio sowie visueller Indikator.",
 
   "vivecraft.serverSettings.pvp.notifyBlockedDamage.tooltip": "Benachrichtigt den Spieler welcher Schaden verursachen wollte, dass er vom Server blockiert wurde.",
   "vivecraft.serverSettings.pvp.VRvsVR.tooltip": "Erlaubt es stehenden VR Spielern sich gegenseitig zu schaden.",
