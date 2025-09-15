@@ -175,7 +175,7 @@ public class VRState {
 
         VR_ENABLED = false;
         VR_INITIALIZED = false;
-        VR_RUNNING = false;
+        // VR_RUNNING gets disabled in MinecraftVRMixin.vivecraft$switchVRState
         FRAME_DELAY = false;
         if (disableVRSetting) {
             dh.vrSettings.vrEnabled = false;

@@ -801,71 +801,78 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
      */
     @Unique
     private void vivecraft$switchVRState(boolean vrActive) {
+        boolean changed = VRState.VR_RUNNING != vrActive;
         VRState.VR_RUNNING = vrActive;
-        if (vrActive) {
-            // force first person camera in VR
-            this.vivecraft$lastCameraType = this.options.getCameraType();
-            this.options.setCameraType(CameraType.FIRST_PERSON);
+        if (changed) {
+            if (vrActive) {
+                // force first person camera in VR
+                this.vivecraft$lastCameraType = this.options.getCameraType();
+                this.options.setCameraType(CameraType.FIRST_PERSON);
 
-            if (this.player != null) {
-                // snap room origin to the player
-                ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(this.player, false, false);
-            }
-            // release mouse when switching to standing
-            if (!ClientDataHolderVR.getInstance().vrSettings.seated || this.screen != null || this.level == null) {
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
-                    this.mouseHandler.xpos(), this.mouseHandler.ypos());
-                this.mouseHandler.onMove(this.window.getWindow(), this.mouseHandler.xpos(), this.mouseHandler.ypos());
-            }
-        } else {
-            // VR got disabled
-            RenderPassManager.setVanillaRenderPass();
-            // reset gui
-            GuiHandler.GUI_POS_ROOM = null;
-            GuiHandler.GUI_ROTATION_ROOM = null;
-            GuiHandler.GUI_SCALE = 1.0F;
-
-            // reset camera
-            if (this.vivecraft$lastCameraType != null) {
-                this.options.setCameraType(this.vivecraft$lastCameraType);
-            }
-
-            if (this.player != null) {
-                // remove vr player instance
-                ClientVRPlayers.getInstance().disableVR(this.player.getUUID());
-            }
-            if (this.gameRenderer != null) {
-                // update active effect, since VR does block t hem
-                this.gameRenderer.checkEntityPostEffect(
-                    this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
-            }
-
-            // scale vr mouse position to the window position
-            double mouseX = this.mouseHandler.xpos() / (double) GuiHandler.GUI_WIDTH * this.window.getScreenWidth();
-            double mouseY = this.mouseHandler.ypos() / (double) GuiHandler.GUI_HEIGHT * this.window.getScreenHeight();
-
-            if (this.screen != null || this.level == null) {
-                // release mouse
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseX, mouseY);
-                this.mouseHandler.onMove(this.window.getWindow(), mouseX, mouseY);
-                this.mouseHandler.releaseMouse();
+                if (this.player != null) {
+                    // snap room origin to the player
+                    ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(this.player, false, false);
+                }
+                // release mouse when switching to standing
+                if (!ClientDataHolderVR.getInstance().vrSettings.seated || this.screen != null || this.level == null) {
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
+                        this.mouseHandler.xpos(), this.mouseHandler.ypos());
+                    this.mouseHandler.onMove(this.window.getWindow(), this.mouseHandler.xpos(),
+                        this.mouseHandler.ypos());
+                }
             } else {
-                // grab mouse when in a menu
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_DISABLED, mouseX, mouseY);
-                this.mouseHandler.grabMouse();
+                // VR got disabled
+                RenderPassManager.setVanillaRenderPass();
+                // reset gui
+                GuiHandler.GUI_POS_ROOM = null;
+                GuiHandler.GUI_ROTATION_ROOM = null;
+                GuiHandler.GUI_SCALE = 1.0F;
+
+                // reset camera
+                if (this.vivecraft$lastCameraType != null) {
+                    this.options.setCameraType(this.vivecraft$lastCameraType);
+                }
+
+                if (this.player != null) {
+                    // remove vr player instance
+                    ClientVRPlayers.getInstance().disableVR(this.player.getUUID());
+                }
+                if (this.gameRenderer != null) {
+                    // update active effect, since VR does block t hem
+                    this.gameRenderer.checkEntityPostEffect(
+                        this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
+                }
+
+                // scale vr mouse position to the window position
+                double mouseX = this.mouseHandler.xpos() / (double) GuiHandler.GUI_WIDTH * this.window.getScreenWidth();
+                double mouseY =
+                    this.mouseHandler.ypos() / (double) GuiHandler.GUI_HEIGHT * this.window.getScreenHeight();
+
+                if (this.screen != null || this.level == null) {
+                    // release mouse
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseX, mouseY);
+                    this.mouseHandler.onMove(this.window.getWindow(), mouseX, mouseY);
+                    this.mouseHandler.releaseMouse();
+                } else {
+                    // grab mouse when in a menu
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_DISABLED, mouseX,
+                        mouseY);
+                    this.mouseHandler.grabMouse();
+                }
+            }
+
+            // send new VR state to the server
+            ClientNetworking.sendServerPacket(new VRActivePayloadC2S(vrActive));
+
+            // send options, since we override the main hand setting
+            this.options.broadcastOptions();
+
+            // reload sound manager, to toggle HRTF between VR and NONVR one
+            if (!getSoundManager().getAvailableSounds().isEmpty()) {
+                getSoundManager().reload();
             }
         }
-
-        // send new VR state to the server
-        ClientNetworking.sendServerPacket(new VRActivePayloadC2S(vrActive));
-
-        // send options, since we override the main hand setting
-        this.options.broadcastOptions();
-
-        // reload sound manager, to toggle HRTF between VR and NONVR one
-        if (!getSoundManager().getAvailableSounds().isEmpty()) {
-            getSoundManager().reload();
-        }
+        // always resize, since that also rebuild the screen
         resizeDisplay();
         this.window.updateVsync(this.options.enableVsync().get());
     }
