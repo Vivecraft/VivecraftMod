@@ -136,7 +136,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
     private Vector3f getHotbarStart(float scale) {
         // offset from center to the left of the hotbar
-        Vector3f offset = GuiHandler.GUI_OFFSET_LOCAL.add(-0.32F * scale, -0.38F * GuiHandler.GUI_SCALE_APPLIED, 0,
+        Vector3f offset = GuiHandler.GUI_OFFSET_LOCAL.add(-0.32F * scale, -0.38F * scale, 0,
             new Vector3f());
 
         // transform local offset to room offset

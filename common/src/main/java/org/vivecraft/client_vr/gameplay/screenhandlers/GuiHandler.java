@@ -685,11 +685,11 @@ public class GuiHandler {
         poseMatrix.mul(guirot);
         poseMatrix.translate(guilocal.x, guilocal.y, guilocal.z);
 
+        GUI_SCALE_APPLIED = scale;
+        GUI_OFFSET_LOCAL.set(guilocal).div(DH.vrPlayer.vrdata_world_render.worldScale);
+
         float thescale = scale * DH.vrPlayer.vrdata_world_render.worldScale;
         poseMatrix.scale(thescale, thescale, thescale);
-
-        GUI_SCALE_APPLIED = thescale;
-        GUI_OFFSET_LOCAL.set(guilocal);
 
         GUI_RENDER_POS_ROOM = VRPlayer.worldToRoomPos(guipos, DH.vrPlayer.vrdata_world_render);
         GUI_RENDER_ROTATION_ROOM.rotationY(-DH.vrPlayer.vrdata_world_render.rotation_radians).mul(guirot);
