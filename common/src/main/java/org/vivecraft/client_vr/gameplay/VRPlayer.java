@@ -640,7 +640,7 @@ public class VRPlayer {
             Vector3fc aim = this.dh.bowTracker.getAimVector();
 
             if (this.dh.bowTracker.isNotched() && aim != null && aim.lengthSquared() > 0.0F) {
-                out = new Vec3(-aim.x(), -aim.y(), -aim.z());
+                out = new Vec3(aim.x(), aim.y(), aim.z());
             } else if (this.dh.vrSettings.aimDevice != VRSettings.AimDevice.HMD) {
                 out = new Vec3(data.getController(c).getDirection());
             }

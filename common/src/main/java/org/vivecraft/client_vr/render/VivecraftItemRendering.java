@@ -202,41 +202,7 @@ public class VivecraftItemRendering {
                 }
 
                 Vector3fc aim = DH.bowTracker.getAimVector();
-
-                Vector3f localBack = DH.vrPlayer.vrdata_world_render.getHand(bowHand).getCustomVector(MathUtils.BACK);
-
-                float aimPitch = (float) Math.toDegrees(Math.asin(aim.y() / aim.length()));
-                float yaw = (float) Math.toDegrees(Math.atan2(aim.x(), aim.z()));
-
-                // we want the normal to aim aiming plane, but vertical.
-                Vector3f aimHorizontal = new Vector3f(aim.x(), 0.0F, aim.z());
-
-                Vector3f pAim2 = new Vector3f();
-                // angle between controller up and aim, just for ortho check
-                float aimProj = localBack.dot(aimHorizontal);
-
-                // check to make sure we aren't holding the bow perfectly straight up.
-                if (aimProj != 0.0F) {
-                    // projection of l_controller_up onto aim vector ... why is there no multiply?
-                    aimHorizontal.mul(aimProj, pAim2);
-                }
-
-                Vector3f proj = localBack.sub(pAim2, new Vector3f()).normalize();
-                // angle between our projection and straight up (the default bow render pos.)
-                float dot = proj.dot(MathUtils.UP);
-
-                // angle sign test, negative is left roll
-                float dot2 = aimHorizontal.dot(proj.cross(MathUtils.UP, new Vector3f()));
-
-                float angle;
-                if (dot2 < 0.0F) {
-                    angle = (float) -Math.acos(dot);
-                } else {
-                    angle = (float) Math.acos(dot);
-                }
-
-                // calculate bow model roll.
-                float roll = Mth.RAD_TO_DEG * angle;
+                Vector3f forward = DH.vrPlayer.vrdata_world_render.getHand(bowHand).getCustomVector(MathUtils.FORWARD);
 
                 if (DH.bowTracker.isCharged()) {
                     // bow jitter
@@ -249,14 +215,10 @@ public class VivecraftItemRendering {
                 poseStack.last().pose()
                     .mul(DH.vrPlayer.vrdata_world_render.getController(bowHand).getMatrix().transpose());
 
-                // rotate in world coords
-                rotation.mul(Axis.YP.rotationDegrees(yaw));
-                rotation.mul(Axis.XP.rotationDegrees(-aimPitch));
-                rotation.mul(Axis.ZP.rotationDegrees(-roll));
-                rotation.mul(Axis.ZP.rotationDegrees(180.0F));
+                // align with controller
+                preRotation = new Quaternionf().lookAlong(aim, forward).conjugate();
 
-                poseStack.last().pose().rotate(rotation);
-
+                // bow model adjustment
                 rotation = Axis.YP.rotationDegrees(180.0F);
                 rotation.mul(Axis.XP.rotationDegrees(160.0F));
 
