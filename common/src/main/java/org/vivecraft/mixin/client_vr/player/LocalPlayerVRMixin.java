@@ -287,6 +287,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
             original.call(x, y, z);
             return;
         }
+        boolean wasZero = this.position() == Vec3.ZERO;
         double oldX = this.getX();
         double oldY = this.getY();
         double oldZ = this.getZ();
@@ -298,12 +299,16 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         if (Minecraft.getInstance().getCameraEntity() == (Object) this && this.isPassenger()) {
             ClientDataHolderVR.getInstance().vehicleTracker.updateRiderPos(x, y, z, this.getVehicle());
         } else if (!ClientDataHolderVR.getInstance().vehicleTracker.isRiding()) {
-            Vec3 roomOrigin = ClientDataHolderVR.getInstance().vrPlayer.roomOrigin;
-            VRPlayer.get().setRoomOrigin(
-                roomOrigin.x + (newX - oldX),
-                roomOrigin.y + (newY - oldY),
-                roomOrigin.z + (newZ - oldZ),
-                x + y + z == 0.0D);
+            if (wasZero) {
+                VRPlayer.get().snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, x + y + z == 0.0D, false);
+            } else {
+                Vec3 roomOrigin = ClientDataHolderVR.getInstance().vrPlayer.roomOrigin;
+                VRPlayer.get().setRoomOrigin(
+                    roomOrigin.x + (newX - oldX),
+                    roomOrigin.y + (newY - oldY),
+                    roomOrigin.z + (newZ - oldZ),
+                    x + y + z == 0.0D);
+            }
         }
     }
 
