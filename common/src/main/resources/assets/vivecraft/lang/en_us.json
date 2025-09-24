@@ -723,6 +723,7 @@
 
   "vivecraft.serverSettings.vrChanges": "Vanilla Modifications for VR Players",
   "vivecraft.serverSettings.vrChanges.creeperSwellDistance": "Creeper Swell Distance",
+  "vivecraft.serverSettings.vrChanges.mobAttackRangeAdjustment": "Mobs Melee Range Adjustment",
   "vivecraft.serverSettings.vrChanges.dualWielding": "Dual Wielding",
   "vivecraft.serverSettings.vrChanges.bootsArmorDamage": "Boots Damage Addition",
   "vivecraft.serverSettings.vrChanges.projectileInaccuracyMultiplier": "Projectile Inaccuracy Multiplier",
@@ -812,7 +813,8 @@
   "vivecraft.serverSettings.messages.deathByMobSeated.tooltip": "Message sent when a player dies because of a mob with VR in seated mode.",
   "vivecraft.serverSettings.messages.deathByMobVanilla.tooltip": "Message sent when a player dies because of a mob without Vivecraft.",
 
-  "vivecraft.serverSettings.vrChanges.creeperSwellDistance.tooltip": "Distance at which creepers swell and explode for VR players.\n Vanilla distance: 3",
+  "vivecraft.serverSettings.vrChanges.creeperSwellDistance.tooltip": "Distance at which creepers swell and explode for standing VR players.\n Vanilla distance: 3",
+  "vivecraft.serverSettings.vrChanges.mobAttackRangeAdjustment.tooltip": "Adjusts the range in which mobs can use melee attacks against standing VR players.\n This is a reduction to the vanilla range (0.8 blocks), so 0.0 causes no change, and -0.7 means the mobs need to almost touch the player to cause an attack.\n When set very low, mobs might stop right in front of the player without attacking!",
   "vivecraft.serverSettings.vrChanges.dualWielding.tooltip": "Allows vr players to hit/mine with their non-dominant hand items.",
   "vivecraft.serverSettings.vrChanges.bootsArmorDamage.tooltip": "Melee damage addition for VR players when hitting with their feet.\n This scales with the armor attribute of the boots, doing one additional damage per Armor level, times this multiplier\n Set to 0.0 to disable.",
   "vivecraft.serverSettings.vrChanges.projectileInaccuracyMultiplier.tooltip": "Projectiles by default have an inaccuracy to not shoot in the same direction all the time.\n With this, the inaccuracy can be adjusted for VR players.\n 1.0 is equal to vanilla, 0.0 is no inaccuracy at all.",

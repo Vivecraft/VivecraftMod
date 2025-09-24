@@ -60,6 +60,7 @@ public class ServerConfig {
     public static ConfigBuilder.BooleanValue DUAL_WIELDING;
     public static ConfigBuilder.DoubleValue BOOTS_ARMOR_DAMAGE;
     public static ConfigBuilder.DoubleValue CREEPER_SWELL_DISTANCE;
+    public static ConfigBuilder.DoubleValue MOB_ATTACK_RANGE_ADNJUSTMENT;
     public static ConfigBuilder.DoubleValue PROJECTILE_INACCURACY_MULTIPLIER;
     public static ConfigBuilder.BooleanValue ALLOW_FASTER_BLOCK_BREAKING;
     public static ConfigBuilder.BooleanValue ALLOW_ROOMSCALE_SHIELD_BLOCKING;
@@ -250,6 +251,9 @@ public class ServerConfig {
         CREEPER_SWELL_DISTANCE = BUILDER
             .push("creeperSwellDistance")
             .defineInRange(1.75, 0.1, 10.0);
+        MOB_ATTACK_RANGE_ADNJUSTMENT = BUILDER
+            .push("mobAttackRangeAdjustment")
+            .defineInRange(-0.4, -0.7, 0.0);
         DUAL_WIELDING = BUILDER
             .push("dualWielding")
             .define(true)

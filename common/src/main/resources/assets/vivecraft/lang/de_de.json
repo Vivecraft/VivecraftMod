@@ -721,6 +721,7 @@
 
   "vivecraft.serverSettings.vrChanges": "Vanilla Modifikationen für VR Spieler",
   "vivecraft.serverSettings.vrChanges.creeperSwellDistance": "Creeper bläh Distanz",
+  "vivecraft.serverSettings.vrChanges.mobAttackRangeAdjustment": "Kreaturen Nahkampf Reichweitenanpassung",
   "vivecraft.serverSettings.vrChanges.dualWielding": "Beidhändigkeit",
   "vivecraft.serverSettings.vrChanges.bootsArmorDamage": "Stiefel Schadensaddition",
   "vivecraft.serverSettings.vrChanges.projectileInaccuracyMultiplier": "Projektil Ungenauigkeit Multiplikator",
@@ -810,7 +811,8 @@
   "vivecraft.serverSettings.messages.deathByMobSeated.tooltip": "Nachricht die gesendet wird, wenn ein Spieler, wegen einer Kreatur, mit VR im sitzenden Modus stirbt.",
   "vivecraft.serverSettings.messages.deathByMobVanilla.tooltip": "Nachricht die gesendet wird, wenn ein Spieler, wegen einer Kreatur, ohne Vivecraft stirbt.",
 
-  "vivecraft.serverSettings.vrChanges.creeperSwellDistance.tooltip": "Distanz bei welcher sich Creeper für VR spieler aufblähen und explodieren.\n Vanilla Distanz: 3",
+  "vivecraft.serverSettings.vrChanges.creeperSwellDistance.tooltip": "Distanz bei welcher sich Creeper für stehende VR spieler aufblähen und explodieren.\n Vanilla Distanz: 3",
+  "vivecraft.serverSettings.vrChanges.mobAttackRangeAdjustment.tooltip": "Passt die Reichweite an, mit welcher Kreaturen Nahkampfangriffe gegen stehende VR Spieler ausführen können.\n Dies ist eine Reduzierung von der Vanilla Reichweite (0.8 Blöcke), 0.0 macht keine Änderung und mit -0.7 müssen Kreaturen den Spieler fast berühren, um einen Angriff auszuführen.\n Wenn dies sehr niedrig ist, kann es passieren, dass Kreaturen vor dem Spieler stehen bleiben, ohne anzugreifen!",
   "vivecraft.serverSettings.vrChanges.dualWielding.tooltip": "Erlaubt es VR Spielern mit den Gegenständen in der nichtdominanten Hand zu schlagen/abzubauen.",
   "vivecraft.serverSettings.vrChanges.bootsArmorDamage.tooltip": "Nahkampfschaden addition für VR Spieler, wenn sie mit den Füßen treten.\n Dies skaliert mit dem Rüstungswert der Stiefel. Verursacht 1 zusätzlichen schaden per Rüstungslevel, multipliziert mit diesem Multiplikator.\n Zum Deaktivieren auf 0.0 setzen.",
   "vivecraft.serverSettings.vrChanges.projectileInaccuracyMultiplier.tooltip": "Projektile haben normalerweise eine Ungenauigkeit, damit sie nicht andauernd dieselbe Stelle treffen.\n Mit dieser Einstellung kann diese für VR Spieler angepasst werden.\n 1.0 ist equivalent zu Vanilla, 0.0 bedeuten gar keine Ungenauigkeit.",

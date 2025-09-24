@@ -113,6 +113,7 @@
     "server.players.PlayerListMixin",
     "world.entity.InventoryMixin",
     "world.entity.LivingEntityMixin",
+    "world.entity.MobMixin",
     "world.entity.PlayerMixin",
     "world.entity.ai.goal.SwellGoalMixin",
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
