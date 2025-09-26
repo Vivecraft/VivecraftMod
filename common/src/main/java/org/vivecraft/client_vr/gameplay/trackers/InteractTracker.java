@@ -7,6 +7,7 @@ import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.HeldInteractModule;
 import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.interact_modules.DebugRenderModule;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -54,6 +55,8 @@ public class InteractTracker implements DebugRenderTracker {
             return false;
         } else if (player == null) {
             return false;
+        } else if (this.mc.screen instanceof FBTCalibrationScreen) {
+            return false;
         } else if (!player.isAlive()) {
             return false;
         } else if (player.isSleeping()) {
@@ -67,6 +70,10 @@ public class InteractTracker implements DebugRenderTracker {
 
     @Override
     public void inactiveProcess(LocalPlayer player) {
+        if (this.mc.screen instanceof FBTCalibrationScreen) {
+            // the FBT screen uses the interact binding, so don't mess with it
+            return;
+        }
         for (int c = 0; c < 2; c++) {
             this.reset(player, c);
         }
