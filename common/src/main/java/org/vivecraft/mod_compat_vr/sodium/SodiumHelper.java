@@ -19,6 +19,7 @@ public class SodiumHelper {
 
     // use reflection, because sodium changed package in 0.6
     private static Method SpriteUtil_markSpriteActive;
+    private static Object SpriteUtil_INSTANCE = null;
 
     private static boolean HAS_MODELCUBOID_QUADS;
     private static boolean HAS_MODELCUBOID_FLOATS;
@@ -68,7 +69,7 @@ public class SodiumHelper {
         if (init()) {
             try {
                 // SpriteUtil.markSpriteActive(sprite);
-                SpriteUtil_markSpriteActive.invoke(null, sprite);
+                SpriteUtil_markSpriteActive.invoke(SpriteUtil_INSTANCE, sprite);
             } catch (InvocationTargetException | IllegalAccessException e) {
                 VRSettings.LOGGER.error("Vivecraft: couldn't set Sodium sprite as animated:", e);
             }
@@ -166,12 +167,24 @@ public class SodiumHelper {
             return !INIT_FAILED;
         }
         try {
-            Class<?> spriteUtil = ClassUtils.getClassWithAlternative(
-                "me.jellysquid.mods.sodium.client.render.texture.SpriteUtil",
-                "net.caffeinemc.mods.sodium.client.render.texture.SpriteUtil"
-            );
+            try {
+                // try new public api first
+                Class<?> spriteUtil = Class.forName("net.caffeinemc.mods.sodium.api.texture.SpriteUtil");
+                SpriteUtil_markSpriteActive = spriteUtil.getMethod("markSpriteActive", TextureAtlasSprite.class);
+                SpriteUtil_INSTANCE = spriteUtil.getField("INSTANCE").get(null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: Sodium SpriteUtil error", e);
+            } catch (ClassNotFoundException ignored) {
+                // try old internals as backup
+                Class<?> spriteUtil = ClassUtils.getClassWithAlternative(
+                    "me.jellysquid.mods.sodium.client.render.texture.SpriteUtil",
+                    "net.caffeinemc.mods.sodium.client.render.texture.SpriteUtil"
+                );
 
-            SpriteUtil_markSpriteActive = spriteUtil.getMethod("markSpriteActive", TextureAtlasSprite.class);
+                SpriteUtil_markSpriteActive = spriteUtil.getMethod("markSpriteActive", TextureAtlasSprite.class);
+                // for old versions this was static, so null calls the static method
+                SpriteUtil_INSTANCE = null;
+            }
 
             try {
                 // model
