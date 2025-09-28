@@ -401,6 +401,20 @@ public class ServerNetworking {
     }
 
     /**
+     * removes the crawl state from every vive player, if crawling is disabled
+     *
+     * @param server server to get the vive players from
+     */
+    public static void updateCrawling(MinecraftServer server) {
+        if (!ServerConfig.CRAWLING_ENABLED.get()) {
+            // remove the current crawl state from every player
+            for (ServerVivePlayer vivePlayer : ServerVRPlayers.getPlayersWithVivecraft(server).values()) {
+                vivePlayer.crawling = false;
+            }
+        }
+    }
+
+    /**
      * sends a haptic event to the given player if they are in VR, to be processed on the client
      */
     public static void sendHapticToClient(

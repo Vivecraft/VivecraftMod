@@ -363,6 +363,7 @@ public class ServerConfig {
         CRAWLING_ENABLED = BUILDER
             .push("enabled")
             .define(true)
+            .setOnUpdate(ServerNetworking::updateCrawling)
             .setPacketFunction(v -> new CrawlPayloadS2C(ServerConfig.CRAWLING_ENABLED.get(), v.networkVersion));
         // end crawling
         BUILDER.pop();

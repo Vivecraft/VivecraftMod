@@ -420,7 +420,7 @@ public class ClientNetworking {
                         Minecraft.getInstance().getWindow().getGuiScaledHeight());
                 }
             }
-            case CRAWL -> SERVER_ALLOWS_CRAWLING = true;
+            case CRAWL -> SERVER_ALLOWS_CRAWLING = ((CrawlPayloadS2C) s2cPayload).allowed();
             case NETWORK_VERSION -> {
                 USED_NETWORK_VERSION = ((NetworkVersionPayloadS2C) s2cPayload).version();
 
