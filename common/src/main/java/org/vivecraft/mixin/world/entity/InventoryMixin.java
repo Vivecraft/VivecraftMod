@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.VRState;
@@ -33,6 +35,21 @@ public class InventoryMixin {
     @ModifyReturnValue(method = "getSelectedItem", at = @At("RETURN"))
     private ItemStack vivecraft$dualHandingItem(ItemStack original) {
         return vivecraft$activeItem(original);
+    }
+
+    @Inject(method = "setSelectedItem", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$setOffhand(ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
+        if (this.player instanceof ServerPlayer serverPlayer && ServerConfig.DUAL_WIELDING.get()) {
+            if (ServerVRPlayers.isVRPlayer(serverPlayer)) {
+                ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
+                // older clients don't reset the active hand
+                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
+                    vivePlayer.activeBodyPart == VRBodyPart.OFF_HAND)
+                {
+                    cir.setReturnValue(this.equipment.set(EquipmentSlot.OFFHAND, stack));
+                }
+            }
+        }
     }
 
     @Unique
