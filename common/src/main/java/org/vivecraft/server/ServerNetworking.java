@@ -197,10 +197,12 @@ public class ServerNetworking {
             case WORLDSCALE -> vivePlayer.worldScale = ((WorldScalePayloadC2S) c2sPayload).worldScale();
             case HEIGHT -> vivePlayer.heightScale = ((HeightPayloadC2S) c2sPayload).heightScale();
             case TELEPORT -> {
+                if (!ServerConfig.TELEPORT_ENABLED.get()) break;
                 TeleportPayloadC2S payload = (TeleportPayloadC2S) c2sPayload;
                 player.absSnapTo(payload.x(), payload.y(), payload.z(), player.getYRot(), player.getXRot());
             }
             case CLIMBING -> {
+                if (!ServerConfig.CLIMBEY_ENABLED.get()) break;
                 player.fallDistance = 0.0F;
                 player.connection.aboveGroundTickCount = 0;
             }
@@ -211,7 +213,9 @@ public class ServerNetworking {
                     newBodyPart = VRBodyPart.MAIN_HAND;
                 }
                 vivePlayer.useBodyPartForAim = activeBodypart.useForAim();
-                if (vivePlayer.activeBodyPart != newBodyPart) {
+                if (vivePlayer.activeBodyPart != newBodyPart && ServerConfig.DUAL_WIELDING.get() &&
+                    vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING)
+                {
                     // handle equipment changes
                     ItemStack oldItem = player.getItemBySlot(EquipmentSlot.MAINHAND);
                     vivePlayer.activeBodyPart = newBodyPart;
@@ -226,6 +230,7 @@ public class ServerNetworking {
                 }
             }
             case CRAWL -> {
+                if (!ServerConfig.CRAWLING_ENABLED.get()) break;
                 vivePlayer.crawling = ((CrawlPayloadC2S) c2sPayload).crawling();
                 if (vivePlayer.crawling) {
                     player.setPose(Pose.SWIMMING);
