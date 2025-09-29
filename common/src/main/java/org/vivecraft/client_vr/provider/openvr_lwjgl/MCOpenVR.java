@@ -462,7 +462,10 @@ public class MCOpenVR extends MCVR {
 
     @Override
     public void processInputs() {
-        if (this.dh.vrSettings.seated || this.dh.viewOnly || !this.inputInitialized) return;
+        if (this.dh.vrSettings.seated || this.dh.viewOnly || !this.inputInitialized) {
+            this.ignorePressesNextFrame = false;
+            return;
+        }
 
         for (VRInputAction action : this.inputActions.values()) {
             if (action.isHanded()) {
