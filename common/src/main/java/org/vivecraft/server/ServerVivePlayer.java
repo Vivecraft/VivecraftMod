@@ -2,6 +2,7 @@ package org.vivecraft.server;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -24,6 +25,8 @@ public class ServerVivePlayer {
     public float worldScale = 1.0F;
     public float heightScale = 1.0F;
     public VRBodyPart activeBodyPart = VRBodyPart.MAIN_HAND;
+    // we need to keep a copy of this, in case the item breaks during dualwielding
+    public ItemStack activeItemOverride = ItemStack.EMPTY;
     // when a player mines a block too fast, the destroy is delayed, need to keep track of the bodypart that actually destroyed it
     public VRBodyPart delayedDestroyBodyPart = null;
     public boolean useBodyPartForAim = false;

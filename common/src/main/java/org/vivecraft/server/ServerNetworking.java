@@ -217,28 +217,12 @@ public class ServerNetworking {
                     vivePlayer.activeBodyPart = newBodyPart;
                     ItemStack newItem = player.getItemBySlot(EquipmentSlot.MAINHAND);
 
-                    // attribute modification, based on vanilla code: LivingEntity#collectEquipmentChanges
-                    if (player.equipmentHasChanged(oldItem, newItem)) {
-                        AttributeMap attributeMap = player.getAttributes();
-                        if (!oldItem.isEmpty()) {
-                            oldItem.forEachModifier(EquipmentSlot.MAINHAND, (holder, attributeModifier) -> {
-                                AttributeInstance attributeInstance = attributeMap.getInstance(holder);
-                                if (attributeInstance != null) {
-                                    attributeInstance.removeModifier(attributeModifier);
-                                }
-                            });
-                        }
-
-                        if (!newItem.isEmpty()) {
-                            newItem.forEachModifier(EquipmentSlot.MAINHAND, (holder, attributeModifier) -> {
-                                AttributeInstance attributeInstance = attributeMap.getInstance(holder);
-                                if (attributeInstance != null) {
-                                    attributeInstance.removeModifier(attributeModifier.id());
-                                    attributeInstance.addTransientModifier(attributeModifier);
-                                }
-                            });
-                        }
-                    }
+                    // in case the item broke
+                    applyEquipmentChange(player, vivePlayer.activeItemOverride, oldItem);
+                    // actual item change
+                    applyEquipmentChange(player, oldItem, newItem);
+                    // store in case it breaks
+                    vivePlayer.activeItemOverride = newItem.copy();
                 }
             }
             case CRAWL -> {
@@ -284,6 +268,37 @@ public class ServerNetworking {
             }
             default -> throw new IllegalStateException(
                 "Vivecraft: got unexpected packet on server: " + c2sPayload.payloadId());
+        }
+    }
+
+    /**
+     * attribute modification, based on vanilla code: {@link net.minecraft.world.entity.LivingEntity#collectEquipmentChanges}
+     *
+     * @param player  player to modify attributes for
+     * @param oldItem old item to remove the attributes for
+     * @param newItem new item to add the attributes for
+     */
+    private static void applyEquipmentChange(ServerPlayer player, ItemStack oldItem, ItemStack newItem) {
+        if (player.equipmentHasChanged(oldItem, newItem)) {
+            AttributeMap attributeMap = player.getAttributes();
+            if (!oldItem.isEmpty()) {
+                oldItem.forEachModifier(EquipmentSlot.MAINHAND, (holder, attributeModifier) -> {
+                    AttributeInstance attributeInstance = attributeMap.getInstance(holder);
+                    if (attributeInstance != null) {
+                        attributeInstance.removeModifier(attributeModifier);
+                    }
+                });
+            }
+
+            if (!newItem.isEmpty()) {
+                newItem.forEachModifier(EquipmentSlot.MAINHAND, (holder, attributeModifier) -> {
+                    AttributeInstance attributeInstance = attributeMap.getInstance(holder);
+                    if (attributeInstance != null) {
+                        attributeInstance.removeModifier(attributeModifier.id());
+                        attributeInstance.addTransientModifier(attributeModifier);
+                    }
+                });
+            }
         }
     }
 
