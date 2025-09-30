@@ -20,11 +20,11 @@ public class MobMixin {
         Mob instance, Operation<AABB> original, @Local(argsOnly = true) LivingEntity other)
     {
         AABB attackRange = original.call(instance);
-        if (other instanceof ServerPlayer player && ServerConfig.MOB_ATTACK_RANGE_ADNJUSTMENT.get() < 0) {
+        if (other instanceof ServerPlayer player && ServerConfig.MOB_ATTACK_RANGE_ADJUSTMENT.get() < 0) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
             if (serverVivePlayer != null && !serverVivePlayer.isSeated()) {
-                attackRange = attackRange.inflate(ServerConfig.MOB_ATTACK_RANGE_ADNJUSTMENT.get(), 0,
-                    ServerConfig.MOB_ATTACK_RANGE_ADNJUSTMENT.get());
+                attackRange = attackRange.inflate(ServerConfig.MOB_ATTACK_RANGE_ADJUSTMENT.get(), 0,
+                    ServerConfig.MOB_ATTACK_RANGE_ADJUSTMENT.get());
             }
         }
         return attackRange;
