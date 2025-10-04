@@ -24,6 +24,7 @@ public class SodiumHelper {
     private static boolean HAS_MODELCUBOID_QUADS;
     private static boolean HAS_MODELCUBOID_FLOATS;
     private static boolean HAS_MODELCUBOID_CUBES;
+    private static boolean HAS_MODELCUBOID_LONGS;
     private static Field ModelPart_sodium$cuboids;
     private static Field ModelCuboid_quads;
 
@@ -39,6 +40,8 @@ public class SodiumHelper {
     private static Field ModelCuboid_v0;
     private static Field ModelCuboid_v1;
     private static Field ModelCuboid_v2;
+
+    private static Field ModelCuboid_textures;
 
     private static Field ModelCuboid$Quad_textures;
 
@@ -103,31 +106,41 @@ public class SodiumHelper {
                         destTextures[i].x = sourceTextures[i].x;
                         destTextures[i].y = sourceTextures[i].y;
                     }
-                } else if (HAS_MODELCUBOID_FLOATS) {
-                    // ModelCuboid stores the texture info in per cube floats
+                } else {
+                    // ModelCuboid stores the texture info in per cube
                     Object sourceCuboid = HAS_MODELCUBOID_CUBES ? Cube_sodium$cuboid.get(source.cubes.get(0)) :
                         ((Object[]) ModelPart_sodium$cuboids.get(source))[0];
-
-                    float[][] UVs = new float[][]{{
-                        (float) ModelCuboid_u0.get(sourceCuboid),
-                        (float) ModelCuboid_u1.get(sourceCuboid),
-                        (float) ModelCuboid_u2.get(sourceCuboid),
-                        (float) ModelCuboid_u3.get(sourceCuboid),
-                        (float) ModelCuboid_u4.get(sourceCuboid),
-                        (float) ModelCuboid_u5.get(sourceCuboid)
-                    }, {
-                        (float) ModelCuboid_v0.get(sourceCuboid),
-                        (float) ModelCuboid_v1.get(sourceCuboid),
-                        (float) ModelCuboid_v2.get(sourceCuboid)
-                    }};
-
                     Object destCuboid = HAS_MODELCUBOID_CUBES ? Cube_sodium$cuboid.get(dest.cubes.get(0)) :
                         ((Object[]) ModelPart_sodium$cuboids.get(dest))[0];
-                    ((ModelCuboidExtension) destCuboid).vivecraft$addOverrides(
-                        mapDirection(destPoly),
-                        mapDirection(sourcePoly),
-                        UVs
-                    );
+
+                    if (HAS_MODELCUBOID_FLOATS) {
+                        // uvs are stored as a bunch of floats
+                        float[][] UVs = new float[][]{{
+                            (float) ModelCuboid_u0.get(sourceCuboid),
+                            (float) ModelCuboid_u1.get(sourceCuboid),
+                            (float) ModelCuboid_u2.get(sourceCuboid),
+                            (float) ModelCuboid_u3.get(sourceCuboid),
+                            (float) ModelCuboid_u4.get(sourceCuboid),
+                            (float) ModelCuboid_u5.get(sourceCuboid)
+                        }, {
+                            (float) ModelCuboid_v0.get(sourceCuboid),
+                            (float) ModelCuboid_v1.get(sourceCuboid),
+                            (float) ModelCuboid_v2.get(sourceCuboid)
+                        }};
+                        ((ModelCuboidExtension) destCuboid).vivecraft$addOverrides(
+                            mapDirection(destPoly),
+                            mapDirection(sourcePoly),
+                            UVs
+                        );
+                    } else if (HAS_MODELCUBOID_LONGS) {
+                        // uvs are packed into longs
+                        long[] sourceUVs = (long[]) ModelCuboid_textures.get(sourceCuboid);
+                        long[] destUVs = (long[]) ModelCuboid_textures.get(destCuboid);
+                        destUVs[mapDirection(destPoly) * 4] = sourceUVs[mapDirection(sourcePoly) * 4];
+                        destUVs[mapDirection(destPoly) * 4 + 1] = sourceUVs[mapDirection(sourcePoly) * 4 + 1];
+                        destUVs[mapDirection(destPoly) * 4 + 2] = sourceUVs[mapDirection(sourcePoly) * 4 + 2];
+                        destUVs[mapDirection(destPoly) * 4 + 3] = sourceUVs[mapDirection(sourcePoly) * 4 + 3];
+                    }
                 }
             } catch (IllegalAccessException | ClassCastException e) {
                 VRSettings.LOGGER.error(
@@ -213,17 +226,24 @@ public class SodiumHelper {
                     ModelCuboid$Quad_textures = ModelCuboid$Quad.getDeclaredField("textures");
                     HAS_MODELCUBOID_QUADS = true;
                 } catch (ClassNotFoundException noQuads) {
-                    // texture bounds are stored in global UVs instead
-                    ModelCuboid_u0 = ModelCuboid.getDeclaredField("u0");
-                    ModelCuboid_u1 = ModelCuboid.getDeclaredField("u1");
-                    ModelCuboid_u2 = ModelCuboid.getDeclaredField("u2");
-                    ModelCuboid_u3 = ModelCuboid.getDeclaredField("u3");
-                    ModelCuboid_u4 = ModelCuboid.getDeclaredField("u4");
-                    ModelCuboid_u5 = ModelCuboid.getDeclaredField("u5");
-                    ModelCuboid_v0 = ModelCuboid.getDeclaredField("v0");
-                    ModelCuboid_v1 = ModelCuboid.getDeclaredField("v1");
-                    ModelCuboid_v2 = ModelCuboid.getDeclaredField("v2");
-                    HAS_MODELCUBOID_FLOATS = true;
+                    try {
+                        // sodium 0.5.6-0.6.13
+                        // texture bounds are stored in global UVs instead
+                        ModelCuboid_u0 = ModelCuboid.getDeclaredField("u0");
+                        ModelCuboid_u1 = ModelCuboid.getDeclaredField("u1");
+                        ModelCuboid_u2 = ModelCuboid.getDeclaredField("u2");
+                        ModelCuboid_u3 = ModelCuboid.getDeclaredField("u3");
+                        ModelCuboid_u4 = ModelCuboid.getDeclaredField("u4");
+                        ModelCuboid_u5 = ModelCuboid.getDeclaredField("u5");
+                        ModelCuboid_v0 = ModelCuboid.getDeclaredField("v0");
+                        ModelCuboid_v1 = ModelCuboid.getDeclaredField("v1");
+                        ModelCuboid_v2 = ModelCuboid.getDeclaredField("v2");
+                        HAS_MODELCUBOID_FLOATS = true;
+                    } catch (NoSuchFieldException array) {
+                        // sodium 0.7+, uvs are packet into a long array
+                        ModelCuboid_textures = ModelCuboid.getDeclaredField("textures");
+                        HAS_MODELCUBOID_LONGS = true;
+                    }
                 }
             } catch (ClassNotFoundException ignored) {
                 // older versions didn't use that so can ignore it

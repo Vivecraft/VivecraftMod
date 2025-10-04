@@ -29,10 +29,10 @@ dependencies {
     modCompileOnly("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.8-0.7.0-fabric"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.9.0+1.21.6-fabric"
+    modCompileOnly "maven.modrinth:iris:1.9.2+1.21.8-fabric"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
