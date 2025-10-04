@@ -550,6 +550,10 @@ public class VRPlayerModel extends PlayerModel {
             poseStack.translate(side == HumanoidArm.RIGHT ? 0.03125F : -0.03125F, 0.0F, 0.0F);
         }
 
+        doAttackAnim(side, poseStack);
+    }
+
+    protected void doAttackAnim(HumanoidArm side, PoseStack poseStack) {
         if (side == this.attackArm) {
             poseStack.translate(0.0F, 0.5F, 0.0F);
             poseStack.mulPose(Axis.XP.rotation(Mth.sin(this.attackTime * Mth.PI)));

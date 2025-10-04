@@ -1,7 +1,6 @@
 package org.vivecraft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -440,10 +439,6 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
 
         poseStack.translate(side == HumanoidArm.LEFT ? -0.0625F : 0.0625F, -0.65F, 0.0F);
 
-        if (side == this.attackArm) {
-            poseStack.translate(0.0F, 0.5F, 0.0F);
-            poseStack.mulPose(Axis.XP.rotation(Mth.sin(this.attackTime * Mth.PI)));
-            poseStack.translate(0.0F, -0.5F, 0.0F);
-        }
+        doAttackAnim(side, poseStack);
     }
 }
