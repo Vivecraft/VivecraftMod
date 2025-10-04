@@ -3,6 +3,7 @@ package org.vivecraft.mixin.client_vr.renderer;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
@@ -10,6 +11,7 @@ import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -60,5 +62,13 @@ public class ScreenEffectRendererVRMixin {
             // call the scale with original to allow operation stacking
             original.call(poseStack, sinProgress, sinProgress, sinProgress);
         }
+    }
+
+    @ModifyArg(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Lighting;setupFor(Lcom/mojang/blaze3d/platform/Lighting$Entry;)V"))
+    private Lighting.Entry vivecraft$worldLighting(Lighting.Entry entry) {
+        if (!RenderPassType.isVanilla()) {
+            return Lighting.Entry.LEVEL;
+        }
+        return entry;
     }
 }

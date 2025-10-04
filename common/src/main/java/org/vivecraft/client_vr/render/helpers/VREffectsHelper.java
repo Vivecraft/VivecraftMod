@@ -642,7 +642,7 @@ public class VREffectsHelper {
             renderGuiAndShadow(partialTick, false, false);
         }
 
-        renderVRSelfEffects(partialTick);
+        renderVRSelfEffects(partialTick, true);
         VRWidgetHelper.renderVRThirdPersonCamWidget();
         VRWidgetHelper.renderVRHandheldCameraWidget();
 
@@ -711,7 +711,7 @@ public class VREffectsHelper {
                 DATA_HOLDER.menuHandMain, DATA_HOLDER.menuHandOff);
         }
 
-        renderVRSelfEffects(partialTick);
+        renderVRSelfEffects(partialTick, !secondPass);
 
         // iris, need to end all, to have stuff rendered in the right order
         MC.renderBuffers().bufferSource().endBatch();
@@ -802,7 +802,7 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    private static void renderVRSelfEffects(float partialTick) {
+    private static void renderVRSelfEffects(float partialTick, boolean firstPass) {
         // only render the fire in first person, other views have the burning entity
         if (DATA_HOLDER.currentPass != RenderPass.THIRD && DATA_HOLDER.currentPass != RenderPass.CAMERA &&
             !MC.player.isSpectator() && MC.player.isOnFire() && !Xevents.renderFireOverlay(MC.player, new PoseStack()))
@@ -810,9 +810,11 @@ public class VREffectsHelper {
             VREffectsHelper.renderFireInFirstPerson();
         }
 
-        // totem of undying
-        ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
-            .renderItemActivationAnimation(new PoseStack(), partialTick);
+        if (firstPass) {
+            // totem of undying
+            ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
+                .renderItemActivationAnimation(new PoseStack(), partialTick);
+        }
     }
 
     /**
