@@ -120,7 +120,7 @@ public class ServerNetworking {
 
                 vivePlayer.setVR(payload.vr());
 
-                ServerVRPlayers.getPlayersWithVivecraft(player.getServer()).put(player.getUUID(), vivePlayer);
+                ServerVRPlayers.getPlayersWithVivecraft(player.level().getServer()).put(player.getUUID(), vivePlayer);
 
                 packetConsumer.accept(new VersionPayloadS2C(CommonDataHolder.getInstance().versionIdentifier));
                 packetConsumer.accept(new RequestDataPayloadS2C());
@@ -500,7 +500,7 @@ public class ServerNetworking {
         ServerVivePlayer vivePlayer, Function<Integer, Packet<?>> packetProvider)
     {
         Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(
-            vivePlayer.player.getServer());
+            vivePlayer.player.level().getServer());
         for (var trackedPlayer : getTrackingPlayers(vivePlayer.player)) {
             if (!vivePlayers.containsKey(trackedPlayer.getPlayer().getUUID()) ||
                 trackedPlayer.getPlayer() == vivePlayer.player)

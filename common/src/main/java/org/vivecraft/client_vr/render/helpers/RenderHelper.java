@@ -24,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
 import org.vivecraft.api.client.data.RenderPass;
@@ -245,13 +246,14 @@ public class RenderHelper {
 
         // black background with border
         guiGraphics.fill(x, y, x + width, y + height, 0xFF000000);
-        guiGraphics.renderOutline(x, y, width, height, 0xFFFFFFFF);
+        guiGraphics.submitOutline(x, y, width, height, 0xFFFFFFFF);
 
         for (int line = 0; line < formattedChars.size(); line++) {
             guiGraphics.drawCenteredString(MC.font, formattedChars.get(line), guiGraphics.guiWidth() / 2,
                 y + 5 + line * 12, 0xFFFFFFFF);
         }
 
+        guiGraphics.renderDeferredElements();
         GuiRenderHelper.finish();
     }
 

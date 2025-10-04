@@ -71,7 +71,7 @@ public class ModelUtils {
      */
     private static void copyUV(ModelPart.Polygon source, ModelPart.Polygon target) {
         for (int i = 0; i < source.vertices().length; i++) {
-            ModelPart.Vertex newVertex = new ModelPart.Vertex(target.vertices()[i].pos(), source.vertices()[i].u(),
+            ModelPart.Vertex newVertex = target.vertices()[i].remap(source.vertices()[i].u(),
                 source.vertices()[i].v());
             // Optifine has custom internal polygon data which also needs to be modified
             if (OptifineHelper.isOptifineLoaded()) {

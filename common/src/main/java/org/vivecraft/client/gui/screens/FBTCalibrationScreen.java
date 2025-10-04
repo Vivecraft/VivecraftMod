@@ -159,15 +159,15 @@ public class FBTCalibrationScreen extends Screen {
 
         if (!this.calibrated || !this.usingUnlabeledTrackers) {
             // arm overlay
-            guiGraphics.renderOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
-            guiGraphics.renderOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
 
             // render target rectangles
-            guiGraphics.renderOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
-            guiGraphics.renderOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
 
             // submit player pip

@@ -131,7 +131,7 @@ public class HapticTracker implements Tracker {
 
     private boolean isInRain(LocalPlayer player) {
         BlockPos blockpos = player.blockPosition();
-        return player.clientLevel.isRainingAt(blockpos) || player.clientLevel.isRainingAt(
+        return player.level().isRainingAt(blockpos) || player.level().isRainingAt(
             new BlockPos(blockpos.getX(), (int) player.getBoundingBox().maxY, blockpos.getZ()));
     }
 
@@ -218,9 +218,9 @@ public class HapticTracker implements Tracker {
 
         @Override
         void tick(LocalPlayer player) {
-            if (!player.clientLevel.isRaining()) return;
+            if (!player.level().isRaining()) return;
 
-            boolean isSnow = player.clientLevel.getBiome(player.blockPosition()).value()
+            boolean isSnow = player.level().getBiome(player.blockPosition()).value()
                 .coldEnoughToSnow(player.blockPosition(), player.level().getSeaLevel());
 
             // Terminal Velocity of rain in m/s
@@ -235,7 +235,7 @@ public class HapticTracker implements Tracker {
 
             for (RiggedBody.HapticPoint p : points) {
                 // Check Occlusion
-                if (!player.clientLevel.isRainingAt(player.blockPosition())) {
+                if (!player.level().isRainingAt(player.blockPosition())) {
                     continue;
                 }
 

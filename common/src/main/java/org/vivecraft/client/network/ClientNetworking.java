@@ -162,7 +162,7 @@ public class ClientNetworking {
         }
         if (ClientDataHolderVR.getInstance().vrSettings.mainPlayerDataSource != VRSettings.DataSource.SERVER) {
             ClientVRPlayers.getInstance()
-                .update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale,
+                .update(Minecraft.getInstance().player.getGameProfile().id(), vrPlayerState, worldScale,
                     userHeight / AutoCalibration.DEFAULT_HEIGHT, true);
         }
     }

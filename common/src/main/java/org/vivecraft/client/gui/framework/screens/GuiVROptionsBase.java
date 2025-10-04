@@ -4,6 +4,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
@@ -110,11 +113,12 @@ public abstract class GuiVROptionsBase extends Screen {
                         layout.getOption())
                     {
                         @Override
-                        public void onClick(double mouseX, double mouseY) {
+                        public void onClick(MouseButtonEvent mouseEvent, boolean doubleClick) {
                             if (layout.getCustomHandler() == null ||
-                                !layout.getCustomHandler().apply(this, new Vec2((float) mouseX, (float) mouseY)))
+                                !layout.getCustomHandler()
+                                    .apply(this, new Vec2((float) mouseEvent.x(), (float) mouseEvent.y())))
                             {
-                                super.onClick(mouseX, mouseY);
+                                super.onClick(mouseEvent, doubleClick);
                             }
                         }
                     });
@@ -266,32 +270,32 @@ public abstract class GuiVROptionsBase extends Screen {
     protected void actionPerformedRightClick(AbstractWidget widget) {}
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean success = super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent mouseEvent, boolean doubleClick) {
+        boolean success = super.mouseClicked(mouseEvent, doubleClick);
 
         if (success && getFocused() instanceof AbstractWidget widget) {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (mouseEvent.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 this.actionPerformed(widget);
-            } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            } else if (mouseEvent.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                 this.actionPerformedRightClick(widget);
             }
         } else if (this.visibleList != null) {
-            return this.visibleList.mouseClicked(mouseX, mouseY, button);
+            return this.visibleList.mouseClicked(mouseEvent, doubleClick);
         }
 
         return success;
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.visibleList != null ? this.visibleList.mouseReleased(mouseX, mouseY, button) :
-            super.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseReleased(MouseButtonEvent mouseEvent) {
+        return this.visibleList != null ? this.visibleList.mouseReleased(mouseEvent) :
+            super.mouseReleased(mouseEvent);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        return this.visibleList != null ? this.visibleList.mouseDragged(mouseX, mouseY, button, dragX, dragY) :
-            super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    public boolean mouseDragged(MouseButtonEvent mouseEvent, double dragX, double dragY) {
+        return this.visibleList != null ? this.visibleList.mouseDragged(mouseEvent, dragX, dragY) :
+            super.mouseDragged(mouseEvent, dragX, dragY);
     }
 
     @Override
@@ -304,8 +308,8 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (keyEvent.key() == GLFW.GLFW_KEY_ESCAPE) {
             if (!this.onDoneClicked()) {
                 this.dataHolder.vrSettings.saveOptions();
                 this.minecraft.setScreen(this.lastScreen);
@@ -313,21 +317,21 @@ public abstract class GuiVROptionsBase extends Screen {
 
             return true;
         } else {
-            if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            if (super.keyPressed(keyEvent)) {
                 if (this.getFocused() instanceof AbstractWidget widget) {
                     this.actionPerformed(widget);
                 }
                 return true;
             } else {
-                return this.visibleList != null && this.visibleList.keyPressed(keyCode, scanCode, modifiers);
+                return this.visibleList != null && this.visibleList.keyPressed(keyEvent);
             }
         }
     }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers) {
-        return this.visibleList != null && this.visibleList.charTyped(codePoint, modifiers) ||
-            super.charTyped(codePoint, modifiers);
+    public boolean charTyped(CharacterEvent characterEvent) {
+        return this.visibleList != null && this.visibleList.charTyped(characterEvent) ||
+            super.charTyped(characterEvent);
     }
 
     private void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {

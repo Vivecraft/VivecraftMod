@@ -1,6 +1,7 @@
 package org.vivecraft.client.extensions;
 
 import org.vivecraft.client.ClientVRPlayers;
+import org.vivecraft.client.render.VRPlayerRenderData;
 
 public interface EntityRenderStateExtension {
     /**
@@ -32,4 +33,14 @@ public interface EntityRenderStateExtension {
      * set the players scale
      */
     void vivecraft$setTotalScale(float totalScale);
+
+    /**
+     * @return the render data needed to animate the vr player model
+     */
+    VRPlayerRenderData vivecraft$getVRRenderData();
+
+    /**
+     * set render data
+     */
+    void vivecraft$setVRRenderData(VRPlayerRenderData data);
 }

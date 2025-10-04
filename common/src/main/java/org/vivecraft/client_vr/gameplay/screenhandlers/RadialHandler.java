@@ -2,6 +2,8 @@ package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -137,31 +139,35 @@ public class RadialHandler {
 
             if (!VivecraftVRMod.INSTANCE.keyRadialMenu.isDown()) {
                 if (ACTIVE_CONTROLLER == ControllerType.LEFT) {
-                    UI.mouseClicked(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                    UI.mouseClicked(new MouseButtonEvent(x1, y1, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)),
+                        false);
                 } else {
-                    UI.mouseClicked(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                    UI.mouseClicked(new MouseButtonEvent(x2, y2, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)),
+                        false);
                 }
 
                 setOverlayShowing(false, null);
             }
         } else {
             if (POINTED_L && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.LEFT)) {
-                UI.mouseClicked(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                UI.mouseClicked(new MouseButtonEvent(x1, y1, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)),
+                    false);
                 LAST_PRESSED_CLICK_L = true;
             }
 
             if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.LEFT) && LAST_PRESSED_CLICK_L) {
-                UI.mouseReleased(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                UI.mouseReleased(new MouseButtonEvent(x1, y1, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
                 LAST_PRESSED_CLICK_L = false;
             }
 
             if (POINTED_R && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.RIGHT)) {
-                UI.mouseClicked(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                UI.mouseClicked(new MouseButtonEvent(x2, y2, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)),
+                    false);
                 LAST_PRESSED_CLICK_R = true;
             }
 
             if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.RIGHT) && LAST_PRESSED_CLICK_R) {
-                UI.mouseReleased(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                UI.mouseReleased(new MouseButtonEvent(x2, y2, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
                 LAST_PRESSED_CLICK_R = false;
             }
         }

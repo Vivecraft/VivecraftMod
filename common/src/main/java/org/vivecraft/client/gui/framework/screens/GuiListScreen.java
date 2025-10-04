@@ -61,7 +61,7 @@ public abstract class GuiListScreen extends Screen {
             this.searchBox = null;
         }
 
-        this.list.setSelectedIndex(this.lastSelected);
+        this.list.setSelected(this.lastSelected == -1 ? null : this.list.children().get(this.lastSelected));
         this.list.setFocused(this.list.getSelected());
         this.list.setScrollAmount(scrollAmount);
         this.addRenderableWidget(this.list);
@@ -110,7 +110,7 @@ public abstract class GuiListScreen extends Screen {
             ((GuiGraphicsAccessor) guiGraphics).getDeferredTooltip() == null)
         {
             TooltipRenderer.renderTooltip(guiGraphics, entry.getTooltip(),
-                this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)), this.list.getItemHeight());
+                this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)) + 2, this.list.getItemHeight());
         }
     }
 }

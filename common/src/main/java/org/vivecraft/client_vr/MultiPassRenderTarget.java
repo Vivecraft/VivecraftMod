@@ -26,8 +26,6 @@ public class MultiPassRenderTarget extends RenderTarget {
         // use the default vanilla target for those
         this.width = mainTarget.width;
         this.height = mainTarget.height;
-        this.viewWidth = mainTarget.viewWidth;
-        this.viewHeight = mainTarget.viewHeight;
         this.filterMode = mainTarget.filterMode;
     }
 

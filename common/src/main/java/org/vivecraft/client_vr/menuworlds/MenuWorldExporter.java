@@ -247,7 +247,7 @@ public class MenuWorldExporter {
                 dimFixedTime = OptionalLong.of(6000L);
                 dimHasCeiling = false;
                 dimMinY = 0;
-                dimAmbientLight = 0.0f;
+                dimAmbientLight = 0.25f;
             } else { // overworld/default
                 dimHasCeiling = false;
                 dimMinY = 0; // pre-v5 worlds don't have deeper underground
@@ -262,7 +262,9 @@ public class MenuWorldExporter {
             dimAmbientLight = dis.readFloat();
         }
         // TODO 1.21.6 store that in the menuworld
-        Optional<Integer> cloudHeight = dimHasSkyLight ? Optional.of(192) : Optional.empty();
+        // TODO 1.21.9 this should now definitely be in the menuworld, because end has skylight now
+        Optional<Integer> cloudHeight =
+            dimHasSkyLight && !dimName.equals(BuiltinDimensionTypes.END_EFFECTS) ? Optional.of(192) : Optional.empty();
 
         DimensionType dimensionType = new DimensionType(dimFixedTime, dimHasSkyLight, dimHasCeiling, false, false, 1.0,
             true, false, dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimName, dimAmbientLight, cloudHeight,

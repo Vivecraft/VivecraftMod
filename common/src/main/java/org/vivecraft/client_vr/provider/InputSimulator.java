@@ -1,6 +1,9 @@
 package org.vivecraft.client_vr.provider;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.ClientUtils;
@@ -23,8 +26,9 @@ public class InputSimulator {
     }
 
     private static void handleKeyAction(int key, int modifiers, int action) {
-        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0,
-            action, modifiers);
+        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().handle(), action,
+            new KeyEvent(key, 0,
+                modifiers));
     }
 
     public static void pressKey(int key, int modifiers) {
@@ -64,8 +68,8 @@ public class InputSimulator {
     }
 
     public static void typeChar(char character, int modifiers) {
-        Minecraft.getInstance().keyboardHandler.charTyped(Minecraft.getInstance().getWindow().getWindow(), character,
-            modifiers);
+        Minecraft.getInstance().keyboardHandler.charTyped(Minecraft.getInstance().getWindow().handle(),
+            new CharacterEvent(character, modifiers));
     }
 
     public static void typeChar(char character) {
@@ -73,8 +77,7 @@ public class InputSimulator {
     }
 
     public static void pressMouse(int button, int modifiers) {
-        Minecraft.getInstance().mouseHandler.onPress(Minecraft.getInstance().getWindow().getWindow(), button, 1,
-            modifiers);
+        Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(), new MouseButtonInfo(button, modifiers), GLFW.GLFW_PRESS);
     }
 
     public static void pressMouse(int button) {
@@ -82,8 +85,7 @@ public class InputSimulator {
     }
 
     public static void releaseMouse(int button, int modifiers) {
-        Minecraft.getInstance().mouseHandler.onPress(Minecraft.getInstance().getWindow().getWindow(), button, 0,
-            modifiers);
+        Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(), new MouseButtonInfo(button, modifiers), GLFW.GLFW_RELEASE);
     }
 
     public static void releaseMouse(int button) {
@@ -91,11 +93,11 @@ public class InputSimulator {
     }
 
     public static void setMousePos(double x, double y) {
-        Minecraft.getInstance().mouseHandler.onMove(Minecraft.getInstance().getWindow().getWindow(), x, y);
+        Minecraft.getInstance().mouseHandler.onMove(Minecraft.getInstance().getWindow().handle(), x, y);
     }
 
     public static void scrollMouse(double xOffset, double yOffset) {
-        Minecraft.getInstance().mouseHandler.onScroll(Minecraft.getInstance().getWindow().getWindow(), xOffset,
+        Minecraft.getInstance().mouseHandler.onScroll(Minecraft.getInstance().getWindow().handle(), xOffset,
             yOffset);
     }
 

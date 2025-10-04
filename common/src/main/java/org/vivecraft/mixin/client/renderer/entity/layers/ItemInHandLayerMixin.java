@@ -14,7 +14,7 @@ import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 @Mixin(ItemInHandLayer.class)
 public abstract class ItemInHandLayerMixin {
 
-    @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ArmedModel;translateToHand(Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V", shift = At.Shift.AFTER))
+    @Inject(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ArmedModel;translateToHand(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V", shift = At.Shift.AFTER))
     private void vivecraft$firstPersonItemScale(
         CallbackInfo ci, @Local(argsOnly = true) ArmedEntityRenderState renderState,
         @Local(argsOnly = true) PoseStack poseStack)

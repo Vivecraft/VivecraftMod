@@ -57,13 +57,13 @@ public class XplatImpl implements Xplat {
                 return new TextureAtlasSprite[]{
                     Minecraft.getInstance().getModelManager().getBlockModelShaper()
                         .getBlockModel(Blocks.LAVA.defaultBlockState()).particleIcon(),
-                    ModelBakery.LAVA_FLOW.sprite()
+                    Minecraft.getInstance().getAtlasManager().get(ModelBakery.LAVA_FLOW)
                 };
             } else {
                 return new TextureAtlasSprite[]{
                     Minecraft.getInstance().getModelManager().getBlockModelShaper()
                         .getBlockModel(Blocks.WATER.defaultBlockState()).particleIcon(),
-                    ModelBakery.WATER_FLOW.sprite()
+                    Minecraft.getInstance().getAtlasManager().get(ModelBakery.WATER_FLOW)
                 };
             }
         }

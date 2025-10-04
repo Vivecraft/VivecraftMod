@@ -82,7 +82,7 @@ public class TooltipUtil {
     }
 
     private static String getClientOnlyTooltip() {
-        if (Minecraft.getInstance().level != null && !Minecraft.getInstance().isLocalServer()) {
+        if (Minecraft.getInstance() != null && Minecraft.getInstance().level != null && !Minecraft.getInstance().isLocalServer()) {
             return "\n" + Language.getInstance().getOrDefault("vivecraft.messages.serversettingsnotavailablesingle");
         } else {
             return "";

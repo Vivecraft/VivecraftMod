@@ -19,13 +19,16 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -602,10 +605,6 @@ public class VREffectsHelper {
             return;
         }
 
-        // make sure other stuff is finished drawing, or they will render on our buffers/use the wrong projection matrix
-        // mainly an issue with iris and the crumbling effect/nausea effect
-        MC.renderBuffers().bufferSource().endBatch();
-
         // remember the original buffer
         RenderTarget mainTarget = MC.mainRenderTarget;
 
@@ -629,9 +628,6 @@ public class VREffectsHelper {
                 renderHands && DATA_HOLDER.menuHandOff, true, true);
         }
 
-        // iris, need to end all, to have stuff rendered in the right order
-        MC.renderBuffers().bufferSource().endBatch();
-
         // switch to VR UnOccluded buffer, no depth copy
         RenderSystem.getDevice().createCommandEncoder()
             .clearColorAndDepthTextures(extTargets.vivecraft$getUnoccluded().get().getColorTexture(), 0x00000000,
@@ -651,9 +647,6 @@ public class VREffectsHelper {
                 renderHands && DATA_HOLDER.menuHandOff, true, true);
         }
 
-        // iris, need to end all, to have stuff rendered in the right order
-        MC.renderBuffers().bufferSource().endBatch();
-
         // switch to VR hands buffer
         RenderSystem.getDevice().createCommandEncoder()
             .clearColorTexture(extTargets.vivecraft$getHands().get().getColorTexture(), 0x00000000);
@@ -662,9 +655,6 @@ public class VREffectsHelper {
 
         VRArmHelper.renderVRHands(partialTick, renderHands && !DATA_HOLDER.menuHandMain,
             renderHands && !DATA_HOLDER.menuHandOff, false, false);
-
-        // iris, need to end all, to have stuff rendered in the right order
-        MC.renderBuffers().bufferSource().endBatch();
 
         // rebind the original buffer
         MC.mainRenderTarget = mainTarget;
@@ -683,9 +673,6 @@ public class VREffectsHelper {
             // skip for spyglass
             return;
         }
-        // make sure other stuff is finished drawing, or they will render on our buffers/use the wrong projection matrix
-        // mainly an issue with iris and the crumbling effect/nausea effect
-        MC.renderBuffers().bufferSource().endBatch();
 
         Profiler.get().popPush("VR");
 
@@ -698,9 +685,6 @@ public class VREffectsHelper {
             renderGuiAndShadow(partialTick, !shouldOccludeGui(), true);
         }
 
-        // iris, need to end all, to have stuff rendered in the right order
-        MC.renderBuffers().bufferSource().endBatch();
-
         // render hands in second pass when gui is open
         boolean renderHandsSecond =
             RadialHandler.isShowing() || KeyboardHandler.SHOWING || Minecraft.getInstance().screen != null;
@@ -712,9 +696,6 @@ public class VREffectsHelper {
         }
 
         renderVRSelfEffects(partialTick, !secondPass);
-
-        // iris, need to end all, to have stuff rendered in the right order
-        MC.renderBuffers().bufferSource().endBatch();
     }
 
     /**
@@ -813,7 +794,7 @@ public class VREffectsHelper {
         if (firstPass) {
             // totem of undying
             ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
-                .renderItemActivationAnimation(new PoseStack(), partialTick);
+                .renderItemActivationAnimation(new PoseStack(), partialTick, MC.gameRenderer.getSubmitNodeStorage());
         }
     }
 
@@ -824,7 +805,7 @@ public class VREffectsHelper {
         PoseStack posestack = new PoseStack();
         RenderHelper.applyStereo(DATA_HOLDER.currentPass, posestack);
 
-        TextureAtlasSprite fireSprite = ModelBakery.FIRE_1.sprite();
+        TextureAtlasSprite fireSprite = MC.getAtlasManager().get(ModelBakery.FIRE_1);
 
         if (OptifineHelper.isOptifineLoaded()) {
             OptifineHelper.markTextureAsActive(fireSprite);
@@ -853,7 +834,7 @@ public class VREffectsHelper {
         );
 
         RenderType renderType;
-        TextureAtlasSprite textureAtlasSprite = ModelBakery.FIRE_1.sprite();
+        TextureAtlasSprite textureAtlasSprite = MC.getAtlasManager().get(ModelBakery.FIRE_1);
         if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
             // with depthtest
             renderType = VRRenderTypes.guiTextured(textureAtlasSprite.atlasLocation());
@@ -1260,7 +1241,8 @@ public class VREffectsHelper {
             brightness = 0.5F;
         }
 
-        TextureAtlasSprite crosshairSprite = Minecraft.getInstance().getGuiSprites().getSprite(Gui.CROSSHAIR_SPRITE);
+        TextureAtlasSprite crosshairSprite = MC.getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
+            .getSprite(Gui.CROSSHAIR_SPRITE);
 
         RenderType renderType = VRRenderTypes.crosshairWorld(crosshairSprite.atlasLocation(), depthAlways);
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);

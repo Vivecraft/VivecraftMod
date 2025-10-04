@@ -16,7 +16,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(WeatherEffectRenderer.class)
 public class WeatherEffectRendererVRMixin {
-    @ModifyVariable(method = "collectColumnInstances", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "extractRenderState", at = @At("HEAD"), argsOnly = true)
     private Vec3 vivecraft$rainCenterPos(Vec3 cameraPos) {
         if (!RenderPassType.isVanilla() && (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT ||
             ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT

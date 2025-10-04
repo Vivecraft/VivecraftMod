@@ -92,7 +92,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                     Component.translatable(this.vrTitle), this,
                     () -> Arrays.stream(this.minecraft.options.keyMappings).sorted().toList(),
                     key -> Component.translatable(key.getName()),
-                    KeyMapping::getCategory,
+                    key -> key.getCategory().id().toLanguageKey("key.category"),
                     key -> {
                         this.selectedIndex = index;
                         this.setKey(key);

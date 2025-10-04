@@ -677,7 +677,7 @@ public abstract class MCVR {
                     );
 
                 InputSimulator.setMousePos(screenX, screenY);
-                GLFW.glfwSetCursorPos(this.mc.getWindow().getWindow(), screenX, screenY);
+                GLFW.glfwSetCursorPos(this.mc.getWindow().handle(), screenX, screenY);
 
                 if (this.dh.vrSettings.aimDevice == VRSettings.AimDevice.CONTROLLER) {
                     temp.rotationY(Mth.DEG_TO_RAD * (-180.0F - hPos - this.hmdForwardYaw));

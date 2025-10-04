@@ -15,10 +15,11 @@ mutable field net/minecraft/client/renderer/entity/layers/RenderLayer renderer L
 accessible field net/minecraft/client/renderer/entity/layers/RenderLayer renderer Lnet/minecraft/client/renderer/entity/RenderLayerParent;
 
 # gui handling
-accessible method net/minecraft/client/MouseHandler onPress (JIII)V
+accessible method net/minecraft/client/MouseHandler onButton (JLnet/minecraft/client/input/MouseButtonInfo;I)V
 accessible method net/minecraft/client/MouseHandler onMove (JDD)V
 accessible method net/minecraft/client/MouseHandler onScroll (JDD)V
-accessible method net/minecraft/client/KeyboardHandler charTyped (JII)V
+accessible method net/minecraft/client/KeyboardHandler charTyped (JLnet/minecraft/client/input/CharacterEvent;)V
+accessible method net/minecraft/client/KeyboardHandler keyPress (JILnet/minecraft/client/input/KeyEvent;)V
 
 # for aim fix
 accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
@@ -43,9 +44,6 @@ accessible method net/minecraft/client/Minecraft isMultiplayerServer ()Z
 
 # to add custom key mappings
 mutable field net/minecraft/client/Options keyMappings [Lnet/minecraft/client/KeyMapping;
-# to add custom controls categories
-accessible field net/minecraft/client/KeyMapping CATEGORY_SORT_ORDER Ljava/util/Map;
-mutable field net/minecraft/client/KeyMapping CATEGORY_SORT_ORDER Ljava/util/Map;
 # to check key inputs
 accessible field net/minecraft/client/KeyMapping clickCount I
 accessible method net/minecraft/client/KeyMapping release ()V
@@ -55,10 +53,10 @@ accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platfor
 accessible method com/mojang/blaze3d/opengl/GlTexture <init> (ILjava/lang/String;Lcom/mojang/blaze3d/textures/TextureFormat;IIIII)V
 
 # to render vr hands
-accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V
+accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
 
 # to render item activation outside of gamerenderer
-accessible method net/minecraft/client/renderer/ScreenEffectRenderer renderItemActivationAnimation (Lcom/mojang/blaze3d/vertex/PoseStack;F)V
+accessible method net/minecraft/client/renderer/ScreenEffectRenderer renderItemActivationAnimation (Lcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/client/renderer/SubmitNodeCollector;)V
 # to disable destroy delay, on roomscale hitting
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
 

@@ -3,22 +3,21 @@ package org.vivecraft.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.render.armor.VRArmorLayer;
-import org.vivecraft.client.render.armor.VRArmorModel_WithArms;
-import org.vivecraft.client.render.armor.VRArmorModel_WithArmsLegs;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public class VRPlayerRenderer extends PlayerRenderer {
+public class VRPlayerRenderer extends AvatarRenderer<AbstractClientPlayer> {
     // Vanilla model
     private static final LayerDefinition VR_LAYER_DEF = LayerDefinition.create(
         VRPlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
@@ -81,13 +80,13 @@ public class VRPlayerRenderer extends PlayerRenderer {
             // add split armor layer
             if (type == ModelType.SPLIT_ARMS) {
                 this.addLayer(new VRArmorLayer<>(this,
-                    new VRArmorModel_WithArms<>(VRArmorLayer.VR_ARMOR_DEF_ARMS_INNER.bakeRoot()),
-                    new VRArmorModel_WithArms<>(VRArmorLayer.VR_ARMOR_DEF_ARMS_OUTER.bakeRoot()),
+                    VRArmorLayer.VR_ARMOR_DEF_ARMS.map(
+                        layerDefinition -> new VRPlayerModel_WithArms(layerDefinition.bakeRoot(), slim)),
                     context.getEquipmentRenderer()));
             } else {
                 this.addLayer(new VRArmorLayer<>(this,
-                    new VRArmorModel_WithArmsLegs<>(VRArmorLayer.VR_ARMOR_DEF_ARMS_LEGS_INNER.bakeRoot()),
-                    new VRArmorModel_WithArmsLegs<>(VRArmorLayer.VR_ARMOR_DEF_ARMS_LEGS_OUTER.bakeRoot()),
+                    VRArmorLayer.VR_ARMOR_DEF_ARMS_LEGS.map(
+                        layerDefinition -> new VRPlayerModel_WithArmsLegs(layerDefinition.bakeRoot(), slim)),
                     context.getEquipmentRenderer()));
             }
         }
@@ -107,7 +106,7 @@ public class VRPlayerRenderer extends PlayerRenderer {
     }
 
     @Override
-    public Vec3 getRenderOffset(PlayerRenderState renderState) {
+    public Vec3 getRenderOffset(AvatarRenderState renderState) {
         // idk why we do this anymore
         // this changes the offset to only apply when swimming, instead of crouching
         if (((EntityRenderStateExtension) renderState).vivecraft$isFirstPersonPlayer()) {
@@ -120,7 +119,7 @@ public class VRPlayerRenderer extends PlayerRenderer {
 
     @Override
     protected void setupRotations(
-        PlayerRenderState renderState, PoseStack poseStack, float rotationYaw, float scale)
+        AvatarRenderState renderState, PoseStack poseStack, float rotationYaw, float scale)
     {
         ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) renderState).vivecraft$getRotInfo();
         if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && rotInfo != null) {

@@ -2,6 +2,8 @@ package org.vivecraft.server.config;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.screens.GuiStringListEditorScreen;
 import org.vivecraft.server.ServerNetworking;
@@ -62,15 +64,15 @@ public class WidgetBuilder {
                 Component.literal(stringValue.get()))
             {
                 @Override
-                public boolean charTyped(char character, int modifiers) {
-                    boolean ret = super.charTyped(character, modifiers);
+                public boolean charTyped(CharacterEvent characterEvent) {
+                    boolean ret = super.charTyped(characterEvent);
                     stringValue.set(this.getValue());
                     return ret;
                 }
 
                 @Override
-                public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                    boolean ret = super.keyPressed(keyCode, scanCode, modifiers);
+                public boolean keyPressed(KeyEvent keyEvent) {
+                    boolean ret = super.keyPressed(keyEvent);
                     stringValue.set(this.getValue());
                     return ret;
                 }

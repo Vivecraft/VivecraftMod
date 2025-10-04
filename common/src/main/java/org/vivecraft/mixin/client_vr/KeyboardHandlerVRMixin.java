@@ -6,6 +6,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
@@ -32,9 +33,9 @@ public class KeyboardHandlerVRMixin {
 
     @Inject(method = "keyPress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/KeyboardHandler;debugCrashKeyTime:J", ordinal = 0), cancellable = true)
     private void vivecraft$handleVivecraftKeys(
-        long windowPointer, int key, int scanCode, int action, int modifiers, CallbackInfo ci)
+        long windowPointer, int action, KeyEvent keyEvent, CallbackInfo ci)
     {
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
+        if (keyEvent.key() == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
             if (org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.SHOWING) {
                 org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
 
@@ -51,7 +52,7 @@ public class KeyboardHandlerVRMixin {
             }
         }
 
-        if (VRHotkeys.handleKeyboardInputs(key, scanCode, action, modifiers)) {
+        if (VRHotkeys.handleKeyboardInputs(keyEvent.key(), keyEvent.scancode(), action, keyEvent.modifiers())) {
             ci.cancel();
         }
     }

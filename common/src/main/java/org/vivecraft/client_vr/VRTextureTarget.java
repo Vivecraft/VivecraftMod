@@ -40,8 +40,6 @@ public class VRTextureTarget extends RenderTarget {
         this.clearColor = clearColor;
 
         // need to set this first, because the forge/neoforge stencil enabled does a resize
-        this.viewWidth = width;
-        this.viewHeight = height;
         this.width = width;
         this.height = height;
 
@@ -102,7 +100,7 @@ public class VRTextureTarget extends RenderTarget {
             Tex ID: %s"""
             .formatted(
                 this.label,
-                this.viewWidth, this.viewHeight,
+                this.width, this.height,
                 this.colorTexture.getLabel());
     }
 

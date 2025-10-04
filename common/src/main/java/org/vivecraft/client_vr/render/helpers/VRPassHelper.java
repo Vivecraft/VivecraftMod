@@ -41,6 +41,8 @@ public class VRPassHelper {
 
         // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
         MC.levelRenderer.endFrame();
+        MC.gameRenderer.getSubmitNodeStorage().endFrame();
+        MC.gameRenderer.getFeatureRenderDispatcher().endFrame();
 
         RenderHelper.checkGLError("post game render " + eye);
 

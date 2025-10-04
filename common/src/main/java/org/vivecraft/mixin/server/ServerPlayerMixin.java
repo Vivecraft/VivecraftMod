@@ -177,7 +177,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             // check if any hand is holding a shield
             for (int i = 0; i < 2; i++) {
                 InteractionHand hand = InteractionHand.values()[i];
-                ItemStack stack = this.getItemBySlot(LivingEntity.getSlotForHand(hand));
+                ItemStack stack = this.getItemBySlot(hand.asEquipmentSlot());
                 // check for shield and do not bypass item cooldowns
                 if (stack != null && stack.get(DataComponents.BLOCKS_ATTACKS) != null &&
                     !this.getCooldowns().isOnCooldown(stack))

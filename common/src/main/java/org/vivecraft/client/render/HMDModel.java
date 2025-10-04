@@ -4,11 +4,15 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 
-public class HMDModel extends HumanoidModel<PlayerRenderState> {
+public class HMDModel extends HumanoidModel<AvatarRenderState> {
+
+    public final ModelPart head;
+
     public HMDModel(ModelPart root) {
         super(root);
+        this.head = root.getChild("head");
     }
 
     public static LayerDefinition createHMDLayer() {

@@ -73,7 +73,7 @@ public final class VRAPIImpl implements VRAPI {
         if (player.isLocalPlayer()) {
             return VRClientAPIImpl.INSTANCE.getHistoricalVRPoses();
         } else if (isVRPlayer(player)) {
-            return getMap(player.level().isClientSide).get(player.getUUID());
+            return getMap(player.level().isClientSide()).get(player.getUUID());
         } else {
             return null;
         }

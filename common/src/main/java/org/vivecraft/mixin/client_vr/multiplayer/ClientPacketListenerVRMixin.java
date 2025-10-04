@@ -45,7 +45,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
         this.vivecraft$resetServerState();
     }
 
-    @Inject(method = "handleRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/ReceivingLevelScreen$Reason;)V", shift = At.Shift.AFTER))
+    @Inject(method = "handleRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V", shift = At.Shift.AFTER))
     private void vivecraft$resetOnDimensionChange(CallbackInfo ci) {
         this.vivecraft$resetServerState();
     }
