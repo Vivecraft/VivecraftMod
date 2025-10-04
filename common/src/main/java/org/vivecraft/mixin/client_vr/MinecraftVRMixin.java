@@ -323,7 +323,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Inject(method = "setCameraEntity", at = @At("HEAD"))
     private void vivecraft$rideEntity(Entity entity, CallbackInfo ci) {
-        if (VRState.VR_INITIALIZED) {
+        if (VRState.VR_INITIALIZED && entity != null) {
             if (entity != this.getCameraEntity()) {
                 // snap to entity, if it changed
                 ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(entity, true, false);
