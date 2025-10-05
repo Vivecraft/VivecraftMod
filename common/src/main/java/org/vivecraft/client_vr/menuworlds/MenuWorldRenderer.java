@@ -1354,7 +1354,7 @@ public class MenuWorldRenderer {
                     .putFloat(this.blockAccess.dimensionType().ambientLight())
                     .putFloat(effectiveSkyLight)
                     .putFloat(this.blockLightRedFlicker + 1.5f)
-                    .putInt(0)
+                    .putInt(this.dimensionInfo.forceBrightLightmap() ? 1 : 0)
                     .putFloat(nightVision)
                     .putFloat(0F)
                     .putFloat(0F)
