@@ -252,7 +252,7 @@ public class MenuWorldExporter {
                 dimFixedTime = OptionalLong.of(6000L);
                 dimHasCeiling = false;
                 dimMinY = 0;
-                dimAmbientLight = 0.25f;
+                dimAmbientLight = 0.0f;
             } else { // overworld/default
                 dimHasCeiling = false;
                 dimMinY = 0; // pre-v5 worlds don't have deeper underground
@@ -275,6 +275,10 @@ public class MenuWorldExporter {
             if (dis.readBoolean()) {
                 cloudHeight = Optional.of(dis.readInt());
             }
+        }
+
+        if (dataVersion < 4554 && BuiltinDimensionTypes.END_EFFECTS.equals(dimName)) {
+            dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
         }
 
         DimensionType dimensionType = new DimensionType(dimFixedTime, dimHasSkyLight, dimHasCeiling, false, false, 1.0,
