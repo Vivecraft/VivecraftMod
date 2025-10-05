@@ -2,12 +2,14 @@ package org.vivecraft.client_vr.provider;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.InputQuirks;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,8 +29,7 @@ public class InputSimulator {
 
     private static void handleKeyAction(int key, int modifiers, int action) {
         Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().handle(), action,
-            new KeyEvent(key, 0,
-                modifiers));
+            new KeyEvent(key, 0, modifiers));
     }
 
     public static void pressKey(int key, int modifiers) {
@@ -77,19 +78,21 @@ public class InputSimulator {
     }
 
     public static void pressMouse(int button, int modifiers) {
-        Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(), new MouseButtonInfo(button, modifiers), GLFW.GLFW_PRESS);
+        Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(),
+            new MouseButtonInfo(button, modifiers), GLFW.GLFW_PRESS);
     }
 
     public static void pressMouse(int button) {
-        pressMouse(button, 0);
+        pressMouse(button, getActiveModifier());
     }
 
     public static void releaseMouse(int button, int modifiers) {
-        Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(), new MouseButtonInfo(button, modifiers), GLFW.GLFW_RELEASE);
+        Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(),
+            new MouseButtonInfo(button, modifiers), GLFW.GLFW_RELEASE);
     }
 
     public static void releaseMouse(int button) {
-        releaseMouse(button, 0);
+        releaseMouse(button, getActiveModifier());
     }
 
     public static void setMousePos(double x, double y) {
@@ -97,8 +100,7 @@ public class InputSimulator {
     }
 
     public static void scrollMouse(double xOffset, double yOffset) {
-        Minecraft.getInstance().mouseHandler.onScroll(Minecraft.getInstance().getWindow().handle(), xOffset,
-            yOffset);
+        Minecraft.getInstance().mouseHandler.onScroll(Minecraft.getInstance().getWindow().handle(), xOffset, yOffset);
     }
 
     public static void typeChars(CharSequence characters) {
@@ -131,5 +133,24 @@ public class InputSimulator {
         if (dataHolder.vrSettings.keyboardPressBinds && code != GLFW.GLFW_KEY_UNKNOWN) {
             releaseKey(code);
         }
+    }
+
+    private static int getActiveModifier() {
+        return (shiftDown() ? GLFW.GLFW_MOD_SHIFT : 0) |
+            (controlDown() ? InputQuirks.EDIT_SHORTCUT_KEY_MODIFIER : 0) |
+            (altDown() ? GLFW.GLFW_MOD_ALT : 0);
+    }
+
+    private static boolean shiftDown() {
+        return MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT_SHIFT) || MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT);
+    }
+
+    private static boolean controlDown() {
+        return MethodHolder.isKeyDown(InputQuirks.EDIT_SHORTCUT_KEY_LEFT) ||
+            MethodHolder.isKeyDown(InputQuirks.EDIT_SHORTCUT_KEY_RIGHT);
+    }
+
+    private static boolean altDown() {
+        return MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) || MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT);
     }
 }
