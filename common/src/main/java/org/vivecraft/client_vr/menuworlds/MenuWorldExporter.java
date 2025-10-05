@@ -41,7 +41,7 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class MenuWorldExporter {
-    public static final int VERSION = 5;
+    public static final int VERSION = 6;
     public static final int MIN_VERSION = 2;
 
     private static final DataFixer DATA_FIXER = DataFixers.getDataFixer();
@@ -111,6 +111,10 @@ public class MenuWorldExporter {
         dos.writeBoolean(level.dimensionType().hasCeiling());
         dos.writeInt(level.dimensionType().minY());
         dos.writeFloat(level.dimensionType().ambientLight());
+        dos.writeBoolean(level.dimensionType().cloudHeight().isPresent());
+        if (level.dimensionType().cloudHeight().isPresent()) {
+            dos.writeInt(level.dimensionType().cloudHeight().get());
+        }
 
         dos.writeFloat(switch (Minecraft.getInstance().player.getDirection()) {
             case SOUTH -> 180.0f;
@@ -236,6 +240,7 @@ public class MenuWorldExporter {
         boolean dimHasCeiling;
         int dimMinY;
         float dimAmbientLight;
+        Optional<Integer> cloudHeight = Optional.empty();
 
         if (header.version < 5) { // fill in missing values
             if (BuiltinDimensionTypes.NETHER_EFFECTS.equals(dimName)) {
@@ -261,10 +266,16 @@ public class MenuWorldExporter {
             dimMinY = dis.readInt();
             dimAmbientLight = dis.readFloat();
         }
-        // TODO 1.21.6 store that in the menuworld
-        // TODO 1.21.9 this should now definitely be in the menuworld, because end has skylight now
-        Optional<Integer> cloudHeight =
-            dimHasSkyLight && !dimName.equals(BuiltinDimensionTypes.END_EFFECTS) ? Optional.of(192) : Optional.empty();
+
+        if (header.version < 6) {
+            if (dimHasSkyLight) { // might be an issue for modded dimensions but whatever
+                cloudHeight = Optional.of(192);
+            }
+        } else {
+            if (dis.readBoolean()) {
+                cloudHeight = Optional.of(dis.readInt());
+            }
+        }
 
         DimensionType dimensionType = new DimensionType(dimFixedTime, dimHasSkyLight, dimHasCeiling, false, false, 1.0,
             true, false, dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimName, dimAmbientLight, cloudHeight,
