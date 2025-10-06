@@ -277,10 +277,6 @@ public class MenuWorldExporter {
             }
         }
 
-        if (dataVersion < 4554 && BuiltinDimensionTypes.END_EFFECTS.equals(dimName)) {
-            dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
-        }
-
         DimensionType dimensionType = new DimensionType(dimFixedTime, dimHasSkyLight, dimHasCeiling, false, false, 1.0,
             true, false, dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimName, dimAmbientLight, cloudHeight,
             new DimensionType.MonsterSettings(false, false, ConstantInt.of(0), 0));

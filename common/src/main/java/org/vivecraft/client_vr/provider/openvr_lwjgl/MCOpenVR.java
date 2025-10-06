@@ -676,12 +676,8 @@ public class MCOpenVR extends MCVR {
             Language lang = ClientLanguage.loadFrom(this.mc.getResourceManager(), langs, false);
 
             for (VRInputAction action : sortedActions) {
-                String categoryKey = action.keyBinding.getCategory().id().getNamespace().equals("vivecraft") ?
-                    action.keyBinding.getCategory().id().toLanguageKey() :
-                    action.keyBinding.getCategory().id().toLanguageKey("key.category");
-                localeMap.put(action.name,
-                    lang.getOrDefault(categoryKey) + " - " +
-                        lang.getOrDefault(action.keyBinding.getName()));
+                localeMap.put(action.name, lang.getOrDefault(action.keyBinding.getCategory()) + " - " +
+                    lang.getOrDefault(action.keyBinding.getName()));
             }
 
             for (VRInputActionSet actionSet : VRInputActionSet.values()) {

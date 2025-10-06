@@ -84,10 +84,6 @@ public class VRArmHelper {
                 renderVRHand_Offhand(partialTick, true);
             }
         }
-        if (!menuHandMain || !menuHandOff) {
-            // render the hands
-            MC.gameRenderer.getFeatureRenderDispatcher().renderAllFeatures();
-        }
 
         VREffectsHelper.reAddNausea();
 
@@ -176,10 +172,13 @@ public class VRArmHelper {
             OptifineHelper.beginEntities();
         }
 
+        MultiBufferSource.BufferSource bufferSource = MC.renderBuffers().bufferSource();
         MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
             0.0F, InteractionHand.MAIN_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
-            poseStack, MC.gameRenderer.getSubmitNodeStorage(),
+            poseStack, bufferSource,
             MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
+
+        bufferSource.endBatch();
 
         if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
             // undo the thing we did before
@@ -222,10 +221,13 @@ public class VRArmHelper {
                 OptifineHelper.beginEntities();
             }
 
+            MultiBufferSource.BufferSource bufferSource = MC.renderBuffers().bufferSource();
             MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
                 0.0F, InteractionHand.OFF_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
-                poseStack, MC.gameRenderer.getSubmitNodeStorage(),
+                poseStack, bufferSource,
                 MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
+
+            bufferSource.endBatch();
 
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                 // undo the thing we did before

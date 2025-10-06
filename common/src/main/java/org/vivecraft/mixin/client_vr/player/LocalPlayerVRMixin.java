@@ -2,7 +2,6 @@ package org.vivecraft.mixin.client_vr.player;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
@@ -79,9 +78,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     public abstract boolean isUsingItem();
 
     @Inject(method = "startRiding", at = @At("TAIL"))
-    private void vivecraft$startRidingTracker(
-        CallbackInfoReturnable<Boolean> cir, @Local(argsOnly = true) Entity vehicle)
-    {
+    private void vivecraft$startRidingTracker(Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> cir) {
         if (VRState.VR_INITIALIZED && vivecraft$isLocalPlayer(this)) {
             ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(vehicle);
         }

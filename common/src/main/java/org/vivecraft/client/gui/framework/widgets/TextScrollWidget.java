@@ -5,8 +5,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -107,17 +105,17 @@ public class TextScrollWidget extends AbstractWidget {
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
     @Override
-    public void onClick(MouseButtonEvent mouseEvent, boolean doubleClick) {
-        if (mouseEvent.x() >= getX() + this.width - this.scrollBarWidth && mouseEvent.x() <= getX() + this.width &&
-            mouseEvent.y() >= getY() && mouseEvent.y() <= getY() + this.height)
+    public void onClick(double mouseX, double mouseY) {
+        if (mouseX >= getX() + this.width - this.scrollBarWidth && mouseX <= getX() + this.width &&
+            mouseY >= getY() && mouseY <= getY() + this.height)
         {
             this.scrollDragActive = true;
             if (this.maxLines < this.formattedChars.size()) {
                 // update scroll position
-                setCurrentLineFromYPos(mouseEvent.y());
+                setCurrentLineFromYPos(mouseY);
             }
-        } else if (this.isMouseOver(mouseEvent.x(), mouseEvent.y())) {
-            Style style = getMouseoverStyle(mouseEvent.x(), mouseEvent.y());
+        } else if (this.isMouseOver(mouseX, mouseY)) {
+            Style style = getMouseoverStyle(mouseX, mouseY);
             if (style != null && style.getClickEvent() != null) {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.player != null) {
@@ -131,15 +129,15 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public void onRelease(MouseButtonEvent mouseEvent) {
+    public void onRelease(double mouseX, double mouseY) {
         this.scrollDragActive = false;
-        super.onRelease(mouseEvent);
+        super.onRelease(mouseX, mouseY);
     }
 
     @Override
-    public void onDrag(MouseButtonEvent mouseEvent, double dragX, double dragY) {
+    public void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
         if (this.visible && this.active && this.scrollDragActive) {
-            setCurrentLineFromYPos(mouseEvent.y());
+            setCurrentLineFromYPos(mouseY);
         }
     }
 
@@ -169,13 +167,13 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent keyEvent) {
-        if (keyEvent.key() == GLFW.GLFW_KEY_UP || keyEvent.key() == GLFW.GLFW_KEY_DOWN) {
-            if (mouseScrolled(0, 0, 0, keyEvent.key() == GLFW.GLFW_KEY_UP ? 1 : -1)) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
+            if (mouseScrolled(0, 0, 0, keyCode == GLFW.GLFW_KEY_UP ? 1 : -1)) {
                 return true;
             }
         }
-        return super.keyPressed(keyEvent);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     public Style getMouseoverStyle(double mouseX, double mouseY) {

@@ -2028,8 +2028,8 @@ public class VRSettings {
                 if (VRState.VR_INITIALIZED) {
                     RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
                     return prefix + Math.round((float) value * 100) + "% (" +
-                        (int) Math.ceil(eye0.width * Math.sqrt((float) value)) + "x" +
-                        (int) Math.ceil(eye0.height * Math.sqrt((float) value)) + ")";
+                        (int) Math.ceil(eye0.viewWidth * Math.sqrt((float) value)) + "x" +
+                        (int) Math.ceil(eye0.viewHeight * Math.sqrt((float) value)) + ")";
                 } else {
                     return prefix + Math.round((float) value * 100) + "%";
                 }

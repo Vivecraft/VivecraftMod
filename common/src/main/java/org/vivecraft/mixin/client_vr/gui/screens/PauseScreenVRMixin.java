@@ -67,12 +67,12 @@ public abstract class PauseScreenVRMixin extends Screen {
         // on a multiplayer server also add the social button
         if (!Minecraft.getInstance().isMultiplayerServer()) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
-                (p) -> this.minecraft.setScreen(new ChatScreen("", false))).width(98).build());
+                (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(98).build());
         } else {
             GridLayout gridWidgetChat_Social = new GridLayout();
             GridLayout.RowHelper rowHelperChat_Social = gridWidgetChat_Social.createRowHelper(2);
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
-                    (p) -> this.minecraft.setScreen(new ChatScreen("", false))).width(48).build(),
+                    (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(48).build(),
                 LayoutSettings.defaults().paddingRight(2));
 
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.social"),
@@ -94,7 +94,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         GridLayout.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"),
             (p) -> {
-                this.minecraft.debugEntries.toggleF3Visible();
+                this.minecraft.gui.getDebugOverlay().toggleOverlay();
                 this.minecraft.setScreen(null);
             }).width(48).build(), LayoutSettings.defaults().paddingRight(2));
 

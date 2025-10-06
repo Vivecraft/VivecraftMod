@@ -35,7 +35,7 @@ public class OpenGLHelper {
      */
     public static void genMipmaps(GpuTexture texture) {
         if (texture instanceof GlTexture glTexture) {
-            int textureUnit = GlStateManager._getInteger(GL30C.GL_ACTIVE_TEXTURE);
+            int textureUnit = GlStateManager._getActiveTexture();
             int boundTexture = GlStateManager._getInteger(GL30C.GL_TEXTURE_BINDING_2D);
 
             GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
@@ -58,7 +58,7 @@ public class OpenGLHelper {
     public static void enableAnisotropicFiltering(GpuTexture texture) {
         if (supportsAnisotropicFiltering()) {
             if (texture instanceof GlTexture glTexture) {
-                int textureUnit = GlStateManager._getInteger(GL30C.GL_ACTIVE_TEXTURE);
+                int textureUnit = GlStateManager._getActiveTexture();
                 int boundTexture = GlStateManager._getInteger(GL30C.GL_TEXTURE_BINDING_2D);
 
                 GlStateManager._activeTexture(GL30C.GL_TEXTURE0);

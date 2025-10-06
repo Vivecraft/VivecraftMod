@@ -16,11 +16,9 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.FluidTags;
@@ -244,8 +242,8 @@ public abstract class GameRendererVRMixin
                         }
                     }
                 }
-                case CAMERA -> (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.width /
-                    (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.height;
+                case CAMERA -> (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth /
+                    (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight;
                 case SCOPEL, SCOPER -> 1.0F;
                 default -> aspect;
             };
@@ -459,7 +457,7 @@ public abstract class GameRendererVRMixin
         return RenderPassType.isVanilla() ? rotation : new Quaternionf();
     }
 
-    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderLevel(Lcom/mojang/blaze3d/resource/GraphicsResourceAllocator;Lnet/minecraft/client/DeltaTracker;ZLnet/minecraft/client/Camera;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Vector4f;Z)V"), index = 4)
+    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), index = 1)
     private Matrix4f vivecraft$applyModelView(Matrix4f matrix) {
         if (!RenderPassType.isVanilla()) {
             RenderHelper.applyVRModelView(vivecraft$DATA_HOLDER.currentPass, matrix);
@@ -473,16 +471,17 @@ public abstract class GameRendererVRMixin
     }
 
 
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ScreenEffectRenderer;renderScreenEffect(ZFLnet/minecraft/client/renderer/SubmitNodeCollector;)V"))
+    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ScreenEffectRenderer;renderScreenEffect(ZF)V"))
     private boolean vivecraft$noScreenEffectsInVR(
-        ScreenEffectRenderer instance, boolean isSleeping, float partialTick, SubmitNodeCollector collector)
+        ScreenEffectRenderer instance, boolean isSleeping, float partialTick)
     {
         return RenderPassType.isVanilla();
     }
 
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/DebugScreenOverlay;render3dCrosshair(Lnet/minecraft/client/Camera;)V"))
-    private boolean vivecraft$noDebugCrosshairInVR(DebugScreenOverlay instance, Camera camera) {
-        return RenderPassType.isVanilla();
+    @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;shouldRenderDebugCrosshair()Z"))
+    private boolean vivecraft$noDebugCrosshairInVR(boolean renderCrosshair)
+    {
+        return renderCrosshair && RenderPassType.isVanilla();
     }
 
     @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)

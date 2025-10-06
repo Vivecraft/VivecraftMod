@@ -3,7 +3,6 @@ package org.vivecraft.client.gui.settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import org.vivecraft.client.gui.framework.VROptionEntry;
 import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.widgets.GuiVROption;
@@ -115,7 +114,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseEvent) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         // Hacky way of making the render scale slider only reinit on mouse release
         if (this.vrSettings.renderScaleFactor != this.prevRenderScaleFactor ||
             this.vrSettings.handCameraResScale != this.prevHandCameraResScale)
@@ -129,6 +128,6 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
             }
         }
 
-        return super.mouseReleased(mouseEvent);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 }

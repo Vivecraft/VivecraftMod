@@ -11,7 +11,7 @@ public class HandedKeyBinding extends KeyMapping {
     private final boolean[] pressed = new boolean[ControllerType.values().length];
     private final int[] pressTime = new int[ControllerType.values().length];
 
-    public HandedKeyBinding(String name, int keyCode, Category category) {
+    public HandedKeyBinding(String name, int keyCode, String category) {
         super(name, keyCode, category);
     }
 

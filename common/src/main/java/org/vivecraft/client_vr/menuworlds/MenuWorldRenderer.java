@@ -82,9 +82,6 @@ public class MenuWorldRenderer {
         "textures/environment/clouds.png");
     private static final ResourceLocation END_SKY_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/environment/end_sky.png");
-    private static final ResourceLocation END_LIGHT_LOCATION = ResourceLocation.withDefaultNamespace(
-        "textures/environment/end_flash.png");
-    private static final Vector3f END_FLASH_SKY_LIGHT_COLOR = new Vector3f(0.9f, 0.5f, 1.0f);
 
     private static final ResourceLocation FORCEFIELD_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/misc/forcefield.png");
@@ -116,13 +113,6 @@ public class MenuWorldRenderer {
     private GpuBuffer skyVBO;
     private GpuBuffer sky2VBO;
     private GpuBuffer endSkyVBO;
-    private GpuBuffer sunVBO;
-    private GpuBuffer moonVBO;
-    private GpuBuffer sunriseVBO;
-    private GpuBuffer endFlashVBO;
-    private EndFlashState endFlashState;
-    private final RenderSystem.AutoStorageIndexBuffer quadIndices = RenderSystem.getSequentialBuffer(
-        VertexFormat.Mode.QUADS);
     private int renderDistance;
     private int renderDistanceChunks;
     public final MenuFogRenderer fogRenderer;
@@ -169,8 +159,8 @@ public class MenuWorldRenderer {
         RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.lightMap, 0xFFFFFFFF);
         this.lightMapUbo = new MappableRingBuffer(() -> "Menuworld Lightmap UBO",
             GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
-            new Std140SizeCalculator().putFloat().putFloat().putFloat().putFloat().putFloat().putFloat()
-                .putFloat().putVec3().putVec3().get());
+            new Std140SizeCalculator().putFloat().putFloat().putFloat().putInt().putFloat().putFloat().putFloat()
+                .putFloat().putVec3().get());
 
         this.fogRenderer = new MenuFogRenderer(this);
         this.rand = new Random();
@@ -640,7 +630,6 @@ public class MenuWorldRenderer {
             this.vertexBuffers = null;
         }
         this.animatedSprites = null;
-        this.endFlashState = null;
         this.ready = false;
     }
 
@@ -658,18 +647,6 @@ public class MenuWorldRenderer {
         if (this.endSkyVBO != null) {
             this.endSkyVBO.close();
         }
-        if (this.sunVBO != null) {
-            this.sunVBO.close();
-        }
-        if (this.moonVBO != null) {
-            this.moonVBO.close();
-        }
-        if (this.sunriseVBO != null) {
-            this.sunriseVBO.close();
-        }
-        if (this.endFlashVBO != null) {
-            this.endFlashVBO.close();
-        }
         this.fogRenderer.close();
         this.lightMap.close();
         this.lightMapView.close();
@@ -680,9 +657,6 @@ public class MenuWorldRenderer {
     public void tick() {
         this.ticks++;
         this.updateTorchFlicker();
-        if (this.endFlashState != null) {
-            this.endFlashState.tick(this.ticks);
-        }
 
         if (this.areEyesInFluid(FluidTags.WATER)) {
             int i = 1; // this.isSpectator() ? 10 : 1;
@@ -718,9 +692,6 @@ public class MenuWorldRenderer {
             this.thunderLevel = blockAccess.getThunder() ? 1.0F : 0.0F;
 
             this.worldRotation = blockAccess.getRotation();
-            if (this.blockAccess.dimensionType().hasSkyLight() && this.dimensionInfo.hasEndFlashes()) {
-                this.endFlashState = new EndFlashState();
-            }
         }
     }
 
@@ -737,11 +708,7 @@ public class MenuWorldRenderer {
 
         this.generateSky();
         this.generateEndSky();
-        this.buildStars();
-        this.buildEndFlashQuad();
-        this.buildSunQuad();
-        this.buildMoonPhases();
-        this.buildSunriseFan();
+        this.generateStars();
     }
 
     public boolean isReady() {
@@ -780,7 +747,6 @@ public class MenuWorldRenderer {
     public void renderSky(Matrix4fStack poseStack, Vec3 position) {
         if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.END) {
             this.renderEndSky();
-            this.renderEndFlash(poseStack);
         } else if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.OVERWORLD) {
 
             Vec3 skyColor = this.getSkyColor(position);
@@ -816,32 +782,28 @@ public class MenuWorldRenderer {
 
             MultiBufferSource.BufferSource bufferSource = this.mc.renderBuffers().bufferSource();
 
-            float sunriseAlpha = ARGB.alphaFloat(sunriseColor);
-
             if (sunriseColor != 0 && this.dimensionInfo.isSunriseOrSunset(this.getTimeOfDay()) &&
-                (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()) && sunriseAlpha > 0.001F)
+                (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()))
             {
-                poseStack.pushMatrix();
-                poseStack.rotate(Axis.XP.rotationDegrees(90.0f));
-                poseStack.rotate(Axis.ZP.rotationDegrees(Mth.sin(this.getSunAngle()) < 0.0f ? 180.0f : 0.0f));
-                poseStack.rotate(Axis.ZP.rotationDegrees(90.0f));
+                Matrix4f rotation = new Matrix4f();
+                rotation.rotate(Axis.XP.rotationDegrees(90.0f));
+                rotation.rotate(Axis.ZP.rotationDegrees(Mth.sin(this.getSunAngle()) < 0.0f ? 180.0f : 0.0f));
+                rotation.rotate(Axis.ZP.rotationDegrees(90.0f));
 
-                poseStack.scale(1.0f, 1.0f, sunriseAlpha);
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(poseStack,
-                    new Vector4f(ARGB.redFloat(sunriseColor), ARGB.greenFloat(sunriseColor),
-                        ARGB.blueFloat(sunriseColor), sunriseAlpha), new Vector3f(), new Matrix4f(), 0.0f);
-                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Sunrise sunset",
-                        this.mc.getMainRenderTarget().getColorTextureView(), OptionalInt.empty(),
-                        this.mc.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
-                {
-                    renderPass.setPipeline(RenderPipelines.SUNRISE_SUNSET);
-                    RenderSystem.bindDefaultUniforms(renderPass);
-                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.setVertexBuffer(0, this.sunriseVBO);
-                    renderPass.draw(0, 18);
+                VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.sunriseSunset());
+                vertexConsumer
+                    .addVertex(rotation, 0.0f, 100.0f, 0.0f)
+                    .setColor(sunriseColor);
+
+                for (int j = 0; j <= 16; ++j) {
+                    float f6 = (float) j * Mth.TWO_PI / 16.0F;
+                    float f7 = Mth.sin(f6);
+                    float f8 = Mth.cos(f6);
+                    vertexConsumer
+                        .addVertex(rotation, f7 * 120.0F, f8 * 120.0F, -f8 * 40.0F * ARGB.alphaFloat(sunriseColor))
+                        .setColor(ARGB.transparent(sunriseColor));
                 }
-                poseStack.popMatrix();
+                bufferSource.endLastBatch();
             }
             poseStack.pushMatrix();
 
@@ -855,58 +817,31 @@ public class MenuWorldRenderer {
 
             poseStack.rotate(Axis.XP.rotationDegrees(this.getTimeOfDay() * 360.0f));
 
+            float size = 30.0F;
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()) {
-                AbstractTexture sunTexture = this.mc.getTextureManager().getTexture(SUN_LOCATION);
-                sunTexture.setUseMipmaps(false);
-                poseStack.pushMatrix();
-                poseStack.translate(0.0f, 100.0f, 0.0f);
-                poseStack.scale(30.0f, 1.0f, 30.0f);
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(poseStack, new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility), new Vector3f(),
-                        new Matrix4f(), 0.0f);
-                GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
-                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Sky sun", this.mc.getMainRenderTarget().getColorTextureView(),
-                        OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
-                        OptionalDouble.empty()))
-                {
-                    renderPass.setPipeline(RenderPipelines.CELESTIAL);
-                    RenderSystem.bindDefaultUniforms(renderPass);
-                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.bindSampler("Sampler0", sunTexture.getTextureView());
-                    renderPass.setVertexBuffer(0, this.sunVBO);
-                    renderPass.setIndexBuffer(gpuBuffer, this.quadIndices.type());
-                    renderPass.drawIndexed(0, 0, 6, 1);
-                }
-                poseStack.popMatrix();
+                int color = ARGB.white(skyVisibility);
+                VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.celestial(SUN_LOCATION));
+                vertexConsumer.addVertex(-size, 100.0F, -size).setUv(0.0F, 0.0F).setColor(color);
+                vertexConsumer.addVertex(size, 100.0F, -size).setUv(1.0F, 0.0F).setColor(color);
+                vertexConsumer.addVertex(size, 100.0F, size).setUv(1.0F, 1.0F).setColor(color);
+                vertexConsumer.addVertex(-size, 100.0F, size).setUv(0.0F, 1.0F).setColor(color);
             }
 
+            size = 20.0F;
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()) {
-                AbstractTexture moonTexture = this.mc.getTextureManager().getTexture(MOON_LOCATION);
-                moonTexture.setUseMipmaps(false);
-                int moonPhase = this.getMoonPhase() & 7;
-                int startIndex = moonPhase * 4;
-                poseStack.pushMatrix();
-                poseStack.translate(0.0f, -100.0f, 0.0f);
-                poseStack.scale(20.0f, 1.0f, 20.0f);
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(poseStack, new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility), new Vector3f(),
-                        new Matrix4f(), 0.0f);
-                GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
-                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Sky moon", this.mc.getMainRenderTarget().getColorTextureView(),
-                        OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
-                        OptionalDouble.empty()))
-                {
-                    renderPass.setPipeline(RenderPipelines.CELESTIAL);
-                    RenderSystem.bindDefaultUniforms(renderPass);
-                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.bindSampler("Sampler0", moonTexture.getTextureView());
-                    renderPass.setVertexBuffer(0, this.moonVBO);
-                    renderPass.setIndexBuffer(gpuBuffer, this.quadIndices.type());
-                    renderPass.drawIndexed(startIndex, 0, 6, 1);
-                }
-                poseStack.popMatrix();
+                int moonPhase = this.getMoonPhase();
+                int l = moonPhase % 4;
+                int i1 = moonPhase / 4 % 2;
+                float u0 = (float) (l) / 4.0F;
+                float v0 = (float) (i1) / 2.0F;
+                float u1 = (float) (l + 1) / 4.0F;
+                float v1 = (float) (i1 + 1) / 2.0F;
+                int color = ARGB.white(skyVisibility);
+                VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.celestial(MOON_LOCATION));
+                vertexConsumer.addVertex(-size, -100.0f, size).setUv(u0, v1).setColor(color);
+                vertexConsumer.addVertex(size, -100.0f, size).setUv(u1, v1).setColor(color);
+                vertexConsumer.addVertex(size, -100.0f, -size).setUv(u1, v0).setColor(color);
+                vertexConsumer.addVertex(-size, -100.0f, -size).setUv(u0, v0).setColor(color);
             }
             bufferSource.endBatch();
 
@@ -985,35 +920,6 @@ public class MenuWorldRenderer {
                 renderPass.drawIndexed(0, 0, 36, 1);
             }
         }
-    }
-
-    private void renderEndFlash(Matrix4fStack poseStack) {
-        if (this.endFlashState == null || this.endFlashState.getIntensity(1F) < 0.0001) return;
-
-        AbstractTexture endFlashTexture = this.mc.getTextureManager().getTexture(END_LIGHT_LOCATION);
-        endFlashTexture.setUseMipmaps(false);
-        poseStack.pushMatrix();
-        poseStack.rotate(Axis.YP.rotationDegrees(180.0f - this.endFlashState.getYAngle()));
-        poseStack.rotate(Axis.XP.rotationDegrees(-90.0f - this.endFlashState.getXAngle()));
-        poseStack.translate(0.0f, 100.0f, 0.0f);
-        poseStack.scale(60.0f, 1.0f, 60.0f);
-        GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-            .writeTransform(poseStack, new Vector4f(this.endFlashState.getIntensity(1F)), new Vector3f(),
-                new Matrix4f(), 0.0f);
-        GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
-        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-            .createRenderPass(() -> "End flash", this.mc.getMainRenderTarget().getColorTextureView(),
-                OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty());)
-        {
-            renderPass.setPipeline(RenderPipelines.CELESTIAL);
-            RenderSystem.bindDefaultUniforms(renderPass);
-            renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-            renderPass.bindSampler("Sampler0", endFlashTexture.getTextureView());
-            renderPass.setVertexBuffer(0, this.endFlashVBO);
-            renderPass.setIndexBuffer(gpuBuffer, this.quadIndices.type());
-            renderPass.drawIndexed(0, 0, 6, 1);
-        }
-        poseStack.popMatrix();
     }
 
     public void renderClouds(double x, double y, double z) {
@@ -1344,10 +1250,14 @@ public class MenuWorldRenderer {
         }
     }
 
-    private void buildStars() {
+    private void generateStars() {
         if (this.starVBO != null) {
             this.starVBO.close();
         }
+        this.starVBO = this.buildStars();
+    }
+
+    private GpuBuffer buildStars() {
         RandomSource randomSource = RandomSource.create(10842L);
         int starCount = 1500;
         float starDistance = 100.0F;
@@ -1378,110 +1288,9 @@ public class MenuWorldRenderer {
             }
             try (MeshData meshData = bufferBuilder.buildOrThrow()) {
                 this.starIndexCount = meshData.drawState().indexCount();
-                this.starVBO = RenderSystem.getDevice()
+                return RenderSystem.getDevice()
                     .createBuffer(() -> "Stars vertex buffer", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
                         meshData.vertexBuffer());
-            }
-        }
-    }
-
-    private void buildSunriseFan() {
-        if (this.sunriseVBO != null) {
-            this.sunriseVBO.close();
-        }
-        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-            18 * DefaultVertexFormat.POSITION_COLOR.getVertexSize()))
-        {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLE_FAN,
-                DefaultVertexFormat.POSITION_COLOR);
-            int solid = ARGB.white(1.0f);
-            int transparent = ARGB.white(0.0f);
-            bufferBuilder.addVertex(0.0f, 100.0f, 0.0f).setColor(solid);
-            for (int i = 0; i <= 16; i++) {
-                float angle = i * Mth.TWO_PI / 16.0f;
-                bufferBuilder.addVertex(
-                        Mth.sin(angle) * 120.0f,
-                        Mth.cos(angle) * 120.0f,
-                        -Mth.cos(angle) * 40.0f)
-                    .setColor(transparent);
-            }
-            try (MeshData meshData = bufferBuilder.buildOrThrow()) {
-                this.sunriseVBO = RenderSystem.getDevice()
-                    .createBuffer(() -> "Sunrise/Sunset fan", GpuBuffer.USAGE_VERTEX, meshData.vertexBuffer());
-            }
-        }
-    }
-
-    private void buildSunQuad() {
-        if (this.sunVBO != null) {
-            this.sunVBO.close();
-        }
-        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-            4 * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
-        {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
-                DefaultVertexFormat.POSITION_TEX);
-            Matrix4f identity = new Matrix4f();
-            bufferBuilder.addVertex(identity, -1.0f, 0.0f, -1.0f).setUv(0.0f, 0.0f);
-            bufferBuilder.addVertex(identity, 1.0f, 0.0f, -1.0f).setUv(1.0f, 0.0f);
-            bufferBuilder.addVertex(identity, 1.0f, 0.0f, 1.0f).setUv(1.0f, 1.0f);
-            bufferBuilder.addVertex(identity, -1.0f, 0.0f, 1.0f).setUv(0.0f, 1.0f);
-            try (MeshData meshData = bufferBuilder.buildOrThrow()) {
-                this.sunVBO = RenderSystem.getDevice()
-                    .createBuffer(() -> "Sun quad", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
-                        meshData.vertexBuffer());
-            }
-        }
-    }
-
-    private void buildMoonPhases() {
-        if (this.moonVBO != null) {
-            this.moonVBO.close();
-        }
-        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-            32 * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
-        {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
-                DefaultVertexFormat.POSITION_TEX);
-            Matrix4f identity = new Matrix4f();
-            // 8 moonphases
-            for (int i = 0; i < 8; i++) {
-                int n3 = i % 4;
-                int n4 = i / 4 % 2;
-                float uMin = (float) n3 / 4.0f;
-                float vMin = (float) n4 / 2.0f;
-                float uMax = (float) (n3 + 1) / 4.0f;
-                float VMax = (float) (n4 + 1) / 2.0f;
-                bufferBuilder.addVertex(identity, -1.0f, 0.0f, 1.0f).setUv(uMax, VMax);
-                bufferBuilder.addVertex(identity, 1.0f, 0.0f, 1.0f).setUv(uMin, VMax);
-                bufferBuilder.addVertex(identity, 1.0f, 0.0f, -1.0f).setUv(uMin, vMin);
-                bufferBuilder.addVertex(identity, -1.0f, 0.0f, -1.0f).setUv(uMax, vMin);
-            }
-            try (MeshData meshData = bufferBuilder.buildOrThrow()) {
-                this.moonVBO = RenderSystem.getDevice()
-                    .createBuffer(() -> "Moon phases", GpuBuffer.USAGE_VERTEX, meshData.vertexBuffer());
-            }
-        }
-    }
-
-    private void buildEndFlashQuad() {
-        if (this.endFlashVBO != null) {
-            this.endFlashVBO.close();
-        }
-        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-            4 * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
-        {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
-                DefaultVertexFormat.POSITION_TEX);
-            Matrix4f identity = new Matrix4f();
-            bufferBuilder.addVertex(identity, -1.0f, 0.0f, -1.0f).setUv(0.0f, 0.0f);
-            bufferBuilder.addVertex(identity, 1.0f, 0.0f, -1.0f).setUv(1.0f, 0.0f);
-            bufferBuilder.addVertex(identity, 1.0f, 0.0f, 1.0f).setUv(1.0f, 1.0f);
-            bufferBuilder.addVertex(identity, -1.0f, 0.0f, 1.0f).setUv(0.0f, 1.0f);
-
-            try (MeshData meshData = bufferBuilder.buildOrThrow()) {
-                this.endFlashVBO = RenderSystem.getDevice()
-                    .createBuffer(() -> "End flash quad", GpuBuffer.USAGE_VERTEX, meshData.vertexBuffer());
             }
         }
     }
@@ -1517,18 +1326,7 @@ public class MenuWorldRenderer {
 			}*/
 
             float skyLight = getSkyDarken();
-            float effectiveSkyLight;
-            Vector3f ambientColor = new Vector3f(1);
-            if (this.dimensionInfo != null && this.dimensionInfo.hasEndFlashes()) {
-                ambientColor = new Vector3f(0.99f, 1.12f, 1.0f);
-                if (this.endFlashState != null && !this.mc.options.hideLightningFlash().get()) {
-                    effectiveSkyLight = this.endFlashState.getIntensity(1);
-                } else {
-                    effectiveSkyLight = 0.0f;
-                }
-            } else {
-                effectiveSkyLight = this.skyFlashTime > 0 ? 1.0f : skyLight * 0.95F + 0.05F;
-            }
+            float effectiveSkyLight = this.skyFlashTime > 0 ? 1.0f : skyLight * 0.95F + 0.05F;
 
 			/* no darkness effect, we don't have an actual player
 			float darknessScale = this.mc.options.darknessEffectScale().get().floatValue();
@@ -1544,9 +1342,10 @@ public class MenuWorldRenderer {
 			*/
             float nightVision = 0.0f;
 
-            Vector3f skylightColor =
-                this.dimensionInfo != null && this.dimensionInfo.hasEndFlashes() ? END_FLASH_SKY_LIGHT_COLOR :
-                    new Vector3f(skyLight, skyLight, 1.0f).lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
+            Vector3f skylightColor = new Vector3f(skyLight, skyLight, 1.0f).lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
+
+            RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(
+                VertexFormat.Mode.QUADS);
 
             try (GpuBuffer.MappedView buffer = RenderSystem.getDevice().createCommandEncoder()
                 .mapBuffer(this.lightMapUbo.currentBuffer(), false, true))
@@ -1555,12 +1354,12 @@ public class MenuWorldRenderer {
                     .putFloat(this.blockAccess.dimensionType().ambientLight())
                     .putFloat(effectiveSkyLight)
                     .putFloat(this.blockLightRedFlicker + 1.5f)
+                    .putInt(this.dimensionInfo.forceBrightLightmap() ? 1 : 0)
                     .putFloat(nightVision)
-                    .putFloat(0F) // darkness factor
-                    .putFloat(0F) // darkenworld factor
+                    .putFloat(0F)
+                    .putFloat(0F)
                     .putFloat(Math.max(0.0F, this.mc.options.gamma().get().floatValue()))
-                    .putVec3(skylightColor)
-                    .putVec3(ambientColor);
+                    .putVec3(skylightColor);
             }
 
             try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
@@ -1569,7 +1368,9 @@ public class MenuWorldRenderer {
                 renderPass.setPipeline(RenderPipelines.LIGHTMAP);
                 RenderSystem.bindDefaultUniforms(renderPass);
                 renderPass.setUniform("LightmapInfo", this.lightMapUbo.currentBuffer());
-                renderPass.draw(0, 3);
+                renderPass.setVertexBuffer(0, RenderSystem.getQuadVertexBuffer());
+                renderPass.setIndexBuffer(autoStorageIndexBuffer.getBuffer(6), autoStorageIndexBuffer.type());
+                renderPass.drawIndexed(0, 0, 6, 1);
             }
             this.lightMapUbo.rotate();
             this.lightmapUpdateNeeded = false;

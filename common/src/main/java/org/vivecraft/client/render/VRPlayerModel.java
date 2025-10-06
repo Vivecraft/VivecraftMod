@@ -7,10 +7,9 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.data.RenderPass;
@@ -24,9 +23,24 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.mca.MCAHelper;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 public class VRPlayerModel extends PlayerModel {
+    protected ClientVRPlayers.RotInfo rotInfo;
+    protected float bodyYaw;
+    protected boolean laying;
+    protected float xRot;
+    protected float layAmount;
+
+    protected HumanoidArm attackArm = null;
+    protected HumanoidArm mainArm = HumanoidArm.RIGHT;
+    protected boolean isMainPlayer;
+    protected float attackTime;
+    protected float bodyScale;
+    protected float armScale;
+    protected float legScale;
 
     // temp vec for most math
     protected final Vector3f tempV = new Vector3f();
@@ -45,14 +59,14 @@ public class VRPlayerModel extends PlayerModel {
     }
 
     @Override
-    public void setupAnim(AvatarRenderState renderState) {
+    public void setupAnim(PlayerRenderState renderState) {
         // no crouch hip movement when roomscale crawling
         renderState.isCrouching &= !renderState.isVisuallySwimming;
         super.setupAnim(renderState);
     }
 
     public static void animateVRModel(
-        PlayerModel model, AvatarRenderState renderState, Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
+        PlayerModel model, PlayerRenderState renderState, Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
     {
         if (model instanceof VRPlayerModel_WithArms armsModel) {
             armsModel.leftHand.visible = model.leftArm.visible;
@@ -60,14 +74,18 @@ public class VRPlayerModel extends PlayerModel {
         }
 
         ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) renderState).vivecraft$getRotInfo();
-        VRPlayerRenderData data = ((EntityRenderStateExtension) renderState).vivecraft$getVRRenderData();
 
-        if (rotInfo == null || data == null) {
+        if (rotInfo == null) {
             // not a vr player
+            if (model instanceof VRPlayerModel vrModel) {
+                vrModel.rotInfo = null;
+            }
             return;
         }
 
-        if (data.isMainPlayer()) {
+        boolean isMainPlayer = ((EntityRenderStateExtension) renderState).vivecraft$isFirstPersonPlayer();
+
+        if (isMainPlayer) {
             if (ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA &&
                 ClientDataHolderVR.getInstance().cameraTracker.isQuickMode() &&
                 ClientDataHolderVR.getInstance().grabScreenShot)
@@ -102,11 +120,64 @@ public class VRPlayerModel extends PlayerModel {
             }
         }
 
+        HumanoidArm mainArm = rotInfo.leftHanded ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
+        HumanoidArm attackArm = null;
+
+        if (renderState.attackTime > 0F) {
+            // we ignore the vanilla main arm setting
+            attackArm = renderState.attackArm;
+            if (rotInfo.leftHanded) {
+                attackArm = attackArm.getOpposite();
+            }
+        }
+
+        float bodyYaw;
+
+        if (isMainPlayer) {
+            bodyYaw = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyYawRad();
+        } else {
+            bodyYaw = rotInfo.getBodyYawRad();
+        }
+
+        boolean laying = renderState.swimAmount > 0.0F || renderState.isFallFlying;
+        float layAmount = renderState.isFallFlying ? 1F : renderState.swimAmount;
+
+        boolean swimming = (laying && renderState.isInWater) || renderState.isFallFlying;
+        boolean noLowerBodyAnimation = swimming || rotInfo.fbtMode == FBTMode.ARMS_ONLY;
+
+        float bodyScale = 1F;
+        float armScale = 1F;
+        float legScale = 1F;
+
+        // this check is similar to VREffectsHelper#isFirstPersonEntityPass,
+        // but does different stuff for shaders shadow pass
+        if (isMainPlayer && ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
+            !(ImmersivePortalsHelper.isLoaded() && ImmersivePortalsHelper.isRenderingPortal()) &&
+            (!ShadersHelper.isRenderingShadows() &&
+                RenderPass.isFirstPerson(ClientDataHolderVR.getInstance().currentPass)
+            ) ||
+            (ShadersHelper.isRenderingShadows() && ClientDataHolderVR.getInstance().vrSettings.shaderFullSizeShadowLimbs
+            ))
+        {
+            bodyScale = ClientDataHolderVR.getInstance().vrSettings.playerModelBodyScale;
+            armScale = ClientDataHolderVR.getInstance().vrSettings.playerModelArmsScale;
+            legScale = ClientDataHolderVR.getInstance().vrSettings.playerModelLegScale;
+        }
+
         // scale the offset with the body and arm scale, to keep them attached
-        float sideOffset = 4F * data.bodyScale() + data.armScale();
+        float sideOffset = 4F * bodyScale + armScale;
+
+        float xRot;
+
+        if (swimming) {
+            // in water also rotate around the view vector
+            xRot = layAmount * (-Mth.HALF_PI - Mth.DEG_TO_RAD * renderState.xRot);
+        } else {
+            xRot = layAmount * -Mth.HALF_PI;
+        }
 
         // head pivot
-        if (!data.swimming()) {
+        if (!swimming) {
             rotInfo.headQuat.transform(0F, -0.2F, 0.1F, tempV2);
             tempV2.mul(rotInfo.heightScale * rotInfo.worldScale);
         } else {
@@ -121,12 +192,12 @@ public class VRPlayerModel extends PlayerModel {
 
         // rotate head
         tempM.set(rotInfo.headQuat)
-            .rotateLocalY(data.bodyYaw() + Mth.PI)
-            .rotateLocalX(-data.xRot());
+            .rotateLocalY(bodyYaw + Mth.PI)
+            .rotateLocalX(-xRot);
         ModelUtils.setRotation(model.head, tempM, tempV);
-        ModelUtils.worldToModel(renderState, tempV2, rotInfo, data.bodyYaw(), true, tempV);
+        ModelUtils.worldToModel(renderState, tempV2, rotInfo, bodyYaw, true, tempV);
 
-        if (data.swimming()) {
+        if (swimming) {
             // move the head in front of the body when swimming
             tempV.z += 3F;
         }
@@ -139,31 +210,31 @@ public class VRPlayerModel extends PlayerModel {
         if (renderState.isPassenger) {
             // when riding, rotate body to sitting position
             ModelUtils.pointModelAtModelForward(model.body, 0F, 14F, 2F + heightOffset, tempV, tempV2, tempM);
-            tempM.rotateLocalX(-data.xRot());
+            tempM.rotateLocalX(-xRot);
             ModelUtils.setRotation(model.body, tempM, tempV);
-        } else if (data.noLowerBodyAnimation()) {
+        } else if (noLowerBodyAnimation) {
             // with only arms simply rotate the body in place
             model.body.setRotation(
                 Mth.PI * Math.max(0F, model.body.y / 22F) * (model instanceof VRPlayerModel_WithArmsLegs ? 0.5F : 1F),
                 0F, 0F);
-            if (data.laying()) {
+            if (laying) {
                 float bodyXRot;
-                if (data.swimming()) {
-                    bodyXRot = -data.xRot();
+                if (swimming) {
+                    bodyXRot = -xRot;
                 } else {
                     float aboveGround = (heightOffset - 11F) / 11F;
                     bodyXRot = progress * (Mth.PI - Mth.HALF_PI * (1F + 0.3F * (1F - aboveGround)));
                 }
                 // lerp body rotation when swimming, to keep the model connected
-                model.body.xRot = Mth.lerp(data.layAmount(), model.body.xRot, bodyXRot);
-                model.head.y -= 2F * data.layAmount();
-                model.body.y -= 2F * data.layAmount();
+                model.body.xRot = Mth.lerp(layAmount, model.body.xRot, bodyXRot);
+                model.head.y -= 2F * layAmount;
+                model.body.y -= 2F * layAmount;
             }
         } else {
             // body/arm position with waist tracker
             // if there is a waist tracker, align the body to that
             ModelUtils.pointModelAtLocal(renderState, model.body, rotInfo.waistPos, rotInfo.waistQuat, rotInfo,
-                data.bodyYaw(), true, tempV, tempV2, tempM);
+                bodyYaw, true, tempV, tempV2, tempM);
 
             // offset arms
             tempM.transform(sideOffset, 2F, 0F, tempV2);
@@ -176,13 +247,13 @@ public class VRPlayerModel extends PlayerModel {
             model.rightArm.y = model.body.y + tempV2.y;
             model.rightArm.z = model.body.z - tempV2.z;
 
-            tempM.rotateLocalX(-data.xRot());
+            tempM.rotateLocalX(-xRot);
             ModelUtils.setRotation(model.body, tempM, tempV);
         }
 
         float cosBodyRot = Mth.cos(model.body.xRot);
 
-        if (renderState.isPassenger || data.noLowerBodyAnimation()) {
+        if (renderState.isPassenger || noLowerBodyAnimation) {
             // offset arms with body rotation
             model.leftArm.x = model.body.x + sideOffset;
             model.rightArm.x = model.body.x - sideOffset;
@@ -199,11 +270,11 @@ public class VRPlayerModel extends PlayerModel {
         if (renderState.isPassenger) {
             model.leftLeg.z = heightOffset;
             model.rightLeg.z = model.leftLeg.z;
-        } else if (data.laying() && data.noLowerBodyAnimation()) {
+        } else if (laying && noLowerBodyAnimation) {
             // adjust legs
-            if (data.swimming()) {
+            if (swimming) {
                 tempV.set(0, 12, 0);
-                tempV.rotateX(-data.xRot());
+                tempV.rotateX(-xRot);
                 model.leftLeg.y = model.body.y + tempV.y;
                 model.leftLeg.z = model.body.z + tempV.z;
             } else {
@@ -219,11 +290,11 @@ public class VRPlayerModel extends PlayerModel {
             model.rightLeg.z = model.leftLeg.z;
         } else if (rotInfo.fbtMode != FBTMode.ARMS_ONLY) {
             // fbt leg position
-            ModelUtils.worldToModel(renderState, rotInfo.waistPos, rotInfo, data.bodyYaw(), true, tempV);
+            ModelUtils.worldToModel(renderState, rotInfo.waistPos, rotInfo, bodyYaw, true, tempV);
 
             tempV2.set(-1.9F, -2F, 0F);
             rotInfo.waistQuat.transform(tempV2);
-            ModelUtils.worldToModelDirection(tempV2, data.bodyYaw(), tempV2);
+            ModelUtils.worldToModelDirection(tempV2, bodyYaw, tempV2);
             model.leftLeg.setPos(
                 tempV.x + tempV2.x,
                 tempV.y + tempV2.y,
@@ -231,7 +302,7 @@ public class VRPlayerModel extends PlayerModel {
 
             tempV2.set(1.9F, -2F, 0F);
             rotInfo.waistQuat.transform(tempV2);
-            ModelUtils.worldToModelDirection(tempV2, data.bodyYaw(), tempV2);
+            ModelUtils.worldToModelDirection(tempV2, bodyYaw, tempV2);
             model.rightLeg.setPos(
                 tempV.x + tempV2.x,
                 tempV.y + tempV2.y,
@@ -242,7 +313,7 @@ public class VRPlayerModel extends PlayerModel {
         }
 
         // regular positioning
-        if (!renderState.isPassenger && data.layAmount() < 1.0F && rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
+        if (!renderState.isPassenger && layAmount < 1.0F && rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
             // move legs back with bend
             float newLegY = 12F + Math.min(model.body.y, 0F);
             float newLegZ = model.body.z + 10F * Mth.sin(model.body.xRot);
@@ -250,15 +321,15 @@ public class VRPlayerModel extends PlayerModel {
                 newLegY += 10F * Mth.sin(model.body.xRot);
             }
 
-            model.leftLeg.y = Mth.lerp(data.layAmount(), newLegY, model.leftLeg.y);
-            model.leftLeg.z = Mth.lerp(data.layAmount(), newLegZ, model.leftLeg.z);
+            model.leftLeg.y = Mth.lerp(layAmount, newLegY, model.leftLeg.y);
+            model.leftLeg.z = Mth.lerp(layAmount, newLegZ, model.leftLeg.z);
 
             model.rightLeg.y = model.leftLeg.y;
             model.rightLeg.z = model.leftLeg.z;
         }
 
         // arms/legs only when standing
-        if (!rotInfo.seated || data.isMainPlayer()) {
+        if (!rotInfo.seated || isMainPlayer) {
             // arms only when not a split arms model
             if (!(model instanceof VRPlayerModel_WithArms) &&
                 rotInfo.offHandPos.distanceSquared(rotInfo.mainHandPos) > 0.0F)
@@ -268,17 +339,16 @@ public class VRPlayerModel extends PlayerModel {
 
                 // rotation offset, since the rotation point isn't in the center.
                 // this rotates the arm 0.5 or 1 pixels at full arm distance, so that the hand matches up with the center
-                float offset =
-                    (rotInfo.leftHanded ? -1F : 1f) * (model.slim ? 0.016F : 0.032F) * Mth.PI * data.armScale();
+                float offset = (rotInfo.leftHanded ? -1F : 1f) * (model.slim ? 0.016F : 0.032F) * Mth.PI * armScale;
 
                 // main hand
-                ModelUtils.worldToModel(renderState, rotInfo.mainHandPos, rotInfo, data.bodyYaw(),
-                    data.isMainPlayer() || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
+                ModelUtils.worldToModel(renderState, rotInfo.mainHandPos, rotInfo, bodyYaw,
+                    isMainPlayer || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
                 tempV.sub(mainHand.x, mainHand.y, mainHand.z);
                 // move shoulders up when having the arms up, since the rotation point is slightly offset
                 mainHand.y -= 2F * Math.max(0F, -tempV.y / tempV.length());
 
-                ModelUtils.pointAtModelWithLocal(rotInfo.mainHandQuat, data.bodyYaw(), tempV, tempV2, tempM);
+                ModelUtils.pointAtModelWithLocal(rotInfo.mainHandQuat, bodyYaw, tempV, tempV2, tempM);
 
                 float controllerDist = tempV.length();
 
@@ -293,24 +363,24 @@ public class VRPlayerModel extends PlayerModel {
                     tempM.rotateZ(-offset * Math.min(10F / controllerDist, 1F));
                 }
 
-                if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && data.attackArm() == data.mainArm()) {
-                    ModelUtils.swingAnimation(data.attackArm(), renderState.attackTime, data.isMainPlayer(), tempM,
+                if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && attackArm == mainArm) {
+                    ModelUtils.swingAnimation(attackArm, renderState.attackTime, isMainPlayer, tempM,
                         tempV);
                     mainHand.x -= tempV.x;
                     mainHand.y -= tempV.y;
                     mainHand.z += tempV.z;
                 }
-                tempM.rotateLocalX(-data.xRot());
+                tempM.rotateLocalX(-xRot);
                 ModelUtils.setRotation(mainHand, tempM, tempV);
 
                 // offhand
-                ModelUtils.worldToModel(renderState, rotInfo.offHandPos, rotInfo, data.bodyYaw(),
-                    data.isMainPlayer() || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
+                ModelUtils.worldToModel(renderState, rotInfo.offHandPos, rotInfo, bodyYaw,
+                    isMainPlayer || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
                 tempV.sub(offHand.x, offHand.y, offHand.z);
                 // move shoulders up when having the arms up, since the rotation point is slightly offset
                 offHand.y -= 2F * Math.max(0F, -tempV.y / tempV.length());
 
-                ModelUtils.pointAtModelWithLocal(rotInfo.offHandQuat, data.bodyYaw(), tempV, tempV2, tempM);
+                ModelUtils.pointAtModelWithLocal(rotInfo.offHandQuat, bodyYaw, tempV, tempV2, tempM);
 
                 controllerDist = tempV.length();
 
@@ -325,29 +395,28 @@ public class VRPlayerModel extends PlayerModel {
                     tempM.rotateZ(offset * Math.min(10F / controllerDist, 1F));
                 }
 
-                if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && data.attackArm() != data.mainArm()) {
-                    ModelUtils.swingAnimation(data.attackArm(), renderState.attackTime, data.isMainPlayer(), tempM,
+                if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && attackArm != mainArm) {
+                    ModelUtils.swingAnimation(attackArm, renderState.attackTime, isMainPlayer, tempM,
                         tempV);
                     offHand.x -= tempV.x;
                     offHand.y -= tempV.y;
                     offHand.z += tempV.z;
                 }
 
-                if (data.isMainPlayer() && ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
+                if (isMainPlayer && ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
                     ClientDataHolderVR.getInstance().vrSettings.modelArmsMode != VRSettings.ModelArmsMode.OFF)
                 {
                     GuiHandler.GUI_ROTATION_PLAYER_MODEL.set3x3(tempM);
                     // ModelParts are rotated 90°
                     GuiHandler.GUI_ROTATION_PLAYER_MODEL.rotateX(-Mth.HALF_PI);
                     // undo body yaw
-                    GuiHandler.GUI_ROTATION_PLAYER_MODEL.rotateLocalY(-data.bodyYaw() - Mth.PI);
+                    GuiHandler.GUI_ROTATION_PLAYER_MODEL.rotateLocalY(-bodyYaw - Mth.PI);
 
                     // arm vector
                     GuiHandler.GUI_ROTATION_PLAYER_MODEL.transformDirection(MathUtils.BACK, tempV)
                         .mul(0.584F * rotInfo.worldScale);
 
-                    ModelUtils.modelToWorld(renderState, offHand.x, offHand.y, offHand.z, rotInfo, data.bodyYaw(), true,
-                        true,
+                    ModelUtils.modelToWorld(renderState, offHand.x, offHand.y, offHand.z, rotInfo, bodyYaw, true, true,
                         tempV2);
                     if (MCAHelper.isLoaded()) {
                         // TODO MCA isn't updated yet so no clue how to do this yet
@@ -356,15 +425,16 @@ public class VRPlayerModel extends PlayerModel {
 
                     tempV2.add(tempV);
 
-                    GuiHandler.GUI_POS_PLAYER_MODEL = new Vec3(renderState.x,  renderState.y, renderState.z)
+                    GuiHandler.GUI_POS_PLAYER_MODEL = Minecraft.getInstance().player.getPosition(
+                            ClientUtils.getCurrentPartialTick())
                         .add(tempV2.x, tempV2.y, tempV2.z);
                 }
-                tempM.rotateLocalX(-data.xRot());
+                tempM.rotateLocalX(-xRot);
                 ModelUtils.setRotation(offHand, tempM, tempV);
             }
 
             // legs only when not sitting
-            if (!renderState.isPassenger && !data.noLowerBodyAnimation() &&
+            if (!renderState.isPassenger && !noLowerBodyAnimation &&
                 !(model instanceof VRPlayerModel_WithArmsLegs))
             {
                 float limbRotation = 0F;
@@ -375,43 +445,43 @@ public class VRPlayerModel extends PlayerModel {
                 }
 
                 ModelUtils.pointModelAtLocal(renderState, model.rightLeg, rotInfo.rightFootPos,
-                    rotInfo.rightFootQuat, rotInfo, data.bodyYaw(), true, tempV,
+                    rotInfo.rightFootQuat, rotInfo, bodyYaw, true, tempV,
                     tempV2, tempM);
-                tempM.rotateLocalX(limbRotation - data.xRot());
+                tempM.rotateLocalX(limbRotation - xRot);
                 ModelUtils.setRotation(model.rightLeg, tempM, tempV);
 
                 ModelUtils.pointModelAtLocal(renderState, model.leftLeg, rotInfo.leftFootPos,
                     rotInfo.leftFootQuat,
-                    rotInfo, data.bodyYaw(), true, tempV, tempV2, tempM);
-                tempM.rotateLocalX(-limbRotation - data.xRot());
+                    rotInfo, bodyYaw, true, tempV, tempV2, tempM);
+                tempM.rotateLocalX(-limbRotation - xRot);
                 ModelUtils.setRotation(model.leftLeg, tempM, tempV);
             }
         }
 
-        if (data.layAmount() > 0F) {
-            if (data.noLowerBodyAnimation()) {
+        if (layAmount > 0F) {
+            if (noLowerBodyAnimation) {
                 // with a waist tracker the rotation is already done before
-                model.body.xRot += data.xRot();
+                model.body.xRot += xRot;
             }
 
             if (model instanceof VRPlayerModel_WithArmsLegs) {
-                ModelUtils.applySwimRotationOffset(renderState, data.xRot(), tempV, tempV2,
+                ModelUtils.applySwimRotationOffset(renderState, xRot, tempV, tempV2,
                     model.head, model.body);
             } else if (model instanceof VRPlayerModel_WithArms) {
-                ModelUtils.applySwimRotationOffset(renderState, data.xRot(), tempV, tempV2,
+                ModelUtils.applySwimRotationOffset(renderState, xRot, tempV, tempV2,
                     model.head, model.body,
                     model.leftLeg, model.rightLeg);
             } else {
-                ModelUtils.applySwimRotationOffset(renderState, data.xRot(), tempV, tempV2,
+                ModelUtils.applySwimRotationOffset(renderState, xRot, tempV, tempV2,
                     model.head, model.body,
                     model.leftArm, model.rightArm,
                     model.leftLeg, model.rightLeg);
             }
         }
 
-        model.leftArm.xScale = model.leftArm.zScale = model.rightArm.xScale = model.rightArm.zScale = data.armScale();
-        model.body.xScale = model.body.zScale = data.bodyScale();
-        model.leftLeg.xScale = model.leftLeg.zScale = model.rightLeg.xScale = model.rightLeg.zScale = data.legScale();
+        model.leftArm.xScale = model.leftArm.zScale = model.rightArm.xScale = model.rightArm.zScale = armScale;
+        model.body.xScale = model.body.zScale = bodyScale;
+        model.leftLeg.xScale = model.leftLeg.zScale = model.rightLeg.xScale = model.rightLeg.zScale = legScale;
 
         // spin attack moves the model one block up
         if (renderState.isAutoSpinAttack) {
@@ -422,6 +492,21 @@ public class VRPlayerModel extends PlayerModel {
             if (!(model instanceof VRPlayerModel_WithArmsLegs)) {
                 spinOffset(model.leftLeg, model.rightLeg);
             }
+        }
+
+        if (model instanceof VRPlayerModel vrModel) {
+            vrModel.isMainPlayer = isMainPlayer;
+            vrModel.rotInfo = rotInfo;
+            vrModel.mainArm = mainArm;
+            vrModel.attackArm = attackArm;
+            vrModel.attackTime = renderState.attackTime;
+            vrModel.bodyYaw = bodyYaw;
+            vrModel.laying = laying;
+            vrModel.layAmount = layAmount;
+            vrModel.bodyScale = bodyScale;
+            vrModel.armScale = armScale;
+            vrModel.legScale = legScale;
+            vrModel.xRot = xRot;
         }
     }
 
@@ -457,7 +542,7 @@ public class VRPlayerModel extends PlayerModel {
     }
 
     @Override
-    public void translateToHand(AvatarRenderState avatarRenderState, HumanoidArm side, PoseStack poseStack) {
+    public void translateToHand(HumanoidArm side, PoseStack poseStack) {
         // can't call super, because, the vanilla slim offset doesn't work with rotations
         this.getArm(side).translateAndRotate(poseStack);
 
@@ -465,21 +550,14 @@ public class VRPlayerModel extends PlayerModel {
             poseStack.translate(side == HumanoidArm.RIGHT ? 0.03125F : -0.03125F, 0.0F, 0.0F);
         }
 
-        doAttackAnim(avatarRenderState, side, poseStack);
+        doAttackAnim(side, poseStack);
     }
 
-    protected void doAttackAnim(AvatarRenderState avatarRenderState, HumanoidArm side, PoseStack poseStack) {
-        ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) avatarRenderState).vivecraft$getRotInfo();
-
-        if (rotInfo != null && avatarRenderState.attackTime > 0F) {
-            // we ignore the vanilla main arm setting
-            if (side ==
-                (rotInfo.leftHanded ? avatarRenderState.attackArm.getOpposite() : avatarRenderState.attackArm))
-            {
-                poseStack.translate(0.0F, 0.5F, 0.0F);
-                poseStack.mulPose(Axis.XP.rotation(Mth.sin(avatarRenderState.attackTime * Mth.PI)));
-                poseStack.translate(0.0F, -0.5F, 0.0F);
-            }
+    protected void doAttackAnim(HumanoidArm side, PoseStack poseStack) {
+        if (side == this.attackArm) {
+            poseStack.translate(0.0F, 0.5F, 0.0F);
+            poseStack.mulPose(Axis.XP.rotation(Mth.sin(this.attackTime * Mth.PI)));
+            poseStack.translate(0.0F, -0.5F, 0.0F);
         }
     }
 }

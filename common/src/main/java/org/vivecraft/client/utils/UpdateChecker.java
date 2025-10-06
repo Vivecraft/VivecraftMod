@@ -47,7 +47,7 @@ public class UpdateChecker {
         try {
             String apiURL =
                 "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" + Xloader.getModloader().name +
-                    "%22]&game_versions=[%22" + SharedConstants.getCurrentVersion().name() + "%22]";
+                    "%22]&game_versions=[%22" + SharedConstants.VERSION_STRING + "%22]";
             HttpURLConnection conn = (HttpURLConnection) new URL(apiURL).openConnection();
             // 10 seconds read and connect timeout
             conn.setConnectTimeout(10000);

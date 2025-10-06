@@ -33,14 +33,14 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Inject(method = "getWidth", at = @At("HEAD"), cancellable = true)
     private void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
-            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().width);
+            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewWidth);
         }
     }
 
     @Inject(method = "getHeight", at = @At("HEAD"), cancellable = true)
     private void vivecraft$getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
-            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().height);
+            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewHeight);
         }
     }
 

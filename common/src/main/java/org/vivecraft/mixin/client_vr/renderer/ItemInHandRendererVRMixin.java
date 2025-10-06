@@ -6,7 +6,10 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MapRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -17,7 +20,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
@@ -90,15 +92,15 @@ public abstract class ItemInHandRendererVRMixin {
     @Shadow
     public abstract void renderItem(
         LivingEntity entity, ItemStack itemStack, ItemDisplayContext displayContext,
-        PoseStack poseStack, SubmitNodeCollector collector, int seed);
+        PoseStack poseStack, MultiBufferSource buffer, int seed);
 
     @Shadow
     protected abstract void renderMap(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, ItemStack stack);
+        PoseStack poseStack, MultiBufferSource buffer, int combinedLight, ItemStack stack);
 
     @Shadow
     protected abstract void renderPlayerArm(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float equippedProgress, float swingProgress,
+        PoseStack poseStack, MultiBufferSource buffer, int combinedLight, float equippedProgress, float swingProgress,
         HumanoidArm side);
 
     @Shadow
@@ -107,11 +109,11 @@ public abstract class ItemInHandRendererVRMixin {
 
     @Inject(method = "renderPlayerArm", at = @At("HEAD"), cancellable = true)
     private void vivecraft$overrideArm(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float equippedProgress,
-        float swingProgress, HumanoidArm side, CallbackInfo ci)
+        PoseStack poseStack, MultiBufferSource buffer, int combinedLight, float equippedProgress, float swingProgress,
+        HumanoidArm side, CallbackInfo ci)
     {
         if (VRState.VR_RUNNING) {
-            vivecraft$vrPlayerArm(poseStack, collector, combinedLight, swingProgress, side);
+            vivecraft$vrPlayerArm(poseStack, buffer, combinedLight, swingProgress, side);
             ci.cancel();
         }
     }
@@ -119,11 +121,11 @@ public abstract class ItemInHandRendererVRMixin {
     @Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
     private void vivecraft$overrideArmItem(
         AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand, float swingProgress,
-        ItemStack itemStack, float equippedProgress, PoseStack poseStack, SubmitNodeCollector collector,
-        int combinedLight, CallbackInfo ci)
+        ItemStack itemStack, float equippedProgress, PoseStack poseStack, MultiBufferSource buffer, int combinedLight,
+        CallbackInfo ci)
     {
         if (VRState.VR_RUNNING) {
-            this.vivecraft$vrRenderArmWithItem(player, partialTick, hand, swingProgress, itemStack, poseStack, collector,
+            this.vivecraft$vrRenderArmWithItem(player, partialTick, hand, swingProgress, itemStack, poseStack, buffer,
                 combinedLight);
             ci.cancel();
         }
@@ -131,48 +133,46 @@ public abstract class ItemInHandRendererVRMixin {
 
     @Inject(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"), cancellable = true)
     private void vivecraft$overrideMapShaders(
-        PoseStack poseStack, SubmitNodeCollector collector, int packedLight, ItemStack stack, CallbackInfo ci)
+        PoseStack poseStack, MultiBufferSource buffer, int packedLight, ItemStack stack, CallbackInfo ci)
     {
         // with shaders, at least iris, we can't provide a custom text pipeline so need to use entity
         if (VRState.VR_RUNNING && ShadersHelper.isShaderActive()) {
             MapId mapId = stack.get(DataComponents.MAP_ID);
             MapItemSavedData mapData = MapItem.getSavedData(mapId, this.minecraft.level);
-            RenderType renderType =
-                mapData == null ? VIVECRAFT$MAP_BACKGROUND_NO_CULL : VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL;
+            VertexConsumer consumer = buffer.getBuffer(
+                mapData == null ? VIVECRAFT$MAP_BACKGROUND_NO_CULL : VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL);
             Matrix4f matrix = poseStack.last().pose();
             Vector3f normal = matrix.transformDirection(0F, 0F, 1F, new Vector3f());
-            collector.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
-                consumer.addVertex(matrix, -7.0F, 135.0F, 0.0F)
-                    .setColor(255, 255, 255, 255)
-                    .setUv(0.0F, 1.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                    .setNormal(normal.x, normal.y, normal.z);
-                consumer.addVertex(matrix, 135.0F, 135.0F, 0.0F)
-                    .setColor(255, 255, 255, 255)
-                    .setUv(1.0F, 1.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                    .setNormal(normal.x, normal.y, normal.z);
-                consumer.addVertex(matrix, 135.0F, -7.0F, 0.0F)
-                    .setColor(255, 255, 255, 255)
-                    .setUv(1.0F, 0.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                    .setNormal(normal.x, normal.y, normal.z);
-                consumer.addVertex(matrix, -7.0F, -7.0F, 0.0F)
-                    .setColor(255, 255, 255, 255)
-                    .setUv(0.0F, 0.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                    .setNormal(normal.x, normal.y, normal.z);
-            });
+            consumer.addVertex(matrix, -7.0F, 135.0F, 0.0F)
+                .setColor(255, 255, 255, 255)
+                .setUv(0.0F, 1.0F)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
+                .setNormal(normal.x, normal.y, normal.z);
+            consumer.addVertex(matrix, 135.0F, 135.0F, 0.0F)
+                .setColor(255, 255, 255, 255)
+                .setUv(1.0F, 1.0F)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
+                .setNormal(normal.x, normal.y, normal.z);
+            consumer.addVertex(matrix, 135.0F, -7.0F, 0.0F)
+                .setColor(255, 255, 255, 255)
+                .setUv(1.0F, 0.0F)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
+                .setNormal(normal.x, normal.y, normal.z);
+            consumer.addVertex(matrix, -7.0F, -7.0F, 0.0F)
+                .setColor(255, 255, 255, 255)
+                .setUv(0.0F, 0.0F)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
+                .setNormal(normal.x, normal.y, normal.z);
             if (mapData != null) {
                 MapRenderer mapRenderer = this.minecraft.getMapRenderer();
                 mapRenderer.extractRenderState(mapId, mapData, this.mapRenderState);
-                mapRenderer.render(this.mapRenderState, poseStack, collector, false, packedLight);
+                mapRenderer.render(this.mapRenderState, poseStack, buffer, false, packedLight);
             }
             ci.cancel();
         }
     }
 
-    @ModifyArg(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V"))
+    @ModifyArg(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource;getBuffer(Lnet/minecraft/client/renderer/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"))
     private RenderType vivecraft$overrideMapVanilla(RenderType renderType) {
         if (VRState.VR_RUNNING) {
             return renderType == MAP_BACKGROUND ? VIVECRAFT$MAP_BACKGROUND_NO_CULL_TEXT :
@@ -185,7 +185,7 @@ public abstract class ItemInHandRendererVRMixin {
     @Unique
     private void vivecraft$vrRenderArmWithItem(
         AbstractClientPlayer player, float partialTick, InteractionHand hand, float swingProgress, ItemStack itemStack,
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight)
+        PoseStack poseStack, MultiBufferSource buffer, int combinedLight)
     {
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 
@@ -227,7 +227,7 @@ public abstract class ItemInHandRendererVRMixin {
         }
 
         if (renderArm && !player.isInvisible()) {
-            this.renderPlayerArm(poseStack, collector, combinedLight, equippedProgress, swingProgress, side);
+            this.renderPlayerArm(poseStack, buffer, combinedLight, equippedProgress, swingProgress, side);
         }
 
         if (!itemStack.isEmpty()) {
@@ -277,12 +277,12 @@ public abstract class ItemInHandRendererVRMixin {
             }
 
             if (transformType == VivecraftItemRendering.VivecraftItemTransformType.MAP) {
-                this.renderMap(poseStack, collector, combinedLight, itemStack);
+                this.renderMap(poseStack, buffer, combinedLight, itemStack);
             } else if (transformType == VivecraftItemRendering.VivecraftItemTransformType.TELESCOPE) {
                 if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
                     poseStack.pushPose();
 
-                    renderItem(player, itemStack, itemDisplayContext, poseStack, collector, combinedLight);
+                    renderItem(player, itemStack, itemDisplayContext, poseStack, buffer, combinedLight);
 
                     if (ClientNetworking.isThirdPersonItems()) {
                         // account for the -2/16 offset of the third person spyglass transform
@@ -306,7 +306,7 @@ public abstract class ItemInHandRendererVRMixin {
                     poseStack.popPose();
                 }
             } else {
-                this.renderItem(player, itemStack, itemDisplayContext, poseStack, collector, combinedLight);
+                this.renderItem(player, itemStack, itemDisplayContext, poseStack, buffer, combinedLight);
             }
 
             poseStack.popPose();
@@ -327,7 +327,7 @@ public abstract class ItemInHandRendererVRMixin {
 
     @Unique
     private void vivecraft$vrPlayerArm(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float swingProgress, HumanoidArm side)
+        PoseStack poseStack, MultiBufferSource buffer, int combinedLight, float swingProgress, HumanoidArm side)
     {
         LocalPlayer player = this.minecraft.player;
         boolean rightHand = side == HumanoidArm.RIGHT;
@@ -336,7 +336,7 @@ public abstract class ItemInHandRendererVRMixin {
         float offsetDirection = rightHand ? 1.0F : -1.0F;
 
         VRArmRenderer vrArmRenderer = ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getArmSkinMap()
-            .get(player.getSkin().model());
+            .get(player.getSkin().model().id());
 
         if (vrArmRenderer == null) {
             if (!this.vivecraft$didLogModelError) {
@@ -359,7 +359,7 @@ public abstract class ItemInHandRendererVRMixin {
         }
 
         poseStack.scale(0.4f, 0.4F, 0.4F);
-        boolean slim = player.getSkin().model() == PlayerModelType.SLIM;
+        boolean slim = player.getSkin().model().id().equals("slim");
 
             /*
              x offset: (arm x origin + arm x offset + arm x dimension * 0.5) / 16
@@ -376,12 +376,12 @@ public abstract class ItemInHandRendererVRMixin {
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
 
         vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY);
-        ResourceLocation skin = player.getSkin().body().texturePath();
+        ResourceLocation skin = player.getSkin().texture();
 
         if (rightHand) {
-            vrArmRenderer.renderRightHand(poseStack, collector, combinedLight, skin, true);
+            vrArmRenderer.renderRightHand(poseStack, buffer, combinedLight, skin, true);
         } else {
-            vrArmRenderer.renderLeftHand(poseStack, collector, combinedLight, skin, true);
+            vrArmRenderer.renderLeftHand(poseStack, buffer, combinedLight, skin, true);
         }
         poseStack.popPose();
     }

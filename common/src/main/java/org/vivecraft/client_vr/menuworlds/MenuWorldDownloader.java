@@ -111,7 +111,7 @@ public class MenuWorldDownloader {
         List<MenuWorldItem> list = new ArrayList<>();
         List<String> resultList = FileUtils.httpReadAllLines(
             BASE_URL + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" +
-                MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.getCurrentVersion().name());
+                MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
         for (String str : resultList) {
             list.add(new MenuWorldItem("menuworlds/" + str, null));
         }

@@ -510,8 +510,7 @@ public class SwingTracker implements DebugRenderTracker {
                                 if (this.mc.gameMode.continueDestroyBlock(blockHit.getBlockPos(),
                                     blockHit.getDirection()))
                                 {
-                                    this.mc.level.addBreakingBlockEffect(blockHit.getBlockPos(),
-                                        blockHit.getDirection());
+                                    this.mc.particleEngine.crack(blockHit.getBlockPos(), blockHit.getDirection());
                                 }
 
                                 this.clearBlockHitDelay();

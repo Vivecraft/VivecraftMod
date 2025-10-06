@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
-import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -25,7 +24,6 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.RenderPass;
-import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
@@ -58,25 +56,25 @@ public class GuiHandler {
     private static boolean LAST_PRESSED_ALT;
 
     public static final KeyMapping KEY_LEFT_CLICK = new KeyMapping("vivecraft.key.guiLeftClick", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_RIGHT_CLICK = new KeyMapping("vivecraft.key.guiRightClick", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_MIDDLE_CLICK = new KeyMapping("vivecraft.key.guiMiddleClick", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_SHIFT = new KeyMapping("vivecraft.key.guiShift", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_CTRL = new KeyMapping("vivecraft.key.guiCtrl", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_ALT = new KeyMapping("vivecraft.key.guiAlt", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_SCROLL_UP = new KeyMapping("vivecraft.key.guiScrollUp", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_SCROLL_DOWN = new KeyMapping("vivecraft.key.guiScrollDown", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final KeyMapping KEY_SCROLL_AXIS = new KeyMapping("vivecraft.key.guiScrollAxis", -1,
-        VivecraftVRMod.INSTANCE.categoryGui);
+        "vivecraft.key.category.gui");
     public static final HandedKeyBinding KEY_KEYBOARD_CLICK = new HandedKeyBinding("vivecraft.key.keyboardClick", -1,
-        VivecraftVRMod.INSTANCE.categoryKeyboard)
+        "vivecraft.key.category.keyboard")
     {
         @Override
         public boolean isPriorityOnController(ControllerType type) {
@@ -88,7 +86,7 @@ public class GuiHandler {
         }
     };
     public static final HandedKeyBinding KEY_KEYBOARD_SHIFT = new HandedKeyBinding("vivecraft.key.keyboardShift", -1,
-        VivecraftVRMod.INSTANCE.categoryKeyboard)
+        "vivecraft.key.category.keyboard")
     {
         @Override
         public boolean isPriorityOnController(ControllerType type) {
@@ -593,7 +591,7 @@ public class GuiHandler {
                         // hud on wrist
                         scale = 0.4F;
 
-                        boolean slim = MC.player.getSkin().model() == PlayerModelType.SLIM;
+                        boolean slim = MC.player.getSkin().model().id().equals("slim");
 
                         float xOffset = -0.136F;
 

@@ -206,7 +206,7 @@ public abstract class VRRenderer {
         RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(this.stencilProjectionMatrix.getBuffer(
-                new Matrix4f().setOrtho(0.0F, fb.width, 0.0F, fb.height, 0.0F, 20.0F)),
+                new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F)),
             ProjectionType.ORTHOGRAPHIC);
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().identity();
@@ -216,7 +216,7 @@ public abstract class VRRenderer {
         }
 
         if (dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER) {
-            drawCircle(fb.width, fb.height);
+            drawCircle(fb.viewWidth, fb.viewHeight);
         } else if (providesStencilMask() &&
             (dataholder.currentPass == RenderPass.LEFT || dataholder.currentPass == RenderPass.RIGHT))
         {
@@ -262,7 +262,8 @@ public abstract class VRRenderer {
                 .setColor(0, 0, 0, 255);
         }
 
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
+        // need to end all, because of iris batching
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
     }
 
     /**
@@ -286,7 +287,8 @@ public abstract class VRRenderer {
                     0.0F)
                 .setColor(0, 0, 0, 255);
         }
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
+        // need to end all, because of iris batching
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
     }
 
     /**
@@ -501,8 +503,8 @@ public abstract class VRRenderer {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         // check if window is still the same
-        if (minecraft.getWindow().handle() != this.lastWindow) {
-            this.lastWindow = minecraft.getWindow().handle();
+        if (minecraft.getWindow().getWindow() != this.lastWindow) {
+            this.lastWindow = minecraft.getWindow().getWindow();
             this.reinitFrameBuffers("Window Handle Changed");
         }
 

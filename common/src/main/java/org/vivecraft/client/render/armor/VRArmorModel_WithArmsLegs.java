@@ -1,38 +1,31 @@
 package org.vivecraft.client.render.armor;
 
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.entity.ArmorModelSet;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import org.vivecraft.client.render.VRPlayerModel_WithArmsLegs;
+import org.vivecraft.client.render.models.FeetModel;
+import org.vivecraft.client.utils.ModelUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public class VRArmorModel_WithArmsLegs {
+public class VRArmorModel_WithArmsLegs<S extends HumanoidRenderState> extends VRArmorModel_WithArms<S> implements FeetModel {
+    public final ModelPart leftFoot;
+    public final ModelPart rightFoot;
 
-    public static ArmorModelSet<MeshDefinition> createArmorMeshSet(CubeDeformation inner, CubeDeformation outer) {
-        ArmorModelSet<MeshDefinition> armorSet = VRArmorModel_WithArms.createArmorMeshSet(inner, outer)
-            .map(mesh -> {
-                PartDefinition root = mesh.getRoot();
-                root.addOrReplaceChild("left_foot", CubeListBuilder.create(), PartPose.ZERO);
-                root.addOrReplaceChild("right_foot", CubeListBuilder.create(), PartPose.ZERO);
-                return mesh;
-            });
-        addVRParts(armorSet.legs(), inner);
-        addVRParts(armorSet.feet(), outer);
-
-        return armorSet.map(mesh -> {
-            PartDefinition root = mesh.getRoot();
-            root.getChild("left_leg").addOrReplaceChild("left_pants", CubeListBuilder.create(), PartPose.ZERO);
-            root.getChild("right_leg").addOrReplaceChild("right_pants", CubeListBuilder.create(), PartPose.ZERO);
-            root.getChild("left_foot").addOrReplaceChild("left_foot_pants", CubeListBuilder.create(), PartPose.ZERO);
-            root.getChild("right_foot").addOrReplaceChild("right_foot_pants", CubeListBuilder.create(), PartPose.ZERO);
-            return mesh;
-        });
+    public VRArmorModel_WithArmsLegs(ModelPart root) {
+        super(root);
+        this.leftFoot = root.getChild("left_foot");
+        this.rightFoot = root.getChild("right_foot");
+        ModelUtils.textureHackUpper(this.leftLeg, this.leftFoot);
+        ModelUtils.textureHackUpper(this.rightLeg, this.rightFoot);
     }
 
-    protected static void addVRParts(MeshDefinition meshDefinition, CubeDeformation cubeDeformation) {
+    public static MeshDefinition createBodyLayer(CubeDeformation cubeDeformation) {
+        MeshDefinition meshDefinition = VRArmorModel_WithArms.createBodyLayer(cubeDeformation);
         PartDefinition partDefinition = meshDefinition.getRoot();
 
         boolean connected = ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected;
@@ -59,5 +52,24 @@ public class VRArmorModel_WithArmsLegs {
                 .texOffs(0, 16)
                 .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F + upperExtension, 4.0F, cubeDeformation.extend(-0.1F)),
             PartPose.offset(-1.9F, 12.0F, 0.0F));
+        return meshDefinition;
+    }
+
+    @Override
+    public ModelPart getLeftFoot() {
+        return this.leftFoot;
+    }
+
+    @Override
+    public ModelPart getRightFoot() {
+        return this.rightFoot;
+    }
+
+    @Override
+    public void setAllVisible(boolean visible) {
+        super.setAllVisible(visible);
+
+        this.leftFoot.visible = visible;
+        this.rightFoot.visible = visible;
     }
 }

@@ -8,7 +8,7 @@ import org.vivecraft.client_vr.provider.InputSimulator;
 public abstract class MethodHolder {
 
     public static boolean isKeyDown(int i) {
-        return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().handle(), i) == 1 || InputSimulator.isKeyDown(i);
+        return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), i) == 1 || InputSimulator.isKeyDown(i);
     }
 
     public static boolean isInMenuRoom() {
@@ -18,7 +18,7 @@ public abstract class MethodHolder {
     public static boolean willBeInMenuRoom(Screen newScreen) {
         return Minecraft.getInstance().level == null ||
             newScreen instanceof WinScreen ||
-            newScreen instanceof LevelLoadingScreen ||
+            newScreen instanceof ReceivingLevelScreen ||
             newScreen instanceof ProgressScreen ||
             newScreen instanceof GenericMessageScreen ||
             Minecraft.getInstance().getOverlay() != null;

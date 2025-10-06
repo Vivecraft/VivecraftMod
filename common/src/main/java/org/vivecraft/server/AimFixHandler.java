@@ -12,7 +12,6 @@ import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.network.packet.WrappedPacket;
 import org.vivecraft.server.config.ServerConfig;
 
 public class AimFixHandler extends ChannelInboundHandlerAdapter {
@@ -36,13 +35,13 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             msg instanceof ServerboundUseItemOnPacket ||
             msg instanceof ServerboundPlayerActionPacket;
 
-        if (!ServerVRPlayers.isVRPlayer(serverPlayer) || !isCapturedPacket) {
+        if (!ServerVRPlayers.isVRPlayer(serverPlayer) || !isCapturedPacket || serverPlayer.getServer() == null) {
             // we don't need to handle this packet, just defer to the next handler in the pipeline
             ctx.fireChannelRead(msg);
             return;
         }
 
-        Runnable task = () -> {
+        serverPlayer.getServer().submit(() -> {
             // Save all the current orientation data
             Vec3 pos = serverPlayer.position();
             Vec3 prevPos = new Vec3(serverPlayer.xo, serverPlayer.yo, serverPlayer.zo);
@@ -132,10 +131,6 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             if (vivePlayer != null) {
                 vivePlayer.offset = Vec3.ZERO;
             }
-        };
-
-        try {
-            new WrappedPacket(task).handle(listener);
-        } catch (RunningOnDifferentThreadException ignored) {}
+        });
     }
 }

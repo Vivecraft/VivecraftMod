@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client_vr.blaze3d.platform;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,7 +12,7 @@ import org.vivecraft.client_vr.provider.InputSimulator;
 public class InputConstantsVRMixin {
 
     @Inject(method = "isKeyDown", at = @At("TAIL"), cancellable = true)
-    private static void vivecraft$inputSimulatorDown(Window window, int key, CallbackInfoReturnable<Boolean> cir) {
+    private static void vivecraft$inputSimulatorDown(long window, int key, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(cir.getReturnValueZ() || (VRState.VR_RUNNING && InputSimulator.isKeyDown(key)));
     }
 }

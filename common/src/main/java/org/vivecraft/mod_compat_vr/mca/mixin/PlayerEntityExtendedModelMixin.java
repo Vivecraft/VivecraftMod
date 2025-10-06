@@ -64,8 +64,7 @@ public abstract class PlayerEntityExtendedModelMixin {
                 this.vivecraft$position.x + body.x / (this.breastSize * 0.2f + 1.05f),
                 this.vivecraft$position.y + body.y / (this.breastSize * 0.75f + 0.75f),
                 this.vivecraft$position.z + body.z / (this.breastSize * 0.75f + 0.75f));
-            // TODO if they ever make an updated version, check how to do this correctly
-            this.breastsWear.loadPose(this.breasts.storePose());
+            this.breastsWear.copyFrom(this.breasts);
         }
     }
 }

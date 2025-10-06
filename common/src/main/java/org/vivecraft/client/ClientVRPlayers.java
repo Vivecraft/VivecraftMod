@@ -2,7 +2,6 @@ package org.vivecraft.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -292,7 +291,7 @@ public class ClientVRPlayers {
                             -look.z + (this.rand.nextFloat() - 0.5F) * 0.01F);
 
                         if (particle != null) {
-                            ((SimpleAnimatedParticle) particle).setColor(0.5F + this.rand.nextFloat() * 0.5F,
+                            particle.setColor(0.5F + this.rand.nextFloat() * 0.5F,
                                 0.5F + this.rand.nextFloat() * 0.5F,
                                 0.5F + this.rand.nextFloat() * 0.5F);
 

@@ -1,19 +1,18 @@
 package org.vivecraft.client.render;
 
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.api.data.FBTMode;
-import org.vivecraft.client.ClientVRPlayers;
-import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.render.models.FeetModel;
 import org.vivecraft.client.utils.ModelUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -103,17 +102,14 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
     }
 
     @Override
-    public void setupAnim(AvatarRenderState renderState) {
+    public void setupAnim(PlayerRenderState renderState) {
         super.setupAnim(renderState);
 
-        ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) renderState).vivecraft$getRotInfo();
-        VRPlayerRenderData data = ((EntityRenderStateExtension) renderState).vivecraft$getVRRenderData();
-
-        if (rotInfo == null || data == null) {
+        if (this.rotInfo == null) {
             return;
         }
         boolean noLegs = renderState.isPassenger ||
-            (data.laying() && (renderState.isInWater || rotInfo.fbtMode == FBTMode.ARMS_ONLY)) ||
+            (this.laying && (renderState.isInWater || this.rotInfo.fbtMode == FBTMode.ARMS_ONLY)) ||
             renderState.isFallFlying;
         if (!noLegs) {
             if (ClientDataHolderVR.getInstance().vrSettings.playerWalkAnim) {
@@ -126,12 +122,12 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
                     .rotateX(limbRotation)
                     .sub(0, -0.5F, 0)
                     .mul(1F, 0.75F, 1F)
-                    .rotateY(-data.bodyYaw());
+                    .rotateY(-this.bodyYaw);
                 this.kneeOffset
                     .set(0, -0.5F, 0)
                     .rotateX(-Math.abs(limbRotation))
                     .sub(0, -0.5F, 0)
-                    .rotateY(-data.bodyYaw());
+                    .rotateY(-this.bodyYaw);
             } else {
                 this.footOffset.zero();
                 this.kneeOffset.zero();
@@ -139,21 +135,21 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
 
             // left leg
             Vector3fc kneePos;
-            if (rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
+            if (this.rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
                 this.footPos.set(this.leftLeg.x, 24 + Math.min(this.body.y, 0F), this.leftLeg.z);
-                ModelUtils.modelToWorld(renderState, this.footPos, rotInfo, data.bodyYaw(), true, true,
+                ModelUtils.modelToWorld(renderState, this.footPos, this.rotInfo, this.bodyYaw, true, true,
                     this.footPos);
-                this.footQuat.identity().rotateY(Mth.PI - data.bodyYaw());
+                this.footQuat.identity().rotateY(Mth.PI - this.bodyYaw);
                 if (renderState.isAutoSpinAttack) {
                     // player is offset 1 block during the spin
                     this.footPos.y -= 1F;
                 }
             } else {
-                this.footPos.set(rotInfo.leftFootPos);
-                this.footQuat.set(rotInfo.leftFootQuat);
+                this.footPos.set(this.rotInfo.leftFootPos);
+                this.footQuat.set(this.rotInfo.leftFootQuat);
             }
-            if (rotInfo.fbtMode == FBTMode.WITH_JOINTS) {
-                this.kneePosTemp.set(rotInfo.leftKneePos);
+            if (this.rotInfo.fbtMode == FBTMode.WITH_JOINTS) {
+                this.kneePosTemp.set(this.rotInfo.leftKneePos);
                 this.kneePosTemp.add(this.kneeOffset);
                 kneePos = this.kneePosTemp;
             } else {
@@ -162,30 +158,30 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
 
             this.footPos.add(this.footOffset);
             if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
-                positionConnectedLimb(renderState, rotInfo, data, this.leftLeg, this.leftFoot, this.footPos,
-                    this.footQuat, 0F, kneePos, false, null, true);
+                positionConnectedLimb(renderState, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, 0F,
+                    kneePos, false, null, true);
             } else {
                 this.footQuat.transform(MathUtils.BACK, this.footDir);
-                positionSplitLimb(renderState, rotInfo, data, this.leftLeg, this.leftFoot, this.footPos, this.footQuat,
-                    -Mth.HALF_PI, 0F, kneePos, false, null, true);
+                positionSplitLimb(renderState, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
+                    0F, kneePos, false, null, true);
             }
 
             // right leg
-            if (rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
+            if (this.rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
                 this.footPos.set(this.rightLeg.x, 24 + Math.min(this.body.y, 0F), this.rightLeg.z);
-                ModelUtils.modelToWorld(renderState, this.footPos, rotInfo, data.bodyYaw(), true, true,
+                ModelUtils.modelToWorld(renderState, this.footPos, this.rotInfo, this.bodyYaw, true, true,
                     this.footPos);
                 if (renderState.isAutoSpinAttack) {
                     // player is offset 1 block during the spin
                     this.footPos.y -= 1F;
                 }
             } else {
-                this.footPos.set(rotInfo.rightFootPos);
-                this.footQuat.set(rotInfo.rightFootQuat);
+                this.footPos.set(this.rotInfo.rightFootPos);
+                this.footQuat.set(this.rotInfo.rightFootQuat);
             }
 
-            if (rotInfo.fbtMode == FBTMode.WITH_JOINTS) {
-                this.kneePosTemp.set(rotInfo.rightKneePos);
+            if (this.rotInfo.fbtMode == FBTMode.WITH_JOINTS) {
+                this.kneePosTemp.set(this.rotInfo.rightKneePos);
                 this.kneePosTemp.add(this.kneeOffset);
                 kneePos = this.kneePosTemp;
             } else {
@@ -194,17 +190,17 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
 
             this.footPos.add(-this.footOffset.x, this.footOffset.y, -this.footOffset.z);
             if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
-                positionConnectedLimb(renderState, rotInfo, data, this.rightLeg, this.rightFoot, this.footPos,
-                    this.footQuat, 0F, kneePos, false, null, true);
+                positionConnectedLimb(renderState, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, 0F,
+                    kneePos, false, null, true);
             } else {
                 this.footQuat.transform(MathUtils.BACK, this.footDir);
-                positionSplitLimb(renderState, rotInfo, data, this.rightLeg, this.rightFoot, this.footPos,
-                    this.footQuat, -Mth.HALF_PI, 0F, kneePos, false, null, true);
+                positionSplitLimb(renderState, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
+                    0F, kneePos, false, null, true);
             }
         }
 
-        if (data.layAmount() > 0F) {
-            ModelUtils.applySwimRotationOffset(renderState, data.xRot(), this.tempV, this.tempV2,
+        if (this.layAmount > 0F) {
+            ModelUtils.applySwimRotationOffset(renderState, this.xRot, this.tempV, this.tempV2,
                 this.leftLeg, this.rightLeg,
                 this.leftFoot, this.rightFoot);
         }
@@ -225,7 +221,7 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
             this.rightFoot.setRotation(this.rightLeg.xRot, this.rightLeg.yRot, this.rightLeg.zRot);
         }
 
-        this.leftFoot.xScale = this.leftFoot.zScale = this.rightFoot.xScale = this.rightFoot.zScale = data.legScale();
+        this.leftFoot.xScale = this.leftFoot.zScale = this.rightFoot.xScale = this.rightFoot.zScale = this.legScale;
 
         if (renderState.isAutoSpinAttack) {
             spinOffset(this.leftLeg, this.rightLeg, this.leftFoot, this.rightFoot);
@@ -243,6 +239,15 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
     @Override
     public ModelPart getRightFoot() {
         return this.rightFoot;
+    }
+
+    @Override
+    public void copyPropertiesTo(HumanoidModel model) {
+        super.copyPropertiesTo(model);
+        if (model instanceof FeetModel feetModel) {
+            feetModel.getLeftFoot().copyFrom(this.leftFoot);
+            feetModel.getRightFoot().copyFrom(this.rightFoot);
+        }
     }
 
     @Override

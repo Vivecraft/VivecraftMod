@@ -210,6 +210,8 @@ public class MultiPassTextureTarget extends TextureTarget {
         this.last = current;
         this.width = current.width;
         this.height = current.height;
+        this.viewWidth = current.viewWidth;
+        this.viewHeight = current.viewHeight;
         this.filterMode = current.filterMode;
     }
 }

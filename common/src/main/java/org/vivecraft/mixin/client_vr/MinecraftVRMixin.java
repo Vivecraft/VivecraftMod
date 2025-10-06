@@ -17,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -165,6 +166,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         // set the Garbage collector screen here, when it got reset after loading, but don't set it when using quickplay, because it would be removed after loading has finished
         if (ClientDataHolderVR.getInstance().cachedScreen != null &&
             !(this.screen instanceof LevelLoadingScreen ||
+                this.screen instanceof ReceivingLevelScreen ||
                 this.screen instanceof ConnectScreen
             ))
         {
@@ -336,7 +338,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     // the VR runtime handles the frame limit, no need to manually limit it 60fps
-    @ModifyExpressionValue(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/TimeUnit;toNanos(J)J"))
+    @ModifyExpressionValue(method = "doWorldLoad", at = @At(value = "CONSTANT", args = "longValue=16"))
     private long vivecraft$noWaitOnLevelLoad(long original) {
         return VRState.VR_RUNNING ? 0L : original;
     }
@@ -813,9 +815,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 }
                 // release mouse when switching to standing
                 if (!ClientDataHolderVR.getInstance().vrSettings.seated || this.screen != null || this.level == null) {
-                    InputConstants.grabOrReleaseMouse(this.window, GLFW.GLFW_CURSOR_NORMAL,
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
                         this.mouseHandler.xpos(), this.mouseHandler.ypos());
-                    this.mouseHandler.onMove(this.window.handle(), this.mouseHandler.xpos(),
+                    this.mouseHandler.onMove(this.window.getWindow(), this.mouseHandler.xpos(),
                         this.mouseHandler.ypos());
                 }
             } else {
@@ -848,12 +850,12 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
                 if (this.screen != null || this.level == null) {
                     // release mouse
-                    InputConstants.grabOrReleaseMouse(this.window, GLFW.GLFW_CURSOR_NORMAL, mouseX, mouseY);
-                    this.mouseHandler.onMove(this.window.handle(), mouseX, mouseY);
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseX, mouseY);
+                    this.mouseHandler.onMove(this.window.getWindow(), mouseX, mouseY);
                     this.mouseHandler.releaseMouse();
                 } else {
                     // grab mouse when in a menu
-                    InputConstants.grabOrReleaseMouse(this.window, GLFW.GLFW_CURSOR_DISABLED, mouseX,
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_DISABLED, mouseX,
                         mouseY);
                     this.mouseHandler.grabMouse();
                 }

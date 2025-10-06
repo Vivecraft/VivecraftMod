@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client.model;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.render.VRPlayerModel;
 
 @Mixin(PlayerModel.class)
-public class PlayerModelMixin extends HumanoidModel<AvatarRenderState> {
+public class PlayerModelMixin extends HumanoidModel<PlayerRenderState> {
 
     @Unique
     private final Vector3f vivecraft$tempV = new Vector3f();
@@ -29,8 +29,8 @@ public class PlayerModelMixin extends HumanoidModel<AvatarRenderState> {
     }
 
 
-    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)V", at = @At("TAIL"))
-    private void vivecraft$VRAnim(AvatarRenderState renderState, CallbackInfo ci) {
+    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/PlayerRenderState;)V", at = @At("TAIL"))
+    private void vivecraft$VRAnim(PlayerRenderState renderState, CallbackInfo ci) {
         this.head.visible = true;
         if (((EntityRenderStateExtension) renderState).vivecraft$getRotInfo() != null) {
             VRPlayerModel.animateVRModel((PlayerModel) (Object) this, renderState,

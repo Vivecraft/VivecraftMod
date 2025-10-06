@@ -1,4 +1,4 @@
-#version 330
+#version 150
 
 uniform sampler2D MainSampler;
 uniform sampler2D MainDepthSampler;
@@ -22,8 +22,10 @@ uniform sampler2D VrHandsDepthSampler;
 
 in vec2 texCoord;
 
-vec4 color_layers[9] = vec4[](vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0));
-float depth_layers[9] = float[](0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define NUM_LAYERS 9
+
+vec4 color_layers[NUM_LAYERS];
+float depth_layers[NUM_LAYERS];
 int active_layers = 0;
 float hdepth;
 float udepth;

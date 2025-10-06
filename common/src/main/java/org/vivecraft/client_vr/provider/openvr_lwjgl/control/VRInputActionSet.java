@@ -48,7 +48,7 @@ public enum VRInputActionSet {
      * @return ActionSet the KeyMapping should  be put in
      */
     public static VRInputActionSet fromKeyBinding(KeyMapping keyBinding) {
-        return switch (keyBinding.getCategory().id().toLanguageKey()) {
+        return switch (keyBinding.getCategory()) {
             case "vivecraft.key.category.gui" -> GUI;
             case "vivecraft.key.category.climbey" -> CONTEXTUAL;
             case "vivecraft.key.category.keyboard" -> KEYBOARD;

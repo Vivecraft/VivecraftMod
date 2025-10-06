@@ -396,7 +396,7 @@ public class ShaderHelper {
             DATA_HOLDER.vrRenderer.reinitFrameBuffers("FSAA Setting Changed");
         } else {
             // first pass, horizontal
-            VRShaders.LANCZOS_UBO.updateBuffer(1.0F / (3.0F * (float) firstPass.width), 0F);
+            VRShaders.LANCZOS_UBO.updateBuffer(1.0F / (3.0F * (float) firstPass.viewWidth), 0F);
 
             renderFullscreenQuad(() -> "Vive Lanczos 1", VRShaders.LANCZOS_PIPELINE, renderPass -> {
                 renderPass.bindSampler(VRShaders.LANCZOS_COLOR_SAMPLER, source.getColorTextureView());
@@ -405,7 +405,7 @@ public class ShaderHelper {
             }, firstPass.getColorTextureView());
             VRShaders.LANCZOS_UBO.endFrame();
 
-            VRShaders.LANCZOS_UBO.updateBuffer(0F, 1.0F / (3.0F * (float) secondPass.height));
+            VRShaders.LANCZOS_UBO.updateBuffer(0F, 1.0F / (3.0F * (float) secondPass.viewHeight));
             // second pass, vertical
             renderFullscreenQuad(() -> "Vive Lanczos 2", VRShaders.LANCZOS_PIPELINE, renderPass -> {
                 renderPass.bindSampler(VRShaders.LANCZOS_COLOR_SAMPLER, firstPass.getColorTextureView());
@@ -436,7 +436,7 @@ public class ShaderHelper {
         RenderSystem.assertOnRenderThread();
 
         float drawAspect = (float) width / (float) height;
-        float bufferAspect = (float) source.width / (float) source.height;
+        float bufferAspect = (float) source.viewWidth / (float) source.viewHeight;
 
         float xMin = xCropFactor;
         float yMin = yCropFactor;
@@ -463,10 +463,10 @@ public class ShaderHelper {
             .begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_PIPELINE.getVertexFormat());
 
         // position quad
-        float xMinPos = (float) left / MC.getMainRenderTarget().width * 2F - 1F;
-        float yMinPos = (float) top / MC.getMainRenderTarget().height * 2F - 1F;
-        float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().width * 2F;
-        float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().height * 2F;
+        float xMinPos = (float) left / MC.getMainRenderTarget().viewWidth * 2F - 1F;
+        float yMinPos = (float) top / MC.getMainRenderTarget().viewHeight * 2F - 1F;
+        float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().viewWidth * 2F;
+        float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().viewHeight * 2F;
 
         bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, yMin);
         bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, yMin);

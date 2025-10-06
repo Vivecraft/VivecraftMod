@@ -1,4 +1,4 @@
-#version 330
+#version 150 core
 
 layout(std140) uniform LanczosUbo {
     float texelWidthOffset;

@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
@@ -122,27 +121,28 @@ public class GuiStringListEditorScreen extends GuiListScreen {
         }
 
         @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void render(
+            GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY,
+            boolean hovering, float partialTick)
         {
-            this.editBox.setX(this.getContentX());
-            this.editBox.setY(this.getY());
-            this.editBox.setWidth(this.getContentWidth() - 20);
+            this.editBox.setX(left);
+            this.editBox.setY(top);
+            this.editBox.setWidth(width - 20);
             this.editBox.render(guiGraphics, mouseX, mouseY, partialTick);
-            this.deleteButton.setX(this.getContentRight() - 20);
-            this.deleteButton.setY(this.getY());
+            this.deleteButton.setX(left + width - 20);
+            this.deleteButton.setY(top);
             this.deleteButton.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override
-        public boolean keyPressed(KeyEvent keyEvent) {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             // allow to navigate off the edit box
-            if (this.getFocused() == this.editBox && keyEvent.key() == GLFW.GLFW_KEY_RIGHT &&
+            if (this.getFocused() == this.editBox && keyCode == GLFW.GLFW_KEY_RIGHT &&
                 this.editBox.getValue().length() == this.editBox.getCursorPosition())
             {
                 return false;
             }
-            return super.keyPressed(keyEvent);
+            return super.keyPressed(keyCode, scanCode, modifiers);
         }
 
         @Override

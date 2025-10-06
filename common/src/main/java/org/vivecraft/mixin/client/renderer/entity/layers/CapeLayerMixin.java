@@ -7,7 +7,7 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3f;
 import org.joml.Quaternionf;
@@ -21,7 +21,7 @@ import org.vivecraft.client.utils.ModelUtils;
 import org.vivecraft.common.utils.MathUtils;
 
 @Mixin(CapeLayer.class)
-public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, PlayerModel> {
+public abstract class CapeLayerMixin extends RenderLayer<PlayerRenderState, PlayerModel> {
 
     @Unique
     private final Vector3f vivecraft$tempV = new Vector3f();
@@ -29,7 +29,7 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
     @Unique
     private final Matrix3f vivecraft$bodyRot = new Matrix3f();
 
-    public CapeLayerMixin(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
+    public CapeLayerMixin(RenderLayerParent<PlayerRenderState, PlayerModel> renderer) {
         super(renderer);
     }
 
@@ -45,9 +45,9 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
     }
     */
 
-    @ModifyExpressionValue(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/CapeLayer;hasLayer(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;)Z", ordinal = 1))
+    @ModifyExpressionValue(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/state/PlayerRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/CapeLayer;hasLayer(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;)Z", ordinal = 1))
     private boolean vivecraft$modifyTransform(
-        boolean hasArmor, @Local(argsOnly = true) AvatarRenderState renderState,
+        boolean hasArmor, @Local(argsOnly = true) PlayerRenderState renderState,
         @Local(argsOnly = true) PoseStack poseStack)
     {
         ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) renderState).vivecraft$getRotInfo();
