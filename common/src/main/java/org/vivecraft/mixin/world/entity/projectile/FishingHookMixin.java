@@ -47,7 +47,7 @@ public abstract class FishingHookMixin {
         }
     }
 
-    @WrapOperation(method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;snapTo(DDDFF)V"))
+    @WrapOperation(method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;moveTo(DDDFF)V"))
     private void vivecraft$modifyMoveTo(
         FishingHook instance, double x, double y, double z, float yRot, float xRot, Operation<Void> original,
         @Share("dir") LocalRef<Vec3> controllerDir, @Share("pos") LocalRef<Vec3> controllerPos)

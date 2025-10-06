@@ -5,13 +5,14 @@ import net.minecraft.network.chat.ClickEvent;
 /**
  * Custom ClickEvent to do stuff that vanilla doesn't have an option for
  */
-public class VivecraftClickEvent implements ClickEvent {
+public class VivecraftClickEvent extends ClickEvent {
 
     private final VivecraftAction vivecraftAction;
     private final Object value;
 
     public VivecraftClickEvent(VivecraftAction action, Object value) {
         // dummy action, in case our check fails
+        super(Action.RUN_COMMAND, "");
         this.vivecraftAction = action;
         this.value = value;
     }
@@ -22,11 +23,6 @@ public class VivecraftClickEvent implements ClickEvent {
 
     public Object getVivecraftValue() {
         return this.value;
-    }
-
-    @Override
-    public Action action() {
-        return Action.RUN_COMMAND;
     }
 
     public enum VivecraftAction {

@@ -1,18 +1,15 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.state.MapRenderState;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.resources.ResourceLocation;
@@ -22,18 +19,12 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.saveddata.maps.MapId;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.Xloader;
 import org.vivecraft.api.client.data.RenderPass;
@@ -48,27 +39,11 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
-import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin {
-
-    @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderType.entityCutoutNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background.png"), false);
-    @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderType.entityCutoutNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background_checkerboard.png"), false);
-
-    @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL_TEXT = VRRenderTypes.textNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background.png"));
-    @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL_TEXT = VRRenderTypes.textNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background_checkerboard.png"));
 
     @Final
     @Shadow
@@ -76,6 +51,9 @@ public abstract class ItemInHandRendererVRMixin {
     @Final
     @Shadow
     private EntityRenderDispatcher entityRenderDispatcher;
+    @Shadow
+    @Final
+    private ItemModelResolver itemModelResolver;
     @Shadow
     private float oMainHandHeight;
     @Shadow
@@ -86,12 +64,8 @@ public abstract class ItemInHandRendererVRMixin {
     private float offHandHeight;
 
     @Shadow
-    @Final
-    private MapRenderState mapRenderState;
-
-    @Shadow
     public abstract void renderItem(
-        LivingEntity entity, ItemStack itemStack, ItemDisplayContext displayContext,
+        LivingEntity entity, ItemStack itemStack, ItemDisplayContext displayContext, boolean leftHand,
         PoseStack poseStack, MultiBufferSource buffer, int seed);
 
     @Shadow
@@ -102,10 +76,6 @@ public abstract class ItemInHandRendererVRMixin {
     protected abstract void renderPlayerArm(
         PoseStack poseStack, MultiBufferSource buffer, int combinedLight, float equippedProgress, float swingProgress,
         HumanoidArm side);
-
-    @Shadow
-    @Final
-    private static RenderType MAP_BACKGROUND;
 
     @Inject(method = "renderPlayerArm", at = @At("HEAD"), cancellable = true)
     private void vivecraft$overrideArm(
@@ -128,57 +98,6 @@ public abstract class ItemInHandRendererVRMixin {
             this.vivecraft$vrRenderArmWithItem(player, partialTick, hand, swingProgress, itemStack, poseStack, buffer,
                 combinedLight);
             ci.cancel();
-        }
-    }
-
-    @Inject(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"), cancellable = true)
-    private void vivecraft$overrideMapShaders(
-        PoseStack poseStack, MultiBufferSource buffer, int packedLight, ItemStack stack, CallbackInfo ci)
-    {
-        // with shaders, at least iris, we can't provide a custom text pipeline so need to use entity
-        if (VRState.VR_RUNNING && ShadersHelper.isShaderActive()) {
-            MapId mapId = stack.get(DataComponents.MAP_ID);
-            MapItemSavedData mapData = MapItem.getSavedData(mapId, this.minecraft.level);
-            VertexConsumer consumer = buffer.getBuffer(
-                mapData == null ? VIVECRAFT$MAP_BACKGROUND_NO_CULL : VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL);
-            Matrix4f matrix = poseStack.last().pose();
-            Vector3f normal = matrix.transformDirection(0F, 0F, 1F, new Vector3f());
-            consumer.addVertex(matrix, -7.0F, 135.0F, 0.0F)
-                .setColor(255, 255, 255, 255)
-                .setUv(0.0F, 1.0F)
-                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                .setNormal(normal.x, normal.y, normal.z);
-            consumer.addVertex(matrix, 135.0F, 135.0F, 0.0F)
-                .setColor(255, 255, 255, 255)
-                .setUv(1.0F, 1.0F)
-                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                .setNormal(normal.x, normal.y, normal.z);
-            consumer.addVertex(matrix, 135.0F, -7.0F, 0.0F)
-                .setColor(255, 255, 255, 255)
-                .setUv(1.0F, 0.0F)
-                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                .setNormal(normal.x, normal.y, normal.z);
-            consumer.addVertex(matrix, -7.0F, -7.0F, 0.0F)
-                .setColor(255, 255, 255, 255)
-                .setUv(0.0F, 0.0F)
-                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
-                .setNormal(normal.x, normal.y, normal.z);
-            if (mapData != null) {
-                MapRenderer mapRenderer = this.minecraft.getMapRenderer();
-                mapRenderer.extractRenderState(mapId, mapData, this.mapRenderState);
-                mapRenderer.render(this.mapRenderState, poseStack, buffer, false, packedLight);
-            }
-            ci.cancel();
-        }
-    }
-
-    @ModifyArg(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource;getBuffer(Lnet/minecraft/client/renderer/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"))
-    private RenderType vivecraft$overrideMapVanilla(RenderType renderType) {
-        if (VRState.VR_RUNNING) {
-            return renderType == MAP_BACKGROUND ? VIVECRAFT$MAP_BACKGROUND_NO_CULL_TEXT :
-                VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL_TEXT;
-        } else {
-            return renderType;
         }
     }
 
@@ -238,7 +157,7 @@ public abstract class ItemInHandRendererVRMixin {
             }
 
             VivecraftItemRendering.VivecraftItemTransformType transformType = VivecraftItemRendering.getTransformType(
-                itemStack, player);
+                itemStack, player, this.itemModelResolver);
 
             boolean useLeftHandModelinLeftHand = false;
 
@@ -277,12 +196,15 @@ public abstract class ItemInHandRendererVRMixin {
             }
 
             if (transformType == VivecraftItemRendering.VivecraftItemTransformType.MAP) {
+                RenderSystem.disableCull();
                 this.renderMap(poseStack, buffer, combinedLight, itemStack);
             } else if (transformType == VivecraftItemRendering.VivecraftItemTransformType.TELESCOPE) {
                 if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
                     poseStack.pushPose();
 
-                    renderItem(player, itemStack, itemDisplayContext, poseStack, buffer, combinedLight);
+                    // render item
+                    renderItem(player, itemStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand,
+                        poseStack, buffer, combinedLight);
 
                     if (ClientNetworking.isThirdPersonItems()) {
                         // account for the -2/16 offset of the third person spyglass transform
@@ -306,7 +228,8 @@ public abstract class ItemInHandRendererVRMixin {
                     poseStack.popPose();
                 }
             } else {
-                this.renderItem(player, itemStack, itemDisplayContext, poseStack, buffer, combinedLight);
+                this.renderItem(player, itemStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand,
+                    poseStack, buffer, combinedLight);
             }
 
             poseStack.popPose();
@@ -335,6 +258,7 @@ public abstract class ItemInHandRendererVRMixin {
             side == (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
         float offsetDirection = rightHand ? 1.0F : -1.0F;
 
+        RenderSystem.setShaderTexture(0, player.getSkin().texture());
         VRArmRenderer vrArmRenderer = ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getArmSkinMap()
             .get(player.getSkin().model().id());
 

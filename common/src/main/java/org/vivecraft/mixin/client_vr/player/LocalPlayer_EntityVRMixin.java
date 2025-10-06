@@ -98,6 +98,6 @@ public abstract class LocalPlayer_EntityVRMixin {
     /**
      * dummy to be overridden in {@link LocalPlayerVRMixin}
      */
-    @Inject(method = {"absSnapTo(DDDFF)V", "snapTo(DDDFF)V"}, at = @At("TAIL"))
+    @Inject(method = {"absMoveTo(DDDFF)V", "moveTo(DDDFF)V"}, at = @At("TAIL"))
     protected void vivecraft$afterAbsMoveTo(CallbackInfo ci) {}
 }

@@ -190,8 +190,8 @@ public class JumpTracker implements Tracker {
                     movement.mul(limit / movement.length());
                 }
 
-                if (player.hasEffect(MobEffects.JUMP_BOOST)) {
-                    movement.mul(player.getEffect(MobEffects.JUMP_BOOST).getAmplifier() + 1.5F);
+                if (player.hasEffect(MobEffects.JUMP)) {
+                    movement.mul(player.getEffect(MobEffects.JUMP).getAmplifier() + 1.5F);
                 }
 
                 movement.rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians);

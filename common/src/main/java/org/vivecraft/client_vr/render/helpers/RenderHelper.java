@@ -1,20 +1,18 @@
 package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderProgram;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
@@ -34,10 +32,11 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
-import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.List;
@@ -49,10 +48,6 @@ public class RenderHelper {
 
     public static final ResourceLocation WHITE_TEXTURE = ResourceLocation.parse("vivecraft:textures/white.png");
     public static final ResourceLocation BLACK_TEXTURE = ResourceLocation.parse("vivecraft:textures/black.png");
-
-    public static GpuTexture getGpuTexture(ResourceLocation resourceLocation) {
-        return MC.getTextureManager().getTexture(resourceLocation).getTexture();
-    }
 
     /**
      * gets the rotation matrix for the given RenderPass
@@ -214,8 +209,20 @@ public class RenderHelper {
             1000.0F, 21000.0F);
         RenderSystem.setProjectionMatrix(guiProjection, ProjectionType.ORTHOGRAPHIC);
 
+        RenderSystem.blendFuncSeparate(
+            GlStateManager.SourceFactor.SRC_ALPHA,
+            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+            GlStateManager.SourceFactor.ONE,
+            GlStateManager.DestFactor.ONE);
+
         screen.render(guiGraphics, 0, 0, deltaTracker.getRealtimeDeltaTicks());
         guiGraphics.flush();
+
+        RenderSystem.blendFuncSeparate(
+            GlStateManager.SourceFactor.SRC_ALPHA,
+            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+            GlStateManager.SourceFactor.ONE,
+            GlStateManager.DestFactor.ONE);
 
         // reset gui scale
         GuiHandler.GUI_SCALE_FACTOR = backupGuiScale;
@@ -224,7 +231,7 @@ public class RenderHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps for Gui layer
-            OpenGLHelper.genMipmaps(MC.mainRenderTarget.getColorTexture());
+            OpenGLHelper.genMipmaps(MC.mainRenderTarget);
         }
     }
 
@@ -239,7 +246,7 @@ public class RenderHelper {
         float size = 15.0F * Math.max(ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale,
             1.0F / (float) MC.getWindow().getGuiScale());
 
-        guiGraphics.blitSprite(VRRenderTypes::crosshairMenu, Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
+        guiGraphics.blitSprite(VRShaders.MENU_CROSSHAIR, Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
             (int) (mouseY - size * 0.5F + 1), (int) size, (int) size);
     }
 
@@ -248,8 +255,7 @@ public class RenderHelper {
      */
     public static void drawVRConnectingMessage() {
         // clear depth, because text that was already there would be over ours
-        RenderSystem.getDevice().createCommandEncoder()
-            .clearDepthTexture(MC.getMainRenderTarget().getDepthTexture(), 1.0);
+        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT);
         // setup modelview for screen rendering
         Matrix4fStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushMatrix();
@@ -291,80 +297,79 @@ public class RenderHelper {
     }
 
     /**
-     * draws a quad with the PositionTex shader, ignoring depth, to be used when <b>not</b> in a world
+     * draws a quad with the PositionTex shader, to be used when <b>not</b> in a world
      *
      * @param displayWidth  texture width
      * @param displayHeight texture height
      * @param size          size of the quad
      * @param color         color of the quad, expects an array of length 4 for: r, g, b, a
      * @param matrix        matrix to position the screen with
-     * @param source        TenderTarget to render
      */
     public static void drawSizedQuad(
-        float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix, RenderTarget source)
+        float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix)
     {
         float sizeX = size * 0.5F;
         float sizeY = sizeX * displayHeight / displayWidth;
 
-        RenderType renderType = VRRenderTypes.guiTextureOverlay(source.getColorTexture());
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        consumer
+        RenderSystem.setShader(CoreShaders.POSITION_TEX);
+        RenderSystem.setShaderColor(color[0], color[1], color[2], color[3]);
+
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder
             .addVertex(matrix, -sizeX, -sizeY, 0)
-            .setUv(0.0F, 0.0F)
-            .setColor(color[0], color[1], color[2], color[3]);
-        consumer
+            .setUv(0.0F, 0.0F);
+        bufferBuilder
             .addVertex(matrix, sizeX, -sizeY, 0)
-            .setUv(1.0F, 0.0F)
-            .setColor(color[0], color[1], color[2], color[3]);
-        consumer
+            .setUv(1.0F, 0.0F);
+        bufferBuilder
             .addVertex(matrix, sizeX, sizeY, 0)
-            .setUv(1.0F, 1.0F)
-            .setColor(color[0], color[1], color[2], color[3]);
-        consumer
+            .setUv(1.0F, 1.0F);
+        bufferBuilder
             .addVertex(matrix, -sizeX, sizeY, 0)
-            .setUv(0.0F, 1.0F)
-            .setColor(color[0], color[1], color[2], color[3]);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+            .setUv(0.0F, 1.0F);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
     /**
-     * draws a quad with the given entity RenderType and no color modifier, to be used when <b>in</b> a world
+     * draws a quad with the given entity ShaderProgram and no color modifier, to be used when <b>in</b> a world
      *
      * @param displayWidth  texture width
      * @param displayHeight texture height
      * @param size          size of the quad
      * @param packedLight   block and sky light packed into an int
      * @param matrix        matrix to use to
-     * @param renderType    entity RenderType to use
+     * @param shader        entity Shader to use
      * @param flipY         if the texture should be flipped vertically
      */
     public static void drawSizedQuadWithLightmap(
-        float displayWidth, float displayHeight, float size, int packedLight, Matrix4f matrix, RenderType renderType,
+        float displayWidth, float displayHeight, float size, int packedLight, Matrix4f matrix, ShaderProgram shader,
         boolean flipY)
     {
         drawSizedQuadWithLightmap(displayWidth, displayHeight, size, packedLight, new float[]{1, 1, 1, 1}, matrix,
-            renderType, flipY);
+            shader, flipY);
     }
 
     /**
-     * draws a quad with the given entity RenderType at full brightness, to be used when <b>in</b> a world
+     * draws a quad with the given entity ShaderProgram at full brightness, to be used when <b>in</b> a world
      *
      * @param displayWidth  texture width
      * @param displayHeight texture height
      * @param size          size of the quad
      * @param color         color of the quad, expects an array of length 4 for: r, g, b, a
      * @param matrix        matrix to use to
-     * @param renderType    entity RenderType to use
+     * @param shader        entity Shader to use
      */
     public static void drawSizedQuadFullbright(
-        float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix, RenderType renderType)
+        float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix, ShaderProgram shader)
     {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.FULL_BRIGHT, color, matrix,
-            renderType, false);
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.FULL_BRIGHT, color, matrix, shader,
+            false);
     }
 
     /**
-     * draws a quad with the given entity RenderType, to be used when <b>in</b> a world
+     * draws a quad with the given entity ShaderProgram, to be used when <b>in</b> a world
      *
      * @param displayWidth  texture width
      * @param displayHeight texture height
@@ -372,79 +377,97 @@ public class RenderHelper {
      * @param packedLight   block and sky light packed into an int
      * @param color         color of the quad, expects an array of length 4 for: r, g, b, a
      * @param matrix        matrix to use to for positioning
-     * @param renderType    RenderType to render as, needs to be one of the entity types
+     * @param shader        Shader to render as, needs to be one of the entity types
      * @param flipY         if the texture should be flipped vertically
      */
     public static void drawSizedQuadWithLightmap(
         float displayWidth, float displayHeight, float size, int packedLight, float[] color, Matrix4f matrix,
-        RenderType renderType, boolean flipY)
+        ShaderProgram shader, boolean flipY)
     {
         float sizeX = size * 0.5F;
         float sizeY = sizeX * displayHeight / displayWidth;
 
+        RenderSystem.setShader(shader);
+        MC.gameRenderer.lightTexture().turnOnLightLayer();
+        MC.gameRenderer.overlayTexture().setupOverlayColor();
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+
+        // store old lights
+        Vector3f light0Old = RenderSystemAccessor.getShaderLightDirections()[0];
+        Vector3f light1Old = RenderSystemAccessor.getShaderLightDirections()[1];
+
         Vector3f normal = new Matrix3f(matrix).transform(new Vector3f(0, 0, 1)).normalize();
 
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
+        // set lights to front
+        RenderSystem.setShaderLights(normal, normal);
+        RenderSystem.setupShaderLights(RenderSystem.getShader());
 
-        consumer.addVertex(matrix, -sizeX, -sizeY, 0)
+        bufferBuilder.addVertex(matrix, -sizeX, -sizeY, 0)
             .setColor(color[0], color[1], color[2], color[3])
             .setUv(0.0F, flipY ? 1.0F : 0.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
             .setNormal(normal.x, normal.y, normal.z);
-        consumer.addVertex(matrix, sizeX, -sizeY, 0)
+        bufferBuilder.addVertex(matrix, sizeX, -sizeY, 0)
             .setColor(color[0], color[1], color[2], color[3])
             .setUv(1.0F, flipY ? 1.0F : 0.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
             .setNormal(normal.x, normal.y, normal.z);
-        consumer.addVertex(matrix, sizeX, sizeY, 0)
+        bufferBuilder.addVertex(matrix, sizeX, sizeY, 0)
             .setColor(color[0], color[1], color[2], color[3])
             .setUv(1.0F, flipY ? 0.0F : 1.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
             .setNormal(normal.x, normal.y, normal.z);
-        consumer.addVertex(matrix, -sizeX, sizeY, 0)
+        bufferBuilder.addVertex(matrix, -sizeX, sizeY, 0)
             .setColor(color[0], color[1], color[2], color[3])
             .setUv(0.0F, flipY ? 0.0F : 1.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
             .setNormal(normal.x, normal.y, normal.z);
 
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+
+        MC.gameRenderer.lightTexture().turnOffLightLayer();
+
+        // reset lights
+        if (light0Old != null && light1Old != null) {
+            RenderSystem.setShaderLights(light0Old, light1Old);
+            RenderSystem.setupShaderLights(RenderSystem.getShader());
+        }
     }
 
     /**
      * draws a colored quad
      *
-     * @param pos         center position of the quad
-     * @param width       width of the quad
-     * @param height      height of the quad
-     * @param yaw         y rotation of the quad
-     * @param r           red 0-255
-     * @param g           green 0-255
-     * @param b           blue 0-255
-     * @param a           alpha 0-255
-     * @param matrix      Matrix4f to use for positioning
-     * @param depthAlways ignores depth and always draws
+     * @param pos    center position of the quad
+     * @param width  width of the quad
+     * @param height height of the quad
+     * @param yaw    y rotation of the quad
+     * @param r      red 0-255
+     * @param g      green 0-255
+     * @param b      blue 0-255
+     * @param a      alpha 0-255
+     * @param matrix Matrix4f to use for positioning
      */
     public static void renderFlatQuad(
-        Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, Matrix4f matrix,
-        boolean depthAlways)
+        Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, Matrix4f matrix)
     {
-        RenderType renderType = VRRenderTypes.quads(depthAlways);
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
         Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))
             .yRot(Mth.DEG_TO_RAD * -yaw);
         ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
-        consumer.addVertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
-            .setColor(r, g, b, a);
-        consumer.addVertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
-            .setColor(r, g, b, a);
-        consumer.addVertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z - offset.z))
-            .setColor(r, g, b, a);
-        consumer.addVertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
-            .setColor(r, g, b, a);
+        bufferBuilder.addVertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
+            .setColor(r, g, b, a).setNormal(0.0F, 1.0F, 0.0F);
+        bufferBuilder.addVertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
+            .setColor(r, g, b, a).setNormal(0.0F, 1.0F, 0.0F);
+        bufferBuilder.addVertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z - offset.z))
+            .setColor(r, g, b, a).setNormal(0.0F, 1.0F, 0.0F);
+        bufferBuilder.addVertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
+            .setColor(r, g, b, a).setNormal(0.0F, 1.0F, 0.0F);
 
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
     }
 
     /**
@@ -499,6 +522,9 @@ public class RenderHelper {
         Vec3 down = up.scale(minY);
         up = up.scale(maxY);
 
+        Vec3 upNormal = up.normalize();
+        Vec3 rightNormal = right.normalize();
+
         Vec3 backRightBottom = start.add(right.x + down.x, right.y + down.y, right.z + down.z);
         Vec3 backRightTop = start.add(right.x + up.x, right.y + up.y, right.z + up.z);
         Vec3 backLeftBottom = start.add(left.x + down.x, left.y + down.y, left.z + down.z);
@@ -509,35 +535,38 @@ public class RenderHelper {
         Vec3 frontLeftBottom = end.add(left.x + down.x, left.y + down.y, left.z + down.z);
         Vec3 frontLeftTop = end.add(left.x + up.x, left.y + up.y, left.z + up.z);
 
-        addVertex(consumer, matrix, backRightBottom, color, alpha);
-        addVertex(consumer, matrix, backLeftBottom, color, alpha);
-        addVertex(consumer, matrix, backLeftTop, color, alpha);
-        addVertex(consumer, matrix, backRightTop, color, alpha);
+        addVertex(consumer, matrix, backRightBottom, color, alpha, forward);
+        addVertex(consumer, matrix, backLeftBottom, color, alpha, forward);
+        addVertex(consumer, matrix, backLeftTop, color, alpha, forward);
+        addVertex(consumer, matrix, backRightTop, color, alpha, forward);
 
-        addVertex(consumer, matrix, frontLeftBottom, color, alpha);
-        addVertex(consumer, matrix, frontRightBottom, color, alpha);
-        addVertex(consumer, matrix, frontRightTop, color, alpha);
-        addVertex(consumer, matrix, frontLeftTop, color, alpha);
+        forward = forward.reverse();
+        addVertex(consumer, matrix, frontLeftBottom, color, alpha, forward);
+        addVertex(consumer, matrix, frontRightBottom, color, alpha, forward);
+        addVertex(consumer, matrix, frontRightTop, color, alpha, forward);
+        addVertex(consumer, matrix, frontLeftTop, color, alpha, forward);
 
-        addVertex(consumer, matrix, frontRightBottom, color, alpha);
-        addVertex(consumer, matrix, backRightBottom, color, alpha);
-        addVertex(consumer, matrix, backRightTop, color, alpha);
-        addVertex(consumer, matrix, frontRightTop, color, alpha);
+        addVertex(consumer, matrix, frontRightBottom, color, alpha, rightNormal);
+        addVertex(consumer, matrix, backRightBottom, color, alpha, rightNormal);
+        addVertex(consumer, matrix, backRightTop, color, alpha, rightNormal);
+        addVertex(consumer, matrix, frontRightTop, color, alpha, rightNormal);
 
-        addVertex(consumer, matrix, backLeftBottom, color, alpha);
-        addVertex(consumer, matrix, frontLeftBottom, color, alpha);
-        addVertex(consumer, matrix, frontLeftTop, color, alpha);
-        addVertex(consumer, matrix, backLeftTop, color, alpha);
+        rightNormal = rightNormal.reverse();
+        addVertex(consumer, matrix, backLeftBottom, color, alpha, rightNormal);
+        addVertex(consumer, matrix, frontLeftBottom, color, alpha, rightNormal);
+        addVertex(consumer, matrix, frontLeftTop, color, alpha, rightNormal);
+        addVertex(consumer, matrix, backLeftTop, color, alpha, rightNormal);
 
-        addVertex(consumer, matrix, backLeftTop, color, alpha);
-        addVertex(consumer, matrix, frontLeftTop, color, alpha);
-        addVertex(consumer, matrix, frontRightTop, color, alpha);
-        addVertex(consumer, matrix, backRightTop, color, alpha);
+        addVertex(consumer, matrix, backLeftTop, color, alpha, upNormal);
+        addVertex(consumer, matrix, frontLeftTop, color, alpha, upNormal);
+        addVertex(consumer, matrix, frontRightTop, color, alpha, upNormal);
+        addVertex(consumer, matrix, backRightTop, color, alpha, upNormal);
 
-        addVertex(consumer, matrix, frontLeftBottom, color, alpha);
-        addVertex(consumer, matrix, backLeftBottom, color, alpha);
-        addVertex(consumer, matrix, backRightBottom, color, alpha);
-        addVertex(consumer, matrix, frontRightBottom, color, alpha);
+        upNormal = upNormal.reverse();
+        addVertex(consumer, matrix, frontLeftBottom, color, alpha, upNormal);
+        addVertex(consumer, matrix, backLeftBottom, color, alpha, upNormal);
+        addVertex(consumer, matrix, backRightBottom, color, alpha, upNormal);
+        addVertex(consumer, matrix, frontRightBottom, color, alpha, upNormal);
     }
 
     /**
@@ -548,12 +577,14 @@ public class RenderHelper {
      * @param pos      position of the vertex
      * @param color    color of the vertex 0-255
      * @param alpha    transparency of the vertex 0-255
+     * @param normal   normal of the vertex
      */
     private static void addVertex(
-        VertexConsumer consumer, Matrix4f matrix, Vec3 pos, Vec3i color, int alpha)
+        VertexConsumer consumer, Matrix4f matrix, Vec3 pos, Vec3i color, int alpha, Vec3 normal)
     {
         consumer.addVertex(matrix, (float) pos.x, (float) pos.y, (float) pos.z)
-            .setColor(color.getX(), color.getY(), color.getZ(), alpha);
+            .setColor(color.getX(), color.getY(), color.getZ(), alpha)
+            .setNormal((float) normal.x, (float) normal.y, (float) normal.z);
     }
 
     /**

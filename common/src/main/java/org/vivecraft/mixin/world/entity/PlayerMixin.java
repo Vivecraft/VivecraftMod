@@ -1,21 +1,33 @@
 package org.vivecraft.mixin.world.entity;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemCooldowns;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.mixin.server.ServerPlayerMixin;
+import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.ServerVivePlayer;
+import org.vivecraft.server.config.ServerConfig;
 
 @Mixin(Player.class)
 public abstract class PlayerMixin extends LivingEntityMixin {
@@ -26,6 +38,9 @@ public abstract class PlayerMixin extends LivingEntityMixin {
     @Shadow
     @Final
     public InventoryMenu inventoryMenu;
+
+    @Shadow
+    public abstract ItemStack getItemBySlot(EquipmentSlot slot);
 
     @Shadow
     public abstract ItemCooldowns getCooldowns();
@@ -51,5 +66,37 @@ public abstract class PlayerMixin extends LivingEntityMixin {
     @ModifyArg(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     protected float vivecraft$damageModifier(float damage) {
         return damage;
+    }
+
+    /**
+     * dummy to be overridden in {@link ServerPlayerMixin}
+     */
+    @WrapMethod(method = "hurtCurrentlyUsedShield")
+    protected void vivecraft$roomscaleShieldItemDamage(float damageAmount, Operation<Void> original) {
+        original.call(damageAmount);
+    }
+
+    /**
+     * dummy to be overridden in {@link ServerPlayerMixin}
+     */
+    @ModifyExpressionValue(method = "hurtCurrentlyUsedShield", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getUsedItemHand()Lnet/minecraft/world/InteractionHand;"))
+    protected InteractionHand vivecraft$roomscaleShieldHand(InteractionHand original) {
+        return original;
+    }
+
+    @ModifyVariable(method = "setItemSlot", at = @At("HEAD"), argsOnly = true)
+    private EquipmentSlot vivecraft$setOffhand(EquipmentSlot equipmentSlot) {
+        if ((Object) this instanceof ServerPlayer serverPlayer && ServerConfig.DUAL_WIELDING.get()) {
+            if (ServerVRPlayers.isVRPlayer(serverPlayer)) {
+                ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
+                // older clients don't reset the active hand
+                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
+                    vivePlayer.activeBodyPart == VRBodyPart.OFF_HAND)
+                {
+                    equipmentSlot = EquipmentSlot.OFFHAND;
+                }
+            }
+        }
+        return equipmentSlot;
     }
 }

@@ -29,8 +29,6 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -80,7 +78,6 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -149,16 +146,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Final
     private DeltaTracker.Timer deltaTracker;
 
-    @WrapOperation(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/server/packs/resources/ReloadableResourceManager"))
-    private ReloadableResourceManager vivecraft$initVivecraft(
-        PackType packType, Operation<ReloadableResourceManager> original)
-    {
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear()V"))
+    private void vivecraft$initVivecraft(RenderTarget instance, Operation<Void> original) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.mainRenderTarget);
         VRSettings.initSettings();
         new Thread(UpdateChecker::checkForUpdates, "VivecraftUpdateThread").start();
-        ShadersHelper.registerPipelines();
 
-        return original.call(packType);
+        original.call(instance);
     }
 
     @Inject(method = "onGameLoadFinished", at = @At("TAIL"))
@@ -289,6 +283,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             // set gui pass before setup, to always be in that pass and not a random one from last frame
             RenderPassManager.setGUIRenderPass();
 
+            RenderSystem.depthMask(true);
+            RenderSystem.colorMask(true, true, true, true);
+            RenderSystem.defaultBlendFunc();
+            this.mainRenderTarget.clear();
+            this.mainRenderTarget.bindWrite(true);
+
+            // somehow without this it causes issues with the lightmap sometimes
+            this.mainRenderTarget.unbindRead();
+
             // draw screen/gui to buffer
             // push pose so we can pop it later
             RenderSystem.getModelViewStack().pushMatrix();
@@ -303,21 +306,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
-    private void vivecraft$blitMirror(RenderTarget instance, Operation<Void> original) {
+    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;unbindWrite()V"))
+    private void vivecraft$blitMirror(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             Profiler.get().popPush("vrMirror");
             RenderPassManager.setMirrorRenderPass();
+            this.mainRenderTarget.bindWrite(true);
             ShaderHelper.drawMirror();
             RenderHelper.checkGLError("post-mirror");
-            original.call(this.mainRenderTarget);
-            RenderPassManager.setGUIRenderPass();
-        } else {
-            if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
-                // show message that the game is connecting to the vr runtime
-                RenderHelper.drawVRConnectingMessage();
-            }
-            original.call(instance);
+        } else if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
+            // show message that the game is connecting to the vr runtime
+            RenderHelper.drawVRConnectingMessage();
         }
     }
 
@@ -451,7 +450,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         .withStyle(ChatFormatting.ITALIC, ChatFormatting.GREEN)).withStyle(
                     style -> style.withClickEvent(
                             new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new UpdateScreen()))
-                        .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))));
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            Component.translatable("vivecraft.messages.click")))));
             }
 
             // cached screen screen
@@ -532,7 +532,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         Component.translatable("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
                                 new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
-                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                Component.translatable("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
                     ClientNetworking.SERVER_VR_CHANGES_LIST = null;
                     ClientNetworking.DISPLAYED_VR_CHANGES = true;

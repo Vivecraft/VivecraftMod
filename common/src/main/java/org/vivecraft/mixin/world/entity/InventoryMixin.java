@@ -1,19 +1,19 @@
 package org.vivecraft.mixin.world.entity;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityEquipment;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.VRState;
@@ -30,26 +30,16 @@ public class InventoryMixin {
 
     @Shadow
     @Final
-    private EntityEquipment equipment;
+    public NonNullList<ItemStack> offhand;
 
-    @ModifyReturnValue(method = "getSelectedItem", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getSelected", at = @At("RETURN"))
     private ItemStack vivecraft$dualHandingItem(ItemStack original) {
         return vivecraft$activeItem(original);
     }
 
-    @Inject(method = "setSelectedItem", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$setOffhand(ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
-        if (this.player instanceof ServerPlayer serverPlayer && ServerConfig.DUAL_WIELDING.get()) {
-            if (ServerVRPlayers.isVRPlayer(serverPlayer)) {
-                ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
-                // older clients don't reset the active hand
-                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
-                    vivePlayer.activeBodyPart == VRBodyPart.OFF_HAND)
-                {
-                    cir.setReturnValue(this.equipment.set(EquipmentSlot.OFFHAND, stack));
-                }
-            }
-        }
+    @WrapOperation(method = "getDestroySpeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getDestroySpeed(Lnet/minecraft/world/level/block/state/BlockState;)F"))
+    private float vivecraft$dualHandingDestroySpeed(ItemStack instance, BlockState state, Operation<Float> original) {
+        return original.call(vivecraft$activeItem(instance), state);
     }
 
     @Unique
@@ -72,7 +62,7 @@ public class InventoryMixin {
 
         if (bodyPart != null) {
             if (bodyPart == VRBodyPart.OFF_HAND) {
-                return this.equipment.get(EquipmentSlot.OFFHAND);
+                return this.offhand.get(0);
             } else if (bodyPart != VRBodyPart.MAIN_HAND && bodyPart != VRBodyPart.HEAD) {
                 // feet
                 return ItemStack.EMPTY;

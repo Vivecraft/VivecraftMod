@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.FogParameters;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.utils.TextUtils;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class MirrorNotification {
             int screenX = MC.mainRenderTarget.width;
             int screenY = MC.mainRenderTarget.height;
 
+            RenderSystem.viewport(0, 0, screenX, screenY);
             Matrix4f projection = new Matrix4f().setOrtho(0.0F, screenX,
                 screenY, 0.0F, 1000.0F, 21000.0F);
             RenderSystem.setProjectionMatrix(projection, ProjectionType.ORTHOGRAPHIC);
@@ -58,8 +60,8 @@ public class MirrorNotification {
             guiGraphics.pose().scale(3, 3, 3);
 
             if (MIRROR_NOTIFY_CLEAR) {
-                RenderSystem.getDevice().createCommandEncoder()
-                    .clearColorTexture(MC.mainRenderTarget.getColorTexture(), 0xFF000000);
+                RenderSystem.clearColor(0F, 0F, 0F, 1F);
+                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT);
             }
 
             final int TEXT_WORDWRAP_LEN = screenX / 22;

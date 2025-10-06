@@ -1,8 +1,8 @@
 package org.vivecraft.mod_compat_vr.optifine;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -16,7 +16,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.lwjgl.opengl.GL30C;
+import org.lwjgl.opengl.GL13C;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -172,23 +172,21 @@ public class OptifineHelper {
      * @param renderTarget renderTarget to copy the depth to
      */
     public static void copyOptifineShaderDepth(RenderTarget renderTarget) {
-        if (renderTarget.getDepthTexture() instanceof GlTexture glTexture) {
-            if (!bindShaderFramebuffer()) {
-                return;
-            }
-
-            GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
-            GlStateManager._bindTexture(glTexture.glId());
-
-            RenderHelper.checkGLError("pre copy depth");
-            GL30C.glCopyTexSubImage2D(GL30C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, renderTarget.width, renderTarget.height);
-            RenderHelper.checkGLError("post copy depth");
-
-            unbindShaderFramebuffer();
-            GlStateManager._bindTexture(0);
-        } else {
-            throw new IllegalStateException("Vivecraft: only opengl textures are supported");
+        if (!bindShaderFramebuffer()) {
+            return;
         }
+
+        RenderSystem.activeTexture(GL13C.GL_TEXTURE0);
+        RenderSystem.bindTexture(renderTarget.getDepthTextureId());
+
+        RenderHelper.checkGLError("pre copy depth");
+        GlStateManager._glCopyTexSubImage2D(GL13C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, renderTarget.width,
+            renderTarget.height);
+        RenderHelper.checkGLError("post copy depth");
+
+        unbindShaderFramebuffer();
+        // rebind the original buffer
+        renderTarget.bindWrite(false);
     }
 
     /**

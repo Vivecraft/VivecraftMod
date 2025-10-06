@@ -266,8 +266,8 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     }
 
     /**
-     * inject into {@link Entity#absSnapTo(double, double, double, float, float)}
-     * and {@link Entity#snapTo(double, double, double, float, float)}
+     * inject into {@link Entity#absMoveTo(double, double, double, float, float)}
+     * and {@link Entity#moveTo(double, double, double, float, float)}
      */
     @Override
     protected void vivecraft$afterAbsMoveTo(CallbackInfo ci) {

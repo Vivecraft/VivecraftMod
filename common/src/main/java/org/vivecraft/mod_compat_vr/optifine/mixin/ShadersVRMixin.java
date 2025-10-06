@@ -3,6 +3,7 @@ package org.vivecraft.mod_compat_vr.optifine.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -21,6 +22,11 @@ import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 @Pseudo
 @Mixin(targets = "net.optifine.shaders.Shaders")
 public class ShadersVRMixin {
+    @Inject(method = "beginRender", at = @At("TAIL"), remap = false)
+    private static void vivecraft$resetBlend(CallbackInfo ci) {
+        // somehow the blend state is wrong here after shadows, when a spider gets rendered?
+        RenderSystem.defaultBlendFunc();
+    }
 
     @ModifyExpressionValue(method = "setProgramUniforms", at = @At(value = "CONSTANT", args = "floatValue=0.05F"), remap = false)
     private static float vivecraft$nearPlane(float original) {

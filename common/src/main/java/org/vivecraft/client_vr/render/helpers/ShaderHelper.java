@@ -1,23 +1,22 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.buffers.BufferType;
-import com.mojang.blaze3d.buffers.BufferUsage;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.ShaderProgram;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL43;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -27,9 +26,7 @@ import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 
-import javax.annotation.Nullable;
-import java.util.OptionalInt;
-import java.util.function.Consumer;
+import java.util.Objects;
 
 public class ShaderHelper {
 
@@ -46,60 +43,58 @@ public class ShaderHelper {
     private static float BLUE;
     private static float TIME;
 
-    private static GpuBuffer SCREEN_VBO;
-
     /**
-     * renders a fullscreen quad with the given RenderPipeline, and the given RenderTarget bound as "Sampler0"
+     * renders a fullscreen quad with the given shader, and the given RenderTarget bound as "Sampler0"
      *
-     * @param instance      RenderPipeline to use to render
-     * @param uniformSetter consumer to set the uniforms
-     * @param target        texture to write to, if {@code null} will write to the main target
+     * @param instance shader to use to render
+     * @param source   RenderTarget to sample from
      */
-    public static void renderFullscreenQuad(
-        @NotNull RenderPipeline instance,
-        @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
-        @Nullable GpuTexture target)
-    {
-        if (instance.getVertexFormat() != DefaultVertexFormat.POSITION_TEX) {
-            throw new IllegalStateException("Vertex format needs to be 'POSITION_TEX'");
-        }
+    public static void renderFullscreenQuad(@NotNull ShaderProgram instance, @NotNull RenderTarget source) {
+        RenderSystem.colorMask(true, true, true, false);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.disableBlend();
 
-        GpuBuffer quad = getFullscreenQuad();
-        RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-        GpuBuffer indexGpuBuffer = indexBuffer.getBuffer(6);
+        CompiledShaderProgram program = Objects.requireNonNull(
+            RenderSystem.setShader(instance), "required shader not loaded");
 
-        try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-            .createRenderPass(
-                target != null ? target : MC.getMainRenderTarget().getColorTexture(), OptionalInt.empty()))
-        {
-            renderPass.setPipeline(instance);
-            renderPass.setVertexBuffer(0, quad);
-            uniformSetter.accept(renderPass);
+        program.bindSampler("Sampler0", source.getColorTextureId());
+        program.apply();
 
-            renderPass.setIndexBuffer(indexGpuBuffer, indexBuffer.type());
-            renderPass.drawIndexed(0, 6);
-        }
+        drawFullscreenQuad(instance.vertexFormat());
+
+        program.clear();
+        RenderSystem.depthMask(true);
+        RenderSystem.colorMask(true, true, true, true);
     }
 
     /**
-     * tessellates a fullscreen quad and returns it
+     * tessellates a fullscreen quad and draws it with the bound shader
+     *
+     * @param format VertexFormat to use for rendering
      */
-    private static GpuBuffer getFullscreenQuad() {
-        if (SCREEN_VBO == null) {
-            BufferBuilder builder = Tesselator.getInstance()
-                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+    private static void drawFullscreenQuad(VertexFormat format) {
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, format);
+
+        if (format == DefaultVertexFormat.POSITION_TEX) {
             builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
             builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
             builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
             builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
-
-            try (MeshData meshData = builder.buildOrThrow()) {
-                SCREEN_VBO = RenderSystem.getDevice()
-                    .createBuffer(() -> "fullscreen vr vertex buffer", BufferType.VERTICES, BufferUsage.STATIC_WRITE,
-                        meshData.vertexBuffer());
-            }
+        } else if (format == DefaultVertexFormat.POSITION_TEX_COLOR) {
+            builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F)
+                .setColor(255, 255, 255, 255);
+            builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F)
+                .setColor(255, 255, 255, 255);
+            builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F)
+                .setColor(255, 255, 255, 255);
+            builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F)
+                .setColor(255, 255, 255, 255);
+        } else {
+            throw new IllegalStateException("Unexpected vertex format " + format);
         }
-        return SCREEN_VBO;
+
+        BufferUploader.draw(builder.buildOrThrow());
     }
 
     /**
@@ -112,10 +107,9 @@ public class ShaderHelper {
      *
      * @param eye         RenderPass that is being post processed, LEFT or RIGHT
      * @param source      RenderTarget that holds the rendered image
-     * @param target      RenderTarget to write to
      * @param partialTick current partial tick
      */
-    public static void doVrPostProcess(RenderPass eye, RenderTarget source, RenderTarget target, float partialTick) {
+    public static void doVrPostProcess(RenderPass eye, RenderTarget source, float partialTick) {
         if (eye == RenderPass.LEFT) {
             // only update these once per frame, or the effects are twice as fast
             // and could be out of sync between the eyes
@@ -154,11 +148,11 @@ public class ShaderHelper {
                     WATER_EFFECT = 0.0F;
                 }
 
-                float portalTime = Mth.lerp(partialTick, MC.player.oPortalEffectIntensity,
-                    MC.player.portalEffectIntensity);
+                float portalTime = Mth.lerp(partialTick, MC.player.oSpinningEffectIntensity,
+                    MC.player.spinningEffectIntensity);
                 if (DATA_HOLDER.vrSettings.portalEffect &&
                     // vanilla check for portal overlay
-                    portalTime > 0.0F)
+                    portalTime > 0.0F && !MC.player.hasEffect(MobEffects.CONFUSION))
                 {
                     PORTAL_EFFECT = portalTime;
                 } else {
@@ -222,30 +216,30 @@ public class ShaderHelper {
                 WATER_EFFECT = 0.0F;
                 FOV_REDUCTION = 1.0F;
             }
-        }
 
-        renderFullscreenQuad(VRShaders.POST_PROCESSING_PIPELINE, renderPass -> {
             if (PUMPKIN_EFFECT > 0.0F) {
-                renderPass.setUniform(VRShaders.POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM, 0.3F);
-                renderPass.setUniform(VRShaders.POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM, 0.0F);
+                VRShaders.POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM.set(0.3F);
+                VRShaders.POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM.set(0.0F);
             } else {
-                renderPass.setUniform(VRShaders.POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM, FOV_REDUCTION);
-                renderPass.setUniform(VRShaders.POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM, 0.06F);
+                VRShaders.POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM.set(FOV_REDUCTION);
+                VRShaders.POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM.set(0.06F);
             }
 
-            renderPass.setUniform(VRShaders.POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM,
-                DATA_HOLDER.vrSettings.fovRedutioncOffset);
+            VRShaders.POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM.set(DATA_HOLDER.vrSettings.fovRedutioncOffset);
 
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM, RED);
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM, BLUE);
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM, BLACK);
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_TIME_UNIFORM, TIME);
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM, WATER_EFFECT);
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM, PORTAL_EFFECT);
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM, PUMPKIN_EFFECT);
-            renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_EYE_UNIFORM, eye == RenderPass.LEFT ? 1 : -1);
-            renderPass.bindSampler(VRShaders.POST_PROCESSING_COLOR_SAMPLER, source.getColorTexture());
-        }, target.getColorTexture());
+            VRShaders.POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM.set(RED);
+            VRShaders.POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM.set(BLUE);
+            VRShaders.POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM.set(BLACK);
+            VRShaders.POST_PROCESSING_OVERLAY_TIME_UNIFORM.set(TIME);
+            VRShaders.POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM.set(WATER_EFFECT);
+            VRShaders.POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM.set(PORTAL_EFFECT);
+            VRShaders.POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM.set(PUMPKIN_EFFECT);
+        }
+
+        // this needs to be set for each eye
+        VRShaders.POST_PROCESSING_OVERLAY_EYE_UNIFORM.set(eye == RenderPass.LEFT ? 1 : -1);
+
+        ShaderHelper.renderFullscreenQuad(VRShaders.POST_PROCESSING_SHADER, source);
     }
 
     /**
@@ -258,7 +252,12 @@ public class ShaderHelper {
             // no mirror, only show when headset is not tracking, to be able to see the menu with the headset off
             MirrorNotification.notify("Mirror is OFF", true, 1000);
         } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
-            ShaderHelper.doMixedRealityMirror();
+            if (MC.getShaderManager().getProgram(VRShaders.MIXED_REALITY_SHADER) != null) {
+                ShaderHelper.doMixedRealityMirror();
+            } else {
+                MirrorNotification.notify("Mixed Reality Shader compile failed, see log for info", true,
+                    10000);
+            }
         } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.DUAL &&
             (!DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera ||
                 !DATA_HOLDER.cameraTracker.isVisible()
@@ -327,6 +326,11 @@ public class ShaderHelper {
     }
 
     public static void doMixedRealityMirror() {
+        // set viewport to fullscreen, since it would be still on the one from the last pass
+        RenderSystem.viewport(0, 0,
+            MC.mainRenderTarget.width,
+            MC.mainRenderTarget.height);
+
         Vector3f camPlayer = DATA_HOLDER.vrPlayer.vrdata_room_pre.getHeadPivotF()
             .sub(DATA_HOLDER.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPositionF());
 
@@ -339,53 +343,56 @@ public class ShaderHelper {
         boolean alphaMask =
             DATA_HOLDER.vrSettings.mixedRealityUnityLike && DATA_HOLDER.vrSettings.mixedRealityAlphaMask;
 
-        renderFullscreenQuad(VRShaders.MIXED_REALITY_PIPELINE, renderPass -> {
-            // set uniforms
-            renderPass.setUniform(VRShaders.MIXED_REALITY_PROJECTION_MATRIX_UNIFORM,
-                ((GameRendererExtension) MC.gameRenderer).vivecraft$getThirdPassProjectionMatrix());
-            renderPass.setUniform(VRShaders.MIXED_REALITY_VIEW_MATRIX_UNIFORM, viewMatrix);
+        // set uniforms
+        VRShaders.MIXED_REALITY_PROJECTION_MATRIX_UNIFORM.set(
+            ((GameRendererExtension) MC.gameRenderer).vivecraft$getThirdPassProjectionMatrix());
+        VRShaders.MIXED_REALITY_VIEW_MATRIX_UNIFORM.set(viewMatrix);
 
-            renderPass.setUniform(VRShaders.MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM,
-                camPlayer.x, camPlayer.y, camPlayer.z);
-            renderPass.setUniform(VRShaders.MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM,
-                cameraLook.x, cameraLook.y, cameraLook.z);
+        VRShaders.MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM.set(camPlayer.x, camPlayer.y, camPlayer.z);
+        VRShaders.MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM.set(cameraLook.x, cameraLook.y, cameraLook.z);
 
-            if (!alphaMask) {
-                renderPass.setUniform(VRShaders.MIXED_REALITY_KEY_COLOR_UNIFORM,
-                    (float) DATA_HOLDER.vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
-                    (float) DATA_HOLDER.vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
-                    (float) DATA_HOLDER.vrSettings.mixedRealityKeyColor.getBlue() / 255.0F);
+        if (!alphaMask) {
+            VRShaders.MIXED_REALITY_KEY_COLOR_UNIFORM.set(
+                (float) DATA_HOLDER.vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
+                (float) DATA_HOLDER.vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
+                (float) DATA_HOLDER.vrSettings.mixedRealityKeyColor.getBlue() / 255.0F);
+        } else {
+            VRShaders.MIXED_REALITY_KEY_COLOR_UNIFORM.set(0F, 0F, 0F);
+        }
+        VRShaders.MIXED_REALITY_ALPHA_MODE_UNIFORM.set(alphaMask ? 1 : 0);
+
+        VRShaders.MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM.set(DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
+
+        CompiledShaderProgram mixedRealityShader = Objects.requireNonNull(
+            RenderSystem.setShader(VRShaders.MIXED_REALITY_SHADER), "mixed reality shader not loaded");
+
+        // bind textures
+        mixedRealityShader.bindSampler(VRShaders.MIXED_REALITY_THIRD_COLOR_SAMPLER,
+            DATA_HOLDER.vrRenderer.framebufferMR.getColorTextureId());
+        mixedRealityShader.bindSampler(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
+            DATA_HOLDER.vrRenderer.framebufferMR.getDepthTextureId());
+
+        if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
+            RenderTarget source;
+            if (DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible()) {
+                source = DATA_HOLDER.vrRenderer.cameraFramebuffer;
+            } else if (DATA_HOLDER.vrSettings.mixedRealityUndistorted) {
+                source = DATA_HOLDER.vrRenderer.framebufferUndistorted;
             } else {
-                renderPass.setUniform(VRShaders.MIXED_REALITY_KEY_COLOR_UNIFORM, 0F, 0F, 0F);
-            }
-            renderPass.setUniform(VRShaders.MIXED_REALITY_ALPHA_MODE_UNIFORM, alphaMask ? 1 : 0);
-
-            renderPass.setUniform(VRShaders.MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM,
-                DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
-
-
-            // bind textures
-            renderPass.bindSampler(VRShaders.MIXED_REALITY_THIRD_COLOR_SAMPLER,
-                DATA_HOLDER.vrRenderer.framebufferMR.getColorTexture());
-            renderPass.bindSampler(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
-                DATA_HOLDER.vrRenderer.framebufferMR.getDepthTexture());
-
-            if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
-                RenderTarget source;
-                if (DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible()) {
-                    source = DATA_HOLDER.vrRenderer.cameraFramebuffer;
-                } else if (DATA_HOLDER.vrSettings.mixedRealityUndistorted) {
-                    source = DATA_HOLDER.vrRenderer.framebufferUndistorted;
+                if (DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
+                    source = DATA_HOLDER.vrRenderer.framebufferEye0;
                 } else {
-                    if (DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
-                        source = DATA_HOLDER.vrRenderer.framebufferEye0;
-                    } else {
-                        source = DATA_HOLDER.vrRenderer.framebufferEye1;
-                    }
+                    source = DATA_HOLDER.vrRenderer.framebufferEye1;
                 }
-                renderPass.bindSampler(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, source.getColorTexture());
             }
-        }, null);
+            mixedRealityShader.bindSampler(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, source.getColorTextureId());
+        }
+
+        mixedRealityShader.apply();
+
+        drawFullscreenQuad(VRShaders.MIXED_REALITY_SHADER.vertexFormat());
+
+        mixedRealityShader.clear();
     }
 
     /**
@@ -399,23 +406,42 @@ public class ShaderHelper {
         if (firstPass == null) {
             DATA_HOLDER.vrRenderer.reinitFrameBuffers("FSAA Setting Changed");
         } else {
+            RenderSystem.disableBlend();
+            // set to always, since we want to override the depth
+            // disabling depth test would disable depth writes
+            RenderSystem.depthFunc(GL43.GL_ALWAYS);
+
+            CompiledShaderProgram lanczosShader = Objects.requireNonNull(
+                RenderSystem.setShader(VRShaders.LANCZOS_SHADER), "lanczos shader not loaded");
+
             // first pass, horizontal
-            renderFullscreenQuad(VRShaders.LANCZOS_PIPELINE, renderPass -> {
-                renderPass.bindSampler(VRShaders.LANCZOS_COLOR_SAMPLER, source.getColorTexture());
-                renderPass.bindSampler(VRShaders.LANCZOS_DEPTH_SAMPLER, source.getDepthTexture());
-                renderPass.setUniform(VRShaders.LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM,
-                    1.0F / (3.0F * (float) firstPass.viewWidth));
-                renderPass.setUniform(VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM, 0.0F);
-            }, firstPass.getColorTexture());
+            firstPass.bindWrite(true);
+
+            lanczosShader.bindSampler(VRShaders.LANCZOS_COLOR_SAMPLER, source.getColorTextureId());
+            lanczosShader.bindSampler(VRShaders.LANCZOS_DEPTH_SAMPLER, source.getDepthTextureId());
+            VRShaders.LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM.set(1.0F / (3.0F * (float) firstPass.viewWidth));
+            VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(0.0F);
+            lanczosShader.apply();
+
+            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.vertexFormat());
 
             // second pass, vertical
-            renderFullscreenQuad(VRShaders.LANCZOS_PIPELINE, renderPass -> {
-                renderPass.bindSampler(VRShaders.LANCZOS_COLOR_SAMPLER, firstPass.getColorTexture());
-                renderPass.bindSampler(VRShaders.LANCZOS_DEPTH_SAMPLER, firstPass.getDepthTexture());
-                renderPass.setUniform(VRShaders.LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM, 0.0F);
-                renderPass.setUniform(VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM,
-                    1.0F / (3.0F * (float) secondPass.viewHeight));
-            }, secondPass.getColorTexture());
+            secondPass.bindWrite(true);
+
+            lanczosShader.bindSampler(VRShaders.LANCZOS_COLOR_SAMPLER, firstPass.getColorTextureId());
+            lanczosShader.bindSampler(VRShaders.LANCZOS_DEPTH_SAMPLER, firstPass.getDepthTextureId());
+            VRShaders.LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM.set(0.0F);
+            VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(1.0F / (3.0F * (float) secondPass.viewHeight));
+            lanczosShader.apply();
+
+            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.vertexFormat());
+
+            // Clean up time
+            lanczosShader.clear();
+            secondPass.unbindWrite();
+
+            RenderSystem.depthFunc(GL43.GL_LEQUAL);
+            RenderSystem.enableBlend();
         }
     }
 
@@ -438,6 +464,10 @@ public class ShaderHelper {
         boolean keepAspect)
     {
         RenderSystem.assertOnRenderThread();
+        RenderSystem.colorMask(true, true, true, false);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.disableBlend();
 
         float drawAspect = (float) width / (float) height;
         float bufferAspect = (float) source.viewWidth / (float) source.viewHeight;
@@ -463,8 +493,14 @@ public class ShaderHelper {
             }
         }
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_PIPELINE.getVertexFormat());
+        CompiledShaderProgram blitShader = Objects.requireNonNull(
+            RenderSystem.setShader(VRShaders.BLIT_VR_SHADER), "Vivecraft blit shader not loaded");
+        blitShader.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureId());
+
+        blitShader.apply();
+
+        BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator()
+            .begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_SHADER.vertexFormat());
 
         // position quad
         float xMinPos = (float) left / MC.getMainRenderTarget().viewWidth * 2F - 1F;
@@ -477,34 +513,10 @@ public class ShaderHelper {
         bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, yMax);
         bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, yMax);
 
-        try (MeshData meshData = bufferBuilder.buildOrThrow()) {
-            GpuBuffer gpuBuffer = VRShaders.BLIT_VR_PIPELINE.getVertexFormat()
-                .uploadImmediateVertexBuffer(meshData.vertexBuffer());
+        BufferUploader.draw(bufferBuilder.buildOrThrow());
+        blitShader.clear();
 
-            GpuBuffer indexBuffer;
-            VertexFormat.IndexType indexType;
-            if (meshData.indexBuffer() == null) {
-                RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(
-                    VertexFormat.Mode.QUADS);
-                indexBuffer = autoStorageIndexBuffer.getBuffer(6);
-                indexType = autoStorageIndexBuffer.type();
-            } else {
-                indexBuffer = VRShaders.BLIT_VR_PIPELINE.getVertexFormat()
-                    .uploadImmediateIndexBuffer(meshData.indexBuffer());
-                indexType = meshData.drawState().indexType();
-            }
-
-            try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                .createRenderPass(MC.getMainRenderTarget().getColorTexture(), OptionalInt.empty()))
-            {
-                renderPass.setPipeline(VRShaders.BLIT_VR_PIPELINE);
-                renderPass.setVertexBuffer(0, gpuBuffer);
-
-                renderPass.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTexture());
-
-                renderPass.setIndexBuffer(indexBuffer, indexType);
-                renderPass.drawIndexed(0, 6);
-            }
-        }
+        RenderSystem.depthMask(true);
+        RenderSystem.colorMask(true, true, true, true);
     }
 }

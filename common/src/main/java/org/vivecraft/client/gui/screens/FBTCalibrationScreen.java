@@ -1,12 +1,12 @@
 package org.vivecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -22,7 +22,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;
 
@@ -190,8 +189,9 @@ public class FBTCalibrationScreen extends Screen {
             Vec3i color = this.leftHandAtPosition && this.rightHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE;
 
             // body overlay
-            RenderType renderType = VRRenderTypes.quads(true);
-            VertexConsumer builder = this.minecraft.renderBuffers().bufferSource().getBuffer(renderType);
+            RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+            BufferBuilder builder = Tesselator.getInstance()
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
             // legs
             RenderHelper.renderBox(builder, new Vec3(2, 0, 0), new Vec3(2, 12, 0),
@@ -216,7 +216,7 @@ public class FBTCalibrationScreen extends Screen {
                 new Vec3(-6, 22, 0).add(this.rightHand.x * 10F, this.rightHand.y * 10F, this.rightHand.z * 10F),
                 4, 4, this.rightHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE, ALPHA, poseStack.last().pose());
 
-            this.minecraft.renderBuffers().bufferSource().endBatch(renderType);
+            BufferUploader.drawWithShader(builder.buildOrThrow());
             poseStack.popPose();
         }
     }

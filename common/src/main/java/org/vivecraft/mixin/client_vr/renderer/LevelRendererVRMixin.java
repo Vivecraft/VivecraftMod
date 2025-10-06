@@ -15,6 +15,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
+import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -51,8 +52,8 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.Set;
 
-// priority 990 to inject before iris, for the vrFast rendering
-@Mixin(value = LevelRenderer.class, priority = 990)
+// priority 999 to inject before iris, for the vrFast rendering
+@Mixin(value = LevelRenderer.class, priority = 999)
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
 
     @Unique
@@ -189,6 +190,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
                 this.targets.replace(LevelTargetBundleExtension.HANDS_TARGET_ID,
                     framePass.readsAndWrites(ext.vivecraft$getHands()));
             }
+            // fix vanilla bug https://bugs.mojang.com/browse/MC-278096, is fixed in 1.21.5
+            if (this.targets.clouds != null && this.minecraft.options.getCloudsType() == CloudStatus.OFF) {
+                this.targets.clouds = framePass.readsAndWrites(this.targets.clouds);
+            }
         }
     }
 
@@ -261,6 +266,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         if (RenderPassType.isVanilla()) return;
 
         if (this.targets.translucent != null) {
+            // fix vanilla bug https://bugs.mojang.com/browse/MC-278096, is fixed in 1.21.5
+            if (this.targets.clouds != null && this.minecraft.options.getCloudsType() == CloudStatus.OFF) {
+                this.targets.clouds.get().clear();
+            }
             VREffectsHelper.renderVRFabulous(partialTick, this.targets);
         } else {
             VREffectsHelper.renderVrFast(partialTick, false);
@@ -316,12 +325,12 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @WrapOperation(method = "initOutline", at = @At(value = "NEW", target = "com/mojang/blaze3d/pipeline/TextureTarget"))
     private TextureTarget vivecraft$multiPassOutlineTarget(
-        String name, int width, int height, boolean useDepth, Operation<TextureTarget> original)
+        int width, int height, boolean useDepth, Operation<TextureTarget> original)
     {
         if (VRState.VR_INITIALIZED) {
-            return new MultiPassTextureTarget(name, width, height, useDepth);
+            return new MultiPassTextureTarget(width, height, useDepth);
         } else {
-            return original.call(name, width, height, useDepth);
+            return original.call(width, height, useDepth);
         }
     }
 

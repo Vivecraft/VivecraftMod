@@ -13,7 +13,6 @@ import net.minecraft.network.chat.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 import org.vivecraft.client.gui.framework.screens.ChangeableParentScreen;
 import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
-import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 
@@ -43,13 +42,14 @@ public class GarbageCollectorScreen extends Screen implements ChangeableParentSc
             Component.literal(Integer.toString(6)),
             Component.literal("-XX:+UseZGC").withStyle(s -> s
                 .withColor(ChatFormatting.GOLD)
-                .withClickEvent(new ClickEvent.CopyToClipboard("-XX:+UseZGC"))
-                .withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click")))),
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "-XX:+UseZGC"))
+                .withHoverEvent(
+                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))),
             Component.translatable("vivecraft.gui.openguide").withStyle(style -> style
                 .withUnderlined(true)
                 .withColor(ChatFormatting.GREEN)
-                .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                .withClickEvent(new ClickEvent.OpenUrl(ClientUtils.parseUri(GUIDE_URL)))));
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, GUIDE_URL))));
         this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, message));
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.dontshowagain"), (p) -> {

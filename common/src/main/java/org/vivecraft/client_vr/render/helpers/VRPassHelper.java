@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.profiling.Profiler;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
+import org.lwjgl.opengl.GL13C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -36,9 +37,9 @@ public class VRPassHelper {
      * @param renderLevel  if the level should be rendered, or just the screen
      */
     public static void renderSingleView(RenderPass eye, DeltaTracker.Timer deltaTracker, boolean renderLevel) {
-        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-            MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
-            MC.getMainRenderTarget().getDepthTexture(), 1.0);
+        RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+        RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT | GL13C.GL_DEPTH_BUFFER_BIT);
+        RenderSystem.enableDepthTest();
 
         // THIS IS WHERE EVERYTHING IS RENDERED
         MC.gameRenderer.render(deltaTracker, renderLevel);
@@ -60,10 +61,14 @@ public class VRPassHelper {
                 Profiler.get().pop();
             }
 
+            if (eye == RenderPass.LEFT) {
+                DATA_HOLDER.vrRenderer.framebufferEye0.bindWrite(true);
+            } else {
+                DATA_HOLDER.vrRenderer.framebufferEye1.bindWrite(true);
+            }
+
             // do post-processing
-            ShaderHelper.doVrPostProcess(eye, rendertarget,
-                eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.framebufferEye0 :
-                    DATA_HOLDER.vrRenderer.framebufferEye1, deltaTracker.getGameTimeDeltaPartialTick(false));
+            ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
 
             RenderHelper.checkGLError("post overlay" + eye);
             Profiler.get().pop();
@@ -71,11 +76,12 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
-            // set alpha, because the blit does not copy it anymore
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTexture(), 0xFF000000);
-            DATA_HOLDER.vrRenderer.cameraRenderFramebuffer.blitAndBlendToTexture(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTexture());
+            DATA_HOLDER.vrRenderer.cameraFramebuffer.bindWrite(true);
+            RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+            RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT | GL13C.GL_DEPTH_BUFFER_BIT);
+            DATA_HOLDER.vrRenderer.cameraRenderFramebuffer.blitToScreen(
+                DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth,
+                DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight);
             Profiler.get().pop();
         }
 
@@ -100,6 +106,11 @@ public class VRPassHelper {
         Profiler.get().push("gameRenderer");
 
         Profiler.get().push("VR guis");
+
+        // some mods mess with the depth mask?
+        RenderSystem.depthMask(true);
+        // some mods mess with the backface culling?
+        RenderSystem.enableCull();
 
         // to render gui stuff
         GuiGraphics guiGraphics = new GuiGraphics(MC, MC.renderBuffers().bufferSource());
@@ -142,24 +153,22 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps
-            OpenGLHelper.genMipmaps(MC.mainRenderTarget.getColorTexture());
+            OpenGLHelper.genMipmaps(MC.mainRenderTarget);
         }
 
         Profiler.get().popPush("2D Keyboard");
         if (KeyboardHandler.SHOWING && !DATA_HOLDER.vrSettings.physicalKeyboard) {
             MC.mainRenderTarget = KeyboardHandler.FRAMEBUFFER;
-            RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-                KeyboardHandler.FRAMEBUFFER.getColorTexture(), 0x00000000,
-                KeyboardHandler.FRAMEBUFFER.getDepthTexture(), 1.0);
+            MC.mainRenderTarget.clear();
+            MC.mainRenderTarget.bindWrite(true);
             RenderHelper.drawScreen(guiGraphics, deltaTracker, KeyboardHandler.UI, true);
         }
 
         Profiler.get().popPush("Radial Menu");
         if (RadialHandler.isShowing()) {
             MC.mainRenderTarget = RadialHandler.FRAMEBUFFER;
-            RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-                RadialHandler.FRAMEBUFFER.getColorTexture(), 0x00000000,
-                RadialHandler.FRAMEBUFFER.getDepthTexture(), 1.0);
+            MC.mainRenderTarget.clear();
+            MC.mainRenderTarget.bindWrite(true);
             RenderHelper.drawScreen(guiGraphics, deltaTracker, RadialHandler.UI, true);
         }
         Profiler.get().pop();
@@ -195,6 +204,7 @@ public class VRPassHelper {
 
             Profiler.get().push("Eye:" + DATA_HOLDER.currentPass);
             Profiler.get().push("setup");
+            MC.mainRenderTarget.bindWrite(true);
             Profiler.get().pop();
             VRPassHelper.renderSingleView(renderpass, deltaTracker, renderLevel);
             Profiler.get().pop();
@@ -219,6 +229,7 @@ public class VRPassHelper {
                         rendertarget = DATA_HOLDER.vrRenderer.cameraFramebuffer;
                     }
 
+                    MC.mainRenderTarget.unbindWrite();
                     ClientUtils.takeScreenshot(rendertarget);
                     MC.getWindow().updateDisplay(null);
                     DATA_HOLDER.grabScreenShot = false;

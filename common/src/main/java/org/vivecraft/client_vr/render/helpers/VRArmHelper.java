@@ -1,11 +1,12 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
@@ -14,12 +15,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
-import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
@@ -98,11 +99,20 @@ public class VRArmHelper {
      * @param depthAlways if depth testing should be disabled for rendering
      */
     public static void renderMainMenuHand(int c, boolean depthAlways) {
+        RenderSystem.enableDepthTest();
+        RenderSystem.defaultBlendFunc();
+
         Matrix4f modelView = new Matrix4f();
         RenderHelper.setupRenderingAtController(c, modelView);
 
         if (MC.getOverlay() == null) {
             ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
+        }
+
+        if (depthAlways && c == 0) {
+            RenderSystem.depthFunc(GL11C.GL_ALWAYS);
+        } else {
+            RenderSystem.depthFunc(GL11C.GL_LEQUAL);
         }
 
         Vec3i color = new Vec3i(64, 64, 64);
@@ -127,13 +137,16 @@ public class VRArmHelper {
                 Mth.floor(color.getY() * lightPercent),
                 Mth.floor(color.getZ() * lightPercent));
         }
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 
-        RenderType renderType = VRRenderTypes.quads(depthAlways && c == 0);
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
-        RenderHelper.renderBox(consumer, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha, modelView);
+        RenderHelper.renderBox(bufferBuilder, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha, modelView);
 
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+
+        RenderSystem.depthFunc(GL11C.GL_LEQUAL);
     }
 
     /**
@@ -172,6 +185,8 @@ public class VRArmHelper {
             OptifineHelper.beginEntities();
         }
 
+        MC.gameRenderer.lightTexture().turnOnLightLayer();
+
         MultiBufferSource.BufferSource bufferSource = MC.renderBuffers().bufferSource();
         MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
             0.0F, InteractionHand.MAIN_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
@@ -179,6 +194,8 @@ public class VRArmHelper {
             MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
 
         bufferSource.endBatch();
+
+        MC.gameRenderer.lightTexture().turnOffLightLayer();
 
         if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
             // undo the thing we did before
@@ -221,6 +238,8 @@ public class VRArmHelper {
                 OptifineHelper.beginEntities();
             }
 
+            MC.gameRenderer.lightTexture().turnOnLightLayer();
+
             MultiBufferSource.BufferSource bufferSource = MC.renderBuffers().bufferSource();
             MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
                 0.0F, InteractionHand.OFF_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
@@ -228,6 +247,8 @@ public class VRArmHelper {
                 MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
 
             bufferSource.endBatch();
+
+            MC.gameRenderer.lightTexture().turnOffLightLayer();
 
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                 // undo the thing we did before
@@ -240,6 +261,12 @@ public class VRArmHelper {
 
         // teleport arc
         if (renderTeleport) {
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                GlStateManager.SourceFactor.ONE,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+
             // TP energy
             if (ClientNetworking.isLimitedSurvivalTeleport() && !DATA_HOLDER.vrPlayer.getFreeMove() &&
                 MC.gameMode.hasMissTime() &&
@@ -262,21 +289,24 @@ public class VRArmHelper {
                 }
 
                 // TODO SHADERS use a shader with lightmaps
+                RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+                ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
                 if (size > 0.0F) {
                     // tp energy quad, slightly above the max energy quad
                     RenderHelper.renderFlatQuad(start.add(0.0D, 0.05001D, 0.0D), size, size, 0.0F,
                         TP_LIMITED_COLOR.getX(), TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 128,
-                        poseStack.last().pose(), false);
+                        poseStack.last().pose());
                 }
                 // max energy quad
                 RenderHelper.renderFlatQuad(start.add(0.0D, 0.05D, 0.0D), max, max, 0.0F, TP_LIMITED_COLOR.getX(),
-                    TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 50, poseStack.last().pose(), false);
+                    TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 50, poseStack.last().pose());
 
                 poseStack.popPose();
             }
 
             if (DATA_HOLDER.teleportTracker.isAiming()) {
+                RenderSystem.enableDepthTest();
                 // renders from the head
                 if (DATA_HOLDER.teleportTracker.vrMovementStyle.arcAiming) {
                     renderTeleportArc(poseStack.last().pose());
@@ -284,6 +314,8 @@ public class VRArmHelper {
                     renderTeleportLine(poseStack);
                 }*/
             }
+
+            RenderSystem.defaultBlendFunc();
         }
     }
 
@@ -341,13 +373,15 @@ public class VRArmHelper {
         {
             Profiler.get().push("teleportArc");
 
+            RenderSystem.enableCull();
             // TODO SHADERS use a shader with lightmaps
+            RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 
             // to make shaders work
             ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
-            RenderType renderType = VRRenderTypes.quads(false);
-            VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
+            BufferBuilder bufferBuilder = Tesselator.getInstance()
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
             double VOffset = DATA_HOLDER.teleportTracker.lastTeleportArcDisplayOffset;
             Vec3 dest = DATA_HOLDER.teleportTracker.getDestination();
@@ -397,15 +431,16 @@ public class VRArmHelper {
                     .subtract(cameraPosition);
 
                 float shift = (float) progress * 2.0F;
-                RenderHelper.renderBox(consumer, start, end, -segmentHalfWidth, segmentHalfWidth,
+                RenderHelper.renderBox(bufferBuilder, start, end, -segmentHalfWidth, segmentHalfWidth,
                     (-1.0F + shift) * segmentHalfWidth, (1.0F + shift) * segmentHalfWidth, color, alpha, matrix);
             }
 
-            MC.renderBuffers().bufferSource().endBatch(renderType);
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
             // hit indicator
             if (validLocation && DATA_HOLDER.teleportTracker.movementTeleportProgress >= 1.0D) {
                 // disable culling to show the hit from both sides
+                RenderSystem.disableCull();
                 Vec3 targetPos = (new Vec3(dest.x, dest.y, dest.z)).subtract(cameraPosition);
                 float offset = 0.01F;
                 double x = 0.0D;
@@ -415,17 +450,18 @@ public class VRArmHelper {
                 y += offset;
 
                 RenderHelper.renderFlatQuad(targetPos.add(x, y, z), 0.6F, 0.6F, 0.0F, (int) (color.getX() * 1.03D),
-                    (int) (color.getY() * 1.03D), (int) (color.getZ() * 1.03D), 64, matrix, false);
+                    (int) (color.getY() * 1.03D), (int) (color.getZ() * 1.03D), 64, matrix);
 
                 y += offset;
 
                 RenderHelper.renderFlatQuad(targetPos.add(x, y, z), 0.4F, 0.4F, 0.0F, (int) (color.getX() * 1.04D),
-                    (int) (color.getY() * 1.04D), (int) (color.getZ() * 1.04D), 64, matrix, false);
+                    (int) (color.getY() * 1.04D), (int) (color.getZ() * 1.04D), 64, matrix);
 
                 y += offset;
 
                 RenderHelper.renderFlatQuad(targetPos.add(x, y, z), 0.2F, 0.2F, 0.0F, (int) (color.getX() * 1.05D),
-                    (int) (color.getY() * 1.05D), (int) (color.getZ() * 1.05D), 64, matrix, false);
+                    (int) (color.getY() * 1.05D), (int) (color.getZ() * 1.05D), 64, matrix);
+                RenderSystem.enableCull();
             }
 
             Profiler.get().pop();

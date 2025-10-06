@@ -6,6 +6,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.server.config.ServerConfig;
@@ -50,5 +51,7 @@ public class ReloadListener implements ResourceManagerReloadListener {
         }
         // reinit on reload to update the language
         ServerConfig.init(null);
+
+        VRShaders.reload();
     }
 }

@@ -128,9 +128,7 @@ public class SwingTracker implements DebugRenderTracker {
     }
 
     private static boolean isToolItem(Item item) {
-        return item instanceof ShovelItem ||
-            item instanceof HoeItem ||
-            item instanceof AxeItem ||
+        return item instanceof DiggerItem ||
             item instanceof ArrowItem ||
             item instanceof FishingRodItem ||
             item instanceof FoodOnAStickItem ||
@@ -190,13 +188,13 @@ public class SwingTracker implements DebugRenderTracker {
                 boolean isSword = false;
 
                 if (this.dh.vrSettings.onlySwordCollision &&
-                    !(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)))
+                    !(item instanceof SwordItem || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)))
                 {
                     // only swords can hit
                     continue;
                 }
 
-                if (!(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)) &&
+                if (!(item instanceof SwordItem || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)) &&
                     !(item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS)))
                 {
                     if (isTool(itemstack)) {

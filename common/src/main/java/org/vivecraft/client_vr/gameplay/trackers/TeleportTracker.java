@@ -99,7 +99,7 @@ public class TeleportTracker implements Tracker {
         Vec3 destination = null;
         boolean bindingTeleport = VivecraftVRMod.INSTANCE.keyTeleport.isDown() && this.dh.vrPlayer.isTeleportEnabled();
         boolean seatedTeleport = this.dh.vrSettings.seated && !this.dh.vrPlayer.getFreeMove() &&
-            (player.input.getMoveVector().y != 0.0F || player.input.getMoveVector().x != 0.0F);
+            (player.input.forwardImpulse != 0.0F || player.input.leftImpulse != 0.0F);
 
         if ((bindingTeleport || seatedTeleport) && !player.isPassenger()) {
             destination = this.movementTeleportDestination;
@@ -206,7 +206,7 @@ public class TeleportTracker implements Tracker {
                     ((PlayerExtension) player).vivecraft$setTeleported(true);
                 }
 
-                player.snapTo(destination.x, destination.y, destination.z);
+                player.moveTo(destination.x, destination.y, destination.z);
             }
 
             this.doTeleportCallback();

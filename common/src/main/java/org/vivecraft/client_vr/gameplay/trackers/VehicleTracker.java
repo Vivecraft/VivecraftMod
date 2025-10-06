@@ -74,7 +74,7 @@ public class VehicleTracker implements Tracker {
             if (player.zza > 0) {
                 return getFreeMoveDirection();
             }
-        } else if (entity != null && entity.isLocalInstanceAuthoritative()) {
+        } else if (entity != null && entity.isControlledByLocalInstance()) {
             int c = getControllerWithFoodStick(player);
             if (entity instanceof Mob && c != -1) {
                 // pigs and striders
@@ -140,14 +140,14 @@ public class VehicleTracker implements Tracker {
 
                 if (entity instanceof AbstractHorse abstracthorse && !this.dh.horseTracker.isActive(this.mc.player)) {
 
-                    if (abstracthorse.isLocalInstanceAuthoritative() && abstracthorse.isSaddled()) {
+                    if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled()) {
                         return;
                     }
 
                     this.rotationTarget = abstracthorse.yBodyRot;
                 } else if (entity instanceof Mob mob) {
 
-                    if (mob.isLocalInstanceAuthoritative()) {
+                    if (mob.isControlledByLocalInstance()) {
                         return;
                     }
 

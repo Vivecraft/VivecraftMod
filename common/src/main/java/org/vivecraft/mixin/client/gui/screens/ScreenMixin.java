@@ -15,7 +15,7 @@ public abstract class ScreenMixin {
     /**
      * handles {@link VivecraftClickEvent}
      */
-    @Inject(method = "handleComponentClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Style;getClickEvent()Lnet/minecraft/network/chat/ClickEvent;", ordinal = 0), cancellable = true)
+    @Inject(method = "handleComponentClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/ClickEvent;getAction()Lnet/minecraft/network/chat/ClickEvent$Action;", ordinal = 0), cancellable = true)
     private void vivecraft$handleVivecraftClickEvents(Style style, CallbackInfoReturnable<Boolean> cir) {
         if (style.getClickEvent() instanceof VivecraftClickEvent viveEvent) {
             VivecraftClickEvent.VivecraftAction action = viveEvent.getVivecraftAction();

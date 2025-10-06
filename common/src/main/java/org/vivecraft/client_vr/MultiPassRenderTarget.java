@@ -1,8 +1,6 @@
 package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTexture;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -17,8 +15,8 @@ public class MultiPassRenderTarget extends RenderTarget {
     private final RenderTarget mainTarget;
     private final Function<RenderPass, RenderTarget> vrTargets;
 
-    public MultiPassRenderTarget(String name, RenderTarget mainTarget, Function<RenderPass, RenderTarget> vrTargets) {
-        super(name, mainTarget.useDepth);
+    public MultiPassRenderTarget(RenderTarget mainTarget, Function<RenderPass, RenderTarget> vrTargets) {
+        super(mainTarget.useDepth);
         this.mainTarget = mainTarget;
         this.vrTargets = vrTargets;
 
@@ -27,6 +25,7 @@ public class MultiPassRenderTarget extends RenderTarget {
         this.height = mainTarget.height;
         this.viewWidth = mainTarget.viewWidth;
         this.viewHeight = mainTarget.viewHeight;
+        this.frameBufferId = mainTarget.frameBufferId;
         this.filterMode = mainTarget.filterMode;
     }
 
@@ -52,29 +51,63 @@ public class MultiPassRenderTarget extends RenderTarget {
     }
 
     @Override
-    public void setFilterMode(FilterMode filterMode) {
+    public void setFilterMode(int filterMode) {
         callOnTarget(r -> r.setFilterMode(filterMode));
     }
 
     @Override
-    public void blitToScreen() {
-        callOnTarget(RenderTarget::blitToScreen);
+    public void checkStatus() {
+        callOnTarget(RenderTarget::checkStatus);
     }
 
     @Override
-    public void blitAndBlendToTexture(GpuTexture gpuTexture) {
-        callOnTarget(r -> r.blitAndBlendToTexture(gpuTexture));
+    public void bindRead() {
+        callOnTarget(RenderTarget::bindRead);
     }
 
     @Override
-    public GpuTexture getColorTexture() {
-        return callOnTargetRet(RenderTarget::getColorTexture);
+    public void unbindRead() {
+        callOnTarget(RenderTarget::unbindRead);
     }
 
     @Override
-    public GpuTexture getDepthTexture() {
-        return
-            callOnTargetRet(RenderTarget::getDepthTexture);
+    public void bindWrite(boolean setViewport) {
+        callOnTarget(r -> r.bindWrite(setViewport));
+    }
+
+    @Override
+    public void unbindWrite() {
+        callOnTarget(RenderTarget::unbindWrite);
+    }
+
+    @Override
+    public void setClearColor(float red, float green, float blue, float alpha) {
+        callOnTarget(r -> r.setClearColor(red, green, blue, alpha));
+    }
+
+    @Override
+    public void blitToScreen(int width, int height) {
+        callOnTarget(r -> r.blitToScreen(width, height));
+    }
+
+    @Override
+    public void blitAndBlendToScreen(int width, int height) {
+        callOnTarget(r -> r.blitAndBlendToScreen(width, height));
+    }
+
+    @Override
+    public void clear() {
+        callOnTarget(RenderTarget::clear);
+    }
+
+    @Override
+    public int getColorTextureId() {
+        return callOnTargetRet(RenderTarget::getColorTextureId);
+    }
+
+    @Override
+    public int getDepthTextureId() {
+        return callOnTargetRet(RenderTarget::getDepthTextureId);
     }
 
     private void callOnTarget(Consumer<RenderTarget> consumer) {

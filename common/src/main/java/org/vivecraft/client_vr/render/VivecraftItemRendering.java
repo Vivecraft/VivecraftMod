@@ -3,13 +3,10 @@ package org.vivecraft.client_vr.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
@@ -21,7 +18,6 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.BlockModelWrapperExtension;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
@@ -31,14 +27,19 @@ import org.vivecraft.data.ViveItemTags;
 public class VivecraftItemRendering {
     private static final ClientDataHolderVR DH = ClientDataHolderVR.getInstance();
 
+    private static final ItemStackRenderState ITEM_STACK_RENDER_STATE = new ItemStackRenderState();
+
     /**
      * determines how the given ItemStack should be rendered
      *
-     * @param itemStack ItemStack to identify
-     * @param player    Player holding the ItemStack
+     * @param itemStack         ItemStack to identify
+     * @param player            Player holding the ItemStack
+     * @param itemModelResolver ItemModelResolver to query the item model from
      * @return ItemTransformType that specifies how the item should be rendered
      */
-    public static VivecraftItemTransformType getTransformType(ItemStack itemStack, AbstractClientPlayer player) {
+    public static VivecraftItemTransformType getTransformType(
+        ItemStack itemStack, AbstractClientPlayer player, ItemModelResolver itemModelResolver)
+    {
         VivecraftItemTransformType itemTransformType = VivecraftItemTransformType.ITEM;
         Item item = itemStack.getItem();
 
@@ -52,14 +53,14 @@ public class VivecraftItemRendering {
             if (block instanceof BaseTorchBlock) {
                 itemTransformType = VivecraftItemTransformType.BLOCK_STICK;
             } else {
-                ResourceLocation modelName = itemStack.get(DataComponents.ITEM_MODEL);
-                if (modelName != null) {
-                    ItemModel model = Minecraft.getInstance().getModelManager().getItemModel(modelName);
-                    if (model instanceof BlockModelWrapperExtension blockModel && blockModel.vivecraft$isGenerated()) {
-                        return VivecraftItemTransformType.BLOCK_ITEM;
-                    }
+                itemModelResolver.updateForLiving(ITEM_STACK_RENDER_STATE, itemStack, ItemDisplayContext.GUI, false,
+                    player);
+
+                if (ITEM_STACK_RENDER_STATE.isGui3d()) {
+                    itemTransformType = VivecraftItemTransformType.BLOCK_3D;
+                } else {
+                    itemTransformType = VivecraftItemTransformType.BLOCK_ITEM;
                 }
-                itemTransformType = VivecraftItemTransformType.BLOCK_3D;
             }
         } else if (item instanceof MapItem || itemStack.is(ViveItemTags.VIVECRAFT_MAPS)) {
             itemTransformType = VivecraftItemTransformType.MAP;
@@ -81,7 +82,7 @@ public class VivecraftItemRendering {
             itemTransformType = VivecraftItemTransformType.ROTATED_TOOL;
         } else if (item instanceof MaceItem || itemStack.is(ViveItemTags.VIVECRAFT_MACES)) {
             itemTransformType = VivecraftItemTransformType.MACE;
-        } else if (itemStack.is(ItemTags.SWORDS) || itemStack.is(ViveItemTags.VIVECRAFT_SWORDS)) {
+        } else if (item instanceof SwordItem || itemStack.is(ViveItemTags.VIVECRAFT_SWORDS)) {
             itemTransformType = VivecraftItemTransformType.SWORD;
         } else if (item instanceof ShieldItem || itemStack.is(ViveItemTags.VIVECRAFT_SHIELDS)) {
             itemTransformType = VivecraftItemTransformType.SHIELD;

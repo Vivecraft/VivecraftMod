@@ -1,17 +1,13 @@
 package org.vivecraft.mod_compat_vr.shaders;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -51,10 +47,9 @@ public class ShadersHelper {
      * @param resourceLocation ResourceLocation of the texture to bind
      */
     public static void bindTexture(ResourceLocation resourceLocation) {
+        RenderSystem.setShaderTexture(0, resourceLocation);
         if (isShaderActive()) {
-            GpuTexture view = RenderHelper.getGpuTexture(resourceLocation);
-            RenderSystem.setShaderTexture(0, view);
-            OpenGLHelper.bindTexture(0, view);
+            RenderSystem.bindTexture(RenderSystem.getShaderTexture(0));
         }
     }
 
@@ -156,32 +151,5 @@ public class ShadersHelper {
                 () -> ClientDataHolderVR.getInstance().currentPass.ordinal()));
         }
         return UNIFORMS;
-    }
-
-    /**
-     * registers the vr RenderPipelines to be mapped to the shader ones
-     */
-    public static void registerPipelines() {
-        BiConsumer<RenderPipeline, String> consumer = null;
-        if (IrisHelper.isLoaded()) {
-            consumer = IrisHelper::registerPipeline;
-        }
-        // optifine does this still automatically, based on the shader name of the pipeline
-        if (consumer != null) {
-            consumer.accept(VRShaders.CROSSHAIR_WORLD, "ENTITIES");
-            consumer.accept(VRShaders.CROSSHAIR_WORLD_ALWAYS, "ENTITIES");
-
-            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
-            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
-            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT, "ENTITIES");
-            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES");
-            consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, "ENTITIES");
-
-            consumer.accept(VRShaders.QUADS, "BASIC");
-            consumer.accept(VRShaders.QUADS_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TRIANGLES_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TRIANGLE_FAN_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TEXT_NO_CULL, "ENTITIES_TRANSLUCENT");
-        }
     }
 }

@@ -199,7 +199,7 @@ public class ServerNetworking {
             case TELEPORT -> {
                 if (!ServerConfig.TELEPORT_ENABLED.get()) break;
                 TeleportPayloadC2S payload = (TeleportPayloadC2S) c2sPayload;
-                player.absSnapTo(payload.x(), payload.y(), payload.z(), player.getYRot(), player.getXRot());
+                player.absMoveTo(payload.x(), payload.y(), payload.z(), player.getYRot(), player.getXRot());
             }
             case CLIMBING -> {
                 if (!ServerConfig.CLIMBEY_ENABLED.get()) break;

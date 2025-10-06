@@ -2,8 +2,6 @@ package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTexture;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -32,14 +30,14 @@ public class MultiPassTextureTarget extends TextureTarget {
 
     private final TextureTarget vanilla;
 
-    public MultiPassTextureTarget(String name, int width, int height, boolean useDepth) {
-        super(name, width, height, useDepth);
+    public MultiPassTextureTarget(int width, int height, boolean useDepth) {
+        super(width, height, useDepth);
         super.destroyBuffers();
 
         this.vrTargets = new EnumMap<>(RenderPass.class);
 
         this.isVanilla = true;
-        this.vanilla = new TextureTarget(name, width, height, useDepth);
+        this.vanilla = new TextureTarget(width, height, useDepth);
         this.isVanilla = false;
 
         for (RenderPass pass : RenderPass.values()) {
@@ -47,7 +45,7 @@ public class MultiPassTextureTarget extends TextureTarget {
             WorldRenderPass worldPass = WorldRenderPass.getByRenderPass(pass);
             if (worldPass == null) continue;
             RenderTarget original = worldPass.target;
-            this.vrTargets.put(pass, new TextureTarget(name + " " + pass, original.width, original.height, useDepth));
+            this.vrTargets.put(pass, new TextureTarget(original.width, original.height, useDepth));
         }
         // set vanilla as default
         setLast(this.vanilla);
@@ -103,7 +101,7 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
-    public void setFilterMode(FilterMode filterMode) {
+    public void setFilterMode(int filterMode) {
         if (this.vrTargets == null) {
             super.setFilterMode(filterMode);
             return;
@@ -112,37 +110,101 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
-    public void blitToScreen() {
+    public void checkStatus() {
         if (this.vrTargets == null) {
-            super.blitToScreen();
+            super.checkStatus();
             return;
         }
-        callOnTarget(RenderTarget::blitToScreen);
+        callOnTarget(TextureTarget::checkStatus);
     }
 
     @Override
-    public void blitAndBlendToTexture(GpuTexture gpuTexture) {
+    public void bindRead() {
         if (this.vrTargets == null) {
-            super.blitAndBlendToTexture(gpuTexture);
+            super.bindRead();
             return;
         }
-        callOnTarget(r -> r.blitAndBlendToTexture(gpuTexture));
+        callOnTarget(TextureTarget::bindRead);
     }
 
     @Override
-    public GpuTexture getColorTexture() {
+    public void unbindRead() {
         if (this.vrTargets == null) {
-            return super.getColorTexture();
+            super.unbindRead();
+            return;
         }
-        return callOnTargetRet(RenderTarget::getColorTexture);
+        callOnTarget(TextureTarget::unbindRead);
     }
 
     @Override
-    public GpuTexture getDepthTexture() {
+    public void bindWrite(boolean setViewport) {
         if (this.vrTargets == null) {
-            return super.getDepthTexture();
+            super.bindWrite(setViewport);
+            return;
         }
-        return callOnTargetRet(RenderTarget::getDepthTexture);
+        callOnTarget(r -> r.bindWrite(setViewport));
+    }
+
+    @Override
+    public void unbindWrite() {
+        if (this.vrTargets == null) {
+            super.unbindWrite();
+            return;
+        }
+        callOnTarget(TextureTarget::unbindWrite);
+    }
+
+    @Override
+    public void setClearColor(float red, float green, float blue, float alpha) {
+        if (this.vrTargets == null) {
+            super.setClearColor(red, green, blue, alpha);
+            return;
+        }
+        // this one should be called on all TextureTargets
+        callOnAllTargets(r -> r.setClearColor(red, green, blue, alpha));
+    }
+
+    @Override
+    public void blitToScreen(int width, int height) {
+        if (this.vrTargets == null) {
+            super.blitToScreen(width, height);
+            return;
+        }
+        callOnTarget(r -> r.blitToScreen(width, height));
+    }
+
+    @Override
+    public void blitAndBlendToScreen(int width, int height) {
+        if (this.vrTargets == null) {
+            super.blitAndBlendToScreen(width, height);
+            return;
+        }
+        callOnTarget(r -> r.blitAndBlendToScreen(width, height));
+    }
+
+    @Override
+    public void clear() {
+        if (this.vrTargets == null) {
+            super.clear();
+            return;
+        }
+        callOnTarget(TextureTarget::clear);
+    }
+
+    @Override
+    public int getColorTextureId() {
+        if (this.vrTargets == null) {
+            return super.getColorTextureId();
+        }
+        return callOnTargetRet(TextureTarget::getColorTextureId);
+    }
+
+    @Override
+    public int getDepthTextureId() {
+        if (this.vrTargets == null) {
+            return super.getDepthTextureId();
+        }
+        return callOnTargetRet(TextureTarget::getDepthTextureId);
     }
 
     private void callOnAllTargets(Consumer<TextureTarget> consumer) {
@@ -195,6 +257,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         this.height = current.height;
         this.viewWidth = current.viewWidth;
         this.viewHeight = current.viewHeight;
+        this.frameBufferId = current.frameBufferId;
         this.filterMode = current.filterMode;
     }
 }

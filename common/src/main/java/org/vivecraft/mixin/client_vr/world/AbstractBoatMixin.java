@@ -32,12 +32,12 @@ public abstract class AbstractBoatMixin extends Entity {
 
     @ModifyExpressionValue(method = "controlBoat", at = @At(value = "CONSTANT", args = "floatValue=1F", ordinal = 0))
     private float vivecraft$inputLeft(float leftInput) {
-        return VRState.VR_RUNNING ? Minecraft.getInstance().player.input.getMoveVector().x : leftInput;
+        return VRState.VR_RUNNING ? Minecraft.getInstance().player.input.leftImpulse : leftInput;
     }
 
     @ModifyExpressionValue(method = "controlBoat", at = @At(value = "CONSTANT", args = "floatValue=1F", ordinal = 1))
     private float vivecraft$inputRight(float rightInput) {
-        return VRState.VR_RUNNING ? -Minecraft.getInstance().player.input.getMoveVector().x : rightInput;
+        return VRState.VR_RUNNING ? -Minecraft.getInstance().player.input.leftImpulse : rightInput;
     }
 
     // LOAD also counts the += so we need to skip those 3

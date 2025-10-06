@@ -495,8 +495,8 @@ public abstract class MCVR {
             if (this.mc.screen == null) {
                 InputSimulator.scrollMouse(0.0D, dir * 4);
             } else {
-                this.mc.player.getInventory().setSelectedSlot(
-                    ScrollWheelHandler.getNextScrollWheelSelection(dir, this.mc.player.getInventory().getSelectedSlot(),
+                this.mc.player.getInventory().setSelectedHotbarSlot(
+                    ScrollWheelHandler.getNextScrollWheelSelection(dir, this.mc.player.getInventory().selected,
                         Inventory.getSelectionSize()));
             }
         }
@@ -899,11 +899,11 @@ public abstract class MCVR {
                 ItemStack itemstack = this.mc.player.getInventory().getItem(slot);
 
                 if (itemstack.getItem() instanceof BlockItem item && item.getBlock() instanceof TorchBlock) {
-                    this.quickTorchPreviousSlot = this.mc.player.getInventory().getSelectedSlot();
-                    this.mc.player.getInventory().setSelectedSlot(slot);
+                    this.quickTorchPreviousSlot = this.mc.player.getInventory().selected;
+                    this.mc.player.getInventory().selected = slot;
                     this.mc.startUseItem();
                     // switch back immediately
-                    this.mc.player.getInventory().setSelectedSlot(this.quickTorchPreviousSlot);
+                    this.mc.player.getInventory().selected = this.quickTorchPreviousSlot;
                     this.quickTorchPreviousSlot = -1;
                     break;
                 }

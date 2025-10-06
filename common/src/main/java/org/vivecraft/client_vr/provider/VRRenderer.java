@@ -2,13 +2,15 @@ package org.vivecraft.client_vr.provider;
 
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -16,6 +18,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -29,8 +32,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -166,8 +169,6 @@ public abstract class VRRenderer {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         // setup stencil for writing
-        // TODO 1.21.5 no stencil for now
-        /*
         if (StencilHelper.stencilBufferSupported()) {
             GL11.glEnable(GL11.GL_STENCIL_TEST);
             RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
@@ -197,7 +198,12 @@ public abstract class VRRenderer {
         }
 
         RenderSystem.clearStencil(0);
-        */
+        RenderSystem.clearDepth(1);
+
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.depthFunc(GL11.GL_ALWAYS);
+        RenderSystem.disableCull();
 
         RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
 
@@ -212,6 +218,8 @@ public abstract class VRRenderer {
             RenderSystem.getModelViewStack().translate(0, 0, -20);
         }
 
+        CompiledShaderProgram lastShader = RenderSystem.getShader();
+
         if (dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER) {
             drawCircle(fb.viewWidth, fb.viewHeight);
         } else if (providesStencilMask() &&
@@ -223,15 +231,19 @@ public abstract class VRRenderer {
         RenderSystem.restoreProjectionMatrix();
         RenderSystem.getModelViewStack().popMatrix();
 
+        RenderSystem.depthMask(true); // Do write to depth buffer
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.enableDepthTest();
+
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        // TODO 1.21.5 stencil
-        /*
+        RenderSystem.enableCull();
+        RenderSystem.setShader(lastShader);
         if (StencilHelper.stencilBufferSupported()) {
             RenderSystem.stencilFunc(GL11.GL_NOTEQUAL, 255, 1);
             RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
             RenderSystem.stencilMask(0); // Dont Write to stencil buffer
         }
-        */
+        RenderSystem.depthFunc(GL11.GL_LEQUAL);
     }
 
     /**
@@ -241,9 +253,8 @@ public abstract class VRRenderer {
      * @param height height of the circle in screen pixels
      */
     private void drawCircle(float width, float height) {
-        RenderType renderType = VRRenderTypes.triangleFanAlways();
-        VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
-
+        BufferBuilder builder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
         final float edges = 32.0F;
         float radius = width / 2.0F;
 
@@ -254,14 +265,11 @@ public abstract class VRRenderer {
         for (int i = 0; i < edges + 1; i++) {
             float startAngle = (float) i / edges * Mth.TWO_PI;
             builder.addVertex(
-                    radius + Mth.cos(startAngle) * radius,
-                    radius + Mth.sin(startAngle) * radius,
-                    0.0F)
-                .setColor(0, 0, 0, 255);
+                radius + Mth.cos(startAngle) * radius,
+                radius + Mth.sin(startAngle) * radius,
+                0.0F);
         }
-
-        // need to end all, because of iris batching
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
+        BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
     /**
@@ -273,20 +281,20 @@ public abstract class VRRenderer {
             return;
         }
 
-        RenderType renderType = VRRenderTypes.trianglesAlways();
-        VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
+        BufferBuilder builder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
 
         ShadersHelper.bindTexture(RenderHelper.BLACK_TEXTURE);
 
         for (int i = 0; i < verts.length; i += 2) {
             builder.addVertex(
-                    verts[i] * this.renderScale + 0.5F,
-                    verts[i + 1] * this.renderScale + 0.5F,
-                    0.0F)
-                .setColor(0, 0, 0, 255);
+                verts[i] * this.renderScale + 0.5F,
+                verts[i + 1] * this.renderScale + 0.5F,
+                0.0F);
         }
-        // need to end all, because of iris batching
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
+
+        RenderSystem.setShader(CoreShaders.POSITION);
+        BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
     /**
@@ -519,6 +527,16 @@ public abstract class VRRenderer {
             this.reinitFrameBuffers("gfx setting changed to: " + this.previousGraphics);
         }
 
+        if (minecraft.options.graphicsMode().get() == GraphicsStatus.FABULOUS &&
+            minecraft.getShaderManager().getProgram(VRShaders.VR_TRANSPARENCY_SHADER) == null)
+        {
+            // fabulous shader didn't compile
+            ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.fabulousFailed"));
+            minecraft.options.graphicsMode().set(GraphicsStatus.FAST);
+            minecraft.levelRenderer.allChanged();
+            this.reinitFrameBuffers("fabulous missing");
+        }
+
         if (this.resizeFrameBuffers && !this.reinitFrameBuffers) {
             Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
             int eyew = tuple.getA();
@@ -606,8 +624,7 @@ public abstract class VRRenderer {
             RenderHelper.checkGLError("Start Init");
 
             // intel drivers have issues with opengl interop on windows so throw an error
-            if (Util.getPlatform() == Util.OS.WINDOWS &&
-                RenderSystem.getDevice().getRenderer().toLowerCase().contains("intel") &&
+            if (Util.getPlatform() == Util.OS.WINDOWS && GlUtil.getRenderer().toLowerCase().contains("intel") &&
                 dataholder.vrSettings.blockIntelWindows)
             {
                 StringBuilder gpus = new StringBuilder();
@@ -626,16 +643,17 @@ public abstract class VRRenderer {
                 }
                 throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"),
                     Component.translatable("vivecraft.messages.intelgraphics1",
-                        Component.literal(RenderSystem.getDevice().getRenderer()).withStyle(ChatFormatting.GOLD),
+                        Component.literal(GlUtil.getRenderer()).withStyle(ChatFormatting.GOLD),
                         gpus.toString(),
                         onlyIntel ? Component.empty()
                             : Component.translatable("vivecraft.messages.intelgraphics2",
                             Component.literal("https://www.vivecraft.org/faq/#gpu")
                                 .withStyle(style -> style.withUnderlined(true)
                                     .withColor(ChatFormatting.GREEN)
-                                    .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                                    .withClickEvent(new ClickEvent.OpenUrl(
-                                        ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu")))))));
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                        CommonComponents.GUI_OPEN_IN_BROWSER))
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
+                                        "https://www.vivecraft.org/faq/#gpu"))))));
             }
 
             if (!this.isInitialized()) {
@@ -840,6 +858,12 @@ public abstract class VRRenderer {
                     this.reinitFrameBuffers = true;
                     return;
                 }
+            }
+
+            if (!VRShaders.isReady()) {
+                throw new RenderConfigException(
+                    Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
+                    Component.literal("Failed to load VR shaders, see log for full error."));
             }
 
             RenderPassManager.setGUIRenderPass();

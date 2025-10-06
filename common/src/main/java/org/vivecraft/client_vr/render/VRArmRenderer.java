@@ -1,5 +1,7 @@
 package org.vivecraft.client_vr.render;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -56,6 +58,13 @@ public class VRArmRenderer extends PlayerRenderer {
     {
         PlayerModel playermodel = this.getModel();
 
+        // blending, since we render the arm translucent
+        RenderSystem.enableBlend();
+        RenderSystem.enableCull();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+
         // in case some mod messes with it
         rendererArm.resetPose();
         rendererArm.visible = true;
@@ -67,5 +76,8 @@ public class VRArmRenderer extends PlayerRenderer {
         // render hand
         rendererArm.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(resourceLocation)), combinedLight,
             OverlayTexture.NO_OVERLAY, ARGB.white(this.armAlpha));
+
+        RenderSystem.disableBlend();
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

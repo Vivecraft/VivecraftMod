@@ -52,6 +52,7 @@ public abstract class GuiVRMixin implements GuiExtension {
     @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
     private void vivecraft$cancelVignette(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
+            RenderSystem.enableDepthTest();
             ci.cancel();
         }
     }
@@ -124,8 +125,7 @@ public abstract class GuiVRMixin implements GuiExtension {
     private void vivecraft$hotbarContextIndicator(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
-            this.getCameraPlayer().getInventory().getSelectedSlot() !=
-                ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
+            this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = guiGraphics.guiWidth() / 2;
@@ -195,7 +195,7 @@ public abstract class GuiVRMixin implements GuiExtension {
             Holder<MobEffect> mobeffect = null;
 
             if (player.isSprinting()) {
-                mobeffect = MobEffects.SPEED;
+                mobeffect = MobEffects.MOVEMENT_SPEED;
             }
 
             if (player.isVisuallySwimming()) {
