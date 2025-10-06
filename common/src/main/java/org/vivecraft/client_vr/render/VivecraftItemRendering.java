@@ -59,7 +59,7 @@ public class VivecraftItemRendering {
             }
         } else if (item instanceof MapItem || itemStack.is(ViveItemTags.VIVECRAFT_MAPS)) {
             itemTransformType = VivecraftItemTransformType.MAP;
-        } else if (itemStack.getUseAnimation() == ItemUseAnimation.BOW &&
+        } else if (itemStack.getUseAnimation() == UseAnim.BOW &&
             !itemStack.is(ViveItemTags.VIVECRAFT_BOW_EXCLUSION))
         {
             itemTransformType = VivecraftItemTransformType.BOW_SEATED;

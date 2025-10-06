@@ -17,7 +17,7 @@ public class ClientForgeEvents {
         registerClientCommandsEvent.getDispatcher()
             .register(Commands.literal("vivecraft-client-config").executes(context -> {
                 Minecraft mc = Minecraft.getInstance();
-                mc.schedule(() -> mc.setScreen(new VivecraftMainSettings(mc.screen)));
+                mc.tell(() -> mc.setScreen(new VivecraftMainSettings(mc.screen)));
                 return 1;
             }));
     }

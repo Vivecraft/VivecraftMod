@@ -2,10 +2,10 @@ package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import org.vivecraft.Xplat;
-import net.minecraft.client.Minecraft;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 
@@ -47,8 +47,8 @@ public class VRTextureTarget extends RenderTarget {
     }
 
     @Override
-    public void createBuffers(int width, int height) {
-        super.createBuffers(width, height);
+    public void createBuffers(int width, int height, boolean clearError) {
+        super.createBuffers(width, height, clearError);
 
         if (((RenderTargetExtension) this).vivecraft$hasMipmaps()) {
             if (this.anisotropicFiltering) {

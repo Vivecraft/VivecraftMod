@@ -11,6 +11,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
@@ -184,15 +185,16 @@ public class ClientUtils {
                 DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
             {
                 Vec3 controllerPos = DH.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse(DH.vrSettings.chatNotificationSound))
-                    .ifPresent(soundEvent -> {
-                        if (MC.level != null) {
-                            MC.level.playLocalSound(controllerPos.x(), controllerPos.y(), controllerPos.z(),
-                                soundEvent.value(), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
-                        } else {
-                            MC.getSoundManager().play(SimpleSoundInstance.forUI(soundEvent.value(), 0.1F, 0.3F));
-                        }
-                    });
+                SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.get(
+                    ResourceLocation.parse(DH.vrSettings.chatNotificationSound));
+                if (soundEvent != null) {
+                    if (MC.level != null) {
+                        MC.level.playLocalSound(controllerPos.x(), controllerPos.y(), controllerPos.z(),
+                            soundEvent, SoundSource.NEUTRAL, 0.3F, 0.1F, false);
+                    } else {
+                        MC.getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, 0.1F, 0.3F));
+                    }
+                }
             }
         }
     }

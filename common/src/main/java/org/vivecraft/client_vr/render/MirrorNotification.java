@@ -62,7 +62,7 @@ public class MirrorNotification {
 
             if (MIRROR_NOTIFY_CLEAR) {
                 RenderSystem.clearColor(0F, 0F, 0F, 1F);
-                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT);
+                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
             }
 
             final int TEXT_WORDWRAP_LEN = screenX / 22;

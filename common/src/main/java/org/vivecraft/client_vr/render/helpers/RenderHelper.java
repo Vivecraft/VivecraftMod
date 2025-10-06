@@ -38,7 +38,6 @@ import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.List;
-
 import java.util.function.Supplier;
 
 public class RenderHelper {
@@ -269,12 +268,13 @@ public class RenderHelper {
      */
     public static void drawVRConnectingMessage() {
         // clear depth, because text that was already there would be over ours
-        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT);
+        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         // setup modelview for screen rendering
         Matrix4fStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushMatrix();
         poseStack.identity();
         poseStack.translate(0.0F, 0.0F, -11000.0F);
+        RenderSystem.applyModelViewMatrix();
 
         // setup projection
         float guiScale = (float) MC.getWindow().getGuiScale();
@@ -282,7 +282,7 @@ public class RenderHelper {
             0.0F, MC.getMainRenderTarget().width / guiScale,
             MC.getMainRenderTarget().height / guiScale, 0.0F,
             1000.0F, 21000.0F);
-        RenderSystem.setProjectionMatrix(guiProjection, ProjectionType.ORTHOGRAPHIC);
+        RenderSystem.setProjectionMatrix(guiProjection, VertexSorting.ORTHOGRAPHIC_Z);
 
         GuiGraphics guiGraphics = new GuiGraphics(MC, MC.renderBuffers().bufferSource());
 
@@ -308,6 +308,7 @@ public class RenderHelper {
         guiGraphics.flush();
 
         poseStack.popMatrix();
+        RenderSystem.applyModelViewMatrix();
     }
 
     /**
@@ -354,12 +355,12 @@ public class RenderHelper {
      * @param size          size of the quad
      * @param packedLight   block and sky light packed into an int
      * @param matrix        matrix to use to
-     * @param shader        entity Shader to use
+     * @param shader        entity Shader supplier to use
      * @param flipY         if the texture should be flipped vertically
      */
     public static void drawSizedQuadWithLightmap(
-        float displayWidth, float displayHeight, float size, int packedLight, Matrix4f matrix, ShaderProgram shader,
-        boolean flipY)
+        float displayWidth, float displayHeight, float size, int packedLight, Matrix4f matrix,
+        Supplier<ShaderInstance> shader, boolean flipY)
     {
         drawSizedQuadWithLightmap(displayWidth, displayHeight, size, packedLight, new float[]{1, 1, 1, 1}, matrix,
             shader, flipY);
@@ -373,10 +374,11 @@ public class RenderHelper {
      * @param size          size of the quad
      * @param color         color of the quad, expects an array of length 4 for: r, g, b, a
      * @param matrix        matrix to use to
-     * @param shader        entity Shader to use
+     * @param shader        entity Shader supplier to use
      */
     public static void drawSizedQuadFullbright(
-        float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix, ShaderProgram shader)
+        float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix,
+        Supplier<ShaderInstance> shader)
     {
         drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.FULL_BRIGHT, color, matrix, shader,
             false);
@@ -391,7 +393,7 @@ public class RenderHelper {
      * @param packedLight   block and sky light packed into an int
      * @param color         color of the quad, expects an array of length 4 for: r, g, b, a
      * @param matrix        matrix to use to for positioning
-     * @param shader        Shader to render as, needs to be one of the entity types
+     * @param shader        supplier of the Shader to render as, needs to be one of the entity types
      * @param flipY         if the texture should be flipped vertically
      */
     public static void drawSizedQuadWithLightmap(

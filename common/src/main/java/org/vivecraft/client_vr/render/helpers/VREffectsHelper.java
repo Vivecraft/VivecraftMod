@@ -156,7 +156,7 @@ public class VREffectsHelper {
         // draw spyglass view
         RenderSystem.disableBlend();
         RenderHelper.drawSizedQuadFullbright(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1},
-            poseStack.last().pose(), CoreShaders.RENDERTYPE_ENTITY_SOLID);
+            poseStack.last().pose(), GameRenderer::getRendertypeEntitySolidShader);
 
         // draw spyglass overlay
         ShadersHelper.bindTexture(SCOPE_TEXTURE);
@@ -168,7 +168,7 @@ public class VREffectsHelper {
             DATA_HOLDER.vrPlayer.vrdata_world_render.getController(c).getPosition()));
         // draw the overlay, and flip it vertically
         RenderHelper.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, poseStack.last().pose(),
-            CoreShaders.RENDERTYPE_ENTITY_TRANSLUCENT, true);
+            GameRenderer::getRendertypeEntityTranslucentShader, true);
 
         poseStack.popPose();
     }
@@ -621,7 +621,6 @@ public class VREffectsHelper {
         occluded.clear(Minecraft.ON_OSX);
         occluded.copyDepthFrom(MC.getMainRenderTarget());
         occluded.bindWrite(true);
-        MC.mainRenderTarget = extTargets.vivecraft$getOccluded().get();
 
         boolean renderHands = VRArmHelper.shouldRenderHands();
 
@@ -635,7 +634,6 @@ public class VREffectsHelper {
         RenderTarget unOccluded = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer();
         unOccluded.clear(Minecraft.ON_OSX);
         unOccluded.bindWrite(true);
-        MC.mainRenderTarget = extTargets.vivecraft$getUnoccluded().get();
 
         if (!shouldOccludeGui()) {
             renderGuiAndShadow(partialTick, false, false);
@@ -655,7 +653,6 @@ public class VREffectsHelper {
         hands.clear(Minecraft.ON_OSX);
         hands.copyDepthFrom(MC.getMainRenderTarget());
         hands.bindWrite(true);
-        MC.mainRenderTarget = extTargets.vivecraft$getHands().get();
 
         VRArmHelper.renderVRHands(partialTick, renderHands && !DATA_HOLDER.menuHandMain,
             renderHands && !DATA_HOLDER.menuHandOff, false, false);
@@ -663,7 +660,6 @@ public class VREffectsHelper {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1, 1, 1, 1);
         // rebind the original buffer
-        MC.mainRenderTarget = mainTarget;
         MC.getMainRenderTarget().bindWrite(true);
     }
 
@@ -797,7 +793,6 @@ public class VREffectsHelper {
             }
 
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
             ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
             RenderHelper.renderFlatQuad(pos, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
@@ -1038,11 +1033,11 @@ public class VREffectsHelper {
             {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    CoreShaders.RENDERTYPE_ENTITY_TRANSLUCENT, false);
+                    GameRenderer::getRendertypeEntityTranslucentShader, false);
             } else {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    CoreShaders.RENDERTYPE_ENTITY_CUTOUT_NO_CULL, false);
+                    GameRenderer::getRendertypeEntityCutoutNoCullShader, false);
             }
         } else {
             RenderHelper.drawSizedQuad(

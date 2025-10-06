@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
-import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -385,7 +384,7 @@ public class SwingTracker implements DebugRenderTracker {
 
                         if (startPos.subtract(endPos).lengthSqr() < 1.0E-7) {
                             // mc short circuits to a miss if start and end are too close together
-                            endPos = endPos.add(0.001);
+                            endPos = endPos.add(0.001, 0.001, 0.001);
                         }
 
                         blockHit = this.mc.level.clip(
@@ -451,19 +450,15 @@ public class SwingTracker implements DebugRenderTracker {
                         blockstate.getBlock() instanceof AttachedStemBlock ||
                         blockstate.is(ViveBlockTags.VIVECRAFT_CROPS) ||
                         // check if the item can use the block
-                        (item.useOn(new UseOnContext(player,
+                        item.useOn(new UseOnContext(player,
                             c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND,
-                            blockHit)) instanceof InteractionResult.Success success &&
-                            success.swingSource() == InteractionResult.SwingSource.CLIENT
-                        )
+                            blockHit)).shouldSwing()
                     ))
                     {
                         // don't try to break crops with hoes
                         // actually use the item on the block
                         boolean useSuccessful = this.mc.gameMode.useItemOn(player,
-                            i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND,
-                            blockHit) instanceof InteractionResult.Success success &&
-                            success.swingSource() == InteractionResult.SwingSource.CLIENT;
+                            i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit).shouldSwing();
                         if (itemstack.is(ViveItemTags.VIVECRAFT_SCYTHES) && !useSuccessful) {
                             // some scythes just need to be used
                             this.mc.gameMode.useItem(player,

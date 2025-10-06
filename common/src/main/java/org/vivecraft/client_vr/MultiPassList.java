@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr;
 
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 import java.util.*;

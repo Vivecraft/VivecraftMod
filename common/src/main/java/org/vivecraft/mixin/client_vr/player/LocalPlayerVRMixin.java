@@ -261,11 +261,12 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
      */
     @Override
     protected void vivecraft$beforeEat(CallbackInfoReturnable<ItemStack> cir, @Local(argsOnly = true) ItemStack food) {
-        if (VRState.VR_RUNNING && food.get(DataComponents.FOOD) != null && vivecraft$isLocalPlayer(this) &&
-            food.getHoverName().getString().equals("EAT ME"))
-        {
-            ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
-            ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
+        if (VRState.VR_INITIALIZED && food.get(DataComponents.FOOD) != null && vivecraft$isLocalPlayer(this)) {
+            ClientDataHolderVR.getInstance().hapticTracker.handleEat(food);
+            if (food.getHoverName().getString().equals("EAT ME")) {
+                ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
+                ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
+            }
         }
     }
 

@@ -38,8 +38,12 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
             },
             true,
             resourceLocation -> new SilentButton(Component.literal("♫"),
-                b -> BuiltInRegistries.SOUND_EVENT.get(resourceLocation)
-                    .ifPresent(soundEvent -> startSound(soundEvent.value(), b)),
+                b -> {
+                    SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.get(resourceLocation);
+                    if (soundEvent != null) {
+                        startSound(soundEvent, b);
+                    }
+                },
                 20, 20)
         );
     }

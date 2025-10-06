@@ -37,13 +37,12 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.gameplay.interact_modules.BlockInteractionModule;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -329,15 +328,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             return original.call("shaders/post/vrtransparency.json");
         } else {
             return original.call(location);
-        }
-    }
-
-    @Inject(method = "getCloudsTarget", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$getCloudsTarget(CallbackInfoReturnable<RenderTarget> cir) {
-        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
-            ClientDataHolderVR.getInstance().menuWorldRenderer.isRendering())
-        {
-            cir.setReturnValue(null);
         }
     }
 

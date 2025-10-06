@@ -176,7 +176,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
             .rotateLocalY(bodyYaw + Mth.PI)
             .rotateLocalX(-xRot);
         ModelUtils.setRotation(model.head, tempM, tempV);
-        ModelUtils.worldToModel(renderState, tempV2, rotInfo, bodyYaw, true, tempV);
+        ModelUtils.worldToModel(player, tempV2, rotInfo, bodyYaw, true, tempV);
 
         if (swimming) {
             // move the head in front of the body when swimming
@@ -271,7 +271,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
             model.rightLeg.z = model.leftLeg.z;
         } else if (rotInfo.fbtMode != FBTMode.ARMS_ONLY) {
             // fbt leg position
-            ModelUtils.worldToModel(renderState, rotInfo.waistPos, rotInfo, bodyYaw, true, tempV);
+            ModelUtils.worldToModel(player, rotInfo.waistPos, rotInfo, bodyYaw, true, tempV);
 
             tempV2.set(-1.9F, -2F, 0F);
             rotInfo.waistQuat.transform(tempV2);
@@ -323,7 +323,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
                 float offset = (rotInfo.leftHanded ? -1F : 1f) * (model.slim ? 0.016F : 0.032F) * Mth.PI * armScale;
 
                 // main hand
-                ModelUtils.worldToModel(renderState, rotInfo.mainHandPos, rotInfo, bodyYaw,
+                ModelUtils.worldToModel(player, rotInfo.mainHandPos, rotInfo, bodyYaw,
                     isMainPlayer || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
                 tempV.sub(mainHand.x, mainHand.y, mainHand.z);
                 // move shoulders up when having the arms up, since the rotation point is slightly offset
@@ -355,7 +355,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
                 ModelUtils.setRotation(mainHand, tempM, tempV);
 
                 // offhand
-                ModelUtils.worldToModel(renderState, rotInfo.offHandPos, rotInfo, bodyYaw,
+                ModelUtils.worldToModel(player, rotInfo.offHandPos, rotInfo, bodyYaw,
                     isMainPlayer || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
                 tempV.sub(offHand.x, offHand.y, offHand.z);
                 // move shoulders up when having the arms up, since the rotation point is slightly offset
@@ -397,7 +397,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
                     GuiHandler.GUI_ROTATION_PLAYER_MODEL.transformDirection(MathUtils.BACK, tempV)
                         .mul(0.584F * rotInfo.worldScale);
 
-                    ModelUtils.modelToWorld(renderState, offHand.x, offHand.y, offHand.z, rotInfo, bodyYaw, true, true,
+                    ModelUtils.modelToWorld(player, offHand.x, offHand.y, offHand.z, rotInfo, bodyYaw, true, true,
                         tempV2);
                     if (MCAHelper.isLoaded()) {
                         MCAHelper.applyPlayerScale(player, tempV);
@@ -481,7 +481,6 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
             vrModel.rotInfo = rotInfo;
             vrModel.mainArm = mainArm;
             vrModel.attackArm = attackArm;
-            vrModel.attackTime = renderState.attackTime;
             vrModel.bodyYaw = bodyYaw;
             vrModel.laying = laying;
             vrModel.layAmount = layAmount;

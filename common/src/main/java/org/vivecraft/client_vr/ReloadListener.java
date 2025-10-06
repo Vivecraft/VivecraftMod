@@ -52,6 +52,6 @@ public class ReloadListener implements ResourceManagerReloadListener {
         // reinit on reload to update the language
         ServerConfig.init(null);
 
-        VRShaders.reload();
+        VRShaders.reload(resourceManager);
     }
 }

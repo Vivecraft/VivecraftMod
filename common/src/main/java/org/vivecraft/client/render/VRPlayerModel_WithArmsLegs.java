@@ -146,7 +146,7 @@ public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayer
             Vector3fc kneePos;
             if (this.rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
                 this.footPos.set(this.leftLeg.x, 24 + Math.min(this.body.y, 0F), this.leftLeg.z);
-                ModelUtils.modelToWorld(renderState, this.footPos, this.rotInfo, this.bodyYaw, true, true,
+                ModelUtils.modelToWorld(player, this.footPos, this.rotInfo, this.bodyYaw, true, true,
                     this.footPos);
                 this.footQuat.identity().rotateY(Mth.PI - this.bodyYaw);
                 if (player.isAutoSpinAttack()) {
@@ -167,20 +167,20 @@ public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayer
 
             this.footPos.add(this.footOffset);
             if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
-                positionConnectedLimb(renderState, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, 0F,
+                positionConnectedLimb(player, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, 0F,
                     kneePos, false, null, true);
             } else {
                 this.footQuat.transform(MathUtils.BACK, this.footDir);
-                positionSplitLimb(renderState, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
+                positionSplitLimb(player, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
                     0F, kneePos, false, null, true);
             }
 
             // right leg
             if (this.rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
                 this.footPos.set(this.rightLeg.x, 24 + Math.min(this.body.y, 0F), this.rightLeg.z);
-                ModelUtils.modelToWorld(renderState, this.footPos, this.rotInfo, this.bodyYaw, true, true,
+                ModelUtils.modelToWorld(player, this.footPos, this.rotInfo, this.bodyYaw, true, true,
                     this.footPos);
-                if (renderState.isAutoSpinAttack) {
+                if (player.isAutoSpinAttack()) {
                     // player is offset 1 block during the spin
                     this.footPos.y -= 1F;
                 }
@@ -199,11 +199,11 @@ public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayer
 
             this.footPos.add(-this.footOffset.x, this.footOffset.y, -this.footOffset.z);
             if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
-                positionConnectedLimb(renderState, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, 0F,
+                positionConnectedLimb(player, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, 0F,
                     kneePos, false, null, true);
             } else {
                 this.footQuat.transform(MathUtils.BACK, this.footDir);
-                positionSplitLimb(renderState, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
+                positionSplitLimb(player, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
                     0F, kneePos, false, null, true);
             }
         }

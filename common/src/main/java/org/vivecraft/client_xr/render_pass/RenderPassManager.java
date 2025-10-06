@@ -42,6 +42,16 @@ public class RenderPassManager {
     }
 
     /**
+     * sets up rendering for the Mirror, this binds the Mirror RenderTarget
+     */
+    public static void setMirrorRenderPass() {
+        ClientDataHolderVR.getInstance().currentPass = RenderPass.MIRROR;
+        RenderPassManager.WRP = null;
+        RENDER_PASS_TYPE = RenderPassType.GUI_ONLY;
+        MC.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.mirrorFramebuffer;
+    }
+
+    /**
      * resets back to the vanilla RenderPass
      */
     public static void setVanillaRenderPass() {

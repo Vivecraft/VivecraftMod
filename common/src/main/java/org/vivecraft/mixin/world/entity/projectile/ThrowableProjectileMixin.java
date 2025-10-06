@@ -21,7 +21,7 @@ public abstract class ThrowableProjectileMixin extends Entity {
     }
 
     @Inject(method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V", at = @At("TAIL"))
-    private void vivecraft$satToHandPos(EntityType<?> entityType, LivingEntity shooter, Level level, CallbackInfo ci) {
+    private void vivecraft$setToHandPos(EntityType<?> entityType, LivingEntity shooter, Level level, CallbackInfo ci) {
         if (shooter instanceof ServerPlayer player) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {

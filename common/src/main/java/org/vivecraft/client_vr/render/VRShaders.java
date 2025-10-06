@@ -2,8 +2,8 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -89,65 +89,107 @@ public class VRShaders {
         return READY;
     }
 
-    public static void reload() {
-        READY = false;
+    public static void reload(ResourceManager resourceManager) {
+        close();
         try {
-            setupDepthMask();
+            setupDepthMask(resourceManager);
             RenderHelper.checkGLError("init depth shader");
-            setupFOVReduction();
+            setupFOVReduction(resourceManager);
             RenderHelper.checkGLError("init FOV shader");
-            setupFSAA();
-            RenderHelper.checkGLError("init fsaa shader");
+            setupFSAA(resourceManager);
+            RenderHelper.checkGLError("FBO init fsaa shader");
+            setupBlitAspect(resourceManager);
+            RenderHelper.checkGLError("init blit shader");
+            setupPortalShaders(resourceManager);
+            RenderHelper.checkGLError("init portal shader");
             READY = true;
-        } catch (NullPointerException e) {
-            VRSettings.LOGGER.error("Vivecraft: Shader creation failed:", e);
+        } catch (IOException e) {
+            VRSettings.LOGGER.error("error loading VR shaders", e);
+            READY = false;
         }
     }
 
-    private static void setupDepthMask() throws NullPointerException {
-        CompiledShaderProgram program = Minecraft.getInstance().getShaderManager().getProgram(MIXED_REALITY_SHADER);
-        MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM = program.safeGetUniform(MIXED_REALITY_HMD_VIEW_POSITION);
-        MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM = program.safeGetUniform(MIXED_REALITY_HMD_PLANE_NORMAL);
-        MIXED_REALITY_PROJECTION_MATRIX_UNIFORM = program.safeGetUniform(MIXED_REALITY_PROJECTION_MATRIX);
-        MIXED_REALITY_VIEW_MATRIX_UNIFORM = program.safeGetUniform(MIXED_REALITY_VIEW_MATRIX);
-        MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM = program.safeGetUniform(MIXED_REALITY_FIRST_PERSON_PASS);
-        MIXED_REALITY_KEY_COLOR_UNIFORM = program.safeGetUniform(MIXED_REALITY_KEY_COLOR);
-        MIXED_REALITY_ALPHA_MODE_UNIFORM = program.safeGetUniform(MIXED_REALITY_ALPHA_MODE);
+    private static void close() {
+        if (BLIT_VR_SHADER != null) {
+            BLIT_VR_SHADER.close();
+            BLIT_VR_SHADER = null;
+        }
+        if (LANCZOS_SHADER != null) {
+            LANCZOS_SHADER.close();
+            LANCZOS_SHADER = null;
+        }
+        if (MIXED_REALITY_SHADER != null) {
+            MIXED_REALITY_SHADER.close();
+            MIXED_REALITY_SHADER = null;
+        }
+        if (POST_PROCESSING_SHADER != null) {
+            POST_PROCESSING_SHADER.close();
+            POST_PROCESSING_SHADER = null;
+        }
+        if (RENDERTYPE_END_GATEWAY_VR_SHADER != null) {
+            RENDERTYPE_END_GATEWAY_VR_SHADER.close();
+            RENDERTYPE_END_GATEWAY_VR_SHADER = null;
+        }
+        if (RENDERTYPE_END_PORTAL_VR_SHADER != null) {
+            RENDERTYPE_END_PORTAL_VR_SHADER.close();
+            RENDERTYPE_END_PORTAL_VR_SHADER = null;
+        }
+        READY = false;
     }
 
-    private static void setupFSAA() throws NullPointerException {
-        CompiledShaderProgram program = Minecraft.getInstance().getShaderManager().getProgram(LANCZOS_SHADER);
-        LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM = program.safeGetUniform(LANCZOS_TEXEL_WIDTH_OFFSET);
-        LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM = program.safeGetUniform(LANCZOS_TEXEL_HEIGHT_OFFSET);
+    private static void setupDepthMask(ResourceManager resourceManager) throws IOException {
+        MIXED_REALITY_SHADER = new ShaderInstance(resourceManager, "mixedreality_vr",
+            DefaultVertexFormat.POSITION_TEX);
+        MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_HMD_VIEW_POSITION);
+        MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_HMD_PLANE_NORMAL);
+        MIXED_REALITY_PROJECTION_MATRIX_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_PROJECTION_MATRIX);
+        MIXED_REALITY_VIEW_MATRIX_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_VIEW_MATRIX);
+        MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_FIRST_PERSON_PASS);
+        MIXED_REALITY_KEY_COLOR_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_KEY_COLOR);
+        MIXED_REALITY_ALPHA_MODE_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_ALPHA_MODE);
     }
 
-    private static void setupFOVReduction() throws NullPointerException {
-        CompiledShaderProgram program = Minecraft.getInstance().getShaderManager().getProgram(POST_PROCESSING_SHADER);
-        POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM = program.safeGetUniform(POST_PROCESSING_FOV_REDUCTION_RADIUS);
-        POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM = program.safeGetUniform(POST_PROCESSING_FOV_REDUCTION_OFFSET);
-        POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM = program.safeGetUniform(POST_PROCESSING_FOV_REDUCTION_BORDER);
-        POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_HEALTH_ALPHA);
-        POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_FREEZE_ALPHA);
-        POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM = program.safeGetUniform(
+    private static void setupFSAA(ResourceManager resourceManager) throws IOException {
+        LANCZOS_SHADER = new ShaderInstance(resourceManager, "lanczos_vr",
+            DefaultVertexFormat.POSITION_TEX);
+        LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM = LANCZOS_SHADER.safeGetUniform(LANCZOS_TEXEL_WIDTH_OFFSET);
+        LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM = LANCZOS_SHADER.safeGetUniform(LANCZOS_TEXEL_HEIGHT_OFFSET);
+    }
+
+    private static void setupFOVReduction(ResourceManager resourceManager) throws IOException {
+        POST_PROCESSING_SHADER = new ShaderInstance(resourceManager, "postprocessing_vr",
+            DefaultVertexFormat.POSITION_TEX);
+        POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(
+            POST_PROCESSING_FOV_REDUCTION_RADIUS);
+        POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(
+            POST_PROCESSING_FOV_REDUCTION_OFFSET);
+        POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(
+            POST_PROCESSING_FOV_REDUCTION_BORDER);
+        POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM = POST_PROCESSING_SHADER.safeGetUniform(
+            POST_PROCESSING_OVERLAY_HEALTH_ALPHA);
+        POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM = POST_PROCESSING_SHADER.safeGetUniform(
+            POST_PROCESSING_OVERLAY_FREEZE_ALPHA);
+        POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(
             POST_PROCESSING_OVERLAY_WATER_AMPLITUDE);
-        POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM = program.safeGetUniform(
+        POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(
             POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE);
-        POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM = program.safeGetUniform(
+        POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(
             POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE);
-        POST_PROCESSING_OVERLAY_EYE_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_EYE);
-        POST_PROCESSING_OVERLAY_TIME_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_TIME);
-        POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_BLACK_ALPHA);
+        POST_PROCESSING_OVERLAY_EYE_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(POST_PROCESSING_OVERLAY_EYE);
+        POST_PROCESSING_OVERLAY_TIME_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(POST_PROCESSING_OVERLAY_TIME);
+        POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM = POST_PROCESSING_SHADER.safeGetUniform(
+            POST_PROCESSING_OVERLAY_BLACK_ALPHA);
     }
 
-    public static void setupBlitAspect() throws Exception {
-        BLIT_VR_SHADER = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "blit_vr",
+    private static void setupBlitAspect(ResourceManager resourceManager) throws IOException {
+        BLIT_VR_SHADER = new ShaderInstance(resourceManager, "blit_vr",
             DefaultVertexFormat.POSITION_TEX);
     }
 
-    public static void setupPortalShaders() throws IOException {
-        RENDERTYPE_END_PORTAL_VR_SHADER = new ShaderInstance(Minecraft.getInstance().getResourceManager(),
-            "rendertype_end_portal_vr", DefaultVertexFormat.POSITION);
-        RENDERTYPE_END_GATEWAY_VR_SHADER = new ShaderInstance(Minecraft.getInstance().getResourceManager(),
-            "rendertype_end_gateway_vr", DefaultVertexFormat.POSITION);
+    private static void setupPortalShaders(ResourceManager resourceManager) throws IOException {
+        RENDERTYPE_END_PORTAL_VR_SHADER = new ShaderInstance(resourceManager, "rendertype_end_portal_vr",
+            DefaultVertexFormat.POSITION);
+        RENDERTYPE_END_GATEWAY_VR_SHADER = new ShaderInstance(resourceManager, "rendertype_end_gateway_vr",
+            DefaultVertexFormat.POSITION);
     }
 }

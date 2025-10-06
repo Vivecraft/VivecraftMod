@@ -10,7 +10,7 @@ public class ClientEvents {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
             ClientCommandManager.literal("vivecraft-client-config").executes(context -> {
                 Minecraft mc = context.getSource().getClient();
-                mc.schedule(() -> mc.setScreen(new VivecraftMainSettings(mc.screen)));
+                mc.tell(() -> mc.setScreen(new VivecraftMainSettings(mc.screen)));
                 return 1;
             })));
     }

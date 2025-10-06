@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.vehicle.AbstractBoat;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -41,7 +41,7 @@ public class RowTracker implements Tracker {
             return false;
         } else if (this.mc.options.keyUp.isDown()) { // important
             return false;
-        } else if (!(player.getVehicle() instanceof AbstractBoat)) {
+        } else if (!(player.getVehicle() instanceof Boat)) {
             return false;
         } else {
             return !this.dh.bowTracker.isNotched();
@@ -93,7 +93,7 @@ public class RowTracker implements Tracker {
     }
 
     public void doProcessFinaltransmithastofixthis(LocalPlayer player) {
-        AbstractBoat boat = (AbstractBoat) player.getVehicle();
+        Boat boat = (Boat) player.getVehicle();
         Quaternionf boatRot = new Quaternionf().rotationYXZ(
             Mth.DEG_TO_RAD * -(boat.getYRot() % 360.0F),
             Mth.DEG_TO_RAD * boat.getXRot(),
@@ -133,13 +133,13 @@ public class RowTracker implements Tracker {
         }
     }
 
-    private Vec3 getArmToPaddleVector(int paddle, AbstractBoat boat) {
+    private Vec3 getArmToPaddleVector(int paddle, Boat boat) {
         Vec3 attachAbs = this.getAttachmentPoint(paddle, boat);
         Vec3 armAbs = this.getAbsArmPos(paddle == 0 ? 1 : 0);
         return attachAbs.subtract(armAbs);
     }
 
-    private Vec3 getAttachmentPoint(int paddle, AbstractBoat boat) {
+    private Vec3 getAttachmentPoint(int paddle, Boat boat) {
         Vector3f attachmentPoint = new Vector3f((paddle == 0 ? 9.0F : -9.0F) / 16.0F, 0.625F,
             0.1875F); // values from ModelBoat
         Quaternionf boatRot = new Quaternionf().rotationYXZ(
@@ -155,7 +155,7 @@ public class RowTracker implements Tracker {
         return this.dh.vrPlayer.roomOrigin.add(arm.x, arm.y, arm.z);
     }
 
-    private boolean isPaddleUnderWater(int paddle, AbstractBoat boat) {
+    private boolean isPaddleUnderWater(int paddle, Boat boat) {
         Vec3 attachAbs = this.getAttachmentPoint(paddle, boat);
         Vec3 armToPaddle = this.getArmToPaddleVector(paddle, boat).normalize();
         BlockPos blockPos = BlockPos.containing(attachAbs.add(armToPaddle));

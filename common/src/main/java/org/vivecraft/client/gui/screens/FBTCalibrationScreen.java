@@ -189,7 +189,7 @@ public class FBTCalibrationScreen extends Screen {
             Vec3i color = this.leftHandAtPosition && this.rightHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE;
 
             // body overlay
-            RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
             BufferBuilder builder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 

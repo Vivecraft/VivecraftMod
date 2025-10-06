@@ -179,7 +179,7 @@ public class NullVR extends MCVR {
                 }
             }
 
-            Profiler.get().popPush("processInputs");
+            this.mc.getProfiler().popPush("processInputs");
             this.processInputs();
             this.mc.getProfiler().popPush("hmdSampling");
             this.hmdSampling();

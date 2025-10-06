@@ -618,7 +618,7 @@ public class MenuWorldRenderer {
         if (this.cloudVBO != null) {
             this.cloudVBO.close();
         }
-        this.lightMap.destroyBuffers();
+        this.lightTexture.close();
         this.ready = false;
     }
 
@@ -715,8 +715,9 @@ public class MenuWorldRenderer {
     public void renderSky(Matrix4fStack poseStack, Vec3 position) {
         if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.END) {
             this.renderEndSky(poseStack);
-        } else if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.OVERWORLD) {
-            CompiledShaderProgram skyShader = RenderSystem.setShader(CoreShaders.POSITION);
+        } else if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.NORMAL) {
+            RenderSystem.setShader(GameRenderer::getPositionShader);
+            ShaderInstance skyShader = RenderSystem.getShader();
             this.fogRenderer.setupFog(FogRenderer.FogMode.FOG_SKY);
 
             Vec3 skyColor = this.getSkyColor(position);
@@ -873,7 +874,7 @@ public class MenuWorldRenderer {
             RenderSystem.setShaderTexture(0, END_SKY_LOCATION);
 
             this.endSkyVBO.bind();
-            this.endSkyVBO.drawWithShader(poseStack, RenderSystem.getProjectionMatrix(), shader);
+            this.endSkyVBO.drawWithShader(poseStack, RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
             VertexBuffer.unbind();
 
             RenderSystem.depthMask(true);
@@ -1471,7 +1472,7 @@ public class MenuWorldRenderer {
                 .setUv(16.0f, 0.0f).setColor(r, g, b, 255);
         }
 
-        this.endSkyVBO = new VertexBuffer(BufferUsage.STATIC_WRITE);
+        this.endSkyVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
         this.endSkyVBO.bind();
         this.endSkyVBO.upload(bufferBuilder.buildOrThrow());
         VertexBuffer.unbind();

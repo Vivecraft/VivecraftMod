@@ -7,7 +7,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -63,12 +62,12 @@ public abstract class LivingEntityMixin extends Entity {
     /**
      * dummy to be overridden in {@link ServerPlayerMixin}
      */
-    @ModifyExpressionValue(method = "isDamageSourceBlocked", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getItemBlockingWith()Lnet/minecraft/world/item/ItemStack;"))
-    protected ItemStack vivecraft$roomscaleShieldBlockingItem(
-        ItemStack original, @Local(argsOnly = true) DamageSource damageSource,
+    @ModifyExpressionValue(method = "isDamageSourceBlocked", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isBlocking()Z"))
+    protected boolean vivecraft$roomscaleShieldBlockingItem(
+        boolean isBlocking, @Local(argsOnly = true) DamageSource damageSource,
         @Share("roomscaleBlocked") LocalBooleanRef roomscaleBlocked)
     {
-        return original;
+        return isBlocking;
     }
 
     /**

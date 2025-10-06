@@ -65,7 +65,6 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         this.allEntries.forEach(entry -> entry.setParentActive(active));
     }
 
-
     private void replaceEntriesFlatten(List<SettingsList.BaseEntry> entries) {
         this.replaceEntriesFlatten(entries.stream());
     }
@@ -191,6 +190,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         return this.active && this.visible && super.isMouseOver(mouseX, mouseY);
     }
 
+    // there to make it public
+    public int getRowTop(int index) {
+        return super.getRowTop(index);
+    }
 
     // there to make it public
     public BaseEntry getHovered() {

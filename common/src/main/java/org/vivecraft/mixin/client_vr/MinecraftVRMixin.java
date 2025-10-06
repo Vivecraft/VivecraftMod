@@ -327,12 +327,12 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         return VRState.VR_RUNNING ? null : original;
     }
 
-    @WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen(II)V"))
-    private void vivecraft$blitMirror(RenderTarget instance, int width, int height, Operation<Void> original) {
-        if (!VRState.VR_RUNNING) {
-            original.call(instance, width, height);
-        } else {
+    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;unbindWrite()V"))
+    private void vivecraft$blitMirror(CallbackInfo ci) {
+        if (VRState.VR_RUNNING) {
             this.profiler.popPush("vrMirror");
+            RenderPassManager.setMirrorRenderPass();
+            this.mainRenderTarget.bindWrite(true);
             ShaderHelper.drawMirror();
             RenderHelper.checkGLError("post-mirror");
         } else if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
@@ -580,7 +580,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 dataHolder.menuWorldRenderer.tick();
             }
 
-            Profiler.get().push("vrProcessBindings");
+            this.profiler.push("vrProcessBindings");
             dataHolder.vr.processBindings();
 
             this.profiler.popPush("vrInputActionsTick");

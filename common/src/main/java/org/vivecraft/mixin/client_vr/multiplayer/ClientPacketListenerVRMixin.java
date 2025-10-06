@@ -8,6 +8,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -114,7 +115,10 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     @Inject(at = @At("TAIL"), method = "handleExplosion")
     public void vivecraft$handleExplosion(ClientboundExplodePacket clientboundExplodePacket, CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
-            ClientDataHolderVR.getInstance().hapticTracker.handleExplode(clientboundExplodePacket.center());
+            ClientDataHolderVR.getInstance().hapticTracker.handleExplode(
+                new Vec3(clientboundExplodePacket.getX(),
+                    clientboundExplodePacket.getY(),
+                    clientboundExplodePacket.getZ()));
         }
     }
 }

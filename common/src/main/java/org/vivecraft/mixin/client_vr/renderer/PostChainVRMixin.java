@@ -14,13 +14,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MultiPassList;
 import org.vivecraft.client_vr.MultiPassRenderTarget;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -81,11 +81,10 @@ public abstract class PostChainVRMixin {
     @Inject(method = "getTempTarget", at = @At("RETURN"), cancellable = true)
     private void vivecraft$getVRTempTarget(String attributeName, CallbackInfoReturnable<RenderTarget> cir) {
         if (cir.getReturnValue() != null && VRState.VR_INITIALIZED && !this.vivecraft$VRPostChains.isEmpty()) {
-            EnumMap<RenderPass, RenderTarget> vrTargets = new EnumMap<>(RenderPass.class);
-            for (Map.Entry<RenderPass, PostChain> entry : this.vivecraft$VRPostChains.entrySet()) {
-                vrTargets.put(entry.getKey(), entry.getValue().getTempTarget(attributeName));
-            }
-            cir.setReturnValue(new MultiPassRenderTarget(cir.getReturnValue(), vrTargets));
+            cir.setReturnValue(new MultiPassRenderTarget(cir.getReturnValue(), pass -> {
+                return this.vivecraft$VRPostChains.containsKey(pass) ?
+                    this.vivecraft$VRPostChains.get(pass).getTempTarget(attributeName) : null;
+            }));
         }
     }
 

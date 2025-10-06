@@ -1,13 +1,18 @@
 package org.vivecraft.mixin.world.entity.monster;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.ServerVivePlayer;
 
 @Mixin(EnderMan.class)
 public abstract class EndermanMixin {
@@ -48,9 +53,9 @@ public abstract class EndermanMixin {
     }
 
     @ModifyExpressionValue(method = "isLookingAtMe", at = @At(value = "CONSTANT", args = "doubleValue=0.025"))
-    private double vivecraft$biggerViewCone(double original, @Local(argsOnly = true) Player player) {
+    private double vivecraft$biggerViewCone(double original, @Share("hmdPos") LocalRef<Vec3> hmdPos) {
         // increase the view cone check from 1.4° to 5.7°, makes it easier to stop enderman,
         // since it's hard to know where the center of the view is
-        return player instanceof ServerPlayer serverPlayer && ServerVRPlayers.isVRPlayer(serverPlayer) ? 0.1 : original;
+        return hmdPos.get() != null ? 0.1 : original;
     }
 }

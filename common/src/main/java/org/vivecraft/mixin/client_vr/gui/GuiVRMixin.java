@@ -119,9 +119,11 @@ public abstract class GuiVRMixin implements GuiExtension {
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = guiGraphics.guiWidth() / 2;
+            RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
             guiGraphics.blitSprite(HOTBAR_SELECTION_SPRITE,
                 middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
-                guiGraphics.guiHeight() - 22 - 1, 24, 23, 0xFF00FF00);
+                guiGraphics.guiHeight() - 22 - 1, 24, 23);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
@@ -157,9 +159,13 @@ public abstract class GuiVRMixin implements GuiExtension {
                 ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player);
 
         if (changeColor) {
-            instance.blitSprite(renderTypeGetter, sprite, x, y, width, height, 0xFF0000FF);
-        } else {
-            original.call(instance, renderTypeGetter, sprite, x, y, width, height);
+            RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
+        }
+
+        original.call(instance, sprite, x, y, width, height);
+
+        if (changeColor) {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 

@@ -9,7 +9,6 @@ import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.monster.*;
-import net.minecraft.world.entity.monster.creaking.Creaking;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
@@ -40,8 +39,7 @@ public class Utils {
             entity instanceof AbstractVillager ||
             entity instanceof SnowGolem ||
             entity instanceof Vex ||
-            entity instanceof Strider ||
-            entity instanceof Creaking)
+            entity instanceof Strider)
         {
 
             Vec3 headPos = entity.getEyePosition();

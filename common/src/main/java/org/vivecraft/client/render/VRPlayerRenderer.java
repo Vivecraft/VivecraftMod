@@ -123,7 +123,9 @@ public class VRPlayerRenderer extends PlayerRenderer {
         ClientVRPlayers.RotInfo rotInfo = ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID());
         if (rotInfo != null) {
             float scale = rotInfo.heightScale;
-            if (VRState.VR_RUNNING && player == Minecraft.getInstance().player) {
+            if ((VRState.VR_RUNNING && player == Minecraft.getInstance().player) ||
+                ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale)
+            {
                 // remove entity scale, since the entity is already scaled by that before
                 scale *= rotInfo.worldScale / ScaleHelper.getEntityEyeHeightScale(player, partialTick);
             }

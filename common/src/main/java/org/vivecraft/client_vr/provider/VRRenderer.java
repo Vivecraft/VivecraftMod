@@ -19,12 +19,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL43;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
-import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.StencilHelper;
-import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.WindowExtension;
@@ -67,6 +66,7 @@ public abstract class VRRenderer {
     public RenderTarget cameraRenderFramebuffer;
     public RenderTarget telescopeFramebufferL;
     public RenderTarget telescopeFramebufferR;
+    public RenderTarget mirrorFramebuffer;
 
     // Stencil mesh buffer for each eye
     protected float[][] hiddenMeshVertices = new float[2][];
@@ -527,19 +527,6 @@ public abstract class VRRenderer {
             this.reinitFrameBuffers("gfx setting changed to: " + this.previousGraphics);
         }
 
-        if (minecraft.options.graphicsMode().get() == GraphicsStatus.FABULOUS) {
-            try {
-                minecraft.getShaderManager().getProgramForLoading(VRShaders.VR_TRANSPARENCY_SHADER);
-            } catch (Exception e) {
-                // fabulous shader didn't compile
-                VRSettings.LOGGER.error("Failed to load fabulous vr shader program: ", e);
-                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.fabulousFailed"));
-                minecraft.options.graphicsMode().set(GraphicsStatus.FAST);
-                minecraft.levelRenderer.allChanged();
-                this.reinitFrameBuffers("fabulous missing");
-            }
-        }
-
         if (this.resizeFrameBuffers && !this.reinitFrameBuffers) {
             Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
             int eyew = tuple.getA();
@@ -578,7 +565,8 @@ public abstract class VRRenderer {
                 }
                 this.mirrorFramebuffer.resize(
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
-                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()));
+                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()),
+                    Minecraft.ON_OSX);
             }
 
             // telescopes
@@ -602,15 +590,15 @@ public abstract class VRRenderer {
             if (GuiHandler.updateResolution() || mipmapChanged) {
                 ((RenderTargetExtension) GuiHandler.GUI_FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
                 ((VRTextureTarget) GuiHandler.GUI_FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
-                GuiHandler.GUI_FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
+                GuiHandler.GUI_FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT, Minecraft.ON_OSX);
 
                 ((RenderTargetExtension) RadialHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
                 ((VRTextureTarget) RadialHandler.FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
-                RadialHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
+                RadialHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT, Minecraft.ON_OSX);
 
                 ((RenderTargetExtension) KeyboardHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
                 ((VRTextureTarget) KeyboardHandler.FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
-                KeyboardHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
+                KeyboardHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT, Minecraft.ON_OSX);
                 if (minecraft.screen != null) {
                     int guiWidth = minecraft.getWindow().getGuiScaledWidth();
                     int guiHeight = minecraft.getWindow().getGuiScaledHeight();
@@ -914,8 +902,8 @@ public abstract class VRRenderer {
                 // do a full reload
                 minecraft.reloadResourcePacks();
             } else {
-            // this reloads any PostChain, at least in vanilla
-            minecraft.levelRenderer.onResourceManagerReload(minecraft.getResourceManager());
+                // this reloads any PostChain, at least in vanilla
+                minecraft.levelRenderer.onResourceManagerReload(minecraft.getResourceManager());
             }
 
             ShadersHelper.maybeReloadShaders();
@@ -1011,6 +999,11 @@ public abstract class VRRenderer {
             this.framebufferEye1.destroyBuffers();
             this.framebufferEye1 = null;
             this.RightEyeTextureId = -1;
+        }
+
+        if (this.mirrorFramebuffer != null) {
+            this.mirrorFramebuffer.destroyBuffers();
+            this.mirrorFramebuffer = null;
         }
     }
 

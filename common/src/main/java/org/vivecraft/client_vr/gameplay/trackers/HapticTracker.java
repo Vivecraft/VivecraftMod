@@ -183,8 +183,8 @@ public class HapticTracker implements Tracker {
 
     public void handleEat(ItemStack itemStack) {
         if (this.isActive(this.mc.player)) {
-            if (itemStack.get(DataComponents.FOOD) != null && itemStack.get(DataComponents.CONSUMABLE) != null) {
-                if (itemStack.get(DataComponents.CONSUMABLE).onConsumeEffects().isEmpty()) {
+            if (itemStack.get(DataComponents.FOOD) != null) {
+                if (itemStack.get(DataComponents.FOOD).effects().isEmpty()) {
                     Haptics.getAnimation(Haptics.Animations.CONSUME).playSingle(true, null);
                 } else {
                     Haptics.getAnimation(Haptics.Animations.CONSUME_EFFECT).playSingle(true, null);
@@ -221,7 +221,7 @@ public class HapticTracker implements Tracker {
             if (!player.clientLevel.isRaining()) return;
 
             boolean isSnow = player.clientLevel.getBiome(player.blockPosition()).value()
-                .coldEnoughToSnow(player.blockPosition(), player.level().getSeaLevel());
+                .coldEnoughToSnow(player.blockPosition());
 
             // Terminal Velocity of rain in m/s
             Vec3 rainFall = new Vec3(0, -9, 0);

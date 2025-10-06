@@ -23,8 +23,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -165,8 +165,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
      * inject into {@link LivingEntity#isDamageSourceBlocked}
      */
     @Override
-    protected ItemStack vivecraft$roomscaleShieldBlockingItem(
-        ItemStack original, DamageSource damageSource, LocalBooleanRef roomscaleBlocked)
+    protected boolean vivecraft$roomscaleShieldBlockingItem(
+        boolean isBlocking, DamageSource damageSource, LocalBooleanRef roomscaleBlocked)
     {
         // in case it wasn't reset the last time, since isDamageSourceBlocked is not just called from the serverHurt
         this.vivecraft$roomscaleShieldItem = null;
@@ -174,7 +174,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
 
         ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
         // only when VR and not already blocking, and if it is a directional damage
-        if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && (original == null || original.isEmpty()) &&
+        if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && !isBlocking &&
             damageSource.getSourcePosition() != null && serverVivePlayer != null && serverVivePlayer.isVR())
         {
             Vec3 dmgPos = damageSource.getSourcePosition();
@@ -189,8 +189,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                 InteractionHand hand = InteractionHand.values()[i];
                 ItemStack stack = this.getItemBySlot(LivingEntity.getSlotForHand(hand));
                 // check for shield and do not bypass item cooldowns
-                if (stack != null && stack.getItem().getUseAnimation(stack) == ItemUseAnimation.BLOCK &&
-                    !this.getCooldowns().isOnCooldown(stack))
+                if (stack != null && stack.getItem().getUseAnimation(stack) == UseAnim.BLOCK &&
+                    !this.getCooldowns().isOnCooldown(stack.getItem()))
                 {
                     // check if it blocks
                     Vector3fc sideDir;
@@ -211,19 +211,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                         angle = shieldDir.dot(dmgDir);
                     } else {
                         // horizontal direction to the player
-                        Vec3 dmgDir = dmgPos.subtract(this.position()).horizontal().normalize();
-                        angle = shieldDir.horizontal().normalize().dot(dmgDir);
+                        Vec3 dmgDir = dmgPos.subtract(this.position());
+                        dmgDir = new Vec3(dmgDir.x, 0, dmgDir.z).normalize();
+                        Vec3 shieldHor = new Vec3(shieldDir.x, 0, shieldDir.z).normalize();
+                        angle = shieldHor.dot(dmgDir);
                     }
                     if (angle > 0.5) {
                         roomscaleBlocked.set(true);
                         this.vivecraft$roomscaleShieldItem = stack;
                         this.vivecraft$roomscaleShieldHand = hand;
-                        return stack;
+                        return true;
                     }
                 }
             }
         }
-        return original;
+        return isBlocking;
     }
 
     /**
@@ -359,7 +361,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         }
     }
 
-    @Inject(method = "hurtServer", at = @At("RETURN"))
+    @Inject(method = "hurt", at = @At("RETURN"))
     private void vivecraft$sendDamageDir(
         CallbackInfoReturnable<Boolean> cir, @Local(argsOnly = true) DamageSource damageSource)
     {

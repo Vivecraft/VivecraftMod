@@ -342,7 +342,7 @@ public class DebugRenderHelper {
      * @param points list of points the line should follow, at least 2
      */
     public static void renderLine(Vector3fc color, Vector3fc... points) {
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
@@ -361,7 +361,7 @@ public class DebugRenderHelper {
      * @param color  color of the line
      */
     public static void renderLine(List<Pair<Vector3fc, Boolean>> points, Vector3fc color) {
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
@@ -392,7 +392,7 @@ public class DebugRenderHelper {
      * @param points list of points the line should follow
      */
     public static void renderLine(Vector3fc color, Vec3 camPos, Iterable<Vec3> points) {
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
@@ -546,7 +546,7 @@ public class DebugRenderHelper {
      * @param color   circle color
      */
     public static void renderCircle(Vector3fc center, Vector3fc forward, float radius, Vector3fc color) {
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
@@ -563,7 +563,7 @@ public class DebugRenderHelper {
      * @param color  sphere color
      */
     public static void renderSphere(Vector3fc center, float radius, Vector3fc color) {
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
@@ -584,7 +584,7 @@ public class DebugRenderHelper {
      * @param color  sphere color
      */
     public static void renderCone(Vector3fc tip, Vector3fc dir, float angle, float length, Vector3fc color) {
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
@@ -619,7 +619,7 @@ public class DebugRenderHelper {
      * @param color  sphere color
      */
     public static void renderCylinder(Vector3fc bottom, Vector3fc topDir, float radius, Vector3fc color) {
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 

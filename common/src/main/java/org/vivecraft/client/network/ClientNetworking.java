@@ -300,8 +300,7 @@ public class ClientNetworking {
         OVERRIDDEN_PITCH = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
         OVERRIDDEN_YAW = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
         ((LocalPlayer) player).connection.send(
-            new ServerboundMovePlayerPacket.Rot(OVERRIDDEN_YAW, OVERRIDDEN_PITCH, player.onGround(),
-                player.horizontalCollision));
+            new ServerboundMovePlayerPacket.Rot(OVERRIDDEN_YAW, OVERRIDDEN_PITCH, player.onGround()));
         OVERRIDE_ACTIVE = true;
     }
 

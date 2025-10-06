@@ -168,18 +168,18 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
                 positionConnectedLimb(player, mainShoulder, mainHand, this.rotInfo.mainHandPos,
                     this.rotInfo.mainHandQuat, -offset, this.rotInfo.rightElbowPos, true, this.mainArm, useWorldScale);
             } else {
-                positionSplitLimb(renderState, mainShoulder, mainHand, this.rotInfo.mainHandPos,
+                positionSplitLimb(player, mainShoulder, mainHand, this.rotInfo.mainHandPos,
                     this.rotInfo.mainHandQuat, 0F, -offset, this.rotInfo.rightElbowPos, true, this.mainArm,
                     useWorldScale);
             }
 
             // offhand
             if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
-                positionConnectedLimb(renderState, offShoulder, offHand, this.rotInfo.offHandPos,
+                positionConnectedLimb(player, offShoulder, offHand, this.rotInfo.offHandPos,
                     this.rotInfo.offHandQuat, offset, this.rotInfo.leftElbowPos, true, this.mainArm.getOpposite(),
                     useWorldScale);
             } else {
-                positionSplitLimb(renderState, offShoulder, offHand, this.rotInfo.offHandPos, this.rotInfo.offHandQuat,
+                positionSplitLimb(player, offShoulder, offHand, this.rotInfo.offHandPos, this.rotInfo.offHandQuat,
                     0F, offset, this.rotInfo.leftElbowPos, true, this.mainArm.getOpposite(), useWorldScale);
             }
 
@@ -262,17 +262,17 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
      * @param arm       arm this is positioning, to check if the swing animation should be applied
      */
     protected void positionSplitLimb(
-        PlayerRenderState renderState, ModelPart upper, ModelPart lower, Vector3fc lowerPos, Quaternionfc lowerRot,
+        LivingEntity player, ModelPart upper, ModelPart lower, Vector3fc lowerPos, Quaternionfc lowerRot,
         float lowerXRot, float lowerXOffset, Vector3fc jointPos, boolean jointDown, HumanoidArm arm,
         boolean useWorldScale)
     {
         // place lower directly at the lower point
-        ModelUtils.worldToModel(renderState, lowerPos, this.rotInfo, this.bodyYaw, useWorldScale, this.tempV);
+        ModelUtils.worldToModel(player, lowerPos, this.rotInfo, this.bodyYaw, useWorldScale, this.tempV);
         lower.setPos(this.tempV.x, this.tempV.y, this.tempV.z);
 
         // joint estimation
         // point the elbow away from the hand direction
-        ModelUtils.estimateJointDir(upper, lower, lowerRot, this.bodyYaw, jointDown, jointPos, renderState,
+        ModelUtils.estimateJointDir(upper, lower, lowerRot, this.bodyYaw, jointDown, jointPos, player,
             this.rotInfo, useWorldScale, this.tempV2, this.tempV);
 
         // get joint
@@ -321,11 +321,11 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
      * @param arm       arm this is positioning, to check if the swing animation should be applied
      */
     protected void positionConnectedLimb(
-        PlayerRenderState renderState, ModelPart upper, ModelPart lower, Vector3fc lowerPos, Quaternionfc lowerRot,
+        LivingEntity player, ModelPart upper, ModelPart lower, Vector3fc lowerPos, Quaternionfc lowerRot,
         float lowerXOffset, Vector3fc jointPos, boolean jointDown, HumanoidArm arm, boolean useWorldScale)
     {
         // position lower
-        ModelUtils.worldToModel(renderState, lowerPos, this.rotInfo, this.bodyYaw, useWorldScale, this.tempV);
+        ModelUtils.worldToModel(player, lowerPos, this.rotInfo, this.bodyYaw, useWorldScale, this.tempV);
         float armLength = 10F;
         if (arm != null) {
             // increase arm length to the front, feels better, since human shoulders can move forward
@@ -345,7 +345,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         lower.setPos(this.tempV.x, this.tempV.y, this.tempV.z);
 
         // point the elbow away from the hand direction
-        ModelUtils.estimateJointDir(upper, lower, lowerRot, this.bodyYaw, jointDown, jointPos, renderState,
+        ModelUtils.estimateJointDir(upper, lower, lowerRot, this.bodyYaw, jointDown, jointPos, player,
             this.rotInfo, useWorldScale, this.tempV2, this.tempV);
 
         // get joint

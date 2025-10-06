@@ -1523,9 +1523,8 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 try {
-                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse((String) value)).get()
-                        .value();
-                    return prefix + ClientUtils.getNameFromSoundEvent(se.location()).getString();
+                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse((String) value));
+                    return prefix + ClientUtils.getNameFromSoundEvent(se.getLocation()).getString();
                 } catch (Exception e) {
                     return prefix + "unknown sound: " + value;
                 }

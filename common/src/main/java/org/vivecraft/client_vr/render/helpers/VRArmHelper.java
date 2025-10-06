@@ -289,7 +289,6 @@ public class VRArmHelper {
 
                 // TODO SHADERS use a shader with lightmaps
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
                 ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
                 if (size > 0.0F) {

@@ -5,7 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.vehicle.AbstractBoat;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.phys.Vec3;
@@ -70,7 +70,7 @@ public class VehicleTracker implements Tracker {
         Entity entity = player.getVehicle();
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
-        if (entity instanceof AbstractHorse || entity instanceof AbstractBoat) {
+        if (entity instanceof AbstractHorse || entity instanceof Boat) {
             if (player.zza > 0) {
                 return getFreeMoveDirection();
             }

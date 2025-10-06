@@ -47,10 +47,8 @@ public class ShadersHelper {
      * @param resourceLocation ResourceLocation of the texture to bind
      */
     public static void bindTexture(ResourceLocation resourceLocation) {
+        Minecraft.getInstance().getTextureManager().bindForSetup(resourceLocation);
         RenderSystem.setShaderTexture(0, resourceLocation);
-        if (isShaderActive()) {
-            RenderSystem.bindTexture(RenderSystem.getShaderTexture(0));
-        }
     }
 
     /**
