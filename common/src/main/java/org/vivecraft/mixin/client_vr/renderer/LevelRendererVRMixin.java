@@ -36,12 +36,12 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
-import org.vivecraft.client_vr.gameplay.trackers.InteractTracker;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.gameplay.interact_modules.BlockInteractionModule;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -113,7 +113,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Inject(method = "onResourceManagerReload", at = @At("TAIL"))
     private void vivecraft$reinitVR(ResourceManager resourceManager, CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
-            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
+            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffersMaybe("Resource Reload");
         }
     }
 
@@ -189,15 +189,13 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             OptifineHelper.beginOutlineShader();
         }
 
-        InteractTracker interactTracker = ClientDataHolderVR.getInstance().interactTracker;
+        BlockInteractionModule blockModule = ClientDataHolderVR.getInstance().blockModule;
 
         for (int c = 0; c < 2; c++) {
-            if (interactTracker.isInteractActive(c) &&
-                (interactTracker.inBlockHit[c] != null || interactTracker.bukkit[c]))
-            {
-                BlockPos blockpos = interactTracker.inBlockHit[c] != null ?
-                    interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(
-                    ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+            if (blockModule.isActive(c)) {
+                BlockPos blockpos = blockModule.inBlockHit[c] != null ? blockModule.inBlockHit[c].getBlockPos() :
+                    BlockPos.containing(
+                        ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                 BlockState blockstate = this.level.getBlockState(blockpos);
                 this.renderHitOutline(poseStack,
                     this.renderBuffers.bufferSource().getBuffer(RenderType.lines()),

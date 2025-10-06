@@ -1,6 +1,6 @@
 package org.vivecraft.mod_compat_vr.iris.extensions;
 
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 
 public interface PipelineManagerExtension {
 

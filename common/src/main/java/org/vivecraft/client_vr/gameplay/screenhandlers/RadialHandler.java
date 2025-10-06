@@ -33,7 +33,7 @@ public class RadialHandler {
     private static boolean LAST_PRESSED_SHIFT_R;
 
     public static boolean setOverlayShowing(boolean showingState, ControllerType controller) {
-        if (ClientDataHolderVR.KIOSK) {
+        if (DH.kiosk) {
             return false;
         } else {
             if (DH.vrSettings.seated) {

@@ -10,13 +10,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-public class JumpTracker extends Tracker {
+public class JumpTracker implements Tracker {
     // in room space
     public Vector3f[] latchStart = new Vector3f[]{new Vector3f(), new Vector3f()};
 
@@ -25,9 +26,12 @@ public class JumpTracker extends Tracker {
     public Vec3[] latchStartPlayer = new Vec3[]{Vec3.ZERO, Vec3.ZERO};
     private boolean c0Latched = false;
     private boolean c1Latched = false;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public JumpTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     /**
@@ -91,7 +95,7 @@ public class JumpTracker extends Tracker {
     }
 
     @Override
-    public void idleTick(LocalPlayer player) {
+    public void idleProcess(LocalPlayer player) {
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(hasClimbeyJumpEquipped(player) &&
             (this.isActive(player) ||
                 (ClimbTracker.hasClimbeyClimbEquipped(player) && this.dh.climbTracker.isGrabbingLadder())
@@ -99,13 +103,18 @@ public class JumpTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.c1Latched = false;
         this.c0Latched = false;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         boolean climbeyEquipped = hasClimbeyJumpEquipped(player);
 
         if (climbeyEquipped) {

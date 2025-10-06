@@ -6,7 +6,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import org.vivecraft.client.gui.widgets.TextScrollWidget;
+import org.vivecraft.client.gui.framework.screens.ChangeableParentScreen;
+import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class ErrorScreen extends Screen implements ChangeableParentScreen {
@@ -48,7 +49,7 @@ public class ErrorScreen extends Screen implements ChangeableParentScreen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
     }
 
     @Override

@@ -16,10 +16,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -67,11 +67,9 @@ public abstract class EntityRenderDispatcherVRMixin implements EntityRenderDispa
         } else {
             Vec3 source;
             if (RenderPass.isThirdPerson(ClientDataHolderVR.getInstance().currentPass)) {
-                source = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld()
-                    .getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
+                source = this.camera.getPosition();
             } else {
-                source = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER)
-                    .getPosition();
+                source = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().hmd.getPosition();
             }
             Vec3 direction = entity.position()
                 .add(0.0D, entity.getBbHeight() * scale + offset, 0.0D)

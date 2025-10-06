@@ -1,10 +1,10 @@
 package org.vivecraft.client_vr.gameplay;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import org.vivecraft.client.utils.ClientUtils;
 
 public class VRMovementStyle {
 
@@ -138,15 +138,11 @@ public class VRMovementStyle {
             this.arcAiming = true;
         } else {
             changedStyle = false;
-            if (Minecraft.getInstance().gui != null) {
-                Minecraft.getInstance().gui.getChat()
-                    .addMessage(Component.literal("Unknown teleport style requested: " + requestedStyle));
-            }
+            ClientUtils.addChatMessage(Component.literal("Unknown teleport style requested: " + requestedStyle));
         }
 
-        if (changedStyle && Minecraft.getInstance().gui != null) {
-            Minecraft.getInstance().gui.getChat()
-                .addMessage(Component.literal("Teleport style (RCTRL-M): " + this.name));
+        if (changedStyle) {
+            ClientUtils.addChatMessage(Component.literal("Teleport style (RCTRL-M): " + this.name));
         }
     }
 }

@@ -14,10 +14,10 @@ import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.render.models.FeetModel;
 import org.vivecraft.client.utils.ModelUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.utils.MathUtils;
 
 public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayerModel_WithArms<T> implements FeetModel {
@@ -126,15 +126,17 @@ public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayer
                 // vanilla walking animation on top
                 // limbSwingAmount = 1;
                 float limbRotation = Mth.cos(limbSwing * 0.6662F) * limbSwingAmount;
-                this.footOffset.set(0, -0.5F, 0)
+                this.footOffset
+                    .set(0, -0.5F, 0)
                     .rotateX(limbRotation)
                     .sub(0, -0.5F, 0)
                     .mul(1F, 0.75F, 1F)
                     .rotateY(-this.bodyYaw);
                 this.kneeOffset
                     .set(0, -0.5F, 0)
-                    .rotateX(Math.abs(limbRotation))
-                    .sub(0, -0.5F, 0);
+                    .rotateX(-Math.abs(limbRotation))
+                    .sub(0, -0.5F, 0)
+                    .rotateY(-this.bodyYaw);
             } else {
                 this.footOffset.zero();
                 this.kneeOffset.zero();
@@ -144,7 +146,7 @@ public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayer
             Vector3fc kneePos;
             if (this.rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
                 this.footPos.set(this.leftLeg.x, 24 + Math.min(this.body.y, 0F), this.leftLeg.z);
-                ModelUtils.modelToWorld(player, this.footPos, this.rotInfo, this.bodyYaw, true, this.isMainPlayer,
+                ModelUtils.modelToWorld(player, this.footPos, this.rotInfo, this.bodyYaw, true, true,
                     this.footPos);
                 this.footQuat.identity().rotateY(Mth.PI - this.bodyYaw);
                 if (player.isAutoSpinAttack()) {
@@ -165,18 +167,18 @@ public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayer
 
             this.footPos.add(this.footOffset);
             if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
-                positionConnectedLimb(player, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, 0F, kneePos,
-                    false, null);
+                positionConnectedLimb(player, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, 0F,
+                    kneePos, false, null, true);
             } else {
                 this.footQuat.transform(MathUtils.BACK, this.footDir);
-                positionSplitLimb(player, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, -Mth.HALF_PI, 0F,
-                    kneePos, false, null);
+                positionSplitLimb(player, this.leftLeg, this.leftFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
+                    0F, kneePos, false, null, true);
             }
 
             // right leg
             if (this.rotInfo.fbtMode == FBTMode.ARMS_ONLY) {
                 this.footPos.set(this.rightLeg.x, 24 + Math.min(this.body.y, 0F), this.rightLeg.z);
-                ModelUtils.modelToWorld(player, this.footPos, this.rotInfo, this.bodyYaw, true, this.isMainPlayer,
+                ModelUtils.modelToWorld(player, this.footPos, this.rotInfo, this.bodyYaw, true, true,
                     this.footPos);
                 if (player.isAutoSpinAttack()) {
                     // player is offset 1 block during the spin
@@ -197,12 +199,12 @@ public class VRPlayerModel_WithArmsLegs<T extends LivingEntity> extends VRPlayer
 
             this.footPos.add(-this.footOffset.x, this.footOffset.y, -this.footOffset.z);
             if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
-                positionConnectedLimb(player, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, 0F, kneePos,
-                    false, null);
+                positionConnectedLimb(player, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, 0F,
+                    kneePos, false, null, true);
             } else {
                 this.footQuat.transform(MathUtils.BACK, this.footDir);
-                positionSplitLimb(player, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, -Mth.HALF_PI, 0F,
-                    kneePos, false, null);
+                positionSplitLimb(player, this.rightLeg, this.rightFoot, this.footPos, this.footQuat, -Mth.HALF_PI,
+                    0F, kneePos, false, null, true);
             }
         }
 

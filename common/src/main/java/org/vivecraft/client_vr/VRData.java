@@ -4,12 +4,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.api.data.VRBodyPartData;
+import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.FBTMode;
+import org.vivecraft.common.api_impl.data.VRBodyPartDataImpl;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.utils.MathUtils;
 
 import javax.annotation.Nullable;
@@ -18,6 +23,9 @@ import java.lang.Math;
 public class VRData {
     // headset center
     public VRDevicePose hmd;
+    // smoothed headset center
+    public VRDevicePose center;
+
     // left eye
     public VRDevicePose eye0;
     // right eye
@@ -60,6 +68,9 @@ public class VRData {
     // pose positions get scaled by that
     public float worldScale;
 
+    // API pose object representing the data of this object
+    private VRPose vrPose;
+
     public VRData(Vec3 origin, float walkMul, float worldScale, float rotation) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         MCVR mcVR = dataHolder.vr;
@@ -75,6 +86,24 @@ public class VRData {
 
         // headset
         this.hmd = new VRDevicePose(this, mcVR.hmdRotation, scaledPos, mcVR.getHmdVector());
+
+        // smoothed headset, only when needed
+        float smoothing = dataHolder.vrSettings.displayMirrorCenterSmooth;
+        if (smoothing > 0.0F && (dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON ||
+            (dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY &&
+                dataHolder.vrSettings.mixedRealityUndistorted
+            )
+        ))
+        {
+            Matrix4f smoothedRotation = new Matrix4f().rotation(mcVR.hmdRotHistory.averageRotation(smoothing))
+                .rotateY(this.rotation_radians).transpose();
+            this.center = new VRDevicePose(this,
+                smoothedRotation,
+                mcVR.hmdHistory.averagePosition(smoothing).add(scaleOffset),
+                smoothedRotation.transformDirection(MathUtils.BACK, new Vector3f()));
+        } else {
+            this.center = this.hmd;
+        }
 
         this.eye0 = new VRDevicePose(this,
             mcVR.getEyeRotation(RenderPass.LEFT),
@@ -244,6 +273,26 @@ public class VRData {
     }
 
     /**
+     * @param bodyPart BodyPart to get the data for
+     * @return the device pose for the specified BodyPart, if the device is not available {@code null} is returned
+     */
+    @Nullable
+    public VRDevicePose getBodyPart(VRBodyPart bodyPart) {
+        return switch (bodyPart) {
+            case MAIN_HAND -> this.c0;
+            case OFF_HAND -> this.c1;
+            case WAIST -> this.waist;
+            case LEFT_FOOT -> this.foot_left;
+            case RIGHT_FOOT -> this.foot_right;
+            case LEFT_KNEE -> this.knee_left;
+            case RIGHT_KNEE -> this.knee_right;
+            case LEFT_ELBOW -> this.elbow_left;
+            case RIGHT_ELBOW -> this.elbow_right;
+            case HEAD -> this.hmd;
+        };
+    }
+
+    /**
      * @return the device pose for the device that is used to aim
      */
     public VRDevicePose getAim() {
@@ -282,8 +331,8 @@ public class VRData {
 
             Vec3 headPos = this.hmd.getPosition();
 
-            Vector3f c1Pos = this.c1.getPosition().subtract(headPos).toVector3f();
-            Vector3f c0Pos = this.c0.getPosition().subtract(headPos).toVector3f();
+            Vector3f c1Pos = MathUtils.subtractToVector3f(this.c1.getPosition(), headPos);
+            Vector3f c0Pos = MathUtils.subtractToVector3f(this.c0.getPosition(), headPos);
             Vector3f head = this.hmd.getDirection();
 
             return MathUtils.bodyYawRad(c0Pos, c1Pos, head);
@@ -315,15 +364,29 @@ public class VRData {
         }
     }
 
+    private Vector3f getHeadPivotOffset() {
+        // scale pivot point with world scale, to prevent unwanted player movement
+        return this.hmd.getMatrix()
+            .transformPosition(new Vector3f(0.0F, -0.1F * this.worldScale, 0.1F * this.worldScale));
+    }
+
     /**
+     * estimates the head pivot
+     *
      * @return estimated pivot point that the players head rotates around, in world space
      */
     public Vec3 getHeadPivot() {
-        Vec3 eye = this.hmd.getPosition();
-        // scale pivot point with world scale, to prevent unwanted player movement
-        Vector3f headPivotOffset = this.hmd.getMatrix()
-            .transformPosition(new Vector3f(0.0F, -0.1F * this.worldScale, 0.1F * this.worldScale));
-        return eye.add(headPivotOffset.x, headPivotOffset.y, headPivotOffset.z);
+        Vector3f headPivotOffset = getHeadPivotOffset();
+        return this.hmd.getPosition().add(headPivotOffset.x, headPivotOffset.y, headPivotOffset.z);
+    }
+
+    /**
+     * estimates the head pivot as a float Vector, is safe to use for VRData marked as {@code room}
+     *
+     * @return estimated pivot point that the players head rotates around.
+     */
+    public Vector3f getHeadPivotF() {
+        return this.hmd.getPositionF().add(getHeadPivotOffset());
     }
 
     /**
@@ -357,7 +420,7 @@ public class VRData {
      */
     public VRDevicePose getEye(RenderPass pass) {
         return switch (pass) {
-            case CENTER -> this.hmd;
+            case CENTER -> this.center;
             case LEFT -> this.eye0;
             case RIGHT -> this.eye1;
             case THIRD -> this.c2;
@@ -366,6 +429,35 @@ public class VRData {
             case CAMERA -> this.cam;
             default -> this.hmd;
         };
+    }
+
+    /**
+     * @return this data in a manner better-suited for the API
+     */
+    public VRPose asVRPose() {
+        if (this.vrPose == null) {
+            this.vrPose = new VRPoseImpl(
+                this.hmd.asVRBodyPart(),
+                this.c0.asVRBodyPart(),
+                this.c1.asVRBodyPart(),
+                getDataIfAvailable(this.foot_right, this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_FOOT)),
+                getDataIfAvailable(this.foot_left, this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_FOOT)),
+                getDataIfAvailable(this.waist, this.fbtMode.bodyPartAvailable(VRBodyPart.WAIST)),
+                getDataIfAvailable(this.knee_right, this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_KNEE)),
+                getDataIfAvailable(this.knee_left, this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_KNEE)),
+                getDataIfAvailable(this.elbow_right, this.fbtMode.bodyPartAvailable(VRBodyPart.RIGHT_ELBOW)),
+                getDataIfAvailable(this.elbow_left, this.fbtMode.bodyPartAvailable(VRBodyPart.LEFT_ELBOW)),
+                ClientDataHolderVR.getInstance().vrSettings.seated,
+                ClientDataHolderVR.getInstance().vrSettings.reverseHands,
+                this.fbtMode
+            );
+        }
+        return this.vrPose;
+    }
+
+    @Nullable
+    private static VRBodyPartData getDataIfAvailable(VRDevicePose pose, boolean partAvailable) {
+        return partAvailable ? pose.asVRBodyPart() : null;
     }
 
     @Override
@@ -510,6 +602,14 @@ public class VRData {
          */
         public Matrix4f getMatrix() {
             return new Matrix4f().rotationY(VRData.this.rotation_radians).mul(this.matrix);
+        }
+
+        public VRBodyPartData asVRBodyPart() {
+            return new VRBodyPartDataImpl(
+                getPosition(),
+                new Vec3(getDirection()),
+                new Quaternionf().setFromUnnormalized(getMatrix())
+            );
         }
 
         @Override

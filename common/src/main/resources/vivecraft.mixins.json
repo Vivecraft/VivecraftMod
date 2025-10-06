@@ -12,7 +12,6 @@
     "client.gui.screens.JoinMultiplayerScreenMixin",
     "client.gui.screens.ScreenMixin",
     "client.gui.screens.TitleScreenMixin",
-    "client.main.MainMixin",
     "client.model.PlayerModelMixin",
     "client.multiplayer.ClientLevelMixin",
     "client.particle.SparkParticleMixin",
@@ -75,6 +74,7 @@
     "client_vr.renderer.entity.GuardianRendererVRMixin",
     "client_vr.renderer.entity.layers.CustomHeadLayerMixin",
     "client_vr.renderer.entity.layers.HumanoidArmorLayerMixin",
+    "client_vr.sounds.SoundEngineVRMixin",
     "client_vr.tutorial.MovementTutorialStepInstanceVRMixin",
     "client_vr.tutorial.OpenInventoryTutorialStepVRMixin",
     "client_vr.tutorial.PunchTreeTutorialStepInstanceVRMixin",
@@ -97,9 +97,11 @@
     "server.ServerGamePacketListenerImplMixin",
     "server.ServerPlayerMixin",
     "server.TrackedEntityAccessor",
+    "server.level.ServerPlayerGameModeMixin",
     "server.players.PlayerListMixin",
     "world.entity.InventoryMixin",
     "world.entity.LivingEntityMixin",
+    "world.entity.MobMixin",
     "world.entity.PlayerMixin",
     "world.entity.ai.goal.SwellGoalMixin",
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
@@ -112,6 +114,9 @@
     "world.entity.projectile.ThrowableProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
     "world.item.CrossbowItemMixin",
-    "world.item.crafting.ShapedRecipeMixin"
+    "world.item.ItemMixin",
+    "world.item.CrossbowItemMixin",
+    "world.item.crafting.ShapedRecipeMixin",
+    "world.level.block.FenceGateBlockServerMixin"
   ]
 }

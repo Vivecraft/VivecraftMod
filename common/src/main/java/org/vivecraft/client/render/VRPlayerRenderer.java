@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.render.armor.VRArmorLayer;
 import org.vivecraft.client.render.armor.VRArmorModel_WithArms;
@@ -20,7 +21,6 @@ import org.vivecraft.client.render.armor.VRArmorModel_WithArmsLegs;
 import org.vivecraft.client.utils.ScaleHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -123,7 +123,9 @@ public class VRPlayerRenderer extends PlayerRenderer {
         ClientVRPlayers.RotInfo rotInfo = ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID());
         if (rotInfo != null) {
             float scale = rotInfo.heightScale;
-            if (VRState.VR_RUNNING && player == Minecraft.getInstance().player) {
+            if ((VRState.VR_RUNNING && player == Minecraft.getInstance().player) ||
+                ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale)
+            {
                 // remove entity scale, since the entity is already scaled by that before
                 scale *= rotInfo.worldScale / ScaleHelper.getEntityEyeHeightScale(player, partialTick);
             }

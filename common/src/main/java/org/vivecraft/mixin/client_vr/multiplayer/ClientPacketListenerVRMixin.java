@@ -2,11 +2,9 @@ package org.vivecraft.mixin.client_vr.multiplayer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,11 +14,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerVRMixin {
@@ -36,49 +33,42 @@ public abstract class ClientPacketListenerVRMixin {
     private void vivecraft$init(CallbackInfo ci) {
         if (ClientNetworking.NEEDS_RESET) {
             ClientNetworking.resetServerSettings();
-            ClientNetworking.DISPLAYED_CHAT_MESSAGE = false;
-            ClientNetworking.DISPLAYED_CHAT_WARNING = false;
+            ClientNetworking.resetOnceServerSettings();
             ClientNetworking.NEEDS_RESET = false;
         }
     }
 
     @Inject(method = "handleLogin", at = @At("TAIL"))
     private void vivecraft$resetOnLogin(CallbackInfo ci) {
-        // clear old data
-        ClientNetworking.resetServerSettings();
-
-        // request server data
-        ClientNetworking.sendVersionInfo();
-
-        if (VRState.VR_INITIALIZED) {
-            // set the timer, even if vr is currently not running
-            ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer = 200;
-            ClientDataHolderVR.getInstance().vrPlayer.teleportWarning = true;
-            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning = false;
-        }
+        this.vivecraft$resetServerState();
     }
 
     @Inject(method = "handleRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V", shift = At.Shift.AFTER))
     private void vivecraft$resetOnDimensionChange(CallbackInfo ci) {
+        this.vivecraft$resetServerState();
+    }
+
+    @Unique
+    private void vivecraft$resetServerState() {
         // clear old data
         ClientNetworking.resetServerSettings();
 
         // request server data
         ClientNetworking.sendVersionInfo();
 
-        if (VRState.VR_INITIALIZED) {
-            // set the timer, even if vr is currently not running
-            ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer = 200;
-            ClientDataHolderVR.getInstance().vrPlayer.teleportWarning = true;
-            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning = false;
-        }
+        // set the timer, even if vr is currently not running
+        ClientNetworking.CHAT_WARNING_TIMER = 200;
+        ClientNetworking.ABLE_TO_DISPLAY_CHAT_WARNINGS = false;
+        ClientNetworking.TELEPORT_WARNING = true;
+        ClientNetworking.VR_SWITCHING_WARNING = false;
+        ClientNetworking.HEAD_AIM_WARNING = false;
+        ClientNetworking.REQUESTED_DAMAGE_DIRECTION = false;
     }
 
     @Inject(method = "close", at = @At("TAIL"))
     private void vivecraft$cleanup(CallbackInfo ci) {
         ClientNetworking.resetServerSettings();
-        ClientNetworking.DISPLAYED_CHAT_MESSAGE = false;
-        ClientNetworking.DISPLAYED_CHAT_WARNING = false;
+        ClientNetworking.resetOnceServerSettings();
         ClientNetworking.NEEDS_RESET = true;
     }
 
@@ -98,7 +88,7 @@ public abstract class ClientPacketListenerVRMixin {
             packet.sender() == this.minecraft.player.getUUID()
         ))
         {
-            vivecraft$triggerHapticSound();
+            ClientUtils.triggerChatHapticSound();
         }
         this.vivecraft$lastMsg = null;
     }
@@ -109,38 +99,23 @@ public abstract class ClientPacketListenerVRMixin {
             packet.content().getString().contains(this.vivecraft$lastMsg)
         ))
         {
-            vivecraft$triggerHapticSound();
+            ClientUtils.triggerChatHapticSound();
         }
         this.vivecraft$lastMsg = null;
-    }
-
-    @Unique
-    private void vivecraft$triggerHapticSound() {
-        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
-        if (dataHolder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
-            if (!dataHolder.vrSettings.seated &&
-                (dataHolder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC ||
-                    dataHolder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH
-                ))
-            {
-                dataHolder.vr.triggerHapticPulse(ControllerType.LEFT, 0.2F, 1000.0F, 1.0F);
-            }
-
-            if (dataHolder.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND ||
-                dataHolder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
-            {
-                Vec3 controllerPos = dataHolder.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                this.minecraft.level.playLocalSound(
-                    controllerPos.x(), controllerPos.y(), controllerPos.z(),
-                    BuiltInRegistries.SOUND_EVENT.get(
-                        new ResourceLocation(dataHolder.vrSettings.chatNotificationSound)),
-                    SoundSource.NEUTRAL, 0.3F, 0.1F, false);
-            }
-        }
     }
 
     @Inject(method = "handleOpenScreen", at = @At("HEAD"))
     private void vivecraft$markScreenActive(CallbackInfo ci) {
         GuiHandler.GUI_APPEAR_OVER_BLOCK_ACTIVE = true;
+    }
+
+    @Inject(at = @At("TAIL"), method = "handleExplosion")
+    public void vivecraft$handleExplosion(ClientboundExplodePacket clientboundExplodePacket, CallbackInfo ci) {
+        if (VRState.VR_INITIALIZED) {
+            ClientDataHolderVR.getInstance().hapticTracker.handleExplode(
+                new Vec3(clientboundExplodePacket.getX(),
+                    clientboundExplodePacket.getY(),
+                    clientboundExplodePacket.getZ()));
+        }
     }
 }

@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.*;
@@ -50,6 +50,29 @@ public class FileUtils {
         } catch (Exception exception) {
             handleAssetException(exception, sourcePath, required);
         }
+    }
+
+    /**
+     * loads contents of an asset to a String
+     *
+     * @param sourcePath Path to the source file inside the mods assets
+     * @param required   if set and an error occurs, it will not be caught
+     * @return contents of the asset, or {@code null} if there was an error and {@code required} is false
+     */
+    public static String loadAssetToString(String sourcePath, boolean required) {
+        try {
+            Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
+                .getResource(new ResourceLocation("vivecraft", sourcePath));
+
+            if (resource.isPresent()) {
+                try (InputStream is = resource.get().open()) {
+                    return IOUtils.toString(is, StandardCharsets.UTF_8);
+                }
+            }
+        } catch (Exception exception) {
+            handleAssetException(exception, sourcePath, required);
+        }
+        return null;
     }
 
     /**
@@ -105,7 +128,7 @@ public class FileUtils {
      * @return if a file was unpacked
      */
     public static boolean unpackFile(String sourceFile, String targetFile, boolean required) {
-        return unpackFile(Xplat.getJarPath().resolve(sourceFile), new File(targetFile), required);
+        return unpackFile(Xloader.getJarPath().resolve(sourceFile), new File(targetFile), required);
     }
 
     /**
@@ -122,7 +145,7 @@ public class FileUtils {
 
         boolean didExtractSomething = false;
 
-        try (Stream<Path> natives = Files.list(Xplat.getJarPath().resolve(source))) {
+        try (Stream<Path> natives = Files.list(Xloader.getJarPath().resolve(source))) {
             for (Path file : natives.collect(Collectors.toCollection(ArrayList::new))) {
                 didExtractSomething |= unpackFile(file, new File(target + "/" + file.getFileName()), false);
             }

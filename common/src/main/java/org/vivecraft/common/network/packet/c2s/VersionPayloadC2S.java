@@ -2,6 +2,7 @@ package org.vivecraft.common.network.packet.c2s;
 
 import com.google.common.base.Charsets;
 import net.minecraft.network.FriendlyByteBuf;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 
 /**
@@ -45,7 +46,8 @@ public record VersionPayloadC2S(String version, boolean vr, int maxVersion, int 
         if (parts.length >= 3) {
             return new VersionPayloadC2S(parts[0], vr, Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), false);
         } else {
-            return new VersionPayloadC2S(parts[0], vr, -1, -1, true);
+            return new VersionPayloadC2S(parts[0], vr, CommonNetworkHelper.NETWORK_VERSION_LEGACY,
+                CommonNetworkHelper.NETWORK_VERSION_LEGACY, true);
         }
     }
 }

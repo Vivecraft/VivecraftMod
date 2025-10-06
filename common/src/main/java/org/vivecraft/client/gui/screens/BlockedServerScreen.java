@@ -42,7 +42,7 @@ public class BlockedServerScreen extends Screen {
         this.renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
         this.message.renderCentered(guiGraphics, this.width / 2, 120);
     }
 }

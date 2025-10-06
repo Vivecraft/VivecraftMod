@@ -15,7 +15,6 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
@@ -55,10 +54,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.VivecraftClickEvent;
-import org.vivecraft.client.gui.screens.ChangeableParentScreen;
+import org.vivecraft.client.gui.framework.screens.ChangeableParentScreen;
 import org.vivecraft.client.gui.screens.ErrorScreen;
+import org.vivecraft.client.gui.screens.ServerVrChangesScreen;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -94,10 +95,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Unique
     private CameraType vivecraft$lastCameraType;
-
-    @Final
-    @Shadow
-    public Gui gui;
 
     @Shadow
     @Final
@@ -227,8 +224,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             VRState.initializeVR();
         } else if (VRState.VR_INITIALIZED) {
             // turn off VR if it was on before
-            vivecraft$switchVRState(false);
             VRState.destroyVR(true);
+            vivecraft$switchVRState(false);
         }
         if (!VRState.VR_INITIALIZED) {
             return;
@@ -262,7 +259,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (VRState.VR_RUNNING) {
             ClientDataHolderVR.getInstance().vrPlayer.preTick();
         }
-        if (VRState.VR_ENABLED) {
+        if (VRState.VR_INITIALIZED) {
             if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
                 ClientDataHolderVR.getInstance().menuWorldRenderer.checkTask();
                 if (ClientDataHolderVR.getInstance().menuWorldRenderer.isBuilding()) {
@@ -295,9 +292,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @ModifyArg(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V"))
     private boolean vivecraft$setupRenderGUI(boolean renderLevel) {
         if (VRState.VR_RUNNING) {
-            // set gui pass before setup, to always be in that pass and not a random one from last frame
-            RenderPassManager.setGUIRenderPass();
-
             try {
                 this.profiler.push("setupRenderConfiguration");
                 RenderHelper.checkGLError("pre render setup");
@@ -305,8 +299,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 RenderHelper.checkGLError("post render setup");
             } catch (Exception e) {
                 // something went wrong, disable VR
-                vivecraft$switchVRState(false);
                 VRState.destroyVR(true);
+                vivecraft$switchVRState(false);
                 VRSettings.LOGGER.error("Vivecraft: setupRenderConfiguration failed:", e);
                 if (e instanceof RenderConfigException renderConfigException) {
                     setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
@@ -318,6 +312,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             } finally {
                 this.profiler.pop();
             }
+
+            // set gui pass before setup, to always be in that pass and not a random one from last frame
+            RenderPassManager.setGUIRenderPass();
 
             RenderSystem.depthMask(true);
             RenderSystem.colorMask(true, true, true, true);
@@ -347,20 +344,23 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         return VRState.VR_RUNNING ? null : original;
     }
 
-    @WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen(II)V"))
-    private void vivecraft$blitMirror(RenderTarget instance, int width, int height, Operation<Void> original) {
-        if (!VRState.VR_RUNNING) {
-            original.call(instance, width, height);
-        } else {
+    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;unbindWrite()V"))
+    private void vivecraft$blitMirror(CallbackInfo ci) {
+        if (VRState.VR_RUNNING) {
             this.profiler.popPush("vrMirror");
+            RenderPassManager.setMirrorRenderPass();
+            this.mainRenderTarget.bindWrite(true);
             ShaderHelper.drawMirror();
             RenderHelper.checkGLError("post-mirror");
+        } else if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
+            // show message that the game is connecting to the vr runtime
+            RenderHelper.drawVRConnectingMessage();
         }
     }
 
     @Inject(method = "setCameraEntity", at = @At("HEAD"))
     private void vivecraft$rideEntity(Entity entity, CallbackInfo ci) {
-        if (VRState.VR_INITIALIZED) {
+        if (VRState.VR_INITIALIZED && entity != null) {
             if (entity != this.getCameraEntity()) {
                 // snap to entity, if it changed
                 ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(entity, true, false);
@@ -394,7 +394,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @WrapOperation(method = {"continueAttack", "startAttack"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))
     private void vivecraft$swingArmAttack(LocalPlayer instance, InteractionHand hand, Operation<Void> original) {
         if (VRState.VR_RUNNING) {
-            ClientDataHolderVR.getInstance().swingType = VRFirstPersonArmSwing.Attack;
+            ClientDataHolderVR.getInstance().swingType = VRFirstPersonArmSwing.ATTACK;
         }
         original.call(instance, hand);
     }
@@ -406,6 +406,12 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             !VRState.VR_RUNNING || ClientDataHolderVR.getInstance().vrSettings.seated || this.vivecraft$attackKeyDown;
         this.vivecraft$attackKeyDown = false;
         return call;
+    }
+
+    @WrapWithCondition(method = "continueAttack", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;missTime:I", opcode = Opcodes.PUTFIELD))
+    private boolean vivecraft$noDelayReset(Minecraft instance, int value) {
+        // don't reset the miss timer, while we are not repressing keys
+        return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().vr.ignorePressesNextFrame;
     }
 
     @ModifyExpressionValue(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;isDestroying()Z"))
@@ -436,7 +442,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     {
         if (VRState.VR_RUNNING) {
             if (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemstack)) {
-                ClientNetworking.sendActiveHand(hand);
+                ClientNetworking.sendActiveHand(hand, false);
             } else {
                 // no telescope use in standing vr
                 return null;
@@ -449,34 +455,35 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Inject(method = "startUseItem", at = @At("RETURN"))
     private void vivecraft$sendActiveHandStartReset(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
-            ClientNetworking.sendActiveHand(InteractionHand.MAIN_HAND);
+            ClientNetworking.resetActiveBodyPart();
         }
     }
 
     @WrapOperation(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))
     private void vivecraft$swingArmUse(LocalPlayer instance, InteractionHand hand, Operation<Void> original) {
         if (VRState.VR_RUNNING) {
-            ClientDataHolderVR.getInstance().swingType = VRFirstPersonArmSwing.Use;
+            ClientDataHolderVR.getInstance().swingType = VRFirstPersonArmSwing.USE;
         }
         original.call(instance, hand);
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void vivecraft$vrTick(CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().tickCounter++;
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+        dataHolder.tickCounter++;
 
         // general chat notifications
         if (this.level != null) {
             // update notification
-            if (!ClientDataHolderVR.getInstance().showedUpdateNotification && UpdateChecker.HAS_UPDATE &&
-                (ClientDataHolderVR.getInstance().vrSettings.alwaysShowUpdates ||
-                    !UpdateChecker.NEWEST_VERSION.equals(ClientDataHolderVR.getInstance().vrSettings.lastUpdate)
+            if (!dataHolder.showedUpdateNotification && UpdateChecker.HAS_UPDATE &&
+                (dataHolder.vrSettings.alwaysShowUpdates ||
+                    !UpdateChecker.NEWEST_VERSION.equals(dataHolder.vrSettings.lastUpdate)
                 ))
             {
-                ClientDataHolderVR.getInstance().vrSettings.lastUpdate = UpdateChecker.NEWEST_VERSION;
-                ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                ClientDataHolderVR.getInstance().showedUpdateNotification = true;
-                this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.updateAvailable",
+                dataHolder.vrSettings.lastUpdate = UpdateChecker.NEWEST_VERSION;
+                dataHolder.vrSettings.saveOptions();
+                dataHolder.showedUpdateNotification = true;
+                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.updateAvailable",
                     Component.literal(UpdateChecker.NEWEST_VERSION)
                         .withStyle(ChatFormatting.ITALIC, ChatFormatting.GREEN)).withStyle(
                     style -> style.withClickEvent(
@@ -486,77 +493,124 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
 
             // cached screen screen
-            if (ClientDataHolderVR.getInstance().cachedScreen != null) {
-                if (this.screen.getClass() != ClientDataHolderVR.getInstance().cachedScreen.getClass()) {
+            if (dataHolder.cachedScreen != null) {
+                if (this.screen.getClass() != dataHolder.cachedScreen.getClass()) {
                     // set cached screens here, in case Quickplay is used, this shouldn't be triggered in other cases, since the cached screen gets cleared if it's the same screen
-                    if (ClientDataHolderVR.getInstance().cachedScreen instanceof ChangeableParentScreen child) {
+                    if (dataHolder.cachedScreen instanceof ChangeableParentScreen child) {
                         child.setParent(this.screen);
                     }
-                    setScreen(ClientDataHolderVR.getInstance().cachedScreen);
+                    setScreen(dataHolder.cachedScreen);
                 }
-                ClientDataHolderVR.getInstance().cachedScreen = null;
+                dataHolder.cachedScreen = null;
             }
-        }
 
-        // VR enabled only chat notifications
-        if (VRState.VR_INITIALIZED && this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
+            // VR only chat notifications
             // server warnings
-            if (ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer >= 0 &&
-                --ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer == 0)
-            {
-                boolean showMessage = !ClientNetworking.DISPLAYED_CHAT_WARNING ||
-                    ClientDataHolderVR.getInstance().vrSettings.showServerPluginMissingMessageAlways;
-
-                // no server mod
-                if (ClientDataHolderVR.getInstance().vrPlayer.teleportWarning) {
-                    if (showMessage) {
-                        this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
-                    }
-                    ClientDataHolderVR.getInstance().vrPlayer.teleportWarning = false;
-
+            if (ClientNetworking.CHAT_WARNING_TIMER >= 0 && --ClientNetworking.CHAT_WARNING_TIMER == 0) {
+                ClientNetworking.ABLE_TO_DISPLAY_CHAT_WARNINGS = true;
+                if (ClientNetworking.TELEPORT_WARNING) {
                     // allow vr switching on vanilla server
                     ClientNetworking.SERVER_ALLOWS_VR_SWITCHING = true;
                 }
-                // old server mod
-                if (ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning) {
-                    if (showMessage) {
-                        this.gui.getChat()
-                            .addMessage(Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
-                    }
-                    ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning = false;
-                }
-                ClientNetworking.DISPLAYED_CHAT_WARNING = true;
             }
-            if (!ClientDataHolderVR.getInstance().showedFbtCalibrationNotification &&
-                ((MCVR.get().hasFBT() && !ClientDataHolderVR.getInstance().vrSettings.fbtCalibrated) ||
-                    (MCVR.get().hasExtendedFBT() && !ClientDataHolderVR.getInstance().vrSettings.fbtExtendedCalibrated)
-                ))
-            {
-                ClientDataHolderVR.getInstance().showedFbtCalibrationNotification = true;
-                this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibratefbtchat"));
+            if (ClientNetworking.CHAT_WARNING_TIMER < 0) {
+                // only show messages when vr is activated
+                if (VRState.VR_INITIALIZED) {
+                    // old server plugin that doesn't support head aim correctly
+                    if (ClientNetworking.HEAD_AIM_WARNING && !ClientNetworking.DISPLAYED_HEAD_AIM_WARNING &&
+                        dataHolder.vrSettings.aimDevice == VRSettings.AimDevice.HMD)
+                    {
+                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.noheadaimserverplugin"));
+                        ClientNetworking.HEAD_AIM_WARNING = false;
+                        ClientNetworking.DISPLAYED_HEAD_AIM_WARNING = true;
+                    }
+
+                    // other server messages that should only be shown once when joining
+                    if (ClientNetworking.ABLE_TO_DISPLAY_CHAT_WARNINGS) {
+                        boolean showMessage = !ClientNetworking.DISPLAYED_CHAT_WARNING ||
+                            dataHolder.vrSettings.showServerPluginMissingMessageAlways;
+
+                        // no server mod
+                        if (ClientNetworking.TELEPORT_WARNING) {
+                            if (showMessage) {
+                                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.noserverplugin"));
+                            }
+                            ClientNetworking.TELEPORT_WARNING = false;
+                        }
+                        // old server mod
+                        if (ClientNetworking.VR_SWITCHING_WARNING) {
+                            if (showMessage) {
+                                ClientUtils.addChatMessage(
+                                    Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
+                            }
+                            ClientNetworking.VR_SWITCHING_WARNING = false;
+                        }
+
+                        ClientNetworking.DISPLAYED_CHAT_WARNING = true;
+                        ClientNetworking.ABLE_TO_DISPLAY_CHAT_WARNINGS = false;
+                    }
+                }
+            }
+            if (VRState.VR_INITIALIZED) {
+                // fbt calibration notification
+                if (!dataHolder.showedFbtCalibrationNotification &&
+                    ((MCVR.get().hasFBT() && !dataHolder.vrSettings.fbtCalibrated) ||
+                        (MCVR.get().hasExtendedFBT() && !dataHolder.vrSettings.fbtExtendedCalibrated)
+                    ))
+                {
+                    dataHolder.showedFbtCalibrationNotification = true;
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.calibratefbtchat"));
+                }
+
+                // non default server settings
+                if (!ClientNetworking.DISPLAYED_VR_CHANGES && ClientNetworking.SERVER_VR_CHANGES_LIST != null &&
+                    dataHolder.vrSettings.showServerVrChangesMessage.getAsBoolean())
+                {
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
+                        Component.translatable("vivecraft.messages.click").withStyle(style -> style
+                            .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
+                                new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                Component.translatable("vivecraft.messages.click")))
+                            .withColor(ChatFormatting.GREEN))));
+                    ClientNetworking.SERVER_VR_CHANGES_LIST = null;
+                    ClientNetworking.DISPLAYED_VR_CHANGES = true;
+                }
+
+                // no teleport message
+                if (ClientNetworking.SHOW_NO_TELEPORT_MESSAGE) {
+                    MCVR vr = dataHolder.vr;
+                    // only if the player is using teleports
+                    if (!vr.getOrigins(vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleport)).isEmpty() ||
+                        !vr.getOrigins(vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback)).isEmpty() ||
+                        (dataHolder.vrSettings.seated && !dataHolder.vrSettings.seatedFreeMove))
+                    {
+                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.noteleport"));
+                        ClientNetworking.SHOW_NO_TELEPORT_MESSAGE = false;
+                    }
+                }
             }
         }
 
         if (VRState.VR_RUNNING) {
-            if (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() && MethodHolder.isInMenuRoom()) {
-                ClientDataHolderVR.getInstance().menuWorldRenderer.tick();
+            if (dataHolder.menuWorldRenderer.isReady() && MethodHolder.isInMenuRoom()) {
+                dataHolder.menuWorldRenderer.tick();
                 if (this.level == null) {
                     // vanilla doesn't tick it when the level is null;
                     this.textureManager.tick();
                 }
             }
 
-            this.profiler.push("vrProcessInputs");
-            ClientDataHolderVR.getInstance().vr.processInputs();
-            ClientDataHolderVR.getInstance().vr.processBindings();
+            this.profiler.push("vrProcessBindings");
+            dataHolder.vr.processBindings();
 
             this.profiler.popPush("vrInputActionsTick");
-            for (VRInputAction vrinputaction : ClientDataHolderVR.getInstance().vr.getInputActions()) {
+            for (VRInputAction vrinputaction : dataHolder.vr.getInputActions()) {
                 vrinputaction.tick();
             }
 
-            if (this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
-                ClientDataHolderVR.getInstance().vrPlayer.updateFreeMove();
+            if (this.level != null && dataHolder.vrPlayer != null) {
+                dataHolder.vrPlayer.updateFreeMove();
             }
 
             this.profiler.pop();
@@ -610,14 +664,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 } else {
                     MenuWorldExporter.saveAreaToFile(this.level, blockpos.getX() - offset, blockpos.getZ() - offset,
                         size, size, blockpos.getY(), foundFile);
-                    this.gui.getChat()
-                        .addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
+                    ClientUtils.addChatMessage(
+                        Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
                 }
 
                 if (error == null) {
-                    this.gui.getChat()
-                        .addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
-                    this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2",
+                    ClientUtils.addChatMessage(
+                        Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2",
                         foundFile.getAbsolutePath()));
                 }
             } catch (Throwable throwable) {
@@ -625,7 +679,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 error = throwable;
             } finally {
                 if (error != null) {
-                    this.gui.getChat().addMessage(
+                    ClientUtils.addChatMessage(
                         Component.translatable("vivecraft.messages.menuworldexporterror", error.getMessage()));
                 }
             }
@@ -670,7 +724,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))
     private void vivecraft$swingArmDrop(LocalPlayer instance, InteractionHand hand, Operation<Void> original) {
         if (VRState.VR_RUNNING) {
-            ClientDataHolderVR.getInstance().swingType = VRFirstPersonArmSwing.Attack;
+            ClientDataHolderVR.getInstance().swingType = VRFirstPersonArmSwing.ATTACK;
         }
         original.call(instance, hand);
     }
@@ -680,8 +734,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (!VRState.VR_RUNNING || ClientDataHolderVR.getInstance().vrSettings.seated) {
             return useKeyDown;
         } else {
-            return useKeyDown || ClientDataHolderVR.getInstance().vrPlayer.isTrackerUsingItem(this.player);
+            return useKeyDown || ClientDataHolderVR.getInstance().isTrackerUsingItem(this.player);
         }
+    }
+
+    @WrapWithCondition(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startUseItem()V"))
+    private boolean vivecraft$noUseWithRoomscaleBow(Minecraft instance) {
+        return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().bowTracker.isActive(this.player);
     }
 
     @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V"))
@@ -689,11 +748,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         MultiPlayerGameMode instance, Player player, Operation<Void> original)
     {
         if (VRState.VR_RUNNING) {
-            ClientNetworking.sendActiveHand(this.player.getUsedItemHand());
+            ClientNetworking.sendActiveHand(this.player.getUsedItemHand(), false);
         }
         original.call(instance, player);
         if (VRState.VR_RUNNING) {
-            ClientNetworking.sendActiveHand(InteractionHand.MAIN_HAND);
+            ClientNetworking.resetActiveBodyPart();
         }
     }
 
@@ -785,65 +844,78 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
      */
     @Unique
     private void vivecraft$switchVRState(boolean vrActive) {
+        boolean changed = VRState.VR_RUNNING != vrActive;
         VRState.VR_RUNNING = vrActive;
-        if (vrActive) {
-            // force first person camera in VR
-            this.vivecraft$lastCameraType = this.options.getCameraType();
-            this.options.setCameraType(CameraType.FIRST_PERSON);
+        if (changed) {
+            if (vrActive) {
+                // force first person camera in VR
+                this.vivecraft$lastCameraType = this.options.getCameraType();
+                this.options.setCameraType(CameraType.FIRST_PERSON);
 
-            if (this.player != null) {
-                // snap room origin to the player
-                ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(this.player, false, false);
-            }
-            // release mouse when switching to standing
-            if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
-                    this.mouseHandler.xpos(), this.mouseHandler.ypos());
-            }
-        } else {
-            // VR got disabled
-            // reset gui
-            GuiHandler.GUI_POS_ROOM = null;
-            GuiHandler.GUI_ROTATION_ROOM = null;
-            GuiHandler.GUI_SCALE = 1.0F;
-
-            // reset camera
-            if (this.vivecraft$lastCameraType != null) {
-                this.options.setCameraType(this.vivecraft$lastCameraType);
-            }
-
-            if (this.player != null) {
-                // remove vr player instance
-                ClientVRPlayers.getInstance().disableVR(this.player.getUUID());
-            }
-            if (this.gameRenderer != null) {
-                // update active effect, since VR does block t hem
-                this.gameRenderer.checkEntityPostEffect(
-                    this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
-            }
-            if (this.screen != null || this.level == null) {
-                // release mouse
-                this.mouseHandler.releaseMouse();
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
-                    this.mouseHandler.xpos(), this.mouseHandler.ypos());
+                if (this.player != null) {
+                    // snap room origin to the player
+                    ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(this.player, false, false);
+                }
+                // release mouse when switching to standing
+                if (!ClientDataHolderVR.getInstance().vrSettings.seated || this.screen != null || this.level == null) {
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL,
+                        this.mouseHandler.xpos(), this.mouseHandler.ypos());
+                    this.mouseHandler.onMove(this.window.getWindow(), this.mouseHandler.xpos(),
+                        this.mouseHandler.ypos());
+                }
             } else {
-                // grab mouse when in a menu
-                this.mouseHandler.grabMouse();
-                InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_DISABLED,
-                    this.mouseHandler.xpos(), this.mouseHandler.ypos());
+                // VR got disabled
+                RenderPassManager.setVanillaRenderPass();
+                // reset gui
+                GuiHandler.GUI_POS_ROOM = null;
+                GuiHandler.GUI_ROTATION_ROOM = null;
+                GuiHandler.GUI_SCALE = 1.0F;
+
+                // reset camera
+                if (this.vivecraft$lastCameraType != null) {
+                    this.options.setCameraType(this.vivecraft$lastCameraType);
+                }
+
+                if (this.player != null) {
+                    // remove vr player instance
+                    ClientVRPlayers.getInstance().disableVR(this.player.getUUID());
+                }
+                if (this.gameRenderer != null) {
+                    // update active effect, since VR does block t hem
+                    this.gameRenderer.checkEntityPostEffect(
+                        this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
+                }
+
+                // scale vr mouse position to the window position
+                double mouseX = this.mouseHandler.xpos() / (double) GuiHandler.GUI_WIDTH * this.window.getScreenWidth();
+                double mouseY =
+                    this.mouseHandler.ypos() / (double) GuiHandler.GUI_HEIGHT * this.window.getScreenHeight();
+
+                if (this.screen != null || this.level == null) {
+                    // release mouse
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseX, mouseY);
+                    this.mouseHandler.onMove(this.window.getWindow(), mouseX, mouseY);
+                    this.mouseHandler.releaseMouse();
+                } else {
+                    // grab mouse when in a menu
+                    InputConstants.grabOrReleaseMouse(this.window.getWindow(), GLFW.GLFW_CURSOR_DISABLED, mouseX,
+                        mouseY);
+                    this.mouseHandler.grabMouse();
+                }
+            }
+
+            // send new VR state to the server
+            ClientNetworking.sendServerPacket(new VRActivePayloadC2S(vrActive));
+
+            // send options, since we override the main hand setting
+            this.options.broadcastOptions();
+
+            // reload sound manager, to toggle HRTF between VR and NONVR one
+            if (!getSoundManager().getAvailableSounds().isEmpty()) {
+                getSoundManager().reload();
             }
         }
-
-        // send new VR state to the server
-        ClientNetworking.sendServerPacket(new VRActivePayloadC2S(vrActive));
-
-        // send options, since we override the main hand setting
-        this.options.broadcastOptions();
-
-        // reload sound manager, to toggle HRTF between VR and NONVR one
-        if (!getSoundManager().getAvailableSounds().isEmpty()) {
-            getSoundManager().reload();
-        }
+        // always resize, since that also rebuild the screen
         resizeDisplay();
         this.window.updateVsync(this.options.enableVsync().get());
     }

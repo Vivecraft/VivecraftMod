@@ -77,6 +77,9 @@ public class MCOpenVR extends MCVR {
     private final Map<VRInputActionSet, Long> actionSetHandles = new EnumMap<>(VRInputActionSet.class);
     private VRActiveActionSet.Buffer activeActionSetsBuffer;
 
+    private final Map<VRInputActionSet, Set<VRInputAction>> unpressedSetKeys = new EnumMap<>(VRInputActionSet.class);
+    private List<VRInputActionSet> activeActionSets = new ArrayList<>();
+
     private Map<Long, String> controllerComponentNames;
     private Map<String, Matrix4f[]> controllerComponentTransforms;
 
@@ -213,6 +216,10 @@ public class MCOpenVR extends MCVR {
             this.deviceVelocity[i] = new Vector3f();
         }
 
+        for (VRInputActionSet set : VRInputActionSet.values()) {
+            this.unpressedSetKeys.put(set, new HashSet<>());
+        }
+
         // allocate memory
         this.poseData = InputPoseActionData.calloc();
         this.originInfo = InputOriginInfo.calloc();
@@ -237,11 +244,11 @@ public class MCOpenVR extends MCVR {
                 VR_ShutdownInternal();
                 this.initialized = false;
 
-                if (ClientDataHolderVR.KAT_VR) {
+                if (this.dh.katVr) {
                     jkatvr.Halt();
                 }
 
-                if (ClientDataHolderVR.INFINADECK) {
+                if (this.dh.infinadeck) {
                     jinfinadeck.Destroy();
                 }
             } catch (Throwable throwable) {
@@ -351,7 +358,7 @@ public class MCOpenVR extends MCVR {
             this.initialized = true;
 
             // initialize treadmill support, if they are enabled
-            if (ClientDataHolderVR.KAT_VR) {
+            if (this.dh.katVr) {
                 try {
                     VRSettings.LOGGER.info("Vivecraft: Waiting for KATVR....");
                     FileUtils.unpackFolder("natives/katvr", "openvr/katvr");
@@ -370,7 +377,7 @@ public class MCOpenVR extends MCVR {
                 }
             }
 
-            if (ClientDataHolderVR.INFINADECK) {
+            if (this.dh.infinadeck) {
                 try {
                     VRSettings.LOGGER.info("Vivecraft: Waiting for Infinadeck....");
                     FileUtils.unpackFolder("natives/infinadeck", "openvr/infinadeck");
@@ -398,8 +405,9 @@ public class MCOpenVR extends MCVR {
      * @throws RuntimeException when an error happens during LWJGL init, or some critical OpenVR components are missing
      */
     private void initializeOpenVR() throws RuntimeException {
-        int token = VR_InitInternal(this.errorBuffer, EVRApplicationType_VRApplication_Scene);
+        VRSettings.LOGGER.info("Vivecraft: Connecting to OpenVR");
 
+        int token = VR_InitInternal(this.errorBuffer, EVRApplicationType_VRApplication_Scene);
         if (!this.isError()) {
             OpenVR.create(token);
         }
@@ -444,15 +452,6 @@ public class MCOpenVR extends MCVR {
         this.mc.getProfiler().popPush("updatePose/Vsync");
         this.updatePose();
 
-        if (!this.dh.vrSettings.seated) {
-            if (this.mc.screen == null && this.dh.vrSettings.vrTouchHotbar) {
-                this.mc.getProfiler().popPush("touchHotbar");
-                if (this.dh.vrSettings.vrHudLockMode != VRSettings.HUDLock.HEAD && this.hudPopup) {
-                    this.processHotbar();
-                }
-            }
-        }
-
         this.mc.getProfiler().popPush("processInputs");
         this.processInputs();
         this.mc.getProfiler().popPush("hmdSampling");
@@ -462,7 +461,10 @@ public class MCOpenVR extends MCVR {
 
     @Override
     public void processInputs() {
-        if (this.dh.vrSettings.seated || ClientDataHolderVR.VIEW_ONLY || !this.inputInitialized) return;
+        if (this.dh.vrSettings.seated || this.dh.viewOnly || !this.inputInitialized) {
+            this.ignorePressesNextFrame = false;
+            return;
+        }
 
         for (VRInputAction action : this.inputActions.values()) {
             if (action.isHanded()) {
@@ -806,7 +808,18 @@ public class MCOpenVR extends MCVR {
                 .set(this.getActionSetHandle(activeSets.get(i)), k_ulInvalidInputValueHandle, 0, 0);
         }
 
+        // clear any sets that got deactivated
+        this.activeActionSets.removeAll(activeSets);
+        for (VRInputActionSet set : this.activeActionSets) {
+            this.unpressedSetKeys.get(set).clear();
+        }
+        this.activeActionSets = activeSets;
+
         return !activeSets.isEmpty();
+    }
+
+    public void refreshControllerTransforms() {
+        this.getXforms = true;
     }
 
     @Override
@@ -879,90 +892,104 @@ public class MCOpenVR extends MCVR {
             this.controllerComponentTransforms.put(component, new Matrix4f[2]);
 
             for (int c = 0; c < 2; c++) {
-                if (this.deviceSource[c].source != DeviceSource.Source.OPENVR ||
-                    this.deviceSource[c].deviceIndex == k_unTrackedDeviceIndexInvalid)
-                {
-                    failed = true;
-                    continue;
-                }
-                try (MemoryStack stack = MemoryStack.stackPush()) {
-                    var stringBuffer = stack.calloc(k_unMaxPropertyStringSize);
-
-                    VRSystem_GetStringTrackedDeviceProperty(this.deviceSource[c].deviceIndex,
-                        VR.ETrackedDeviceProperty_Prop_RenderModelName_String, stringBuffer, this.errorBuffer);
-
-                    String renderModelName = memUTF8NullTerminated(stringBuffer);
-
-                    VRSystem_GetStringTrackedDeviceProperty(this.deviceSource[c].deviceIndex,
-                        VR.ETrackedDeviceProperty_Prop_InputProfilePath_String, stringBuffer, this.errorBuffer);
-
-                    String inputProfilePath = memUTF8NullTerminated(stringBuffer);
-                    boolean isWMR = inputProfilePath.contains("holographic");
-                    boolean isRifts = inputProfilePath.contains("rifts");
-
-                    String componentName = component;
-                    if (isWMR && component.equals(k_pch_Controller_Component_HandGrip)) {
-                        // I have no idea, Microsoft, none.
-                        componentName = "body";
+                if (this.dh.vrSettings.controllerTransform != ControllerTransform.AUTO) {
+                    VRSettings.LOGGER.info("Vivecraft: forcing {} controller transforms!",
+                        this.dh.vrSettings.controllerTransform);
+                    if (component.equals(k_pch_Controller_Component_Tip)) {
+                        this.controllerComponentTransforms.get(component)[c] = new Matrix4f(
+                            c == 0 ? this.dh.vrSettings.controllerTransform.tipR :
+                                this.dh.vrSettings.controllerTransform.tipL);
+                    } else {
+                        this.controllerComponentTransforms.get(component)[c] = new Matrix4f(
+                            c == 0 ? this.dh.vrSettings.controllerTransform.handGripR :
+                                this.dh.vrSettings.controllerTransform.handGripL);
                     }
-
-                    long button = VRRenderModels_GetComponentButtonMask(renderModelName, componentName);
-
-                    if (button > 0L) {
-                        // see now... wtf OpenVR, '0' is the system button, it cant also be the error value!
-                        // (hint: it's a mask, not an index)
-                        // u get 1 button per component, nothing more
-                        this.controllerComponentNames.put(button, component);
-                    }
-
-                    long sourceHandle = this.deviceHandle[c];
-
-                    if (sourceHandle == k_ulInvalidInputValueHandle) {
+                } else {
+                    if (this.deviceSource[c].source != DeviceSource.Source.OPENVR ||
+                        this.deviceSource[c].deviceIndex == k_unTrackedDeviceIndexInvalid)
+                    {
                         failed = true;
                         continue;
                     }
+                    try (MemoryStack stack = MemoryStack.stackPush()) {
+                        var stringBuffer = stack.calloc(k_unMaxPropertyStringSize);
 
-                    var renderModelComponentState = RenderModelComponentState.calloc(stack);
-                    boolean valid = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName,
-                        sourceHandle, RenderModelControllerModeState.calloc(stack), renderModelComponentState);
+                        VRSystem_GetStringTrackedDeviceProperty(this.deviceSource[c].deviceIndex,
+                            VR.ETrackedDeviceProperty_Prop_RenderModelName_String, stringBuffer, this.errorBuffer);
 
-                    if (!valid) {
-                        failed = true;
-                        continue;
-                    }
+                        String renderModelName = memUTF8NullTerminated(stringBuffer);
 
-                    Matrix4f localTransform = OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(
-                        renderModelComponentState.mTrackingToComponentLocal(), new Matrix4f());
-                    this.controllerComponentTransforms.get(component)[c] = localTransform;
+                        VRSystem_GetStringTrackedDeviceProperty(this.deviceSource[c].deviceIndex,
+                            VR.ETrackedDeviceProperty_Prop_InputProfilePath_String, stringBuffer, this.errorBuffer);
 
-                    if (c == LEFT_CONTROLLER && isRifts && component.equals(k_pch_Controller_Component_HandGrip)) {
-                        // I have no idea, Valve, none.
-                        this.controllerComponentTransforms.get(
-                            component)[LEFT_CONTROLLER] = this.controllerComponentTransforms.get(
-                            component)[RIGHT_CONTROLLER];
-                    }
+                        String inputProfilePath = memUTF8NullTerminated(stringBuffer);
+                        boolean isWMR = inputProfilePath.contains("holographic");
+                        boolean isRifts = inputProfilePath.contains("rifts");
 
-                    if (!failed && c == RIGHT_CONTROLLER) {
-                        // calculate gun angle
-                        try {
-                            Matrix4fc tip = this.getControllerComponentTransform(RIGHT_CONTROLLER,
-                                k_pch_Controller_Component_Tip);
-                            Matrix4fc hand = this.getControllerComponentTransform(RIGHT_CONTROLLER,
-                                k_pch_Controller_Component_HandGrip);
-
-                            Vector3f tipVec = tip.transformDirection(MathUtils.BACK, new Vector3f());
-                            Vector3f handVec = hand.transformDirection(MathUtils.BACK, new Vector3f());
-
-                            float dot = Math.abs(tipVec.dot(handVec));
-
-                            float angleRad = (float) Math.acos(dot);
-                            float angleDeg = Mth.RAD_TO_DEG * angleRad;
-
-                            this.gunStyle = angleDeg > 10.0F;
-                            this.gunAngle = angleDeg;
-                        } catch (Exception exception) {
-                            failed = true;
+                        String componentName = component;
+                        if (isWMR && component.equals(k_pch_Controller_Component_HandGrip)) {
+                            // I have no idea, Microsoft, none.
+                            componentName = "body";
                         }
+
+                        long button = VRRenderModels_GetComponentButtonMask(renderModelName, componentName);
+
+                        if (button > 0L) {
+                            // see now... wtf OpenVR, '0' is the system button, it cant also be the error value!
+                            // (hint: it's a mask, not an index)
+                            // u get 1 button per component, nothing more
+                            this.controllerComponentNames.put(button, component);
+                        }
+
+                        long sourceHandle = this.deviceHandle[c];
+
+                        if (sourceHandle == k_ulInvalidInputValueHandle) {
+                            failed = true;
+                            continue;
+                        }
+
+                        var renderModelComponentState = RenderModelComponentState.calloc(stack);
+                        boolean valid = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName,
+                            sourceHandle, RenderModelControllerModeState.calloc(stack), renderModelComponentState);
+
+                        if (!valid) {
+                            failed = true;
+                            continue;
+                        }
+
+                        Matrix4f localTransform = OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(
+                            renderModelComponentState.mTrackingToComponentLocal(), new Matrix4f());
+                        this.controllerComponentTransforms.get(component)[c] = localTransform;
+
+                        if (c == LEFT_CONTROLLER && isRifts && component.equals(k_pch_Controller_Component_HandGrip)) {
+                            // I have no idea, Valve, none.
+                            this.controllerComponentTransforms.get(
+                                component)[LEFT_CONTROLLER] = this.controllerComponentTransforms.get(
+                                component)[RIGHT_CONTROLLER];
+                        }
+                    }
+                }
+
+                if (!failed && c == RIGHT_CONTROLLER) {
+                    // calculate gun angle
+                    try {
+                        Matrix4fc tip = this.getControllerComponentTransform(RIGHT_CONTROLLER,
+                            k_pch_Controller_Component_Tip);
+                        Matrix4fc hand = this.getControllerComponentTransform(RIGHT_CONTROLLER,
+                            k_pch_Controller_Component_HandGrip);
+
+                        Vector3f tipVec = tip.transformDirection(MathUtils.BACK, new Vector3f());
+                        Vector3f handVec = hand.transformDirection(MathUtils.BACK, new Vector3f());
+
+                        float dot = Math.abs(tipVec.dot(handVec));
+
+                        float angleRad = (float) Math.acos(dot);
+                        float angleDeg = Mth.RAD_TO_DEG * angleRad;
+
+                        this.gunStyle = angleDeg > 10.0F;
+                        this.gunAngle = angleDeg;
+                    } catch (Exception exception) {
+                        failed = true;
                     }
                 }
             }
@@ -1033,7 +1060,7 @@ public class MCOpenVR extends MCVR {
     }
 
     /**
-     * checks if hte given path contains any non ASCII character, because steamvr refuses to support those
+     * checks if the given path contains any non ASCII character, because steamvr refuses to support those
      *
      * @param path        path to check
      * @param knownError  String of an error that should be shown to the user when this fails
@@ -1212,8 +1239,8 @@ public class MCOpenVR extends MCVR {
             // try to prevent double left clicks
             (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui ||
                 !(action.actionSet == VRInputActionSet.INGAME &&
-                    action.keyBinding.key.getType() == InputConstants.Type.MOUSE &&
-                    action.keyBinding.key.getValue() == GLFW.GLFW_MOUSE_BUTTON_LEFT && this.mc.screen != null
+                    action.keyBinding.key == InputConstants.Type.MOUSE.getOrCreate(GLFW.GLFW_MOUSE_BUTTON_LEFT) &&
+                    this.mc.screen != null
                 )
             ))
         {
@@ -1221,16 +1248,64 @@ public class MCOpenVR extends MCVR {
                 if (action.isButtonPressed() && action.isEnabled()) {
                     // We do this, so shit like closing a GUI by clicking a button won't
                     // also click in the world immediately after.
-                    if (!this.ignorePressesNextFrame) {
-                        action.pressBinding();
+                    if (!this.ignorePressesNextFrame || canActionBeRepressed(action)) {
+                        pressAction(action);
                     }
                 } else {
-                    action.unpressBinding();
+                    unpressAction(action);
                 }
+            } else if (action.isButtonPressed() && action.isEnabled() && !action.keyBinding.isDown() &&
+                canActionBeRepressed(action))
+            {
+                // allow repressing ingame buttons that were held before
+                pressAction(action);
             }
-        } else {
-            action.unpressBinding();
+        } else if (checkIfNotMovement(action)) {
+            unpressAction(action);
         }
+    }
+
+    /**
+     * @param action VRInputAction to check
+     * @return if the given VRInputAction was pressed before actionset changes and can be repressed
+     */
+    private boolean canActionBeRepressed(VRInputAction action) {
+        // allow repressing ingame buttons that were held before the set change
+        return action.actionSet == VRInputActionSet.INGAME &&
+            this.unpressedSetKeys.get(action.actionSet).contains(action);
+    }
+
+    /**
+     * presses the given VRInputActions binding and removes it from the unpressed keys
+     *
+     * @param action VRInputAction to press
+     */
+    private void pressAction(VRInputAction action) {
+        action.pressBinding();
+        this.unpressedSetKeys.get(action.actionSet).remove(action);
+    }
+
+    /**
+     * unpresses the given VRInputActions binding and adds it to the unpressed keys, if its actionSet is not active right now
+     *
+     * @param action VRInputAction to press
+     */
+    private void unpressAction(VRInputAction action) {
+        if (!this.activeActionSets.contains(action.actionSet) && action.isButtonChanged()) {
+            this.unpressedSetKeys.get(action.actionSet).add(action);
+        }
+        action.unpressBinding();
+    }
+
+    /**
+     * @param action VRInputAction to check for
+     * @return if the given action does not correspond to one of the movement keys, or if the player didn't move
+     */
+    private boolean checkIfNotMovement(VRInputAction action) {
+        return action.keyBinding != this.mc.options.keyLeft &&
+            action.keyBinding != this.mc.options.keyRight &&
+            action.keyBinding != this.mc.options.keyUp &&
+            action.keyBinding != this.mc.options.keyDown || !this.isMovement;
     }
 
     /**
@@ -1339,8 +1414,8 @@ public class MCOpenVR extends MCVR {
                             this.mc.stop();
                         } else {
                             VRSettings.LOGGER.info("Vivecraft: SteamVR closed, disabling VR");
-                            VRState.VR_ENABLED = !VRState.VR_ENABLED;
-                            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.VR_ENABLED;
+                            VRState.VR_ENABLED = false;
+                            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = false;
                             ClientDataHolderVR.getInstance().vrSettings.saveOptions();
                         }
                     }

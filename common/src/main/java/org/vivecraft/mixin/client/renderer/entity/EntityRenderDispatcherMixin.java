@@ -95,25 +95,30 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
         {
             String skinType = player.getModelName();
             if (ClientVRPlayers.getInstance().isVRPlayer(player)) {
-                VRPlayerRenderer vrPlayerRenderer;
-                if (ClientVRPlayers.getInstance().isVRAndSeated(player.getUUID()) ||
-                    ClientDataHolderVR.getInstance().vrSettings.playerModelType == VRSettings.PlayerModelType.VANILLA)
-                {
-                    vrPlayerRenderer = this.vivecraft$skinMapVRVanilla.getOrDefault(skinType,
-                        this.vivecraft$playerRendererVRVanilla);
-                } else if (ClientDataHolderVR.getInstance().vrSettings.playerModelType ==
-                    VRSettings.PlayerModelType.SPLIT_ARMS)
-                {
-                    vrPlayerRenderer = this.vivecraft$skinMapVRArms.getOrDefault(skinType,
-                        this.vivecraft$playerRendererVRArms);
-                } else {
-                    vrPlayerRenderer = this.vivecraft$skinMapVRLegs.getOrDefault(skinType,
-                        this.vivecraft$playerRendererVRLegs);
-                }
-
-                cir.setReturnValue(vrPlayerRenderer);
+                cir.setReturnValue(
+                    vivecraft$getVRRenderer(skinType, ClientVRPlayers.getInstance().isVRAndSeated(player.getUUID())));
             }
         }
+    }
+
+    @Unique
+    private VRPlayerRenderer vivecraft$getVRRenderer(String skinType, boolean seated) {
+        VRPlayerRenderer vrPlayerRenderer;
+        if (seated ||
+            ClientDataHolderVR.getInstance().vrSettings.playerModelType == VRSettings.PlayerModelType.VANILLA)
+        {
+            vrPlayerRenderer = this.vivecraft$skinMapVRVanilla.getOrDefault(skinType,
+                this.vivecraft$playerRendererVRVanilla);
+        } else if (ClientDataHolderVR.getInstance().vrSettings.playerModelType ==
+            VRSettings.PlayerModelType.SPLIT_ARMS)
+        {
+            vrPlayerRenderer = this.vivecraft$skinMapVRArms.getOrDefault(skinType,
+                this.vivecraft$playerRendererVRArms);
+        } else {
+            vrPlayerRenderer = this.vivecraft$skinMapVRLegs.getOrDefault(skinType,
+                this.vivecraft$playerRendererVRLegs);
+        }
+        return vrPlayerRenderer;
     }
 
     @Inject(method = "onResourceManagerReload", at = @At(value = "HEAD"))

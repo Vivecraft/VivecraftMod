@@ -1,9 +1,9 @@
 package org.vivecraft.mod_compat_vr.iris.mixin.coderbot;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.coderbot.iris.Iris;
-import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
@@ -37,13 +36,9 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Shadow(remap = false)
     private Supplier<ShadowRenderTargets> shadowTargetsSupplier;
 
-    @Final
-    @Shadow(remap = false)
-    private ShadowRenderer shadowRenderer;
-
     // store shadowTargets of the first pipeline
     @Inject(method = "<init>", at = @At("TAIL"), remap = false)
-    private void vivecraft$storeShadowTargets(ProgramSet par1, CallbackInfo ci) {
+    private void vivecraft$storeShadowTargets(ProgramSet programSet, CallbackInfo ci) {
         // because iris pre 1.6 doesn't have those fields use reflection here
         try {
             Class<?> renderingPipeline = Class.forName(
@@ -81,14 +76,11 @@ public class IrisNewWorldRenderingPipelineVRMixin {
         original.call(instance, wrappedSupplier);
     }
 
-    @Inject(method = "shouldDisableVanillaEntityShadows()Z", at = @At("HEAD"), cancellable = true, remap = false)
-    private void vivecraft$shouldDisableEntityShadows(CallbackInfoReturnable<Boolean> cir) {
-        if (!IrisHelper.SLOW_MODE && !RenderPassType.isVanilla() && (this.shadowRenderer != null ||
+    @ModifyReturnValue(method = "shouldDisableVanillaEntityShadows()Z", at = @At("RETURN"), remap = false)
+    private boolean vivecraft$shouldDisableEntityShadows(boolean noEntityShadows) {
+        return noEntityShadows || (!IrisHelper.SLOW_MODE && !RenderPassType.isVanilla() &&
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null
-        ))
-        {
-            cir.setReturnValue(true);
-        }
+        );
     }
 
     /**
