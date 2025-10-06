@@ -41,6 +41,10 @@ public class VRPassHelper {
         RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT | GL13C.GL_DEPTH_BUFFER_BIT);
         RenderSystem.enableDepthTest();
 
+        // some mods mess with these
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
+
         // THIS IS WHERE EVERYTHING IS RENDERED
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
