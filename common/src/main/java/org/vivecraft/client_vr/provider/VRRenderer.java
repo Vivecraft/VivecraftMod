@@ -533,10 +533,10 @@ public abstract class VRRenderer {
             } catch (Exception e) {
                 // fabulous shader didn't compile
                 VRSettings.LOGGER.error("Failed to load fabulous vr shader program: ", e);
-            ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.fabulousFailed"));
-            minecraft.options.graphicsMode().set(GraphicsStatus.FAST);
-            minecraft.levelRenderer.allChanged();
-            this.reinitFrameBuffers("fabulous missing");
+                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.fabulousFailed"));
+                minecraft.options.graphicsMode().set(GraphicsStatus.FAST);
+                minecraft.levelRenderer.allChanged();
+                this.reinitFrameBuffers("fabulous missing");
             }
         }
 

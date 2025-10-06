@@ -130,8 +130,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
      */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.isValidClickButton(button)) {
-            this.updateScrolling(mouseX, mouseY, button);
+        if (this.isValidMouseClick(button)) {
+            this.updateScrollingState(mouseX, mouseY, button);
             if (this.isMouseOver(mouseX, mouseY)) {
                 SettingsList.BaseEntry hovered = this.getEntryAtPositionFixed(mouseX, mouseY);
                 if (hovered != null && hovered.mouseClicked(mouseX, mouseY, button)) {
@@ -154,9 +154,9 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
      * just checks if the position is left of the scrollbar, instead of some weird left limit
      */
     private SettingsList.BaseEntry getEntryAtPositionFixed(double mouseX, double mouseY) {
-        int listY = Mth.floor(mouseY - this.getY()) - this.headerHeight + (int) this.scrollAmount() - 4;
+        int listY = Mth.floor(mouseY - this.getY()) - this.headerHeight + (int) this.getScrollAmount() - 4;
         int hoveredItem = listY / this.itemHeight;
-        return mouseX < this.scrollBarX() && hoveredItem >= 0 && listY >= 0 &&
+        return mouseX < this.getScrollbarPosition() && hoveredItem >= 0 && listY >= 0 &&
             hoveredItem < this.getItemCount() ? this.children().get(hoveredItem) : null;
     }
 
@@ -166,7 +166,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     }
 
     @Override
-    protected int scrollBarX() {
+    protected int getScrollbarPosition() {
         return this.getRowRight() + 2;
     }
 
@@ -182,6 +182,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     public int getItemHeight() {
         return this.itemHeight;
+    }
+
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        // for some reason AbstractSelectionList removes the active checks
+        return this.active && this.visible && super.isMouseOver(mouseX, mouseY);
     }
 
     // there to make it public

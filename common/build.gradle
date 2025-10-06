@@ -15,7 +15,7 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.21.3-0.6.5-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.3-0.6.13-fabric"
 
     // for iris compat
     modCompileOnly "maven.modrinth:iris:1.8.1+1.21.3-fabric"

@@ -74,7 +74,6 @@ public abstract class AbstractArrowMixin extends Entity {
                             owner,
                             ParticleTypes.CRIT,
                             true, // always render the hit particles on the client
-                            true, // always render the hit particles on the client
                             hitPos.x, hitPos.y, hitPos.z,
                             5,
                             -this.getDeltaMovement().x, -this.getDeltaMovement().y, -this.getDeltaMovement().z,

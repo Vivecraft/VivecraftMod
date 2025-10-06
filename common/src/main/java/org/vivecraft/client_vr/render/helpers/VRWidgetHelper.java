@@ -149,7 +149,7 @@ public class VRWidgetHelper {
         RenderSystem.defaultBlendFunc();
 
         // we use block models, so the camera texture is on the regular block atlas
-        ShadersHelper.bindTexture(TextureAtlas.LOCATION_BLOCKS);
+        ShadersHelper.bindTexture(InventoryMenu.BLOCK_ATLAS);
         if (MC.level != null) {
             RenderSystem.setShader(CoreShaders.RENDERTYPE_ENTITY_CUTOUT_NO_CULL);
         } else {
@@ -158,7 +158,8 @@ public class VRWidgetHelper {
         MC.gameRenderer.lightTexture().turnOnLightLayer();
 
         // render camera model
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         MC.getBlockRenderer().getModelRenderer()
             .renderModel(poseStack.last(), bufferBuilder, null, MC.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F,
@@ -170,7 +171,7 @@ public class VRWidgetHelper {
         displayBindFunc.run();
         RenderSystem.setShader(CoreShaders.RENDERTYPE_ENTITY_SOLID);
 
-        bufferBuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen
         for (BakedQuad bakedquad : MC.getModelManager().getModel(displayModel).getQuads(null, null, RANDOM)) {
