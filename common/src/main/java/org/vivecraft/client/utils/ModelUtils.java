@@ -121,7 +121,7 @@ public class ModelUtils {
      * @param position      Position to convert
      * @param rotInfo       player VR info
      * @param bodyYaw       players Y rotation
-     * @param useWorldScale when set will cancel out the worldScale, instead of entity scale
+     * @param useWorldScale when set will cancel out the whole worldScale, instead of just the entity scale
      * @param out           Vector3f to store the result in
      */
     public static void worldToModel(
@@ -134,12 +134,13 @@ public class ModelUtils {
             out.y += 1F;
         }
 
+        // worldscale includes entity scale
         if (useWorldScale) {
-            // the main player has the entity scale in its world scale
             out.div(rotInfo.worldScale);
         } else {
             out.div(((EntityRenderStateExtension) renderState).vivecraft$getTotalScale());
         }
+
         if (MCAHelper.isLoaded()) {
             // TODO MCA isn't updated yet so no clue how to do this
             // MCAHelper.undoPlayerScale(player, out);
@@ -184,7 +185,7 @@ public class ModelUtils {
      * @param rotInfo       player VR info
      * @param bodyYaw       players Y rotation
      * @param applyScale    if the woldScale/entity scale should be applied
-     * @param useWorldScale when set will apply the worldScale, instead of entity scale
+     * @param useWorldScale when set will apply the whole worldScale, instead of just the entity scale
      * @param out           Vector3f to store the result in
      * @return {@code out} vector
      */
@@ -207,7 +208,7 @@ public class ModelUtils {
      * @param rotInfo       player VR info
      * @param bodyYaw       players Y rotation
      * @param applyScale    if the woldScale/entity scale should be applied
-     * @param useWorldScale when set will apply the worldScale, instead of entity scale
+     * @param useWorldScale when set will apply the whole worldScale, instead of just the entity scale
      * @param out           Vector3f to store the result in
      * @return {@code out} vector
      */
@@ -227,8 +228,8 @@ public class ModelUtils {
         }
 
         if (applyScale) {
+            // worldscale includes entity scale
             if (useWorldScale) {
-                // the main player has the entity scale in its world scale
                 out.mul(rotInfo.worldScale);
             } else {
                 out.mul(((EntityRenderStateExtension) renderState).vivecraft$getTotalScale());
@@ -247,7 +248,7 @@ public class ModelUtils {
      * @param targetRot     target rotation the {@code part} should respect
      * @param rotInfo       players data
      * @param bodyYaw       players Y rotation
-     * @param useWorldScale when set will apply the worldScale, instead of entity scale
+     * @param useWorldScale when set will cancel out the whole worldScale, instead of just the entity scale
      * @param tempVDir      Vector3f object to work with, contains the direction after the call, in model space
      * @param tempVUp       second Vector3f object to work with, contains the up direction after the call
      * @param tempM         Matrix3f object to work with, contains the rotation after the call
@@ -271,6 +272,29 @@ public class ModelUtils {
 
         // rotate model
         pointAtModel(tempVDir, tempVUp, tempM);
+    }
+
+    /**
+     * sets the matrix {@code tempM} so that it points in {@code dir}, using local {@code targetRot} to get the up dir
+     *
+     * @param targetRot target rotation the {@code tempM} should respect, in world space
+     * @param bodyYaw   players Y rotation
+     * @param dir       the direction the matrix should point at, in model space
+     * @param tempVUp   Vector3f object to work with, contains the up direction after the call
+     * @param tempM     Matrix3f object to work with, contains the rotation after the call
+     */
+    public static void pointAtModelWithLocal(
+        Quaternionfc targetRot, float bodyYaw, Vector3fc dir, Vector3f tempVUp, Matrix3f tempM)
+    {
+
+        // get the up vector the ModelPart should face
+        targetRot.transform(MathUtils.RIGHT, tempVUp);
+        worldToModelDirection(tempVUp, bodyYaw, tempVUp);
+
+        dir.cross(tempVUp, tempVUp);
+
+        // rotate model
+        pointAtModel(dir, tempVUp, tempM);
     }
 
     /**
@@ -374,7 +398,7 @@ public class ModelUtils {
      * @param jointPos      available joint position, can be {@code null}
      * @param renderState   RenderState of the player the {@code jointPos} is from
      * @param rotInfo       player VR info
-     * @param useWorldScale when set will cancel out the worldScale, instead of entity scale
+     * @param useWorldScale when set will cancel out the whole worldScale, instead of just the entity scale
      * @param tempV         Vector3f object to work with, contains the joint direction after the call
      * @param tempV2        Vector3f object to work with
      */
@@ -449,7 +473,7 @@ public class ModelUtils {
         // zero it always, since it's supposed to have the offset at the end
         tempV.zero();
         if (attackTime > 0.0F) {
-            if (!isMainPlayer || ClientDataHolderVR.getInstance().swingType == VRFirstPersonArmSwing.Attack) {
+            if (!isMainPlayer || ClientDataHolderVR.getInstance().swingType == VRFirstPersonArmSwing.ATTACK) {
                 // arm swing animation
                 float rotation;
                 if (attackTime > 0.5F) {
@@ -461,7 +485,7 @@ public class ModelUtils {
                 tempM.rotateX(rotation * 30.0F * Mth.DEG_TO_RAD);
             } else {
                 switch (ClientDataHolderVR.getInstance().swingType) {
-                    case Use -> {
+                    case USE -> {
                         // hand forward animation
                         float movement;
                         if (attackTime > 0.25F) {
@@ -471,7 +495,7 @@ public class ModelUtils {
                         }
                         tempM.transform(MathUtils.DOWN, tempV).mul((1F + movement) * 1.6F);
                     }
-                    case Interact -> {
+                    case INTERACT -> {
                         // arm rotation animation
                         float rotation;
                         if (attackTime > 0.5F) {

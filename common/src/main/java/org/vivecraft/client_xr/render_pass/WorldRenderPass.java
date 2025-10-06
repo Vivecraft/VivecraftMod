@@ -1,7 +1,7 @@
 package org.vivecraft.client_xr.render_pass;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 
 public class WorldRenderPass implements AutoCloseable {
 

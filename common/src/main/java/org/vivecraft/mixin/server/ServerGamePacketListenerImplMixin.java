@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.server.*;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -45,7 +46,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             if (this.player.hasDisconnected()) {
                 // if they did disconnect remove them
                 ServerVRPlayers.getPlayersWithVivecraft(this.player.server).remove(this.player.getUUID());
-            } else if (vivePlayer.isVR() && vivePlayer.vrPlayerState != null) {
+            } else if (vivePlayer.isVR() && vivePlayer.vrPlayerState() != null) {
                 ServerNetworking.sendVrPlayerStateToClients(vivePlayer);
                 if (ServerConfig.DEBUG_PARTICLES.get()) {
                     ServerUtil.debugParticleAxes(vivePlayer);
@@ -65,5 +66,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
         // remove player from viveplayer list, when they leave
         ServerVRPlayers.getPlayersWithVivecraft(this.server).remove(this.player.getUUID());
+        VRAPIImpl.INSTANCE.clearPoseHistory(this.player.getUUID(), false);
     }
 }

@@ -6,6 +6,14 @@
       "required": false
     },
     {
+      "id": "#c:shields",
+      "required": false
+    },
+    {
+      "id": "#c:tools/shield",
+      "required": false
+    },
+    {
       "id": "tetra:modular_shield",
       "required": false
     },

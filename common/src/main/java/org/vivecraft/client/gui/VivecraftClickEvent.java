@@ -17,7 +17,6 @@ public class VivecraftClickEvent extends ClickEvent {
         this.value = value;
     }
 
-
     public VivecraftAction getVivecraftAction() {
         return this.vivecraftAction;
     }

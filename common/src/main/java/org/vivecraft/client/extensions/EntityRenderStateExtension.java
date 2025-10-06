@@ -24,12 +24,12 @@ public interface EntityRenderStateExtension {
     void vivecraft$setFirstPersonPlayer(boolean firstPersonPlayer);
 
     /**
-     * @return if the entity, this state is for, is the main player
+     * @return the players scale, including any other mods scaling
      */
     float vivecraft$getTotalScale();
 
     /**
-     * set if the entity, this state is for, is the main player
+     * set the players scale
      */
     void vivecraft$setTotalScale(float totalScale);
 }

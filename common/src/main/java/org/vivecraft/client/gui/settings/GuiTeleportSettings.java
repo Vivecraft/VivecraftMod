@@ -2,8 +2,9 @@ package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROption;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.widgets.GuiVROption;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiTeleportSettings extends GuiVROptionsBase {
@@ -26,7 +27,7 @@ public class GuiTeleportSettings extends GuiVROptionsBase {
         this.vrTitle = "vivecraft.options.screen.teleport";
         super.init(TELEPORT_SETTINGS, true);
 
-        if (this.vrSettings.vrLimitedSurvivalTeleport) {
+        if (ClientNetworking.isLimitedSurvivalTeleport()) {
             super.init(LIMITED_TELEPORT_SETTINGS, false);
         }
 

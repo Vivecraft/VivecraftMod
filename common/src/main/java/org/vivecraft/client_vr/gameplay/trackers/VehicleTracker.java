@@ -5,18 +5,19 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.data.ItemTags;
+import org.vivecraft.data.ViveItemTags;
 
-public class VehicleTracker extends Tracker {
+public class VehicleTracker implements Tracker {
     private float PreMount_World_Rotation;
     public Vec3 Premount_Pos_Room = Vec3.ZERO;
     public float vehicleInitialRotation = 0.0F;
@@ -27,8 +28,12 @@ public class VehicleTracker extends Tracker {
     private int minecartStupidityCounter;
     private boolean isRiding = false;
 
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
+
     public VehicleTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -43,9 +48,14 @@ public class VehicleTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.minecartStupidityCounter = 2;
         this.isRiding = false;
+    }
+
+    @Override
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
     }
 
     public double getVehicleFloor(Entity vehicle, double original) {
@@ -60,31 +70,54 @@ public class VehicleTracker extends Tracker {
         Entity entity = player.getVehicle();
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
-        if (entity instanceof AbstractHorse || entity instanceof Boat) {
+        if (entity instanceof AbstractHorse || entity instanceof AbstractBoat) {
             if (player.zza > 0) {
-                if (dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
-                    return dataHolder.vrPlayer.vrdata_world_pre.hmd.getDirection();
-                } else {
-                    return dataHolder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
-                }
+                return getFreeMoveDirection();
             }
-        } else if (entity instanceof Mob mob && mob.isControlledByLocalInstance()) {
-            // pigs and striders
-            int c = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem ||
-                player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)
-            ) ? 0 : 1;
-            VRData.VRDevicePose con = dataHolder.vrPlayer.vrdata_world_pre.getController(c);
-            return MathUtils.subtractToVector3f(con.getPosition(), entity.position())
-                .add(con.getDirection().mul(0.3F))
-                .normalize();
+        } else if (entity != null && entity.isControlledByLocalInstance()) {
+            int c = getControllerWithFoodStick(player);
+            if (entity instanceof Mob && c != -1) {
+                // pigs and striders
+                VRData.VRDevicePose con = dataHolder.vrPlayer.vrdata_world_pre.getController(c);
+                return MathUtils.subtractToVector3f(con.getPosition(), entity.position())
+                    .add(con.getDirection().mul(0.3F))
+                    .normalize();
+            } else {
+                // for other entities always set it, for mod compatibility
+                return getFreeMoveDirection();
+            }
         }
 
         // ignore other vehicles
         return null;
     }
 
+    private static Vector3f getFreeMoveDirection() {
+        if (ClientDataHolderVR.getInstance().vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
+            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.hmd.getDirection();
+        } else {
+            // not exactly sure why we use the main hand for riding, when we use the offhand for regular walking
+            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getController(0).getDirection();
+        }
+    }
+
+    private static int getControllerWithFoodStick(LocalPlayer player) {
+        if (player.getMainHandItem().getItem() instanceof FoodOnAStickItem ||
+            player.getMainHandItem().is(ViveItemTags.VIVECRAFT_FOOD_STICKS))
+        {
+            return 0;
+        } else if (player.getOffhandItem().getItem() instanceof FoodOnAStickItem ||
+            player.getOffhandItem().is(ViveItemTags.VIVECRAFT_FOOD_STICKS))
+        {
+            return 1;
+        } else {
+            // doesn't hold a food stick
+            return -1;
+        }
+    }
+
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void activeProcess(LocalPlayer player) {
         if (!this.mc.isPaused()) {
             // do vehicle rotation, which rotates around a different point.
             if (this.dismountCooldown > 0) {

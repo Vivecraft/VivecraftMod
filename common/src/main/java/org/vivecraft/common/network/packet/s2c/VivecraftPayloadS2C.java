@@ -40,14 +40,17 @@ public interface VivecraftPayloadS2C extends VivecraftPayload {
                 case VERSION -> VersionPayloadS2C.read(buffer);
                 case REQUESTDATA -> new RequestDataPayloadS2C();
                 case UBERPACKET -> UberPacketPayloadS2C.read(buffer);
-                case TELEPORT -> new TeleportPayloadS2C();
+                case TELEPORT -> TeleportPayloadS2C.read(buffer);
                 case CLIMBING -> ClimbingPayloadS2C.read(buffer);
                 case SETTING_OVERRIDE -> SettingOverridePayloadS2C.read(buffer);
-                case CRAWL -> new CrawlPayloadS2C();
+                case CRAWL -> CrawlPayloadS2C.read(buffer);
                 case NETWORK_VERSION -> NetworkVersionPayloadS2C.read(buffer);
                 case VR_SWITCHING -> VRSwitchingPayloadS2C.read(buffer);
                 case IS_VR_ACTIVE -> VRActivePayloadS2C.read(buffer);
                 case DUAL_WIELDING -> DualWieldingPayloadS2C.read(buffer);
+                case HAPTIC -> HapticPayloadS2C.read(buffer);
+                case SERVER_VR_CHANGES -> ServerVrChangesS2CPacket.read(buffer);
+                case DAMAGE_DIRECTION -> DamageDirectionPayloadS2C.read(buffer);
                 default -> {
                     VRSettings.LOGGER.error("Vivecraft: Got unexpected payload identifier on client: {}", id);
                     yield UnknownPayloadS2C.read(buffer);

@@ -26,11 +26,11 @@ loom {
         mixinConfig "vivecraft.iris.mixins.json"
         mixinConfig "vivecraft.mca.mixins.json"
         mixinConfig "vivecraft.optifine.mixins.json"
-        mixinConfig "vivecraft.physicsmod.mixins.json"
         mixinConfig "vivecraft.rei.mixins.json"
         mixinConfig "vivecraft.resolutioncontrol.mixins.json"
         mixinConfig "vivecraft.sereneseasons.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
+        mixinConfig "vivecraft.xaerosmimimap.mixins.json"
     }
 }
 
@@ -62,6 +62,8 @@ dependencies {
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
     forgeRuntimeLibrary("com.illposed.osc:javaosc-core:0.9") { transitive = false }
+    forgeRuntimeLibrary("com.github.bhaptics:tact-java:0.1.4") { transitive = false }
+    forgeRuntimeLibrary("org.java-websocket:Java-WebSocket:1.5.1") { transitive = false }
 
     // shadow the natives
     bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
@@ -73,6 +75,8 @@ dependencies {
     implementation(include("io.github.llamalad7:mixinextras-forge:${rootProject.mixin_extras_version}"))
 
     include(implementation("com.illposed.osc:javaosc-core:0.9"))
+    include(implementation("com.github.bhaptics:tact-java:0.1.4"))
+    include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
 }
 
 processResources {

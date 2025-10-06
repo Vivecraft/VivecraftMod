@@ -1,0 +1,8 @@
+{
+  "sources": [
+    {
+      "type": "single",
+      "resource": "vivecraft:gui/sprites/icon/search"
+    }
+  ]
+}

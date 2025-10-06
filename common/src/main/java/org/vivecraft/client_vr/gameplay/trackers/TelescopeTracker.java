@@ -10,13 +10,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.ItemInUseTracker;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.data.ItemTags;
+import org.vivecraft.data.ViveItemTags;
 
-public class TelescopeTracker extends Tracker {
+public class TelescopeTracker implements ItemInUseTracker {
     public static final ModelResourceLocation SCOPE_MODEL = ModelResourceLocation.inventory(
         ResourceLocation.fromNamespaceAndPath("vivecraft", "spyglass_in_hand"));
     private static final float LENS_DIST_MAX = 0.05F;
@@ -26,8 +27,12 @@ public class TelescopeTracker extends Tracker {
 
     private final boolean[] viewing = new boolean[2];
 
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
+
     public TelescopeTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -43,13 +48,18 @@ public class TelescopeTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.viewing[0] = false;
         this.viewing[1] = false;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         for (int c = 0; c < 2; c++) {
             if (isTelescope(player.getItemInHand(InteractionHand.values()[c]))) {
                 if (isViewing(c)) {
@@ -72,7 +82,8 @@ public class TelescopeTracker extends Tracker {
      */
     public static boolean isTelescope(ItemStack itemStack) {
         return itemStack != null &&
-            (itemStack.is(Items.SPYGLASS) || isLegacyTelescope(itemStack) || itemStack.is(ItemTags.VIVECRAFT_TELESCOPE)
+            (itemStack.is(Items.SPYGLASS) || isLegacyTelescope(itemStack) ||
+                itemStack.is(ViveItemTags.VIVECRAFT_TELESCOPE)
             );
     }
 

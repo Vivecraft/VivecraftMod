@@ -2,7 +2,7 @@ package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 
@@ -79,7 +79,7 @@ public class MultiPassTextureTarget extends TextureTarget {
             return;
         }
         // this one should be called on all TextureTargets
-        callOnAllTarget(TextureTarget::destroyBuffers);
+        callOnAllTargets(TextureTarget::destroyBuffers);
     }
 
     @Override
@@ -161,7 +161,7 @@ public class MultiPassTextureTarget extends TextureTarget {
             return;
         }
         // this one should be called on all TextureTargets
-        callOnAllTarget(r -> r.setClearColor(red, green, blue, alpha));
+        callOnAllTargets(r -> r.setClearColor(red, green, blue, alpha));
     }
 
     @Override
@@ -196,7 +196,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.vrTargets == null) {
             return super.getColorTextureId();
         }
-        return callOnTargetInt(TextureTarget::getColorTextureId);
+        return callOnTargetRet(TextureTarget::getColorTextureId);
     }
 
     @Override
@@ -204,10 +204,10 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.vrTargets == null) {
             return super.getDepthTextureId();
         }
-        return callOnTargetInt(TextureTarget::getDepthTextureId);
+        return callOnTargetRet(TextureTarget::getDepthTextureId);
     }
 
-    private void callOnAllTarget(Consumer<TextureTarget> consumer) {
+    private void callOnAllTargets(Consumer<TextureTarget> consumer) {
         this.isVanilla = true;
         consumer.accept(this.vanilla);
         this.isVanilla = false;
@@ -226,7 +226,7 @@ public class MultiPassTextureTarget extends TextureTarget {
         consumer.accept(current);
     }
 
-    private int callOnTargetInt(Function<TextureTarget, Integer> function) {
+    private <T> T callOnTargetRet(Function<TextureTarget, T> function) {
         TextureTarget current = getCurrent();
         if (current != this.last) {
             setLast(current);

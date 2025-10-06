@@ -1,17 +1,15 @@
 package org.vivecraft.mod_compat_vr.shaders.patches;
 
-import java.util.regex.Pattern;
-
 /**
  * patches:
  * vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition), viewSpacePosition.z * gl_ProjectionMatrix[2].w);
  */
 public class EbinMadPatch extends Patch {
     public EbinMadPatch() {
-        this.pattern = Pattern.compile(
-            "vec4\\s*\\(\\s*(\\w+)\\s*\\(\\s*(\\w+)\\s*,\\s*(\\w+)\\s*\\)\\s*,\\s*\\3\\s*\\.\\s*[zbp]\\s*\\*\\s*\\2\\s*\\[\\s*2\\s*\\]\\s*\\.\\s*[waq]\\s*\\)",
-            Pattern.CASE_INSENSITIVE);
-
-        this.replacement = "$2 * vec4($3, 1.0)";
+        super("""
+                vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition), viewSpacePosition.z * gl_ProjectionMatrix[2].w);
+                """, """
+                $2 * vec4($3, 1.0)""",
+            "vec4\\((\\w+)\\((\\w+),(\\w+)\\),\\3\\.z\\*\\2\\[2]\\.w\\)");
     }
 }

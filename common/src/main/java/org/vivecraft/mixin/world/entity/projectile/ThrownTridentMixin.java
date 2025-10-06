@@ -19,7 +19,8 @@ public class ThrownTridentMixin {
         if (instance instanceof ServerPlayer player) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-                return serverVivePlayer.getBodyPartPos(serverVivePlayer.activeBodyPart);
+                // can be shot with the offhand
+                return serverVivePlayer.getAimPos(true);
             }
         }
         return original.call(instance);

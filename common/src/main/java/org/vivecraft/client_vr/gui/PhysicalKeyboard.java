@@ -32,6 +32,7 @@ import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.OptionEnum;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.RGBAColor;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -551,8 +552,7 @@ public class PhysicalKeyboard {
 
         RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
 
-        RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
-        RenderSystem.bindTexture(RenderSystem.getShaderTexture(0));
+        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
         // Start building vertices for key boxes
         Tesselator tesselator = Tesselator.getInstance();

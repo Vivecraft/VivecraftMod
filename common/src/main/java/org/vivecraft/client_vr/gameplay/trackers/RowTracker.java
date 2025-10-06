@@ -4,14 +4,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.utils.MathUtils;
 
-public class RowTracker extends Tracker {
+public class RowTracker implements Tracker {
     private static final double TRANSMISSION_EFFICIENCY = 0.9D;
 
     public double[] forces = new double[]{0.0D, 0.0D};
@@ -21,11 +22,14 @@ public class RowTracker extends Tracker {
 
     private final Vec3[] lastUWPs = new Vec3[2];
 
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
+
     public RowTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
-    @Override
     public boolean isActive(LocalPlayer player) {
         if (this.dh.vrSettings.seated) {
             return false;
@@ -37,7 +41,7 @@ public class RowTracker extends Tracker {
             return false;
         } else if (this.mc.options.keyUp.isDown()) { // important
             return false;
-        } else if (!(player.getVehicle() instanceof Boat)) {
+        } else if (!(player.getVehicle() instanceof AbstractBoat)) {
             return false;
         } else {
             return !this.dh.bowTracker.isNotched();
@@ -49,14 +53,19 @@ public class RowTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.LOar = 0.0F;
         this.ROar = 0.0F;
         this.FOar = 0.0F;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         float c0Move = this.dh.vr.controllerHistory[0].averageSpeed(0.5D);
         float c1Move = this.dh.vr.controllerHistory[1].averageSpeed(0.5D);
 
@@ -84,7 +93,7 @@ public class RowTracker extends Tracker {
     }
 
     public void doProcessFinaltransmithastofixthis(LocalPlayer player) {
-        Boat boat = (Boat) player.getVehicle();
+        AbstractBoat boat = (AbstractBoat) player.getVehicle();
         Quaternionf boatRot = new Quaternionf().rotationYXZ(
             Mth.DEG_TO_RAD * -(boat.getYRot() % 360.0F),
             Mth.DEG_TO_RAD * boat.getXRot(),
@@ -124,13 +133,13 @@ public class RowTracker extends Tracker {
         }
     }
 
-    private Vec3 getArmToPaddleVector(int paddle, Boat boat) {
+    private Vec3 getArmToPaddleVector(int paddle, AbstractBoat boat) {
         Vec3 attachAbs = this.getAttachmentPoint(paddle, boat);
         Vec3 armAbs = this.getAbsArmPos(paddle == 0 ? 1 : 0);
         return attachAbs.subtract(armAbs);
     }
 
-    private Vec3 getAttachmentPoint(int paddle, Boat boat) {
+    private Vec3 getAttachmentPoint(int paddle, AbstractBoat boat) {
         Vector3f attachmentPoint = new Vector3f((paddle == 0 ? 9.0F : -9.0F) / 16.0F, 0.625F,
             0.1875F); // values from ModelBoat
         Quaternionf boatRot = new Quaternionf().rotationYXZ(
@@ -146,7 +155,7 @@ public class RowTracker extends Tracker {
         return this.dh.vrPlayer.roomOrigin.add(arm.x, arm.y, arm.z);
     }
 
-    private boolean isPaddleUnderWater(int paddle, Boat boat) {
+    private boolean isPaddleUnderWater(int paddle, AbstractBoat boat) {
         Vec3 attachAbs = this.getAttachmentPoint(paddle, boat);
         Vec3 armToPaddle = this.getArmToPaddleVector(paddle, boat).normalize();
         BlockPos blockPos = BlockPos.containing(attachAbs.add(armToPaddle));

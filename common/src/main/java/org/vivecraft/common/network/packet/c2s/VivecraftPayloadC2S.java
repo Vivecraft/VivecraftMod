@@ -50,6 +50,7 @@ public interface VivecraftPayloadC2S extends VivecraftPayload {
                 case CRAWL -> CrawlPayloadC2S.read(buffer);
                 case IS_VR_ACTIVE -> VRActivePayloadC2S.read(buffer);
                 case VR_PLAYER_STATE -> VRPlayerStatePayloadC2S.read(buffer);
+                case DAMAGE_DIRECTION -> new DamageDirectionPayloadC2S();
                 default -> {
                     ServerNetworking.LOGGER.error("Vivecraft: Got unexpected payload identifier on server: {}", id);
                     yield UnknownPayloadC2S.read(buffer);

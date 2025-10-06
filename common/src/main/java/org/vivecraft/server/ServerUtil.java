@@ -19,8 +19,8 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.utils.UpdateChecker;
-import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
@@ -45,7 +45,7 @@ public class ServerUtil {
 
     /**
      * schedules delayed welcome/kick messages for the give player <br>
-     * the delay is for  the case that the clients VERSION packed isn't received immediately
+     * the delay is for the case that the client's VERSION packed isn't received immediately
      *
      * @param serverPlayer player to send messages for / kick
      */
@@ -59,37 +59,10 @@ public class ServerUtil {
                     ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
                     String message = "";
 
-                    boolean isOpAndAllowed = ServerConfig.ALLOW_OP.get() &&
-                        serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile());
-
-                    // kick non VR players
-                    if (!isOpAndAllowed && ServerConfig.VR_ONLY.get() && (vivePlayer == null || !vivePlayer.isVR())) {
-                        String kickMessage = ServerConfig.MESSAGES_KICK_VR_ONLY.get();
-                        try {
-                            kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
-                        } catch (IllegalFormatException e) {
-                            // catch errors users might put into the messages, to not crash other stuff
-                            ServerNetworking.LOGGER.error("Vivecraft: KickVROnly message '{}' has errors: ",
-                                kickMessage, e);
-                        }
-                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
+                    if (kickIfNotAllowed(serverPlayer)) {
+                        // player got kicked
                         return;
                     }
-
-                    // kick non vivecraft players
-                    if (!isOpAndAllowed && ServerConfig.VIVE_ONLY.get() && vivePlayer == null) {
-                        String kickMessage = ServerConfig.MESSAGES_KICK_VIVE_ONLY.get();
-                        try {
-                            kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
-                        } catch (IllegalFormatException e) {
-                            // catch errors users might put into the messages, to not crash other stuff
-                            ServerNetworking.LOGGER.error("Vivecraft: KickViveOnly message '{}' has errors: ",
-                                kickMessage, e);
-                        }
-                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
-                        return;
-                    }
-
 
                     // welcome message
                     if (ServerConfig.MESSAGES_ENABLED.get()) {
@@ -118,6 +91,50 @@ public class ServerUtil {
                 }
             }, (long) (ServerConfig.MESSAGE_KICK_DELAY.get() * 1000), TimeUnit.MILLISECONDS);
         }
+    }
+
+    /**
+     * kicks the given player if the server settings don't allow them
+     *
+     * @param player player to maybe kick
+     * @return if the player got kicked tou
+     */
+    public static boolean kickIfNotAllowed(ServerPlayer player) {
+        if (!player.hasDisconnected()) {
+            ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
+
+            boolean isOpAndAllowed = ServerConfig.ALLOW_OP.get() &&
+                player.server.getPlayerList().isOp(player.getGameProfile());
+
+            // kick non VR players
+            if (!isOpAndAllowed && ServerConfig.VR_ONLY.get() && (vivePlayer == null || !vivePlayer.isVR())) {
+                String kickMessage = ServerConfig.MESSAGES_KICK_VR_ONLY.get();
+                try {
+                    kickMessage = kickMessage.formatted(player.getName().getString());
+                } catch (IllegalFormatException e) {
+                    // catch errors users might put into the messages, to not crash other stuff
+                    ServerNetworking.LOGGER.error("Vivecraft: KickVROnly message '{}' has errors: ",
+                        kickMessage, e);
+                }
+                player.connection.disconnect(Component.literal(kickMessage));
+                return true;
+            }
+
+            // kick non vivecraft players
+            if (!isOpAndAllowed && ServerConfig.VIVE_ONLY.get() && vivePlayer == null) {
+                String kickMessage = ServerConfig.MESSAGES_KICK_VIVE_ONLY.get();
+                try {
+                    kickMessage = kickMessage.formatted(player.getName().getString());
+                } catch (IllegalFormatException e) {
+                    // catch errors users might put into the messages, to not crash other stuff
+                    ServerNetworking.LOGGER.error("Vivecraft: KickViveOnly message '{}' has errors: ",
+                        kickMessage, e);
+                }
+                player.connection.disconnect(Component.literal(kickMessage));
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -155,13 +172,18 @@ public class ServerUtil {
             .requires(source -> source.hasPermission(4))
             .then(Commands.literal("reload")
                 .executes(context -> {
-                    ServerConfig.init((action, path, incorrectValue, correctedValue) -> context.getSource()
-                        .sendSystemMessage(Component.literal(
-                            "Corrected §a[%s]§r: was '(%s)%s', is now '(%s)%s'".formatted(
-                                String.join("§r.§a", path),
+                    ServerConfig.init((action, path, incorrectValue, correctedValue) -> {
+                        context.getSource().sendSystemMessage(Component.literal(
+                            "Corrected §a[%s]§r: was '(%s)%s', is now '(%s)%s'".formatted(String.join("§r.§a", path),
                                 incorrectValue.getClass().getSimpleName(), incorrectValue,
-                                correctedValue.getClass().getSimpleName(), correctedValue
-                            ))));
+                                correctedValue.getClass().getSimpleName(), correctedValue)));
+                        String pathString = String.join(".", path);
+                        ServerConfig.getConfigValues().stream().filter(c -> c.getPath().equals(pathString)).findFirst()
+                            .ifPresent(setting -> {
+                                setting.onUpdate(context.getSource().getServer());
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                            });
+                    });
                     return 1;
                 })
             )
@@ -207,6 +229,8 @@ public class ServerUtil {
                                 context.getSource().sendSystemMessage(
                                     Component.literal(
                                         "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
+                                setting.onUpdate(context.getSource().getServer());
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
                                 return 1;
                             } else {
                                 throw new CommandSyntaxException(
@@ -235,6 +259,8 @@ public class ServerUtil {
                                 context.getSource().sendSystemMessage(
                                     Component.literal(
                                         "set §a[%s]§r to '%s'".formatted(setting.getPath(), newEnumValue)));
+                                setting.onUpdate(context.getSource().getServer());
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
                                 return 1;
                             } else {
                                 throw new CommandSyntaxException(
@@ -253,6 +279,8 @@ public class ServerUtil {
                             context.getSource().sendSystemMessage(
                                 Component.literal(
                                     "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
+                            setting.onUpdate(context.getSource().getServer());
+                            ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
                             return 1;
                         })
                     )
@@ -273,6 +301,8 @@ public class ServerUtil {
                                         "added '%s' to §a[%s]§r".formatted(newValue, setting.getPath())));
                                 context.getSource().sendSystemMessage(
                                     Component.literal("is now '%s'".formatted(setting.get())));
+                                setting.onUpdate(context.getSource().getServer());
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
                                 return 1;
                             } catch (Exception e) {
                                 ServerNetworking.LOGGER.error("Vivecraft: error adding block to list:", e);
@@ -301,6 +331,8 @@ public class ServerUtil {
                                     newValue, setting.getPath())));
                             context.getSource().sendSystemMessage(
                                 Component.literal("is now '%s'".formatted(setting.get())));
+                            setting.onUpdate(context.getSource().getServer());
+                            ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
                             return 1;
                         })
                     )
@@ -313,6 +345,8 @@ public class ServerUtil {
                     Object newValue = setting.reset();
                     context.getSource().sendSystemMessage(
                         Component.literal("reset §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
+                    setting.onUpdate(context.getSource().getServer());
+                    ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
                     return 1;
                 })
             );
@@ -338,13 +372,13 @@ public class ServerUtil {
      * @param vivePlayer vive vivePlayer to spawn particles for
      */
     public static void debugParticleAxes(ServerVivePlayer vivePlayer) {
-        if (vivePlayer.isVR() && vivePlayer.vrPlayerState != null) {
-            for (BodyPart bodyPart : BodyPart.values()) {
-                if (bodyPart.isValid(vivePlayer.vrPlayerState.fbtMode())) {
+        if (vivePlayer.isVR() && vivePlayer.vrPlayerState() != null) {
+            for (VRBodyPart bodyPart : VRBodyPart.values()) {
+                if (bodyPart.availableInMode(vivePlayer.vrPlayerState().fbtMode()) && bodyPart != VRBodyPart.HEAD) {
                     debugParticleAxes(
                         vivePlayer.player.serverLevel(),
                         vivePlayer.getBodyPartPos(bodyPart),
-                        vivePlayer.vrPlayerState.getBodyPartPose(bodyPart).orientation());
+                        vivePlayer.vrPlayerState().getBodyPartPose(bodyPart).orientation());
                 }
             }
 
@@ -352,7 +386,7 @@ public class ServerUtil {
                 debugParticleAxes(
                     vivePlayer.player.serverLevel(),
                     vivePlayer.getHMDPos(),
-                    vivePlayer.vrPlayerState.hmd().orientation());
+                    vivePlayer.vrPlayerState().hmd().orientation());
             }
         }
     }

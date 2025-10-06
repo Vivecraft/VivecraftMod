@@ -1,11 +1,7 @@
 package org.vivecraft.client.utils.math;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -85,10 +81,11 @@ public class BezierCurve {
         double x = player.xOld + (player.getX() - player.xOld) * partialTick;
         double y = player.yOld + (player.getY() - player.yOld) * partialTick;
         double z = player.zOld + (player.getZ() - player.zOld) * partialTick;
-        // GlStateManager._disableLighting();
+
         RenderSystem.depthMask(false);
         BufferBuilder buffer = Tesselator.getInstance()
-            .begin(Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+            .begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+
         Vec3[] avec3 = this.getLinearInterpolation(vertexCount / this.nodes.size());
 
         for (int i = 0; i < avec3.length; i++) {
@@ -96,11 +93,10 @@ public class BezierCurve {
         }
 
         BufferUploader.drawWithShader(buffer.buildOrThrow());
-        // GlStateManager._enableLighting();
         RenderSystem.depthMask(true);
     }
 
-    void renderVertex(BufferBuilder buffer, Vec3 vert, Color color, double offX, double offY, double offZ) {
+    void renderVertex(VertexConsumer buffer, Vec3 vert, Color color, double offX, double offY, double offZ) {
         buffer.addVertex((float) (vert.x - offX), (float) (vert.y - offY), (float) (vert.z - offZ))
             .setColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     }
