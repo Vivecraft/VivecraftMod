@@ -13,7 +13,7 @@ import org.vivecraft.client.extensions.LevelRenderStateExtension;
 public class LevelRenderStateMixin implements LevelRenderStateExtension {
 
     @Unique
-    private final BlockOutlineRenderState[] vivecraft$interactOutlineStates =  new BlockOutlineRenderState[2];
+    private final BlockOutlineRenderState[] vivecraft$interactOutlineStates = new BlockOutlineRenderState[2];
 
     @Override
     @Unique

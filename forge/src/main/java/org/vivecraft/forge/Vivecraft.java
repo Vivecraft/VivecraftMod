@@ -1,7 +1,6 @@
 package org.vivecraft.forge;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.common.Mod;

@@ -72,7 +72,8 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
         {
             if (ClientVRPlayers.getInstance().isVRPlayer(player)) {
                 cir.setReturnValue(
-                    vivecraft$getVRRenderer(player.getSkin().model(), ClientVRPlayers.getInstance().isVRAndSeated(player.getUUID())));
+                    vivecraft$getVRRenderer(player.getSkin().model(),
+                        ClientVRPlayers.getInstance().isVRAndSeated(player.getUUID())));
             }
         }
     }

@@ -110,7 +110,8 @@ public abstract class GuiListScreen extends Screen {
             ((GuiGraphicsAccessor) guiGraphics).getDeferredTooltip() == null)
         {
             TooltipRenderer.renderTooltip(guiGraphics, entry.getTooltip(),
-                this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)) + 2, this.list.getItemHeight());
+                this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)) + 2,
+                this.list.getItemHeight());
         }
     }
 }

@@ -1,7 +1,6 @@
 package org.vivecraft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -18,7 +17,6 @@ import org.joml.Vector3fc;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.render.models.HandModel;
-import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ModelUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -192,7 +190,7 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
                 ModelUtils.modelToWorld(renderState, offHand.x, offHand.y, offHand.z, rotInfo,
                     data.bodyYaw(), true, true, this.tempV);
 
-                GuiHandler.GUI_POS_PLAYER_MODEL = new Vec3(renderState.x,  renderState.y, renderState.z)
+                GuiHandler.GUI_POS_PLAYER_MODEL = new Vec3(renderState.x, renderState.y, renderState.z)
                     .add(this.tempV.x, this.tempV.y, this.tempV.z);
             }
         } else {

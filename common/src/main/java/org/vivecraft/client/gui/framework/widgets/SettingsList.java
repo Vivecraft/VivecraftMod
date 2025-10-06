@@ -4,18 +4,19 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
 import org.vivecraft.client.utils.StringSimilarity;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -264,7 +265,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         @Override
         public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY,  boolean hovering, float partialTick)
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             guiGraphics.drawString(Minecraft.getInstance().font, this.name,
                 Minecraft.getInstance().screen.width / 2 - this.width / 2,
@@ -313,12 +314,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         @Override
         public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY,  boolean hovering, float partialTick)
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
             this.mainWidget.setX(this.getContentX());
             this.mainWidget.setY(this.getContentY());
-            this.mainWidget.setWidth(this.optionalWidget == null ? this.getContentWidth() : this.getContentWidth() - 10 - this.optionalWidget.getWidth());
+            this.mainWidget.setWidth(this.optionalWidget == null ? this.getContentWidth() :
+                this.getContentWidth() - 10 - this.optionalWidget.getWidth());
             this.mainWidget.render(guiGraphics, mouseX, mouseY, partialTick);
 
             if (this.optionalWidget != null) {
@@ -403,7 +405,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         @Override
         public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY,  boolean hovering, float partialTick)
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
             this.resetButton.setX(this.getContentRight() - 20);
@@ -473,7 +475,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         @Override
         public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY,  boolean hovering, float partialTick)
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
 
@@ -483,7 +485,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 guiGraphics.drawString(Minecraft.getInstance().font, this.name, this.getContentX(),
                     textY, this.textColor());
             } else {
-                AbstractWidget.renderScrollingString(guiGraphics, Minecraft.getInstance().font, this.name, this.getContentX(),
+                AbstractWidget.renderScrollingString(guiGraphics, Minecraft.getInstance().font, this.name,
+                    this.getContentX(),
                     textY, this.getContentRight() - VALUE_BUTTON_WIDTH - 5,
                     textY + Minecraft.getInstance().font.lineHeight - 1, this.textColor());
             }
@@ -525,12 +528,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         @Override
         public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY,  boolean hovering, float partialTick)
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             if (this.isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard() ||
                 hovering && Minecraft.getInstance().getLastInputType().isMouse())
             {
-                guiGraphics.fill(this.getX(), this.getContentY(), this.getContentRight(), this.getContentY() + this.getHeight(), 0x80000000);
+                guiGraphics.fill(this.getX(), this.getContentY(), this.getContentRight(),
+                    this.getContentY() + this.getHeight(), 0x80000000);
             }
         }
 

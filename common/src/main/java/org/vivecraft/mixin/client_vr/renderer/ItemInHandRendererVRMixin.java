@@ -1,12 +1,14 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MapRenderer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -98,7 +100,8 @@ public abstract class ItemInHandRendererVRMixin {
 
     @Shadow
     protected abstract void renderPlayerArm(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float equippedProgress, float swingProgress,
+        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float equippedProgress,
+        float swingProgress,
         HumanoidArm side);
 
     @Shadow
@@ -123,7 +126,8 @@ public abstract class ItemInHandRendererVRMixin {
         int combinedLight, CallbackInfo ci)
     {
         if (VRState.VR_RUNNING) {
-            this.vivecraft$vrRenderArmWithItem(player, partialTick, hand, swingProgress, itemStack, poseStack, collector,
+            this.vivecraft$vrRenderArmWithItem(player, partialTick, hand, swingProgress, itemStack, poseStack,
+                collector,
                 combinedLight);
             ci.cancel();
         }
