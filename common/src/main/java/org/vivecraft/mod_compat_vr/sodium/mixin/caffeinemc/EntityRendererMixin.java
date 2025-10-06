@@ -10,9 +10,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client_vr.extensions.MethodDependentMixin;
 import org.vivecraft.mod_compat_vr.sodium.extensions.ModelCuboidExtension;
 
+// only for sodium 0.5.6 to 0.6.13
 @Pseudo
+@MethodDependentMixin("buildVertexTexCoord")
 @Mixin(targets = "net.caffeinemc.mods.sodium.client.render.immediate.model.EntityRenderer")
 public class EntityRendererMixin {
     @Shadow(remap = false)

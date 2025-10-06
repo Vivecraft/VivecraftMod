@@ -9,19 +9,19 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL43;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.MirrorNotification;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
@@ -34,6 +34,12 @@ public class ShaderHelper {
     private static float FOV_REDUCTION = 1.0F;
     private static float WATER_EFFECT;
     private static boolean WAS_IN_WATER;
+    private static float PUMPKIN_EFFECT;
+    private static float PORTAL_EFFECT;
+    private static float RED;
+    private static float BLACK;
+    private static float BLUE;
+    private static float TIME;
 
     /**
      * renders a fullscreen quad with the given shader, and the given RenderTarget bound as "Sampler0"
@@ -105,16 +111,15 @@ public class ShaderHelper {
             // and could be out of sync between the eyes
 
             // status effects
-            float red = 0.0F;
-            float black = 0.0F;
-            float blue = 0.0F;
-            float time = (float) Util.getMillis() / 1000.0F;
+            RED = 0.0F;
+            BLACK = 0.0F;
+            BLUE = 0.0F;
+            TIME = (float) Util.getMillis() / 1000.0F;
 
-            float pumpkinEffect = 0.0F;
-            float portalEffect = 0.0F;
+            PUMPKIN_EFFECT = 0.0F;
+            PORTAL_EFFECT = 0.0F;
 
             if (MC.player != null && MC.level != null) {
-
                 boolean isInWater = ((GameRendererExtension) MC.gameRenderer).vivecraft$isInWater();
                 if (DATA_HOLDER.vrSettings.waterEffect && WAS_IN_WATER != isInWater) {
                     // water state changed, start effect
@@ -145,15 +150,19 @@ public class ShaderHelper {
                     // vanilla check for portal overlay
                     portalTime > 0.0F && !MC.player.hasEffect(MobEffects.CONFUSION))
                 {
-                    portalEffect = portalTime;
+                    PORTAL_EFFECT = portalTime;
+                } else {
+                    PORTAL_EFFECT = 0.0F;
                 }
 
-                ItemStack itemstack = MC.player.getInventory().getArmor(3);
+                ItemStack itemstack = MC.player.getItemBySlot(EquipmentSlot.HEAD);
 
                 if (DATA_HOLDER.vrSettings.pumpkinEffect && itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem() &&
                     (!itemstack.has(DataComponents.CUSTOM_MODEL_DATA)))
                 {
-                    pumpkinEffect = 1.0F;
+                    PUMPKIN_EFFECT = 1.0F;
+                } else {
+                    PUMPKIN_EFFECT = 0.0F;
                 }
 
                 float hurtTimer = (float) MC.player.hurtTime - partialTick;
@@ -164,28 +173,28 @@ public class ShaderHelper {
                     hurtTimer = hurtTimer / (float) MC.player.hurtDuration;
                     hurtTimer = healthPercent +
                         Mth.sin(hurtTimer * hurtTimer * hurtTimer * hurtTimer * Mth.PI) * 0.5F;
-                    red = hurtTimer;
+                    RED = hurtTimer;
                 } else if (DATA_HOLDER.vrSettings.lowHealthIndicator) { // red due to low health
-                    red = healthPercent * Mth.abs(Mth.sin((2.5F * time) / (1.0F - healthPercent + 0.1F)));
+                    RED = healthPercent * Mth.abs(Mth.sin((2.5F * TIME) / (1.0F - healthPercent + 0.1F)));
 
                     if (MC.player.isCreative()) {
-                        red = 0.0F;
+                        RED = 0.0F;
                     }
                 }
 
                 float freeze = MC.player.getPercentFrozen();
                 if (DATA_HOLDER.vrSettings.freezeEffect && freeze > 0) {
-                    blue = red;
-                    blue = Math.max(freeze / 2, blue);
-                    red = 0;
+                    BLUE = RED;
+                    BLUE = Math.max(freeze / 2, BLUE);
+                    RED = 0;
                 }
 
                 if (MC.player.isSleeping()) {
-                    black = 0.5F + 0.3F * MC.player.getSleepTimer() * 0.01F;
+                    BLACK = 0.5F + 0.3F * MC.player.getSleepTimer() * 0.01F;
                 }
 
-                if (DATA_HOLDER.vr.isWalkingAbout && black < 0.8F) {
-                    black = 0.5F;
+                if (DATA_HOLDER.vr.isWalkingAbout && BLACK < 0.8F) {
+                    BLACK = 0.5F;
                 }
 
                 // fov reduction when moving
@@ -204,7 +213,7 @@ public class ShaderHelper {
                 FOV_REDUCTION = 1.0F;
             }
 
-            if (pumpkinEffect > 0.0F) {
+            if (PUMPKIN_EFFECT > 0.0F) {
                 VRShaders.POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM.set(0.3F);
                 VRShaders.POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM.set(0.0F);
             } else {
@@ -214,13 +223,13 @@ public class ShaderHelper {
 
             VRShaders.POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM.set(DATA_HOLDER.vrSettings.fovRedutioncOffset);
 
-            VRShaders.POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM.set(red);
-            VRShaders.POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM.set(blue);
-            VRShaders.POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM.set(black);
-            VRShaders.POST_PROCESSING_OVERLAY_TIME_UNIFORM.set(time);
+            VRShaders.POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM.set(RED);
+            VRShaders.POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM.set(BLUE);
+            VRShaders.POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM.set(BLACK);
+            VRShaders.POST_PROCESSING_OVERLAY_TIME_UNIFORM.set(TIME);
             VRShaders.POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM.set(WATER_EFFECT);
-            VRShaders.POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM.set(portalEffect);
-            VRShaders.POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM.set(pumpkinEffect);
+            VRShaders.POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM.set(PORTAL_EFFECT);
+            VRShaders.POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM.set(PUMPKIN_EFFECT);
         }
 
         // this needs to be set for each eye
@@ -318,24 +327,25 @@ public class ShaderHelper {
             ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth(),
             ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight());
 
-        Vec3 camPlayer = DATA_HOLDER.vrPlayer.vrdata_room_pre.getHeadPivot()
-            .subtract(DATA_HOLDER.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
+        Vector3f camPlayer = DATA_HOLDER.vrPlayer.vrdata_room_pre.getHeadPivotF()
+            .sub(DATA_HOLDER.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPositionF());
 
         // transpose, because camera rotations are transposed
         Matrix4f viewMatrix = DATA_HOLDER.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix().transpose();
         Vector3f cameraLook = DATA_HOLDER.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getDirection();
+        // only horizontal
+        cameraLook.set(-cameraLook.x, 0.0F, -cameraLook.z);
+
+        boolean alphaMask =
+            DATA_HOLDER.vrSettings.mixedRealityUnityLike && DATA_HOLDER.vrSettings.mixedRealityAlphaMask;
 
         // set uniforms
         VRShaders.MIXED_REALITY_PROJECTION_MATRIX_UNIFORM.set(
             ((GameRendererExtension) MC.gameRenderer).vivecraft$getThirdPassProjectionMatrix());
         VRShaders.MIXED_REALITY_VIEW_MATRIX_UNIFORM.set(viewMatrix);
 
-        VRShaders.MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM.set((float) camPlayer.x, (float) camPlayer.y,
-            (float) camPlayer.z);
-        VRShaders.MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM.set(-cameraLook.x, 0.0F, -cameraLook.z);
-
-        boolean alphaMask =
-            DATA_HOLDER.vrSettings.mixedRealityUnityLike && DATA_HOLDER.vrSettings.mixedRealityAlphaMask;
+        VRShaders.MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM.set(camPlayer.x, camPlayer.y, camPlayer.z);
+        VRShaders.MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM.set(cameraLook.x, cameraLook.y, cameraLook.z);
 
         if (!alphaMask) {
             VRShaders.MIXED_REALITY_KEY_COLOR_UNIFORM.set(
@@ -350,9 +360,9 @@ public class ShaderHelper {
         VRShaders.MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM.set(DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
 
         // bind textures
-        VRShaders.MIXED_REALITY_SHADER.setSampler("thirdPersonColor",
+        VRShaders.MIXED_REALITY_SHADER.setSampler(VRShaders.MIXED_REALITY_THIRD_COLOR_SAMPLER,
             DATA_HOLDER.vrRenderer.framebufferMR.getColorTextureId());
-        VRShaders.MIXED_REALITY_SHADER.setSampler("thirdPersonDepth",
+        VRShaders.MIXED_REALITY_SHADER.setSampler(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
             DATA_HOLDER.vrRenderer.framebufferMR.getDepthTextureId());
 
         if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
@@ -368,7 +378,8 @@ public class ShaderHelper {
                     source = DATA_HOLDER.vrRenderer.framebufferEye1;
                 }
             }
-            VRShaders.MIXED_REALITY_SHADER.setSampler("firstPersonColor", source.getColorTextureId());
+            VRShaders.MIXED_REALITY_SHADER.setSampler(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER,
+                source.getColorTextureId());
         }
 
         VRShaders.MIXED_REALITY_SHADER.apply();
@@ -397,8 +408,8 @@ public class ShaderHelper {
             // first pass, horizontal
             firstPass.bindWrite(true);
 
-            VRShaders.LANCZOS_SHADER.setSampler("Sampler0", source.getColorTextureId());
-            VRShaders.LANCZOS_SHADER.setSampler("Sampler1", source.getDepthTextureId());
+            VRShaders.LANCZOS_SHADER.setSampler(VRShaders.LANCZOS_COLOR_SAMPLER, source.getColorTextureId());
+            VRShaders.LANCZOS_SHADER.setSampler(VRShaders.LANCZOS_DEPTH_SAMPLER, source.getDepthTextureId());
             VRShaders.LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM.set(1.0F / (3.0F * (float) firstPass.viewWidth));
             VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(0.0F);
             VRShaders.LANCZOS_SHADER.apply();
@@ -408,8 +419,8 @@ public class ShaderHelper {
             // second pass, vertical
             secondPass.bindWrite(true);
 
-            VRShaders.LANCZOS_SHADER.setSampler("Sampler0", firstPass.getColorTextureId());
-            VRShaders.LANCZOS_SHADER.setSampler("Sampler1", firstPass.getDepthTextureId());
+            VRShaders.LANCZOS_SHADER.setSampler(VRShaders.LANCZOS_COLOR_SAMPLER, firstPass.getColorTextureId());
+            VRShaders.LANCZOS_SHADER.setSampler(VRShaders.LANCZOS_DEPTH_SAMPLER, firstPass.getDepthTextureId());
             VRShaders.LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM.set(0.0F);
             VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(1.0F / (3.0F * (float) secondPass.viewHeight));
             VRShaders.LANCZOS_SHADER.apply();
@@ -447,7 +458,6 @@ public class ShaderHelper {
         RenderSystem.colorMask(true, true, true, false);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        RenderSystem.viewport(left, top, width, height);
         RenderSystem.disableBlend();
 
         float drawAspect = (float) width / (float) height;
@@ -474,20 +484,26 @@ public class ShaderHelper {
             }
         }
 
-        ShaderInstance instance = VRShaders.BLIT_VR_SHADER;
-        instance.setSampler("DiffuseSampler", source.getColorTextureId());
+        VRShaders.BLIT_VR_SHADER.setSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureId());
 
-        instance.apply();
+        VRShaders.BLIT_VR_SHADER.apply();
 
-        BufferBuilder bufferbuilder = RenderSystem.renderThreadTesselator().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
+        BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator()
+            .begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_SHADER.getVertexFormat());
 
-        bufferbuilder.vertex(-1.0F, -1.0F, 0.0F).uv(xMin, yMin).endVertex();
-        bufferbuilder.vertex(1.0F, -1.0F, 0.0F).uv(xMax, yMin).endVertex();
-        bufferbuilder.vertex(1.0F, 1.0F, 0.0F).uv(xMax, yMax).endVertex();
-        bufferbuilder.vertex(-1.0F, 1.0F, 0.0F).uv(xMin, yMax).endVertex();
-        BufferUploader.draw(bufferbuilder.end());
-        instance.clear();
+        // position quad
+        float xMinPos = (float) left / MC.getMainRenderTarget().viewWidth * 2F - 1F;
+        float yMinPos = (float) top / MC.getMainRenderTarget().viewHeight * 2F - 1F;
+        float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().viewWidth * 2F;
+        float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().viewHeight * 2F;
+
+        bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, yMin);
+        bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, yMin);
+        bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, yMax);
+        bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, yMax);
+
+        BufferUploader.draw(bufferBuilder.buildOrThrow());
+        VRShaders.BLIT_VR_SHADER.clear();
 
         RenderSystem.depthMask(true);
         RenderSystem.colorMask(true, true, true, true);

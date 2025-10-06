@@ -1,15 +1,16 @@
 #version 150 core
 
 uniform sampler2D Sampler0;
+
 uniform float circle_radius;
 uniform float circle_offset = 0.1;
 uniform float border;
 
 uniform float water;
-uniform float portal;
 uniform float pumpkin;
-
+uniform float portal;
 uniform float portaltime;
+
 uniform float redalpha;
 uniform float bluealpha;
 uniform float blackalpha;

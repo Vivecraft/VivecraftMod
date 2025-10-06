@@ -1,7 +1,6 @@
 package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.Minecraft;
@@ -9,14 +8,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL13C;
-import org.lwjgl.opengl.GL30C;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -41,6 +40,10 @@ public class VRPassHelper {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
         RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT | GL13C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         RenderSystem.enableDepthTest();
+
+        // some mods mess with these
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
 
         // THIS IS WHERE EVERYTHING IS RENDERED
         MC.gameRenderer.render(partialTick, nanoTime, renderLevel);
@@ -89,18 +92,10 @@ public class VRPassHelper {
         if (DATA_HOLDER.currentPass == RenderPass.THIRD &&
             DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY &&
             renderLevel && MC.level != null &&
-            OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive() &&
-            OptifineHelper.bindShaderFramebuffer())
+            OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive())
         {
             // copy optifine depth buffer, since we need it for the mixed reality split
-            RenderSystem.activeTexture(GL13C.GL_TEXTURE0);
-            RenderSystem.bindTexture(DATA_HOLDER.vrRenderer.framebufferMR.getDepthTextureId());
-            RenderHelper.checkGLError("pre copy depth");
-            GlStateManager._glCopyTexSubImage2D(GL13C.GL_TEXTURE_2D, 0, 0, 0, 0, 0,
-                DATA_HOLDER.vrRenderer.framebufferMR.width, DATA_HOLDER.vrRenderer.framebufferMR.height);
-            RenderHelper.checkGLError("post copy depth");
-            // rebind the original buffer
-            DATA_HOLDER.vrRenderer.framebufferMR.bindWrite(false);
+            OptifineHelper.copyOptifineShaderDepth(DATA_HOLDER.vrRenderer.framebufferMR);
         }
     }
 
@@ -170,9 +165,7 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps
-            MC.mainRenderTarget.bindRead();
-            GL30C.glGenerateMipmap(GL30C.GL_TEXTURE_2D);
-            MC.mainRenderTarget.unbindRead();
+            OpenGLHelper.genMipmaps(MC.mainRenderTarget);
         }
 
         MC.getProfiler().popPush("2D Keyboard");
@@ -197,7 +190,7 @@ public class VRPassHelper {
         MC.getProfiler().pop();
 
         // render the different vr passes
-        List<RenderPass> list = DATA_HOLDER.vrRenderer.getRenderPasses();
+        List<RenderPass> list = DATA_HOLDER.vrRenderer.getRenderPasses(false);
         DATA_HOLDER.isFirstPass = true;
         for (RenderPass renderpass : list) {
             DATA_HOLDER.currentPass = renderpass;

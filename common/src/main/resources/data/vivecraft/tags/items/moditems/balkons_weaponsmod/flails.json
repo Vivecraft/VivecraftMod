@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "weaponmod:flail.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:flail.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:flail.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:flail.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:flail.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:flail.netherite",
+      "required": false
+    }
+  ]
+}

@@ -44,7 +44,7 @@ public class QuaternionfHistory {
      * @return the newest Quaternion
      */
     public Quaternionf latest() {
-        return this.data.getLast().quat;
+        return this.data.isEmpty() ? new Quaternionf() : this.data.getLast().quat;
     }
 
     /**

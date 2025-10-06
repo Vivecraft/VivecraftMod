@@ -1,7 +1,5 @@
 package org.vivecraft.mod_compat_vr.shaders.patches;
 
-import java.util.regex.Pattern;
-
 /**
  * patches all of these
  * diagonal4(mat) * v.xyzz + mat[3];
@@ -11,10 +9,14 @@ import java.util.regex.Pattern;
  */
 public class ProjDiag4Patch extends Patch {
     public ProjDiag4Patch() {
-        this.pattern = Pattern.compile(
-            "((((diagonal4|diag4)\\(\\w+\\))|\\w+|vec4\\s*\\(\\s*(\\w+)\\s*\\[\\s*0\\s*\\]\\s*\\.\\s*[xrs]\\s*,\\s*\\5\\s*\\[\\s*1\\s*\\]\\s*\\.\\s*[ygt]\\s*,\\s*\\5\\s*\\[\\s*2\\s*\\]\\s*\\.\\s*[zbp][waq]\\s*\\))\\s*\\*\\s*)?(\\w+)\\s*\\.\\s*[xrs][ygt][zbp][zbp](\\s*\\*\\s*((diagonal4|diag4)\\(\\w+\\)))?\\s*\\+\\s*(\\w+)\\s*\\[\\s*3\\s*\\]\\s*;",
-            Pattern.CASE_INSENSITIVE);
-
-        this.replacement = "$10 * vec4($6, 1.0);";
+        super(
+            """
+                diagonal4(mat) * v.xyzz + mat[3];
+                v.xyzz * diagonal4(mat) + mat[3];
+                vec4(m[0].x, m[1].y, m[2].zw) * pos.xyzz + m[3];
+                iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
+                """, """
+                $10 * vec4($6, 1.0);""",
+            "((((diagonal4|diag4)\\(\\w+\\))|\\w+|vec4\\((\\w+)\\[0]\\.x,\\5\\[1]\\.y,\\5\\[2]\\.zw\\))\\*\\s*)?(\\w+)\\.xyzz(\\*((diagonal4|diag4)\\(\\w+\\)))?\\+(\\w+)\\[3];");
     }
 }

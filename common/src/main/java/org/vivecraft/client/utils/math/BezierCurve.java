@@ -84,7 +84,7 @@ public class BezierCurve {
         double x = player.xOld + (player.getX() - player.xOld) * partialTick;
         double y = player.yOld + (player.getY() - player.yOld) * partialTick;
         double z = player.zOld + (player.getZ() - player.zOld) * partialTick;
-        // GlStateManager._disableLighting();
+
         RenderSystem.depthMask(false);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
@@ -96,11 +96,10 @@ public class BezierCurve {
         }
 
         tesselator.end();
-        // GlStateManager._enableLighting();
         RenderSystem.depthMask(true);
     }
 
-    void renderVertex(BufferBuilder buffer, Vec3 vert, Color color, double offX, double offY, double offZ) {
+    void renderVertex(VertexConsumer buffer, Vec3 vert, Color color, double offX, double offY, double offZ) {
         buffer.vertex(vert.x - offX, vert.y - offY, vert.z - offZ)
             .color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
     }

@@ -1,0 +1,31 @@
+package org.vivecraft.client.gui.settings;
+
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import org.vivecraft.client.gui.framework.screens.GuiListScreen;
+import org.vivecraft.client.gui.framework.widgets.SettingsList;
+import org.vivecraft.client_vr.settings.VRSettings;
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class GuiDebugSettings extends GuiListScreen {
+    public GuiDebugSettings(Screen lastScreen) {
+        super(Component.translatable("vivecraft.options.screen.debug"), lastScreen);
+    }
+
+    @Override
+    protected List<SettingsList.BaseEntry> getEntries() {
+        List<SettingsList.BaseEntry> entries = new LinkedList<>();
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_HEAD_HITBOX));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_DEVICE_AXES));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_PLAYER_AXES));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_TRACKERS));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.MAIN_PLAYER_DATA));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.RENDER_DEBUG_GAMEPLAY_TRACKER));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.GAMEPLAY_TRACKER_TO_RENDER));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.CONTROLLER_TRANSFORM));
+
+        return entries;
+    }
+}

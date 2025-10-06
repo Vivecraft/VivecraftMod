@@ -15,10 +15,13 @@ public class ShaderPatcher {
         new RreProjInvPatch(),
         new SuperDuperProjInvPatch(),
         new EbinProjInvPatch(),
+        new MakeupProjInvPatch(),
         new SuperDuperProj2Patch(),
+        new SuperDuperLineProj2Patch(),
         new SuperDuperProj3Patch(),
         new EbinProjPatch(),
-        new ProjDiag3Patch()
+        new ProjDiag3Patch(),
+        new MakeupProjPatch()
     );
 
     /**
@@ -30,9 +33,13 @@ public class ShaderPatcher {
     public static String patchShader(String shader) {
         if (ClientDataHolderVR.getInstance().vrSettings.shaderPatching) {
             for (Patch patch : PATCHES) {
-                shader = patch.getPattern().matcher(shader).replaceAll(patch.getReplacement());
+                shader = patch.patch(shader);
             }
         }
         return shader;
+    }
+
+    public static Set<Patch> getPatches() {
+        return PATCHES;
     }
 }

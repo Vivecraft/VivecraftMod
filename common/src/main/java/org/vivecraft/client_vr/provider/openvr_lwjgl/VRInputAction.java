@@ -6,8 +6,8 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.Xplat;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
@@ -166,6 +166,9 @@ public class VRInputAction {
         }
     }
 
+    /**
+     * @return the last origin the vr runtime sent, if the VRInputAction is not currently in an active set this is likely 0
+     */
     public long getLastOrigin() {
         return switch (this.type) {
             case "boolean" -> this.digitalData().activeOrigin;
@@ -327,6 +330,14 @@ public class VRInputAction {
             }
         } else if (this.unpressInTicks[0] > 0 && --this.unpressInTicks[0] == 0) {
             this.unpressBindingImmediately(null);
+        }
+    }
+
+    public void setPressed(boolean pressed) {
+        if (pressed) {
+            this.pressBinding();
+        } else {
+            this.unpressBinding();
         }
     }
 

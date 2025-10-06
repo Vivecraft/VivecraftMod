@@ -6,6 +6,7 @@
       "required": false
     },
 
-    "#vivecraft:moditems/irons_spellbooks"
+    "#vivecraft:moditems/irons_spellbooks",
+    "#vivecraft:moditems/balkons_weaponsmod/nonbows"
   ]
 }
