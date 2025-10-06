@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
 import org.vivecraft.client.utils.StringSimilarity;
 import org.vivecraft.client_vr.ClientDataHolderVR;

@@ -6,10 +6,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class VivecraftVRMod {
 
