@@ -2,9 +2,9 @@ package org.vivecraft.client_xr.render_pass;
 
 import com.mojang.blaze3d.pipeline.MainTarget;
 import net.minecraft.client.Minecraft;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.render.RenderPass;
 
 public class RenderPassManager {
     private static final Minecraft MC = Minecraft.getInstance();
@@ -45,7 +45,7 @@ public class RenderPassManager {
      * resets back to the vanilla RenderPass
      */
     public static void setVanillaRenderPass() {
-        ClientDataHolderVR.getInstance().currentPass = null;
+        ClientDataHolderVR.getInstance().currentPass = RenderPass.VANILLA;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.VANILLA;
         MC.mainRenderTarget = INSTANCE.vanillaRenderTarget;

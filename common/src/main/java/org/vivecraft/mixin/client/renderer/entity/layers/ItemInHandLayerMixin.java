@@ -2,11 +2,7 @@ package org.vivecraft.mixin.client.renderer.entity.layers;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -25,11 +21,7 @@ import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 
 @Mixin(ItemInHandLayer.class)
-public abstract class ItemInHandLayerMixin extends RenderLayer {
-
-    public ItemInHandLayerMixin(RenderLayerParent renderer) {
-        super(renderer);
-    }
+public abstract class ItemInHandLayerMixin {
 
     @ModifyVariable(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("STORE"), ordinal = 0)
     private boolean vivecraft$isRightMainHand(boolean isRightMainHand, @Local(argsOnly = true) LivingEntity entity) {

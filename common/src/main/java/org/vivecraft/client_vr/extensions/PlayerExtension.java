@@ -1,8 +1,6 @@
 package org.vivecraft.client_vr.extensions;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 public interface PlayerExtension {
@@ -12,14 +10,6 @@ public interface PlayerExtension {
      * @param teleported if the player teleported
      */
     void vivecraft$setTeleported(boolean teleported);
-
-    /**
-     * sets the given ItemStack as used by the player
-     *
-     * @param itemStack       ItemStack to use
-     * @param interactionHand hand that used the ItemStack
-     */
-    void vivecraft$setItemInUseClient(ItemStack itemStack, InteractionHand interactionHand);
 
     /**
      * sets the ticks the used item has remaining

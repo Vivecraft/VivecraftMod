@@ -6,7 +6,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,9 +25,8 @@ public abstract class ThrowableProjectileMixin extends Entity {
         if (shooter instanceof ServerPlayer player) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-                Vec3 pos = serverVivePlayer.getBodyPartPos(serverVivePlayer.activeBodyPart);
-                Vec3 dir = serverVivePlayer.getBodyPartDir(serverVivePlayer.activeBodyPart).scale(0.6F);
-                this.setPos(pos.x + dir.x, pos.y + dir.y, pos.z + dir.z);
+                // can be shot with the offhand
+                this.setPos(serverVivePlayer.getAimPos(true));
             }
         }
     }

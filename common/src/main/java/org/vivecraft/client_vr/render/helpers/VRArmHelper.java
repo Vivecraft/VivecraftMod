@@ -15,11 +15,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
@@ -37,7 +37,7 @@ public class VRArmHelper {
      * @return if first person hands should be rendered in the current RenderPass
      */
     public static boolean shouldRenderHands() {
-        if (ClientDataHolderVR.VIEW_ONLY) {
+        if (DATA_HOLDER.viewOnly) {
             return false;
         } else if (DATA_HOLDER.currentPass == RenderPass.THIRD) {
             return DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY;
@@ -60,13 +60,13 @@ public class VRArmHelper {
     {
         if (!renderMain && !renderOff) return;
         MC.getProfiler().push("hands");
-        ClientDataHolderVR.IS_FP_HAND = true;
+        DATA_HOLDER.isFpHand = true;
 
         VREffectsHelper.removeNausea(partialTick);
 
         if (renderMain) {
             // set main hand active, for the attack cooldown transparency
-            ClientDataHolderVR.IS_MAIN_HAND = true;
+            DATA_HOLDER.isMainHand = true;
 
             if (menuHandMain) {
                 renderMainMenuHand(0, false);
@@ -74,7 +74,7 @@ public class VRArmHelper {
                 renderVRHand_Main(partialTick);
             }
 
-            ClientDataHolderVR.IS_MAIN_HAND = false;
+            DATA_HOLDER.isMainHand = false;
         }
 
         if (renderOff) {
@@ -87,7 +87,7 @@ public class VRArmHelper {
 
         VREffectsHelper.reAddNausea();
 
-        ClientDataHolderVR.IS_FP_HAND = false;
+        DATA_HOLDER.isFpHand = false;
         MC.getProfiler().pop();
     }
 
@@ -105,8 +105,7 @@ public class VRArmHelper {
         RenderHelper.setupRenderingAtController(c, modelView);
 
         if (MC.getOverlay() == null) {
-            MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
-            RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
         }
 
         if (depthAlways && c == 0) {
@@ -291,13 +290,13 @@ public class VRArmHelper {
                 // TODO SHADERS use a shader with lightmaps
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
                 MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
-                RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
+                ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
                 if (size > 0.0F) {
                     // tp energy quad, slightly above the max energy quad
                     RenderHelper.renderFlatQuad(start.add(0.0D, 0.05001D, 0.0D), size, size, 0.0F,
-                        TP_LIMITED_COLOR.getX(), TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 128, poseStack.last()
-                            .pose());
+                        TP_LIMITED_COLOR.getX(), TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 128,
+                        poseStack.last().pose());
                 }
                 // max energy quad
                 RenderHelper.renderFlatQuad(start.add(0.0D, 0.05D, 0.0D), max, max, 0.0F, TP_LIMITED_COLOR.getX(),
@@ -307,9 +306,8 @@ public class VRArmHelper {
             }
 
             if (DATA_HOLDER.teleportTracker.isAiming()) {
-                // renders from the head
                 RenderSystem.enableDepthTest();
-
+                // renders from the head
                 if (DATA_HOLDER.teleportTracker.vrMovementStyle.arcAiming) {
                     renderTeleportArc(poseStack.last().pose());
                 } /* else {
@@ -380,8 +378,7 @@ public class VRArmHelper {
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
             // to make shaders work
-            MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
-            RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
             BufferBuilder bufferBuilder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
@@ -418,8 +415,7 @@ public class VRArmHelper {
 
             double segmentProgress = 1.0D / (double) segments;
 
-            Vec3 cameraPosition = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass,
-                DATA_HOLDER.vrPlayer.getVRDataWorld());
+            Vec3 cameraPosition = MC.gameRenderer.getMainCamera().getPosition();
 
             // arc
             for (int i = 0; i < segments; i++) {

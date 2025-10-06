@@ -22,10 +22,14 @@ public class InputSimulator {
         return PRESSED_KEYS.contains(key) || (PRESSED_MODIFIERS.getOrDefault(key, 0) > 0);
     }
 
+    private static void handleKeyAction(int key, int modifiers, int action) {
+        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0,
+            action, modifiers);
+    }
+
     public static void pressKey(int key, int modifiers) {
         PRESSED_KEYS.add(key);
-        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 1,
-            modifiers);
+        handleKeyAction(key, modifiers, GLFW.GLFW_PRESS);
     }
 
     public static void pressKey(int key) {
@@ -34,8 +38,7 @@ public class InputSimulator {
 
     public static void releaseKey(int key, int modifiers) {
         PRESSED_KEYS.remove(key);
-        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 0,
-            modifiers);
+        handleKeyAction(key, modifiers, GLFW.GLFW_RELEASE);
     }
 
     public static void releaseKey(int key) {
@@ -44,8 +47,7 @@ public class InputSimulator {
 
     public static void pressModifier(int key, int modifiers) {
         PRESSED_MODIFIERS.merge(key, 1, Integer::sum);
-        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 1,
-            modifiers);
+        handleKeyAction(key, modifiers, GLFW.GLFW_PRESS);
     }
 
     public static void pressModifier(int key) {
@@ -54,8 +56,7 @@ public class InputSimulator {
 
     public static void releaseModifier(int key, int modifiers) {
         PRESSED_MODIFIERS.merge(key, -1, Integer::sum);
-        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 0,
-            modifiers);
+        handleKeyAction(key, modifiers, GLFW.GLFW_RELEASE);
     }
 
     public static void releaseModifier(int key) {
@@ -116,7 +117,7 @@ public class InputSimulator {
                 pressKey(code);
             }
         } else if (minecraft.screen == null && ClientUtils.milliTime() - AIR_TYPING_WARNING_TIME >= 30000) {
-            minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.airtypingwarning"));
+            ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.airtypingwarning"));
             AIR_TYPING_WARNING_TIME = ClientUtils.milliTime();
         }
     }

@@ -10,8 +10,9 @@ import java.util.Map;
  * holds a map of settings the server has overridden
  *
  * @param overrides map with the key as the setting, and the value as the override
+ * @param clear     tells the client to remove any override mentioned in this packet
  */
-public record SettingOverridePayloadS2C(Map<String, String> overrides) implements VivecraftPayloadS2C {
+public record SettingOverridePayloadS2C(Map<String, String> overrides, boolean clear) implements VivecraftPayloadS2C {
 
     @Override
     public PayloadIdentifier payloadId() {
@@ -25,6 +26,9 @@ public record SettingOverridePayloadS2C(Map<String, String> overrides) implement
             buffer.writeUtf(entry.getKey());
             buffer.writeUtf(entry.getValue());
         }
+
+        buffer.writeUtf("clearOverrides");
+        buffer.writeUtf(String.valueOf(this.clear));
     }
 
     public static SettingOverridePayloadS2C read(FriendlyByteBuf buffer) {
@@ -34,6 +38,7 @@ public record SettingOverridePayloadS2C(Map<String, String> overrides) implement
             overrides.put(buffer.readUtf(), buffer.readUtf());
         }
 
-        return new SettingOverridePayloadS2C(overrides);
+        return new SettingOverridePayloadS2C(overrides,
+            overrides.containsKey("clearOverrides") && overrides.get("clearOverrides").equals("true"));
     }
 }

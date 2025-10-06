@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
-import org.vivecraft.server.config.ClimbeyBlockmode;
+import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

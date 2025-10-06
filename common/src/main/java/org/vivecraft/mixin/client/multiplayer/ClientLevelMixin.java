@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.common.api_impl.VRAPIImpl;
 
 @Mixin(ClientLevel.class)
 public class ClientLevelMixin {
@@ -13,5 +14,6 @@ public class ClientLevelMixin {
     private void vivecraft$allowVivecraft(CallbackInfo ci) {
         // re allow VR on disconnect
         ClientDataHolderVR.getInstance().completelyDisabled = false;
+        VRAPIImpl.INSTANCE.clearAllPoseHistories();
     }
 }

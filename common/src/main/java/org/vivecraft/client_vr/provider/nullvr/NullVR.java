@@ -6,19 +6,16 @@ import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.DeviceSource;
-import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.provider.VRRenderer;
+import org.vivecraft.client_vr.provider.*;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.utils.MathUtils;
 
 import java.lang.Math;
@@ -38,6 +35,10 @@ public class NullVR extends MCVR {
 
     private BodyPart currentBodyPart = BodyPart.HEAD;
     private FBTMode fbtMode = FBTMode.ARMS_ONLY;
+    // when on, moves arms/legs on both sides, when off, moves only the right one
+    private boolean syncBodyparts = true;
+    // when on, moves the bodyparts relative to the room, when off, moves them relative to their orientation
+    private boolean moveRoom = true;
 
     private ControllerTransform controllerType = ControllerTransform.NULL;
 
@@ -177,6 +178,9 @@ public class NullVR extends MCVR {
                     this.hmdRotation.set3x3(GuiHandler.GUI_ROTATION_ROOM);
                 }
             }
+
+            Profiler.get().popPush("processInputs");
+            this.processInputs();
             this.mc.getProfiler().popPush("hmdSampling");
             this.hmdSampling();
 
@@ -185,12 +189,17 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public void processInputs() {}
+    public void processInputs() {
+        this.ignorePressesNextFrame = false;
+    }
 
     @Override
     protected ControllerType findActiveBindingControllerType(KeyMapping keyMapping) {
         return null;
     }
+
+    @Override
+    public void refreshControllerTransforms() {}
 
     @Override
     public Matrix4fc getControllerComponentTransform(int controllerIndex, String componentName) {
@@ -246,7 +255,7 @@ public class NullVR extends MCVR {
 
     @Override
     public List<Long> getOrigins(VRInputAction action) {
-        return null;
+        return List.of();
     }
 
     @Override
@@ -293,12 +302,15 @@ public class NullVR extends MCVR {
 
                 if (key == GLFW.GLFW_KEY_F9) {
                     this.controllerType = ClientUtils.getNextEnum(this.controllerType, offset);
+                    if (this.controllerType == ControllerTransform.AUTO) {
+                        this.controllerType = ClientUtils.getNextEnum(this.controllerType, offset);
+                    }
                     Vector3f tipForward = this.controllerType.tipR.transformDirection(MathUtils.BACK, new Vector3f());
                     Vector3f handForward = this.controllerType.handGripR.transformDirection(MathUtils.BACK,
                         new Vector3f());
                     this.gunAngle = (float) Math.toDegrees(Math.acos(Math.abs(tipForward.dot(handForward))));
                     this.gunStyle = this.gunAngle > 10.0F;
-                    MirrorNotification.notify("Changed to controller: " + this.currentBodyPart, false, 1000);
+                    MirrorNotification.notify("Changed to controller: " + this.controllerType, false, 1000);
                     triggered = true;
                 } else if (key == GLFW.GLFW_KEY_KP_5) {
                     // toggle body part
@@ -309,6 +321,16 @@ public class NullVR extends MCVR {
                     // toggle fbt mode
                     this.fbtMode = ClientUtils.getNextEnum(this.fbtMode, offset);
                     MirrorNotification.notify("Changed fbt mode to: " + this.fbtMode, false, 1000);
+                    triggered = true;
+                } else if (key == GLFW.GLFW_KEY_KP_MULTIPLY) {
+                    // toggle body sync
+                    this.syncBodyparts = !this.syncBodyparts;
+                    MirrorNotification.notify("toggled body part sync to : " + this.syncBodyparts, false, 1000);
+                    triggered = true;
+                } else if (key == GLFW.GLFW_KEY_KP_DIVIDE) {
+                    // toggle movement space
+                    this.moveRoom = !this.moveRoom;
+                    MirrorNotification.notify("toggled body part room relative to : " + this.moveRoom, false, 1000);
                     triggered = true;
                 }
             }
@@ -375,7 +397,7 @@ public class NullVR extends MCVR {
 
     private void rotateBody(float angle, Vector3fc axis) {
         this.deviceRotations[this.currentBodyPart.rightIndex].rotateAxis(angle, axis);
-        if (this.currentBodyPart.leftIndex != -1) {
+        if (this.currentBodyPart.leftIndex != -1 && this.syncBodyparts) {
             if (axis == MathUtils.RIGHT) {
                 this.deviceRotations[this.currentBodyPart.leftIndex].rotateAxis(angle, axis);
             } else {
@@ -385,9 +407,19 @@ public class NullVR extends MCVR {
     }
 
     private void translateBody(float x, float y, float z) {
-        this.deviceOffsets[this.currentBodyPart.rightIndex].add(x, y, z);
-        if (this.currentBodyPart.leftIndex != -1) {
-            this.deviceOffsets[this.currentBodyPart.leftIndex].add(-x, y, z);
+        if (this.moveRoom) {
+            this.deviceOffsets[this.currentBodyPart.rightIndex].add(x, y, z);
+        } else {
+            this.deviceOffsets[this.currentBodyPart.rightIndex].add(
+                this.deviceRotations[this.currentBodyPart.rightIndex].transform(x, y, z, new Vector3f()));
+        }
+        if (this.currentBodyPart.leftIndex != -1 && this.syncBodyparts) {
+            if (this.moveRoom) {
+                this.deviceOffsets[this.currentBodyPart.leftIndex].add(-x, y, z);
+            } else {
+                this.deviceOffsets[this.currentBodyPart.leftIndex].add(
+                    this.deviceRotations[this.currentBodyPart.leftIndex].transform(x, y, z, new Vector3f()));
+            }
         }
     }
 }

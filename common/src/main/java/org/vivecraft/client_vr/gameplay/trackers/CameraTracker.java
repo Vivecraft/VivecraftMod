@@ -9,12 +9,12 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.common.utils.MathUtils;
 
-public class CameraTracker extends Tracker {
+public class CameraTracker implements Tracker {
     public static final ModelResourceLocation CAMERA_MODEL = new ModelResourceLocation(
         ResourceLocation.fromNamespaceAndPath("vivecraft", "camera"), "standalone");
     public static final ModelResourceLocation CAMERA_DISPLAY_MODEL = new ModelResourceLocation(
@@ -29,9 +29,12 @@ public class CameraTracker extends Tracker {
     private Vec3 startPosition;
     private Quaternionf startRotation;
     private boolean quickMode;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public CameraTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -46,7 +49,19 @@ public class CameraTracker extends Tracker {
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
+        this.visible = false;
+        this.quickMode = false;
+        this.stopMoving();
+    }
+
+    @Override
+    public ProcessType processType() {
+        return ProcessType.PER_FRAME;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         if (this.startControllerPose != null) {
             VRData.VRDevicePose controllerPose = this.dh.vrPlayer.vrdata_world_render.getController(
                 this.startController);
@@ -70,23 +85,11 @@ public class CameraTracker extends Tracker {
         }
 
         // chunk renderer gets angry if we're really far away, force hide when >3/4 render distance
-        if (this.dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().distanceTo(this.position) >
+        if (this.dh.vrPlayer.vrdata_world_render.hmd.getPosition().distanceTo(this.position) >
             this.mc.options.getEffectiveRenderDistance() * 12)
         {
             this.visible = false;
         }
-    }
-
-    @Override
-    public void reset(LocalPlayer player) {
-        this.visible = false;
-        this.quickMode = false;
-        this.stopMoving();
-    }
-
-    @Override
-    public EntryPoint getEntryPoint() {
-        return EntryPoint.SPECIAL_ITEMS; // smoother camera movement
     }
 
     public boolean isVisible() {

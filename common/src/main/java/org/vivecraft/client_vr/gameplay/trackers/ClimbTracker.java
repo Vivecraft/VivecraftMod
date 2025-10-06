@@ -19,6 +19,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -26,12 +27,12 @@ import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.common.network.packet.c2s.ClimbingPayloadC2S;
-import org.vivecraft.data.BlockTags;
-import org.vivecraft.server.config.ClimbeyBlockmode;
+import org.vivecraft.data.ViveBlockTags;
+import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 
 import java.util.*;
 
-public class ClimbTracker extends Tracker {
+public class ClimbTracker implements Tracker {
     public static final ModelResourceLocation CLAWS_MODEL = new ModelResourceLocation(
         ResourceLocation.fromNamespaceAndPath("vivecraft", "item/climb_claws"), "standalone");
 
@@ -62,9 +63,12 @@ public class ClimbTracker extends Tracker {
     private final AABB fullBB = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     private final Random rand = new Random();
     private boolean unsetFlag;
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
 
     public ClimbTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isGrabbingLadder() {
@@ -158,7 +162,7 @@ public class ClimbTracker extends Tracker {
     }
 
     @Override
-    public void idleTick(LocalPlayer player) {
+    public void idleProcess(LocalPlayer player) {
         if (!this.isActive(player)) {
             this.wasLatched[0] = false;
             this.wasLatched[1] = false;
@@ -179,7 +183,7 @@ public class ClimbTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.latchStartController = -1;
         this.latched[0] = false;
         this.latched[1] = false;
@@ -187,7 +191,12 @@ public class ClimbTracker extends Tracker {
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
         boolean[] button = new boolean[2];
         boolean[] allowed = new boolean[2];
         Vec3[] controllerPos = new Vec3[2];
@@ -222,7 +231,7 @@ public class ClimbTracker extends Tracker {
                 boolean ok = block instanceof LadderBlock ||
                     isClimbableTrapdoor(this.mc.level, blockPos, blockState) ||
                     block instanceof VineBlock ||
-                    blockState.is(BlockTags.VIVECRAFT_CLIMBABLE);
+                    blockState.is(ViveBlockTags.VIVECRAFT_CLIMBABLE);
 
                 if (!ok) { // check other end of controllerBB.
                     BlockPos blockPos2 = BlockPos.containing(controllerPosNear);
@@ -232,7 +241,7 @@ public class ClimbTracker extends Tracker {
                     if (block2 instanceof LadderBlock ||
                         isClimbableTrapdoor(this.mc.level, blockPos2, blockState2) ||
                         block2 instanceof VineBlock ||
-                        blockState2.is(BlockTags.VIVECRAFT_CLIMBABLE))
+                        blockState2.is(ViveBlockTags.VIVECRAFT_CLIMBABLE))
                     {
                         blockPos = blockPos2;
                         blockState = blockState2;
@@ -326,7 +335,7 @@ public class ClimbTracker extends Tracker {
                         this.inBlock[c] = this.wasInBlock[c] &&
                             latchBlockState.getBlock() instanceof LadderBlock ||
                             latchBlockState.getBlock() instanceof VineBlock ||
-                            latchBlockState.is(BlockTags.VIVECRAFT_CLIMBABLE);
+                            latchBlockState.is(ViveBlockTags.VIVECRAFT_CLIMBABLE);
                     }
                 }
 

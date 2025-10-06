@@ -28,8 +28,9 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.opengl.GL11C;
+import org.vivecraft.Xevents;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xevents;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.settings.GuiOtherHUDSettings;
 import org.vivecraft.client.gui.settings.GuiRenderOpticsSettings;
@@ -47,7 +48,6 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
@@ -154,11 +154,12 @@ public class VREffectsHelper {
 
         float alpha = TelescopeTracker.viewPercent(c);
         // draw spyglass view
-        RenderHelper.drawSizedQuadFullbrightSolid(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1},
-            poseStack.last().pose());
+        RenderSystem.disableBlend();
+        RenderHelper.drawSizedQuadFullbright(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1},
+            poseStack.last().pose(), CoreShaders.RENDERTYPE_ENTITY_SOLID);
 
         // draw spyglass overlay
-        RenderSystem.setShaderTexture(0, SCOPE_TEXTURE);
+        ShadersHelper.bindTexture(SCOPE_TEXTURE);
         RenderSystem.enableBlend();
         // slight offset to not cause z fighting
         poseStack.translate(0.0F, 0.0F, 0.00001F);
@@ -166,7 +167,8 @@ public class VREffectsHelper {
         int light = LevelRenderer.getLightColor(MC.level, BlockPos.containing(
             DATA_HOLDER.vrPlayer.vrdata_world_render.getController(c).getPosition()));
         // draw the overlay, and flip it vertically
-        RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, poseStack.last().pose(), true);
+        RenderHelper.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, poseStack.last().pose(),
+            CoreShaders.RENDERTYPE_ENTITY_TRANSLUCENT, true);
 
         poseStack.popPose();
     }
@@ -184,7 +186,7 @@ public class VREffectsHelper {
                     DATA_HOLDER.vrSettings.showChatMessageStencil)
                 {
                     DATA_HOLDER.showedStencilMessage = true;
-                    MC.gui.getChat().addMessage(Component.translatable("vivecraft.messages.stencil",
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.stencil",
                         Component.translatable("vivecraft.messages.3options",
                                 Component.translatable("options.title"),
                                 Component.translatable("vivecraft.options.screen.main"),
@@ -267,85 +269,85 @@ public class VREffectsHelper {
         // translate by half of the cube size
         poseStack.translate(-50F, -50F, -50.0F);
 
-        BufferBuilder bufferbuilder;
+        BufferBuilder bufferBuilder;
 
         // down
         RenderSystem.setShaderTexture(0, CUBE_DOWN);
-        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(poseStack, 0, 0, 0)
             .setUv(0, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 0, 0, 100)
+        bufferBuilder.addVertex(poseStack, 0, 0, 100)
             .setUv(0, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 0, 100)
+        bufferBuilder.addVertex(poseStack, 100, 0, 100)
             .setUv(1, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 0, 0)
+        bufferBuilder.addVertex(poseStack, 100, 0, 0)
             .setUv(1, 0).setColor(255, 255, 255, 255);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         // up
         RenderSystem.setShaderTexture(0, CUBE_UP);
-        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(poseStack, 0, 100, 100)
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(poseStack, 0, 100, 100)
             .setUv(0, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 0, 100, 0)
+        bufferBuilder.addVertex(poseStack, 0, 100, 0)
             .setUv(0, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 100, 0)
+        bufferBuilder.addVertex(poseStack, 100, 100, 0)
             .setUv(1, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 100, 100)
+        bufferBuilder.addVertex(poseStack, 100, 100, 100)
             .setUv(1, 0).setColor(255, 255, 255, 255);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         // left
         RenderSystem.setShaderTexture(0, CUBE_LEFT);
-        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(poseStack, 0, 0, 0)
             .setUv(1, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 0, 100, 0)
+        bufferBuilder.addVertex(poseStack, 0, 100, 0)
             .setUv(1, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 0, 100, 100)
+        bufferBuilder.addVertex(poseStack, 0, 100, 100)
             .setUv(0, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 0, 0, 100)
+        bufferBuilder.addVertex(poseStack, 0, 0, 100)
             .setUv(0, 1).setColor(255, 255, 255, 255);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         // right
         RenderSystem.setShaderTexture(0, CUBE_RIGHT);
-        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(poseStack, 100, 0, 0)
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(poseStack, 100, 0, 0)
             .setUv(0, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 0, 100)
+        bufferBuilder.addVertex(poseStack, 100, 0, 100)
             .setUv(1, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 100, 100)
+        bufferBuilder.addVertex(poseStack, 100, 100, 100)
             .setUv(1, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 100, 0)
+        bufferBuilder.addVertex(poseStack, 100, 100, 0)
             .setUv(0, 0).setColor(255, 255, 255, 255);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         // front
         RenderSystem.setShaderTexture(0, CUBE_FRONT);
-        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(poseStack, 0, 0, 0)
             .setUv(0, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 0, 0)
+        bufferBuilder.addVertex(poseStack, 100, 0, 0)
             .setUv(1, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 100, 0)
+        bufferBuilder.addVertex(poseStack, 100, 100, 0)
             .setUv(1, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 0, 100, 0)
+        bufferBuilder.addVertex(poseStack, 0, 100, 0)
             .setUv(0, 0).setColor(255, 255, 255, 255);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         // back
         RenderSystem.setShaderTexture(0, CUBE_BACK);
-        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(poseStack, 0, 0, 100)
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(poseStack, 0, 0, 100)
             .setUv(1, 1).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 0, 100, 100)
+        bufferBuilder.addVertex(poseStack, 0, 100, 100)
             .setUv(1, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 100, 100)
+        bufferBuilder.addVertex(poseStack, 100, 100, 100)
             .setUv(0, 0).setColor(255, 255, 255, 255);
-        bufferbuilder.addVertex(poseStack, 100, 0, 100)
+        bufferBuilder.addVertex(poseStack, 100, 0, 100)
             .setUv(0, 1).setColor(255, 255, 255, 255);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         poseStack.popMatrix();
 
@@ -373,7 +375,7 @@ public class VREffectsHelper {
                 RenderSystem.setShaderTexture(0, DIRT);
                 r = g = b = 128;
             }
-            bufferbuilder = Tesselator.getInstance()
+            bufferBuilder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
             // offset so the floor is centered
@@ -381,24 +383,24 @@ public class VREffectsHelper {
 
             final int repeat = 4; // texture wraps per meter
 
-            bufferbuilder
+            bufferBuilder
                 .addVertex(poseStack, 0, 0.005f * -i, 0)
                 .setUv(0, 0)
                 .setColor(r, g, b, 255);
-            bufferbuilder
+            bufferBuilder
                 .addVertex(poseStack, 0, 0.005f * -i, length)
                 .setUv(0, repeat * length)
                 .setColor(r, g, b, 255);
-            bufferbuilder
+            bufferBuilder
                 .addVertex(poseStack, width, 0.005f * -i, length)
                 .setUv(repeat * width, repeat * length)
                 .setColor(r, g, b, 255);
-            bufferbuilder
+            bufferBuilder
                 .addVertex(poseStack, width, 0.005f * -i, 0)
                 .setUv(repeat * width, 0)
                 .setColor(r, g, b, 255);
 
-            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             poseStack.popMatrix();
         }
     }
@@ -438,70 +440,70 @@ public class VREffectsHelper {
         // offset so the room is centered
         poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance()
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         // floor
-        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+        bufferBuilder.addVertex(poseStack, 0, 0, 0)
             .setUv(0, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, 0, 0, length)
+        bufferBuilder.addVertex(poseStack, 0, 0, length)
             .setUv(0, repeat * length).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, 0, length)
+        bufferBuilder.addVertex(poseStack, width, 0, length)
             .setUv(repeat * width, repeat * length).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, 0, 0)
+        bufferBuilder.addVertex(poseStack, width, 0, 0)
             .setUv(repeat * width, 0).setColor(r, g, b, a);
 
         // ceiling
-        bufferbuilder.addVertex(poseStack, 0, height, length)
+        bufferBuilder.addVertex(poseStack, 0, height, length)
             .setUv(0, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, 0, height, 0)
+        bufferBuilder.addVertex(poseStack, 0, height, 0)
             .setUv(0, repeat * length).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, height, 0)
+        bufferBuilder.addVertex(poseStack, width, height, 0)
             .setUv(repeat * width, repeat * length).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, height, length)
+        bufferBuilder.addVertex(poseStack, width, height, length)
             .setUv(repeat * width, 0).setColor(r, g, b, a);
 
         // left
-        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+        bufferBuilder.addVertex(poseStack, 0, 0, 0)
             .setUv(0, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, 0, height, 0)
+        bufferBuilder.addVertex(poseStack, 0, height, 0)
             .setUv(0, repeat * height).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, 0, height, length)
+        bufferBuilder.addVertex(poseStack, 0, height, length)
             .setUv(repeat * length, repeat * height).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, 0, 0, length)
+        bufferBuilder.addVertex(poseStack, 0, 0, length)
             .setUv(repeat * length, 0).setColor(r, g, b, a);
 
         // right
-        bufferbuilder.addVertex(poseStack, width, 0, 0)
+        bufferBuilder.addVertex(poseStack, width, 0, 0)
             .setUv(0, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, 0, length)
+        bufferBuilder.addVertex(poseStack, width, 0, length)
             .setUv(repeat * length, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, height, length)
+        bufferBuilder.addVertex(poseStack, width, height, length)
             .setUv(repeat * length, repeat * height).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, height, 0)
+        bufferBuilder.addVertex(poseStack, width, height, 0)
             .setUv(0, repeat * height).setColor(r, g, b, a);
 
         // front
-        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+        bufferBuilder.addVertex(poseStack, 0, 0, 0)
             .setUv(0, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, 0, 0)
+        bufferBuilder.addVertex(poseStack, width, 0, 0)
             .setUv(repeat * width, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, height, 0)
+        bufferBuilder.addVertex(poseStack, width, height, 0)
             .setUv(repeat * width, repeat * height).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, 0, height, 0)
+        bufferBuilder.addVertex(poseStack, 0, height, 0)
             .setUv(0, repeat * height).setColor(r, g, b, a);
 
         // back
-        bufferbuilder.addVertex(poseStack, 0, 0, length)
+        bufferBuilder.addVertex(poseStack, 0, 0, length)
             .setUv(0, 0).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, 0, height, length)
+        bufferBuilder.addVertex(poseStack, 0, height, length)
             .setUv(0, repeat * height).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, height, length)
+        bufferBuilder.addVertex(poseStack, width, height, length)
             .setUv(repeat * width, repeat * height).setColor(r, g, b, a);
-        bufferbuilder.addVertex(poseStack, width, 0, length)
+        bufferBuilder.addVertex(poseStack, width, 0, length)
             .setUv(repeat * width, 0).setColor(r, g, b, a);
 
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         poseStack.popMatrix();
     }
 
@@ -558,27 +560,27 @@ public class VREffectsHelper {
 
             poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
 
-            BufferBuilder bufferbuilder = Tesselator.getInstance()
+            BufferBuilder bufferBuilder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
-            bufferbuilder
-                .addVertex(poseStack, 0, 0.005f, 0)
+            bufferBuilder
+                .addVertex(0, 0.005f, 0)
                 .setUv(0, 0)
                 .setColor(1f, 1f, 1f, 1f);
-            bufferbuilder
-                .addVertex(poseStack, 0, 0.005f, length)
+            bufferBuilder
+                .addVertex(0, 0.005f, length)
                 .setUv(0, 4 * length)
                 .setColor(1f, 1f, 1f, 1f);
-            bufferbuilder
-                .addVertex(poseStack, width, 0.005f, length)
+            bufferBuilder
+                .addVertex(width, 0.005f, length)
                 .setUv(4 * width, 4 * length)
                 .setColor(1f, 1f, 1f, 1f);
-            bufferbuilder
-                .addVertex(poseStack, width, 0.005f, 0)
+            bufferBuilder
+                .addVertex(width, 0.005f, 0)
                 .setUv(4 * width, 0)
                 .setColor(1f, 1f, 1f, 1f);
 
-            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
             poseStack.popMatrix();
 
@@ -619,33 +621,41 @@ public class VREffectsHelper {
         occluded.clear(Minecraft.ON_OSX);
         occluded.copyDepthFrom(MC.getMainRenderTarget());
         occluded.bindWrite(true);
+        MC.mainRenderTarget = extTargets.vivecraft$getOccluded().get();
+
+        boolean renderHands = VRArmHelper.shouldRenderHands();
 
         if (shouldOccludeGui()) {
             renderGuiAndShadow(partialTick, false, false);
+            VRArmHelper.renderVRHands(partialTick, renderHands && DATA_HOLDER.menuHandMain,
+                renderHands && DATA_HOLDER.menuHandOff, true, true);
         }
 
         // switch to VR UnOccluded buffer, no depth copy
         RenderTarget unOccluded = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer();
         unOccluded.clear(Minecraft.ON_OSX);
         unOccluded.bindWrite(true);
+        MC.mainRenderTarget = extTargets.vivecraft$getUnoccluded().get();
 
         if (!shouldOccludeGui()) {
             renderGuiAndShadow(partialTick, false, false);
         }
 
-        renderVRSelfEffects(partialTick);
+        renderVRSelfEffects(partialTick, true);
         VRWidgetHelper.renderVRThirdPersonCamWidget();
         VRWidgetHelper.renderVRHandheldCameraWidget();
 
-        boolean renderHands = VRArmHelper.shouldRenderHands();
-        VRArmHelper.renderVRHands(partialTick, renderHands && DATA_HOLDER.menuHandMain,
-            renderHands && DATA_HOLDER.menuHandOff, true, true);
+        if (!shouldOccludeGui()) {
+            VRArmHelper.renderVRHands(partialTick, renderHands && DATA_HOLDER.menuHandMain,
+                renderHands && DATA_HOLDER.menuHandOff, true, true);
+        }
 
         // switch to VR hands buffer
         RenderTarget hands = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRHandsFramebuffer();
         hands.clear(Minecraft.ON_OSX);
         hands.copyDepthFrom(MC.getMainRenderTarget());
         hands.bindWrite(true);
+        MC.mainRenderTarget = extTargets.vivecraft$getHands().get();
 
         VRArmHelper.renderVRHands(partialTick, renderHands && !DATA_HOLDER.menuHandMain,
             renderHands && !DATA_HOLDER.menuHandOff, false, false);
@@ -653,6 +663,7 @@ public class VREffectsHelper {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1, 1, 1, 1);
         // rebind the original buffer
+        MC.mainRenderTarget = mainTarget;
         MC.getMainRenderTarget().bindWrite(true);
     }
 
@@ -695,7 +706,7 @@ public class VREffectsHelper {
                 DATA_HOLDER.menuHandMain, DATA_HOLDER.menuHandOff);
         }
 
-        renderVRSelfEffects(partialTick);
+        renderVRSelfEffects(partialTick, !secondPass);
     }
 
     /**
@@ -705,13 +716,12 @@ public class VREffectsHelper {
         if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
             return true;
         } else {
-            Vec3 pos = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
             return DATA_HOLDER.vrSettings.hudOcclusion &&
                 !MethodHolder.isInMenuRoom() &&
                 MC.screen == null &&
                 !KeyboardHandler.SHOWING &&
                 !RadialHandler.isShowing() &&
-                !isInsideOpaqueBlock(pos);
+                !isInsideOpaqueBlock(MC.gameRenderer.getMainCamera().getPosition());
         }
     }
 
@@ -767,17 +777,17 @@ public class VREffectsHelper {
         AABB aabb = MC.player.getBoundingBox();
 
         if (DATA_HOLDER.vrSettings.vrShowBlueCircleBuddy && aabb != null) {
-            // disable culling to show it from below and above
-            RenderSystem.disableCull();
 
-            Vec3 cameraPos = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass,
-                DATA_HOLDER.vrPlayer.vrdata_world_render);
+            Vec3 cameraPos = MC.gameRenderer.getMainCamera().getPosition();
 
             Vec3 interpolatedPlayerPos = ((GameRendererExtension) MC.gameRenderer).vivecraft$getRvePos(partialTick);
 
             Vec3 pos = interpolatedPlayerPos.subtract(cameraPos).add(0.0D, 0.005D, 0.0D);
 
-            RenderHelper.setupPolyRendering(true);
+            // disable culling to show it from below and above
+            RenderSystem.disableCull();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
             RenderSystem.enableDepthTest();
 
             if (depthAlways) {
@@ -788,7 +798,7 @@ public class VREffectsHelper {
 
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
-            RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
             RenderHelper.renderFlatQuad(pos, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
                 0.0F, 0, 0, 0, 64, new Matrix4f());
@@ -796,7 +806,6 @@ public class VREffectsHelper {
             // reset render state
             RenderSystem.depthFunc(GL11C.GL_LEQUAL);
             RenderSystem.enableCull();
-            RenderHelper.setupPolyRendering(false);
         }
         MC.getProfiler().pop();
     }
@@ -806,7 +815,7 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    private static void renderVRSelfEffects(float partialTick) {
+    private static void renderVRSelfEffects(float partialTick, boolean firstPass) {
         // only render the fire in first person, other views have the burning entity
         if (DATA_HOLDER.currentPass != RenderPass.THIRD && DATA_HOLDER.currentPass != RenderPass.CAMERA &&
             !MC.player.isSpectator() && MC.player.isOnFire() && !Xevents.renderFireOverlay(MC.player, new PoseStack()))
@@ -814,14 +823,16 @@ public class VREffectsHelper {
             VREffectsHelper.renderFireInFirstPerson();
         }
 
-        // totem of undying
-        // this is screen relative, so no view rotation please
-        RenderSystem.getModelViewStack().pushMatrix().identity();
-        RenderSystem.applyModelViewMatrix();
-        MC.gameRenderer.renderItemActivationAnimation(new GuiGraphics(MC, MC.renderBuffers().bufferSource()),
-            partialTick);
-        RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
+        if (firstPass) {
+            // totem of undying
+            // this is screen relative, so no view rotation please
+            RenderSystem.getModelViewStack().pushMatrix().identity();
+            RenderSystem.applyModelViewMatrix();
+            MC.gameRenderer.renderItemActivationAnimation(new GuiGraphics(MC, MC.renderBuffers().bufferSource()),
+                partialTick);
+            RenderSystem.getModelViewStack().popMatrix();
+            RenderSystem.applyModelViewMatrix();
+        }
     }
 
     /**
@@ -850,7 +861,8 @@ public class VREffectsHelper {
         // code adapted from net.minecraft.client.renderer.ScreenEffectRenderer.renderFire
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, fireSprite.atlasLocation());
+        ShadersHelper.bindTexture(fireSprite.atlasLocation());
+
         float uMin = fireSprite.getU0();
         float uMax = fireSprite.getU1();
         float uMid = (uMin + uMax) / 2.0F;
@@ -878,18 +890,18 @@ public class VREffectsHelper {
             posestack.translate(0.0D, -headHeight, 0.0D);
 
             Matrix4f matrix = posestack.last().pose();
-            BufferBuilder bufferbuilder = Tesselator.getInstance()
+            BufferBuilder bufferBuilder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferbuilder.addVertex(matrix, -width, 0.0F, -width)
+            bufferBuilder.addVertex(matrix, -width, 0.0F, -width)
                 .setUv(u1, v1).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            bufferbuilder.addVertex(matrix, width, 0.0F, -width)
+            bufferBuilder.addVertex(matrix, width, 0.0F, -width)
                 .setUv(u0, v1).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            bufferbuilder.addVertex(matrix, width, headHeight, -width)
+            bufferBuilder.addVertex(matrix, width, headHeight, -width)
                 .setUv(u0, v0).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            bufferbuilder.addVertex(matrix, -width, headHeight, -width)
+            bufferBuilder.addVertex(matrix, -width, headHeight, -width)
                 .setUv(u1, v0).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             posestack.popPose();
         }
 
@@ -903,15 +915,14 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      */
     public static void renderPhysicalKeyboard(float partialTick) {
-        if (DATA_HOLDER.bowTracker.isDrawing) return;
+        if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         MC.getProfiler().push("renderPhysicalKeyboard");
 
         removeNausea(partialTick);
 
         MC.getProfiler().push("applyPhysicalKeyboardModelView");
-        Vec3 eye = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass,
-            DATA_HOLDER.vrPlayer.vrdata_world_render);
+        Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
 
         // convert previously calculated coords to world coords
         Vec3 keyboardPos = VRPlayer.roomToWorldPos(KeyboardHandler.POS_ROOM, DATA_HOLDER.vrPlayer.vrdata_world_render);
@@ -1022,9 +1033,17 @@ public class VREffectsHelper {
             int minLight = ShadersHelper.ShaderLight();
             int light = ClientUtils.getCombinedLightWithMin(MC.level, BlockPos.containing(pos), minLight);
 
-            RenderHelper.drawSizedQuadWithLightmapCutout(
-                (float) MC.getWindow().getGuiScaledWidth(), (float) MC.getWindow().getGuiScaledHeight(),
-                1.5F, light, color, matrix, false);
+            if (!ShadersHelper.isShaderActive() ||
+                DATA_HOLDER.vrSettings.shaderGUIRender != VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID)
+            {
+                RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
+                    (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
+                    CoreShaders.RENDERTYPE_ENTITY_TRANSLUCENT, false);
+            } else {
+                RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
+                    (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
+                    CoreShaders.RENDERTYPE_ENTITY_CUTOUT_NO_CULL, false);
+            }
         } else {
             RenderHelper.drawSizedQuad(
                 (float) MC.getWindow().getGuiScaledWidth(), (float) MC.getWindow().getGuiScaledHeight(),
@@ -1046,7 +1065,7 @@ public class VREffectsHelper {
      * @param depthAlways if the depth test should be disabled
      */
     public static void renderGuiLayer(float partialTick, boolean depthAlways) {
-        if (DATA_HOLDER.bowTracker.isDrawing) return;
+        if (DATA_HOLDER.bowTracker.isDrawing()) return;
         if (MC.screen == null && MC.options.hideGui) return;
         if (RadialHandler.isShowing()) return;
 
@@ -1062,8 +1081,7 @@ public class VREffectsHelper {
             depthAlways = true;
 
             poseStack.pushMatrix();
-            Vec3 eye = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass,
-                DATA_HOLDER.vrPlayer.vrdata_world_render);
+            Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
             poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
                 (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
                 (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
@@ -1110,7 +1128,7 @@ public class VREffectsHelper {
     public static void render2D(
         float partialTick, RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways)
     {
-        if (DATA_HOLDER.bowTracker.isDrawing) return;
+        if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         MC.getProfiler().push("render2D");
 
@@ -1120,8 +1138,7 @@ public class VREffectsHelper {
 
         Matrix4f modelView = new Matrix4f();
 
-        Vec3 eye = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass,
-            DATA_HOLDER.vrPlayer.vrdata_world_render);
+        Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
 
         Vec3 worldPos = VRPlayer.roomToWorldPos(pos, DATA_HOLDER.vrPlayer.vrdata_world_render);
 
@@ -1180,14 +1197,16 @@ public class VREffectsHelper {
         RenderSystem.depthMask(true);
         RenderSystem.enableBlend();
         RenderSystem.disableCull();
-        BufferBuilder bufferbuilder = Tesselator.getInstance()
+
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         // render a big quad 2 meters in front
-        bufferbuilder.addVertex(-100.F, -100.F, -2.0F);
-        bufferbuilder.addVertex(100.F, -100.F, -2.0F);
-        bufferbuilder.addVertex(100.F, 100.F, -2.0F);
-        bufferbuilder.addVertex(-100.F, 100.F, -2.0F);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        bufferBuilder.addVertex(-100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
+        bufferBuilder.addVertex(100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
+        bufferBuilder.addVertex(100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
+        bufferBuilder.addVertex(-100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
@@ -1196,7 +1215,7 @@ public class VREffectsHelper {
      * @return if the crosshair should be rendered
      */
     private static boolean shouldRenderCrosshair() {
-        if (ClientDataHolderVR.VIEW_ONLY) {
+        if (DATA_HOLDER.viewOnly) {
             return false;
         } else if (MC.level == null) {
             return false;
@@ -1258,7 +1277,8 @@ public class VREffectsHelper {
 
         Matrix4f modelView = new Matrix4f();
 
-        Vector3f translate = MathUtils.subtractToVector3f(crosshairRenderPos, MC.getCameraEntity().position());
+        Vector3f translate = MathUtils.subtractToVector3f(crosshairRenderPos,
+            MC.gameRenderer.getMainCamera().getPosition());
         modelView.translate(translate.x, translate.y, translate.z);
 
         if (MC.hitResult != null && MC.hitResult.getType() == HitResult.Type.BLOCK) {
@@ -1268,7 +1288,7 @@ public class VREffectsHelper {
             switch (blockhitresult.getDirection()) {
                 case DOWN -> {
                     modelView.rotate(
-                        Axis.YP.rotationDegrees(DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
+                        Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
                     modelView.rotate(Axis.XP.rotationDegrees(-90.0F));
                 }
                 case UP -> {
@@ -1307,7 +1327,6 @@ public class VREffectsHelper {
             RenderSystem.depthFunc(GL11C.GL_LEQUAL);
         }
 
-
         // white crosshair, with blending
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend(); // Fuck it, we want a proper crosshair
@@ -1323,38 +1342,39 @@ public class VREffectsHelper {
         }
 
         TextureAtlasSprite crosshairSprite = Minecraft.getInstance().getGuiSprites().getSprite(Gui.CROSSHAIR_SPRITE);
-        RenderSystem.setShaderTexture(0, crosshairSprite.atlasLocation());
+        ShadersHelper.bindTexture(crosshairSprite.atlasLocation());
 
         RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
-        BufferBuilder bufferbuilder = Tesselator.getInstance()
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
             .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
-        bufferbuilder.addVertex(modelView, -1.0F, 1.0F, 0.0F)
+        bufferBuilder.addVertex(modelView, -1.0F, 1.0F, 0.0F)
             .setColor(brightness, brightness, brightness, 1.0F)
             .setUv(crosshairSprite.getU1(), crosshairSprite.getV0())
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
             .setNormal(0.0F, 0.0F, 1.0F);
-        bufferbuilder.addVertex(modelView, 1.0F, 1.0F, 0.0F)
+        bufferBuilder.addVertex(modelView, 1.0F, 1.0F, 0.0F)
             .setColor(brightness, brightness, brightness, 1.0F)
             .setUv(crosshairSprite.getU0(), crosshairSprite.getV0())
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
             .setNormal(0.0F, 0.0F, 1.0F);
-        bufferbuilder.addVertex(modelView, 1.0F, -1.0F, 0.0F)
+        bufferBuilder.addVertex(modelView, 1.0F, -1.0F, 0.0F)
             .setColor(brightness, brightness, brightness, 1.0F)
             .setUv(crosshairSprite.getU0(), crosshairSprite.getV1())
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
             .setNormal(0.0F, 0.0F, 1.0F);
-        bufferbuilder.addVertex(modelView, -1.0F, -1.0F, 0.0F)
+        bufferBuilder.addVertex(modelView, -1.0F, -1.0F, 0.0F)
             .setColor(brightness, brightness, brightness, 1.0F)
             .setUv(crosshairSprite.getU1(), crosshairSprite.getV1())
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
             .setNormal(0.0F, 0.0F, 1.0F);
 
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
+
         MC.getProfiler().pop();
     }
 }

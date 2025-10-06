@@ -2,8 +2,8 @@ package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionEntry;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -22,7 +22,8 @@ public class GuiPlayerModelSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.PLAYER_MODEL_LEGS_SCALE),
         new VROptionEntry(VRSettings.VrOptions.PLAYER_LIMBS_LIMIT),
         new VROptionEntry(VRSettings.VrOptions.PLAYER_WALK_ANIM),
-        new VROptionEntry(VRSettings.VrOptions.PLAYER_ARM_ANIM)
+        new VROptionEntry(VRSettings.VrOptions.PLAYER_ARM_ANIM),
+        new VROptionEntry(VRSettings.VrOptions.APPLY_PLAYER_WORLDSCALE)
     };
 
     private final VROptionEntry[] fbtCalibration = new VROptionEntry[]{new VROptionEntry(

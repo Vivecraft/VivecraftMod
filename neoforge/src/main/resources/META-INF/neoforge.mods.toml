@@ -64,8 +64,6 @@ config = "vivecraft.mca.mixins.json"
 [[mixins]]
 config = "vivecraft.optifine.mixins.json"
 [[mixins]]
-config = "vivecraft.physicsmod.mixins.json"
-[[mixins]]
 config = "vivecraft.rei.mixins.json"
 [[mixins]]
 config = "vivecraft.resolutioncontrol.mixins.json"
@@ -75,3 +73,5 @@ config = "vivecraft.sereneseasons.mixins.json"
 config = "vivecraft.sodium.mixins.json"
 [[mixins]]
 config = "vivecraft.trinkets.mixins.json"
+[[mixins]]
+config = "vivecraft.xaerosmimimap.mixins.json"

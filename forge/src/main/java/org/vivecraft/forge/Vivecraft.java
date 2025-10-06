@@ -5,11 +5,12 @@ import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.EventNetworkChannel;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
+import org.vivecraft.forge.event.ClientModEvents;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -26,6 +27,8 @@ public class Vivecraft {
 
     public Vivecraft() {
         // init server config
+        // this is too early for the lang files to be loaded, is needed to register the commands though
+        // server config is validated again later to have the comments
         ServerConfig.init(null);
 
         VIVECRAFT_NETWORK_CHANNEL.addListener(event -> {
@@ -36,6 +39,9 @@ public class Vivecraft {
             }
             event.getSource().setPacketHandled(true);
         });
+        if (FMLEnvironment.dist.isClient()) {
+            ClientModEvents.registerConfigScreen(context);
+        }
     }
 
     private static void handleClientVivePacket(FriendlyByteBuf buffer, CustomPayloadEvent.Context context) {

@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.settings;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class AutoCalibration {
@@ -11,14 +11,13 @@ public class AutoCalibration {
      * sets the player height for how they are standing right now
      */
     public static void calibrateManual() {
-        Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
         dataHolder.vrSettings.manualCalibration = dataHolder.vr.hmdPivotHistory.averagePosition(0.5D).y;
         // round to nearest %
         int percentHeight = Math.round(100.0F * getPlayerHeight() / DEFAULT_HEIGHT);
 
-        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.heightset", percentHeight));
+        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.heightset", percentHeight));
         dataHolder.vrSettings.saveOptions();
     }
 

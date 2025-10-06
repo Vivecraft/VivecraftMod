@@ -16,11 +16,11 @@ import traben.entity_model_features.models.parts.EMFModelPart;
 public class EMFModelPartWithStateVRMixin {
     @WrapWithCondition(method = {"render", "method_22699", "m_104306_"}, at = @At(value = "INVOKE", target = "Ljava/lang/Runnable;run()V"))
     private boolean vivecraft$noRenderEventForFirstPerson(Runnable instance) {
-        return !VRState.VR_RUNNING || !ClientDataHolderVR.IS_FP_HAND;
+        return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().isFpHand;
     }
 
     @WrapWithCondition(method = {"render", "method_22699", "m_104306_"}, at = @At(value = "INVOKE", target = "Ltraben/entity_model_features/models/parts/EMFModelPart$Animator;run()V"))
     private boolean vivecraft$noAnimationForFirstPerson(EMFModelPart.Animator original) {
-        return !VRState.VR_RUNNING || !ClientDataHolderVR.IS_FP_HAND;
+        return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().isFpHand;
     }
 }
