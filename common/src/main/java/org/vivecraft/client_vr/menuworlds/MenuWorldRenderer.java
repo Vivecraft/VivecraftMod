@@ -718,7 +718,7 @@ public class MenuWorldRenderer {
             this.thunderLevel = blockAccess.getThunder() ? 1.0F : 0.0F;
 
             this.worldRotation = blockAccess.getRotation();
-            if (this.dimensionInfo.hasEndFlashes()) {
+            if (this.blockAccess.dimensionType().hasSkyLight() && this.dimensionInfo.hasEndFlashes()) {
                 this.endFlashState = new EndFlashState();
             }
         }
