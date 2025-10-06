@@ -20,6 +20,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MultiPassList;
 import org.vivecraft.client_vr.MultiPassRenderTarget;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.extensions.PostChainExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @Mixin(PostChain.class)
-public abstract class PostChainVRMixin {
+public abstract class PostChainVRMixin implements PostChainExtension {
 
     @Shadow
     @Final
@@ -42,45 +43,45 @@ public abstract class PostChainVRMixin {
     @Mutable
     private List<PostPass> passes;
 
+    @Shadow
+    @Final
+    private String name;
+
+    @Shadow
+    @Final
+    private ResourceProvider resourceProvider;
+
     @Accessor
     public abstract List<PostPass> getPasses();
 
     @Unique
     private final EnumMap<RenderPass, PostChain> vivecraft$VRPostChains = new EnumMap<>(RenderPass.class);
 
+    @Unique
+    private boolean vivecraft$mainPostChain;
+
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     private void vivecraft$createVRChains(
         TextureManager textureManager, ResourceProvider resourceProvider, RenderTarget screenTarget,
         ResourceLocation name, CallbackInfo ci) throws IOException
     {
-        if (VRState.VR_INITIALIZED && this.screenTarget == RenderPassManager.INSTANCE.vanillaRenderTarget) {
-            for (RenderPass pass : RenderPass.values()) {
-                // gui has no world renderpass
-                if (pass == RenderPass.GUI) {
-                    this.vivecraft$VRPostChains.put(pass,
-                        new PostChain(textureManager, resourceProvider, GuiHandler.GUI_FRAMEBUFFER, name));
-                    continue;
-                }
+        if (this.screenTarget == RenderPassManager.INSTANCE.vanillaRenderTarget) {
+            this.vivecraft$mainPostChain = true;
+            ClientDataHolderVR.getInstance().activePostchains.put(this.name, this);
+            this.vivecraft$updatePasses();
 
-                // create one post chain for each active render pass
-                if (WorldRenderPass.getByRenderPass(pass) == null) continue;
-                this.vivecraft$VRPostChains.put(pass,
-                    new PostChain(textureManager, resourceProvider, WorldRenderPass.getByRenderPass(pass).target,
-                        name));
-            }
-
-            EnumMap<RenderPass, List<PostPass>> vrPasses = new EnumMap<>(RenderPass.class);
-            for (Map.Entry<RenderPass, PostChain> entry : this.vivecraft$VRPostChains.entrySet()) {
-                vrPasses.put(entry.getKey(), ((PostChainVRMixin) (Object) entry.getValue()).getPasses());
-            }
-
-            this.passes = new MultiPassList<>(this.passes, vrPasses);
+            this.passes = new MultiPassList<>(this.passes, pass -> {
+                return this.vivecraft$VRPostChains.containsKey(pass) ?
+                    ((PostChainVRMixin) (Object) this.vivecraft$VRPostChains.get(pass)).getPasses() : null;
+            });
+        } else {
+            this.vivecraft$mainPostChain = false;
         }
     }
 
     @Inject(method = "getTempTarget", at = @At("RETURN"), cancellable = true)
     private void vivecraft$getVRTempTarget(String attributeName, CallbackInfoReturnable<RenderTarget> cir) {
-        if (cir.getReturnValue() != null && VRState.VR_INITIALIZED && !this.vivecraft$VRPostChains.isEmpty()) {
+        if (cir.getReturnValue() != null && VRState.VR_INITIALIZED && this.vivecraft$mainPostChain) {
             cir.setReturnValue(new MultiPassRenderTarget(cir.getReturnValue(), pass -> {
                 return this.vivecraft$VRPostChains.containsKey(pass) ?
                     this.vivecraft$VRPostChains.get(pass).getTempTarget(attributeName) : null;
@@ -103,6 +104,10 @@ public abstract class PostChainVRMixin {
             postChain.close();
         }
         this.vivecraft$VRPostChains.clear();
+        if (this.vivecraft$mainPostChain) {
+            // remove it from active post chains
+            ClientDataHolderVR.getInstance().activePostchains.remove(this.name);
+        }
     }
 
     @Inject(method = "resize", at = @At("TAIL"))
@@ -130,6 +135,42 @@ public abstract class PostChainVRMixin {
         {
             this.vivecraft$VRPostChains.get(ClientDataHolderVR.getInstance().currentPass).process(partialTick);
             ci.cancel();
+        }
+    }
+
+    @Override
+    @Unique
+    public void vivecraft$updatePasses() throws IOException {
+        if (!this.vivecraft$mainPostChain) {
+            // this shouldn't even be called on non main post chains
+            return;
+        }
+
+        for (PostChain chain : this.vivecraft$VRPostChains.values()) {
+            chain.close();
+        }
+        this.vivecraft$VRPostChains.clear();
+
+        if (VRState.VR_INITIALIZED) {
+            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+            ResourceLocation resourceLocation = ResourceLocation.parse(this.name);
+            for (RenderPass pass : RenderPass.values()) {
+                RenderTarget target = null;
+                // gui has no world renderpass
+                if (pass == RenderPass.GUI) {
+                    target = GuiHandler.GUI_FRAMEBUFFER;
+                } else {
+                    if (WorldRenderPass.getByRenderPass(pass) == null) continue;
+                    target = WorldRenderPass.getByRenderPass(pass).target;
+                }
+
+                if (target != null) {
+                    PostChain subChain = new PostChain(textureManager, this.resourceProvider, target, resourceLocation);
+                    this.vivecraft$VRPostChains.put(pass, subChain);
+                    // this needs to be called, or the ortho matrix of the passes is not set
+                    subChain.resize(target.width, target.height);
+                }
+            }
         }
     }
 }

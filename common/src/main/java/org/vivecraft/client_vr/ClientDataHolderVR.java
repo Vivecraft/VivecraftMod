@@ -9,6 +9,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client_vr.extensions.PostChainExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.interact_modules.*;
 import org.vivecraft.client_vr.gameplay.trackers.*;
@@ -18,9 +19,8 @@ import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.BiFunction;
 
 public class ClientDataHolderVR {
@@ -101,6 +101,9 @@ public class ClientDataHolderVR {
     public boolean showedUpdateNotification;
     public boolean showedStencilMessage;
     public boolean showedFbtCalibrationNotification;
+
+    // list to keep track of post chains to update on vr toggle
+    public final Map<String, PostChainExtension> activePostchains = new HashMap<>();
 
     private ClientDataHolderVR() {
         // need to set this at the beginning again, since the static initializer only sets it after creation
@@ -213,5 +216,16 @@ public class ClientDataHolderVR {
      */
     public boolean isTrackerUsingItem(LocalPlayer player) {
         return this.itemInUseTrackers.stream().anyMatch(tracker -> tracker.itemInUse(player));
+    }
+
+    /**
+     * recreats sub postchains of all captures postchains
+     *
+     * @throws IOException when an error occurs when craeting the postchains
+     */
+    public void updateActivePostChains() throws IOException {
+        for (PostChainExtension chain : this.activePostchains.values()) {
+            chain.vivecraft$updatePasses();
+        }
     }
 }

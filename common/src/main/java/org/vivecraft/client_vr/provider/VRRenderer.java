@@ -904,6 +904,7 @@ public abstract class VRRenderer {
             } else {
                 // this reloads any PostChain, at least in vanilla
                 minecraft.levelRenderer.onResourceManagerReload(minecraft.getResourceManager());
+                dataholder.updateActivePostChains();
             }
 
             ShadersHelper.maybeReloadShaders();

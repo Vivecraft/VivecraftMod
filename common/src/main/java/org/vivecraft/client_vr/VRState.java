@@ -20,6 +20,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
 
@@ -188,6 +189,12 @@ public class VRState {
                 // regenerates the outline target
                 Minecraft.getInstance().levelRenderer.onResourceManagerReload(
                     Minecraft.getInstance().getResourceManager());
+                try {
+                    dh.updateActivePostChains();
+                } catch (IOException exception) {
+                    // this shouldn't happen, since no post chains are crated when vr is off
+                    VRSettings.LOGGER.error("Vivecraft: Failed close vr postchains: ", exception);
+                }
             }
         }
         VRClientAPIImpl.INSTANCE.clearPoseHistory();

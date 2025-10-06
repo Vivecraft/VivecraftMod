@@ -3,16 +3,19 @@ package org.vivecraft.client_vr;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MultiPassList<T> implements List<T> {
 
     private final List<T> vanilla;
-    private final Map<RenderPass, List<T>> passes;
+    private final Function<RenderPass, List<T>> passes;
 
-    public MultiPassList(List<T> vanilla, Map<RenderPass, List<T>> passes) {
+    public MultiPassList(List<T> vanilla, Function<RenderPass, List<T>> passes) {
         this.vanilla = vanilla;
         this.passes = passes;
     }
@@ -145,7 +148,8 @@ public class MultiPassList<T> implements List<T> {
         if (RenderPassType.isVanilla()) {
             return this.vanilla;
         } else {
-            return this.passes.get(ClientDataHolderVR.getInstance().currentPass);
+            List<T> list = this.passes.apply(ClientDataHolderVR.getInstance().currentPass);
+            return list != null ? list : this.vanilla;
         }
     }
 }
