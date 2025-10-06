@@ -1,0 +1,22 @@
+package org.vivecraft.client_vr.extensions;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Mixins annotated with this class only apply if the
+ * given Method is present.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface MethodDependentMixin {
+    /**
+     * The method name of the Method that should be present to
+     * load the mixin annotated with this Interface.
+     *
+     * @return The String method name.
+     */
+    String value();
+}

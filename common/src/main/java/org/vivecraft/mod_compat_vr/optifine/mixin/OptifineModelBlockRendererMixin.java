@@ -6,8 +6,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.ClassDependentMixin;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
+@ClassDependentMixin("net.optifine.Config")
 @Mixin(ModelBlockRenderer.class)
 public class OptifineModelBlockRendererMixin {
     /**

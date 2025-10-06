@@ -5,7 +5,9 @@ import net.minecraft.client.renderer.block.LiquidBlockRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.ClassDependentMixin;
 
+@ClassDependentMixin("net.optifine.Config")
 @Mixin(LiquidBlockRenderer.class)
 public class OptifineLiquidBlockRendererMixin {
     /**

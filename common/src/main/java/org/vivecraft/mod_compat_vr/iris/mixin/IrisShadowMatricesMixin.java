@@ -3,6 +3,7 @@ package org.vivecraft.mod_compat_vr.iris.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -10,7 +11,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 
@@ -31,8 +31,7 @@ public class IrisShadowMatricesMixin {
         float xOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
         if (!RenderPassType.isVanilla() && !IrisHelper.SLOW_MODE) {
-            curPos.set(RenderHelper.getSmoothCameraPosition(ClientDataHolderVR.getInstance().currentPass,
-                ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld()));
+            curPos.set(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
             if (ClientDataHolderVR.getInstance().isFirstPass) {
                 vivecraft$FIRST_PASS_POS = curPos.get();
             }

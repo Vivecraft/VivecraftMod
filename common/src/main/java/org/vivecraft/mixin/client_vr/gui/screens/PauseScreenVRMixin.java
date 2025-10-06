@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -33,7 +34,7 @@ public abstract class PauseScreenVRMixin extends Screen {
 
     @Inject(method = "createPauseMenu", at = @At("TAIL"))
     private void vivecraft$addTopButtons(CallbackInfo ci) {
-        if (!VRState.VR_ENABLED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
+        if (!VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             return;
         }
 
@@ -128,7 +129,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             }
         }
 
-        if (ClientDataHolderVR.KAT_VR) {
+        if (ClientDataHolderVR.getInstance().katVr) {
             this.addRenderableWidget(
                 new Button(this.width / 2 + 106, this.height / 4 + 120 + -16 + offset, 98, 20,
                     Component.translatable("vivecraft.gui.alignkatwalk"),
@@ -158,7 +159,8 @@ public abstract class PauseScreenVRMixin extends Screen {
     private GuiEventListener vivecraft$hideFeedback(
         PauseScreen instance, GuiEventListener child, Operation<GuiEventListener> original)
     {
-        ((Button) child).visible = !VRState.VR_ENABLED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
+        ((Button) child).visible =
+            !VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
         return original.call(instance, child);
     }
 
@@ -166,7 +168,8 @@ public abstract class PauseScreenVRMixin extends Screen {
     private GuiEventListener vivecraft$hideReportBugs(
         PauseScreen instance, GuiEventListener child, Operation<GuiEventListener> original)
     {
-        ((Button) child).visible = !VRState.VR_ENABLED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
+        ((Button) child).visible =
+            !VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
         return original.call(instance, child);
     }
 }

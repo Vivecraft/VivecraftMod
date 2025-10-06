@@ -6,11 +6,12 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
+import org.vivecraft.fabric.client.ClientEvents;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerUtil;
 import org.vivecraft.server.config.ServerConfig;
@@ -33,6 +34,7 @@ public class VivecraftMod implements ModInitializer {
                     VivecraftPayloadS2C packet = VivecraftPayloadS2C.readPacket(buffer);
                     client.execute(() -> ClientNetworking.handlePacket(packet));
                 });
+            ClientEvents.registerClientCommands();
         }
 
         ServerPlayNetworking.registerGlobalReceiver(CommonNetworkHelper.CHANNEL,

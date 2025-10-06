@@ -4,11 +4,21 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
+import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.BufferedReader;
@@ -18,6 +28,7 @@ import java.util.Random;
 public class ClientUtils {
 
     private static final Minecraft MC = Minecraft.getInstance();
+    private static final ClientDataHolderVR DH = ClientDataHolderVR.getInstance();
     private static final Random AV_RANDOMIZER = new Random();
 
     /**
@@ -104,7 +115,7 @@ public class ClientUtils {
     public static void takeScreenshot(RenderTarget fb) {
         Minecraft minecraft = Minecraft.getInstance();
         Screenshot.grab(minecraft.gameDirectory, fb, text ->
-            minecraft.execute(() -> minecraft.gui.getChat().addMessage(text)));
+            minecraft.execute(() -> ClientUtils.addChatMessage(text)));
     }
 
     /**
@@ -126,5 +137,65 @@ public class ClientUtils {
 
     public static long milliTime() {
         return System.nanoTime() / 1000000L;
+    }
+
+    public static Component getNameFromSoundEvent(ResourceLocation soundLocation) {
+        String key = soundLocation.getPath();
+        if (I18n.exists(key)) {
+            return Component.translatable(key);
+        } else if (I18n.exists("subtitles." + key)) {
+            return Component.translatable("subtitles." + key);
+        } else if (key.startsWith("music_disc.")) {
+            String jukebox = key.replace("music_disc.", "jukebox_song.minecraft.");
+            if (I18n.exists(jukebox)) {
+                return Component.translatable(jukebox);
+            }
+        }
+        return Component.literal(key);
+    }
+
+    /**
+     * adds the given message to chat, and triggers the chat sound when VR is active
+     *
+     * @param message message to add
+     */
+    public static void addChatMessage(Component message) {
+        // can be null, when called very early
+        if (MC.gui != null) {
+            MC.gui.getChat().addMessage(message);
+        }
+        if (VRState.VR_RUNNING) {
+            triggerChatHapticSound();
+        }
+    }
+
+    /**
+     * triggers a chat notification
+     */
+    public static void triggerChatHapticSound() {
+        if (DH.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
+            if (!DH.vrSettings.seated && (DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC ||
+                DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH
+            ))
+            {
+                DH.vr.triggerHapticPulse(ControllerType.LEFT, 0.2F, 1000.0F, 1.0F);
+            }
+
+            if (DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND ||
+                DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
+            {
+                Vec3 controllerPos = DH.vrPlayer.vrdata_world_pre.getController(1).getPosition();
+                SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.get(
+                    new ResourceLocation(DH.vrSettings.chatNotificationSound));
+                if (soundEvent != null) {
+                    if (MC.level != null) {
+                        MC.level.playLocalSound(controllerPos.x(), controllerPos.y(), controllerPos.z(),
+                            soundEvent, SoundSource.NEUTRAL, 0.3F, 0.1F, false);
+                    } else {
+                        MC.getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, 0.1F, 0.3F));
+                    }
+                }
+            }
+        }
     }
 }

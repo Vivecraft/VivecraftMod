@@ -3,12 +3,12 @@ package org.vivecraft.mod_compat_vr.bettercombat;
 import net.bettercombat.api.WeaponAttributes;
 import net.bettercombat.logic.WeaponRegistry;
 import net.minecraft.world.item.ItemStack;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 
 public class BetterCombatHelper {
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("bettercombat");
+        return Xloader.isModLoaded("bettercombat");
     }
 
     /**
@@ -20,7 +20,8 @@ public class BetterCombatHelper {
      */
     public static double getItemRange(double rangeIn, ItemStack itemStack) {
         WeaponAttributes attribute = WeaponRegistry.getAttributes(itemStack);
-        if (attribute != null) {
+        // try to avoid breaking swings completely
+        if (attribute != null && attribute.attackRange() != 0) {
             return attribute.attackRange();
         }
         return rangeIn;

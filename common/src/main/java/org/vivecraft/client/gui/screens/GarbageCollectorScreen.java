@@ -12,7 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
-import org.vivecraft.client.gui.widgets.TextScrollWidget;
+import org.vivecraft.client.gui.framework.screens.ChangeableParentScreen;
+import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 
@@ -81,7 +82,7 @@ public class GarbageCollectorScreen extends Screen implements ChangeableParentSc
     public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTick);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
 
         Style style = this.text.getMouseoverStyle(mouseX, mouseY);
         if (style != null) {

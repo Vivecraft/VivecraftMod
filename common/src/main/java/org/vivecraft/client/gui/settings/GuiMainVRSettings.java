@@ -1,8 +1,8 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionLayout;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -46,10 +46,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
     private final VROptionLayout[] vrSeatedOptions = new VROptionLayout[]{
         new VROptionLayout(GuiSeatedOptions.class, VROptionLayout.Position.POS_LEFT, 4.0F, true,
             "vivecraft.options.screen.seated.button"),
-        new VROptionLayout(VRSettings.VrOptions.RESET_ORIGIN, (button, mousePos) -> {
-            this.resetOrigin();
-            return true;
-        }, VROptionLayout.Position.POS_RIGHT, 4.0F, true, null)
+        new VROptionLayout(VRSettings.VrOptions.RESET_ORIGIN, VROptionLayout.Position.POS_RIGHT, 4.0F, true, null)
     };
     private final VROptionLayout[] vrConfirm = new VROptionLayout[]{
         new VROptionLayout((button, mousePos) -> {
@@ -83,10 +80,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
 
                 if (this.dataHolder.vrSettings.allowStandingOriginOffset) {
                     super.init(new VROptionLayout[]{new VROptionLayout(VRSettings.VrOptions.RESET_ORIGIN,
-                        (button, mousePos) -> {
-                            this.resetOrigin();
-                            return true;
-                        }, VROptionLayout.Position.POS_LEFT, 7.0F, true, null)
+                        VROptionLayout.Position.POS_LEFT, 7.0F, true, null)
                     }, false);
                 }
             }
@@ -116,13 +110,5 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
             return true;
         }
         return super.onDoneClicked();
-    }
-
-    protected void resetOrigin() {
-        if (VRState.VR_RUNNING) {
-            MCVR.get().resetPosition();
-            this.vrSettings.saveOptions();
-            this.minecraft.setScreen(null);
-        }
     }
 }
