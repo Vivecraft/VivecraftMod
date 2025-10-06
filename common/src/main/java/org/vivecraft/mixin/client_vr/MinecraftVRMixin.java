@@ -51,9 +51,9 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.Xloader;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.framework.screens.ChangeableParentScreen;
 import org.vivecraft.client.gui.screens.ErrorScreen;
@@ -191,14 +191,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vivecraft$showGarbageCollectorScreenFabric(CallbackInfo ci) {
-        if (Xplat.getModloader() == Xplat.ModLoader.FABRIC) {
+        if (Xloader.getModloader() == Xloader.ModLoader.FABRIC) {
             vivecraft$showGarbageCollectorScreen();
         }
     }
 
     @Inject(method = "lambda$new$2", at = @At("TAIL"), remap = false, require = 0, expect = 0)
     private void vivecraft$showGarbageCollectorScreenForge(CallbackInfo ci) {
-        if (Xplat.getModloader() == Xplat.ModLoader.FORGE) {
+        if (Xloader.getModloader() == Xloader.ModLoader.FORGE) {
             vivecraft$showGarbageCollectorScreen();
         }
     }

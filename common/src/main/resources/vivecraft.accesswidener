@@ -79,7 +79,7 @@ accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/
 accessible field net/minecraft/client/gui/screens/Screen deferredTooltipRendering Lnet/minecraft/client/gui/screens/Screen$DeferredTooltipRendering;
 
 # to render scrollling text
-accessible method net/minecraft/client/gui/components/AbstractWidget renderScrollingString (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIII)V
+accessible method net/minecraft/client/gui/components/AbstractWidget renderScrollingString (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIII)V
 
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z

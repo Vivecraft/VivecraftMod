@@ -260,7 +260,7 @@ public class RenderHelper {
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.setIdentity();
-        poseStack.translate(0.0F, 0.0F, -11000.0F);
+        poseStack.translate(0.0F, 0.0F, -2000.0F);
         RenderSystem.applyModelViewMatrix();
 
         // setup projection
@@ -268,31 +268,31 @@ public class RenderHelper {
         Matrix4f guiProjection = (new Matrix4f()).setOrtho(
             0.0F, MC.getMainRenderTarget().width / guiScale,
             MC.getMainRenderTarget().height / guiScale, 0.0F,
-            1000.0F, 21000.0F);
-        RenderSystem.setProjectionMatrix(guiProjection, VertexSorting.ORTHOGRAPHIC_Z);
+            1000.0F, 3000.0F);
+        RenderSystem.setProjectionMatrix(guiProjection);
 
-        GuiGraphics guiGraphics = new GuiGraphics(MC, MC.renderBuffers().bufferSource());
+        PoseStack renderStack = new PoseStack();
 
         int width = 200;
         List<FormattedCharSequence> formattedChars = MC.font.split(
             Component.translatable("vivecraft.messages.connectingtoruntime"), width - 10);
         int height = formattedChars.size() * 8 + Math.max(formattedChars.size() - 1, 0) * 4 + 10;
 
-        int x = guiGraphics.guiWidth() / 2 - width / 2;
-        int y = guiGraphics.guiHeight() / 2 - height / 2;
+        int x = MC.getWindow().getGuiScaledWidth() / 2 - width / 2;
+        int y = MC.getWindow().getGuiScaledHeight() / 2 - height / 2;
 
         // transparent background to dim the game
-        guiGraphics.fill(0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), 0x40000000);
+        GuiComponent.fill(renderStack, 0, 0, MC.getWindow().getGuiScaledWidth(), MC.getWindow().getGuiScaledHeight(),
+            0x40000000);
 
         // black background with border
-        guiGraphics.fill(x, y, x + width, y + height, 0xFF000000);
-        guiGraphics.renderOutline(x, y, width, height, 0xFFFFFFFF);
+        GuiComponent.fill(renderStack, x, y, x + width, y + height, 0xFF000000);
+        GuiComponent.renderOutline(renderStack, x, y, width, height, 0xFFFFFFFF);
 
         for (int line = 0; line < formattedChars.size(); line++) {
-            guiGraphics.drawCenteredString(MC.font, formattedChars.get(line), guiGraphics.guiWidth() / 2,
-                y + 5 + line * 12, 0xFFFFFFFF);
+            GuiComponent.drawCenteredString(renderStack, MC.font, formattedChars.get(line),
+                MC.getWindow().getGuiScaledWidth() / 2, y + 5 + line * 12, 0xFFFFFFFF);
         }
-        guiGraphics.flush();
 
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();

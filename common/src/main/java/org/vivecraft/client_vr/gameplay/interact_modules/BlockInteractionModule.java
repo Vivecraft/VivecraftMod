@@ -79,9 +79,9 @@ public class BlockInteractionModule implements InteractModule {
         if (this.dh.vrSettings.realisticBlockInteractEnabled) {
             Vec3 hmdPos = this.dh.vrPlayer.vrdata_world_pre.getHeadPivot();
             BlockPos blockpos = BlockPos.containing(handPosition);
-            BlockState blockstate = player.level().getBlockState(blockpos);
+            BlockState blockstate = player.level.getBlockState(blockpos);
 
-            BlockHitResult hit = blockstate.getShape(player.level(), blockpos).clip(hmdPos, handPosition, blockpos);
+            BlockHitResult hit = blockstate.getShape(player.level, blockpos).clip(hmdPos, handPosition, blockpos);
             this.inBlockHit[hand.ordinal()] = hit;
 
             if (hit != null && (this.rightClickable.contains(blockstate.getBlock().getClass()) ||
@@ -89,7 +89,7 @@ public class BlockInteractionModule implements InteractModule {
             ))
             {
                 return true;
-            } else if (player.getItemInHand(hand).getItem() == Items.BUCKET && blockstate.liquid()) {
+            } else if (player.getItemInHand(hand).getItem() == Items.BUCKET && blockstate.getMaterial().isLiquid()) {
                 // bucket liquid pickup
                 this.bukkit[hand.ordinal()] = true;
                 return true;

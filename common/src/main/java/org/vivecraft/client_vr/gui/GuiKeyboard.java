@@ -189,7 +189,7 @@ public class GuiKeyboard extends TwoHandedScreen {
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
-        guiGraphics.drawCenteredString(this.font, "Keyboard", this.width / 2, 2, 0xFFFFFFFF);
+        drawCenteredString(poseStack, this.font, "Keyboard", this.width / 2, 2, 0xFFFFFFFF);
         super.render(poseStack, 0, 0, partialTick);
     }
 }

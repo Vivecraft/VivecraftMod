@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.framework.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
@@ -16,16 +16,16 @@ public class TextOnlyButton extends Button {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         int textWidth = Minecraft.getInstance().font.width(this.getMessage());
         int textY = this.getY() + this.getHeight() / 2 - Minecraft.getInstance().font.lineHeight / 2 + 2;
 
         int color = !this.active ? 0xFFA0A0A0 : (this.isHoveredOrFocused() ? 0xFF55FF55 : 0xFFFFFFFF);
 
         if (textWidth < this.getWidth()) {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX(), textY, color);
+            drawString(poseStack, Minecraft.getInstance().font, this.getMessage(), this.getX(), textY, color);
         } else {
-            AbstractWidget.renderScrollingString(guiGraphics, Minecraft.getInstance().font, this.getMessage(),
+            AbstractWidget.renderScrollingString(poseStack, Minecraft.getInstance().font, this.getMessage(),
                 this.getX(), textY, this.getX() + this.getWidth() - 5,
                 textY + Minecraft.getInstance().font.lineHeight - 1, color);
         }

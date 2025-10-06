@@ -51,7 +51,7 @@ public class ErrorScreen extends Screen implements ChangeableParentScreen {
     public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
 
         Style style = this.text.getMouseoverStyle(mouseX, mouseY);
         if (style != null) {

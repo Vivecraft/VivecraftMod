@@ -248,7 +248,7 @@ public abstract class GuiVROptionsBase extends Screen {
 
         super.render(poseStack, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 0xFFFFFFFF);
+        drawCenteredString(poseStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 0xFFFFFFFF);
 
         if (this.btnDefaults != null) {
             this.btnDefaults.visible = this.drawDefaultButtons;
@@ -348,7 +348,7 @@ public abstract class GuiVROptionsBase extends Screen {
         if (hover instanceof GuiVROption guiHover && guiHover.getOption() != null &&
             this.deferredTooltipRendering == null)
         {
-            TooltipRenderer.renderTooltip(guiGraphics, TooltipUtil.getClientConfigTooltip(guiHover.getOption()),
+            TooltipRenderer.renderTooltip(poseStack, TooltipUtil.getClientConfigTooltip(guiHover.getOption()),
                 this.width / 2, guiHover.getY(), guiHover.getHeight());
         }
     }

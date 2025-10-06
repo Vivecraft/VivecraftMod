@@ -1467,7 +1467,7 @@ public class MenuWorldRenderer {
                 .uv(16.0f, 0.0f).color(r, g, b, 255).endVertex();
         }
 
-        this.endSkyVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
+        this.endSkyVBO = new VertexBuffer();
         this.endSkyVBO.bind();
         this.endSkyVBO.upload(bufferBuilder.end());
         VertexBuffer.unbind();

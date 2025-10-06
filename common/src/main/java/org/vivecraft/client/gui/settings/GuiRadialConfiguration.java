@@ -128,7 +128,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         super.render(poseStack, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.minecraft.font,
+        drawCenteredString(poseStack, this.minecraft.font,
             Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50,
             0xFF55FF55);
 
@@ -136,7 +136,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
             drawCenteredString(poseStack, this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36,
                 0xFFD23877);
-            guiGraphics.drawCenteredString(this.minecraft.font,
+            drawCenteredString(poseStack, this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.3"), this.width / 2, this.height - 22,
                 0xFFD23877);
         }

@@ -49,7 +49,7 @@ public class GuiQuickCommandsInGame extends Screen {
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
-        guiGraphics.drawCenteredString(this.font, this.getTitle(), this.width / 2, 16, 0xFFFFFFFF);
+        drawCenteredString(poseStack, this.font, this.getTitle(), this.width / 2, 16, 0xFFFFFFFF);
         super.render(poseStack, mouseX, mouseY, partialTick);
     }
 }

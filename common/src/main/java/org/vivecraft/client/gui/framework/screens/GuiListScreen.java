@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.framework.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -89,19 +89,19 @@ public abstract class GuiListScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics) {
-        this.renderDirtBackground(guiGraphics);
+    public void renderBackground(PoseStack poseStack) {
+        this.renderDirtBackground(poseStack);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             init();
             this.reinit = false;
         }
-        this.list.render(guiGraphics, mouseX, mouseY, partialTick);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
+        this.list.render(poseStack, mouseX, mouseY, partialTick);
+        super.render(poseStack, mouseX, mouseY, partialTick);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 
         // render custom tooltip
         SettingsList.BaseEntry entry = null;
@@ -112,7 +112,7 @@ public abstract class GuiListScreen extends Screen {
             entry = this.list.getHovered();
         }
         if (entry != null && this.list.isEntryVisible(entry) && this.deferredTooltipRendering == null) {
-            TooltipRenderer.renderTooltip(guiGraphics, entry.getTooltip(),
+            TooltipRenderer.renderTooltip(poseStack, entry.getTooltip(),
                 this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)), this.list.getItemHeight());
         }
     }
