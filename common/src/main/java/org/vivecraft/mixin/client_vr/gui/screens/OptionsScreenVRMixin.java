@@ -90,7 +90,7 @@ public class OptionsScreenVRMixin extends Screen {
             for (GuiEventListener child : children()) {
                 if (child instanceof AbstractWidget button && button != this.vivecraft$settings) {
                     // only change buttons that are in the main columns and at the same height as ours
-                    if (button.getX() < rightEdge && button.getRight() > leftEdge &&
+                    if (button.getX() < rightEdge && (button.getX() + button.getWidth()) > leftEdge &&
                         button.getY() + button.getHeight() > this.vivecraft$settings.getY() &&
                         button.getY() < this.vivecraft$settings.getY() + this.vivecraft$settings.getHeight())
                     {

@@ -81,6 +81,9 @@ accessible field net/minecraft/client/gui/Gui GUI_ICONS_LOCATION Lnet/minecraft/
 # to check for an active tooltip
 accessible field net/minecraft/client/gui/screens/Screen deferredTooltipRendering Lnet/minecraft/client/gui/screens/Screen$DeferredTooltipRendering;
 
+# to render scrollling text
+accessible method net/minecraft/client/gui/components/AbstractWidget renderScrollingString (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIII)V
+
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J

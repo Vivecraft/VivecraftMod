@@ -236,7 +236,7 @@ public class VRPlayer {
 
         // Gather VRPose history if we're in a non-paused world.
         if (this.mc.level != null &&
-            (this.mc.getSingleplayerServer() == null || !this.mc.getSingleplayerServer().isPaused()))
+            (this.mc.getSingleplayerServer() == null || !this.mc.isPaused()))
         {
             VRClientAPIImpl.INSTANCE.addPoseToHistory(this.vrdata_world_pre.asVRPose());
         }

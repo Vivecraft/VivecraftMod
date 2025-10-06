@@ -11,8 +11,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.block.BaseTorchBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.TorchBlock;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -46,7 +46,7 @@ public class VivecraftItemRendering {
         } else if (item instanceof BlockItem) {
             Block block = ((BlockItem) item).getBlock();
 
-            if (block instanceof BaseTorchBlock) {
+            if (block instanceof TorchBlock) {
                 itemTransformType = VivecraftItemTransformType.BLOCK_STICK;
             } else {
                 BakedModel bakedmodel = itemRenderer.getModel(itemStack, player.level(), player, 0);

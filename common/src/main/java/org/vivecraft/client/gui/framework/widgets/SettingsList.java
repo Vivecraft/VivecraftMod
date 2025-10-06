@@ -40,12 +40,15 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     private String activeFilter = "";
 
+    private boolean active = true;
+
     private final Screen parent;
 
     public SettingsList(Screen parent, Minecraft minecraft, List<SettingsList.BaseEntry> entries, boolean searchable) {
         // arguments are
-        // width, height, Y position, entry height
-        super(minecraft, parent.width, parent.height - (searchable ? 74 : 52), searchable ? 42 : 20, 20);
+        // width, screen height, list top Y, list bottom Y, entry height
+        super(minecraft, parent.width, parent.height, searchable ? 42 : 20,
+            parent.height - (searchable ? 74 : 52) + (searchable ? 42 : 20), 20);
 
         this.parent = parent;
         entries = entries.stream().filter(Objects::nonNull).toList();
@@ -129,20 +132,18 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
      */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.isValidMouseClick(button)) {
-            this.updateScrollingState(mouseX, mouseY, button);
-            if (this.isMouseOver(mouseX, mouseY)) {
-                SettingsList.BaseEntry hovered = this.getEntryAtPositionFixed(mouseX, mouseY);
-                if (hovered != null && hovered.mouseClicked(mouseX, mouseY, button)) {
-                    if (this.getFocused() != hovered && this.getFocused() != null) {
-                        // unselect old entry
-                        this.getFocused().setFocused(null);
-                    }
-
-                    this.setFocused(hovered);
-                    this.setDragging(true);
-                    return true;
+        this.updateScrollingState(mouseX, mouseY, button);
+        if (this.isMouseOver(mouseX, mouseY)) {
+            SettingsList.BaseEntry hovered = this.getEntryAtPositionFixed(mouseX, mouseY);
+            if (hovered != null && hovered.mouseClicked(mouseX, mouseY, button)) {
+                if (this.getFocused() != hovered && this.getFocused() != null) {
+                    // unselect old entry
+                    this.getFocused().setFocused(null);
                 }
+
+                this.setFocused(hovered);
+                this.setDragging(true);
+                return true;
             }
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -153,7 +154,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
      * just checks if the position is left of the scrollbar, instead of some weird left limit
      */
     private SettingsList.BaseEntry getEntryAtPositionFixed(double mouseX, double mouseY) {
-        int listY = Mth.floor(mouseY - this.getY()) - this.headerHeight + (int) this.getScrollAmount() - 4;
+        int listY = Mth.floor(mouseY - this.y0) - this.headerHeight + (int) this.getScrollAmount() - 4;
         int hoveredItem = listY / this.itemHeight;
         return mouseX < this.getScrollbarPosition() && hoveredItem >= 0 && listY >= 0 &&
             hoveredItem < this.getItemCount() ? this.children().get(hoveredItem) : null;
@@ -161,7 +162,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     public boolean isEntryVisible(SettingsList.BaseEntry entry) {
         int index = this.children().indexOf(entry);
-        return this.getRowTop(index) < this.getBottom() && this.getRowBottom(index) > this.getY();
+        return this.getRowTop(index) < this.y1 && this.getRowBottom(index) > this.y0;
     }
 
     @Override
@@ -176,7 +177,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     @Override
     public int getRowLeft() {
-        return this.getX() + this.width / 2 - this.getRowWidth() / 2 + 2;
+        return this.x0 + this.width / 2 - this.getRowWidth() / 2 + 2;
     }
 
     public int getItemHeight() {
@@ -186,7 +187,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         // for some reason AbstractSelectionList removes the active checks
-        return this.active && this.visible && super.isMouseOver(mouseX, mouseY);
+        return this.active && super.isMouseOver(mouseX, mouseY);
     }
 
     // there to make it public

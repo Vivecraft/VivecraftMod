@@ -103,6 +103,7 @@
     "world.entity.LivingEntityMixin",
     "world.entity.MobMixin",
     "world.entity.PlayerMixin",
+    "world.entity.ai.goal.MeleeAttackGoalMixin",
     "world.entity.ai.goal.SwellGoalMixin",
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
     "world.entity.monster.EndermanMixin",
@@ -115,7 +116,6 @@
     "world.entity.projectile.ThrownTridentMixin",
     "world.item.CrossbowItemMixin",
     "world.item.ItemMixin",
-    "world.item.CrossbowItemMixin",
     "world.item.crafting.ShapedRecipeMixin",
     "world.level.block.FenceGateBlockServerMixin"
   ]

@@ -1351,7 +1351,7 @@ public class VREffectsHelper {
             brightness = 0.5F;
         }
 
-        RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
+        ShadersHelper.bindTexture(Gui.GUI_ICONS_LOCATION);
 
         // sprite location of the crosshair on the atlas
         float uMax = 15.0F / 256.0F;

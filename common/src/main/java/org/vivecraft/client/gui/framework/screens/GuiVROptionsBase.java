@@ -22,7 +22,8 @@ import org.vivecraft.common.utils.TooltipUtil;
 import java.util.ArrayList;
 
 public abstract class GuiVROptionsBase extends Screen {
-    private static final ResourceLocation SEARCH_ICON = new ResourceLocation("vivecraft", "icon/search");
+    private static final ResourceLocation VIVE_WIDGETS_LOCATION = new ResourceLocation("vivecraft",
+        "textures/gui/widgets.png");
 
     protected ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
     protected final Screen lastScreen;
@@ -42,13 +43,12 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     protected void addDefaultButtons() {
-        Button search = SpriteIconButton.builder(Component.translatable("vivecraft.options.screen.search"),
-                (p) -> this.minecraft.setScreen(new GuiAllSettings(this)), true)
-            .sprite(SEARCH_ICON, 15, 15)
-            .size(20, 20)
-            .build();
-        search.setX(this.width / 2 - 180);
-        search.setY((int) Math.ceil((float) (this.height / 6) - 10.0F));
+        Button search = new ImageButton(
+            this.width / 2 - 180, (int) Math.ceil((float) (this.height / 6) - 10.0F),
+            20, 20, 0, 0, 20,
+            VIVE_WIDGETS_LOCATION, 64, 64,
+            (p) -> this.minecraft.setScreen(new GuiAllSettings(this)),
+            Component.translatable("vivecraft.options.screen.search"));
         search.setTooltip(Tooltip.create(Component.translatable("vivecraft.options.screen.search")));
         this.addRenderableWidget(search);
 
