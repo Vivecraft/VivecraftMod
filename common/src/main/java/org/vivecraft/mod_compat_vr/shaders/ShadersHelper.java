@@ -1,10 +1,12 @@
 package org.vivecraft.mod_compat_vr.shaders;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
@@ -37,6 +39,16 @@ public class ShadersHelper {
      */
     public static int ShaderLight() {
         return isShaderActive() ? 8 : 4;
+    }
+
+    /**
+     * binds the given texture to texture slot 0, only if shaders are active
+     *
+     * @param resourceLocation ResourceLocation of the texture to bind
+     */
+    public static void bindTexture(ResourceLocation resourceLocation) {
+        Minecraft.getInstance().getTextureManager().bindForSetup(resourceLocation);
+        RenderSystem.setShaderTexture(0, resourceLocation);
     }
 
     /**
@@ -84,8 +96,6 @@ public class ShadersHelper {
         for (RenderPass pass : RenderPass.values()) {
             createValueMacro.accept("VIVECRAFT_PASS_" + pass.toString(), pass.ordinal());
         }
-
-        createValueMacro.accept("VIVECRAFT_PASS_VANILLA", -1);
     }
 
     /**
@@ -136,8 +146,7 @@ public class ShadersHelper {
 
             // renderpass
             UNIFORMS.add(Triple.of("vivecraftRenderpass", UniformType.INTEGER,
-                () -> VRState.VR_RUNNING && ClientDataHolderVR.getInstance().currentPass != null ?
-                    ClientDataHolderVR.getInstance().currentPass.ordinal() : -1));
+                () -> ClientDataHolderVR.getInstance().currentPass.ordinal()));
         }
         return UNIFORMS;
     }

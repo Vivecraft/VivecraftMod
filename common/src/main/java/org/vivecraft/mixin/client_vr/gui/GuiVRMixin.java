@@ -116,15 +116,15 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Inject(method = "renderHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V", ordinal = 1, shift = At.Shift.AFTER))
     private void vivecraft$hotbarContextIndicator(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
-        if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 &&
-            ClientDataHolderVR.getInstance().interactTracker.hotbar < 9 &&
-            this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().interactTracker.hotbar &&
+        if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
+            ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
+            this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = this.screenWidth / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
             guiGraphics.blitSprite(HOTBAR_SELECTION_SPRITE,
-                middle - 91 - 1 + ClientDataHolderVR.getInstance().interactTracker.hotbar * 20,
+                middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
                 this.screenHeight - 22 - 1, 24, 23);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
@@ -157,8 +157,9 @@ public abstract class GuiVRMixin implements GuiExtension {
     private void vivecraft$renderColoredIcon(
         GuiGraphics instance, ResourceLocation sprite, int x, int y, int width, int height, Operation<Void> original)
     {
-        boolean changeColor = VRState.VR_RUNNING && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 &&
-            ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player);
+        boolean changeColor =
+            VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar == 9 &&
+                ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player);
 
         if (changeColor) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);

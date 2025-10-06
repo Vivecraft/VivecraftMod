@@ -5,11 +5,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,11 +14,7 @@ import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
 @Mixin(FishingHook.class)
-public abstract class FishingHookMixin extends Entity {
-
-    public FishingHookMixin(EntityType<?> entityType, Level level) {
-        super(entityType, level);
-    }
+public abstract class FishingHookMixin {
 
     @WrapOperation(method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getXRot()F"))
     private float vivecraft$modifyXRot(
@@ -33,8 +26,9 @@ public abstract class FishingHookMixin extends Entity {
         if (instance instanceof ServerPlayer serverPlayer) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-                controllerDir.set(serverVivePlayer.getBodyPartDir(serverVivePlayer.activeBodyPart));
-                controllerPos.set(serverVivePlayer.getBodyPartPos(serverVivePlayer.activeBodyPart));
+                // fishing rods can be shot with the offhand
+                controllerDir.set(serverVivePlayer.getAimDir(true));
+                controllerPos.set(serverVivePlayer.getAimPos(true));
 
                 return -(float) Math.toDegrees(Math.asin(controllerDir.get().y / controllerDir.get().length()));
             }

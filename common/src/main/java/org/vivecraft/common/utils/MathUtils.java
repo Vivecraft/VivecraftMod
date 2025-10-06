@@ -23,6 +23,13 @@ public class MathUtils {
     public static final Vec3 UP_D = new Vec3(0.0, 1.0, 0.0);
     public static final Vec3 DOWN_D = new Vec3(0.0, -1.0, 0.0);
 
+    public static final Vector3fc RED = LEFT;
+    public static final Vector3fc GREEN = UP;
+    public static final Vector3fc BLUE = FORWARD;
+    public static final Vector3fc ORANGE = new Vector3f(1.0F, 0.75F, 0.0F);
+    public static final Vector3fc DARK_GRAY = new Vector3f(0.25F);
+    public static final Vector3fc LIGHT_GRAY = new Vector3f(0.75F);
+
     public static final Matrix4fc IDENTITY = new Matrix4f();
 
     /**
@@ -34,6 +41,31 @@ public class MathUtils {
      */
     public static Vector3f subtractToVector3f(Vec3 a, Vec3 b) {
         return new Vector3f((float) (a.x - b.x), (float) (a.y - b.y), (float) (a.z - b.z));
+    }
+
+    /**
+     * Converts a {@link Vector3fc} to a {@link Vec3}.
+     *
+     * @param v The original Vector3fc.
+     * @return The Vec3.
+     */
+    public static Vec3 toMcVec3(Vector3fc v) {
+        return new Vec3(v.x(), v.y(), v.z());
+    }
+
+    /**
+     * Calculates a perpendicular/normal vector to the given vector. There is no guarantee in which direction it will look
+     *
+     * @param vec Vector to get the perpendicular/normal vector for
+     * @return the perpendicular/normal vector
+     */
+    public static Vector3f getPerpendicularVec(Vector3fc vec) {
+        // check if the vector is parallel, then we can't use up
+        if (Math.abs(vec.dot(UP)) / vec.length() != 1F) {
+            return vec.cross(UP, new Vector3f()).normalize();
+        } else {
+            return vec.cross(LEFT, new Vector3f()).normalize();
+        }
     }
 
     public static double lerpMod(double from, double to, double percent, double mod) {
@@ -126,6 +158,13 @@ public class MathUtils {
         );
     }
 
+    /**
+     * checks if the abs value of {@code axis} is above {@code deadzone} and normalizes the range [deadzone, 1] to [0, 1]
+     *
+     * @param axis     value to check and normalize
+     * @param deadzone {@code axis} below this value will be 0
+     * @return normalized {@code axis}
+     */
     public static float applyDeadzone(float axis, float deadzone) {
         if (Math.abs(axis) > deadzone) {
             float scalar = 1.0F / (1.0F - deadzone);
@@ -133,6 +172,35 @@ public class MathUtils {
         } else {
             return 0F;
         }
+    }
+
+    /**
+     * converts the given {@code value} to represent a digital signal in X/Y, if the length is above {@code deadzone}
+     * the resulting digital signal is dependent on the angle the original {@code value} points at
+     *
+     * @param value    value to convert
+     * @param deadzone threshold value for the check
+     * @return a new Vector2f holding the digital value
+     */
+    public static Vector2f toDigital(Vector2f value, float deadzone) {
+        Vector2f digital = new Vector2f();
+        if (value.length() > deadzone) {
+            // get pointing angle, forward 0, back +-PI
+            float angle = (float) Math.atan2(value.x, value.y);
+            float angleAbs = Math.abs(angle);
+            final float PI_8TH = Mth.PI / 8F;
+            // left/right
+            if (angleAbs >= PI_8TH && angleAbs <= Mth.PI - PI_8TH) {
+                digital.x = Math.signum(angle);
+            }
+            // forward/back
+            if (angleAbs < Mth.HALF_PI - PI_8TH) {
+                digital.y = 1F;
+            } else if (angleAbs > Mth.HALF_PI + PI_8TH) {
+                digital.y = -1F;
+            }
+        }
+        return digital;
     }
 
     public static float normalizedDotXZ(Vector3fc a, Vector3fc b) {
@@ -183,6 +251,16 @@ public class MathUtils {
         eulerAngles.z = org.joml.Math.atan2(rot.x() * rot.y() + rot.w() * rot.z(),
             0.5f - rot.y() * rot.y() - rot.z() * rot.z());
         return eulerAngles;
+    }
+
+    /**
+     * checks if the given vector is a zero vector
+     *
+     * @param vec vector to check
+     * @return if the given vector is a zero vector
+     */
+    public static boolean isZero(Vector3fc vec) {
+        return vec.x() == 0 && vec.y() == 0 && vec.z() == 0;
     }
 
     /**

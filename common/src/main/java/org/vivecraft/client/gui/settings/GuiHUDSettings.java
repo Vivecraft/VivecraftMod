@@ -1,12 +1,9 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROption;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionEntry;
-import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiHUDSettings extends GuiVROptionsBase {
@@ -21,6 +18,7 @@ public class GuiHUDSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.TOUCH_HOTBAR),
         new VROptionEntry(VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE),
         new VROptionEntry(VRSettings.VrOptions.GUI_APPEAR_OVER_BLOCK),
+        new VROptionEntry(VRSettings.VrOptions.HUD_WRIST_OFFSET),
         new VROptionEntry("vivecraft.options.screen.guirendering.button", (button, mousePos) -> {
             Minecraft.getInstance().setScreen(new GuiRenderingSettings(this));
             return true;
@@ -50,14 +48,5 @@ public class GuiHUDSettings extends GuiVROptionsBase {
     protected void loadDefaults() {
         super.loadDefaults();
         this.minecraft.options.hideGui = false;
-    }
-
-    @Override
-    protected void actionPerformed(AbstractWidget widget) {
-        if (widget instanceof GuiVROption button) {
-            if (button.getId() == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
-                GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
-            }
-        }
     }
 }

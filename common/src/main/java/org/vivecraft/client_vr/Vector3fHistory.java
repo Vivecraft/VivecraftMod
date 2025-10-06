@@ -42,7 +42,7 @@ public class Vector3fHistory {
      * @return the newest Vector3f
      */
     public Vector3fc latest() {
-        return (this.data.getLast()).vec;
+        return this.data.isEmpty() ? new Vector3f() : this.data.getLast().vec;
     }
 
     /**
@@ -160,7 +160,7 @@ public class Vector3fHistory {
             count++;
         }
 
-        return count == 0 ? vec3 : vec3.div(count);
+        return count == 0 ? vec3.set(latest()) : vec3.div(count);
     }
 
     /**

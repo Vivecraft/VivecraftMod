@@ -29,8 +29,8 @@ SOFTWARE.
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 
-uniform float GameTime;
 uniform int EndPortalLayers;
+uniform float GameTime;
 
 in vec3 pos;
 
