@@ -4,9 +4,16 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.EnumGetMethod;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
+import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
+import org.vivecraft.common.utils.TooltipUtil;
+import org.vivecraft.server.ServerVivePlayer;
 
+import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -23,13 +30,27 @@ public class ConfigBuilder {
     }
 
     /**
-     * pushes the given subPath to the path
+     * pushes the given subPath to the path and adds a comment from the lang file, if available
      *
      * @param subPath new sub path
      * @return this builder, for chaining commands
      */
     public ConfigBuilder push(String subPath) {
         this.stack.add(subPath);
+        this.comment(false);
+        return this;
+    }
+
+    /**
+     * pushes the given subPath to the path
+     *
+     * @param subPath       new sub path
+     * @param addAllComment if the group comment should also be added
+     * @return this builder, for chaining commands
+     */
+    public ConfigBuilder push(String subPath, boolean addAllComment) {
+        this.stack.add(subPath);
+        this.comment(addAllComment);
         return this;
     }
 
@@ -41,6 +62,17 @@ public class ConfigBuilder {
     public ConfigBuilder pop() {
         this.stack.removeLast();
         return this;
+    }
+
+    /**
+     * adds a comment taken from the lang file for the current path
+     *
+     * @param addAllComment if the comment for all group elements should also be added
+     * @return this builder, for chaining commands
+     */
+    public ConfigBuilder comment(boolean addAllComment) {
+        return this.comment(
+            TooltipUtil.getServerConfigTooltip(String.join(".", this.stack.stream().toList()), addAllComment));
     }
 
     /**
@@ -227,8 +259,17 @@ public class ConfigBuilder {
         private final CommentedConfig config;
         private final List<String> path;
         private final T defaultValue;
-        // cache te value to minimize config lookups
+        // cache the value to minimize config lookups
         private T cachedValue = null;
+
+        /**
+         * Function that takes a VivePlayer on setting change and creates a network packet for them
+         */
+        private Function<ServerVivePlayer, VivecraftPayloadS2C> packetFunction = null;
+        /**
+         * Consumer that takes a MinecraftServer on setting change to send updates
+         */
+        private Consumer<MinecraftServer> updateConsumer = null;
 
         public ConfigValue(CommentedConfig config, List<String> path, T defaultValue) {
             this.config = config;
@@ -249,8 +290,7 @@ public class ConfigBuilder {
         }
 
         public T reset() {
-            this.config.set(this.path, this.defaultValue);
-            this.cachedValue = this.defaultValue;
+            this.set(this.defaultValue);
             return this.defaultValue;
         }
 
@@ -273,6 +313,31 @@ public class ConfigBuilder {
 
         public Supplier<AbstractWidget> getWidget(int width, int height) {
             return WidgetBuilder.getBaseWidget(this, width, height);
+        }
+
+        @SuppressWarnings("unchecked")
+        public <V extends ConfigValue<T>> V setOnUpdate(Consumer<MinecraftServer> consumer) {
+            this.updateConsumer = consumer;
+            return (V) this;
+        }
+
+        public void onUpdate(MinecraftServer server) {
+            if (this.updateConsumer != null) {
+                this.updateConsumer.accept(server);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        public <V extends ConfigValue<T>> V setPacketFunction(
+            Function<ServerVivePlayer, VivecraftPayloadS2C> supplier)
+        {
+            this.packetFunction = supplier;
+            return (V) this;
+        }
+
+        @Nullable
+        public Function<ServerVivePlayer, VivecraftPayloadS2C> getPacketFunction() {
+            return this.packetFunction;
         }
     }
 
@@ -410,7 +475,7 @@ public class ConfigBuilder {
         @Override
         public void fromNormalized(double value) {
             double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
-            this.set(Math.round(newValue * 100.0) / 100.0);
+            this.set(Math.round(newValue * 10.0) / 10.0);
         }
     }
 }

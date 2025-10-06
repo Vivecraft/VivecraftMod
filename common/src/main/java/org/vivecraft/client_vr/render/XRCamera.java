@@ -1,16 +1,14 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.math.Vector3f;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.material.FogType;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.common.utils.MathUtils;
 
 /**
  * an extension of the Camera, to correctly set up the camera position for the current pass
@@ -40,23 +38,10 @@ public class XRCamera extends Camera {
         RenderPass renderpass = dataholder.currentPass;
 
         VRData.VRDevicePose eye = dataholder.vrPlayer.getVRDataWorld().getEye(renderpass);
-        if (renderpass == RenderPass.CENTER && dataholder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
-            this.setPosition(RenderHelper.getSmoothCameraPosition(renderpass, dataholder.vrPlayer.getVRDataWorld()));
-        } else {
-            this.setPosition(eye.getPosition());
-        }
-        this.xRot = -eye.getPitch();
-        this.yRot = eye.getYaw();
-        org.joml.Vector3f forward = eye.getDirection();
-        this.getLookVector().set(forward.x, forward.y, forward.z);
-        org.joml.Vector3f up = eye.getCustomVector(MathUtils.UP);
-        this.getUpVector().set(up.x, up.y, up.z);
-        org.joml.Vector3f left = eye.getCustomVector(MathUtils.LEFT);
-        this.getLeftVector().set(left.x, left.y, left.z);
-
-        this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F);
-        this.rotation().mul(Vector3f.YP.rotationDegrees(-this.yRot));
-        this.rotation().mul(Vector3f.XP.rotationDegrees(this.xRot));
+        this.setPosition(eye.getPosition());
+        // we cannot set the rotation to the full matrix, because particles would rotate with the head
+        // instead of being world up oriented
+        this.setRotation(eye.getYaw(), -eye.getPitch());
     }
 
     /**

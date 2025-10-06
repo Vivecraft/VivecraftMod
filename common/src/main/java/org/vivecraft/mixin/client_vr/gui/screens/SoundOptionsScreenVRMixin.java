@@ -1,16 +1,11 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.SoundOptionsScreen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -44,13 +39,8 @@ public class SoundOptionsScreenVRMixin extends Screen {
             .create(this.width / 2 - 155 + 160, this.height / 6 - 12 + 22 * 5, 150, 20,
                 new TranslatableComponent("vivecraft.options.HRTF_SELECTION"),
                 (cycleButton, newValue) -> {
-                    ClientDataHolderVR.getInstance().vrSettings.hrtfSelection = (boolean) newValue ? 0 : -1;
                     ClientDataHolderVR.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);
                     ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-
-                    SoundManager soundManager = Minecraft.getInstance().getSoundManager();
-                    soundManager.reload();
-                    soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 });
 
         this.addRenderableWidget(this.vivecraft$directionalAudioVRButton);

@@ -1,28 +1,28 @@
 package org.vivecraft.common;
 
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 
 public class CommonDataHolder {
 
-    private static CommonDataHolder INSTANCE;
+    private static CommonDataHolder INSTANCE = new CommonDataHolder();
     public final String versionIdentifier;
 
     public CommonDataHolder() {
+        // to prevent race conditions
+        INSTANCE = this;
+
         String mcVersion = "";
         String modVersion = "";
-        if (Xplat.isModLoadedSuccess()) {
-            String[] version = Xplat.getModVersion().split("-", 2);
+        if (Xloader.isModLoadedSuccess()) {
+            String[] version = Xloader.getModVersion().split("-", 2);
             mcVersion = version[0];
             modVersion = version[1];
         }
 
-        this.versionIdentifier = "Vivecraft-" + mcVersion + "-" + Xplat.getModloader().name + "-" + modVersion;
+        this.versionIdentifier = "Vivecraft-" + mcVersion + "-" + Xloader.getModloader().name + "-" + modVersion;
     }
 
     public static CommonDataHolder getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new CommonDataHolder();
-        }
         return INSTANCE;
     }
 }

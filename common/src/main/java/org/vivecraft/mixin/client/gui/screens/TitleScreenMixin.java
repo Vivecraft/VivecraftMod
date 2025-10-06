@@ -17,6 +17,7 @@ import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
@@ -55,7 +56,8 @@ public abstract class TitleScreenMixin extends Screen {
 
             button.setMessage(new TranslatableComponent("vivecraft.gui.vr",
                 VRState.VR_ENABLED ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
-        });
+        }, (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
+            Component.translatable("vivecraft.options.VR_ENABLED.tooltip")));
         this.vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
 
         this.addRenderableWidget(this.vivecraft$vrModeButton);
@@ -74,13 +76,11 @@ public abstract class TitleScreenMixin extends Screen {
     private void vivecraft$renderToolTip(
         PoseStack poseStack, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
     {
-        this.vivecraft$updateButton.visible = UpdateChecker.HAS_UPDATE;
-
-        if (this.vivecraft$vrModeButton.visible && this.vivecraft$vrModeButton.isMouseOver(mouseX, mouseY)) {
-            renderTooltip(poseStack,
-                this.font.split(new TranslatableComponent("vivecraft.options.VR_ENABLED.tooltip"),
-                    Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+        // some mods cancel the title screen init
+        if (this.vivecraft$updateButton != null) {
+            this.vivecraft$updateButton.visible = UpdateChecker.HAS_UPDATE;
         }
+
         if (VRState.VR_INITIALIZED && !VRState.VR_RUNNING) {
             Component hotswitchMessage = new TranslatableComponent("vivecraft.messages.vrhotswitchinginfo");
             renderTooltip(poseStack, this.font.split(hotswitchMessage, 280), this.width / 2 - 140 - 12, 17);

@@ -56,6 +56,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     private double vivecraft$additionZ;
 
     @Unique
+    private boolean vivecraft$walkUpBlocksActive = false;
+
+    @Unique
     private final ClientDataHolderVR vivecraft$dataholder = ClientDataHolderVR.getInstance();
 
     @Unique
@@ -66,12 +69,6 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     protected Minecraft minecraft;
 
     @Shadow
-    private boolean startedUsingItem;
-
-    @Shadow
-    private InteractionHand usingItemHand;
-
-    @Shadow
     protected abstract void updateAutoJump(float movementX, float movementZ);
 
     @Shadow
@@ -79,6 +76,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
 
     @Shadow
     public abstract InteractionHand getUsedItemHand();
+
+    @Shadow
+    public abstract boolean isUsingItem();
 
     @Inject(method = "startRiding", at = @At("TAIL"))
     private void vivecraft$startRidingTracker(Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> cir) {
@@ -154,6 +154,10 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         if (!VRState.VR_RUNNING || !vivecraft$isLocalPlayer(this) ||
             Minecraft.getInstance().getCameraEntity() != (Object) this)
         {
+            if (this.vivecraft$walkUpBlocksActive) {
+                this.maxUpStep = 0.6F;
+                this.vivecraft$walkUpBlocksActive = false;
+            }
             return;
         }
         // stuckSpeedMultiplier gets zeroed in the super call.
@@ -189,8 +193,12 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
 
                 if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
                     this.maxUpStep = this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F;
+                    this.vivecraft$walkUpBlocksActive = this.getBlockJumpFactor() == 1.0F;
                 } else {
-                    this.maxUpStep = 0.6F;
+                    if (this.vivecraft$walkUpBlocksActive) {
+                        this.maxUpStep = 0.6F;
+                        this.vivecraft$walkUpBlocksActive = false;
+                    }
                     this.updateAutoJump((float) (this.getX() - oldX), (float) (this.getZ() - oldZ));
                 }
 
@@ -249,11 +257,12 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
      */
     @Override
     protected void vivecraft$beforeEat(CallbackInfoReturnable<ItemStack> cir, @Local(argsOnly = true) ItemStack food) {
-        if (VRState.VR_RUNNING && food.isEdible() && vivecraft$isLocalPlayer(this) &&
-            food.getHoverName().getString().equals("EAT ME"))
-        {
-            ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
-            ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
+        if (VRState.VR_INITIALIZED && food.isEdible() && vivecraft$isLocalPlayer(this)) {
+            ClientDataHolderVR.getInstance().hapticTracker.handleEat(food);
+            if (food.getHoverName().getString().equals("EAT ME")) {
+                ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
+                ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
+            }
         }
     }
 
@@ -263,7 +272,8 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     @Override
     protected void vivecraft$beforeReleaseUsingItem(CallbackInfo ci) {
         if (VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) {
-            ClientNetworking.sendActiveHand(this.getUsedItemHand());
+            ClientNetworking.sendActiveHand(this.isUsingItem() ? this.getUsedItemHand() : InteractionHand.MAIN_HAND,
+                false);
         }
     }
 
@@ -289,6 +299,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
             original.call(x, y, z);
             return;
         }
+        boolean wasZero = this.position() == Vec3.ZERO;
         double oldX = this.getX();
         double oldY = this.getY();
         double oldZ = this.getZ();
@@ -300,12 +311,16 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         if (Minecraft.getInstance().getCameraEntity() == (Object) this && this.isPassenger()) {
             ClientDataHolderVR.getInstance().vehicleTracker.updateRiderPos(x, y, z, this.getVehicle());
         } else if (!ClientDataHolderVR.getInstance().vehicleTracker.isRiding()) {
-            Vec3 roomOrigin = ClientDataHolderVR.getInstance().vrPlayer.roomOrigin;
-            VRPlayer.get().setRoomOrigin(
-                roomOrigin.x + (newX - oldX),
-                roomOrigin.y + (newY - oldY),
-                roomOrigin.z + (newZ - oldZ),
-                x + y + z == 0.0D);
+            if (wasZero) {
+                VRPlayer.get().snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, x + y + z == 0.0D, false);
+            } else {
+                Vec3 roomOrigin = ClientDataHolderVR.getInstance().vrPlayer.roomOrigin;
+                VRPlayer.get().setRoomOrigin(
+                    roomOrigin.x + (newX - oldX),
+                    roomOrigin.y + (newY - oldY),
+                    roomOrigin.z + (newZ - oldZ),
+                    x + y + z == 0.0D);
+            }
         }
     }
 
@@ -332,10 +347,10 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
             double mY = 0.0D;
             double addFactor = 1.0D;
 
-            if (speed >= (double) 1.0E-4F || ClientDataHolderVR.KAT_VR) {
+            if (speed >= (double) 1.0E-4F || ClientDataHolderVR.getInstance().katVr) {
                 speed = Mth.sqrt((float) speed);
 
-                if (speed < 1.0D && !ClientDataHolderVR.KAT_VR) {
+                if (speed < 1.0D && !ClientDataHolderVR.getInstance().katVr) {
                     speed = 1.0D;
                 }
 
@@ -345,7 +360,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                 Vec3 direction = new Vec3(strafe, 0.0D, forward);
                 boolean isFlyingOrSwimming = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
 
-                if (ClientDataHolderVR.KAT_VR) {
+                if (ClientDataHolderVR.getInstance().katVr) {
                     jkatvr.query();
                     speed = jkatvr.getSpeed() * jkatvr.walkDirection() *
                         this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier;
@@ -357,7 +372,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
 
                     direction = direction.yRot(
                         -jkatvr.getYaw() * Mth.DEG_TO_RAD + vrplayer.vrdata_world_pre.rotation_radians);
-                } else if (ClientDataHolderVR.INFINADECK) {
+                } else if (ClientDataHolderVR.getInstance().infinadeck) {
                     jinfinadeck.query();
                     speed = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() *
                         this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier;
@@ -534,14 +549,6 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
             this.level
                 .playSound(null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), volume, pitch);
         }
-    }
-
-    @Override
-    @Unique
-    public void vivecraft$setItemInUseClient(ItemStack itemStack, InteractionHand interactionHand) {
-        this.useItem = itemStack;
-        this.usingItemHand = interactionHand;
-        this.startedUsingItem = itemStack != ItemStack.EMPTY;
     }
 
     @Override

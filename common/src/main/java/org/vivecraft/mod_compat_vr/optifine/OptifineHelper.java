@@ -1,5 +1,8 @@
 package org.vivecraft.mod_compat_vr.optifine;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -13,7 +16,9 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.lwjgl.opengl.GL13C;
 import org.lwjgl.system.MemoryUtil;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
@@ -67,6 +72,8 @@ public class OptifineHelper {
     private static Field Shaders_DFB;
     private static Field Shaders_isShadowPass;
     private static Field Shaders_shaderUniforms;
+
+    private static Method GlState_unbindFramebuffer;
 
     private static Method ShadersFramebuffer_BindFramebuffer;
 
@@ -131,7 +138,7 @@ public class OptifineHelper {
     }
 
     /**
-     * binds the Shaders_ framebuffer
+     * binds the Shader framebuffer
      *
      * @return if the shader framebuffer got bound
      */
@@ -146,6 +153,40 @@ public class OptifineHelper {
             logError(e, "dfb.BindFramebuffer");
         }
         return false;
+    }
+
+    /**
+     * unbinds the Shader framebuffer
+     */
+    public static void unbindShaderFramebuffer() {
+        try {
+            GlState_unbindFramebuffer.invoke(null);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            logError(e, "GlState.unbindFramebuffer");
+        }
+    }
+
+    /**
+     * copies the depth of the optifine shader frame buffer
+     *
+     * @param renderTarget renderTarget to copy the depth to
+     */
+    public static void copyOptifineShaderDepth(RenderTarget renderTarget) {
+        if (!bindShaderFramebuffer()) {
+            return;
+        }
+
+        RenderSystem.activeTexture(GL13C.GL_TEXTURE0);
+        RenderSystem.bindTexture(renderTarget.getDepthTextureId());
+
+        RenderHelper.checkGLError("pre copy depth");
+        GlStateManager._glCopyTexSubImage2D(GL13C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, renderTarget.width,
+            renderTarget.height);
+        RenderHelper.checkGLError("post copy depth");
+
+        unbindShaderFramebuffer();
+        // rebind the original buffer
+        renderTarget.bindWrite(false);
     }
 
     /**
@@ -593,6 +634,9 @@ public class OptifineHelper {
 
             Class<?> ShadersFramebuffer = Class.forName("net.optifine.shaders.ShadersFramebuffer");
             ShadersFramebuffer_BindFramebuffer = ShadersFramebuffer.getMethod("bindFramebuffer");
+
+            Class<?> GlState = Class.forName("net.optifine.shaders.GlState");
+            GlState_unbindFramebuffer = GlState.getMethod("unbindFramebuffer");
 
             // private methods
             CustomColors_GetSkyColoEnd = CustomColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);

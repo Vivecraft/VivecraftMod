@@ -70,6 +70,9 @@ public abstract class LocalPlayer_EntityVRMixin {
     public abstract double getX();
 
     @Shadow
+    public abstract Vec3 position();
+
+    @Shadow
     public float maxUpStep;
 
     @Shadow

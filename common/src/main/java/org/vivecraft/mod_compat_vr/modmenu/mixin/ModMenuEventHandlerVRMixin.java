@@ -15,7 +15,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(targets = "com.terraformersmc.modmenu.event.ModMenuEventHandler")
 public abstract class ModMenuEventHandlerVRMixin {
 
-    @Inject(method = "afterGameMenuScreenInit", at = @At("TAIL"))
+    @Inject(method = "afterGameMenuScreenInit", at = @At("TAIL"), remap = false)
     private static void vivecraft$modifyButtons(Screen screen, CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
             Button modmenuButton = null;

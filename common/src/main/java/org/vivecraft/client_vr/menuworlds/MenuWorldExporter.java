@@ -27,7 +27,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mixin.client_vr.world.level.biome.BiomeAccessor;
 

@@ -17,10 +17,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(EditBox.class)
 public abstract class EditBoxVRMixin extends AbstractWidget {
@@ -66,20 +66,16 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
     @Inject(method = "setFocus", at = @At("HEAD"))
     private void vivecraft$autoOpenKeyboard(boolean focused, CallbackInfo ci) {
         if (VRState.VR_RUNNING && focused && !(Minecraft.getInstance().screen instanceof InBedChatScreen)) {
-            if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.ON ||
-                (Minecraft.getInstance().screen instanceof ChatScreen &&
-                    ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.CHAT
-                ))
-            {
-                KeyboardHandler.setOverlayShowing(true);
-            }
+            KeyboardHandler.showOverlay(
+                Minecraft.getInstance().screen instanceof ChatScreen ? OpenKeyboardContext.FOCUS_CHAT :
+                    OpenKeyboardContext.FOCUS);
         }
     }
 
     @ModifyExpressionValue(method = "mouseClicked", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/EditBox;canLoseFocus:Z"))
     private boolean vivecraft$openKeyboard(boolean canLoseFocus, @Local boolean hovered) {
         if (VRState.VR_RUNNING && hovered) {
-            KeyboardHandler.setOverlayShowing(true);
+            KeyboardHandler.showOverlay(OpenKeyboardContext.FORCE);
         }
         return canLoseFocus || !this.isFocused();
     }

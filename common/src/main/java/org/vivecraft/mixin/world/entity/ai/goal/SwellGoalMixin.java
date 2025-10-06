@@ -6,13 +6,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.SwellGoal;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
 
+import javax.annotation.Nullable;
+
 @Mixin(SwellGoal.class)
 public class SwellGoalMixin {
+
+    @Shadow
+    @Nullable
+    private LivingEntity target;
 
     @ModifyExpressionValue(method = "canUse", at = @At(value = "CONSTANT", args = "doubleValue=9"))
     private double vivecraft$vrSwellDistance(double swellDistance, @Local LivingEntity target) {
@@ -23,5 +30,17 @@ public class SwellGoalMixin {
             }
         }
         return swellDistance;
+    }
+
+    @ModifyExpressionValue(method = "tick", at = @At(value = "CONSTANT", args = "doubleValue=49"))
+    private double vivecraft$vrDischargeDistance(double dischargeDistance) {
+        if (this.target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
+            ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
+            if (serverVivePlayer != null && !serverVivePlayer.isSeated()) {
+                double distance = ServerConfig.CREEPER_SWELL_DISTANCE.get() + 4;
+                return distance * distance;
+            }
+        }
+        return dischargeDistance;
     }
 }

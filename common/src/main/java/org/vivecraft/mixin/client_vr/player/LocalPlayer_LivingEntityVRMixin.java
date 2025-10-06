@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client_vr.player;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,8 +13,6 @@ public abstract class LocalPlayer_LivingEntityVRMixin extends LocalPlayer_Entity
     public float zza;
     @Shadow
     protected int useItemRemaining;
-    @Shadow
-    protected ItemStack useItem;
 
     @Shadow
     public abstract boolean isFallFlying();

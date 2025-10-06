@@ -60,10 +60,8 @@ public class MirrorNotification {
             poseStack.scale(3, 3, 3);
 
             if (MIRROR_NOTIFY_CLEAR) {
-                RenderSystem.clearColor(0, 0, 0, 0);
-                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
-            } else {
-                RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+                RenderSystem.clearColor(0F, 0F, 0F, 1F);
+                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
             }
 
             final int TEXT_WORDWRAP_LEN = screenX / 22;
@@ -77,7 +75,7 @@ public class MirrorNotification {
             final int COLUMN_GAP = 12;
 
             for (String line : wrapped) {
-                MC.font.draw(poseStack, line, 1, column, 0xFFFFFF);
+                MC.font.draw(poseStack, line, 1, column, 0xFFFFFFFF);
                 column += COLUMN_GAP;
             }
 
