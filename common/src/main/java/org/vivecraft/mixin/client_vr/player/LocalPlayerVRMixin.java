@@ -156,7 +156,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
             Minecraft.getInstance().getCameraEntity() != (Object) this)
         {
             if (this.vivecraft$walkUpBlocksActive) {
-                this.setMaxUpStep(0.6F);
+                this.maxUpStep = 0.6F;
                 this.vivecraft$walkUpBlocksActive = false;
             }
             return;
@@ -197,7 +197,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                     this.vivecraft$walkUpBlocksActive = this.getBlockJumpFactor() == 1.0F;
                 } else {
                     if (this.vivecraft$walkUpBlocksActive) {
-                        this.setMaxUpStep(0.6F);
+                        this.maxUpStep = 0.6F;
                         this.vivecraft$walkUpBlocksActive = false;
                     }
                     this.updateAutoJump((float) (this.getX() - oldX), (float) (this.getZ() - oldZ));

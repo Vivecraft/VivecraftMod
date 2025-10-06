@@ -53,17 +53,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         this.vrTitle = "vivecraft.options.screen.radialmenu";
         this.clearWidgets();
 
-        this.addRenderableWidget(new Button.Builder(
+        this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 6 - 10, 150, 20,
             this.isShift ?
                 Component.translatable("vivecraft.gui.radialmenu.mainset") :
                 Component.translatable("vivecraft.gui.radialmenu.alternateset"),
             (p) -> {
                 this.isShift = !this.isShift;
                 this.reinit = true;
-            })
-            .size(150, 20)
-            .pos(this.width / 2 + 2, this.height / 6 - 10)
-            .build());
+            }));
 
         super.init(OPTIONS, false);
 

@@ -14,6 +14,7 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.server.ServerVRPlayers;
 
 @Mixin(Item.class)
@@ -57,7 +58,7 @@ public class ItemMixin {
         if (player instanceof ServerPlayer serverPlayer && ServerVRPlayers.isVRPlayer(serverPlayer)) {
             aim = ServerVRPlayers.getVivePlayer(serverPlayer).getAimDir(false);
         } else if (player.isLocalPlayer() && VRState.VR_RUNNING && !ClientNetworking.OVERRIDE_ACTIVE) {
-            aim = new Vec3(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(
+            aim = MathUtils.toMcVec3(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(
                     ClientNetworking.IS_LAST_BODY_PART_AIM ? ClientNetworking.getActiveBodyPart() : VRBodyPart.MAIN_HAND)
                 .getDirection());
         }

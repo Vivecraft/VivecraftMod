@@ -51,7 +51,7 @@ public class RenderHelper {
      * @param renderPass RenderPass to get the rotation matrix for
      */
     public static Matrix4f getVRModelView(RenderPass renderPass) {
-        return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().transpose();
+        return MathUtils.toMcMat4(DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().transpose());
     }
 
     /**
@@ -265,9 +265,9 @@ public class RenderHelper {
 
         // setup projection
         float guiScale = (float) MC.getWindow().getGuiScale();
-        Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+        Matrix4f guiProjection = Matrix4f.orthographic(
             0.0F, MC.getMainRenderTarget().width / guiScale,
-            MC.getMainRenderTarget().height / guiScale, 0.0F,
+            0.0F, MC.getMainRenderTarget().height / guiScale,
             1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(guiProjection);
 
@@ -287,7 +287,7 @@ public class RenderHelper {
 
         // black background with border
         GuiComponent.fill(renderStack, x, y, x + width, y + height, 0xFF000000);
-        GuiComponent.renderOutline(renderStack, x, y, width, height, 0xFFFFFFFF);
+        GuiHelper.renderOutline(renderStack, x, y, width, height, 0xFFFFFFFF);
 
         for (int line = 0; line < formattedChars.size(); line++) {
             GuiComponent.drawCenteredString(renderStack, MC.font, formattedChars.get(line),

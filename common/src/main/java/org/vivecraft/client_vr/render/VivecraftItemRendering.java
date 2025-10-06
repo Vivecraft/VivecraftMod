@@ -14,6 +14,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TorchBlock;
+import org.joml.Quaternionf;
 import org.joml.Vector3fc;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -195,7 +196,8 @@ public class VivecraftItemRendering {
                 }
 
                 Vector3fc aim = DH.bowTracker.getAimVector();
-                Vector3f forward = DH.vrPlayer.vrdata_world_render.getHand(bowHand).getCustomVector(MathUtils.FORWARD);
+                org.joml.Vector3f forward = DH.vrPlayer.vrdata_world_render.getHand(bowHand)
+                    .getCustomVector(MathUtils.FORWARD);
 
                 if (DH.bowTracker.isCharged()) {
                     // bow jitter
@@ -209,9 +211,12 @@ public class VivecraftItemRendering {
                     DH.vrPlayer.vrdata_world_render.getController(bowHand).getMatrix().transpose()));
 
                 // align with controller
-                preRotation = new Quaternionf().lookAlong(aim, forward).conjugate();
+                Quaternionf lookRotation = new Quaternionf().lookAlong(aim, forward).conjugate();
+                preRotation.set(lookRotation.x, lookRotation.y, lookRotation.z, lookRotation.w);
 
                 // bow model adjustment
+                rotation = Vector3f.YP.rotationDegrees(180.0F);
+                rotation.mul(Vector3f.XP.rotationDegrees(160.0F));
 
                 translateX += 0.125F;
                 translateY += 0.1225F;
@@ -254,7 +259,7 @@ public class VivecraftItemRendering {
             case BLOCK_3D -> {
                 translateX += 0.05F;
                 translateZ -= 0.1F;
-                rotation.mul(Axis.XP.rotationDegrees(90 - gunAngle));
+                rotation.mul(Vector3f.XP.rotationDegrees(90 - gunAngle));
                 scale = 0.3F;
             }
             case BLOCK_STICK -> {
@@ -377,7 +382,7 @@ public class VivecraftItemRendering {
                 scale = 0.8F;
             }
             case ROTATED_TOOL -> {
-                rotation.mul(Axis.XP.rotationDegrees(90.0F));
+                rotation.mul(Vector3f.XP.rotationDegrees(90.0F));
                 translateY += -0.125F + gunAngle / 40.0F * 0.1F;
                 translateZ -= 0.1F;
             }

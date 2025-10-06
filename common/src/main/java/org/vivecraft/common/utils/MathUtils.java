@@ -55,6 +55,16 @@ public class MathUtils {
     }
 
     /**
+     * Converts a {@link Vector3fc} to a {@link com.mojang.math.Vector3f}.
+     *
+     * @param v The original Vector3fc.
+     * @return The mc Vector3f.
+     */
+    public static com.mojang.math.Vector3f toMcVector3f(Vector3fc v) {
+        return new com.mojang.math.Vector3f(v.x(), v.y(), v.z());
+    }
+
+    /**
      * Calculates a perpendicular/normal vector to the given vector. There is no guarantee in which direction it will look
      *
      * @param vec Vector to get the perpendicular/normal vector for
@@ -70,7 +80,10 @@ public class MathUtils {
     }
 
     /**
-     * @return {@code m} as a Minecraft Matrix4f
+     * Converts a {@link Matrix4fc} to a MC {@link com.mojang.math.Matrix4f}.
+     *
+     * @param m The original Matrix4fc.
+     * @return The MC Matrix4f.
      */
     public static com.mojang.math.Matrix4f toMcMat4(Matrix4fc m) {
         com.mojang.math.Matrix4f mcMat = new com.mojang.math.Matrix4f();
@@ -94,10 +107,13 @@ public class MathUtils {
     }
 
     /**
-     * @return {@code v} as a Vec3
+     * Converts a {@link Quaternionfc} to a MC {@link Quaternion}.
+     *
+     * @param q The original Quaternionfc.
+     * @return The MC Quaternion.
      */
-    public static Quaternion toMcQuat(Quaternionf q) {
-        return new Quaternion(q.x, q.y, q.z, q.w);
+    public static Quaternion toMcQuat(Quaternionfc q) {
+        return new Quaternion(q.x(), q.y(), q.z(), q.w());
     }
 
     public static double lerpMod(double from, double to, double percent, double mod) {

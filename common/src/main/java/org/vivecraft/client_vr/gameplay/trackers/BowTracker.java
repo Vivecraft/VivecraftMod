@@ -155,7 +155,8 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
         float controllersDist = (float) bowPos.distanceTo(arrowPos);
         Vector3f up = new Vector3f(0.0F, vrData.worldScale, 0.0F);
 
-        Vec3 stringPos = new Vec3(vrData.getHand(bowHand).getCustomVector(up).mul(this.maxDraw * 0.5F)).add(bowPos);
+        Vec3 stringPos = MathUtils.toMcVec3(vrData.getHand(bowHand).getCustomVector(up).mul(this.maxDraw * 0.5F))
+            .add(bowPos);
 
         double notchDist = arrowPos.distanceTo(stringPos);
 

@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -45,18 +45,16 @@ public class GuiStringListEditorScreen extends GuiListScreen {
     @Override
     protected void addLowerButtons(int top) {
         this.addRenderableWidget(
-            Button.builder(Component.translatable("vivecraft.gui.loaddefaults"), button -> {
-                    this.loadDefaults.run();
-                    this.elements = null;
-                    this.reinit = true;
-                })
-                .bounds(this.width / 2 - 155, top, 150, 20)
-                .build());
+            new Button(this.width / 2 - 155, top, 150, 20,
+                Component.translatable("vivecraft.gui.loaddefaults"), button -> {
+                this.loadDefaults.run();
+                this.elements = null;
+                this.reinit = true;
+            }));
 
         this.addRenderableWidget(
-            Button.builder(Component.translatable("gui.back"), button -> this.onClose())
-                .bounds(this.width / 2 + 5, top, 150, 20)
-                .build());
+            new Button(this.width / 2 + 5, top, 150, 20,
+                Component.translatable("gui.back"), button -> this.onClose()));
     }
 
     @Override
@@ -96,11 +94,12 @@ public class GuiStringListEditorScreen extends GuiListScreen {
 
         if (!this.fixedEntryCount) {
             entries.add(new SettingsList.WidgetEntry(Component.literal(""),
-                Button.builder(Component.translatable("vivecraft.options.addnew"), button -> {
+                new Button(0, 0, SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20,
+                    Component.translatable("vivecraft.options.addnew"), button -> {
                     this.elements = getCurrentValues();
                     this.elements.add("");
                     this.reinit = true;
-                }).size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20).build()));
+                })));
         }
         return entries;
     }
@@ -113,11 +112,12 @@ public class GuiStringListEditorScreen extends GuiListScreen {
         public StringValueEntry(Component name, EditBox editBox, Button.OnPress deleteAction, boolean deletable) {
             super(name, null);
             this.editBox = editBox;
-            this.deleteButton = Button
-                .builder(Component.literal(deletable ? "-" : "X"),
-                    deletable ? deleteAction : b -> this.editBox.setValue(""))
-                .tooltip(Tooltip.create(Component.translatable("selectWorld.delete")))
-                .bounds(0, 0, 20, 20).build();
+            this.deleteButton = new Button(
+                0, 0, 20, 20,
+                Component.literal(deletable ? "-" : "X"),
+                deletable ? deleteAction : b -> this.editBox.setValue(""),
+                (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
+                    Component.translatable("selectWorld.delete")));
         }
 
         @Override
@@ -126,11 +126,11 @@ public class GuiStringListEditorScreen extends GuiListScreen {
             boolean hovering, float partialTick)
         {
             this.editBox.setX(left);
-            this.editBox.setY(top);
+            this.editBox.y = top;
             this.editBox.setWidth(width - 20);
             this.editBox.render(poseStack, mouseX, mouseY, partialTick);
-            this.deleteButton.setX(left + width - 20);
-            this.deleteButton.setY(top);
+            this.deleteButton.x = left + width - 20;
+            this.deleteButton.y = top;
             this.deleteButton.render(poseStack, mouseX, mouseY, partialTick);
         }
 

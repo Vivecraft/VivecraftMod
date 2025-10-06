@@ -196,7 +196,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         for (int c = 0; c < 2; c++) {
             if (blockModule.isActive(c)) {
                 BlockPos blockpos = blockModule.inBlockHit[c] != null ? blockModule.inBlockHit[c].getBlockPos() :
-                    BlockPos.containing(
+                    new BlockPos(
                         ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                 BlockState blockstate = this.level.getBlockState(blockpos);
                 this.renderHitOutline(poseStack,

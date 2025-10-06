@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
  */
 public class SilentButton extends Button {
     public SilentButton(Component message, OnPress onPress, int width, int height) {
-        super(0, 0, width, height, message, onPress, DEFAULT_NARRATION);
+        super(0, 0, width, height, message, onPress);
     }
 
     @Override

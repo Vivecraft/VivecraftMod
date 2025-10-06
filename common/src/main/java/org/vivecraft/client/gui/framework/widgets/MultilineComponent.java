@@ -49,16 +49,16 @@ public class MultilineComponent extends AbstractWidget {
 
         if (this.renderBackground) {
             GuiComponent.fill(poseStack,
-                this.getX() - 5, this.getY() - 5,
-                this.getX() + this.getWidth() + 5, this.getY() + this.getHeight() + 5,
+                this.x - 5, this.y - 5,
+                this.x + this.getWidth() + 5, this.y + this.getHeight() + 5,
                 0x80000000);
         }
         int yPos = 0;
         for (FormattedCharSequence text : this.text) {
             if (this.centered) {
-                drawCenteredString(poseStack, this.font, text, getX() + this.width / 2, getY() + yPos, 0xFFFFFFFF);
+                drawCenteredString(poseStack, this.font, text, this.x + this.width / 2, this.y + yPos, 0xFFFFFFFF);
             } else {
-                drawString(poseStack, this.font, text, getX(), getY() + yPos, 0xFFFFFFFF);
+                drawString(poseStack, this.font, text, this.x, this.y + yPos, 0xFFFFFFFF);
             }
             yPos += this.font.lineHeight;
         }

@@ -1,7 +1,10 @@
 package org.vivecraft.client.gui.framework.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -16,6 +19,7 @@ import org.vivecraft.client.gui.framework.widgets.GuiVROptionButton;
 import org.vivecraft.client.gui.framework.widgets.GuiVROptionSlider;
 import org.vivecraft.client.gui.settings.GuiAllSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.TooltipUtil;
 
@@ -48,8 +52,9 @@ public abstract class GuiVROptionsBase extends Screen {
             20, 20, 0, 0, 20,
             VIVE_WIDGETS_LOCATION, 64, 64,
             (p) -> this.minecraft.setScreen(new GuiAllSettings(this)),
+            (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
+                Component.translatable("vivecraft.options.screen.search")),
             Component.translatable("vivecraft.options.screen.search"));
-        search.setTooltip(Tooltip.create(Component.translatable("vivecraft.options.screen.search")));
         this.addRenderableWidget(search);
 
         this.addRenderableWidget(
@@ -72,7 +77,7 @@ public abstract class GuiVROptionsBase extends Screen {
         // sort children from top left to bottom right, to fix tab navigation
         this.children().sort((a, b) -> {
             if (a instanceof AbstractWidget wA && b instanceof AbstractWidget wB) {
-                if (wA.getY() < wB.getY() || (wA.getY() == wB.getY() && wA.getX() < wB.getX())) {
+                if (wA.y < wB.y || (wA.y == wB.y && wA.x < wB.x)) {
                     return -1;
                 } else {
                     return 1;
@@ -338,9 +343,7 @@ public abstract class GuiVROptionsBase extends Screen {
                 }
             }
         }
-        if (hover instanceof GuiVROption guiHover && guiHover.getOption() != null &&
-            this.deferredTooltipRendering == null)
-        {
+        if (hover instanceof GuiVROption guiHover && guiHover.getOption() != null) {
             TooltipRenderer.renderTooltip(poseStack, TooltipUtil.getClientConfigTooltip(guiHover.getOption()),
                 this.width / 2, guiHover.getY(), guiHover.getHeight());
         }

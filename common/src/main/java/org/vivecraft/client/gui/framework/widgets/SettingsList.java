@@ -3,14 +3,12 @@ package org.vivecraft.client.gui.framework.widgets;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -19,12 +17,12 @@ import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
 import org.vivecraft.client.utils.StringSimilarity;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.TooltipUtil;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.config.ConfigBuilder;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -162,7 +160,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     public boolean isEntryVisible(SettingsList.BaseEntry entry) {
         int index = this.children().indexOf(entry);
-        return this.getRowTop(index) < this.y1 && this.getRowBottom(index) > this.y0;
+        return this.getRowTop(index) < this.y1 && this.getRowTop(index) + this.itemHeight > this.y0;
     }
 
     @Override
@@ -188,6 +186,25 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     public boolean isMouseOver(double mouseX, double mouseY) {
         // for some reason AbstractSelectionList removes the active checks
         return this.active && super.isMouseOver(mouseX, mouseY);
+    }
+
+    @Override
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        super.render(poseStack, mouseX, mouseY, partialTick);
+
+        // need to manually render the hover tooltip again, or it would be behind the scroll bar
+        BaseEntry entry = this.getEntryAtPositionFixed(mouseX, mouseY);
+        if (entry != null) {
+            for (GuiEventListener widget : entry.children()) {
+                if (widget instanceof AbstractButton button &&
+                    mouseX >= button.x && mouseX < button.x + button.getWidth() &&
+                    mouseY >= button.y && mouseY < button.y + button.getHeight())
+                {
+                    button.renderToolTip(poseStack, mouseX, mouseY);
+                    break;
+                }
+            }
+        }
     }
 
     // there to make it public
@@ -240,13 +257,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 option, true);
         } else {
             // regular button
-            widget = Button.builder(Component.literal(dh.vrSettings.getButtonDisplayString(option, true))
-                    , button -> {
-                        dh.vrSettings.setOptionValue(option);
-                        button.setMessage(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
-                    })
-                .size(width, 20)
-                .build();
+            widget = new Button(0, 0, width, 20,
+                Component.literal(dh.vrSettings.getButtonDisplayString(option, true)),
+                button -> {
+                    dh.vrSettings.setOptionValue(option);
+                    button.setMessage(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
+                });
         }
         return widget;
     }
@@ -319,12 +335,6 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        @Nullable
-        public ComponentPath nextFocusPath(FocusNavigationEvent event) {
-            return null;
-        }
-
-        @Override
         public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
         }
@@ -364,14 +374,14 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             boolean hovering, float partialTick)
         {
             super.render(poseStack, index, top, left, width, height, mouseX, mouseY, hovering, partialTick);
-            this.mainWidget.setX(left);
-            this.mainWidget.setY(top);
+            this.mainWidget.x = left;
+            this.mainWidget.y = top;
             this.mainWidget.setWidth(this.optionalWidget == null ? width : width - 10 - this.optionalWidget.getWidth());
             this.mainWidget.render(poseStack, mouseX, mouseY, partialTick);
 
             if (this.optionalWidget != null) {
-                this.optionalWidget.setX(left + width - this.optionalWidget.getWidth());
-                this.optionalWidget.setY(top);
+                this.optionalWidget.x = left + width - this.optionalWidget.getWidth();
+                this.optionalWidget.y = top;
                 this.optionalWidget.render(poseStack, mouseX, mouseY, partialTick);
             }
         }
@@ -442,11 +452,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         {
             super(name, widget, tooltipSupplier, isActive);
             this.canReset = canReset;
-            this.resetButton = Button.builder(Component.literal("X"), button -> this.valueWidget = resetAction.get())
-                .tooltip(Tooltip.create(Component.translatable("controls.reset")))
-                .bounds(0, 0, 20, 20).build();
-            // need to set the tooltip delay to -1, or the main tooltip flickers on button change
-            this.resetButton.setTooltipDelay(-1);
+            this.resetButton = new Button(0, 0, 20, 20, Component.literal("X"),
+                button -> this.valueWidget = resetAction.get(),
+                (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
+                    Component.translatable("controls.reset")));
         }
 
         @Override
@@ -455,8 +464,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             boolean hovering, float partialTick)
         {
             super.render(poseStack, index, top, left, width, height, mouseX, mouseY, hovering, partialTick);
-            this.resetButton.setX(left + width - 20);
-            this.resetButton.setY(top);
+            this.resetButton.x = left + width - 20;
+            this.resetButton.y = top;
             this.resetButton.active = this.isActive() && this.valueWidget.active && this.canReset.getAsBoolean();
             this.resetButton.render(poseStack, mouseX, mouseY, partialTick);
         }
@@ -483,10 +492,9 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
      */
     public static class ScreenEntry extends WidgetEntry {
         public ScreenEntry(String langKey, Function<Screen, Screen> screenFunction) {
-            super(Component.translatable(langKey), Button.builder(Component.translatable(langKey),
-                        b -> Minecraft.getInstance().setScreen(screenFunction.apply(Minecraft.getInstance().screen)))
-                    .size(WidgetEntry.VALUE_BUTTON_WIDTH, 20)
-                    .build(),
+            super(Component.translatable(langKey),
+                new Button(0, 0, WidgetEntry.VALUE_BUTTON_WIDTH, 20, Component.translatable(langKey),
+                    b -> Minecraft.getInstance().setScreen(screenFunction.apply(Minecraft.getInstance().screen))),
                 () -> I18n.exists(langKey + ".tooltip") ? I18n.get(langKey + ".tooltip") : "");
         }
     }
@@ -533,13 +541,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 drawString(poseStack, Minecraft.getInstance().font, this.name, left,
                     textY, this.textColor());
             } else {
-                AbstractWidget.renderScrollingString(poseStack, Minecraft.getInstance().font, this.name, left,
+                GuiHelper.renderScrollingString(poseStack, Minecraft.getInstance().font, this.name, left,
                     textY, left + width - VALUE_BUTTON_WIDTH - 5,
                     textY + Minecraft.getInstance().font.lineHeight - 1, this.textColor());
             }
 
-            this.valueWidget.setX(left + width - VALUE_BUTTON_WIDTH);
-            this.valueWidget.setY(top);
+            this.valueWidget.x = left + width - VALUE_BUTTON_WIDTH;
+            this.valueWidget.y = top;
             this.valueWidget.active = this.widgetActive.getAsBoolean() && this.isActive();
             this.valueWidget.render(poseStack, mouseX, mouseY, partialTick);
         }
@@ -578,24 +586,9 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY,
             boolean hovering, float partialTick)
         {
-            if (this.isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard() ||
-                hovering && Minecraft.getInstance().getLastInputType().isMouse())
-            {
+            if (hovering || this.getFocused() != null) {
                 GuiComponent.fill(poseStack, left - 2, top, left + width, top + 20, 0x80000000);
             }
-        }
-
-        @Override
-        public ComponentPath focusPathAtIndex(FocusNavigationEvent event, int index) {
-            if (!this.isActive()) {
-                return ComponentPath.leaf(this);
-            }
-            // try to focus any selectable widget to the left, not just the one in line
-            ComponentPath componentPath = null;
-            for (int i = Math.min(index, this.children().size() - 1); componentPath == null && i >= 0; i--) {
-                componentPath = this.children().get(i).nextFocusPath(event);
-            }
-            return ComponentPath.path(this, componentPath);
         }
 
         protected int textColor() {

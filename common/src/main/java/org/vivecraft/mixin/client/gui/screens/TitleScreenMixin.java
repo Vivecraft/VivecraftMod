@@ -2,7 +2,6 @@ package org.vivecraft.mixin.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.CommonComponents;
@@ -17,6 +16,7 @@ import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
@@ -55,7 +55,8 @@ public abstract class TitleScreenMixin extends Screen {
 
             button.setMessage(Component.translatable("vivecraft.gui.vr",
                 VRState.VR_ENABLED ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
-        });
+        }, (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
+            Component.translatable("vivecraft.options.VR_ENABLED.tooltip")));
         this.vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
 
         this.addRenderableWidget(this.vivecraft$vrModeButton);

@@ -3,7 +3,7 @@ package org.vivecraft.client_vr.gameplay.interact_modules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
@@ -63,7 +63,7 @@ public class BlockInteractionModule implements InteractModule {
             this.rightClickable = new HashSet<>();
 
             String name = Xplat.getUseMethodName();
-            for (Object object : BuiltInRegistries.BLOCK) {
+            for (Object object : Registry.BLOCK) {
                 Class<?> oclass = object.getClass();
 
                 addIfClassHasMethod(name, oclass);
@@ -78,7 +78,7 @@ public class BlockInteractionModule implements InteractModule {
 
         if (this.dh.vrSettings.realisticBlockInteractEnabled) {
             Vec3 hmdPos = this.dh.vrPlayer.vrdata_world_pre.getHeadPivot();
-            BlockPos blockpos = BlockPos.containing(handPosition);
+            BlockPos blockpos = new BlockPos(handPosition);
             BlockState blockstate = player.level.getBlockState(blockpos);
 
             BlockHitResult hit = blockstate.getShape(player.level, blockpos).clip(hmdPos, handPosition, blockpos);

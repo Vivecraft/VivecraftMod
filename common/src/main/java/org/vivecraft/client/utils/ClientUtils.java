@@ -7,8 +7,8 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -185,7 +185,7 @@ public class ClientUtils {
                 DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
             {
                 Vec3 controllerPos = DH.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.get(
+                SoundEvent soundEvent = Registry.SOUND_EVENT.get(
                     new ResourceLocation(DH.vrSettings.chatNotificationSound));
                 if (soundEvent != null) {
                     if (MC.level != null) {

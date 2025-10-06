@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -120,12 +119,7 @@ public class SwingTracker implements DebugRenderTracker {
      */
     public static boolean isTool(ItemStack itemStack) {
         return isToolItem(itemStack.getItem()) ||
-            itemStack.is(ViveItemTags.VIVECRAFT_TOOLS) ||
-            // also check the vanilla tags, when on a server without vivecraft
-            itemStack.is(ItemTags.PICKAXES) ||
-            itemStack.is(ItemTags.AXES) ||
-            itemStack.is(ItemTags.SHOVELS) ||
-            itemStack.is(ItemTags.HOES);
+            itemStack.is(ViveItemTags.VIVECRAFT_TOOLS);
     }
 
     private static boolean isToolItem(Item item) {
@@ -141,8 +135,7 @@ public class SwingTracker implements DebugRenderTracker {
             item == Items.REDSTONE_TORCH ||
             item == Items.STICK ||
             item == Items.DEBUG_STICK ||
-            item instanceof FlintAndSteelItem ||
-            item instanceof BrushItem;
+            item instanceof FlintAndSteelItem;
     }
 
     @Override
@@ -471,15 +464,6 @@ public class SwingTracker implements DebugRenderTracker {
                             this.mc.gameMode.useItem(player,
                                 c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                         }
-                    }
-                    // roomscale brushes
-                    else if (isHand && (item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/)) {
-                        ((BrushItem) item).spawnDustParticles(player.level, blockHit, blockstate,
-                            player.getViewVector(0.0F));
-                        player.level.playSound(player, blockHit.getBlockPos(),
-                            SoundEvents.BRUSH_BRUSHING, SoundSource.PLAYERS);
-                        this.mc.gameMode.useItemOn(player,
-                            c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit);
                     }
                     // roomscale noteblocks
                     else if (blockstate.getBlock() instanceof NoteBlock ||

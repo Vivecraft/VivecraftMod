@@ -1,10 +1,10 @@
 package org.vivecraft.client.gui.framework.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
@@ -50,11 +50,15 @@ public abstract class GuiListScreen extends Screen {
 
             this.searchBox = new EditBox(this.minecraft.font, this.width / 2 - 150, 20, 300, 20,
                 Component.translatable("vivecraft.options.screen.search"));
-            this.searchBox.setHint(Component.translatable("vivecraft.options.screen.search")
-                .withStyle(ChatFormatting.GRAY)
-                .withStyle(ChatFormatting.ITALIC));
+            this.searchBox.setResponder(search -> {
+                if (search.isEmpty()) {
+                    this.searchBox.setSuggestion(I18n.get("vivecraft.options.screen.search"));
+                } else {
+                    this.searchBox.setSuggestion(null);
+                }
+                this.list.filter(search);
+            });
             this.searchBox.setValue(filter);
-            this.searchBox.setResponder(search -> this.list.filter(search));
             this.addRenderableWidget(this.searchBox);
         } else {
             this.searchBox = null;
@@ -74,8 +78,9 @@ public abstract class GuiListScreen extends Screen {
      */
     protected void addLowerButtons(int top) {
         this.addRenderableWidget(
-            Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
-                .bounds(this.width / 2 - 100, top, 200, 20).build());
+            new Button(this.width / 2 - 100, top, 200, 20,
+                CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
+        );
     }
 
     /**
@@ -90,7 +95,7 @@ public abstract class GuiListScreen extends Screen {
 
     @Override
     public void renderBackground(PoseStack poseStack) {
-        this.renderDirtBackground(poseStack);
+        this.renderDirtBackground(0);
     }
 
     @Override
@@ -105,13 +110,13 @@ public abstract class GuiListScreen extends Screen {
 
         // render custom tooltip
         SettingsList.BaseEntry entry = null;
-        if (this.minecraft.getLastInputType().isKeyboard() && this.list.getSelected() != null) {
+        if (this.list.getSelected() != null) {
             // render custom tooltip
             entry = this.list.getSelected();
         } else if (this.list.getHovered() != null) {
             entry = this.list.getHovered();
         }
-        if (entry != null && this.list.isEntryVisible(entry) && this.deferredTooltipRendering == null) {
+        if (entry != null && this.list.isEntryVisible(entry)) {
             TooltipRenderer.renderTooltip(poseStack, entry.getTooltip(),
                 this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)), this.list.getItemHeight());
         }

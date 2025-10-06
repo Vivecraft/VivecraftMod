@@ -1,16 +1,17 @@
 package org.vivecraft.client.api_impl;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 import org.vivecraft.api.client.VRRenderingAPI;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.common.utils.MathUtils;
 
 public class VRRenderingAPIImpl implements VRRenderingAPI {
 
@@ -37,9 +38,12 @@ public class VRRenderingAPIImpl implements VRRenderingAPI {
     @Override
     public Matrix4f getRenderPassMatrix(RenderPass pass) {
         if (!VRState.VR_RUNNING || pass == RenderPass.VANILLA || pass == RenderPass.MIRROR || pass == RenderPass.GUI) {
-            return Minecraft.getInstance().gameRenderer.getMainCamera().rotation().get(new Matrix4f());
+            Matrix4f m = new Matrix4f();
+            m.multiply(Minecraft.getInstance().gameRenderer.getMainCamera().rotation());
+            return m;
         } else {
-            return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(pass).getMatrix();
+            return MathUtils.toMcMat4(
+                ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(pass).getMatrix());
         }
     }
 

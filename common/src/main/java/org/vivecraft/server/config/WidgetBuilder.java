@@ -1,6 +1,5 @@
 package org.vivecraft.server.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
@@ -20,10 +19,8 @@ public class WidgetBuilder {
      * @return Button with the value as text
      */
     public static Supplier<AbstractWidget> getBaseWidget(ConfigBuilder.ConfigValue<?> value, int width, int height) {
-        return () -> Button
-            .builder(Component.literal("" + value.get()), button -> {})
-            .bounds(0, 0, width, height)
-            .build();
+        return () -> new Button(0, 0, width, height,
+            Component.literal("" + value.get()), button -> {});
     }
 
     /**
@@ -74,15 +71,6 @@ public class WidgetBuilder {
                     boolean ret = super.keyPressed(keyCode, scanCode, modifiers);
                     stringValue.set(this.getValue());
                     return ret;
-                }
-
-                @Override
-                public void renderButton(PoseStack poseStack, int x, int y, float f) {
-                    super.renderButton(poseStack, x, y, f);
-                    if (this.isHovered) {
-                        Minecraft.getInstance().screen.renderTooltip(poseStack,
-                            Minecraft.getInstance().font.split(Component.literal(stringValue.getComment()), 200), x, y);
-                    }
                 }
             };
             box.setMaxLength(1000);
@@ -158,15 +146,14 @@ public class WidgetBuilder {
         Object first = listValue.get().isEmpty() ? null : listValue.get().get(0);
         if (first == null || first instanceof String) {
             ConfigBuilder.ListValue<String> stringValue = (ConfigBuilder.ListValue<String>) listValue;
-            return () -> Button.builder(Component.translatable("vivecraft.options.editlist"),
-                    button -> Minecraft.getInstance().setScreen(new GuiStringListEditorScreen(
-                        Component.translatable("vivecraft.serverSettings." + listValue.getPath()),
-                        Minecraft.getInstance().screen, false, stringValue::get, stringValue::reset, list -> {
-                        stringValue.set(list);
-                        updateSettingsSinglePlayer(stringValue);
-                    })))
-                .size(width, height)
-                .build();
+            return () -> new Button(0, 0, width, height,
+                Component.translatable("vivecraft.options.editlist"),
+                button -> Minecraft.getInstance().setScreen(new GuiStringListEditorScreen(
+                    Component.translatable("vivecraft.serverSettings." + listValue.getPath()),
+                    Minecraft.getInstance().screen, false, stringValue::get, stringValue::reset, list -> {
+                    stringValue.set(list);
+                    updateSettingsSinglePlayer(stringValue);
+                })));
         } else {
             // TODO handle other types than String
             throw new RuntimeException("Unsupported listvalue type: " + first.getClass().getName());

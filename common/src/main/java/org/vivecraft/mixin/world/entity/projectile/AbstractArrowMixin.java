@@ -82,7 +82,7 @@ public abstract class AbstractArrowMixin extends Entity {
                         // send sound effect
                         owner.connection.send(
                             new ClientboundSoundPacket(
-                                BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.ITEM_BREAK),
+                                SoundEvents.ITEM_BREAK,
                                 SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7f, 0.5f,
                                 owner.level.random.nextLong()));
                     }

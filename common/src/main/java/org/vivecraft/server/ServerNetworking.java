@@ -281,7 +281,7 @@ public class ServerNetworking {
      * @param newItem new item to add the attributes for
      */
     private static void applyEquipmentChange(ServerPlayer player, ItemStack oldItem, ItemStack newItem) {
-        if (player.equipmentHasChanged(oldItem, newItem)) {
+        if (!ItemStack.matches(oldItem, newItem)) {
             if (!oldItem.isEmpty()) {
                 player.getAttributes()
                     .removeAttributeModifiers(oldItem.getAttributeModifiers(EquipmentSlot.MAINHAND));

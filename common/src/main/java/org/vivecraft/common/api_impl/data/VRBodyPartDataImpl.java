@@ -1,8 +1,10 @@
 package org.vivecraft.common.api_impl.data;
 
+import com.mojang.math.Quaternion;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionfc;
 import org.vivecraft.api.data.VRBodyPartData;
+import org.vivecraft.common.utils.MathUtils;
 
 public record VRBodyPartDataImpl(Vec3 pos, Vec3 dir, Quaternionfc rot) implements VRBodyPartData {
 
@@ -35,8 +37,8 @@ public record VRBodyPartDataImpl(Vec3 pos, Vec3 dir, Quaternionfc rot) implement
     }
 
     @Override
-    public Quaternionfc getRotation() {
-        return this.rot;
+    public Quaternion getRotation() {
+        return MathUtils.toMcQuat(this.rot);
     }
 
     @Override

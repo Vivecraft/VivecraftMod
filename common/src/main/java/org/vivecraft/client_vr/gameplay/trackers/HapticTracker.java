@@ -37,7 +37,7 @@ public class HapticTracker implements Tracker {
     private float lastHealth;
 
     private Vector3fc lastHitDirection = null;
-    private float lastVanillaHurtYaw = 0f;
+    private final float lastVanillaHurtYaw = 0f;
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -144,12 +144,6 @@ public class HapticTracker implements Tracker {
             if (this.lastHitDirection != null) {
                 // got a direction from the server plugin
                 dmgVec = this.lastHitDirection;
-            } else if (this.lastVanillaHurtYaw != this.mc.player.getHurtDir()) {
-                // use the vanilla hurt yaw
-                // hurt dir is player local, and doesn't clear for non-directional damage
-                this.lastVanillaHurtYaw = this.mc.player.getHurtDir();
-                dmgVec = new Vector3f(1, 0, 0).rotateY(
-                    (-this.lastVanillaHurtYaw - this.mc.player.getYRot()) * Mth.DEG_TO_RAD);
             }
             // else, no direction
         }

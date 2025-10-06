@@ -863,7 +863,7 @@ public class VREffectsHelper {
         // code adapted from net.minecraft.client.renderer.ScreenEffectRenderer.renderFire
 
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
-        ShadersHelper.bindTexture(fireSprite.atlasLocation());
+        ShadersHelper.bindTexture(fireSprite.atlas().location());
 
         float uMin = fireSprite.getU0();
         float uMax = fireSprite.getU1();
@@ -1298,7 +1298,7 @@ public class VREffectsHelper {
 
         poseStack.pushPose();
 
-        Vector3f translate = MathUtils.subtractToVector3f(crosshairRenderPos,
+        org.joml.Vector3f translate = MathUtils.subtractToVector3f(crosshairRenderPos,
             MC.gameRenderer.getMainCamera().getPosition());
         poseStack.translate(translate.x, translate.y, translate.z);
 
@@ -1309,8 +1309,8 @@ public class VREffectsHelper {
             switch (blockhitresult.getDirection()) {
                 case DOWN -> {
                     poseStack.mulPose(
-                        Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
-                    poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+                        Vector3f.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
+                    poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
                 }
                 case UP -> {
                     poseStack.mulPose(

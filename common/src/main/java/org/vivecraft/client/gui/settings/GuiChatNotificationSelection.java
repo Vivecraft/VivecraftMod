@@ -6,7 +6,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -24,7 +24,7 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
 
     public GuiChatNotificationSelection(Screen lastScreen) {
         super(Component.translatable("vivecraft.options.CHAT_NOTIFICATION_SOUND"), lastScreen,
-            () -> BuiltInRegistries.SOUND_EVENT.keySet().stream().sorted().toList(),
+            () -> Registry.SOUND_EVENT.keySet().stream().sorted().toList(),
             ClientUtils::getNameFromSoundEvent,
             resourceLocation -> "",
             resourceLocation -> {
@@ -39,7 +39,7 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
             true,
             resourceLocation -> new SilentButton(Component.literal("♫"),
                 b -> {
-                    SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.get(resourceLocation);
+                    SoundEvent soundEvent = Registry.SOUND_EVENT.get(resourceLocation);
                     if (soundEvent != null) {
                         startSound(soundEvent, b);
                     }

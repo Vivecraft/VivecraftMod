@@ -40,10 +40,9 @@ public class ServerVrChangesScreen extends Screen {
         this.addRenderableWidget(
             new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 36, this.changes));
 
-        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.ok"), (p) -> onClose())
-            .pos(this.width / 2 - 75, this.height - 32)
-            .size(150, 20)
-            .build());
+        this.addRenderableWidget(
+            new Button(this.width / 2 - 75, this.height - 32, 150, 20,
+                Component.translatable("vivecraft.gui.ok"), (p) -> onClose()));
     }
 
     @Override

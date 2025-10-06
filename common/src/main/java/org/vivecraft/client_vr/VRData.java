@@ -607,7 +607,7 @@ public class VRData {
         public VRBodyPartData asVRBodyPart() {
             return new VRBodyPartDataImpl(
                 getPosition(),
-                new Vec3(getDirection()),
+                MathUtils.toMcVec3(getDirection()),
                 new Quaternionf().setFromUnnormalized(getMatrix())
             );
         }

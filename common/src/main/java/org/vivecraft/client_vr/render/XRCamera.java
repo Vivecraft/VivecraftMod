@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.math.Vector3f;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

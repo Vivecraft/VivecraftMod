@@ -42,8 +42,6 @@ import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
@@ -1437,12 +1435,13 @@ public class MenuWorldRenderer {
 
         for (int i = 0; i < 6; ++i) {
             Matrix4f matrix = new Matrix4f();
+            matrix.setIdentity();
             switch (i) {
-                case 1 -> matrix.rotationX(Mth.HALF_PI);
-                case 2 -> matrix.rotationX(-Mth.HALF_PI);
-                case 3 -> matrix.rotationX(Mth.PI);
-                case 4 -> matrix.rotationZ(Mth.HALF_PI);
-                case 5 -> matrix.rotationZ(-Mth.HALF_PI);
+                case 1 -> matrix.multiply(Vector3f.XP.rotation(Mth.HALF_PI));
+                case 2 -> matrix.multiply(Vector3f.XP.rotation(-Mth.HALF_PI));
+                case 3 -> matrix.multiply(Vector3f.XP.rotation(Mth.PI));
+                case 4 -> matrix.multiply(Vector3f.ZP.rotation(Mth.HALF_PI));
+                case 5 -> matrix.multiply(Vector3f.ZP.rotation(-Mth.HALF_PI));
             }
 
             int r = 40;
@@ -1501,7 +1500,7 @@ public class MenuWorldRenderer {
         float starDistance = 100.0F;
 
         for (int i = 0; i < starCount; i++) {
-            Vector3f starPoint = new Vector3f(
+            org.joml.Vector3f starPoint = new org.joml.Vector3f(
                 randomSource.nextFloat(),
                 randomSource.nextFloat(),
                 randomSource.nextFloat())
@@ -1515,10 +1514,10 @@ public class MenuWorldRenderer {
             float starRotation = (float) (randomSource.nextDouble() * Math.PI * 2.0);
 
             Matrix3f rotation = new Matrix3f()
-                .rotateTowards(starPoint.negate(new Vector3f()), new Vector3f(0.0f, 1.0f, 0.0f))
+                .rotateTowards(starPoint.negate(new org.joml.Vector3f()), new org.joml.Vector3f(0.0f, 1.0f, 0.0f))
                 .rotateZ(-starRotation);
 
-            Vector3f point = new Vector3f(starSize, -starSize, 0.0f).mul(rotation).add(starPoint);
+            org.joml.Vector3f point = new org.joml.Vector3f(starSize, -starSize, 0.0f).mul(rotation).add(starPoint);
             bufferBuilder.vertex(point.x, point.y, point.z).endVertex();
             point.set(starSize, starSize, 0.0f).mul(rotation).add(starPoint);
             bufferBuilder.vertex(point.x, point.y, point.z).endVertex();

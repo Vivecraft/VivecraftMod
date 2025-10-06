@@ -3,10 +3,12 @@ package org.vivecraft.mixin.client_vr.gui.screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,13 +29,13 @@ public class OptionsScreenVRMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "init", at = @At("HEAD"))
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/OptionsScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 4))
     private void vivecraft$addVivecraftSettings(CallbackInfo ci) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
             int xOffset = ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft ? -155 : 5;
 
             this.addRenderableWidget(
-                new Button(this.width / 2 + xOffset, this.height / 6 - 12 + 24, 150, 20,
+                this.vivecraft$settings = new Button(this.width / 2 + xOffset, this.height / 6 - 12 + 24, 150, 20,
                     Component.translatable("vivecraft.options.screen.main.button"), (p) -> {
                     Minecraft.getInstance().options.save();
                     Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
@@ -53,9 +55,9 @@ public class OptionsScreenVRMixin extends Screen {
             for (GuiEventListener child : children()) {
                 if (child instanceof AbstractWidget button && button != this.vivecraft$settings) {
                     // only change buttons that are in the main columns and at the same height as ours
-                    if (button.getX() < rightEdge && (button.getX() + button.getWidth()) > leftEdge &&
-                        button.getY() + button.getHeight() > this.vivecraft$settings.getY() &&
-                        button.getY() < this.vivecraft$settings.getY() + this.vivecraft$settings.getHeight())
+                    if (button.x < rightEdge && (button.x + button.getWidth()) > leftEdge &&
+                        button.y + button.getHeight() > this.vivecraft$settings.y &&
+                        button.y < this.vivecraft$settings.y + this.vivecraft$settings.getHeight())
                     {
                         collidingButtons.add(button);
                     }
@@ -71,7 +73,7 @@ public class OptionsScreenVRMixin extends Screen {
                 if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
                     index++;
                 } else {
-                    this.vivecraft$settings.setX(rightEdge - this.vivecraft$settings.getWidth());
+                    this.vivecraft$settings.x = rightEdge - this.vivecraft$settings.getWidth();
                 }
                 this.vivecraft$settings.setWidth((int) buttonWidth - 4);
 
@@ -80,9 +82,9 @@ public class OptionsScreenVRMixin extends Screen {
                     button.setWidth(
                         (int) buttonWidth - ((index > 0 && index < collidingButtons.size()) ? 8 : 4));
                     // move vertically, so it aligns with ours
-                    button.setY(this.vivecraft$settings.getY());
+                    button.y = this.vivecraft$settings.y;
                     // move them to the side
-                    button.setX(leftEdge + (int) (buttonWidth * index + 0.5F) + (index > 0 ? 4 : 0));
+                    button.x = leftEdge + (int) (buttonWidth * index + 0.5F) + (index > 0 ? 4 : 0);
                     index++;
                 }
             }

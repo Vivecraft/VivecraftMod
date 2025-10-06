@@ -49,18 +49,16 @@ public class GuiSelectionListScreen<T> extends GuiListScreen {
     @Override
     protected void addLowerButtons(int top) {
         this.addRenderableWidget(
-            new Button.Builder(Component.translatable(this.resettable ? "controls.reset" : "vivecraft.gui.clear"),
+            new Button(this.width / 2 - 155, top, 150, 20,
+                Component.translatable(this.resettable ? "controls.reset" : "vivecraft.gui.clear"),
                 p -> {
                     this.consumer.accept(null);
                     this.onClose();
-                })
-                .bounds(this.width / 2 - 155, top, 150, 20)
-                .build());
+                }));
 
         this.addRenderableWidget(
-            new Button.Builder(Component.translatable("gui.cancel"), p -> onClose())
-                .bounds(this.width / 2 + 5, top, 150, 20)
-                .build());
+            new Button(this.width / 2 + 5, top, 150, 20,
+                Component.translatable("gui.cancel"), p -> onClose()));
     }
 
     @Override

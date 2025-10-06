@@ -636,7 +636,7 @@ public class VRPlayer {
             if (this.dh.bowTracker.isNotched() && aim != null && aim.lengthSquared() > 0.0F) {
                 out = new Vec3(aim.x(), aim.y(), aim.z());
             } else if (this.dh.vrSettings.aimDevice != VRSettings.AimDevice.HMD) {
-                out = new Vec3(data.getController(c).getDirection());
+                out = MathUtils.toMcVec3(data.getController(c).getDirection());
             }
         } else if (itemStack.getItem() == Items.BUCKET && this.dh.blockModule.bukkit[c] &&
             ClientNetworking.getActiveBodyPart().ordinal() == c && ClientNetworking.IS_LAST_BODY_PART_AIM)

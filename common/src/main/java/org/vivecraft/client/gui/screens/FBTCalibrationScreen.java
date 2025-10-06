@@ -1,7 +1,6 @@
 package org.vivecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Vec3i;
@@ -18,6 +17,7 @@ import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;
@@ -162,9 +162,9 @@ public class FBTCalibrationScreen extends Screen {
 
         if (!this.calibrated || !this.usingUnlabeledTrackers) {
             // arm overlay
-            GuiComponent.renderOutline(poseStack, this.width / 2 - 64, this.height - 32 - 96,
+            GuiHelper.renderOutline(poseStack, this.width / 2 - 64, this.height - 32 - 96,
                 48, 16, 0xFFFFFFFF);
-            GuiComponent.renderOutline(poseStack, this.width / 2 + 16, this.height - 32 - 96,
+            GuiHelper.renderOutline(poseStack, this.width / 2 + 16, this.height - 32 - 96,
                 48, 16, 0xFFFFFFFF);
 
             poseStack.pushPose();
