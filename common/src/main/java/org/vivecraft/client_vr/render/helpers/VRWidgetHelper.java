@@ -1,10 +1,7 @@
 package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -160,23 +157,22 @@ public class VRWidgetHelper {
         }
         MC.gameRenderer.lightTexture().turnOnLightLayer();
 
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
 
         // render camera model
-        bufferBuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         MC.getBlockRenderer().getModelRenderer()
             .renderModel(poseStack.last(), bufferBuilder, null, MC.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F,
                 combinedLight, OverlayTexture.NO_OVERLAY);
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         // render camera display
         RenderSystem.disableBlend();
         displayBindFunc.run();
         RenderSystem.setShader(GameRenderer::getRendertypeEntitySolidShader);
 
-        bufferBuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen
         for (BakedQuad bakedquad : MC.getModelManager().getModel(displayModel).getQuads(null, null, RANDOM)) {
@@ -228,7 +224,7 @@ public class VRWidgetHelper {
                     .normal(0.0F, 1.0F, 0.0F).endVertex();
             }
         }
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         MC.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.enableBlend();

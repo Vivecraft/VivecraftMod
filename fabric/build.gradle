@@ -29,15 +29,15 @@ dependencies {
     modCompileOnly("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.20.6-0.5.8"
+    modCompileOnly "maven.modrinth:sodium:mc1.20.6-0.5.11"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.7.0+1.20.6"
+    modCompileOnly "maven.modrinth:iris:1.7.2+1.20.6"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
     // for REI compat
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:16.0.788") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:15.0.787") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
     modCompileOnly("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }

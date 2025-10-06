@@ -747,6 +747,8 @@ public abstract class VRRenderer {
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()))
                 .withClearColor(0F, 0F, 0F, 1F)
                 .build();
+            this.mirrorFramebuffer.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            this.mirrorFramebuffer.clear(Minecraft.ON_OSX);
 
             GuiHandler.updateResolution();
             GuiHandler.GUI_FRAMEBUFFER = VRTextureTarget.builder("GUI")

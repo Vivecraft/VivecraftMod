@@ -3,6 +3,7 @@ package org.vivecraft.common.utils;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.SnowGolem;
@@ -106,7 +107,7 @@ public class Utils {
         } else if (source.getEntity() != null) {
             return MathUtils.subtractToVector3f(source.getEntity().position(), target.getBoundingBox().getCenter())
                 .normalize();
-        } else if (source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypeTags.BURN_FROM_STEPPING)) {
+        } else if (source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypes.HOT_FLOOR)) {
             // damage from the below
             return MathUtils.DOWN;
         } else {

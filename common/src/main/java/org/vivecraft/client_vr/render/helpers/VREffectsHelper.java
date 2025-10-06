@@ -265,85 +265,85 @@ public class VREffectsHelper {
         // translate by half of the cube size
         poseStack.translate(-50F, -50F, -50.0F);
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 
         // down
         RenderSystem.setShaderTexture(0, CUBE_DOWN);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(poseStack, 0, 0, 0)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 0, 100)
+        bufferBuilder.vertex(poseStack, 0, 0, 100)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 100)
+        bufferBuilder.vertex(poseStack, 100, 0, 100)
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 0)
+        bufferBuilder.vertex(poseStack, 100, 0, 0)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         // up
         RenderSystem.setShaderTexture(0, CUBE_UP);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 100, 100)
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(poseStack, 0, 100, 100)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 0)
+        bufferBuilder.vertex(poseStack, 0, 100, 0)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 0)
+        bufferBuilder.vertex(poseStack, 100, 100, 0)
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 100)
+        bufferBuilder.vertex(poseStack, 100, 100, 100)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         // left
         RenderSystem.setShaderTexture(0, CUBE_LEFT);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(poseStack, 0, 0, 0)
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 0)
+        bufferBuilder.vertex(poseStack, 0, 100, 0)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 100)
+        bufferBuilder.vertex(poseStack, 0, 100, 100)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 0, 100)
+        bufferBuilder.vertex(poseStack, 0, 0, 100)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         // right
         RenderSystem.setShaderTexture(0, CUBE_RIGHT);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 100, 0, 0)
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(poseStack, 100, 0, 0)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 100)
+        bufferBuilder.vertex(poseStack, 100, 0, 100)
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 100)
+        bufferBuilder.vertex(poseStack, 100, 100, 100)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 0)
+        bufferBuilder.vertex(poseStack, 100, 100, 0)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         // front
         RenderSystem.setShaderTexture(0, CUBE_FRONT);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(poseStack, 0, 0, 0)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 0)
+        bufferBuilder.vertex(poseStack, 100, 0, 0)
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 0)
+        bufferBuilder.vertex(poseStack, 100, 100, 0)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 0)
+        bufferBuilder.vertex(poseStack, 0, 100, 0)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         // back
         RenderSystem.setShaderTexture(0, CUBE_BACK);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 100)
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(poseStack, 0, 0, 100)
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 100)
+        bufferBuilder.vertex(poseStack, 0, 100, 100)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 100)
+        bufferBuilder.vertex(poseStack, 100, 100, 100)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 100)
+        bufferBuilder.vertex(poseStack, 100, 0, 100)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         poseStack.popMatrix();
 
@@ -371,7 +371,7 @@ public class VREffectsHelper {
                 RenderSystem.setShaderTexture(0, DIRT);
                 r = g = b = 128;
             }
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
             // offset so the floor is centered
             poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
@@ -399,7 +399,7 @@ public class VREffectsHelper {
                 .color(r, g, b, 255)
                 .endVertex();
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            BufferUploader.drawWithShader(bufferBuilder.end());
             poseStack.popMatrix();
         }
     }
@@ -439,71 +439,70 @@ public class VREffectsHelper {
         // offset so the room is centered
         poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         // floor
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
+        bufferBuilder.vertex(poseStack, 0, 0, 0)
             .uv(0, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 0, length)
+        bufferBuilder.vertex(poseStack, 0, 0, length)
             .uv(0, repeat * length).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, 0, length)
+        bufferBuilder.vertex(poseStack, width, 0, length)
             .uv(repeat * width, repeat * length).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, 0, 0)
+        bufferBuilder.vertex(poseStack, width, 0, 0)
             .uv(repeat * width, 0).color(r, g, b, a).endVertex();
 
         // ceiling
-        bufferbuilder.vertex(poseStack, 0, height, length)
+        bufferBuilder.vertex(poseStack, 0, height, length)
             .uv(0, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, 0, height, 0)
+        bufferBuilder.vertex(poseStack, 0, height, 0)
             .uv(0, repeat * length).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, height, 0)
+        bufferBuilder.vertex(poseStack, width, height, 0)
             .uv(repeat * width, repeat * length).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, height, length)
+        bufferBuilder.vertex(poseStack, width, height, length)
             .uv(repeat * width, 0).color(r, g, b, a).endVertex();
 
         // left
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
+        bufferBuilder.vertex(poseStack, 0, 0, 0)
             .uv(0, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, 0, height, 0)
+        bufferBuilder.vertex(poseStack, 0, height, 0)
             .uv(0, repeat * height).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, 0, height, length)
+        bufferBuilder.vertex(poseStack, 0, height, length)
             .uv(repeat * length, repeat * height).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 0, length)
+        bufferBuilder.vertex(poseStack, 0, 0, length)
             .uv(repeat * length, 0).color(r, g, b, a).endVertex();
 
         // right
-        bufferbuilder.vertex(poseStack, width, 0, 0)
+        bufferBuilder.vertex(poseStack, width, 0, 0)
             .uv(0, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, 0, length)
+        bufferBuilder.vertex(poseStack, width, 0, length)
             .uv(repeat * length, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, height, length)
+        bufferBuilder.vertex(poseStack, width, height, length)
             .uv(repeat * length, repeat * height).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, height, 0)
+        bufferBuilder.vertex(poseStack, width, height, 0)
             .uv(0, repeat * height).color(r, g, b, a).endVertex();
 
         // front
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
+        bufferBuilder.vertex(poseStack, 0, 0, 0)
             .uv(0, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, 0, 0)
+        bufferBuilder.vertex(poseStack, width, 0, 0)
             .uv(repeat * width, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, height, 0)
+        bufferBuilder.vertex(poseStack, width, height, 0)
             .uv(repeat * width, repeat * height).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, 0, height, 0)
+        bufferBuilder.vertex(poseStack, 0, height, 0)
             .uv(0, repeat * height).color(r, g, b, a).endVertex();
 
         // back
-        bufferbuilder.vertex(poseStack, 0, 0, length)
+        bufferBuilder.vertex(poseStack, 0, 0, length)
             .uv(0, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, 0, height, length)
+        bufferBuilder.vertex(poseStack, 0, height, length)
             .uv(0, repeat * height).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, height, length)
+        bufferBuilder.vertex(poseStack, width, height, length)
             .uv(repeat * width, repeat * height).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(poseStack, width, 0, length)
+        bufferBuilder.vertex(poseStack, width, 0, length)
             .uv(repeat * width, 0).color(r, g, b, a).endVertex();
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
         poseStack.popMatrix();
     }
 
@@ -560,32 +559,31 @@ public class VREffectsHelper {
 
             poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
 
-            BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-
-            bufferbuilder
+            bufferBuilder
                 .vertex(poseStack, 0, 0.005f, 0)
                 .uv(0, 0)
                 .color(1f, 1f, 1f, 1f)
                 .endVertex();
-            bufferbuilder
+            bufferBuilder
                 .vertex(poseStack, 0, 0.005f, length)
                 .uv(0, 4 * length)
                 .color(1f, 1f, 1f, 1f)
                 .endVertex();
-            bufferbuilder
+            bufferBuilder
                 .vertex(poseStack, width, 0.005f, length)
                 .uv(4 * width, 4 * length)
                 .color(1f, 1f, 1f, 1f)
                 .endVertex();
-            bufferbuilder
+            bufferBuilder
                 .vertex(poseStack, width, 0.005f, 0)
                 .uv(4 * width, 0)
                 .color(1f, 1f, 1f, 1f)
                 .endVertex();
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            BufferUploader.drawWithShader(bufferBuilder.end());
 
             poseStack.popMatrix();
 
@@ -828,8 +826,7 @@ public class VREffectsHelper {
             // this is screen relative, so no view rotation please
             RenderSystem.getModelViewStack().pushMatrix().identity();
             RenderSystem.applyModelViewMatrix();
-            MC.gameRenderer.renderItemActivationAnimation(new GuiGraphics(MC, MC.renderBuffers().bufferSource()),
-                partialTick);
+            MC.gameRenderer.renderItemActivationAnimation(0, 0, partialTick);
             RenderSystem.getModelViewStack().popMatrix();
             RenderSystem.applyModelViewMatrix();
         }
@@ -841,7 +838,7 @@ public class VREffectsHelper {
     public static void renderFireInFirstPerson() {
         PoseStack posestack = new PoseStack();
         RenderHelper.applyStereo(DATA_HOLDER.currentPass, posestack);
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 
         if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
             RenderSystem.depthFunc(GL11C.GL_LEQUAL);
@@ -891,18 +888,16 @@ public class VREffectsHelper {
             posestack.translate(0.0D, -headHeight, 0.0D);
 
             Matrix4f matrix = posestack.last().pose();
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-            bufferbuilder.vertex(matrix, -width, 0.0F, -width)
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+            bufferBuilder.vertex(matrix, -width, 0.0F, -width)
                 .color(1.0F, 1.0F, 1.0F, 0.9F).uv(u1, v1).endVertex();
-            bufferbuilder.vertex(matrix, width, 0.0F, -width)
+            bufferBuilder.vertex(matrix, width, 0.0F, -width)
                 .color(1.0F, 1.0F, 1.0F, 0.9F).uv(u0, v1).endVertex();
-            bufferbuilder.vertex(matrix, width, headHeight, -width)
+            bufferBuilder.vertex(matrix, width, headHeight, -width)
                 .color(1.0F, 1.0F, 1.0F, 0.9F).uv(u0, v0).endVertex();
-            bufferbuilder.vertex(matrix, -width, headHeight, -width)
+            bufferBuilder.vertex(matrix, -width, headHeight, -width)
                 .color(1.0F, 1.0F, 1.0F, 0.9F).uv(u1, v0).endVertex();
-            BufferUploader.drawWithShader(bufferbuilder.end());
-
-            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+            BufferUploader.drawWithShader(bufferBuilder.end());
             posestack.popPose();
         }
 
@@ -1190,8 +1185,7 @@ public class VREffectsHelper {
      * renders a fullscreen black quad, to block the screen
      */
     public static void renderFaceInBlock() {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionShader);
         RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0f);
 
@@ -1200,13 +1194,13 @@ public class VREffectsHelper {
         RenderSystem.depthMask(true);
         RenderSystem.enableBlend();
         RenderSystem.disableCull();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         // render a big quad 2 meters in front
-        bufferbuilder.vertex(-100.F, -100.F, -2.0F).endVertex();
-        bufferbuilder.vertex(100.F, -100.F, -2.0F).endVertex();
-        bufferbuilder.vertex(100.F, 100.F, -2.0F).endVertex();
-        bufferbuilder.vertex(-100.F, 100.F, -2.0F).endVertex();
-        tesselator.end();
+        bufferBuilder.vertex(-100.F, -100.F, -2.0F).endVertex();
+        bufferBuilder.vertex(100.F, -100.F, -2.0F).endVertex();
+        bufferBuilder.vertex(100.F, 100.F, -2.0F).endVertex();
+        bufferBuilder.vertex(-100.F, 100.F, -2.0F).endVertex();
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -1345,33 +1339,33 @@ public class VREffectsHelper {
         TextureAtlasSprite crosshairSprite = Minecraft.getInstance().getGuiSprites().getSprite(Gui.CROSSHAIR_SPRITE);
         ShadersHelper.bindTexture(crosshairSprite.atlasLocation());
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-
         RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
-        bufferbuilder.vertex(modelView, -1.0F, 1.0F, 0.0F)
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+
+        bufferBuilder.vertex(modelView, -1.0F, 1.0F, 0.0F)
             .color(brightness, brightness, brightness, 1.0F)
             .uv(crosshairSprite.getU1(), crosshairSprite.getV0())
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
             .normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(modelView, 1.0F, 1.0F, 0.0F)
+        bufferBuilder.vertex(modelView, 1.0F, 1.0F, 0.0F)
             .color(brightness, brightness, brightness, 1.0F)
             .uv(crosshairSprite.getU0(), crosshairSprite.getV0())
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
             .normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(modelView, 1.0F, -1.0F, 0.0F)
+        bufferBuilder.vertex(modelView, 1.0F, -1.0F, 0.0F)
             .color(brightness, brightness, brightness, 1.0F)
             .uv(crosshairSprite.getU0(), crosshairSprite.getV1())
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
             .normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(modelView, -1.0F, -1.0F, 0.0F)
+        bufferBuilder.vertex(modelView, -1.0F, -1.0F, 0.0F)
             .color(brightness, brightness, brightness, 1.0F)
             .uv(crosshairSprite.getU1(), crosshairSprite.getV1())
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
             .normal(0.0F, 0.0F, 1.0F).endVertex();
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();

@@ -141,7 +141,8 @@ public abstract class PauseScreenVRMixin extends Screen {
     private LayoutElement vivecraft$hideFeedback(
         GridLayout.RowHelper rowHelper, LayoutElement child, Operation<LayoutElement> original)
     {
-        ((Button) child).visible = !VRState.VR_ENABLED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
+        ((Button) child).visible =
+            !VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
         return original.call(rowHelper, child);
     }
 

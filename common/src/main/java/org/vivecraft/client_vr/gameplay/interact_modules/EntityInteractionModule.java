@@ -15,7 +15,7 @@ import org.vivecraft.common.utils.MathUtils;
 
 public class EntityInteractionModule implements InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "entity_interact");
+    private static final ResourceLocation ID = new ResourceLocation("vivecraft", "entity_interact");
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;

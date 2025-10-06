@@ -488,8 +488,8 @@ public class ShaderHelper {
 
         VRShaders.BLIT_VR_SHADER.apply();
 
-        BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator()
-            .begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_SHADER.getVertexFormat());
+        BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_SHADER.getVertexFormat());
 
         // position quad
         float xMinPos = (float) left / MC.getMainRenderTarget().viewWidth * 2F - 1F;
@@ -497,12 +497,12 @@ public class ShaderHelper {
         float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().viewWidth * 2F;
         float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().viewHeight * 2F;
 
-        bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, yMin);
-        bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, yMin);
-        bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, yMax);
-        bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, yMax);
+        bufferBuilder.vertex(xMinPos, yMinPos, 0.0F).uv(xMin, yMin).endVertex();
+        bufferBuilder.vertex(xMaxPos, yMinPos, 0.0F).uv(xMax, yMin).endVertex();
+        bufferBuilder.vertex(xMaxPos, yMaxPos, 0.0F).uv(xMax, yMax).endVertex();
+        bufferBuilder.vertex(xMinPos, yMaxPos, 0.0F).uv(xMin, yMax).endVertex();
 
-        BufferUploader.draw(bufferBuilder.buildOrThrow());
+        BufferUploader.draw(bufferBuilder.end());
         VRShaders.BLIT_VR_SHADER.clear();
 
         RenderSystem.depthMask(true);

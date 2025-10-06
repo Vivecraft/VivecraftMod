@@ -87,13 +87,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             try {
                 if (this.netManager.isConnected()) {
                     try {
-                        if (msg instanceof ServerboundUseItemPacket p) {
-                            // need to alter the rotation for this one, for older clients that don't send the right rotation
-                            new ServerboundUseItemPacket(p.getHand(), p.getSequence(), serverPlayer.getYRot(),
-                                serverPlayer.getXRot()).handle(listener);
-                        } else {
-                            ((Packet) msg).handle(this.netManager.getPacketListener());
-                        }
+                        ((Packet) msg).handle(this.netManager.getPacketListener());
                     } catch (RunningOnDifferentThreadException ignored) {
                         // Apparently might get thrown and can be ignored
                     }

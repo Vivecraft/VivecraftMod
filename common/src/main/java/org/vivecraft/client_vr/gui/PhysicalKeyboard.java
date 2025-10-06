@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.gui;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
@@ -579,8 +580,7 @@ public class PhysicalKeyboard {
         ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
         // Start building vertices for key boxes
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buf = tesselator.getBuilder();
+        BufferBuilder buf = Tesselator.getInstance().getBuilder();
         buf.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         for (KeyButton key : this.keys) {
@@ -602,12 +602,12 @@ public class PhysicalKeyboard {
         }
 
         // Draw all the key boxes
-        tesselator.end();
+        BufferUploader.drawWithShader(buf.end());
 
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
 
         // Start building vertices for text
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(tesselator.getBuilder());
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(buf);
 
         // Build all the text
         for (Tuple<String, Vector3f> label : labels) {

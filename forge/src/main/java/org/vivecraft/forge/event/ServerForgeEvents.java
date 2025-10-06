@@ -46,7 +46,7 @@ public class ServerForgeEvents {
                 resourceManager.listPacks().toList());
             Map<String, String> langMap = new HashMap<>();
             try {
-                ResourceLocation langResource = ResourceLocation.fromNamespaceAndPath("vivecraft", langFile);
+                ResourceLocation langResource = new ResourceLocation("vivecraft", langFile);
                 for (Resource resource : clientResources.getResourceStack(langResource)) {
                     try (InputStream stream = resource.open()) {
                         Language.loadFromJson(stream, langMap::put);

@@ -40,6 +40,7 @@ import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
 import org.vivecraft.data.ViveBlockTags;
 import org.vivecraft.data.ViveItemTags;
+import org.vivecraft.mod_compat_vr.bettercombat.BetterCombatHelper;
 import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
 
 import java.util.ArrayList;
@@ -209,6 +210,10 @@ public class SwingTracker implements DebugRenderTracker {
 
                 if (isHand) {
                     double playerEntityReach = player.entityInteractionRange();
+                    if (BetterCombatHelper.isLoaded()) {
+                        // better combat overrides the player reach
+                        playerEntityReach = BetterCombatHelper.getItemRange(playerEntityReach, itemstack);
+                    }
 
                     // subtract arm length and clamp it to 6 meters
                     playerEntityReach = Math.min(playerEntityReach, 6.0) - 0.5;

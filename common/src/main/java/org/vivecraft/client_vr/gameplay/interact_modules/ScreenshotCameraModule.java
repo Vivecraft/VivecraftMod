@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 
 public class ScreenshotCameraModule implements DebugRenderModule, HeldInteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "screenshot_camera");
+    private static final ResourceLocation ID = new ResourceLocation("vivecraft", "screenshot_camera");
 
     private static final float INTERACT_DIST = 0.11F;
 

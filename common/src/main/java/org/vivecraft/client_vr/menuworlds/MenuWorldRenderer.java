@@ -862,8 +862,6 @@ public class MenuWorldRenderer {
 
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, END_SKY_LOCATION);
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferBuilder = tesselator.getBuilder();
 
             this.endSkyVBO.bind();
             this.endSkyVBO.drawWithShader(poseStack, RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
@@ -1150,7 +1148,7 @@ public class MenuWorldRenderer {
             int xFloor = Mth.floor(inX);
             int yFloor = Mth.floor(inY);
             int zFloor = Mth.floor(inZ);
-            BufferBuilder bufferBuilder = tesselator.getBuilder();
+            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
             RenderSystem.disableCull();
             RenderSystem.enableBlend();
             RenderSystem.enableDepthTest();
@@ -1209,7 +1207,7 @@ public class MenuWorldRenderer {
                     if (precipitation == Biome.Precipitation.RAIN) {
                         if (count != 0) {
                             if (count >= 0) {
-                                tesselator.end();
+                                BufferUploader.drawWithShader(bufferBuilder.end());
                             }
                             count = 0;
                             RenderSystem.setShaderTexture(0, RAIN_LOCATION);
@@ -1227,7 +1225,7 @@ public class MenuWorldRenderer {
                     } else if (precipitation == Biome.Precipitation.SNOW) {
                         if (count != 1) {
                             if (count >= 0) {
-                                tesselator.end();
+                                BufferUploader.drawWithShader(bufferBuilder.end());
                             }
                             count = 1;
                             RenderSystem.setShaderTexture(0, SNOW_LOCATION);
@@ -1269,7 +1267,7 @@ public class MenuWorldRenderer {
                 }
             }
             if (count >= 0) {
-                tesselator.end();
+                BufferUploader.drawWithShader(bufferBuilder.end());
             }
         } finally {
             // if any stupid mod messes with level stuff there might be an exception
@@ -1410,8 +1408,7 @@ public class MenuWorldRenderer {
     }
 
     private void generateSky() {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         if (this.skyVBO != null) {
             this.skyVBO.close();
         }
@@ -1420,15 +1417,13 @@ public class MenuWorldRenderer {
         }
 
         this.skyVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
-        BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, 16.0f);
         this.skyVBO.bind();
-        this.skyVBO.upload(renderedBuffer);
+        this.skyVBO.upload(buildSkyDisc(bufferBuilder, 16.0f));
         VertexBuffer.unbind();
 
         this.sky2VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
-        BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, -16.0f);
         this.sky2VBO.bind();
-        this.sky2VBO.upload(renderedBuffer);
+        this.sky2VBO.upload(buildSkyDisc(bufferBuilder, 16.0f));
         VertexBuffer.unbind();
     }
 
@@ -1436,8 +1431,8 @@ public class MenuWorldRenderer {
         if (this.endSkyVBO != null) {
             this.endSkyVBO.close();
         }
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         for (int i = 0; i < 6; ++i) {
             Matrix4f matrix = new Matrix4f();
@@ -1460,19 +1455,19 @@ public class MenuWorldRenderer {
                 g = (int) (newSkyColor.y * 255.0D);
                 b = (int) (newSkyColor.z * 255.0D);
             }
-            bufferBuilder.addVertex(matrix, -100.0f, -100.0f, -100.0f)
-                .setUv(0.0f, 0.0f).setColor(r, g, b, 255);
-            bufferBuilder.addVertex(matrix, -100.0f, -100.0f, 100.0f)
-                .setUv(0.0f, 16.0f).setColor(r, g, b, 255);
-            bufferBuilder.addVertex(matrix, 100.0f, -100.0f, 100.0f)
-                .setUv(16.0f, 16.0f).setColor(r, g, b, 255);
-            bufferBuilder.addVertex(matrix, 100.0f, -100.0f, -100.0f)
-                .setUv(16.0f, 0.0f).setColor(r, g, b, 255);
+            bufferBuilder.vertex(matrix, -100.0f, -100.0f, -100.0f)
+                .uv(0.0f, 0.0f).color(r, g, b, 255).endVertex();
+            bufferBuilder.vertex(matrix, -100.0f, -100.0f, 100.0f)
+                .uv(0.0f, 16.0f).color(r, g, b, 255).endVertex();
+            bufferBuilder.vertex(matrix, 100.0f, -100.0f, 100.0f)
+                .uv(16.0f, 16.0f).color(r, g, b, 255).endVertex();
+            bufferBuilder.vertex(matrix, 100.0f, -100.0f, -100.0f)
+                .uv(16.0f, 0.0f).color(r, g, b, 255).endVertex();
         }
 
         this.endSkyVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
         this.endSkyVBO.bind();
-        this.endSkyVBO.upload(bufferBuilder.buildOrThrow());
+        this.endSkyVBO.upload(bufferBuilder.end());
         VertexBuffer.unbind();
     }
 
@@ -1492,15 +1487,14 @@ public class MenuWorldRenderer {
             this.starVBO.close();
         }
         this.starVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
-        BufferBuilder.RenderedBuffer renderedBuffer = this.buildStars(bufferBuilder);
         this.starVBO.bind();
-        this.starVBO.upload(renderedBuffer);
+        this.starVBO.upload(this.buildStars(Tesselator.getInstance().getBuilder()));
         VertexBuffer.unbind();
     }
 
-    private BufferBuilder.RenderedBuffer buildStars(BufferBuilder bufferBuilderIn) {
-        Random random = new Random(10842L);
-        bufferBuilderIn.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+    private BufferBuilder.RenderedBuffer buildStars(BufferBuilder bufferBuilder) {
+        RandomSource randomSource = RandomSource.create(10842L);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 
         int starCount = 1500;
         float starDistance = 100.0F;
@@ -1523,12 +1517,16 @@ public class MenuWorldRenderer {
                 .rotateTowards(starPoint.negate(new Vector3f()), new Vector3f(0.0f, 1.0f, 0.0f))
                 .rotateZ(-starRotation);
 
-            bufferBuilder.addVertex(new Vector3f(starSize, -starSize, 0.0f).mul(rotation).add(starPoint));
-            bufferBuilder.addVertex(new Vector3f(starSize, starSize, 0.0f).mul(rotation).add(starPoint));
-            bufferBuilder.addVertex(new Vector3f(-starSize, starSize, 0.0f).mul(rotation).add(starPoint));
-            bufferBuilder.addVertex(new Vector3f(-starSize, -starSize, 0.0f).mul(rotation).add(starPoint));
+            Vector3f point = new Vector3f(starSize, -starSize, 0.0f).mul(rotation).add(starPoint);
+            bufferBuilder.vertex(point.x, point.y, point.z).endVertex();
+            point.set(starSize, starSize, 0.0f).mul(rotation).add(starPoint);
+            bufferBuilder.vertex(point.x, point.y, point.z).endVertex();
+            point.set(-starSize, starSize, 0.0f).mul(rotation).add(starPoint);
+            bufferBuilder.vertex(point.x, point.y, point.z).endVertex();
+            point.set(-starSize, -starSize, 0.0f).mul(rotation).add(starPoint);
+            bufferBuilder.vertex(point.x, point.y, point.z).endVertex();
         }
-        return bufferBuilderIn.end();
+        return bufferBuilder.end();
     }
 
     public void turnOffLightLayer() {

@@ -6,8 +6,8 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(GameRenderer.class)

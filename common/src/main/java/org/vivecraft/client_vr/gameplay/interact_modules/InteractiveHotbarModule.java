@@ -22,7 +22,7 @@ import org.vivecraft.common.utils.MathUtils;
 
 public class InteractiveHotbarModule implements DebugRenderModule, InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "interactive_hotbar");
+    private static final ResourceLocation ID = new ResourceLocation("vivecraft", "interactive_hotbar");
 
     private final ClientDataHolderVR dh;
     private final Minecraft mc;

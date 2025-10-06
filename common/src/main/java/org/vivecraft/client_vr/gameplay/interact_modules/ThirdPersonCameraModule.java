@@ -18,8 +18,7 @@ import javax.annotation.Nullable;
 
 public class ThirdPersonCameraModule implements DebugRenderModule, HeldInteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft",
-        "third_person_camera");
+    private static final ResourceLocation ID = new ResourceLocation("vivecraft", "third_person_camera");
 
     private static final float INTERACT_DIST = 0.15F;
 

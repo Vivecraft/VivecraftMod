@@ -326,8 +326,8 @@ public class RenderHelper {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(color[0], color[1], color[2], color[3]);
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder
             .vertex(matrix, -sizeX, -sizeY, 0)
             .uv(0.0F, 0.0F)
@@ -344,7 +344,7 @@ public class RenderHelper {
             .vertex(matrix, -sizeX, sizeY, 0)
             .uv(0.0F, 1.0F)
             .endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
@@ -407,8 +407,8 @@ public class RenderHelper {
         RenderSystem.setShader(shader);
         MC.gameRenderer.lightTexture().turnOnLightLayer();
         MC.gameRenderer.overlayTexture().setupOverlayColor();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         // store old lights
         Vector3f light0Old = RenderSystemAccessor.getShaderLightDirections()[0];
@@ -444,7 +444,7 @@ public class RenderHelper {
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight)
             .normal(normal.x, normal.y, normal.z)
             .endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         MC.gameRenderer.lightTexture().turnOffLightLayer();
 
@@ -471,22 +471,22 @@ public class RenderHelper {
     public static void renderFlatQuad(
         Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, Matrix4f matrix)
     {
-        Tesselator tesselator = Tesselator.getInstance();
-        tesselator.getBuilder().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
         Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))
             .yRot(Mth.DEG_TO_RAD * -yaw);
         ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
-        tesselator.getBuilder().vertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
+        bufferBuilder.vertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
+        bufferBuilder.vertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z - offset.z))
+        bufferBuilder.vertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z - offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
+        bufferBuilder.vertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**

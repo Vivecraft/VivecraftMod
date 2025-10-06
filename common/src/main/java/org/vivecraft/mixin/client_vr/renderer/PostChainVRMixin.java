@@ -153,7 +153,7 @@ public abstract class PostChainVRMixin implements PostChainExtension {
 
         if (VRState.VR_INITIALIZED) {
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-            ResourceLocation resourceLocation = ResourceLocation.parse(this.name);
+            ResourceLocation resourceLocation = new ResourceLocation(this.name);
             for (RenderPass pass : RenderPass.values()) {
                 RenderTarget target = null;
                 // gui has no world renderpass

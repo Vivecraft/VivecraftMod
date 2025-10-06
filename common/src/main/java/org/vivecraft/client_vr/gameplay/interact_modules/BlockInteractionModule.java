@@ -21,7 +21,7 @@ import java.util.HashSet;
 
 public class BlockInteractionModule implements InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "block_interact");
+    private static final ResourceLocation ID = new ResourceLocation("vivecraft", "block_interact");
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;

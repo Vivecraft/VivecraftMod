@@ -92,8 +92,8 @@ public class DebugRenderHelper {
 
                     if (bufferBuilder == null) {
                         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                        bufferbuilder = Tesselator.getInstance().getBuilder();
-                        bufferbuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+                        bufferBuilder = Tesselator.getInstance().getBuilder();
+                        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
                     }
 
                     Vector3f playerPos = MathUtils.subtractToVector3f(p.getPosition(partialTick), camPos);
@@ -124,8 +124,8 @@ public class DebugRenderHelper {
                     }
                 }
             }
-            if (bufferbuilder != null) {
-                BufferUploader.drawWithShader(bufferbuilder.end());
+            if (bufferBuilder != null) {
+                BufferUploader.drawWithShader(bufferBuilder.end());
             }
         }
     }
@@ -136,10 +136,9 @@ public class DebugRenderHelper {
      * @param data VRData to get the devices from
      */
     public static void renderDeviceAxes(VRData data) {
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferbuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         List<VRData.VRDevicePose> list = new ArrayList<>();
 
@@ -183,7 +182,7 @@ public class DebugRenderHelper {
 
         list.forEach(p -> addAxes(bufferBuilder, data, p));
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -242,10 +241,10 @@ public class DebugRenderHelper {
     public static void renderLocalAxes(Matrix4f matrix) {
         RenderSystem.getModelViewStack().pushMatrix().mul(matrix);
         RenderSystem.applyModelViewMatrix();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferbuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         Vector3f position = new Vector3f();
 
@@ -253,7 +252,7 @@ public class DebugRenderHelper {
         addLine(bufferBuilder, position, MathUtils.UP, MathUtils.GREEN);
         addLine(bufferBuilder, position, MathUtils.RIGHT, MathUtils.RED);
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.getModelViewStack().popMatrix();
         RenderSystem.applyModelViewMatrix();
     }
@@ -326,14 +325,14 @@ public class DebugRenderHelper {
      * @param color    line color
      */
     private static void addLine(VertexConsumer consumer, Vector3fc position, Vector3fc dir, Vector3fc color) {
-        consumer.addVertex(position.x(), position.y(), position.z())
-            .setColor(color.x(), color.y(), color.z(), 0.0F);
-        consumer.addVertex(position.x(), position.y(), position.z())
-            .setColor(color.x(), color.y(), color.z(), 1.0F);
-        consumer.addVertex(position.x() + dir.x(), position.y() + dir.y(), position.z() + dir.z())
-            .setColor(color.x(), color.y(), color.z(), 1.0F);
-        consumer.addVertex(position.x() + dir.x(), position.y() + dir.y(), position.z() + dir.z())
-            .setColor(color.x(), color.y(), color.z(), 0.0F);
+        consumer.vertex(position.x(), position.y(), position.z())
+            .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
+        consumer.vertex(position.x(), position.y(), position.z())
+            .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
+        consumer.vertex(position.x() + dir.x(), position.y() + dir.y(), position.z() + dir.z())
+            .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
+        consumer.vertex(position.x() + dir.x(), position.y() + dir.y(), position.z() + dir.z())
+            .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
     }
 
     /**
@@ -344,15 +343,15 @@ public class DebugRenderHelper {
      */
     public static void renderLine(Vector3fc color, Vector3fc... points) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         for (Vector3fc point : points) {
-            bufferBuilder.addVertex(point.x(), point.y(), point.z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            bufferBuilder.vertex(point.x(), point.y(), point.z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -363,26 +362,26 @@ public class DebugRenderHelper {
      */
     public static void renderLine(List<Pair<Vector3fc, Boolean>> points, Vector3fc color) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         Pair<Vector3fc, Boolean> prev = null;
 
         for (Pair<Vector3fc, Boolean> point : points) {
             if (point.getRight() && prev != null) {
                 // reset line
-                bufferBuilder.addVertex(prev.getLeft().x(), prev.getLeft().y(), prev.getLeft().z())
-                    .setColor(color.x(), color.y(), color.z(), 0.0F);
-                bufferBuilder.addVertex(point.getLeft().x(), point.getLeft().y(), point.getLeft().z())
-                    .setColor(color.x(), color.y(), color.z(), 0.0F);
+                bufferBuilder.vertex(prev.getLeft().x(), prev.getLeft().y(), prev.getLeft().z())
+                    .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
+                bufferBuilder.vertex(point.getLeft().x(), point.getLeft().y(), point.getLeft().z())
+                    .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
             }
 
-            bufferBuilder.addVertex(point.getLeft().x(), point.getLeft().y(), point.getLeft().z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            bufferBuilder.vertex(point.getLeft().x(), point.getLeft().y(), point.getLeft().z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
             prev = point;
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -394,16 +393,16 @@ public class DebugRenderHelper {
      */
     public static void renderLine(Vector3fc color, Vec3 camPos, Iterable<Vec3> points) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         for (Vec3 point : points) {
-            bufferBuilder.addVertex((float) (point.x() - camPos.x()), (float) (point.y() - camPos.y()),
+            bufferBuilder.vertex((float) (point.x() - camPos.x()), (float) (point.y() - camPos.y()),
                     (float) (point.z() - camPos.z()))
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -498,15 +497,15 @@ public class DebugRenderHelper {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         Vec3i iColor = new Vec3i((int) (color.x() * 255), (int) (color.y() * 255), (int) (color.z() * 255));
         Vec3 start = new Vec3(position.x(), position.y(), position.z()).add(MathUtils.FORWARD_D.scale(size * 0.5F));
         Vec3 end = new Vec3(position.x(), position.y(), position.z()).add(MathUtils.BACK_D.scale(size * 0.5F));
         RenderHelper.renderBox(bufferBuilder, start, end, size, size, iColor, (byte) 255, new Matrix4f());
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -523,19 +522,19 @@ public class DebugRenderHelper {
     {
         Vector3f offset = MathUtils.getPerpendicularVec(forward).mul(radius);
 
-        vertexConsumer.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
-            .setColor(color.x(), color.y(), color.z(), 0.0F);
+        vertexConsumer.vertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+            .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
 
         for (int i = 0; i <= 20; i++) {
-            vertexConsumer.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
+            vertexConsumer.vertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
             if (i != 20) {
                 offset.rotateAxis(Mth.TWO_PI / 20F, forward.x(), forward.y(), forward.z());
             }
         }
 
-        vertexConsumer.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
-            .setColor(color.x(), color.y(), color.z(), 0.0F);
+        vertexConsumer.vertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+            .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
     }
 
     /**
@@ -548,12 +547,12 @@ public class DebugRenderHelper {
      */
     public static void renderCircle(Vector3fc center, Vector3fc forward, float radius, Vector3fc color) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         addCircle(bufferBuilder, center, forward, radius, color);
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -565,14 +564,14 @@ public class DebugRenderHelper {
      */
     public static void renderSphere(Vector3fc center, float radius, Vector3fc color) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         addCircle(bufferBuilder, center, MathUtils.LEFT, radius, color);
         addCircle(bufferBuilder, center, MathUtils.FORWARD, radius, color);
         addCircle(bufferBuilder, center, MathUtils.UP, radius, color);
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -586,8 +585,8 @@ public class DebugRenderHelper {
      */
     public static void renderCone(Vector3fc tip, Vector3fc dir, float angle, float length, Vector3fc color) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         Vector3f center = dir.normalize(new Vector3f()).mul(length).add(tip);
         float radius = length * (float) Math.tan(Math.toRadians(angle));
@@ -595,20 +594,20 @@ public class DebugRenderHelper {
 
         Vector3f offset = MathUtils.getPerpendicularVec(dir).mul(radius);
         for (int i = 0; i < 2; i++) {
-            bufferBuilder.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
-                .setColor(color.x(), color.y(), color.z(), 0.0F);
-            bufferBuilder.addVertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
-            bufferBuilder.addVertex(tip.x(), tip.y(), tip.z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
-            bufferBuilder.addVertex(center.x() - offset.x(), center.y() - offset.y(), center.z() - offset.z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
-            bufferBuilder.addVertex(center.x() - offset.x(), center.y() - offset.y(), center.z() - offset.z())
-                .setColor(color.x(), color.y(), color.z(), 0.0F);
+            bufferBuilder.vertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+                .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
+            bufferBuilder.vertex(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
+            bufferBuilder.vertex(tip.x(), tip.y(), tip.z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
+            bufferBuilder.vertex(center.x() - offset.x(), center.y() - offset.y(), center.z() - offset.z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
+            bufferBuilder.vertex(center.x() - offset.x(), center.y() - offset.y(), center.z() - offset.z())
+                .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
             offset.rotateAxis(Mth.HALF_PI, dir.x(), dir.y(), dir.z());
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**
@@ -621,8 +620,8 @@ public class DebugRenderHelper {
      */
     public static void renderCylinder(Vector3fc bottom, Vector3fc topDir, float radius, Vector3fc color) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance()
-            .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         Vector3f dir = topDir.normalize(new Vector3f());
 
@@ -634,18 +633,18 @@ public class DebugRenderHelper {
             Vector3f bot = bottom.add(offset, new Vector3f());
             Vector3f top = bot.add(topDir, new Vector3f());
 
-            bufferBuilder.addVertex(bot.x(), bot.y(), bot.z())
-                .setColor(color.x(), color.y(), color.z(), 0.0F);
-            bufferBuilder.addVertex(bot.x(), bot.y(), bot.z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
-            bufferBuilder.addVertex(top.x(), top.y(), top.z())
-                .setColor(color.x(), color.y(), color.z(), 1.0F);
-            bufferBuilder.addVertex(top.x(), top.y(), top.z())
-                .setColor(color.x(), color.y(), color.z(), 0.0F);
+            bufferBuilder.vertex(bot.x(), bot.y(), bot.z())
+                .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
+            bufferBuilder.vertex(bot.x(), bot.y(), bot.z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
+            bufferBuilder.vertex(top.x(), top.y(), top.z())
+                .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
+            bufferBuilder.vertex(top.x(), top.y(), top.z())
+                .color(color.x(), color.y(), color.z(), 0.0F).endVertex();
             offset.rotateAxis(Mth.HALF_PI, dir.x(), dir.y(), dir.z());
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     /**

@@ -138,13 +138,13 @@ public class VRArmHelper {
         }
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        Tesselator tesselator = Tesselator.getInstance();
-        tesselator.getBuilder().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
-        RenderHelper.renderBox(tesselator.getBuilder(), start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha,
+        RenderHelper.renderBox(bufferBuilder, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha,
             modelView);
 
-        BufferUploader.drawWithShader(tesselator.getBuilder().end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
     }
@@ -380,8 +380,8 @@ public class VRArmHelper {
             // to make shaders work
             ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
-            Tesselator tesselator = Tesselator.getInstance();
-            tesselator.getBuilder().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
             double VOffset = DATA_HOLDER.teleportTracker.lastTeleportArcDisplayOffset;
             Vec3 dest = DATA_HOLDER.teleportTracker.getDestination();
@@ -431,11 +431,11 @@ public class VRArmHelper {
                     .subtract(cameraPosition);
 
                 float shift = (float) progress * 2.0F;
-                RenderHelper.renderBox(tesselator.getBuilder(), start, end, -segmentHalfWidth, segmentHalfWidth,
+                RenderHelper.renderBox(bufferBuilder, start, end, -segmentHalfWidth, segmentHalfWidth,
                     (-1.0F + shift) * segmentHalfWidth, (1.0F + shift) * segmentHalfWidth, color, alpha, matrix);
             }
 
-            tesselator.end();
+            BufferUploader.drawWithShader(bufferBuilder.end());
 
             // hit indicator
             if (validLocation && DATA_HOLDER.teleportTracker.movementTeleportProgress >= 1.0D) {

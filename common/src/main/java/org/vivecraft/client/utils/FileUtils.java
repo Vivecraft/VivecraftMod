@@ -62,7 +62,7 @@ public class FileUtils {
     public static String loadAssetToString(String sourcePath, boolean required) {
         try {
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
-                .getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", sourcePath));
+                .getResource(new ResourceLocation("vivecraft", sourcePath));
 
             if (resource.isPresent()) {
                 try (InputStream is = resource.get().open()) {

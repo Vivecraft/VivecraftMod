@@ -186,7 +186,7 @@ public class ClientUtils {
             {
                 Vec3 controllerPos = DH.vrPlayer.vrdata_world_pre.getController(1).getPosition();
                 SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.get(
-                    ResourceLocation.parse(DH.vrSettings.chatNotificationSound));
+                    new ResourceLocation(DH.vrSettings.chatNotificationSound));
                 if (soundEvent != null) {
                     if (MC.level != null) {
                         MC.level.playLocalSound(controllerPos.x(), controllerPos.y(), controllerPos.z(),

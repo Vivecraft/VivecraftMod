@@ -1,12 +1,10 @@
 package org.vivecraft.client.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -189,6 +187,7 @@ public class FBTCalibrationScreen extends Screen {
             Vec3i color = this.leftHandAtPosition && this.rightHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE;
 
             // body overlay
+            BufferBuilder builder = Tesselator.getInstance().getBuilder();
             builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
             // legs

@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
  */
 public class BowModule implements HeldInteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "roomscale_bow");
+    private static final ResourceLocation ID = new ResourceLocation("vivecraft", "roomscale_bow");
 
     private final ClientDataHolderVR dh;
     private final boolean[] isPressed = new boolean[2];

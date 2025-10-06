@@ -22,8 +22,7 @@ import org.vivecraft.common.utils.TooltipUtil;
 import java.util.ArrayList;
 
 public abstract class GuiVROptionsBase extends Screen {
-    private static final ResourceLocation SEARCH_ICON =
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "icon/search");
+    private static final ResourceLocation SEARCH_ICON = new ResourceLocation("vivecraft", "icon/search");
 
     protected ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
     protected final Screen lastScreen;
