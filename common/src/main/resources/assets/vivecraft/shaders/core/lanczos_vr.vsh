@@ -1,9 +1,7 @@
 #version 150 core
 
-layout(std140) uniform LanczosUbo {
-    float texelWidthOffset;
-    float texelHeightOffset;
-};
+uniform float texelWidthOffset;
+uniform float texelHeightOffset;
 
 in vec3 Position;
 in vec2 UV0;

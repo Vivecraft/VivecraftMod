@@ -1,12 +1,13 @@
 package org.vivecraft.neoforge.mixin.network;
 
+import net.neoforged.neoforge.client.network.handlers.ClientPayloadHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 
-@Mixin(targets = "net.neoforged.neoforge.client.network.ClientPayloadHandler")
+@Mixin(ClientPayloadHandler.class)
 public class NeoForgeOpenContainerVRMixin {
     @Inject(method = "handle(Lnet/neoforged/neoforge/network/payload/AdvancedOpenScreenPayload;Lnet/neoforged/neoforge/network/handling/IPayloadContext;)V", at = @At("HEAD"), remap = false)
     private static void vivecraft$markScreenActiveNeoForge(CallbackInfo ci) {

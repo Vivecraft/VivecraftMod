@@ -57,10 +57,9 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         return this.vivecraft$mipmaps;
     }
 
-    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createTexture(Ljava/util/function/Supplier;ILcom/mojang/blaze3d/textures/TextureFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;", remap = false), index = 6, remap = true)
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createTexture(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/TextureFormat;III)Lcom/mojang/blaze3d/textures/GpuTexture;", remap = false), index = 4, remap = true)
     private int vivecraft$mipLevels(
-        Supplier<String> labelSupplier, int usageFlags, TextureFormat textureFormat, int width, int height,
-        int depthLayers, int mipLevels)
+        Supplier<String> labelSupplier, TextureFormat textureFormat, int width, int height, int mipLevels)
     {
         return this.vivecraft$mipmaps && !textureFormat.hasDepthAspect() ?
             Math.max(Mth.log2(this.width), Mth.log2(this.height)) : mipLevels;

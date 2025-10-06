@@ -4,7 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.HappyGhast;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.entity.vehicle.Minecart;
@@ -77,7 +76,7 @@ public class VehicleTracker implements Tracker {
             }
         } else if (entity != null && entity.isLocalInstanceAuthoritative()) {
             int c = getControllerWithFoodStick(player);
-            if (entity instanceof Mob && !(entity instanceof HappyGhast) && c != -1) {
+            if (entity instanceof Mob && c != -1) {
                 // pigs and striders
                 VRData.VRDevicePose con = dataHolder.vrPlayer.vrdata_world_pre.getController(c);
                 return MathUtils.subtractToVector3f(con.getPosition(), entity.position())

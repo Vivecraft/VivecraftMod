@@ -12,7 +12,7 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
-import org.vivecraft.forge.event.ClientEvents;
+import org.vivecraft.forge.event.ClientModEvents;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -42,7 +42,7 @@ public class Vivecraft {
             event.getSource().setPacketHandled(true);
         });
         if (FMLEnvironment.dist.isClient()) {
-            ClientEvents.registerConfigScreen(context);
+            ClientModEvents.registerConfigScreen(context);
         }
     }
 

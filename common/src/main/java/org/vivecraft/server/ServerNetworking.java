@@ -120,7 +120,7 @@ public class ServerNetworking {
 
                 vivePlayer.setVR(payload.vr());
 
-                ServerVRPlayers.getPlayersWithVivecraft(player.getServer()).put(player.getUUID(), vivePlayer);
+                ServerVRPlayers.getPlayersWithVivecraft(player.server).put(player.getUUID(), vivePlayer);
 
                 packetConsumer.accept(new VersionPayloadS2C(CommonDataHolder.getInstance().versionIdentifier));
                 packetConsumer.accept(new RequestDataPayloadS2C());
@@ -473,7 +473,7 @@ public class ServerNetworking {
      * @return unmodifiableSet set of all other players that can see {@code player}
      */
     public static Set<ServerPlayerConnection> getTrackingPlayers(ServerPlayer player) {
-        ChunkMap chunkMap = player.level().getChunkSource().chunkMap;
+        ChunkMap chunkMap = player.serverLevel().getChunkSource().chunkMap;
         TrackedEntityAccessor playerTracker = ((ChunkMapAccessor) chunkMap).getTrackedEntities().get(player.getId());
         return playerTracker != null ? Collections.unmodifiableSet(playerTracker.getPlayersTracking()) :
             Collections.emptySet();
@@ -499,8 +499,7 @@ public class ServerNetworking {
     private static void sendPacketToTrackingPlayers(
         ServerVivePlayer vivePlayer, Function<Integer, Packet<?>> packetProvider)
     {
-        Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(
-            vivePlayer.player.getServer());
+        Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(vivePlayer.player.server);
         for (var trackedPlayer : getTrackingPlayers(vivePlayer.player)) {
             if (!vivePlayers.containsKey(trackedPlayer.getPlayer().getUUID()) ||
                 trackedPlayer.getPlayer() == vivePlayer.player)

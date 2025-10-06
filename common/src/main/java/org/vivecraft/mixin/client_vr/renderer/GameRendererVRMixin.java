@@ -6,10 +6,9 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -17,8 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
-import net.minecraft.client.renderer.ScreenEffectRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.FluidTags;
@@ -34,12 +31,14 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.Xevents;
@@ -58,6 +57,7 @@ import org.vivecraft.client_vr.render.helpers.VRArmHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
@@ -131,10 +131,6 @@ public abstract class GameRendererVRMixin
     @Shadow
     @Final
     private Camera mainCamera;
-
-    @Shadow
-    @Final
-    private PerspectiveProjectionMatrixBuffer levelProjectionMatrixBuffer;
 
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     private Camera vivecraft$replaceCamera() {
@@ -319,7 +315,7 @@ public abstract class GameRendererVRMixin
         this.vivecraft$shouldDrawGui = shouldDrawGui;
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;", ordinal = 1), cancellable = true)
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", ordinal = 2), cancellable = true)
     private void vivecraft$mainMenu(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
@@ -378,9 +374,16 @@ public abstract class GameRendererVRMixin
         ci.cancel();
     }
 
-    @ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;", ordinal = 1), ordinal = 0, argsOnly = true)
+    @ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.AFTER, ordinal = 2), ordinal = 0, argsOnly = true)
     private boolean vivecraft$renderGui(boolean renderLevel) {
         return RenderPassType.isVanilla() ? renderLevel : this.vivecraft$shouldDrawGui;
+    }
+
+    @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemActivationAnimation(Lnet/minecraft/client/gui/GuiGraphics;F)V"))
+    private boolean vivecraft$noItemActivationAnimationOnGUI(
+        GameRenderer instance, GuiGraphics guiGraphics, float partialTick)
+    {
+        return RenderPassType.isVanilla();
     }
 
     @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
@@ -406,6 +409,44 @@ public abstract class GameRendererVRMixin
     private void vivecraft$cancelBobView(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             ci.cancel();
+        }
+    }
+
+    @WrapOperation(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"))
+    private void vivecraft$noTranslateItemInVR(
+        PoseStack instance, float x, float y, float z, Operation<Void> original)
+    {
+        if (RenderPassType.isVanilla()) {
+            original.call(instance, x, y, z);
+        }
+    }
+
+    @WrapOperation(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
+    private void vivecraft$noScaleItem(
+        PoseStack poseStack, float x, float y, float z, Operation<Void> original, @Local(ordinal = 5) float progress)
+    {
+        if (RenderPassType.isVanilla()) {
+            original.call(poseStack, x, y, z);
+        } else {
+            float sinProgress = Mth.sin(progress) * 0.5F;
+            poseStack.translate(0.0F, 0.0F, sinProgress - 1.0F);
+            RenderPass pass = vivecraft$DATA_HOLDER.currentPass;
+            if (pass == RenderPass.THIRD) {
+                // make the item the same size, independent of FOV
+                sinProgress *= vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov / 70.0F;
+            } else if (pass == RenderPass.CENTER) {
+                // make the item the same size, independent of FOV
+                sinProgress *= Minecraft.getInstance().options.fov().get() / 70.0F;
+            } else if (pass == RenderPass.LEFT || pass == RenderPass.RIGHT) {
+                // apply stereo offset, but screen relative, not world
+                VRData data = vivecraft$DATA_HOLDER.vrPlayer.getVRDataWorld();
+                Vector3f offset = MathUtils.subtractToVector3f(data.getEye(pass).getPosition(), data.hmd.getPosition());
+                data.hmd.getMatrix().invert().transformPosition(offset);
+                poseStack.translate(-offset.x, -offset.y, -offset.z);
+            }
+
+            // call the scale with original to allow operation stacking
+            original.call(poseStack, sinProgress, sinProgress, sinProgress);
         }
     }
 
@@ -465,30 +506,9 @@ public abstract class GameRendererVRMixin
         return matrix;
     }
 
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearDepthTexture(Lcom/mojang/blaze3d/textures/GpuTexture;D)V", remap = false), remap = true)
-    private boolean vivecraft$noDepthClearInVR(CommandEncoder instance, GpuTexture gpuTexture, double clearDepth) {
-        return RenderPassType.isVanilla();
-    }
-
-
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ScreenEffectRenderer;renderScreenEffect(ZF)V"))
-    private boolean vivecraft$noScreenEffectsInVR(
-        ScreenEffectRenderer instance, boolean isSleeping, float partialTick)
-    {
-        return RenderPassType.isVanilla();
-    }
-
-    @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;shouldRenderDebugCrosshair()Z"))
-    private boolean vivecraft$noDebugCrosshairInVR(boolean renderCrosshair)
-    {
-        return renderCrosshair && RenderPassType.isVanilla();
-    }
-
-    @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$noHandsInVR(CallbackInfo ci) {
-        if (!RenderPassType.isVanilla()) {
-            ci.cancel();
-        }
+    @ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"))
+    private boolean vivecraft$noHandsInVR(boolean renderHand) {
+        return renderHand && RenderPassType.isVanilla();
     }
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
@@ -662,7 +682,7 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public void vivecraft$resetProjectionMatrix(float partialTick) {
-        RenderSystem.setProjectionMatrix(this.levelProjectionMatrixBuffer.getBuffer(
-            this.getProjectionMatrix(this.getFov(this.mainCamera, partialTick, true))), ProjectionType.PERSPECTIVE);
+        RenderSystem.setProjectionMatrix(this.getProjectionMatrix(this.getFov(this.mainCamera, partialTick, true)),
+            ProjectionType.PERSPECTIVE);
     }
 }

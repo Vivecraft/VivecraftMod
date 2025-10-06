@@ -1,12 +1,14 @@
 package org.vivecraft.client_vr.render.helpers;
 
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,6 +25,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
@@ -31,7 +34,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -48,8 +50,8 @@ public class RenderHelper {
     public static final ResourceLocation WHITE_TEXTURE = ResourceLocation.parse("vivecraft:textures/white.png");
     public static final ResourceLocation BLACK_TEXTURE = ResourceLocation.parse("vivecraft:textures/black.png");
 
-    public static GpuTextureView getGpuTexture(ResourceLocation resourceLocation) {
-        return MC.getTextureManager().getTexture(resourceLocation).getTextureView();
+    public static GpuTexture getGpuTexture(ResourceLocation resourceLocation) {
+        return MC.getTextureManager().getTexture(resourceLocation).getTexture();
     }
 
     /**
@@ -186,20 +188,39 @@ public class RenderHelper {
     /**
      * renders the given screen to the current main target and generates mipmaps for it
      *
-     * @param screen      the Screen to render
-     * @param maxGuiScale if set, renders the screen at max gui scale
+     * @param guiGraphics  GuiGraphics to render with
+     * @param deltaTracker tracker to get the partial tick from
+     * @param screen       the Screen to render
+     * @param maxGuiScale  if set, renders the screen at max gui scale
      */
-    public static void drawScreen(Screen screen, boolean maxGuiScale) {
+    public static void drawScreen(
+        GuiGraphics guiGraphics, DeltaTracker deltaTracker, Screen screen, boolean maxGuiScale)
+    {
+        // setup modelview for screen rendering
+        Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushMatrix();
+        poseStack.identity();
+        poseStack.translate(0.0F, 0.0F, -11000.0F);
+
         double guiScale = maxGuiScale ? GuiHandler.GUI_SCALE_FACTOR_MAX : MC.getWindow().getGuiScale();
 
         // set gui scale to make the scissor work, that checks the window gui scale
         int backupGuiScale = GuiHandler.GUI_SCALE_FACTOR;
         GuiHandler.GUI_SCALE_FACTOR = (int) guiScale;
 
-        GuiRenderHelper.renderScreen(screen);
+        Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+            0.0F, (float) (MC.getMainRenderTarget().width / guiScale),
+            (float) (MC.getMainRenderTarget().height / guiScale), 0.0F,
+            1000.0F, 21000.0F);
+        RenderSystem.setProjectionMatrix(guiProjection, ProjectionType.ORTHOGRAPHIC);
+
+        screen.render(guiGraphics, 0, 0, deltaTracker.getRealtimeDeltaTicks());
+        guiGraphics.flush();
 
         // reset gui scale
         GuiHandler.GUI_SCALE_FACTOR = backupGuiScale;
+
+        poseStack.popMatrix();
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps for Gui layer
@@ -218,7 +239,7 @@ public class RenderHelper {
         float size = 15.0F * Math.max(ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale,
             1.0F / (float) MC.getWindow().getGuiScale());
 
-        guiGraphics.blitSprite(VRShaders.CROSSHAIR_MENU, Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
+        guiGraphics.blitSprite(VRRenderTypes::crosshairMenu, Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
             (int) (mouseY - size * 0.5F + 1), (int) size, (int) size);
     }
 
@@ -229,8 +250,21 @@ public class RenderHelper {
         // clear depth, because text that was already there would be over ours
         RenderSystem.getDevice().createCommandEncoder()
             .clearDepthTexture(MC.getMainRenderTarget().getDepthTexture(), 1.0);
+        // setup modelview for screen rendering
+        Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushMatrix();
+        poseStack.identity();
+        poseStack.translate(0.0F, 0.0F, -11000.0F);
 
-        GuiGraphics guiGraphics = GuiRenderHelper.getGuiGraphics();
+        // setup projection
+        float guiScale = (float) MC.getWindow().getGuiScale();
+        Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+            0.0F, MC.getMainRenderTarget().width / guiScale,
+            MC.getMainRenderTarget().height / guiScale, 0.0F,
+            1000.0F, 21000.0F);
+        RenderSystem.setProjectionMatrix(guiProjection, ProjectionType.ORTHOGRAPHIC);
+
+        GuiGraphics guiGraphics = new GuiGraphics(MC, MC.renderBuffers().bufferSource());
 
         int width = 200;
         List<FormattedCharSequence> formattedChars = MC.font.split(
@@ -251,8 +285,9 @@ public class RenderHelper {
             guiGraphics.drawCenteredString(MC.font, formattedChars.get(line), guiGraphics.guiWidth() / 2,
                 y + 5 + line * 12, 0xFFFFFFFF);
         }
+        guiGraphics.flush();
 
-        GuiRenderHelper.finish();
+        poseStack.popMatrix();
     }
 
     /**
@@ -271,7 +306,7 @@ public class RenderHelper {
         float sizeX = size * 0.5F;
         float sizeY = sizeX * displayHeight / displayWidth;
 
-        RenderType renderType = VRRenderTypes.guiTextureAlways(source.getColorTextureView());
+        RenderType renderType = VRRenderTypes.guiTextureOverlay(source.getColorTexture());
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
         consumer
             .addVertex(matrix, -sizeX, -sizeY, 0)

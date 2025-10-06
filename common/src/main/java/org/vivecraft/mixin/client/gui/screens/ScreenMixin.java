@@ -1,13 +1,12 @@
 package org.vivecraft.mixin.client.gui.screens;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 
 @Mixin(Screen.class)
@@ -16,16 +15,14 @@ public abstract class ScreenMixin {
     /**
      * handles {@link VivecraftClickEvent}
      */
-    @Inject(method = "defaultHandleClickEvent", at = @At("HEAD"), cancellable = true)
-    private static void vivecraft$handleVivecraftClickEvents(
-        CallbackInfo ci, @Local(argsOnly = true) ClickEvent clickEvent, @Local(argsOnly = true) Minecraft minecraft)
-    {
-        if (clickEvent instanceof VivecraftClickEvent viveEvent) {
+    @Inject(method = "handleComponentClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Style;getClickEvent()Lnet/minecraft/network/chat/ClickEvent;", ordinal = 0), cancellable = true)
+    private void vivecraft$handleVivecraftClickEvents(Style style, CallbackInfoReturnable<Boolean> cir) {
+        if (style.getClickEvent() instanceof VivecraftClickEvent viveEvent) {
             VivecraftClickEvent.VivecraftAction action = viveEvent.getVivecraftAction();
             if (action == VivecraftClickEvent.VivecraftAction.OPEN_SCREEN) {
-                minecraft.setScreen((Screen) viveEvent.getVivecraftValue());
+                Minecraft.getInstance().setScreen((Screen) viveEvent.getVivecraftValue());
             }
-            ci.cancel();
+            cir.setReturnValue(true);
         }
     }
 }

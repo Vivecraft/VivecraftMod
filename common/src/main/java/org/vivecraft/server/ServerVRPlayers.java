@@ -15,7 +15,7 @@ public class ServerVRPlayers {
      */
     public static ServerVivePlayer getVivePlayer(ServerPlayer player) {
         // fake players should not get the main players data
-        return Xplat.isFakePlayer(player) ? null : getPlayersWithVivecraft(player.getServer()).get(player.getUUID());
+        return Xplat.isFakePlayer(player) ? null : getPlayersWithVivecraft(player.server).get(player.getUUID());
     }
 
     /**

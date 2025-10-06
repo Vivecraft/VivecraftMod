@@ -5,6 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -47,7 +48,7 @@ public class MultilineComponent extends AbstractWidget {
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
 
         if (this.renderBackground) {
-            guiGraphics.fill(
+            guiGraphics.fill(RenderType.guiOverlay(),
                 this.getX() - 5, this.getY() - 5,
                 this.getX() + this.getWidth() + 5, this.getY() + this.getHeight() + 5,
                 0x80000000);

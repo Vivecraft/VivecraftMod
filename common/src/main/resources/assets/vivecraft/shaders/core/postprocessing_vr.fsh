@@ -2,22 +2,20 @@
 
 uniform sampler2D Sampler0;
 
-layout(std140) uniform PostProcessUbo {
-    float circle_radius;
-    float circle_offset;
-    float border;
+uniform float circle_radius;
+uniform float circle_offset = 0.1;
+uniform float border;
 
-    float water;
-    float pumpkin;
-    float portal;
-    float portaltime;
+uniform float water;
+uniform float pumpkin;
+uniform float portal;
+uniform float portaltime;
 
-    float redalpha;
-    float bluealpha;
-    float blackalpha;
+uniform float redalpha;
+uniform float bluealpha;
+uniform float blackalpha;
 
-    int eye;
-};
+uniform int eye = 0;
 
 in vec2 texCoordinates;
 

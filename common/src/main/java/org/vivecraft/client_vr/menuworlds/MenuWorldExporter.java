@@ -41,7 +41,7 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class MenuWorldExporter {
-    public static final int VERSION = 6;
+    public static final int VERSION = 5;
     public static final int MIN_VERSION = 2;
 
     private static final DataFixer DATA_FIXER = DataFixers.getDataFixer();
@@ -102,7 +102,7 @@ public class MenuWorldExporter {
             dos.writeLong(level.getBiomeManager().biomeZoomSeed); // not really correct :/
         }
 
-        dos.writeInt(SharedConstants.getCurrentVersion().dataVersion().version());
+        dos.writeInt(SharedConstants.getCurrentVersion().getDataVersion().getVersion());
 
         dos.writeBoolean(level.dimensionType().fixedTime().isPresent());
         if (level.dimensionType().fixedTime().isPresent()) {
@@ -111,10 +111,6 @@ public class MenuWorldExporter {
         dos.writeBoolean(level.dimensionType().hasCeiling());
         dos.writeInt(level.dimensionType().minY());
         dos.writeFloat(level.dimensionType().ambientLight());
-        dos.writeBoolean(level.dimensionType().cloudHeight().isPresent());
-        if (level.dimensionType().cloudHeight().isPresent()) {
-            dos.writeInt(level.dimensionType().cloudHeight().get());
-        }
 
         dos.writeFloat(switch (Minecraft.getInstance().player.getDirection()) {
             case SOUTH -> 180.0f;
@@ -231,7 +227,7 @@ public class MenuWorldExporter {
             dataVersion = dis.readInt(); // v5+ stores the real data version
         }
 
-        if (dataVersion > SharedConstants.getCurrentVersion().dataVersion().version()) {
+        if (dataVersion > SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
             VRSettings.LOGGER.warn(
                 "Vivecraft: Menuworld data version is newer than current, this menu world may not load correctly.");
         }
@@ -240,7 +236,6 @@ public class MenuWorldExporter {
         boolean dimHasCeiling;
         int dimMinY;
         float dimAmbientLight;
-        Optional<Integer> cloudHeight = Optional.empty();
 
         if (header.version < 5) { // fill in missing values
             if (BuiltinDimensionTypes.NETHER_EFFECTS.equals(dimName)) {
@@ -267,18 +262,8 @@ public class MenuWorldExporter {
             dimAmbientLight = dis.readFloat();
         }
 
-        if (header.version < 6) {
-            if (dimHasSkyLight) { // might be an issue for modded dimensions but whatever
-                cloudHeight = Optional.of(192);
-            }
-        } else {
-            if (dis.readBoolean()) {
-                cloudHeight = Optional.of(dis.readInt());
-            }
-        }
-
         DimensionType dimensionType = new DimensionType(dimFixedTime, dimHasSkyLight, dimHasCeiling, false, false, 1.0,
-            true, false, dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimName, dimAmbientLight, cloudHeight,
+            true, false, dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimName, dimAmbientLight,
             new DimensionType.MonsterSettings(false, false, ConstantInt.of(0), 0));
 
         float rotation = 0.0f;
@@ -414,7 +399,7 @@ public class MenuWorldExporter {
             for (int i = 0; i < size; i++) {
                 CompoundTag tag = CompoundTag.TYPE.load(dis, NbtAccounter.unlimitedHeap());
                 tag = (CompoundTag) DATA_FIXER.update(References.BLOCK_STATE, new Dynamic<>(NbtOps.INSTANCE, tag),
-                    dataVersion, SharedConstants.getCurrentVersion().dataVersion().version()).getValue();
+                    dataVersion, SharedConstants.getCurrentVersion().getDataVersion().getVersion()).getValue();
                 this.paletteMap.add(NbtUtils.readBlockState(BuiltInRegistries.BLOCK, tag));
             }
         }

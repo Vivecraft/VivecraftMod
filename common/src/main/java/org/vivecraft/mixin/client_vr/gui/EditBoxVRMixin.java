@@ -43,19 +43,14 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
     @Shadow
     private String suggestion;
 
-    @Shadow
-    private int textX;
-
-    @Shadow
-    private int textY;
-
     public EditBoxVRMixin(int x, int y, int width, int height, Component message) {
         super(x, y, width, height, message);
     }
 
     @Inject(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
     private void vivecraft$renderKeyboardHint(
-        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci, @Local String content)
+        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci,
+        @Local String content, @Local(ordinal = 4) int xPos, @Local(ordinal = 5) int yPos)
     {
         if (VRState.VR_RUNNING && !ClientDataHolderVR.getInstance().vrSettings.seated && !KeyboardHandler.SHOWING &&
             content.isEmpty())
@@ -64,8 +59,8 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
                 // limit text to field size
                 String fullString = I18n.get("vivecraft.message.openKeyboard");
                 String cutString = this.font.plainSubstrByWidth(fullString, this.getInnerWidth());
-                guiGraphics.drawString(this.font, fullString.equals(cutString) ? cutString : cutString + "...",
-                    this.textX, this.textY, this.textColorUneditable);
+                guiGraphics.drawString(this.font, fullString.equals(cutString) ? cutString : cutString + "...", xPos,
+                    yPos, this.textColorUneditable);
             }
         }
     }

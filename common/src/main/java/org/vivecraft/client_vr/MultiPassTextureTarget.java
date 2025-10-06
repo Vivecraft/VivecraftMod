@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -122,12 +121,12 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
-    public void blitAndBlendToTexture(GpuTextureView gpuTextureView) {
+    public void blitAndBlendToTexture(GpuTexture gpuTexture) {
         if (this.vrTargets == null) {
-            super.blitAndBlendToTexture(gpuTextureView);
+            super.blitAndBlendToTexture(gpuTexture);
             return;
         }
-        callOnTarget(r -> r.blitAndBlendToTexture(gpuTextureView));
+        callOnTarget(r -> r.blitAndBlendToTexture(gpuTexture));
     }
 
     @Override
@@ -139,27 +138,11 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
-    public GpuTextureView getColorTextureView() {
-        if (this.vrTargets == null) {
-            return super.getColorTextureView();
-        }
-        return callOnTargetRet(RenderTarget::getColorTextureView);
-    }
-
-    @Override
     public GpuTexture getDepthTexture() {
         if (this.vrTargets == null) {
             return super.getDepthTexture();
         }
         return callOnTargetRet(RenderTarget::getDepthTexture);
-    }
-
-    @Override
-    public GpuTextureView getDepthTextureView() {
-        if (this.vrTargets == null) {
-            return super.getDepthTextureView();
-        }
-        return callOnTargetRet(RenderTarget::getDepthTextureView);
     }
 
     private void callOnAllTargets(Consumer<TextureTarget> consumer) {

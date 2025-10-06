@@ -15,10 +15,10 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.5-0.6.11-fabric"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.9.0+1.21.6-fabric"
+    modCompileOnly "maven.modrinth:iris:1.8.9+1.21.5-fabric"
 
     // for REI compat
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }

@@ -19,7 +19,7 @@ public class BufferBuilderMixin implements BufferBuilderExtension {
     }
 
     @Override
-    public long vivecraft$getBufferSize() {
+    public int vivecraft$getBufferSize() {
         return ((ByteBufferBuilderAccessor) this.buffer).getCapacity();
     }
 }

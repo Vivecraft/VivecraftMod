@@ -10,16 +10,14 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
-import org.vivecraft.client_vr.render.ubos.LanczosUBO;
-import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
-import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class VRShaders {
     // FSAA shader and its uniforms
-    public static LanczosUBO LANCZOS_UBO = new LanczosUBO();
+    public static final String LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM = "texelWidthOffset";
+    public static final String LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM = "texelHeightOffset";
     public static final String LANCZOS_COLOR_SAMPLER = "Sampler0";
     public static final String LANCZOS_DEPTH_SAMPLER = "Sampler1";
 
@@ -27,7 +25,8 @@ public class VRShaders {
         .withLocation("pipeline/vivecraft_lanczos")
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
-        .withUniform(LanczosUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
+        .withUniform(LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM, UniformType.FLOAT)
+        .withUniform(LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM, UniformType.FLOAT)
         .withSampler(LANCZOS_COLOR_SAMPLER)
         .withSampler(LANCZOS_DEPTH_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
@@ -36,7 +35,13 @@ public class VRShaders {
         .build();
 
     // mixed reality shader and its uniforms
-    public static MixedRealityUBO MIXED_REALITY_UBO;
+    public static final String MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM = "hmdViewPosition";
+    public static final String MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM = "hmdPlaneNormal";
+    public static final String MIXED_REALITY_PROJECTION_MATRIX_UNIFORM = "projectionMatrix";
+    public static final String MIXED_REALITY_VIEW_MATRIX_UNIFORM = "viewMatrix";
+    public static final String MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM = "firstPersonPass";
+    public static final String MIXED_REALITY_KEY_COLOR_UNIFORM = "keyColor";
+    public static final String MIXED_REALITY_ALPHA_MODE_UNIFORM = "alphaMode";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
@@ -45,7 +50,13 @@ public class VRShaders {
         .withLocation("pipeline/vivecraft_mixed_reality")
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/mixedreality_vr"))
-        .withUniform(MixedRealityUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
+        .withUniform(MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM, UniformType.VEC3)
+        .withUniform(MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM, UniformType.VEC3)
+        .withUniform(MIXED_REALITY_PROJECTION_MATRIX_UNIFORM, UniformType.MATRIX4X4)
+        .withUniform(MIXED_REALITY_VIEW_MATRIX_UNIFORM, UniformType.MATRIX4X4)
+        .withUniform(MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM, UniformType.INT)
+        .withUniform(MIXED_REALITY_KEY_COLOR_UNIFORM, UniformType.VEC3)
+        .withUniform(MIXED_REALITY_ALPHA_MODE_UNIFORM, UniformType.INT)
         .withSampler(MIXED_REALITY_FIRST_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)
@@ -55,14 +66,34 @@ public class VRShaders {
         .build();
 
     // vr post shader and its uniforms
-    public static PostProcessUBO POST_PROCESS_UBO;
+    public static final String POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM = "circle_radius";
+    public static final String POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM = "circle_offset";
+    public static final String POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM = "border";
+    public static final String POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM = "blackalpha";
+    public static final String POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM = "redalpha";
+    public static final String POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM = "bluealpha";
+    public static final String POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM = "water";
+    public static final String POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM = "portal";
+    public static final String POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM = "pumpkin";
+    public static final String POST_PROCESSING_OVERLAY_TIME_UNIFORM = "portaltime";
+    public static final String POST_PROCESSING_OVERLAY_EYE_UNIFORM = "eye";
     public static final String POST_PROCESSING_COLOR_SAMPLER = "Sampler0";
 
     public static final RenderPipeline POST_PROCESSING_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_post_processing")
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/postprocessing_vr"))
-        .withUniform(PostProcessUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
+        .withUniform(POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_TIME_UNIFORM, UniformType.FLOAT)
+        .withUniform(POST_PROCESSING_OVERLAY_EYE_UNIFORM, UniformType.INT)
         .withSampler(POST_PROCESSING_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
@@ -98,19 +129,14 @@ public class VRShaders {
 
     // panorama with alpha color mask
     public static final RenderPipeline SOLID_PANORAMA = RenderPipeline.builder(
-            RenderPipelines.MATRICES_PROJECTION_SNIPPET)
+            RenderPipelines.MATRICES_COLOR_SNIPPET)
         .withLocation("pipeline/panorama")
         .withVertexShader("core/position_tex")
         .withFragmentShader("core/position_tex")
         .withSampler("Sampler0")
         .withDepthWrite(false)
+        .withBlend(BlendFunction.PANORAMA)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS).build();
-
-    public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
-            RenderPipelines.GUI_TEXTURED_SNIPPET)
-        .withLocation("pipeline/gui_textured_always_vr")
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
-
 
     public static final RenderPipeline CROSSHAIR_MENU = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/crosshair_menu_vr")
@@ -207,25 +233,4 @@ public class VRShaders {
             ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
 
     private VRShaders() {}
-
-    public static void init() {
-        MIXED_REALITY_UBO = new MixedRealityUBO();
-        POST_PROCESS_UBO = new PostProcessUBO();
-        LANCZOS_UBO = new LanczosUBO();
-    }
-
-    public static void close() {
-        if (MIXED_REALITY_UBO != null) {
-            MIXED_REALITY_UBO.close();
-            MIXED_REALITY_UBO = null;
-        }
-        if (POST_PROCESS_UBO != null) {
-            POST_PROCESS_UBO.close();
-            POST_PROCESS_UBO = null;
-        }
-        if (LANCZOS_UBO != null) {
-            LANCZOS_UBO.close();
-            LANCZOS_UBO = null;
-        }
-    }
 }

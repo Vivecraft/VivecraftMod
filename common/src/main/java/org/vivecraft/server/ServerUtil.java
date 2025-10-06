@@ -79,7 +79,7 @@ public class ServerUtil {
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
                             try {
-                                serverPlayer.getServer().getPlayerList().broadcastSystemMessage(
+                                serverPlayer.server.getPlayerList().broadcastSystemMessage(
                                     Component.literal(message.formatted(serverPlayer.getName().getString())), false);
                             } catch (IllegalFormatException e) {
                                 // catch errors users might put into the messages, to not crash other stuff
@@ -104,7 +104,7 @@ public class ServerUtil {
             ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
 
             boolean isOpAndAllowed = ServerConfig.ALLOW_OP.get() &&
-                player.getServer().getPlayerList().isOp(player.getGameProfile());
+                player.server.getPlayerList().isOp(player.getGameProfile());
 
             // kick non VR players
             if (!isOpAndAllowed && ServerConfig.VR_ONLY.get() && (vivePlayer == null || !vivePlayer.isVR())) {
@@ -145,8 +145,8 @@ public class ServerUtil {
     public static void sendUpdateNotificationIfOP(ServerPlayer serverPlayer) {
         if (ServerConfig.CHECK_FOR_UPDATES.get()) {
             // don't send update notifications on singleplayer
-            if (serverPlayer.getServer().isDedicatedServer() &&
-                serverPlayer.getServer().getPlayerList().isOp(serverPlayer.getGameProfile()))
+            if (serverPlayer.server.isDedicatedServer() &&
+                serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile()))
             {
                 // check for update on not the main thread
                 SCHEDULER.schedule(() -> {
@@ -376,7 +376,7 @@ public class ServerUtil {
             for (VRBodyPart bodyPart : VRBodyPart.values()) {
                 if (bodyPart.availableInMode(vivePlayer.vrPlayerState().fbtMode()) && bodyPart != VRBodyPart.HEAD) {
                     debugParticleAxes(
-                        vivePlayer.player.level(),
+                        vivePlayer.player.serverLevel(),
                         vivePlayer.getBodyPartPos(bodyPart),
                         vivePlayer.vrPlayerState().getBodyPartPose(bodyPart).orientation());
                 }
@@ -384,7 +384,7 @@ public class ServerUtil {
 
             if (ServerConfig.DEBUG_PARTICLES_HEAD.get()) {
                 debugParticleAxes(
-                    vivePlayer.player.level(),
+                    vivePlayer.player.serverLevel(),
                     vivePlayer.getHMDPos(),
                     vivePlayer.vrPlayerState().hmd().orientation());
             }

@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
@@ -88,9 +87,6 @@ public abstract class VRRenderer {
 
     // last error caused by this renderer
     protected String lastError = "";
-
-    private final PerspectiveProjectionMatrixBuffer stencilProjectionMatrix = new PerspectiveProjectionMatrixBuffer(
-        "stencil");
 
     public VRRenderer(MCVR vr) {
         this.vr = vr;
@@ -203,10 +199,11 @@ public abstract class VRRenderer {
         RenderSystem.clearStencil(0);
         */
 
+        RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
+
         RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(this.stencilProjectionMatrix.getBuffer(
-                new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F)),
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F),
             ProjectionType.ORTHOGRAPHIC);
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().identity();
@@ -226,6 +223,7 @@ public abstract class VRRenderer {
         RenderSystem.restoreProjectionMatrix();
         RenderSystem.getModelViewStack().popMatrix();
 
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         // TODO 1.21.5 stencil
         /*
         if (StencilHelper.stencilBufferSupported()) {
@@ -999,6 +997,5 @@ public abstract class VRRenderer {
      */
     public void destroy() {
         destroyBuffers();
-        this.stencilProjectionMatrix.close();
     }
 }

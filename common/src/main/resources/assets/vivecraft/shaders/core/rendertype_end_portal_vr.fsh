@@ -25,15 +25,18 @@ SOFTWARE.
 */
 
 #moj_import <minecraft:fog.glsl>
-#moj_import <minecraft:matrix.glsl>
-#moj_import <minecraft:globals.glsl>
+#moj_import <matrix.glsl>
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 
+uniform float GameTime;
+uniform float FogStart;
+uniform float FogEnd;
+uniform vec4 FogColor;
+
 in vec3 pos;
-in float sphericalVertexDistance;
-in float cylindricalVertexDistance;
+in float vertexDistance;
 
 const float PI = 3.14159265359;
 
@@ -99,5 +102,5 @@ void main() {
         outColor.rgb += texture(Sampler1, (tmppos * end_portal_layer(float(i + 1))).xy).rgb * COLORS[i];
     }
 
-    fragColor = apply_fog(outColor, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
+    fragColor = linear_fog(outColor, vertexDistance, FogStart, FogEnd, FogColor);
 }

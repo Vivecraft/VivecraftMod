@@ -78,11 +78,11 @@ public abstract class WindowVRMixin implements WindowExtension {
     }
 
     @Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$getScaleFactor(CallbackInfoReturnable<Integer> cir) {
+    private void vivecraft$getScaleFactor(CallbackInfoReturnable<Double> cir) {
         if (VRState.VR_RUNNING) {
             cir.setReturnValue(
                 Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
-                    GuiHandler.GUI_SCALE_FACTOR_MAX : GuiHandler.GUI_SCALE_FACTOR);
+                    (double) GuiHandler.GUI_SCALE_FACTOR_MAX : (double) GuiHandler.GUI_SCALE_FACTOR);
         }
     }
 

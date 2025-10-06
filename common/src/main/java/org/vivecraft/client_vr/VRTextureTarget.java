@@ -5,7 +5,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -53,11 +52,8 @@ public class VRTextureTarget extends RenderTarget {
             // hardcoded opengl here
             if (RenderSystem.getDevice() instanceof GlDevice glDevice) {
                 this.colorTexture = ((GlDeviceExtension) glDevice).vivecraft$createFixedIdTexture(
-                    () -> this.label + " / Color",
-                    GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC | GpuTexture.USAGE_TEXTURE_BINDING |
-                        GpuTexture.USAGE_RENDER_ATTACHMENT, TextureFormat.RGBA8, width, height, 1,
+                    () -> this.label + " / Color", TextureFormat.RGBA8, width, height,
                     mipmaps ? Math.max(Mth.log2(width), Mth.log2(height)) : 1, texId);
-                this.colorTextureView = glDevice.createTextureView(this.colorTexture);
                 this.colorTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
                 this.setFilterMode(linearFilter ? FilterMode.LINEAR : FilterMode.NEAREST);
             } else {

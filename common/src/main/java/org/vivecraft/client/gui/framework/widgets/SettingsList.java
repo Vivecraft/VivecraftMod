@@ -11,6 +11,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -569,7 +570,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             if (this.isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard() ||
                 hovering && Minecraft.getInstance().getLastInputType().isMouse())
             {
-                guiGraphics.fill(left - 2, top, left + width, top + 20, 0x80000000);
+                guiGraphics.fill(RenderType.guiOverlay(), left - 2, top, left + width, top + 20, 0x80000000);
             }
         }
 

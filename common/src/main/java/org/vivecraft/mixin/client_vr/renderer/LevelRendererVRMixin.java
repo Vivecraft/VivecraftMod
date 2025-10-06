@@ -195,8 +195,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     // no remap needed to make the * work
     @Inject(method = {
         "method_62214*", // fabric
-        "lambda$addMainPass$2*", // forge
-        "lambda$addMainPass$3*" // neoforge
+        "lambda$addMainPass$1*", // forge
+        "lambda$addMainPass$2*" // neoforge
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;endOutlineBatch()V", shift = Shift.AFTER, remap = true), remap = false)
     private void vivecraft$interactOutlineSolid(
         CallbackInfo ci, @Local(argsOnly = true) Camera camera, @Local PoseStack poseStack)
@@ -207,8 +207,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     // no remap needed to make the * work
     @Inject(method = {
         "method_62214*", // fabric
-        "lambda$addMainPass$2*", // forge
-        "lambda$addMainPass$3*" // neoforge
+        "lambda$addMainPass$1*", // forge
+        "lambda$addMainPass$2*" // neoforge
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 2, remap = true), remap = false)
     private void vivecraft$interactOutlineTranslucent(
         CallbackInfo ci, @Local(argsOnly = true) Camera camera, @Local PoseStack poseStack)
@@ -254,8 +254,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     // no remap needed to make the * work
     @Inject(method = {
         "method_62214*", // fabric
-        "lambda$addMainPass$2*", // forge
-        "lambda$addMainPass$3*" // neoforge
+        "lambda$addMainPass$1*", // forge
+        "lambda$addMainPass$2*" // neoforge
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = Shift.AFTER, remap = true), remap = false)
     private void vivecraft$renderVrStuffPart1(CallbackInfo ci, @Local(ordinal = 0) float partialTick) {
         if (RenderPassType.isVanilla()) return;

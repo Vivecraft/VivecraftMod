@@ -7,5 +7,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ByteBufferBuilder.class)
 public interface ByteBufferBuilderAccessor {
     @Accessor("capacity")
-    long getCapacity();
+    int getCapacity();
 }

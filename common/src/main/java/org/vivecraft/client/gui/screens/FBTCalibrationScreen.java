@@ -1,26 +1,36 @@
 package org.vivecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.framework.widgets.MultilineComponent;
-import org.vivecraft.client.gui.pip.state.GuiFBTPlayerState;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
 
 public class FBTCalibrationScreen extends Screen {
+
+    private static final Vec3i COLOR_INACTIVE = new Vec3i(128, 64, 64);
+    private static final Vec3i COLOR_ACTIVE = new Vec3i(64, 128, 64);
+    private static final byte ALPHA = (byte) 200;
 
     private final Screen parent;
 
@@ -164,21 +174,50 @@ public class FBTCalibrationScreen extends Screen {
             guiGraphics.renderOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
 
-            // render target rectangles
-            guiGraphics.renderOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
-                48, 16, 0xFFFFFFFF);
-            guiGraphics.renderOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
-                48, 16, 0xFFFFFFFF);
+            PoseStack poseStack = guiGraphics.pose();
+            poseStack.pushPose();
 
-            // submit player pip
-            float yRot = 0;
+            // move to screen center and scale
+            poseStack.translate(guiGraphics.guiWidth() / 2F, guiGraphics.guiHeight() - 32F, 0);
+            poseStack.scale(4, -4, 4);
+            poseStack.mulPose(Axis.YP.rotation(Mth.PI));
+
             if (VRState.VR_RUNNING) {
-                yRot = this.yaw - ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getYawRad();
+                poseStack.mulPose(Axis.YP.rotation(
+                    this.yaw - ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getYawRad()));
             }
 
-            ((GuiGraphicsAccessor) guiGraphics).getGuiRenderState().submitPicturesInPictureState(
-                new GuiFBTPlayerState(this.rightHandAtPosition, this.leftHandAtPosition, new Vector3f(this.rightHand),
-                    new Vector3f(this.leftHand), yRot, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
+            Vec3i color = this.leftHandAtPosition && this.rightHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE;
+
+            // body overlay
+            RenderType renderType = VRRenderTypes.quads(true);
+            VertexConsumer builder = this.minecraft.renderBuffers().bufferSource().getBuffer(renderType);
+
+            // legs
+            RenderHelper.renderBox(builder, new Vec3(2, 0, 0), new Vec3(2, 12, 0),
+                4, 4, color, ALPHA, poseStack.last().pose());
+            RenderHelper.renderBox(builder, new Vec3(-2, 0, 0), new Vec3(-2, 12, 0),
+                4, 4, color, ALPHA, poseStack.last().pose());
+            // body
+            RenderHelper.renderBox(builder, new Vec3(0, 12, 0), new Vec3(0, 24, 0),
+                8, 4, color, ALPHA, poseStack.last().pose());
+
+            // head
+            RenderHelper.renderBox(builder, new Vec3(0, 24, 0), new Vec3(0, 32, 0),
+                8, 8, color, ALPHA, poseStack.last().pose());
+
+            // arms
+            RenderHelper.renderBox(builder,
+                new Vec3(6, 22, 0).subtract(this.leftHand.x * 2F, this.leftHand.y * 2F, this.leftHand.z * 2F),
+                new Vec3(6, 22, 0).add(this.leftHand.x * 10F, this.leftHand.y * 10F, this.leftHand.z * 10F),
+                4, 4, this.leftHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE, ALPHA, poseStack.last().pose());
+            RenderHelper.renderBox(builder,
+                new Vec3(-6, 22, 0).subtract(this.rightHand.x * 2F, this.rightHand.y * 2F, this.rightHand.z * 2F),
+                new Vec3(-6, 22, 0).add(this.rightHand.x * 10F, this.rightHand.y * 10F, this.rightHand.z * 10F),
+                4, 4, this.rightHandAtPosition ? COLOR_ACTIVE : COLOR_INACTIVE, ALPHA, poseStack.last().pose());
+
+            this.minecraft.renderBuffers().bufferSource().endBatch(renderType);
+            poseStack.popPose();
         }
     }
 

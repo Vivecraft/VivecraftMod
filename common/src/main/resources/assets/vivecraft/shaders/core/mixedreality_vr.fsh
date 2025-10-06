@@ -5,18 +5,15 @@ uniform sampler2D firstPersonColor;
 uniform sampler2D thirdPersonColor;
 uniform sampler2D thirdPersonDepth;
 
-layout(std140) uniform MixedRealityUbo {
-    mat4 projectionMatrix;
-    mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
-// these are vec4s beacuse of ubo shenanigans
-    vec4 keyColor;
-    vec4 hmdViewPosition;
-    vec4 hmdPlaneNormal;
+uniform vec3 hmdViewPosition;
+uniform vec3 hmdPlaneNormal;
 
-    int alphaMode;
-    int firstPersonPass;
-};
+uniform vec3 keyColor;
+uniform int alphaMode;
+uniform int firstPersonPass;
 
 in vec2 texCoordinates;
 

@@ -1,20 +1,20 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -58,7 +58,6 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.mixin.client_vr.renderer.GameRendererAccessor;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
@@ -159,12 +158,12 @@ public class VREffectsHelper {
     public static void drawScopeFB(PoseStack poseStack, int c) {
         poseStack.pushPose();
 
-        GpuTextureView scopeView;
+        GpuTexture scopeView;
 
         if (c == 0) {
-            scopeView = DATA_HOLDER.vrRenderer.telescopeFramebufferR.getColorTextureView();
+            scopeView = DATA_HOLDER.vrRenderer.telescopeFramebufferR.getColorTexture();
         } else {
-            scopeView = DATA_HOLDER.vrRenderer.telescopeFramebufferL.getColorTextureView();
+            scopeView = DATA_HOLDER.vrRenderer.telescopeFramebufferL.getColorTexture();
         }
 
         // size of the back of the spyglass 2/16
@@ -276,6 +275,8 @@ public class VREffectsHelper {
             MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+
         poseStack.pushMatrix();
 
         // translate by half of the cube size
@@ -284,7 +285,7 @@ public class VREffectsHelper {
         VertexConsumer consumer;
 
         // down
-        RenderType renderType = VRRenderTypes.guiTextured(CUBE_DOWN);
+        RenderType renderType = RenderType.guiTextured(CUBE_DOWN);
         consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
         consumer.addVertex(poseStack, 0, 0, 0)
             .setUv(0, 0).setColor(255, 255, 255, 255);
@@ -297,7 +298,7 @@ public class VREffectsHelper {
         MC.renderBuffers().bufferSource().endBatch(renderType);
 
         // up
-        renderType = VRRenderTypes.guiTextured(CUBE_UP);
+        renderType = RenderType.guiTextured(CUBE_UP);
         consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
         consumer.addVertex(poseStack, 0, 100, 100)
             .setUv(0, 0).setColor(255, 255, 255, 255);
@@ -310,7 +311,7 @@ public class VREffectsHelper {
         MC.renderBuffers().bufferSource().endBatch(renderType);
 
         // left
-        renderType = VRRenderTypes.guiTextured(CUBE_LEFT);
+        renderType = RenderType.guiTextured(CUBE_LEFT);
         consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
         consumer.addVertex(poseStack, 0, 0, 0)
             .setUv(1, 1).setColor(255, 255, 255, 255);
@@ -323,7 +324,7 @@ public class VREffectsHelper {
         MC.renderBuffers().bufferSource().endBatch(renderType);
 
         // right
-        renderType = VRRenderTypes.guiTextured(CUBE_RIGHT);
+        renderType = RenderType.guiTextured(CUBE_RIGHT);
         consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
         consumer.addVertex(poseStack, 100, 0, 0)
             .setUv(0, 1).setColor(255, 255, 255, 255);
@@ -336,7 +337,7 @@ public class VREffectsHelper {
         MC.renderBuffers().bufferSource().endBatch(renderType);
 
         // front
-        renderType = VRRenderTypes.guiTextured(CUBE_FRONT);
+        renderType = RenderType.guiTextured(CUBE_FRONT);
         consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
         consumer.addVertex(poseStack, 0, 0, 0)
             .setUv(0, 1).setColor(255, 255, 255, 255);
@@ -349,7 +350,7 @@ public class VREffectsHelper {
         MC.renderBuffers().bufferSource().endBatch(renderType);
 
         // back
-        renderType = VRRenderTypes.guiTextured(CUBE_BACK);
+        renderType = RenderType.guiTextured(CUBE_BACK);
         consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
         consumer.addVertex(poseStack, 0, 0, 100)
             .setUv(1, 1).setColor(255, 255, 255, 255);
@@ -384,7 +385,7 @@ public class VREffectsHelper {
             } else {
                 r = g = b = 128;
             }
-            renderType = VRRenderTypes.guiTextured(i == 0 ? GRASS : DIRT);
+            renderType = RenderType.guiTextured(i == 0 ? GRASS : DIRT);
             consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
             // offset so the floor is centered
@@ -423,6 +424,7 @@ public class VREffectsHelper {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
+        RenderSystem.setShaderColor(1, 1, 1, 1);
 
         int repeat = 4; // texture wraps per meter
         float height = 2.5F;
@@ -445,7 +447,7 @@ public class VREffectsHelper {
         // offset so the room is centered
         poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
 
-        RenderType renderType = VRRenderTypes.guiTextured(DIRT);
+        RenderType renderType = RenderType.guiTextured(DIRT);
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
         // floor
@@ -518,6 +520,8 @@ public class VREffectsHelper {
      * @param poseStack Matrix4fStack to use for positioning
      */
     public static void renderTechjarsAwesomeMainMenuRoom(Matrix4fStack poseStack) {
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+
         // transfer the rotation
         RenderSystem.getModelViewStack().pushMatrix().mul(poseStack);
         poseStack = RenderSystem.getModelViewStack();
@@ -531,13 +535,11 @@ public class VREffectsHelper {
 
             // clear sky
             DATA_HOLDER.menuWorldRenderer.fogRenderer.setupFogColor();
-            DATA_HOLDER.menuWorldRenderer.fogRenderer.updateFog();
-
             RenderSystem.getDevice().createCommandEncoder()
                 .clearColorAndDepthTextures(MC.getMainRenderTarget().getColorTexture(),
-                    ARGB.colorFromFloat(0.0f, DATA_HOLDER.menuWorldRenderer.fogRenderer.fogColor.x,
-                        DATA_HOLDER.menuWorldRenderer.fogRenderer.fogColor.y,
-                        DATA_HOLDER.menuWorldRenderer.fogRenderer.fogColor.z),
+                    ARGB.colorFromFloat(0.0f, DATA_HOLDER.menuWorldRenderer.fogRenderer.fogRed,
+                        DATA_HOLDER.menuWorldRenderer.fogRenderer.fogGreen,
+                        DATA_HOLDER.menuWorldRenderer.fogRenderer.fogBlue),
                     MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
             DATA_HOLDER.menuWorldRenderer.updateLightmap();
@@ -554,35 +556,38 @@ public class VREffectsHelper {
             float length = area.y();
 
             float sun = DATA_HOLDER.menuWorldRenderer.getSkyDarken();
+            RenderSystem.setShaderColor(sun, sun, sun, 0.3f);
 
             poseStack.pushMatrix();
 
             poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
 
-            RenderType renderType = VRRenderTypes.guiTextured(DIRT);
+            RenderType renderType = RenderType.guiTextured(DIRT);
 
             VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
             consumer
                 .addVertex(0, 0.005f, 0)
                 .setUv(0, 0)
-                .setColor(sun, sun, sun, 0.3f);
+                .setColor(1f, 1f, 1f, 1f);
             consumer
                 .addVertex(0, 0.005f, length)
                 .setUv(0, 4 * length)
-                .setColor(sun, sun, sun, 0.3f);
+                .setColor(1f, 1f, 1f, 1f);
             consumer
                 .addVertex(width, 0.005f, length)
                 .setUv(4 * width, 4 * length)
-                .setColor(sun, sun, sun, 0.3f);
+                .setColor(1f, 1f, 1f, 1f);
             consumer
                 .addVertex(width, 0.005f, 0)
                 .setUv(4 * width, 0)
-                .setColor(sun, sun, sun, 0.3f);
+                .setColor(1f, 1f, 1f, 1f);
 
             MC.renderBuffers().bufferSource().endBatch(renderType);
 
             poseStack.popMatrix();
+
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         } finally {
             // reset stacks
             RenderSystem.getModelViewStack().popMatrix();
@@ -666,6 +671,7 @@ public class VREffectsHelper {
         // iris, need to end all, to have stuff rendered in the right order
         MC.renderBuffers().bufferSource().endBatch();
 
+        RenderSystem.setShaderColor(1, 1, 1, 1);
         // rebind the original buffer
         MC.mainRenderTarget = mainTarget;
     }
@@ -812,8 +818,11 @@ public class VREffectsHelper {
 
         if (firstPass) {
             // totem of undying
-            ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
-                .renderItemActivationAnimation(new PoseStack(), partialTick);
+            // this is screen relative, so no view rotation please
+            RenderSystem.getModelViewStack().pushMatrix().identity();
+            MC.gameRenderer.renderItemActivationAnimation(new GuiGraphics(MC, MC.renderBuffers().bufferSource()),
+                partialTick);
+            RenderSystem.getModelViewStack().popMatrix();
         }
     }
 
@@ -856,7 +865,7 @@ public class VREffectsHelper {
         TextureAtlasSprite textureAtlasSprite = ModelBakery.FIRE_1.sprite();
         if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
             // with depthtest
-            renderType = VRRenderTypes.guiTextured(textureAtlasSprite.atlasLocation());
+            renderType = RenderType.guiTextured(textureAtlasSprite.atlasLocation());
         } else {
             // without depthtest
             renderType = RenderType.fireScreenEffect(textureAtlasSprite.atlasLocation());
@@ -960,7 +969,7 @@ public class VREffectsHelper {
         RenderTarget framebuffer, boolean depthAlways, boolean noFog, Vec3 pos, Matrix4f matrix)
     {
         // cache fog distance
-        GpuBufferSlice oldFog = RenderSystem.getShaderFog();
+        FogParameters oldFog = RenderSystem.getShaderFog();
         float[] color = new float[]{1.0F, 1.0F, 1.0F, 1.0F};
         if (!MethodHolder.isInMenuRoom()) {
             if (MC.screen == null) {
@@ -968,8 +977,7 @@ public class VREffectsHelper {
             }
             if (noFog || MC.screen != null) {
                 // disable fog for menus
-                RenderSystem.setShaderFog(
-                    ((GameRendererAccessor) MC.gameRenderer).getFogRenderer().getBuffer(FogRenderer.FogMode.NONE));
+                RenderSystem.setShaderFog(FogParameters.NO_FOG);
             }
 
             if (MC.player != null && MC.player.isShiftKeyDown()) {
@@ -990,12 +998,11 @@ public class VREffectsHelper {
             {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityTranslucentNoCardinalLight(framebuffer.getColorTextureView(), depthAlways),
-                    false);
+                    VRRenderTypes.entityTranslucentNoCardinalLight(framebuffer.getColorTexture(), depthAlways), false);
             } else {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityCutoutNoCardinalLight(framebuffer.getColorTextureView(), depthAlways), false);
+                    VRRenderTypes.entityCutoutNoCardinalLight(framebuffer.getColorTexture(), depthAlways), false);
             }
         } else {
             RenderHelper.drawSizedQuad(
@@ -1253,6 +1260,8 @@ public class VREffectsHelper {
         modelView.scale(scale, scale, scale);
 
         // white crosshair, with blending
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
         int light = LevelRenderer.getLightColor(MC.level, BlockPos.containing(crosshairRenderPos));
         float brightness = 1.0F;
 

@@ -45,7 +45,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         if (vivePlayer != null) {
             if (this.player.hasDisconnected()) {
                 // if they did disconnect remove them
-                ServerVRPlayers.getPlayersWithVivecraft(this.player.getServer()).remove(this.player.getUUID());
+                ServerVRPlayers.getPlayersWithVivecraft(this.player.server).remove(this.player.getUUID());
             } else if (vivePlayer.isVR() && vivePlayer.vrPlayerState() != null) {
                 ServerNetworking.sendVrPlayerStateToClients(vivePlayer);
                 if (ServerConfig.DEBUG_PARTICLES.get()) {

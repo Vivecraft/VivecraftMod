@@ -2,7 +2,7 @@ package org.vivecraft.mod_compat_vr.shaders;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
@@ -52,7 +52,7 @@ public class ShadersHelper {
      */
     public static void bindTexture(ResourceLocation resourceLocation) {
         if (isShaderActive()) {
-            GpuTextureView view = RenderHelper.getGpuTexture(resourceLocation);
+            GpuTexture view = RenderHelper.getGpuTexture(resourceLocation);
             RenderSystem.setShaderTexture(0, view);
             OpenGLHelper.bindTexture(0, view);
         }

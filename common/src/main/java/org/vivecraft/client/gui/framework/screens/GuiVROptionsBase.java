@@ -18,7 +18,6 @@ import org.vivecraft.client.gui.settings.GuiAllSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.TooltipUtil;
-import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
 
 import java.util.ArrayList;
 
@@ -346,7 +345,7 @@ public abstract class GuiVROptionsBase extends Screen {
             }
         }
         if (hover instanceof GuiVROption guiHover && guiHover.getOption() != null &&
-            ((GuiGraphicsAccessor) guiGraphics).getDeferredTooltip() == null)
+            this.deferredTooltipRendering == null)
         {
             TooltipRenderer.renderTooltip(guiGraphics, TooltipUtil.getClientConfigTooltip(guiHover.getOption()),
                 this.width / 2, guiHover.getY(), guiHover.getHeight());

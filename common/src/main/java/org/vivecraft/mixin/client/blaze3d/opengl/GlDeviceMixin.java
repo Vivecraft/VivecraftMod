@@ -20,24 +20,16 @@ public class GlDeviceMixin implements GlDeviceExtension {
     private GlDebugLabel debugLabels;
 
     /**
-     * copy of {@link GlDevice#createTexture(String, int, TextureFormat, int, int, int, int)} but with a fixes texture id
+     * copy of {@link GlDevice#createTexture(String, TextureFormat, int, int, int)} but with a fixes texture id
      */
     @Override
     public GpuTexture vivecraft$createFixedIdTexture(
-        @Nullable Supplier<String> labelSupplier, int usageFlags, TextureFormat textureFormat, int width,
-        int height, int depthLayers, int mipmapLevels, int texId)
+        @Nullable Supplier<String> labelSupplier, TextureFormat textureFormat, int width,
+        int height, int mipmapLevels, int texId)
     {
         if (mipmapLevels < 1) {
             throw new IllegalArgumentException("mipLevels must be at least 1");
-        } else if (depthLayers < 1) {
-            throw new IllegalArgumentException("depthOrLayers must be at least 1");
         } else {
-            if ((usageFlags & 16) != 0) {
-                throw new UnsupportedOperationException("CubeMap textures are not supported");
-            } else if (depthLayers > 1) {
-                throw new UnsupportedOperationException("Array or 3D textures are not supported");
-            }
-
             GlStateManager.clearGlErrors();
             String label = this.debugLabels.exists() && labelSupplier != null ? labelSupplier.get() : null;
             if (label == null) {
@@ -64,8 +56,7 @@ public class GlDeviceMixin implements GlDeviceExtension {
             } else if (error != 0) {
                 throw new IllegalStateException("OpenGL error " + error);
             } else {
-                GlTexture glTexture = new GlTexture(usageFlags, label, textureFormat, width, height, depthLayers,
-                    mipmapLevels, texId);
+                GlTexture glTexture = new GlTexture(label, textureFormat, width, height, mipmapLevels, texId);
                 this.debugLabels.applyLabel(glTexture);
                 return glTexture;
             }

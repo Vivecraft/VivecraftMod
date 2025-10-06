@@ -1,10 +1,14 @@
 package org.vivecraft.client_vr.render.helpers;
 
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.profiling.Profiler;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -39,9 +43,6 @@ public class VRPassHelper {
         // THIS IS WHERE EVERYTHING IS RENDERED
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
-        // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
-        MC.levelRenderer.endFrame();
-
         RenderHelper.checkGLError("post game render " + eye);
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
@@ -74,7 +75,7 @@ public class VRPassHelper {
             RenderSystem.getDevice().createCommandEncoder().clearColorTexture(
                 DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTexture(), 0xFF000000);
             DATA_HOLDER.vrRenderer.cameraRenderFramebuffer.blitAndBlendToTexture(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTextureView());
+                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTexture());
             Profiler.get().pop();
         }
 
@@ -100,9 +101,23 @@ public class VRPassHelper {
 
         Profiler.get().push("VR guis");
 
+        // to render gui stuff
+        GuiGraphics guiGraphics = new GuiGraphics(MC, MC.renderBuffers().bufferSource());
+
         Profiler.get().push("gui cursor");
         // draw cursor on Gui Layer
         if (MC.screen != null || !MC.mouseHandler.isMouseGrabbed()) {
+            Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+            poseStack.pushMatrix();
+            poseStack.identity();
+            poseStack.translate(0.0f, 0.0f, -11000.0f);
+
+            Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+                0.0F, MC.getWindow().getGuiScaledWidth(),
+                MC.getWindow().getGuiScaledHeight(), 0.0F,
+                1000.0F, 21000.0F);
+            RenderSystem.setProjectionMatrix(guiProjection, ProjectionType.ORTHOGRAPHIC);
+
             int x = (int) (
                 MC.mouseHandler.xpos() * (double) MC.getWindow().getGuiScaledWidth() /
                     (double) MC.getWindow().getScreenWidth()
@@ -111,8 +126,10 @@ public class VRPassHelper {
                 MC.mouseHandler.ypos() * (double) MC.getWindow().getGuiScaledHeight() /
                     (double) MC.getWindow().getScreenHeight()
             );
-            RenderHelper.drawMouseMenuQuad(GuiRenderHelper.getGuiGraphics(), x, y);
-            GuiRenderHelper.finish();
+            RenderHelper.drawMouseMenuQuad(guiGraphics, x, y);
+
+            guiGraphics.flush();
+            poseStack.popMatrix();
         }
 
         // pop pose that we pushed before the gui
@@ -134,7 +151,7 @@ public class VRPassHelper {
             RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
                 KeyboardHandler.FRAMEBUFFER.getColorTexture(), 0x00000000,
                 KeyboardHandler.FRAMEBUFFER.getDepthTexture(), 1.0);
-            RenderHelper.drawScreen(KeyboardHandler.UI, true);
+            RenderHelper.drawScreen(guiGraphics, deltaTracker, KeyboardHandler.UI, true);
         }
 
         Profiler.get().popPush("Radial Menu");
@@ -143,7 +160,7 @@ public class VRPassHelper {
             RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
                 RadialHandler.FRAMEBUFFER.getColorTexture(), 0x00000000,
                 RadialHandler.FRAMEBUFFER.getDepthTexture(), 1.0);
-            RenderHelper.drawScreen(RadialHandler.UI, true);
+            RenderHelper.drawScreen(guiGraphics, deltaTracker, RadialHandler.UI, true);
         }
         Profiler.get().pop();
         RenderHelper.checkGLError("post 2d ");
