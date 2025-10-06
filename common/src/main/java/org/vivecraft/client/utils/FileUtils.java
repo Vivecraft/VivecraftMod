@@ -58,13 +58,11 @@ public class FileUtils {
      */
     public static String loadAssetToString(String sourcePath, boolean required) {
         try {
-            Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
+            Resource resource = Minecraft.getInstance().getResourceManager()
                 .getResource(new ResourceLocation("vivecraft", sourcePath));
 
-            if (resource.isPresent()) {
-                try (InputStream is = resource.get().open()) {
-                    return IOUtils.toString(is, StandardCharsets.UTF_8);
-                }
+            try (InputStream is = resource.getInputStream()) {
+                return IOUtils.toString(is, StandardCharsets.UTF_8);
             }
         } catch (Exception exception) {
             handleAssetException(exception, sourcePath, required);

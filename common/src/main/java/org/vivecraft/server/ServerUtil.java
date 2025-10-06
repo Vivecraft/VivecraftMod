@@ -117,7 +117,7 @@ public class ServerUtil {
                     ServerNetworking.LOGGER.error("Vivecraft: KickVROnly message '{}' has errors: ",
                         kickMessage, e);
                 }
-                player.connection.disconnect(Component.literal(kickMessage));
+                player.connection.disconnect(new TextComponent(kickMessage));
                 return true;
             }
 
@@ -131,7 +131,7 @@ public class ServerUtil {
                     ServerNetworking.LOGGER.error("Vivecraft: KickViveOnly message '{}' has errors: ",
                         kickMessage, e);
                 }
-                player.connection.disconnect(Component.literal(kickMessage));
+                player.connection.disconnect(new TextComponent(kickMessage));
                 return true;
             }
         }
@@ -175,10 +175,10 @@ public class ServerUtil {
             .then(Commands.literal("reload")
                 .executes(context -> {
                     ServerConfig.init((action, path, incorrectValue, correctedValue) -> {
-                        context.getSource().sendSystemMessage(Component.literal(
+                        context.getSource().sendSuccess(new TextComponent(
                             "Corrected §a[%s]§r: was '(%s)%s', is now '(%s)%s'".formatted(String.join("§r.§a", path),
                                 incorrectValue.getClass().getSimpleName(), incorrectValue,
-                                correctedValue.getClass().getSimpleName(), correctedValue)));
+                                correctedValue.getClass().getSimpleName(), correctedValue)), true);
                         String pathString = String.join(".", path);
                         ServerConfig.getConfigValues().stream().filter(c -> c.getPath().equals(pathString)).findFirst()
                             .ifPresent(setting -> {

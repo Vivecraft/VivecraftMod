@@ -37,7 +37,7 @@ public class ClientDataHolderVR {
     public final boolean kiosk;
     public final boolean viewOnly;
 
-    public static final List<String> HRTF_LIST = new ArrayList<>();
+    public final List<String> hrtfList = new ArrayList<>();
 
     public boolean isMainHand;
     public boolean isFpHand;

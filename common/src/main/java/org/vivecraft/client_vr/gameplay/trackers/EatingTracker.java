@@ -57,7 +57,7 @@ public class EatingTracker implements ItemInUseTracker, DebugRenderTracker {
     private boolean isEatable(ItemStack stack) {
         if (stack != null) {
             UseAnim anim = stack.getUseAnimation();
-            return anim == UseAnim.EAT || anim == UseAnim.DRINK || anim == UseAnim.TOOT_HORN;
+            return anim == UseAnim.EAT || anim == UseAnim.DRINK;
         }
         return false;
     }

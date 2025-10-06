@@ -117,7 +117,7 @@ public class InputSimulator {
                 pressKey(code);
             }
         } else if (minecraft.screen == null && ClientUtils.milliTime() - AIR_TYPING_WARNING_TIME >= 30000) {
-            ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.airtypingwarning"));
+            ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.airtypingwarning"));
             AIR_TYPING_WARNING_TIME = ClientUtils.milliTime();
         }
     }

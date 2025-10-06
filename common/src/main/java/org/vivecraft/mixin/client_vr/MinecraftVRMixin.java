@@ -502,8 +502,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 dataHolder.vrSettings.lastUpdate = UpdateChecker.NEWEST_VERSION;
                 dataHolder.vrSettings.saveOptions();
                 dataHolder.showedUpdateNotification = true;
-                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.updateAvailable",
-                    Component.literal(UpdateChecker.NEWEST_VERSION)
+                ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.updateAvailable",
+                    new TextComponent(UpdateChecker.NEWEST_VERSION)
                         .withStyle(ChatFormatting.ITALIC, ChatFormatting.GREEN)).withStyle(
                     style -> style.withClickEvent(
                             new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new UpdateScreen()))
@@ -539,7 +539,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     if (ClientNetworking.HEAD_AIM_WARNING && !ClientNetworking.DISPLAYED_HEAD_AIM_WARNING &&
                         dataHolder.vrSettings.aimDevice == VRSettings.AimDevice.HMD)
                     {
-                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.noheadaimserverplugin"));
+                        ClientUtils.addChatMessage(
+                            new TranslatableComponent("vivecraft.messages.noheadaimserverplugin"));
                         ClientNetworking.HEAD_AIM_WARNING = false;
                         ClientNetworking.DISPLAYED_HEAD_AIM_WARNING = true;
                     }
@@ -552,7 +553,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         // no server mod
                         if (ClientNetworking.TELEPORT_WARNING) {
                             if (showMessage) {
-                                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.noserverplugin"));
+                                ClientUtils.addChatMessage(
+                                    new TranslatableComponent("vivecraft.messages.noserverplugin"));
                             }
                             ClientNetworking.TELEPORT_WARNING = false;
                         }
@@ -560,7 +562,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         if (ClientNetworking.VR_SWITCHING_WARNING) {
                             if (showMessage) {
                                 ClientUtils.addChatMessage(
-                                    Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
+                                    new TranslatableComponent("vivecraft.messages.novrhotswitchinglegacy"));
                             }
                             ClientNetworking.VR_SWITCHING_WARNING = false;
                         }
@@ -578,19 +580,19 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     ))
                 {
                     dataHolder.showedFbtCalibrationNotification = true;
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.calibratefbtchat"));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.calibratefbtchat"));
                 }
 
                 // non default server settings
                 if (!ClientNetworking.DISPLAYED_VR_CHANGES && ClientNetworking.SERVER_VR_CHANGES_LIST != null &&
                     dataHolder.vrSettings.showServerVrChangesMessage.getAsBoolean())
                 {
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
-                        Component.translatable("vivecraft.messages.click").withStyle(style -> style
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.nondefaultvrchanges",
+                        new TranslatableComponent("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
                                 new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                Component.translatable("vivecraft.messages.click")))
+                                new TranslatableComponent("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
                     ClientNetworking.SERVER_VR_CHANGES_LIST = null;
                     ClientNetworking.DISPLAYED_VR_CHANGES = true;
@@ -604,7 +606,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         !vr.getOrigins(vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback)).isEmpty() ||
                         (dataHolder.vrSettings.seated && !dataHolder.vrSettings.seatedFreeMove))
                     {
-                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.noteleport"));
+                        ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.noteleport"));
                         ClientNetworking.SHOW_NO_TELEPORT_MESSAGE = false;
                     }
                 }
@@ -684,13 +686,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     MenuWorldExporter.saveAreaToFile(this.level, blockpos.getX() - offset, blockpos.getZ() - offset,
                         size, size, blockpos.getY(), foundFile);
                     ClientUtils.addChatMessage(
-                        Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
+                        new TranslatableComponent("vivecraft.messages.menuworldexportclientwarning"));
                 }
 
                 if (error == null) {
                     ClientUtils.addChatMessage(
-                        Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2",
+                        new TranslatableComponent("vivecraft.messages.menuworldexportcomplete.1", size));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.menuworldexportcomplete.2",
                         foundFile.getAbsolutePath()));
                 }
             } catch (Throwable throwable) {

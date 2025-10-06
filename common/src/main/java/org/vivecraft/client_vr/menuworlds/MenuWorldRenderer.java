@@ -295,7 +295,7 @@ public class MenuWorldRenderer {
             if (IrisHelper.isLoaded() && IrisHelper.isShaderActive() && IrisHelper.hasIssuesWithMenuWorld()) {
                 VRSettings.LOGGER.info("Vivecraft: Temporarily disabling shaders to build Menuworld.");
                 this.reenableShaders = true;
-                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.menuworldshaderdisable"));
+                ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.menuworldshaderdisable"));
                 IrisHelper.setShadersActive(false);
             }
 
@@ -1212,7 +1212,8 @@ public class MenuWorldRenderer {
                     if (biome.warmEnoughToRain(mutableBlockPos)) {
                         if (count != 0) {
                             if (count >= 0) {
-                                BufferUploader.drawWithShader(bufferBuilder.end());
+                                bufferBuilder.end();
+                                BufferUploader.end(bufferBuilder);
                             }
                             count = 0;
                             RenderSystem.setShaderTexture(0, RAIN_LOCATION);
@@ -1230,7 +1231,8 @@ public class MenuWorldRenderer {
                     } else {
                         if (count != 1) {
                             if (count >= 0) {
-                                BufferUploader.drawWithShader(bufferBuilder.end());
+                                bufferBuilder.end();
+                                BufferUploader.end(bufferBuilder);
                             }
                             count = 1;
                             RenderSystem.setShaderTexture(0, SNOW_LOCATION);
@@ -1270,7 +1272,8 @@ public class MenuWorldRenderer {
                 }
             }
             if (count >= 0) {
-                BufferUploader.drawWithShader(bufferBuilder.end());
+                bufferBuilder.end();
+                BufferUploader.end(bufferBuilder);
             }
         } finally {
             // if any stupid mod messes with level stuff there might be an exception
@@ -1419,14 +1422,16 @@ public class MenuWorldRenderer {
             this.sky2VBO.close();
         }
 
+        buildSkyDisc(bufferBuilder, 16.0f);
         this.skyVBO = new VertexBuffer();
         this.skyVBO.bind();
-        this.skyVBO.upload(buildSkyDisc(bufferBuilder, 16.0f));
+        this.skyVBO.upload(bufferBuilder);
         VertexBuffer.unbind();
 
+        buildSkyDisc(bufferBuilder, 16.0f);
         this.sky2VBO = new VertexBuffer();
         this.sky2VBO.bind();
-        this.sky2VBO.upload(buildSkyDisc(bufferBuilder, 16.0f));
+        this.sky2VBO.upload(bufferBuilder);
         VertexBuffer.unbind();
     }
 
@@ -1469,13 +1474,14 @@ public class MenuWorldRenderer {
                 .uv(16.0f, 0.0f).color(r, g, b, 255).endVertex();
         }
 
+        bufferBuilder.end();
         this.endSkyVBO = new VertexBuffer();
         this.endSkyVBO.bind();
-        this.endSkyVBO.upload(bufferBuilder.end());
+        this.endSkyVBO.upload(bufferBuilder);
         VertexBuffer.unbind();
     }
 
-    private static BufferBuilder.RenderedBuffer buildSkyDisc(BufferBuilder bufferBuilder, float posY) {
+    private static void buildSkyDisc(BufferBuilder bufferBuilder, float posY) {
         float g = Math.signum(posY) * 512.0f;
         bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
         bufferBuilder.vertex(0.0, posY, 0.0).endVertex();
@@ -1490,14 +1496,17 @@ public class MenuWorldRenderer {
         if (this.starVBO != null) {
             this.starVBO.close();
         }
+
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        this.buildStars(bufferBuilder);
         this.starVBO = new VertexBuffer();
         this.starVBO.bind();
-        this.starVBO.upload(this.buildStars(Tesselator.getInstance().getBuilder()));
+        this.starVBO.upload(bufferBuilder);
         VertexBuffer.unbind();
     }
 
-    private BufferBuilder.RenderedBuffer buildStars(BufferBuilder bufferBuilder) {
-        RandomSource randomSource = RandomSource.create(10842L);
+    private void buildStars(BufferBuilder bufferBuilder) {
+        Random randomSource = new Random(10842L);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 
         int starCount = 1500;
@@ -1530,7 +1539,7 @@ public class MenuWorldRenderer {
             point.set(-starSize, -starSize, 0.0f).mul(rotation).add(starPoint);
             bufferBuilder.vertex(point.x, point.y, point.z).endVertex();
         }
-        return bufferBuilder.end();
+        bufferBuilder.end();
     }
 
     public void turnOffLightLayer() {

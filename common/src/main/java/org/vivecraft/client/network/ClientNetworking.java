@@ -319,13 +319,13 @@ public class ClientNetworking {
 
                 if (!DISPLAYED_CHAT_MESSAGE && dataholder.vrSettings.showServerPluginMessage.getAsBoolean()) {
                     DISPLAYED_CHAT_MESSAGE = true;
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.serverplugin",
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.serverplugin",
                         ((VersionPayloadS2C) s2cPayload).version()));
                 }
                 if (VRState.VR_INITIALIZED && dataholder.vrSettings.manualCalibration == -1.0F &&
                     !dataholder.vrSettings.seated)
                 {
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.calibrateheight"));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.calibrateheight"));
                 }
             }
             case IS_VR_ACTIVE -> {
@@ -430,7 +430,7 @@ public class ClientNetworking {
             case VR_SWITCHING -> {
                 SERVER_ALLOWS_VR_SWITCHING = ((VRSwitchingPayloadS2C) s2cPayload).allowed();
                 if (!SERVER_ALLOWS_VR_SWITCHING) {
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.novrhotswitching"));
                 }
                 VR_SWITCHING_WARNING = false;
             }

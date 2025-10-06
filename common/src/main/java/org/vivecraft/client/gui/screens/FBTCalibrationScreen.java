@@ -271,12 +271,12 @@ public class FBTCalibrationScreen extends Screen {
                     dataHolder.vr.calibrateFBT(this.yaw + Mth.PI);
                     dataHolder.vrSettings.unlabeledTrackersUsed = this.usingUnlabeledTrackers;
                     dataHolder.vrSettings.saveOptions();
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.fbtcalibrationsuccess"));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.fbtcalibrationsuccess"));
                     this.calibrated = true;
                     if (!this.usingUnlabeledTrackers) {
                         this.minecraft.setScreen(this.parent);
                     } else {
-                        this.cancelButton.setMessage(Component.translatable("vivecraft.gui.ok"));
+                        this.cancelButton.setMessage(new TranslatableComponent("vivecraft.gui.ok"));
                         this.resetButton.visible = true;
                     }
                 }

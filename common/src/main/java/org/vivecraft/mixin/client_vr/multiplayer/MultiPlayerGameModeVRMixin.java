@@ -29,9 +29,9 @@ public class MultiPlayerGameModeVRMixin {
 
     @WrapMethod(method = "useItem")
     private InteractionResult vivecraft$useLookOverride(
-        Player player, InteractionHand hand, Operation<InteractionResult> original)
+        Player player, Level level, InteractionHand hand, Operation<InteractionResult> original)
     {
-        return this.vivecraft$wrapWithLookOverride(() -> original.call(player, hand), player,
+        return this.vivecraft$wrapWithLookOverride(() -> original.call(player, level, hand), player,
             () -> ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, hand.ordinal()));
     }
 
@@ -44,9 +44,10 @@ public class MultiPlayerGameModeVRMixin {
 
     @WrapMethod(method = "useItemOn")
     private InteractionResult vivecraft$useOnLookOverride(
-        LocalPlayer player, InteractionHand hand, BlockHitResult result, Operation<InteractionResult> original)
+        LocalPlayer player, ClientLevel level, InteractionHand hand, BlockHitResult result,
+        Operation<InteractionResult> original)
     {
-        return this.vivecraft$wrapWithLookOverride(() -> original.call(player, hand, result), player,
+        return this.vivecraft$wrapWithLookOverride(() -> original.call(player, level, hand, result), player,
             () -> ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, hand.ordinal()));
     }
 

@@ -146,7 +146,8 @@ public class VRArmHelper {
         RenderHelper.renderBox(bufferBuilder, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha,
             poseStack);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         poseStack.popPose();
 
@@ -443,7 +444,8 @@ public class VRArmHelper {
                     (-1.0F + shift) * segmentHalfWidth, (1.0F + shift) * segmentHalfWidth, color, alpha, poseStack);
             }
 
-            BufferUploader.drawWithShader(bufferBuilder.end());
+            bufferBuilder.end();
+            BufferUploader.end(bufferBuilder);
 
             // hit indicator
             if (validLocation && DATA_HOLDER.teleportTracker.movementTeleportProgress >= 1.0D) {

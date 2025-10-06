@@ -600,7 +600,8 @@ public class PhysicalKeyboard {
         }
 
         // Draw all the key boxes
-        BufferUploader.drawWithShader(buf.end());
+        buf.end();
+        BufferUploader.end(buf);
 
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
         RenderSystem.enableTexture();

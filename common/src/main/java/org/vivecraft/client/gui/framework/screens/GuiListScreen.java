@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
 
@@ -31,10 +32,10 @@ public abstract class GuiListScreen extends Screen {
     }
 
     @Override
-    protected void rebuildWidgets() {
-        // need to do this here, because rebuildWidgets clears the selection
+    protected void clearWidgets() {
+        // need to do this here, because init clears the selection
         this.lastSelected = this.list != null ? this.list.children().indexOf(this.list.getSelected()) : -1;
-        super.rebuildWidgets();
+        super.clearWidgets();
     }
 
     @Override
@@ -49,7 +50,7 @@ public abstract class GuiListScreen extends Screen {
             this.list.filter(filter);
 
             this.searchBox = new EditBox(this.minecraft.font, this.width / 2 - 150, 20, 300, 20,
-                Component.translatable("vivecraft.options.screen.search"));
+                new TranslatableComponent("vivecraft.options.screen.search"));
             this.searchBox.setResponder(search -> {
                 if (search.isEmpty()) {
                     this.searchBox.setSuggestion(I18n.get("vivecraft.options.screen.search"));

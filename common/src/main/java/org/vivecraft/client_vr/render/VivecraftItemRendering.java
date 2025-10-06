@@ -71,8 +71,6 @@ public class VivecraftItemRendering {
                     itemTransformType = VivecraftItemTransformType.BOW_ROOMSCALE;
                 }
             }
-        } else if (itemStack.getUseAnimation() == UseAnim.TOOT_HORN) {
-            itemTransformType = VivecraftItemTransformType.HORN;
         } else if (itemStack.is(ViveItemTags.VIVECRAFT_ROTATED_TOOLS)) {
             itemTransformType = VivecraftItemTransformType.ROTATED_TOOL;
         } else if (item instanceof SwordItem || itemStack.is(ViveItemTags.VIVECRAFT_SWORDS)) {
@@ -267,12 +265,6 @@ public class VivecraftItemRendering {
                 translateY += -0.105F + 0.06F * gunAngle / 40.0F;
                 translateZ -= 0.1F;
             }
-            case HORN -> {
-                rotation = Vector3f.XP.rotationDegrees(-45.0F + gunAngle);
-                translateY += -0.105F + 0.06F * gunAngle / 40.0F;
-                translateZ -= 0.1F;
-                scale = 0.3F;
-            }
             case SHIELD -> {
                 int side = mainHand ? 1 : -1;
                 if (DH.vrSettings.reverseHands) {
@@ -428,7 +420,6 @@ public class VivecraftItemRendering {
         CROSSBOW,
         TELESCOPE,
         COMPASS,
-        HORN,
         ROTATED_TOOL
     }
 }

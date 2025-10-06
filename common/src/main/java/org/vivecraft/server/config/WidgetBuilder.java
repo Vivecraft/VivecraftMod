@@ -21,7 +21,7 @@ public class WidgetBuilder {
      */
     public static Supplier<AbstractWidget> getBaseWidget(ConfigBuilder.ConfigValue<?> value, int width, int height) {
         return () -> new Button(0, 0, width, height,
-            Component.literal("" + value.get()), button -> {});
+            new TranslatableComponent("" + value.get()), button -> {});
     }
 
     /**
@@ -38,7 +38,7 @@ public class WidgetBuilder {
         return () -> CycleButton
             .onOffBuilder(booleanValue.get())
             .displayOnlyValue()
-            .create(0, 0, width, height, Component.empty(), (button, bool) -> {
+            .create(0, 0, width, height, TextComponent.EMPTY, (button, bool) -> {
                 booleanValue.set(bool);
                 updateSettingsSinglePlayer(booleanValue);
             });
@@ -93,14 +93,14 @@ public class WidgetBuilder {
         ConfigBuilder.ConfigValue<T> configValue, Collection<? extends T> values, int width, int height)
     {
         return () -> CycleButton
-            .builder((newValue) -> Component.translatable(
+            .builder((newValue) -> new TranslatableComponent(
                 "vivecraft.serverSettings." + configValue.getPath() + "." + newValue))
             .withInitialValue(configValue.get())
             // toArray is needed here, because the button uses Objects, and the collection is of other types
             .withValues(values.toArray())
             .withInitialValue(configValue.get())
             .displayOnlyValue()
-            .create(0, 0, width, height, Component.empty(), (button, newValue) -> {
+            .create(0, 0, width, height, TextComponent.EMPTY, (button, newValue) -> {
                 configValue.set((T) newValue);
                 updateSettingsSinglePlayer(configValue);
             });
@@ -118,11 +118,11 @@ public class WidgetBuilder {
         ConfigBuilder.NumberValue<E> numberValue, int width, int height)
     {
         return () -> new AbstractSliderButton(0, 0, width, height,
-            Component.literal("" + numberValue.get()), numberValue.normalize())
+            new TextComponent("" + numberValue.get()), numberValue.normalize())
         {
             @Override
             protected void updateMessage() {
-                setMessage(Component.literal("" + numberValue.get()));
+                setMessage(new TextComponent("" + numberValue.get()));
             }
 
             @Override
@@ -148,9 +148,9 @@ public class WidgetBuilder {
         if (first == null || first instanceof String) {
             ConfigBuilder.ListValue<String> stringValue = (ConfigBuilder.ListValue<String>) listValue;
             return () -> new Button(0, 0, width, height,
-                Component.translatable("vivecraft.options.editlist"),
+                new TranslatableComponent("vivecraft.options.editlist"),
                 button -> Minecraft.getInstance().setScreen(new GuiStringListEditorScreen(
-                    Component.translatable("vivecraft.serverSettings." + listValue.getPath()),
+                    new TranslatableComponent("vivecraft.serverSettings." + listValue.getPath()),
                     Minecraft.getInstance().screen, false, stringValue::get, stringValue::reset, list -> {
                     stringValue.set(list);
                     updateSettingsSinglePlayer(stringValue);

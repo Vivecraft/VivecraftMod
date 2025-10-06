@@ -12,7 +12,8 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
 import org.vivecraft.client.utils.StringSimilarity;
@@ -219,7 +220,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     public static BaseEntry ConfigToEntry(ConfigBuilder.ConfigValue<?> configValue) {
         BaseEntry entry = new ResettableEntry(
-            Component.translatable("vivecraft.serverSettings." + configValue.getPath()), configValue);
+            new TranslatableComponent("vivecraft.serverSettings." + configValue.getPath()), configValue);
         entry.setActive(Minecraft.getInstance().level == null || Minecraft.getInstance().isLocalServer());
         return entry;
     }
@@ -231,9 +232,9 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         BaseEntry entry;
         if (dh.vrSettings.hasValue(option)) {
             // has a setting so can be reset
-            entry = new ResettableEntry(Component.translatable(optionString), option);
+            entry = new ResettableEntry(new TranslatableComponent(optionString), option);
         } else {
-            entry = new WidgetEntry(Component.translatable(optionString),
+            entry = new WidgetEntry(new TranslatableComponent(optionString),
                 vrOptionToWidget(option, WidgetEntry.VALUE_BUTTON_WIDTH),
                 () -> TooltipUtil.getClientConfigTooltip(option),
                 null);
@@ -258,10 +259,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         } else {
             // regular button
             widget = new Button(0, 0, width, 20,
-                Component.literal(dh.vrSettings.getButtonDisplayString(option, true)),
+                new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)),
                 button -> {
                     dh.vrSettings.setOptionValue(option);
-                    button.setMessage(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
+                    button.setMessage(new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)));
                 });
         }
         return widget;
@@ -452,10 +453,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         {
             super(name, widget, tooltipSupplier, isActive);
             this.canReset = canReset;
-            this.resetButton = new Button(0, 0, 20, 20, Component.literal("X"),
+            this.resetButton = new Button(0, 0, 20, 20, new TextComponent("X"),
                 button -> this.valueWidget = resetAction.get(),
                 (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
-                    Component.translatable("controls.reset")));
+                    new TranslatableComponent("controls.reset")));
         }
 
         @Override
@@ -492,8 +493,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
      */
     public static class ScreenEntry extends WidgetEntry {
         public ScreenEntry(String langKey, Function<Screen, Screen> screenFunction) {
-            super(Component.translatable(langKey),
-                new Button(0, 0, WidgetEntry.VALUE_BUTTON_WIDTH, 20, Component.translatable(langKey),
+            super(new TranslatableComponent(langKey),
+                new Button(0, 0, WidgetEntry.VALUE_BUTTON_WIDTH, 20, new TranslatableComponent(langKey),
                     b -> Minecraft.getInstance().setScreen(screenFunction.apply(Minecraft.getInstance().screen))),
                 () -> I18n.exists(langKey + ".tooltip") ? I18n.get(langKey + ".tooltip") : "");
         }
@@ -615,7 +616,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
          */
         public boolean filter(String filter) {
             boolean match = false;
-            if (this.name.getContents() instanceof TranslatableContents trans) {
+            if (this.name instanceof TranslatableComponent trans) {
                 match = trans.getKey().toLowerCase().contains(filter);
             }
             return match || this.name.getString().toLowerCase().contains(filter);
@@ -629,7 +630,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
          */
         public float search(String search) {
             float matchKey = 0F;
-            if (this.name.getContents() instanceof TranslatableContents trans) {
+            if (this.name instanceof TranslatableComponent trans) {
                 // make this lower to prefer lang key matches
                 matchKey = StringSimilarity.partial_ratio(search, trans.getKey().toLowerCase()) * 0.9F;
             }

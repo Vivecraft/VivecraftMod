@@ -69,7 +69,7 @@ public class BowModule implements HeldInteractModule {
         this.isPressed[hand.ordinal()] = true;
         // call useItem with the hand that has the bow
         boolean bowInMain = BowTracker.isHoldingBow(player, InteractionHand.MAIN_HAND);
-        Minecraft.getInstance().gameMode.useItem(player,
+        Minecraft.getInstance().gameMode.useItem(player, player.level,
             bowInMain ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
         return false;
     }

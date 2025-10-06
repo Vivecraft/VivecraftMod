@@ -55,8 +55,8 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
 
         this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 6 - 10, 150, 20,
             this.isShift ?
-                Component.translatable("vivecraft.gui.radialmenu.mainset") :
-                Component.translatable("vivecraft.gui.radialmenu.alternateset"),
+                new TranslatableComponent("vivecraft.gui.radialmenu.mainset") :
+                new TranslatableComponent("vivecraft.gui.radialmenu.alternateset"),
             (p) -> {
                 this.isShift = !this.isShift;
                 this.reinit = true;
@@ -86,9 +86,9 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
             String label = keyMapping.map(mapping -> I18n.get(mapping.getName())).orElse("");
             this.addRenderableWidget(GuiRadial.createButton(label, (p) -> {
                 this.minecraft.setScreen(new GuiSelectionListScreen<>(
-                    Component.translatable(this.vrTitle), this,
+                    new TranslatableComponent(this.vrTitle), this,
                     () -> Arrays.stream(this.minecraft.options.keyMappings).sorted().toList(),
-                    key -> Component.translatable(key.getName()),
+                    key -> new TranslatableComponent(key.getName()),
                     KeyMapping::getCategory,
                     key -> {
                         this.selectedIndex = index;
@@ -126,15 +126,15 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         super.render(poseStack, mouseX, mouseY, partialTick);
         drawCenteredString(poseStack, this.minecraft.font,
-            Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50,
+            new TranslatableComponent("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50,
             0xFF55FF55);
 
         if (this.isShift) {
             drawCenteredString(poseStack, this.minecraft.font,
-                Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36,
+                new TranslatableComponent("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36,
                 0xFFD23877);
             drawCenteredString(poseStack, this.minecraft.font,
-                Component.translatable("vivecraft.messages.radialmenubind.3"), this.width / 2, this.height - 22,
+                new TranslatableComponent("vivecraft.messages.radialmenubind.3"), this.width / 2, this.height - 22,
                 0xFFD23877);
         }
     }

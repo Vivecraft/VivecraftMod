@@ -83,8 +83,7 @@ public abstract class AbstractArrowMixin extends Entity {
                         owner.connection.send(
                             new ClientboundSoundPacket(
                                 SoundEvents.ITEM_BREAK,
-                                SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7f, 0.5f,
-                                owner.level.random.nextLong()));
+                                SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7f, 0.5f));
                     }
                 }
             }

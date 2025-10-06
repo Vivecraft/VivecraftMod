@@ -527,8 +527,8 @@ public abstract class VRRenderer {
         if ((this.framebufferMR == null || this.framebufferUndistorted == null) && this.allFramebuffersInitialized()) {
             this.reinitFrameBuffers("All buffers needed, but some buffers not initialized");
         }
-        if (minecraft.options.graphicsMode().get() != this.previousGraphics) {
-            this.previousGraphics = minecraft.options.graphicsMode().get();
+        if (minecraft.options.graphicsMode != this.previousGraphics) {
+            this.previousGraphics = minecraft.options.graphicsMode;
             this.reinitFrameBuffers("gfx setting changed to: " + this.previousGraphics);
         }
 
@@ -861,7 +861,7 @@ public abstract class VRRenderer {
             if (!VRShaders.isReady()) {
                 throw new RenderConfigException(
                     new TranslatableComponent("vivecraft.messages.renderiniterror", this.getName()),
-                    Component.literal("Failed to load VR shaders, see log for full error."));
+                    new TextComponent("Failed to load VR shaders, see log for full error."));
             }
 
             RenderPassManager.setGUIRenderPass();

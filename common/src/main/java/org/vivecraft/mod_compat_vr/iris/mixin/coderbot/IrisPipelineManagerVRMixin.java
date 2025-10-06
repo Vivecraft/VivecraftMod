@@ -128,7 +128,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                         !ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization)
                     {
                         first = false;
-                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.slowshader"));
+                        ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.slowshader"));
                     }
                 }
                 // set to currently needed renderpass again

@@ -437,7 +437,7 @@ public class SwingTracker implements DebugRenderTracker {
                     int totalHits = 3;
                     // roomscale door punching
                     if (this.dh.vrSettings.doorHitting && isOpenable(blockstate, blockHit.getDirection()) &&
-                        this.mc.gameMode.useItemOn(player,
+                        this.mc.gameMode.useItemOn(player, player.clientLevel,
                             c == 1 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND, blockHit) !=
                             InteractionResult.PASS)
                     {
@@ -458,11 +458,11 @@ public class SwingTracker implements DebugRenderTracker {
                     {
                         // don't try to break crops with hoes
                         // actually use the item on the block
-                        boolean useSuccessful = this.mc.gameMode.useItemOn(player,
+                        boolean useSuccessful = this.mc.gameMode.useItemOn(player, player.clientLevel,
                             i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit).shouldSwing();
                         if (itemstack.is(ViveItemTags.VIVECRAFT_SCYTHES) && !useSuccessful) {
                             // some scythes just need to be used
-                            this.mc.gameMode.useItem(player,
+                            this.mc.gameMode.useItem(player, player.level,
                                 c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                         }
                     }

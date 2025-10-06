@@ -2,9 +2,9 @@ package org.vivecraft.client.gui.framework;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.List;
 
@@ -39,10 +39,10 @@ public class TooltipRenderer {
 
             // if tooltip is not too low, draw below button, else above
             if (widgetY + widgetHeight + formattedText.size() * (mc.font.lineHeight + 1) + 14 < mc.screen.height) {
-                mc.screen.renderTooltip(poseStack, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH),
+                mc.screen.renderTooltip(poseStack, mc.font.split(new TextComponent(tooltip), TOOLTIP_WIDTH),
                     tooltipCenter - TOOLTIP_HALF_WIDTH - 12, widgetY + widgetHeight + 14);
             } else {
-                mc.screen.renderTooltip(poseStack, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH),
+                mc.screen.renderTooltip(poseStack, mc.font.split(new TextComponent(tooltip), TOOLTIP_WIDTH),
                     tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
                     widgetY - formattedText.size() * (mc.font.lineHeight + 1) + 9);
             }

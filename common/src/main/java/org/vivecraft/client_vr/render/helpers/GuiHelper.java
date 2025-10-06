@@ -1,5 +1,7 @@
 package org.vivecraft.client_vr.render.helpers;
 
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -33,12 +35,24 @@ public class GuiHelper {
             double offsetPosition = Math.sin(Math.PI * 0.5 * Math.cos(Math.PI * 2.0 * seconds / minDif)) / 2.0 + 0.5;
             double offset = Mth.lerp(offsetPosition, 0.0F, difference);
 
-            GuiComponent.enableScissor(minX, minY, maxX, maxY);
+
+            enableScissor(minX, minY, maxX, maxY);
             GuiComponent.drawString(poseStack, font, text, minX - (int) offset, yCenter, color);
-            GuiComponent.disableScissor();
+            RenderSystem.disableScissor();
         } else {
             GuiComponent.drawCenteredString(poseStack, font, text, (minX + maxX) / 2, yCenter, color);
         }
+    }
+
+    private static void enableScissor(int minX, int minY, int maxX, int maxY) {
+        Window window = Minecraft.getInstance().getWindow();
+        int windowHeight = window.getHeight();
+        double scale = window.getGuiScale();
+        double x = minX * scale;
+        double y = windowHeight - maxY * scale;
+        double width = (maxX - minX) * scale;
+        double height = (maxY - minY) * scale;
+        RenderSystem.enableScissor((int)x, (int)y, Math.max(0, (int)width), Math.max(0, (int)height));
     }
 
     public static void renderOnTooltip(Button button, PoseStack poseStack, int x, int y, Component component) {

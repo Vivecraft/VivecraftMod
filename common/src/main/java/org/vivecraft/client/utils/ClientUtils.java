@@ -10,6 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -142,16 +144,16 @@ public class ClientUtils {
     public static Component getNameFromSoundEvent(ResourceLocation soundLocation) {
         String key = soundLocation.getPath();
         if (I18n.exists(key)) {
-            return Component.translatable(key);
+            return new TranslatableComponent(key);
         } else if (I18n.exists("subtitles." + key)) {
-            return Component.translatable("subtitles." + key);
+            return new TranslatableComponent("subtitles." + key);
         } else if (key.startsWith("music_disc.")) {
             String jukebox = key.replace("music_disc.", "jukebox_song.minecraft.");
             if (I18n.exists(jukebox)) {
-                return Component.translatable(jukebox);
+                return new TranslatableComponent(jukebox);
             }
         }
-        return Component.literal(key);
+        return new TextComponent(key);
     }
 
     /**

@@ -92,7 +92,8 @@ public class BezierCurve {
             this.renderVertex(bufferBuilder, avec3[i], c, x, y, z);
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.depthMask(true);
     }

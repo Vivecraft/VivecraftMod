@@ -128,7 +128,8 @@ public class DebugRenderHelper {
                 }
             }
             if (bufferBuilder != null) {
-                BufferUploader.drawWithShader(bufferBuilder.end());
+                bufferBuilder.end();
+                BufferUploader.end(bufferBuilder);
             }
         }
     }
@@ -186,7 +187,8 @@ public class DebugRenderHelper {
 
         list.forEach(p -> addAxes(poseStack, bufferBuilder, data, p));
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -228,9 +230,11 @@ public class DebugRenderHelper {
                             new TextComponent(tracker.getLeft().source.toString()), labels[tracker.getMiddle()]), 0.05F,
                         MathUtils.DARK_GRAY);
                 } else {
-                    addNamedCube(poseStack, pos, orientation, Component.translatable("vivecraft.formatting.name_value",
-                        Component.literal(tracker.getLeft().source.toString() + tracker.getLeft().deviceIndex),
-                        Component.translatable("vivecraft.messages.tracker.unknown")), 0.05F, MathUtils.DARK_GRAY);
+                    addNamedCube(poseStack, pos, orientation,
+                        new TranslatableComponent("vivecraft.formatting.name_value",
+                            new TextComponent(tracker.getLeft().source.toString() + tracker.getLeft().deviceIndex),
+                            new TranslatableComponent("vivecraft.messages.tracker.unknown")), 0.05F,
+                        MathUtils.DARK_GRAY);
                 }
             } else {
                 renderCube(poseStack, pos, 0.05F, MathUtils.DARK_GRAY);
@@ -256,7 +260,8 @@ public class DebugRenderHelper {
         addLine(poseStack, bufferBuilder, position, MathUtils.UP, MathUtils.GREEN);
         addLine(poseStack, bufferBuilder, position, MathUtils.RIGHT, MathUtils.RED);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -363,7 +368,8 @@ public class DebugRenderHelper {
                 .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -396,7 +402,8 @@ public class DebugRenderHelper {
             prev = point;
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -418,7 +425,8 @@ public class DebugRenderHelper {
                 .color(color.x(), color.y(), color.z(), 1.0F).endVertex();
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -530,7 +538,8 @@ public class DebugRenderHelper {
         Vec3 end = new Vec3(position.x(), position.y(), position.z()).add(MathUtils.BACK_D.scale(size * 0.5F));
         RenderHelper.renderBox(bufferBuilder, start, end, size, size, iColor, (byte) 255, poseStack);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -585,7 +594,8 @@ public class DebugRenderHelper {
 
         addCircle(poseStack, bufferBuilder, center, forward, radius, color);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -605,7 +615,8 @@ public class DebugRenderHelper {
         addCircle(poseStack, bufferBuilder, center, MathUtils.FORWARD, radius, color);
         addCircle(poseStack, bufferBuilder, center, MathUtils.UP, radius, color);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -648,7 +659,8 @@ public class DebugRenderHelper {
             offset.rotateAxis(Mth.HALF_PI, dir.x(), dir.y(), dir.z());
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**
@@ -688,7 +700,8 @@ public class DebugRenderHelper {
             offset.rotateAxis(Mth.HALF_PI, dir.x(), dir.y(), dir.z());
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**

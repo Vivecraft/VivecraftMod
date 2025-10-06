@@ -2260,8 +2260,8 @@ public class VRSettings {
                     return prefix + I18n.get("options.off");
                 } else if (hrtfSelection == 0) {
                     return prefix + I18n.get("vivecraft.options.default");
-                } else if (hrtfSelection <= ClientDataHolderVR.HRTF_LIST.size()) {
-                    return prefix + ClientDataHolderVR.HRTF_LIST.get(hrtfSelection - 1);
+                } else if (hrtfSelection <= ClientDataHolderVR.getInstance().hrtfList.size()) {
+                    return prefix + ClientDataHolderVR.getInstance().hrtfList.get(hrtfSelection - 1);
                 }
                 return prefix;
             }
@@ -2269,7 +2269,7 @@ public class VRSettings {
             @Override
             Object setOptionValue(Object value) {
                 int hrtfSelection = (int) value;
-                if (++hrtfSelection > ClientDataHolderVR.HRTF_LIST.size()) {
+                if (++hrtfSelection > ClientDataHolderVR.getInstance().hrtfList.size()) {
                     hrtfSelection = -1;
                 }
                 return hrtfSelection;

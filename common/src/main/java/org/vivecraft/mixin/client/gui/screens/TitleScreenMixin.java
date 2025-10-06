@@ -57,7 +57,7 @@ public abstract class TitleScreenMixin extends Screen {
             button.setMessage(new TranslatableComponent("vivecraft.gui.vr",
                 VRState.VR_ENABLED ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
         }, (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
-            Component.translatable("vivecraft.options.VR_ENABLED.tooltip")));
+            new TranslatableComponent("vivecraft.options.VR_ENABLED.tooltip")));
         this.vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
 
         this.addRenderableWidget(this.vivecraft$vrModeButton);

@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.LangHelper;
@@ -18,7 +19,7 @@ public class ServerVrChangesScreen extends Screen {
     private final Screen lastScreen;
 
     public ServerVrChangesScreen(Map<String, String> changes) {
-        super(Component.translatable("vivecraft.messages.nondefaultvrchanges.title"));
+        super(new TranslatableComponent("vivecraft.messages.nondefaultvrchanges.title"));
         this.lastScreen = Minecraft.getInstance().screen;
         StringBuilder builder = new StringBuilder();
         changes.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
@@ -42,7 +43,7 @@ public class ServerVrChangesScreen extends Screen {
 
         this.addRenderableWidget(
             new Button(this.width / 2 - 75, this.height - 32, 150, 20,
-                Component.translatable("vivecraft.gui.ok"), (p) -> onClose()));
+                new TranslatableComponent("vivecraft.gui.ok"), (p) -> onClose()));
     }
 
     @Override

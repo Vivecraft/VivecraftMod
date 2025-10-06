@@ -2,6 +2,7 @@ package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.screens.GuiListScreen;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class GuiAllSettings extends GuiListScreen {
     public GuiAllSettings(Screen lastScreen) {
-        super(Component.translatable("vivecraft.options.screen.settings"), lastScreen);
+        super(new TranslatableComponent("vivecraft.options.screen.settings"), lastScreen);
     }
 
     @Override

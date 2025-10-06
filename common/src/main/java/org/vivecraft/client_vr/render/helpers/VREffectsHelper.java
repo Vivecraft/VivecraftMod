@@ -187,11 +187,11 @@ public class VREffectsHelper {
                     DATA_HOLDER.vrSettings.showChatMessageStencil)
                 {
                     DATA_HOLDER.showedStencilMessage = true;
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.stencil",
-                        Component.translatable("vivecraft.messages.3options",
-                                Component.translatable("options.title"),
-                                Component.translatable("vivecraft.options.screen.main"),
-                                Component.translatable("vivecraft.options.screen.stereorendering"))
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.stencil",
+                        new TranslatableComponent("vivecraft.messages.3options",
+                            new TranslatableComponent("options.title"),
+                            new TranslatableComponent("vivecraft.options.screen.main"),
+                            new TranslatableComponent("vivecraft.options.screen.stereorendering"))
                             .withStyle(style -> style.withClickEvent(
                                     new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
                                         new GuiRenderOpticsSettings(null)))
@@ -283,7 +283,8 @@ public class VREffectsHelper {
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(matrix, 100, 0, 0)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         // up
         RenderSystem.setShaderTexture(0, CUBE_UP);
@@ -296,7 +297,8 @@ public class VREffectsHelper {
             .uv(1, 1).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(matrix, 100, 100, 100)
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         // left
         RenderSystem.setShaderTexture(0, CUBE_LEFT);
@@ -309,7 +311,8 @@ public class VREffectsHelper {
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(matrix, 0, 0, 100)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         // right
         RenderSystem.setShaderTexture(0, CUBE_RIGHT);
@@ -322,7 +325,8 @@ public class VREffectsHelper {
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(matrix, 100, 100, 0)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         // front
         RenderSystem.setShaderTexture(0, CUBE_FRONT);
@@ -335,7 +339,8 @@ public class VREffectsHelper {
             .uv(1, 0).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(matrix, 0, 100, 0)
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         // back
         RenderSystem.setShaderTexture(0, CUBE_BACK);
@@ -348,7 +353,8 @@ public class VREffectsHelper {
             .uv(0, 0).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(matrix, 100, 0, 100)
             .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         poseStack.popPose();
 
@@ -406,7 +412,8 @@ public class VREffectsHelper {
                 .color(r, g, b, 255)
                 .endVertex();
 
-            BufferUploader.drawWithShader(bufferBuilder.end());
+            bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
             poseStack.popPose();
         }
     }
@@ -511,7 +518,8 @@ public class VREffectsHelper {
         bufferBuilder.vertex(matrix, width, 0, length)
             .uv(repeat * width, 0).color(r, g, b, a).endVertex();
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
         poseStack.popPose();
     }
 
@@ -590,7 +598,8 @@ public class VREffectsHelper {
             .color(1f, 1f, 1f, 1f)
             .endVertex();
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         poseStack.popPose();
 
@@ -901,7 +910,8 @@ public class VREffectsHelper {
                 .color(1.0F, 1.0F, 1.0F, 0.9F).uv(u0, v0).endVertex();
             bufferBuilder.vertex(matrix, -width, headHeight, -width)
                 .color(1.0F, 1.0F, 1.0F, 0.9F).uv(u1, v0).endVertex();
-            BufferUploader.drawWithShader(bufferBuilder.end());
+            bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
             posestack.popPose();
         }
 
@@ -1224,7 +1234,8 @@ public class VREffectsHelper {
         bufferBuilder.vertex(100.F, -100.F, -2.0F).endVertex();
         bufferBuilder.vertex(100.F, 100.F, -2.0F).endVertex();
         bufferBuilder.vertex(-100.F, 100.F, -2.0F).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
         RenderSystem.enableTexture();
@@ -1394,7 +1405,8 @@ public class VREffectsHelper {
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
             .normal(0.0F, 0.0F, 1.0F).endVertex();
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();

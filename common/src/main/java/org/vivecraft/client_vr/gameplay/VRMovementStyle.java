@@ -138,11 +138,11 @@ public class VRMovementStyle {
             this.arcAiming = true;
         } else {
             changedStyle = false;
-            ClientUtils.addChatMessage(Component.literal("Unknown teleport style requested: " + requestedStyle));
+            ClientUtils.addChatMessage(new TextComponent("Unknown teleport style requested: " + requestedStyle));
         }
 
         if (changedStyle) {
-            ClientUtils.addChatMessage(Component.literal("Teleport style (RCTRL-M): " + this.name));
+            ClientUtils.addChatMessage(new TextComponent("Teleport style (RCTRL-M): " + this.name));
         }
     }
 }

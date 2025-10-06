@@ -167,7 +167,8 @@ public class VRWidgetHelper {
         MC.getBlockRenderer().getModelRenderer()
             .renderModel(poseStack.last(), bufferBuilder, null, MC.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F,
                 combinedLight, OverlayTexture.NO_OVERLAY);
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         // render camera display
         RenderSystem.disableBlend();
@@ -226,7 +227,8 @@ public class VRWidgetHelper {
                     .normal(0.0F, 1.0F, 0.0F).endVertex();
             }
         }
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         MC.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.enableBlend();

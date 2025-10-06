@@ -103,12 +103,12 @@ public class BlockInteractionModule implements InteractModule {
         boolean success = false;
         if (this.inBlockHit[hand.ordinal()] != null) {
             ClientNetworking.sendActiveHand(hand, true);
-            success = this.mc.gameMode.useItemOn(player, hand, this.inBlockHit[hand.ordinal()])
+            success = this.mc.gameMode.useItemOn(player, player.clientLevel, hand, this.inBlockHit[hand.ordinal()])
                 .consumesAction();
             ClientNetworking.resetActiveBodyPart();
         } else if (this.bukkit[hand.ordinal()]) {
             ClientNetworking.sendActiveHand(hand, true);
-            success = this.mc.gameMode.useItem(player, hand).consumesAction();
+            success = this.mc.gameMode.useItem(player, player.level, hand).consumesAction();
             ClientNetworking.resetActiveBodyPart();
         }
         return success;

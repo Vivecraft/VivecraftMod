@@ -760,20 +760,20 @@ public abstract class MCVR {
             {
                 if (this.dh.vrSettings.seated) {
                     this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.movementmodeswitch",
-                        this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") :
-                            Component.translatable("vivecraft.options.teleport")));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch",
+                        this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") :
+                            new TranslatableComponent("vivecraft.options.teleport")));
                 } else if (this.dh.vrPlayer.isTeleportSupported()) {
                     this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.movementmodeswitch",
-                        this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") :
-                            Component.translatable("vivecraft.options.teleport")));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch",
+                        this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") :
+                            new TranslatableComponent("vivecraft.options.teleport")));
                 } else if (this.dh.vrPlayer.isTeleportOverridden()) {
                     this.dh.vrPlayer.setTeleportOverride(false);
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.teleportdisabled"));
                 } else {
                     this.dh.vrPlayer.setTeleportOverride(true);
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.teleportenabled"));
                 }
             }
         } else {
@@ -1041,8 +1041,8 @@ public abstract class MCVR {
         // Walk up blocks
         if (MOD.keyToggleWalkUpBlocks.consumeClick()) {
             this.dh.vrSettings.walkUpBlocks = !this.dh.vrSettings.walkUpBlocks;
-            ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.walkupblocks",
-                Component.translatable(this.dh.vrSettings.walkUpBlocks ? LangHelper.ON_KEY : LangHelper.OFF_KEY)));
+            ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.walkupblocks",
+                new TranslatableComponent(this.dh.vrSettings.walkUpBlocks ? LangHelper.ON_KEY : LangHelper.OFF_KEY)));
         }
 
         // process movement here, so we set the keybind states before tick

@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -275,7 +276,7 @@ public class RenderHelper {
 
         int width = 200;
         List<FormattedCharSequence> formattedChars = MC.font.split(
-            Component.translatable("vivecraft.messages.connectingtoruntime"), width - 10);
+            new TranslatableComponent("vivecraft.messages.connectingtoruntime"), width - 10);
         int height = formattedChars.size() * 8 + Math.max(formattedChars.size() - 1, 0) * 4 + 10;
 
         int x = MC.getWindow().getGuiScaledWidth() / 2 - width / 2;
@@ -334,7 +335,8 @@ public class RenderHelper {
             .vertex(matrix, -sizeX, sizeY, 0)
             .uv(0.0F, 1.0F)
             .endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
@@ -436,7 +438,8 @@ public class RenderHelper {
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight)
             .normal(normal.x(), normal.y(), normal.z())
             .endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         MC.gameRenderer.lightTexture().turnOffLightLayer();
 
@@ -480,7 +483,8 @@ public class RenderHelper {
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
         bufferBuilder.vertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     /**

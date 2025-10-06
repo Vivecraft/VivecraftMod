@@ -17,7 +17,7 @@ public class AutoCalibration {
         // round to nearest %
         int percentHeight = Math.round(100.0F * getPlayerHeight() / DEFAULT_HEIGHT);
 
-        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.heightset", percentHeight));
+        ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.heightset", percentHeight));
         dataHolder.vrSettings.saveOptions();
     }
 

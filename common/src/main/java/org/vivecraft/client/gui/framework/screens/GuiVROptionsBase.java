@@ -7,9 +7,9 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
@@ -54,8 +54,8 @@ public abstract class GuiVROptionsBase extends Screen {
             VIVE_WIDGETS_LOCATION, 64, 64,
             (p) -> this.minecraft.setScreen(new GuiAllSettings(this)),
             (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
-                Component.translatable("vivecraft.options.screen.search")),
-            Component.translatable("vivecraft.options.screen.search"));
+                new TranslatableComponent("vivecraft.options.screen.search")),
+            new TranslatableComponent("vivecraft.options.screen.search"));
         this.addRenderableWidget(search);
 
         this.addRenderableWidget(
@@ -251,7 +251,8 @@ public abstract class GuiVROptionsBase extends Screen {
 
         super.render(poseStack, mouseX, mouseY, partialTick);
 
-        drawCenteredString(poseStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 0xFFFFFFFF);
+        drawCenteredString(poseStack, this.font, new TranslatableComponent(this.vrTitle), this.width / 2, 15,
+            0xFFFFFFFF);
 
         if (this.btnDefaults != null) {
             this.btnDefaults.visible = this.drawDefaultButtons;

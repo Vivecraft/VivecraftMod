@@ -26,7 +26,7 @@ public class GuiServerSettings extends GuiListScreen {
         super.init();
         if (this.minecraft.level != null && !this.minecraft.isLocalServer()) {
             this.addRenderableWidget(new MultilineComponent(this.width / 2, this.height / 2, this.list.getRowWidth(),
-                Component.translatable("vivecraft.messages.serversettingsnotavailable"), true,
+                new TranslatableComponent("vivecraft.messages.serversettingsnotavailable"), true,
                 this.minecraft.font).withBackground());
             this.list.setActive(false);
             if (this.searchBox != null) {
@@ -64,7 +64,7 @@ public class GuiServerSettings extends GuiListScreen {
                 }
                 // create a new group
                 SettingsList.GroupedEntry groupedEntry = new SettingsList.GroupedEntry(
-                    Component.translatable("vivecraft.serverSettings." + group));
+                    new TranslatableComponent("vivecraft.serverSettings." + group));
                 // add category
                 consumer.accept(groupedEntry);
                 groupStack.addFirst(groupedEntry);

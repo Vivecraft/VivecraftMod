@@ -30,7 +30,7 @@ public class LibraryVRMixin {
     private void vivecraft$setHRTF(String string, CallbackInfo ci, @Local ALCCapabilities aLCCapabilities) {
         if (!VRState.VR_RUNNING) return;
 
-        ClientDataHolderVR.HRTF_LIST.clear();
+        ClientDataHolderVR.getInstance().hrtfList.clear();
 
         if (aLCCapabilities.ALC_SOFT_HRTF) {
             int hrtfCount = ALC10.alcGetInteger(this.currentDevice, 6548);
@@ -41,7 +41,7 @@ public class LibraryVRMixin {
                 for (int i = 0; i < hrtfCount; i++) {
                     String name = Objects.requireNonNull(
                         SOFTHRTF.alcGetStringiSOFT(this.currentDevice, SOFTHRTF.ALC_HRTF_SPECIFIER_SOFT, i));
-                    ClientDataHolderVR.HRTF_LIST.add(name);
+                    ClientDataHolderVR.getInstance().hrtfList.add(name);
                     VRSettings.LOGGER.info("Vivecraft: {}: {}", i, name);
                 }
 
@@ -60,11 +60,12 @@ public class LibraryVRMixin {
                 IntBuffer buf = BufferUtils.createIntBuffer(10).put(SOFTHRTF.ALC_HRTF_SOFT).put(hrtfEnable);
 
                 if (selectedIndex != -1) {
-                    if (selectedIndex > 0 && selectedIndex <= ClientDataHolderVR.HRTF_LIST.size()) {
-                        VRSettings.LOGGER.info("Using HRTF: {}", ClientDataHolderVR.HRTF_LIST.get(selectedIndex - 1));
+                    if (selectedIndex > 0 && selectedIndex <= ClientDataHolderVR.getInstance().hrtfList.size()) {
+                        VRSettings.LOGGER.info("Using HRTF: {}",
+                            ClientDataHolderVR.getInstance().hrtfList.get(selectedIndex - 1));
                         buf.put(SOFTHRTF.ALC_HRTF_ID_SOFT).put(selectedIndex - 1);
                     } else {
-                        if (selectedIndex > ClientDataHolderVR.HRTF_LIST.size()) {
+                        if (selectedIndex > ClientDataHolderVR.getInstance().hrtfList.size()) {
                             VRSettings.LOGGER.warn("Invalid HRTF index: {}", selectedIndex);
                         }
                         VRSettings.LOGGER.info("Using default HRTF");

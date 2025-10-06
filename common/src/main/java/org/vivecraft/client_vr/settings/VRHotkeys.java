@@ -56,15 +56,15 @@ public class VRHotkeys {
                     // Debug aim
                     if (key == GLFW.GLFW_KEY_RIGHT_SHIFT) {
                         dataHolder.vrSettings.storeDebugAim = true;
-                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.showaim"));
+                        ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.showaim"));
                         gotKey = true;
                     }
 
                     // Player inertia
                     if (key == GLFW.GLFW_KEY_I) {
                         dataHolder.vrSettings.inertiaFactor = dataHolder.vrSettings.inertiaFactor.getNext();
-                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.playerinertia",
-                            Component.translatable(dataHolder.vrSettings.inertiaFactor.getLangKey())));
+                        ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.playerinertia",
+                            new TranslatableComponent(dataHolder.vrSettings.inertiaFactor.getLangKey())));
 
                         gotKey = true;
                     }
@@ -73,10 +73,11 @@ public class VRHotkeys {
                     if (key == GLFW.GLFW_KEY_R && ClientNetworking.SERVER_ALLOWS_DIRECT_TELEPORT) {
                         if (dataHolder.vrPlayer.isTeleportOverridden()) {
                             dataHolder.vrPlayer.setTeleportOverride(false);
-                            ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                            ClientUtils.addChatMessage(
+                                new TranslatableComponent("vivecraft.messages.teleportdisabled"));
                         } else {
                             dataHolder.vrPlayer.setTeleportOverride(true);
-                            ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                            ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.teleportenabled"));
                         }
 
                         gotKey = true;

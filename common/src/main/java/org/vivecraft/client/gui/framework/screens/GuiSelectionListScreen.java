@@ -4,6 +4,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
 
 import javax.annotation.Nullable;
@@ -50,7 +51,7 @@ public class GuiSelectionListScreen<T> extends GuiListScreen {
     protected void addLowerButtons(int top) {
         this.addRenderableWidget(
             new Button(this.width / 2 - 155, top, 150, 20,
-                Component.translatable(this.resettable ? "controls.reset" : "vivecraft.gui.clear"),
+                new TranslatableComponent(this.resettable ? "controls.reset" : "vivecraft.gui.clear"),
                 p -> {
                     this.consumer.accept(null);
                     this.onClose();
@@ -58,7 +59,7 @@ public class GuiSelectionListScreen<T> extends GuiListScreen {
 
         this.addRenderableWidget(
             new Button(this.width / 2 + 5, top, 150, 20,
-                Component.translatable("gui.cancel"), p -> onClose()));
+                new TranslatableComponent("gui.cancel"), p -> onClose()));
     }
 
     @Override
@@ -70,7 +71,7 @@ public class GuiSelectionListScreen<T> extends GuiListScreen {
             String newCategory = this.categorySupplier.apply(item);
             if (!currentCategory.equals(newCategory)) {
                 currentCategory = newCategory;
-                activeCategory = new SettingsList.GroupedEntry(Component.translatable(newCategory));
+                activeCategory = new SettingsList.GroupedEntry(new TranslatableComponent(newCategory));
                 entries.add(activeCategory);
             }
             SettingsList.BaseEntry entry = new SettingsList.SelectableEntry(this.componentSupplier.apply(item),

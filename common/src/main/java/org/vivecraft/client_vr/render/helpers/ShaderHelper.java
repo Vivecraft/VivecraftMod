@@ -503,7 +503,8 @@ public class ShaderHelper {
         bufferBuilder.vertex(xMaxPos, yMaxPos, 0.0F).uv(xMax, yMax).endVertex();
         bufferBuilder.vertex(xMinPos, yMaxPos, 0.0F).uv(xMin, yMax).endVertex();
 
-        BufferUploader.draw(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader._endInternal(bufferBuilder);
         VRShaders.BLIT_VR_SHADER.clear();
 
         RenderSystem.depthMask(true);

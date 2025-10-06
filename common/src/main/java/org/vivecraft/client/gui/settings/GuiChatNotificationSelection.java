@@ -8,6 +8,8 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import org.vivecraft.client.gui.framework.screens.GuiSelectionListScreen;
@@ -23,7 +25,7 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
     private static AbstractWidget ACTIVE_BUTTON;
 
     public GuiChatNotificationSelection(Screen lastScreen) {
-        super(Component.translatable("vivecraft.options.CHAT_NOTIFICATION_SOUND"), lastScreen,
+        super(new TranslatableComponent("vivecraft.options.CHAT_NOTIFICATION_SOUND"), lastScreen,
             () -> Registry.SOUND_EVENT.keySet().stream().sorted().toList(),
             ClientUtils::getNameFromSoundEvent,
             resourceLocation -> "",
@@ -37,7 +39,7 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
             },
             true,
-            resourceLocation -> new SilentButton(Component.literal("♫"),
+            resourceLocation -> new SilentButton(new TextComponent("♫"),
                 b -> {
                     SoundEvent soundEvent = Registry.SOUND_EVENT.get(resourceLocation);
                     if (soundEvent != null) {
@@ -66,7 +68,7 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
 
     private static void stopSound() {
         Minecraft.getInstance().getSoundManager().stop(ACTIVE_SOUND);
-        ACTIVE_BUTTON.setMessage(Component.literal("♫"));
+        ACTIVE_BUTTON.setMessage(new TextComponent("♫"));
         ACTIVE_SOUND = null;
         ACTIVE_BUTTON = null;
     }
@@ -79,6 +81,6 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
         Minecraft.getInstance().getSoundManager().play(ACTIVE_SOUND);
 
         ACTIVE_BUTTON = abstractWidget;
-        ACTIVE_BUTTON.setMessage(Component.literal("♫").withStyle(ChatFormatting.GREEN));
+        ACTIVE_BUTTON.setMessage(new TextComponent("♫").withStyle(ChatFormatting.GREEN));
     }
 }
