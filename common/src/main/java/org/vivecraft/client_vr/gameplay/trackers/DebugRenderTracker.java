@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.LocalPlayer;
 import org.vivecraft.api.client.Tracker;
 
@@ -13,5 +14,5 @@ public interface DebugRenderTracker extends Tracker {
      * <br>
      * This is called every frame, so {@link ProcessType#PER_TICK} trackers should make sure that stuff is not {@code null}, since this could be called before {@link Tracker#activeProcess(LocalPlayer)} is called.
      */
-    void renderDebug();
+    void renderDebug(PoseStack poseStack);
 }

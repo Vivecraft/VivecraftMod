@@ -82,15 +82,4 @@ public interface VRRenderingAPI {
      * @since 1.3.0
      */
     void setupRenderingAtHand(InteractionHand hand, PoseStack stack);
-
-    /**
-     * Sets the provided {@link Matrix4f} to render at the position of and with the rotation of the provided
-     * {@link InteractionHand}, this assumes the given {@code matrix} to be an identity.
-     *
-     * @param hand   The hand to set the Matrix4f to.
-     * @param matrix The Matrix4f to be set.
-     * @since 1.3.0
-     * @since Minecraft 1.20.5
-     */
-    void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix);
 }

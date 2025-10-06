@@ -623,7 +623,6 @@ public class VRPlayer {
             itemStack.getItem() instanceof PotionItem ||
             itemStack.getItem() instanceof BowItem ||
             itemStack.getItem() instanceof FishingRodItem ||
-            itemStack.getItem() instanceof WindChargeItem ||
             // crossbows actually don't work with this; they use the head rotation to aim, which is only updated on tick
             (itemStack.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(itemStack)) ||
             itemStack.is(ViveItemTags.VIVECRAFT_THROW_ITEMS)

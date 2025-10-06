@@ -282,24 +282,13 @@ public class ServerNetworking {
      */
     private static void applyEquipmentChange(ServerPlayer player, ItemStack oldItem, ItemStack newItem) {
         if (player.equipmentHasChanged(oldItem, newItem)) {
-            AttributeMap attributeMap = player.getAttributes();
             if (!oldItem.isEmpty()) {
-                oldItem.forEachModifier(EquipmentSlot.MAINHAND, (holder, attributeModifier) -> {
-                    AttributeInstance attributeInstance = attributeMap.getInstance(holder);
-                    if (attributeInstance != null) {
-                        attributeInstance.removeModifier(attributeModifier);
-                    }
-                });
+                player.getAttributes()
+                    .removeAttributeModifiers(oldItem.getAttributeModifiers(EquipmentSlot.MAINHAND));
             }
-
             if (!newItem.isEmpty()) {
-                newItem.forEachModifier(EquipmentSlot.MAINHAND, (holder, attributeModifier) -> {
-                    AttributeInstance attributeInstance = attributeMap.getInstance(holder);
-                    if (attributeInstance != null) {
-                        attributeInstance.removeModifier(attributeModifier.id());
-                        attributeInstance.addTransientModifier(attributeModifier);
-                    }
-                });
+                player.getAttributes()
+                    .addTransientAttributeModifiers(newItem.getAttributeModifiers(EquipmentSlot.MAINHAND));
             }
         }
     }

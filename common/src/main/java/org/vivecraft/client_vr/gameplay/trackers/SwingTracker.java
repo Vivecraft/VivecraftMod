@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
@@ -26,10 +27,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -75,7 +76,7 @@ public class SwingTracker implements DebugRenderTracker {
     private final AABB[] lastAttackAABB = new AABB[4];
     private final Vec3[] lastBlockHit = new Vec3[4];
     private final int[] lastMiningPointHit = new int[4];
-    private final List<Pair<Vec3, Vector3fc>>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
+    private final LinkedList<Pair<Vec3, Vector3fc>>[] previousMiningPoints = new LinkedList[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -647,7 +648,7 @@ public class SwingTracker implements DebugRenderTracker {
     }
 
     @Override
-    public void renderDebug() {
+    public void renderDebug(PoseStack poseStack) {
         int trackers = 2;
 
         if (this.dh.vrSettings.feetCollision && this.dh.vrPlayer.vrdata_world_pre.fbtMode != FBTMode.ARMS_ONLY) {
@@ -688,15 +689,15 @@ public class SwingTracker implements DebugRenderTracker {
                     }
                 }
 
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.miningPoint[i], cam), 0.025F,
+                DebugRenderHelper.renderCube(poseStack, MathUtils.subtractToVector3f(this.miningPoint[i], cam), 0.025F,
                     this.canAct[i] ? MathUtils.GREEN : failColor);
                 if (!this.previousMiningPoints[i].isEmpty()) {
                     Pair<Vec3, Vector3fc> prev = null;
                     for (Pair<Vec3, Vector3fc> p : this.previousMiningPoints[i]) {
-                        DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(p.getLeft(), cam), 0.0125F,
+                        DebugRenderHelper.renderCube(poseStack, MathUtils.subtractToVector3f(p.getLeft(), cam), 0.0125F,
                             p.getRight());
                         if (prev != null) {
-                            DebugRenderHelper.renderLine(p.getRight(),
+                            DebugRenderHelper.renderLine(poseStack, p.getRight(),
                                 MathUtils.subtractToVector3f(prev.getLeft(), cam),
                                 MathUtils.subtractToVector3f(p.getLeft(), cam));
                         }
@@ -705,20 +706,20 @@ public class SwingTracker implements DebugRenderTracker {
                 }
             }
             if (this.lastBlockHit[i] != null) {
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.lastBlockHit[i], camWorld), 0.025F,
-                    MathUtils.GREEN);
+                DebugRenderHelper.renderCube(poseStack, MathUtils.subtractToVector3f(this.lastBlockHit[i], camWorld),
+                    0.025F, MathUtils.GREEN);
             }
 
             if (this.lastAttackAABB[i] != null) {
-                DebugRenderHelper.renderAABB(this.lastAttackAABB[i].move(-cam.x, -cam.y, -cam.z),
+                DebugRenderHelper.renderAABB(poseStack, this.lastAttackAABB[i].move(-cam.x, -cam.y, -cam.z),
                     this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
             }
             if (this.weaponTip[i] != null) {
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.weaponTip[i], cam), 0.025F,
+                DebugRenderHelper.renderCube(poseStack, MathUtils.subtractToVector3f(this.weaponTip[i], cam), 0.025F,
                     this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
             }
             for (Entity entity : this.lastHitEntities[i]) {
-                DebugRenderHelper.renderCube(
+                DebugRenderHelper.renderCube(poseStack,
                     MathUtils.subtractToVector3f(entity.getBoundingBox().getCenter(), camWorld),
                     (float) entity.getBoundingBox().getSize() / 2F, MathUtils.GREEN);
             }

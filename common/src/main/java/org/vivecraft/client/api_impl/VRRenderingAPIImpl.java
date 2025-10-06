@@ -50,11 +50,6 @@ public class VRRenderingAPIImpl implements VRRenderingAPI {
 
     @Override
     public void setupRenderingAtHand(InteractionHand hand, PoseStack stack) {
-        RenderHelper.setupRenderingAtController(hand.ordinal(), stack.last().pose());
-    }
-
-    @Override
-    public void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix) {
-        RenderHelper.setupRenderingAtController(hand.ordinal(), matrix);
+        RenderHelper.setupRenderingAtController(hand.ordinal(), stack);
     }
 }

@@ -144,7 +144,7 @@ public class WidgetBuilder {
     public static <T> Supplier<AbstractWidget> getEditListWidget(
         ConfigBuilder.ListValue<T> listValue, int width, int height)
     {
-        Object first = listValue.get().isEmpty() ? null : listValue.get().getFirst();
+        Object first = listValue.get().isEmpty() ? null : listValue.get().get(0);
         if (first == null || first instanceof String) {
             ConfigBuilder.ListValue<String> stringValue = (ConfigBuilder.ListValue<String>) listValue;
             return () -> Button.builder(Component.translatable("vivecraft.options.editlist"),

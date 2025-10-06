@@ -865,7 +865,8 @@ public class MenuWorldRenderer {
             RenderSystem.setShaderTexture(0, END_SKY_LOCATION);
 
             this.endSkyVBO.bind();
-            this.endSkyVBO.drawWithShader(poseStack, RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
+            this.endSkyVBO.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(),
+                RenderSystem.getShader());
             VertexBuffer.unbind();
 
             RenderSystem.depthMask(true);

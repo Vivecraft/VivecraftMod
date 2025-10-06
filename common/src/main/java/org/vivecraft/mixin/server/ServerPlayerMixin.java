@@ -3,7 +3,6 @@ package org.vivecraft.mixin.server;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -175,14 +174,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             Vec3 dmgPos = damageSource.getSourcePosition();
             boolean isProjectile = false;
             // if the hit is from an entity, move it back in the movement direction, to get a better source direction
-            if (damageSource.getDirectEntity() instanceof Entity entity && dmgPos == entity.position()) {
+            Entity entity = damageSource.getDirectEntity();
+            if (entity != null && dmgPos == entity.position()) {
                 isProjectile = entity instanceof Projectile;
                 dmgPos = entity.getBoundingBox().getCenter().subtract(entity.getDeltaMovement().normalize());
             }
             // check if any hand is holding a shield
             for (int i = 0; i < 2; i++) {
                 InteractionHand hand = InteractionHand.values()[i];
-                ItemStack stack = this.getItemBySlot(LivingEntity.getSlotForHand(hand));
+                ItemStack stack = this.getItemBySlot(
+                    hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
                 // check for shield and do not bypass item cooldowns
                 if (stack != null && stack.getItem().getUseAnimation(stack) == UseAnim.BLOCK &&
                     !this.getCooldowns().isOnCooldown(stack.getItem()))

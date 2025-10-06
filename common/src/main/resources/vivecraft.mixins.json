@@ -109,7 +109,6 @@
     "world.entity.monster.EndermanMixin",
     "world.entity.projectile.AbstractArrowMixin",
     "world.entity.projectile.AbstractHurtingProjectileMixin",
-    "world.entity.projectile.AbstractWindChargeMixin",
     "world.entity.projectile.FishingHookMixin",
     "world.entity.projectile.ProjectileMixin",
     "world.entity.projectile.ProjectileUtilMixin",
@@ -118,7 +117,7 @@
     "world.item.CrossbowItemMixin",
     "world.item.ItemMixin",
     "world.item.CrossbowItemMixin",
-    "world.item.crafting.ShapedRecipeMixin"
+    "world.item.crafting.ShapedRecipeMixin",
     "world.level.block.FenceGateBlockServerMixin"
   ]
 }

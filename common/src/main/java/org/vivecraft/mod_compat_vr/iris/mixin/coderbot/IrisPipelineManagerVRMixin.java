@@ -5,7 +5,6 @@ import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.DimensionId;
 import net.coderbot.iris.shaderpack.materialmap.NamespacedId;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,9 +13,10 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Pseudo
-@Mixin(net.coderbot.iris.pipeline.PipelineManager.class)
+@Mixin(PipelineManager.class)
 public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Shadow(remap = false)
@@ -105,7 +105,6 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                 this.vivecraft$vrPipelinesCurrentDimension = this.vivecraft$vrPipelinesPerDimension.get(newDimension);
                 // main pipeline also sets this, but we don't want that, since it is unused
                 this.vivecraft$shadowRenderTargets = null;
-
                 boolean first = true;
 
                 for (RenderPass renderPass : RenderPass.values()) {
@@ -129,8 +128,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                         !ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization)
                     {
                         first = false;
-                        Minecraft.getInstance().gui.getChat()
-                            .addMessage(Component.translatable("vivecraft.messages.slowshader"));
+                        ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.slowshader"));
                     }
                 }
                 // set to currently needed renderpass again
@@ -160,8 +158,8 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     private void vivecraft$returnCurrentVRPipeline164(
         DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir)
     {
+        this.vivecraft$updatePipeline(newDimension);
         if (!RenderPassType.isVanilla()) {
-            this.pipeline = vivecraft$getCurrentVRPipeline(newDimension);
             cir.setReturnValue(this.pipeline);
         }
     }
@@ -171,9 +169,19 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     private void vivecraft$returnCurrentVRPipeline165(
         NamespacedId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir)
     {
+        this.vivecraft$updatePipeline(newDimension);
+        if (!RenderPassType.isVanilla()) {
+            cir.setReturnValue(this.pipeline);
+        }
+    }
+
+    @Unique
+    private void vivecraft$updatePipeline(Object newDimension) {
         if (!RenderPassType.isVanilla()) {
             this.pipeline = vivecraft$getCurrentVRPipeline(newDimension);
-            cir.setReturnValue(this.pipeline);
+            IrisHelper.swapSSBOs(this.pipeline, ClientDataHolderVR.getInstance().currentPass);
+        } else {
+            IrisHelper.swapSSBOs(this.pipeline, ClientDataHolderVR.getInstance().currentPass);
         }
     }
 

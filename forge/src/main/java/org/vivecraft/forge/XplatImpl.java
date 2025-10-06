@@ -17,6 +17,7 @@ import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.NetworkDirection;
 import org.lwjgl.glfw.GLFW;

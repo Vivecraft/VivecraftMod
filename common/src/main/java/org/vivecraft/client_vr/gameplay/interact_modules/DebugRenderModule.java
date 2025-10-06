@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.interact_modules;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
@@ -17,5 +18,5 @@ public interface DebugRenderModule extends InteractModule {
      *
      * @param isActive if the given module is currently one of active InteractModules
      */
-    void renderDebug(boolean isActive);
+    void renderDebug(PoseStack poseStack, boolean isActive);
 }

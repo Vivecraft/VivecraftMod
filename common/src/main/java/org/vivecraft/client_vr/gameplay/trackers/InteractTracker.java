@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -170,10 +171,10 @@ public class InteractTracker implements DebugRenderTracker {
     }
 
     @Override
-    public void renderDebug() {
+    public void renderDebug(PoseStack poseStack) {
         for (InteractModule module : this.modules) {
             if (module instanceof DebugRenderModule debugModule) {
-                debugModule.renderDebug(isActiveModule(module));
+                debugModule.renderDebug(poseStack, isActiveModule(module));
             }
         }
     }

@@ -4,7 +4,6 @@ import com.bhaptics.haptic.models.PositionType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -115,7 +114,7 @@ public class HapticTracker implements Tracker {
 
     private boolean hasPotionPositive(LocalPlayer player) {
         for (MobEffectInstance effect : player.getActiveEffects()) {
-            if (effect.getEffect().value().isBeneficial()
+            if (effect.getEffect().isBeneficial()
                 && !effect.isAmbient())
             {
                 return true;
@@ -126,7 +125,7 @@ public class HapticTracker implements Tracker {
 
     private boolean hasPotionNegative(LocalPlayer player) {
         return player.getActiveEffects().stream().anyMatch(
-            effect -> effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL && !effect.isAmbient());
+            effect -> effect.getEffect().getCategory() == MobEffectCategory.HARMFUL && !effect.isAmbient());
     }
 
     private boolean isInRain(LocalPlayer player) {
@@ -183,8 +182,8 @@ public class HapticTracker implements Tracker {
 
     public void handleEat(ItemStack itemStack) {
         if (this.isActive(this.mc.player)) {
-            if (itemStack.get(DataComponents.FOOD) != null) {
-                if (itemStack.get(DataComponents.FOOD).effects().isEmpty()) {
+            if (itemStack.isEdible() && itemStack.getItem().getFoodProperties() != null) {
+                if (itemStack.getItem().getFoodProperties().getEffects().isEmpty()) {
                     Haptics.getAnimation(Haptics.Animations.CONSUME).playSingle(true, null);
                 } else {
                     Haptics.getAnimation(Haptics.Animations.CONSUME_EFFECT).playSingle(true, null);

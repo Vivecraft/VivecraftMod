@@ -16,7 +16,7 @@ import org.vivecraft.server.ServerVRPlayers;
 
 @Mixin(FenceGateBlock.class)
 public class FenceGateBlockServerMixin {
-    @ModifyExpressionValue(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDirection()Lnet/minecraft/core/Direction;"))
+    @ModifyExpressionValue(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDirection()Lnet/minecraft/core/Direction;"))
     private Direction vivecraft$changeDirection(
         Direction direction, @Local(argsOnly = true) Player player, @Local(argsOnly = true) BlockHitResult hitResult)
     {

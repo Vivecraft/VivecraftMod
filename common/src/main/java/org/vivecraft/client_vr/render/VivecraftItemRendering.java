@@ -75,8 +75,6 @@ public class VivecraftItemRendering {
             itemTransformType = VivecraftItemTransformType.HORN;
         } else if (itemStack.is(ViveItemTags.VIVECRAFT_ROTATED_TOOLS)) {
             itemTransformType = VivecraftItemTransformType.ROTATED_TOOL;
-        } else if (item instanceof MaceItem || itemStack.is(ViveItemTags.VIVECRAFT_MACES)) {
-            itemTransformType = VivecraftItemTransformType.MACE;
         } else if (item instanceof SwordItem || itemStack.is(ViveItemTags.VIVECRAFT_SWORDS)) {
             itemTransformType = VivecraftItemTransformType.SWORD;
         } else if (item instanceof ShieldItem || itemStack.is(ViveItemTags.VIVECRAFT_SHIELDS)) {
@@ -428,7 +426,6 @@ public class VivecraftItemRendering {
         TELESCOPE,
         COMPASS,
         HORN,
-        MACE,
         ROTATED_TOOL
     }
 }

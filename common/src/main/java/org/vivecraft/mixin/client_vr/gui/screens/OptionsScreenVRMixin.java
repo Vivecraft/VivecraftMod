@@ -1,16 +1,14 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.lang3.tuple.Triple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,21 +18,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.gui.settings.GuiMainVRSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-@Mixin(OptionsScreen.class)
+// we want to be late here to be able to fix button collisions with other mods
+@Mixin(value = OptionsScreen.class, priority = 1100)
 public class OptionsScreenVRMixin extends Screen {
 
     @Unique
     private Button vivecraft$settings;
 
-    @Unique
-    private final Map<AbstractWidget, Triple<Integer, Integer, Integer>> vivecraft$alteredButtons = new LinkedHashMap<>();
-
     protected OptionsScreenVRMixin(Component title) {
         super(title);
     }
+
     @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
     private int vivecraft$makeSpacer1wide(int occupiedColumns) {
         // if we add the VR settings button, use one of the spacer slots
@@ -61,28 +58,33 @@ public class OptionsScreenVRMixin extends Screen {
 
     @Unique
     private void vivecraft$addVivecraftButton(GridLayout.RowHelper rowHelper) {
-        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"),
+        this.vivecraft$settings = new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"),
             (p) -> {
                 Minecraft.getInstance().options.save();
-                Minecraft.getInstance().setScreen(new GuiMainVRSettings((Screen) (Object) this));
-            }).build());
+                Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
+            }).build();
+        rowHelper.addChild(this.vivecraft$settings);
     }
 
-    @WrapMethod(method = "repositionElements")
-    private void vivecraft$fitButtons(Operation<Void> original) {
-        // restore old buttons, if we moved them already
-        for (Map.Entry<AbstractWidget, Triple<Integer, Integer, Integer>> button : this.vivecraft$alteredButtons.entrySet()) {
-            button.getKey().setX(button.getValue().getLeft());
-            button.getKey().setY(button.getValue().getMiddle());
-            button.getKey().setWidth(button.getValue().getRight());
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;arrangeElements()V"))
+    private void vivecraft$noBigButtonsPlease(CallbackInfo ci, @Local GridLayout gridLayout) {
+        if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
+            // if we don't do this it causes issues with bedrockify
+            gridLayout.visitChildren(child -> {
+                if (child.getWidth() > 150 && child instanceof Button button) {
+                    button.setWidth(150);
+                }
+            });
         }
-        this.vivecraft$alteredButtons.clear();
+    }
 
-        original.call();
-
+    @Inject(method = "init", at = @At("TAIL"))
+    private void vivecraft$fitButtons(CallbackInfo ci) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
             int leftEdge = this.width / 2 - 154;
             int rightEdge = this.width / 2 + 154;
+
+            Set<AbstractWidget> collidingButtons = new HashSet<>();
 
             // search for colliding buttons
             for (GuiEventListener child : children()) {
@@ -92,18 +94,14 @@ public class OptionsScreenVRMixin extends Screen {
                         button.getY() + button.getHeight() > this.vivecraft$settings.getY() &&
                         button.getY() < this.vivecraft$settings.getY() + this.vivecraft$settings.getHeight())
                     {
-                        this.vivecraft$alteredButtons.put(button,
-                            Triple.of(button.getX(), button.getY(), button.getWidth()));
+                        collidingButtons.add(button);
                     }
                 }
             }
 
             // if there is something colliding, rearrange them
-            if (!this.vivecraft$alteredButtons.isEmpty()) {
-                Triple<Integer, Integer, Integer> vivecraftSettingsTriple = Triple.of(this.vivecraft$settings.getX(),
-                    this.vivecraft$settings.getY(), this.vivecraft$settings.getWidth());
-
-                float buttonWidth = 308F / (this.vivecraft$alteredButtons.size() + 1);
+            if (!collidingButtons.isEmpty()) {
+                float buttonWidth = 308F / (collidingButtons.size() + 1);
 
                 int index = 0;
                 // alter our button to fit
@@ -115,18 +113,15 @@ public class OptionsScreenVRMixin extends Screen {
                 this.vivecraft$settings.setWidth((int) buttonWidth - 4);
 
                 // alter other buttons
-                for (AbstractWidget button : this.vivecraft$alteredButtons.keySet()) {
+                for (AbstractWidget button : collidingButtons) {
                     button.setWidth(
-                        (int) buttonWidth - ((index > 0 && index < this.vivecraft$alteredButtons.size()) ? 8 : 4));
+                        (int) buttonWidth - ((index > 0 && index < collidingButtons.size()) ? 8 : 4));
                     // move vertically, so it aligns with ours
                     button.setY(this.vivecraft$settings.getY());
                     // move them to the side
                     button.setX(leftEdge + (int) (buttonWidth * index + 0.5F) + (index > 0 ? 4 : 0));
                     index++;
                 }
-
-                // add our own button as altered
-                this.vivecraft$alteredButtons.put(this.vivecraft$settings, vivecraftSettingsTriple);
             }
         }
     }

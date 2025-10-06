@@ -56,6 +56,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     private double vivecraft$additionZ;
 
     @Unique
+    private boolean vivecraft$walkUpBlocksActive = false;
+
+    @Unique
     private final ClientDataHolderVR vivecraft$dataholder = ClientDataHolderVR.getInstance();
 
     @Final
@@ -142,9 +145,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         if (!VRState.VR_RUNNING || !vivecraft$isLocalPlayer(this) ||
             Minecraft.getInstance().getCameraEntity() != (Object) this)
         {
-            AttributeInstance attribute = this.getAttribute(Attributes.STEP_HEIGHT);
-            if (attribute != null && attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
-                attribute.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
+            if (this.vivecraft$walkUpBlocksActive) {
+                this.setMaxUpStep(0.6F);
+                this.vivecraft$walkUpBlocksActive = false;
             }
             return;
         }
@@ -179,26 +182,15 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                 double oldZ = this.getZ();
                 super.move(type, pos);
 
-                AttributeInstance attribute = this.getAttribute(Attributes.STEP_HEIGHT);
-                if (attribute != null) {
-                    if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
-                        if (this.getBlockJumpFactor() == 1.0F) {
-                            if (!attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
-                                attribute.addTransientModifier(
-                                    new AttributeModifier(ViveModifiers.WALK_UP_BLOCKS, 0.4F,
-                                        AttributeModifier.Operation.ADD_VALUE));
-                            }
-                        } else {
-                            if (attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
-                                attribute.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
-                            }
-                        }
-                    } else {
-                        if (attribute.hasModifier(ViveModifiers.WALK_UP_BLOCKS)) {
-                            attribute.removeModifier(ViveModifiers.WALK_UP_BLOCKS);
-                        }
-                        this.updateAutoJump((float) (this.getX() - oldX), (float) (this.getZ() - oldZ));
+                if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
+                    this.setMaxUpStep(this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F);
+                    this.vivecraft$walkUpBlocksActive = this.getBlockJumpFactor() == 1.0F;
+                } else {
+                    if (this.vivecraft$walkUpBlocksActive) {
+                        this.setMaxUpStep(0.6F);
+                        this.vivecraft$walkUpBlocksActive = false;
                     }
+                    this.updateAutoJump((float) (this.getX() - oldX), (float) (this.getZ() - oldZ));
                 }
 
                 VRPlayer.get().setRoomOrigin(
@@ -256,7 +248,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
      */
     @Override
     protected void vivecraft$beforeEat(CallbackInfoReturnable<ItemStack> cir, @Local(argsOnly = true) ItemStack food) {
-        if (VRState.VR_INITIALIZED && food.get(DataComponents.FOOD) != null && vivecraft$isLocalPlayer(this)) {
+        if (VRState.VR_INITIALIZED && food.isEdible() && vivecraft$isLocalPlayer(this)) {
             ClientDataHolderVR.getInstance().hapticTracker.handleEat(food);
             if (food.getHoverName().getString().equals("EAT ME")) {
                 ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;

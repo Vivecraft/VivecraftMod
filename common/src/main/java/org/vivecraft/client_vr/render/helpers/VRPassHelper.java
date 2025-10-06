@@ -22,7 +22,6 @@ import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class VRPassHelper {
 

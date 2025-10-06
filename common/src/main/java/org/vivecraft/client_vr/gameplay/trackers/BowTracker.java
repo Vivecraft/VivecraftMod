@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -264,14 +265,15 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     @Override
-    public void renderDebug() {
+    public void renderDebug(PoseStack poseStack) {
         VRData world = this.dh.vrPlayer.getVRDataWorld();
         Vec3 cam = world.getEye(this.dh.currentPass).getPosition();
         int bowHand = this.dh.vrSettings.reverseShootingEye && ClientNetworking.supportsReversedBow() ? 0 : 1;
         Vector3f bowPos = MathUtils.subtractToVector3f(world.getController(bowHand).getPosition(), cam);
         if (this.isDrawing() || this.dh.vrSettings.seated) {
             // aim dir
-            DebugRenderHelper.renderLine(MathUtils.RED, bowPos, this.aim.mul(-1F, new Vector3f()).add(bowPos));
+            DebugRenderHelper.renderLine(poseStack, MathUtils.RED, bowPos,
+                this.aim.mul(-1F, new Vector3f()).add(bowPos));
         } else {
             float dist = 0.15F * world.worldScale;
             VRData.VRDevicePose bowHandPose = world.getHand(bowHand);
@@ -280,14 +282,14 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
             // bow distance threshold and angle cone
             Vector3f stringPos = bowHandPose.getCustomVector(MathUtils.UP)
                 .mul(world.worldScale * this.maxDraw * 0.5F).add(bowPos);
-            DebugRenderHelper.renderSphere(stringPos, dist,
+            DebugRenderHelper.renderSphere(poseStack, stringPos, dist,
                 isNotched() ? MathUtils.GREEN : MathUtils.RED);
             Vector3f bowDir = bowHandPose.getCustomVector(MathUtils.DOWN);
-            DebugRenderHelper.renderCone(bowDir.mul(-dist, new Vector3f()).add(stringPos), bowDir, 20.F,
+            DebugRenderHelper.renderCone(poseStack, bowDir.mul(-dist, new Vector3f()).add(stringPos), bowDir, 20.F,
                 0.25F * world.worldScale, isNotched() ? MathUtils.GREEN : MathUtils.RED);
 
             // arrow point dir
-            DebugRenderHelper.renderLine(isNotched() ? MathUtils.GREEN : MathUtils.RED,
+            DebugRenderHelper.renderLine(poseStack, isNotched() ? MathUtils.GREEN : MathUtils.RED,
                 MathUtils.subtractToVector3f(arrowPose.getPosition(), cam),
                 MathUtils.subtractToVector3f(arrowPose.getPosition(), cam)
                     .add(arrowPose.getDirection().mul(world.worldScale)));

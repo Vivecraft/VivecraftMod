@@ -25,7 +25,6 @@ import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.config.ConfigBuilder;
 
 import javax.annotation.Nullable;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -446,7 +445,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 .tooltip(Tooltip.create(Component.translatable("controls.reset")))
                 .bounds(0, 0, 20, 20).build();
             // need to set the tooltip delay to -1, or the main tooltip flickers on button change
-            this.resetButton.setTooltipDelay(Duration.ofMillis(-1));
+            this.resetButton.setTooltipDelay(-1);
         }
 
         @Override

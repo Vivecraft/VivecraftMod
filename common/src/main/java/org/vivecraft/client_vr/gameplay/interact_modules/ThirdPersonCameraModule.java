@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.interact_modules;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -83,7 +84,7 @@ public class ThirdPersonCameraModule implements DebugRenderModule, HeldInteractM
     }
 
     @Override
-    public void renderDebug(boolean isActive) {
+    public void renderDebug(PoseStack poseStack, boolean isActive) {
         if (this.dh.vrSettings.mixedRealityRenderCameraModel &&
             (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||
                 this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON
@@ -92,7 +93,7 @@ public class ThirdPersonCameraModule implements DebugRenderModule, HeldInteractM
             VRData world = this.dh.vrPlayer.getVRDataWorld();
             // origin offset since the camera is room relative
             Vec3 cam = this.camPos.subtract(this.dh.vrPlayer.vrdata_world_pre.origin).add(world.origin);
-            DebugRenderHelper.renderSphere(
+            DebugRenderHelper.renderSphere(poseStack,
                 MathUtils.subtractToVector3f(cam, world.getEye(this.dh.currentPass).getPosition()),
                 INTERACT_DIST * world.worldScale, isActive ? MathUtils.GREEN : MathUtils.RED);
         }

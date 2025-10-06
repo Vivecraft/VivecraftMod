@@ -255,9 +255,9 @@ public class RenderHelper {
         // clear depth, because text that was already there would be over ours
         RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         // setup modelview for screen rendering
-        Matrix4fStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushMatrix();
-        poseStack.identity();
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        poseStack.setIdentity();
         poseStack.translate(0.0F, 0.0F, -11000.0F);
         RenderSystem.applyModelViewMatrix();
 
@@ -292,7 +292,7 @@ public class RenderHelper {
         }
         guiGraphics.flush();
 
-        poseStack.popMatrix();
+        poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
     }
 

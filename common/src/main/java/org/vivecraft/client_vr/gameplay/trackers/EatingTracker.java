@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -143,17 +144,17 @@ public class EatingTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     @Override
-    public void renderDebug() {
+    public void renderDebug(PoseStack poseStack) {
         VRData world = this.dh.vrPlayer.getVRDataWorld();
         Vec3 cam = world.getEye(this.dh.currentPass).getPosition();
         for (int c = 0; c < 2; c++) {
             if (this.foodPos[c] != null) {
                 Vector3fc food = MathUtils.subtractToVector3f(VRPlayer.roomToWorldPos(this.foodPos[c], world), cam);
                 // food pos
-                DebugRenderHelper.renderCube(food, 0.05F * world.worldScale,
+                DebugRenderHelper.renderCube(poseStack, food, 0.05F * world.worldScale,
                     this.eating[c] ? MathUtils.GREEN : MathUtils.RED);
                 // food distance threshold
-                DebugRenderHelper.renderSphere(food, THRESHOLD * world.worldScale,
+                DebugRenderHelper.renderSphere(poseStack, food, THRESHOLD * world.worldScale,
                     this.eating[c] ? MathUtils.GREEN : MathUtils.RED);
             }
         }

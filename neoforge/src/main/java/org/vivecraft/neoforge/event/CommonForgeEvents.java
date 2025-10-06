@@ -6,7 +6,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.vivecraft.neoforge.Vivecraft;
 import org.vivecraft.server.ServerUtil;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Vivecraft.MODID)
 public class CommonForgeEvents {
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {

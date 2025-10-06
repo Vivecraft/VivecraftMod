@@ -49,7 +49,7 @@ public abstract class PostChainVRMixin implements PostChainExtension {
 
     @Shadow
     @Final
-    private ResourceProvider resourceProvider;
+    private ResourceManager resourceManager;
 
     @Accessor
     public abstract List<PostPass> getPasses();
@@ -165,7 +165,7 @@ public abstract class PostChainVRMixin implements PostChainExtension {
                 }
 
                 if (target != null) {
-                    PostChain subChain = new PostChain(textureManager, this.resourceProvider, target, resourceLocation);
+                    PostChain subChain = new PostChain(textureManager, this.resourceManager, target, resourceLocation);
                     this.vivecraft$VRPostChains.put(pass, subChain);
                     // this needs to be called, or the ortho matrix of the passes is not set
                     subChain.resize(target.width, target.height);

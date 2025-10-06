@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.interact_modules;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -75,11 +76,11 @@ public class ScreenshotCameraModule implements DebugRenderModule, HeldInteractMo
     }
 
     @Override
-    public void renderDebug(boolean isActive) {
+    public void renderDebug(PoseStack poseStack, boolean isActive) {
         if (this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode() && this.camPos != null) {
             VRData world = this.dh.vrPlayer.getVRDataWorld();
             // no origin offset, since the camera is world relative
-            DebugRenderHelper.renderSphere(
+            DebugRenderHelper.renderSphere(poseStack,
                 MathUtils.subtractToVector3f(this.camPos, world.getEye(this.dh.currentPass).getPosition()),
                 INTERACT_DIST * world.worldScale, isActive ? MathUtils.GREEN : MathUtils.RED);
         }

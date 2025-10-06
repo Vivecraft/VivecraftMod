@@ -102,9 +102,8 @@ public class BlockInteractionModule implements InteractModule {
     public boolean onPress(LocalPlayer player, InteractionHand hand) {
         boolean success = false;
         if (this.inBlockHit[hand.ordinal()] != null) {
-            // force main hand, since 1.20.5+ only checks no item interactions for the main hand
             ClientNetworking.sendActiveHand(hand, true);
-            success = this.mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, this.inBlockHit[hand.ordinal()])
+            success = this.mc.gameMode.useItemOn(player, hand, this.inBlockHit[hand.ordinal()])
                 .consumesAction();
             ClientNetworking.resetActiveBodyPart();
         } else if (this.bukkit[hand.ordinal()]) {

@@ -4,13 +4,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import org.vivecraft.client.gui.settings.VivecraftMainSettings;
 import org.vivecraft.neoforge.Vivecraft;
 
-@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME, modid = Vivecraft.MODID)
-public class ClientGameEvents {
+@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Vivecraft.MODID)
+public class ClientForgeEvents {
 
     @SubscribeEvent
     public static void registerClientCommands(RegisterClientCommandsEvent registerClientCommandsEvent) {
