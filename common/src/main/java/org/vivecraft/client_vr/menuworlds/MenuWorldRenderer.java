@@ -284,7 +284,7 @@ public class MenuWorldRenderer {
         for (ChunkSectionLayer layer : group.layers()) {
             List<Pair<Integer, GpuBuffer>> buffers = this.vertexBuffers.get(layer);
             if (buffers.isEmpty()) {
-                return;
+                continue;
             }
             GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
                 .writeTransform(RenderSystem.getModelViewMatrix(),
