@@ -1,9 +1,9 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.vivecraft.client.gui.widgets.SettingsList;
+import org.vivecraft.client.gui.framework.screens.GuiListScreen;
+import org.vivecraft.client.gui.framework.widgets.SettingsList;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -28,29 +28,11 @@ public class VivecraftMainSettings extends GuiListScreen {
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_PLUGIN));
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_CLOSE_WITH_RUNTIME));
 
-        entries.add(new SettingsList.WidgetEntry(
-            Component.translatable("vivecraft.options.screen.main"),
-            Button.builder(Component.translatable("vivecraft.options.screen.main"),
-                    button -> this.minecraft.setScreen(new GuiMainVRSettings(this)))
-                .size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20)
-                .build()
-        ));
+        entries.add(new SettingsList.ScreenEntry("vivecraft.options.screen.main", GuiMainVRSettings::new));
 
-        entries.add(new SettingsList.WidgetEntry(
-            Component.translatable("vivecraft.options.screen.server"),
-            Button.builder(Component.translatable("vivecraft.options.screen.server"),
-                    button -> this.minecraft.setScreen(new GuiServerSettings(this)))
-                .size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20)
-                .build()
-        ));
+        entries.add(new SettingsList.ScreenEntry("vivecraft.options.screen.server", GuiServerSettings::new));
 
-        entries.add(new SettingsList.WidgetEntry(
-            Component.translatable("vivecraft.options.screen.blocklist"),
-            Button.builder(Component.translatable("vivecraft.options.screen.blocklist"),
-                    button -> this.minecraft.setScreen(new GuiBlacklistEditor(this)))
-                .size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20)
-                .build()
-        ));
+        entries.add(new SettingsList.ScreenEntry("vivecraft.options.screen.blocklist", GuiBlacklistEditor::new));
 
         entries.add(new SettingsList.CategoryEntry(Component.literal("Vivecraft Buttons")));
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_TOGGLE_BUTTON_VISIBLE));
@@ -60,13 +42,7 @@ public class VivecraftMainSettings extends GuiListScreen {
 
         entries.add(new SettingsList.CategoryEntry(Component.literal("Debug")));
 
-        entries.add(new SettingsList.WidgetEntry(
-            Component.translatable("vivecraft.options.screen.debug"),
-            Button.builder(Component.translatable("vivecraft.options.screen.debug"),
-                    button -> this.minecraft.setScreen(new GuiDebugRenderSettings(this)))
-                .size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20)
-                .build()
-        ));
+        entries.add(new SettingsList.ScreenEntry("vivecraft.options.screen.debug", GuiDebugSettings::new));
 
         return entries;
     }

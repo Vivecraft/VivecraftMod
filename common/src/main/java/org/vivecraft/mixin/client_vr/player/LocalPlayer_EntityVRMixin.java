@@ -72,6 +72,9 @@ public abstract class LocalPlayer_EntityVRMixin {
     @Shadow
     public abstract double getX();
 
+    @Shadow
+    public abstract Vec3 position();
+
     /**
      * dummy to be overridden in {@link LocalPlayerVRMixin}
      */

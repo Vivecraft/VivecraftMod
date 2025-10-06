@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
-import org.vivecraft.client.gui.widgets.TextScrollWidget;
+import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.UpdateChecker;
 
 
@@ -53,7 +53,7 @@ public class UpdateScreen extends Screen {
     public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTick);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
 
         Style style = this.text.getMouseoverStyle(mouseX, mouseY);
         if (style != null) {

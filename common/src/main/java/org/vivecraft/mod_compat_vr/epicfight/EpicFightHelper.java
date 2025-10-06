@@ -1,7 +1,7 @@
 package org.vivecraft.mod_compat_vr.epicfight;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
@@ -9,7 +9,7 @@ import yesman.epicfight.client.input.EpicFightKeyMappings;
 public class EpicFightHelper {
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("epicfight");
+        return Xloader.isModLoaded("epicfight");
     }
 
     /**

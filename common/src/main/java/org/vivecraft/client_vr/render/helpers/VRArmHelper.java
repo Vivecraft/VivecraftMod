@@ -14,11 +14,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11C;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
@@ -36,7 +36,7 @@ public class VRArmHelper {
      * @return if first person hands should be rendered in the current RenderPass
      */
     public static boolean shouldRenderHands() {
-        if (ClientDataHolderVR.VIEW_ONLY) {
+        if (DATA_HOLDER.viewOnly) {
             return false;
         } else if (DATA_HOLDER.currentPass == RenderPass.THIRD) {
             return DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY;
@@ -61,13 +61,13 @@ public class VRArmHelper {
     {
         if (!renderMain && !renderOff) return;
         MC.getProfiler().push("hands");
-        ClientDataHolderVR.IS_FP_HAND = true;
+        DATA_HOLDER.isFpHand = true;
 
         VREffectsHelper.removeNausea(partialTick, poseStack);
 
         if (renderMain) {
             // set main hand active, for the attack cooldown transparency
-            ClientDataHolderVR.IS_MAIN_HAND = true;
+            DATA_HOLDER.isMainHand = true;
 
             if (menuHandMain) {
                 renderMainMenuHand(0, false, poseStack);
@@ -75,7 +75,7 @@ public class VRArmHelper {
                 renderVRHand_Main(poseStack, partialTick);
             }
 
-            ClientDataHolderVR.IS_MAIN_HAND = false;
+            DATA_HOLDER.isMainHand = false;
         }
 
         if (renderOff) {
@@ -88,7 +88,7 @@ public class VRArmHelper {
 
         VREffectsHelper.reAddNausea(poseStack);
 
-        ClientDataHolderVR.IS_FP_HAND = false;
+        DATA_HOLDER.isFpHand = false;
         MC.getProfiler().pop();
     }
 
@@ -107,8 +107,7 @@ public class VRArmHelper {
         RenderHelper.setupRenderingAtController(c, poseStack);
 
         if (MC.getOverlay() == null) {
-            MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
-            RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
         }
 
         if (depthAlways && c == 0) {
@@ -141,13 +140,13 @@ public class VRArmHelper {
         }
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        Tesselator tesselator = Tesselator.getInstance();
-        tesselator.getBuilder().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
-        RenderHelper.renderBox(tesselator.getBuilder(), start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha,
+        RenderHelper.renderBox(bufferBuilder, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha,
             poseStack);
 
-        BufferUploader.drawWithShader(tesselator.getBuilder().end());
+        BufferUploader.drawWithShader(bufferBuilder.end());
 
         poseStack.popPose();
 
@@ -298,8 +297,7 @@ public class VRArmHelper {
 
                 // TODO SHADERS use a shader with lightmaps
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
-                RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
+                ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
                 if (size > 0.0F) {
                     // tp energy quad, slightly above the max energy quad
@@ -314,9 +312,8 @@ public class VRArmHelper {
             }
 
             if (DATA_HOLDER.teleportTracker.isAiming()) {
-                // renders from the head
                 RenderSystem.enableDepthTest();
-
+                // renders from the head
                 if (DATA_HOLDER.teleportTracker.vrMovementStyle.arcAiming) {
                     renderTeleportArc(poseStack);
                 } /* else {
@@ -387,11 +384,10 @@ public class VRArmHelper {
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
             // to make shaders work
-            MC.getTextureManager().bindForSetup(RenderHelper.WHITE_TEXTURE);
-            RenderSystem.setShaderTexture(0, RenderHelper.WHITE_TEXTURE);
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
-            Tesselator tesselator = Tesselator.getInstance();
-            tesselator.getBuilder().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
             double VOffset = DATA_HOLDER.teleportTracker.lastTeleportArcDisplayOffset;
             Vec3 dest = DATA_HOLDER.teleportTracker.getDestination();
@@ -425,8 +421,7 @@ public class VRArmHelper {
 
             double segmentProgress = 1.0D / (double) segments;
 
-            Vec3 cameraPosition = RenderHelper.getSmoothCameraPosition(DATA_HOLDER.currentPass,
-                DATA_HOLDER.vrPlayer.getVRDataWorld());
+            Vec3 cameraPosition = MC.gameRenderer.getMainCamera().getPosition();
 
             // arc
             for (int i = 0; i < segments; i++) {
@@ -442,11 +437,11 @@ public class VRArmHelper {
                     .subtract(cameraPosition);
 
                 float shift = (float) progress * 2.0F;
-                RenderHelper.renderBox(tesselator.getBuilder(), start, end, -segmentHalfWidth, segmentHalfWidth,
+                RenderHelper.renderBox(bufferBuilder, start, end, -segmentHalfWidth, segmentHalfWidth,
                     (-1.0F + shift) * segmentHalfWidth, (1.0F + shift) * segmentHalfWidth, color, alpha, poseStack);
             }
 
-            tesselator.end();
+            BufferUploader.drawWithShader(bufferBuilder.end());
 
             // hit indicator
             if (validLocation && DATA_HOLDER.teleportTracker.movementTeleportProgress >= 1.0D) {

@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.7-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
 }
 
 architectury {
@@ -27,7 +27,7 @@ subprojects {
             // The following line declares the yarn mappings you may select this one as well.
             // "net.fabricmc:yarn:1.18.2+build.4:v2"
             // parchment mappings as backup
-            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+            parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
         }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
@@ -36,6 +36,13 @@ subprojects {
 
         // for OSC tracker support
         implementation("com.illposed.osc:javaosc-core:0.9")
+
+        // bHaptics Integration
+        implementation("com.github.bhaptics:tact-java:0.1.4")
+
+        // for running testing
+        testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -67,6 +74,30 @@ subprojects {
     remapJar {
         // after remap, copy the final jar to the main /build/libs folder
         finalizedBy copyJarToMain
+    }
+
+    javadoc {
+        if (project.name != "common") {
+            enabled = false
+        }
+        destinationDir = file("../build/javadoc")
+        include 'org/vivecraft/api/**'
+        options.windowTitle("Vivecraft API")
+        title = "Vivecraft API"
+        options.locale("en_US")
+        // also force en_us for the java runtime, because of a java bug
+        options.jFlags("-Duser.country=US", "-Duser.language=en")
+    }
+
+   tasks.named('test', Test) {
+        useJUnitPlatform()
+
+        // always run tests
+        outputs.upToDateWhen { false }
+
+        testLogging {
+            events "passed"
+        }
     }
 }
 
@@ -134,7 +165,7 @@ allprojects {
         maven { url = "https://maven.cafeteria.dev/releases/" }
         maven { url = "https://maven.gegy.dev" }
         maven { url = "https://modmaven.dev" }
-        maven { url = "https://maven.minecraftforge.net/"}
+        maven { url = "https://maven.minecraftforge.net/" }
         exclusiveContent {
             forRepository {
                 maven {

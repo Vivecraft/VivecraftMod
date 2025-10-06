@@ -10,12 +10,8 @@
       "required": false
     },
 
-    "minecraft:wooden_hoe",
-    "minecraft:stone_hoe",
-    "minecraft:iron_hoe",
-    "minecraft:diamond_hoe",
-    "minecraft:golden_hoe",
-    "minecraft:netherite_hoe",
+    "#minecraft:hoes",
+
     {
       "id": "tconstruct:scythe",
       "required": false

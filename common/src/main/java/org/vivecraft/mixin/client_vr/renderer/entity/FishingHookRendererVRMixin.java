@@ -21,7 +21,7 @@ import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.data.ItemTags;
+import org.vivecraft.data.ViveItemTags;
 
 @Mixin(FishingHookRenderer.class)
 public abstract class FishingHookRendererVRMixin {
@@ -47,7 +47,7 @@ public abstract class FishingHookRendererVRMixin {
         @Local Player player, @Share("linePos") LocalRef<Vec3> linePos)
     {
         boolean mainHandFishingRod = player.getMainHandItem().getItem() instanceof FishingRodItem ||
-            player.getMainHandItem().is(ItemTags.VIVECRAFT_FISHING_RODS);
+            player.getMainHandItem().is(ViveItemTags.VIVECRAFT_FISHING_RODS);
         ClientVRPlayers.RotInfo info;
         if (!RenderPassType.isVanilla() && player == Minecraft.getInstance().player) {
             // own player

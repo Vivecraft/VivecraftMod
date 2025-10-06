@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "weaponmod:javelin",
+      "required": false
+    },
+    {
+      "id": "weaponmod:firerod",
+      "required": false
+    },
+    {
+      "id": "weaponmod:crossbow",
+      "required": false
+    }
+  ]
+}

@@ -9,12 +9,9 @@
       "id": "#forge:tools/swords",
       "required": false
     },
-    "minecraft:wooden_sword",
-    "minecraft:stone_sword",
-    "minecraft:iron_sword",
-    "minecraft:diamond_sword",
-    "minecraft:golden_sword",
-    "minecraft:netherite_sword",
+
+    "#minecraft:swords",
+
     {
       "id": "tconstruct:dagger",
       "required": false
@@ -32,6 +29,7 @@
       "required": false
     },
 
-    "#vivecraft:moditems/mvw_weapons"
+    "#vivecraft:moditems/mvw_weapons",
+    "#vivecraft:moditems/balkons_weaponsmod/weapons"
   ]
 }

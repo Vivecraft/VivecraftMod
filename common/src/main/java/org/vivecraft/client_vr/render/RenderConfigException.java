@@ -7,6 +7,7 @@ public class RenderConfigException extends Exception {
     public Component error;
 
     public RenderConfigException(Component title, Component error) {
+        super(error.getString());
         this.title = title;
         this.error = error;
     }
