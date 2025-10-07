@@ -199,7 +199,7 @@ public class ClientVRPlayers {
         if (!localPlayer) {
             Player otherPlayer = this.mc.level.getPlayerByUUID(uuid);
             if (otherPlayer != null) {
-                VRAPIImpl.INSTANCE.addPoseToHistory(uuid, rotInfo.asVRPose(otherPlayer.position()), true);
+                VRAPIImpl.INSTANCE.addPoseToHistory(uuid, rotInfo.asVRPose(otherPlayer.position()), otherPlayer.position(), true);
             }
         }
 

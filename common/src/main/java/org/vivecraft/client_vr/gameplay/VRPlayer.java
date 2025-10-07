@@ -240,7 +240,7 @@ public class VRPlayer {
         if (this.mc.level != null &&
             (this.mc.getSingleplayerServer() == null || !this.mc.getSingleplayerServer().isPaused()))
         {
-            VRClientAPIImpl.INSTANCE.addPoseToHistory(this.vrdata_world_pre.asVRPose());
+            VRClientAPIImpl.INSTANCE.addPoseToHistory(this.vrdata_world_pre.asVRPose(), this.mc.player.position());
         }
     }
 
