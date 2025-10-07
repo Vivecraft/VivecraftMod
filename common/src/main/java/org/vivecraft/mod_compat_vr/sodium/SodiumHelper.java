@@ -91,6 +91,7 @@ public class SodiumHelper {
         if (init()) {
             try {
                 if (HAS_MODELCUBOID_QUADS) {
+                    // sodium 0.4.9-0.5.3
                     // ModelCuboid stores the texture info in quads per face
                     Object sourceQuad = ((Object[]) ModelCuboid_quads.get(
                         ((Object[]) ModelPart_sodium$cuboids.get(source))[0])
@@ -106,7 +107,8 @@ public class SodiumHelper {
                         destTextures[i].x = sourceTextures[i].x;
                         destTextures[i].y = sourceTextures[i].y;
                     }
-                } else {
+                } else if (HAS_MODELCUBOID_FLOATS || HAS_MODELCUBOID_LONGS) {
+                    // sodium 0.5.4+
                     // ModelCuboid stores the texture info in per cube
                     Object sourceCuboid = HAS_MODELCUBOID_CUBES ? Cube_sodium$cuboid.get(source.cubes.get(0)) :
                         ((Object[]) ModelPart_sodium$cuboids.get(source))[0];
@@ -114,6 +116,7 @@ public class SodiumHelper {
                         ((Object[]) ModelPart_sodium$cuboids.get(dest))[0];
 
                     if (HAS_MODELCUBOID_FLOATS) {
+                        // sodium 0.5.4-0.6.13
                         // uvs are stored as a bunch of floats
                         float[][] UVs = new float[][]{{
                             (float) ModelCuboid_u0.get(sourceCuboid),
@@ -132,7 +135,8 @@ public class SodiumHelper {
                             mapDirection(sourcePoly),
                             UVs
                         );
-                    } else if (HAS_MODELCUBOID_LONGS) {
+                    } else {
+                        // sodium 0.7+
                         // uvs are packed into longs
                         long[] sourceUVs = (long[]) ModelCuboid_textures.get(sourceCuboid);
                         long[] destUVs = (long[]) ModelCuboid_textures.get(destCuboid);
@@ -181,7 +185,7 @@ public class SodiumHelper {
         }
         try {
             try {
-                // try new public api first
+                // try new public api first, 0.7+
                 Class<?> spriteUtil = Class.forName("net.caffeinemc.mods.sodium.api.texture.SpriteUtil");
                 SpriteUtil_markSpriteActive = spriteUtil.getMethod("markSpriteActive", TextureAtlasSprite.class);
                 SpriteUtil_INSTANCE = spriteUtil.getField("INSTANCE").get(null);
@@ -208,10 +212,12 @@ public class SodiumHelper {
 
                 try {
                     // all cube cuboids are stored in the ModelPart
+                    // sodium 0.4.9-0.5.11
                     ModelPart_sodium$cuboids = ModelPart.class.getDeclaredField("sodium$cuboids");
                     ModelPart_sodium$cuboids.setAccessible(true);
                 } catch (NoSuchFieldException ignored) {
                     // cuboid is stored in the Cube directly instead
+                    // sodium 0.6+
                     Cube_sodium$cuboid = ModelPart.Cube.class.getDeclaredField("sodium$cuboid");
                     Cube_sodium$cuboid.setAccessible(true);
                     HAS_MODELCUBOID_CUBES = true;
@@ -222,12 +228,13 @@ public class SodiumHelper {
                         "net.caffeinemc.mods.sodium.client.render.immediate.model.ModelCuboid$Quad"
                     );
                     // texture bounds are stored in pre face quads
+                    // sodium 0.4.9-0.5.3
                     ModelCuboid_quads = ModelCuboid.getDeclaredField("quads");
                     ModelCuboid$Quad_textures = ModelCuboid$Quad.getDeclaredField("textures");
                     HAS_MODELCUBOID_QUADS = true;
                 } catch (ClassNotFoundException noQuads) {
                     try {
-                        // sodium 0.5.6-0.6.13
+                        // sodium 0.5.4-0.6.13
                         // texture bounds are stored in global UVs instead
                         ModelCuboid_u0 = ModelCuboid.getDeclaredField("u0");
                         ModelCuboid_u1 = ModelCuboid.getDeclaredField("u1");
