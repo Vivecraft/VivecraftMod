@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
@@ -143,10 +145,21 @@ public abstract class GameRendererVRMixin
     @WrapMethod(method = "pick")
     private void vivecraft$vrPick(float partialTick, Operation<Void> original) {
         if (VRState.VR_RUNNING) {
-            // skip when data not available yet, or screen is open
-            if (vivecraft$DATA_HOLDER.vrPlayer.vrdata_world_render == null ||
-                this.minecraft.getCameraEntity() == null || this.minecraft.screen != null)
+            // don't update the hitresult when chat is open
+            if (this.minecraft.screen != null && this.minecraft.hitResult != null) {
+                return;
+            }
+            // skip when data not available yet
+            else if (vivecraft$DATA_HOLDER.vrPlayer.vrdata_world_render == null ||
+                this.minecraft.getCameraEntity() == null)
             {
+                // some mods don't like it when the hitresult is null, so set it to a miss
+                if (this.minecraft.player != null) {
+                    this.minecraft.hitResult = BlockHitResult.miss(this.minecraft.player.position(),
+                        this.minecraft.player.getDirection(), this.minecraft.player.blockPosition());
+                } else {
+                    this.minecraft.hitResult = BlockHitResult.miss(Vec3.ZERO, Direction.UP, BlockPos.ZERO);
+                }
                 return;
             }
 
