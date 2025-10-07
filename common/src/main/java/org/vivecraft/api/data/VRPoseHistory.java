@@ -13,9 +13,10 @@ import java.util.List;
  * this far back will throw an {@link IllegalArgumentException}.
  * <br>
  * Many methods in this class accept the parameter {@code playerPositionRelative}. When this is {@code true}, all
- * calculations are done relative to the player. For example, the net movement of a player who moved from (0, 0, 0)
- * to (3, 0, 0) but did NOT move their head, hands, etc. would be (3, 0, 0) if {@code playerPositionRelative} is
- * {@code false} and would be (0, 0, 0) if {@code playerPositionRelative} is {@code true}.
+ * calculations are done relative to the player, while if {@code false}, calculations are done in world space. For
+ * example, the net movement of a player who moved from (0, 0, 0) to (3, 0, 0) but did NOT move their head, hands, etc.
+ * would be (3, 0, 0) if {@code playerPositionRelative} is {@code false} and would be (0, 0, 0) if
+ * {@code playerPositionRelative} is {@code true}.
  *
  * @since 1.3.0
  */
@@ -40,7 +41,7 @@ public interface VRPoseHistory {
     List<VRPose> getAllHistoricalData();
 
     /**
-     * Gets the pose from {@code ticksBack} ticks back, or {@code null} if such data isn't available.
+     * Gets the pose from {@code ticksBack} ticks back in world space, or {@code null} if such data isn't available.
      *
      * @param ticksBack Ticks back to retrieve data from.
      * @return A {@link VRPose} instance from {@code ticksBack} ticks ago, or {@code null} if that data isn't available.
@@ -58,13 +59,13 @@ public interface VRPoseHistory {
      * @param playerPositionRelative Whether to get the historical data with position relative to the player's position.
      * @return A {@link VRPose} instance from {@code ticksBack} ticks ago, or {@code null} if that data isn't available.
      * @throws IllegalArgumentException Thrown when {@code ticksBack} is outside the range [0,200].
-     * @since 1.3.2
+     * @since 1.3.3
      */
     VRPose getHistoricalData(int ticksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 
     /**
-     * Gets the net movement between the most recent VRPose in this instance and the oldest VRPose that can be
-     * retrieved, going no farther back than {@code maxTicksBack}.
+     * Gets the net movement in world space between the most recent VRPose in this instance and the oldest VRPose that
+     * can be retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the net movement for.
      * @param maxTicksBack The maximum number of ticks back to compare the most recent data with.
@@ -90,14 +91,14 @@ public interface VRPoseHistory {
      * can be looked back. Will be {@code null} if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
-     * @since 1.3.2
+     * @since 1.3.3
      */
     @Nullable
     Vec3 netMovement(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 
     /**
-     * Gets the average velocity in blocks/tick between the most recent VRPose in this instance and the oldest VRPose
-     * that can be retrieved, going no farther back than {@code maxTicksBack}.
+     * Gets the average velocity in world space in blocks/tick between the most recent VRPose in this instance and the
+     * oldest VRPose that can be retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the average velocity for.
      * @param maxTicksBack The maximum number of ticks back to calculate velocity with.
@@ -123,14 +124,14 @@ public interface VRPoseHistory {
      * if only zero ticks can be looked back. Will be {@code null} if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
-     * @since 1.3.2
+     * @since 1.3.3
      */
     @Nullable
     Vec3 averageVelocity(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 
     /**
-     * Gets the average speed in blocks/tick between the most recent VRPose in this instance and the oldest VRPose
-     * that can be retrieved, going no farther back than {@code maxTicksBack}.
+     * Gets the average speed in world space in blocks/tick between the most recent VRPose in this instance and the
+     * oldest VRPose that can be retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the average speed for.
      * @param maxTicksBack The maximum number of ticks back to calculate speed with.
@@ -155,13 +156,13 @@ public interface VRPoseHistory {
      * can be looked back, or if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
-     * @since 1.3.2
+     * @since 1.3.3
      */
     double averageSpeed(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 
     /**
-     * Gets the average position between the most recent VRPose in this instance and the oldest VRPose that can be
-     * retrieved, going no farther back than {@code maxTicksBack}.
+     * Gets the average position in world space between the most recent VRPose in this instance and the oldest VRPose
+     * that can be retrieved, going no farther back than {@code maxTicksBack}.
      *
      * @param bodyPart     The body part to get the average position for.
      * @param maxTicksBack The maximum number of ticks back to calculate the position with.
@@ -187,7 +188,7 @@ public interface VRPoseHistory {
      * can be looked back. Will be {@code null} if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when {@code maxTicksBack} is outside the range [0,200] or an invalid
      *                                  {@code bodyPart} is supplied.
-     * @since 1.3.2
+     * @since 1.3.3
      */
     @Nullable
     Vec3 averagePosition(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
