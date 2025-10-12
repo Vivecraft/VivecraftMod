@@ -841,7 +841,7 @@
 
   "vivecraft.serverSettings.crawling.enabled.tooltip": "Allows VR players to get into the crawl state by getting low to the ground. Disabling does not prevent vanilla crawling.",
 
-  "vivecraft.serverSettings.teleport.enabled.tooltip": "Allows VR players to use teleport movement. It is recommended to leave this enabled for players prone to VR sickness.",
+  "vivecraft.serverSettings.teleport.enabled.tooltip": "Allows VR players to use teleport movement. It is recommended to leave this enabled for players prone to VR sickness.\n Disabling this only works for Vivecraft 1.3.0+ clients.",
   "vivecraft.serverSettings.teleport.limitedSurvival.tooltip": "Enforces limited teleport range and frequency in Survival.",
   "vivecraft.serverSettings.teleport.upLimit.tooltip": "Maximum number of blocks players in Survival mode can teleport up. Set to 0 to disable.",
   "vivecraft.serverSettings.teleport.downLimit.tooltip": "Maximum number of blocks players in Survival mode can teleport down. Set to 0 to disable.",
