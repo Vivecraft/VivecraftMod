@@ -18,7 +18,7 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.bodylink.RiggedBody;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.packet.c2s.DamageDirectionPayloadC2S;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
@@ -64,7 +64,7 @@ public class HapticTracker implements Tracker {
         //TODO Find better place for this
         RiggedBody.getInstance().updatePose(this.dh.vrPlayer.getVRDataWorld());
 
-        if (ClientNetworking.USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_DAMAGE_DIRECTION &&
+        if (NetworkVersion.DAMAGE_DIRECTION.accepts(ClientNetworking.USED_NETWORK_VERSION) &&
             !ClientNetworking.REQUESTED_DAMAGE_DIRECTION)
         {
             ClientNetworking.sendServerPacket(new DamageDirectionPayloadC2S());

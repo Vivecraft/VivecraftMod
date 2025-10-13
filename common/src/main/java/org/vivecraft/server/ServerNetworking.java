@@ -25,6 +25,7 @@ import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 import org.vivecraft.common.network.packet.c2s.*;
@@ -86,11 +87,11 @@ public class ServerNetworking {
 
                 if (!payload.legacy()) {
                     // check if client supports a supported version
-                    if (CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION <= payload.maxVersion() &&
-                        payload.minVersion() <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION)
+                    if (CommonNetworkHelper.MIN_SUPPORTED_NETWORK_PROTOCOL <= payload.maxVersion() &&
+                        payload.minVersion() <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_PROTOCOL)
                     {
-                        vivePlayer.networkVersion = Math.min(payload.maxVersion(),
-                            CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
+                        vivePlayer.networkVersion = NetworkVersion.fromProtocolVersion(
+                            Math.min(payload.maxVersion(), CommonNetworkHelper.MAX_SUPPORTED_NETWORK_PROTOCOL));
                         if (ServerConfig.DEBUG.get()) {
                             LOGGER.info("Vivecraft: {} networking supported, using version {}",
                                 player.getName().getString(), vivePlayer.networkVersion);
@@ -105,14 +106,14 @@ public class ServerNetworking {
                                 player.getScoreboardName(),
                                 payload.minVersion(),
                                 payload.maxVersion(),
-                                CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION,
-                                CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
+                                CommonNetworkHelper.MIN_SUPPORTED_NETWORK_PROTOCOL,
+                                CommonNetworkHelper.MAX_SUPPORTED_NETWORK_PROTOCOL);
                         }
                         return;
                     }
                 } else {
                     // client didn't send a version, so it's a legacy client
-                    vivePlayer.networkVersion = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
+                    vivePlayer.networkVersion = NetworkVersion.LEGACY;
                     if (ServerConfig.DEBUG.get()) {
                         LOGGER.info("Vivecraft: {} using legacy networking", player.getScoreboardName());
                     }
@@ -132,7 +133,7 @@ public class ServerNetworking {
 
                 // always send in new versions to allow disabling of teleports
                 if (ServerConfig.TELEPORT_ENABLED.get() ||
-                    vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_OPTION_TOGGLE)
+                    NetworkVersion.OPTION_TOGGLE.accepts(vivePlayer.networkVersion))
                 {
                     packetConsumer.accept(
                         new TeleportPayloadS2C(ServerConfig.TELEPORT_ENABLED.get(), vivePlayer.networkVersion));
@@ -161,12 +162,12 @@ public class ServerNetworking {
                 // send if hotswitching is allowed
                 packetConsumer.accept(getVRSwitchingPayload());
 
-                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING) {
+                if (NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion)) {
                     packetConsumer.accept(new DualWieldingPayloadS2C(ServerConfig.DUAL_WIELDING.get()));
                 }
 
                 // send vr changes settings, to inform the client what is non default
-                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_SERVER_VR_CHANGES) {
+                if (NetworkVersion.SERVER_VR_CHANGES.accepts(vivePlayer.networkVersion)) {
                     Map<String, String> settings = new HashMap<>();
                     for (ConfigBuilder.ConfigValue<?> config : ServerConfig.getConfigValues()) {
                         if (config.getPath().startsWith("vrChanges") && !config.isDefault()) {
@@ -214,7 +215,7 @@ public class ServerNetworking {
                 }
                 vivePlayer.useBodyPartForAim = activeBodypart.useForAim();
                 if (vivePlayer.activeBodyPart != newBodyPart && ServerConfig.DUAL_WIELDING.get() &&
-                    vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING)
+                    NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion))
                 {
                     // handle equipment changes
                     ItemStack oldItem = player.getItemBySlot(EquipmentSlot.MAINHAND);
@@ -387,7 +388,7 @@ public class ServerNetworking {
             for (ServerVivePlayer vivePlayer : ServerVRPlayers.getPlayersWithVivecraft(server).values()) {
                 VivecraftPayloadS2C payload = function.apply(vivePlayer);
                 // old clients cannot clear server overrides, crawl or tp
-                if (vivePlayer.networkVersion < CommonNetworkHelper.NETWORK_VERSION_OPTION_TOGGLE &&
+                if (!NetworkVersion.OPTION_TOGGLE.accepts(vivePlayer.networkVersion) &&
                     ((payload instanceof SettingOverridePayloadS2C override && override.clear()) ||
                         (payload instanceof CrawlPayloadS2C crawl && !crawl.allowed()) ||
                         (payload instanceof TeleportPayloadS2C tp && !tp.allowed())
@@ -442,7 +443,7 @@ public class ServerNetworking {
     {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
         if (vivePlayer != null && vivePlayer.isVR() &&
-            vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_HAPTIC_PACKET)
+            NetworkVersion.HAPTIC_PACKET.accepts(vivePlayer.networkVersion))
         {
             vivePlayer.player.connection.send(
                 Xplat.getS2CPacket(new HapticPayloadS2C(bodyPart, duration, frequency, amplitude, delay)));
@@ -457,13 +458,14 @@ public class ServerNetworking {
     public static void sendVrPlayerStateToClients(ServerVivePlayer vivePlayer) {
         // create the packets here, to try to avoid unnecessary memory copies when creating multiple packets
         Packet<?> legacyPacket = Xplat.getS2CPacket(
-            new UberPacketPayloadS2C(vivePlayer.player.getUUID(), new VrPlayerState(vivePlayer.vrPlayerState(), 0),
+            new UberPacketPayloadS2C(vivePlayer.player.getUUID(), new VrPlayerState(vivePlayer.vrPlayerState(), NetworkVersion.LEGACY),
                 vivePlayer.worldScale, vivePlayer.heightScale));
         Packet<?> newPacket = Xplat.getS2CPacket(
             new UberPacketPayloadS2C(vivePlayer.player.getUUID(), vivePlayer.vrPlayerState(), vivePlayer.worldScale,
                 vivePlayer.heightScale));
 
-        sendPacketToTrackingPlayers(vivePlayer, (version) -> version < 1 ? legacyPacket : newPacket);
+        sendPacketToTrackingPlayers(vivePlayer,
+            (version) -> version == NetworkVersion.LEGACY ? legacyPacket : newPacket);
     }
 
     /**
@@ -497,7 +499,7 @@ public class ServerNetworking {
      * @param packetProvider provider for network packets, based on client network version
      */
     private static void sendPacketToTrackingPlayers(
-        ServerVivePlayer vivePlayer, Function<Integer, Packet<?>> packetProvider)
+        ServerVivePlayer vivePlayer, Function<NetworkVersion, Packet<?>> packetProvider)
     {
         Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(
             vivePlayer.player.level().getServer());
