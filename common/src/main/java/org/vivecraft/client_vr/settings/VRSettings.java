@@ -428,6 +428,8 @@ public class VRSettings {
     public float displayMirrorCenterSmooth = 0.0F;
     @SettingField(VrOptions.MIRROR_SCREENSHOT_CAMERA)
     public boolean displayMirrorUseScreenshotCamera = false;
+    @SettingField(VrOptions.MIRROR_OFF_TEXT)
+    public boolean showMirrorOffText = true;
     @SettingField(VrOptions.SHOW_PLAYER_MODEL)
     public boolean shouldRenderSelf = false;
     @SettingField(VrOptions.MAIN_PLAYER_DATA)
@@ -1709,6 +1711,7 @@ public class VRSettings {
                 }
             }
         },
+        MIRROR_OFF_TEXT(false, true), // if text should be shown when the mirror is off
         MIRROR_SCREENSHOT_CAMERA(false, true),
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
             private static final List<Pair<Color, String>> COLORS;

@@ -536,6 +536,7 @@
   "vivecraft.options.MENU_WORLD_FALLBACK": "Fallback Method",
   "vivecraft.options.MIRROR_CROP": "Mirror Cropping",
   "vivecraft.options.MIRROR_SCREENSHOT_CAMERA": "Camera as Desktop Mirror",
+  "vivecraft.options.MIRROR_OFF_TEXT": "Show Mirror OFF Text",
   "vivecraft.options.RENDER_DEBUG_HEAD_HITBOX": "Head Hitboxes",
   "vivecraft.options.RENDER_DEBUG_DEVICE_AXES": "Local Device Axes",
   "vivecraft.options.RENDER_DEBUG_PLAYER_AXES": "Remote Device Axes",
@@ -593,6 +594,7 @@
   "vivecraft.options.MENU_WORLD_FALLBACK.tooltip": "If Menuworlds are disabled or not loaded yet, this fallback will be shown instead.",
   "vivecraft.options.MIRROR_CROP.tooltip": "Specifies how much of the VR image gets cropped. The default 15%% hides the stencil pretty good. If you play without stencil, you can reduce this, to get a bigger FOV for the mirror.",
   "vivecraft.options.MIRROR_SCREENSHOT_CAMERA.tooltip": "If enabled, the screenshot camera will be displayed as the desktop mirror. When the camera is inactive, the currently selected mirror mode is used instead.\nIn mixed reality mode, only applies to the first person viewport in the Unity layout.",
+  "vivecraft.options.MIRROR_OFF_TEXT.tooltip": "If enabled, shows a text stating that the desktop mirror is disabled.",
   "vivecraft.options.RENDER_DEBUG_HEAD_HITBOX.tooltip": "If enabled, a head hitbox will be rendered for all entities when debug hitboxes are shown",
   "vivecraft.options.RENDER_DEBUG_DEVICE_AXES.tooltip": "If enabled, debug axes will be shown for the local players VR devices.",
   "vivecraft.options.RENDER_DEBUG_PLAYER_AXES.tooltip": "If enabled, debug axes will be shown for all VR players received from the server.",
@@ -663,6 +665,7 @@
   "vivecraft.messages.nondefaultvrchanges.title": "Non-Default Gameplay Settings",
   "vivecraft.messages.connectingtoruntime": "Connecting to the VR Runtime",
   "vivecraft.messages.noteleport": "This server has teleporting explicitly disabled. Restricted movement mode (fallback to free move) has been enabled.",
+  "vivecraft.messages.mirroroff": "Mirror is OFF",
 
   "vivecraft.messages.tracker.waist": "Waist",
   "vivecraft.messages.tracker.rightFoot": "Right Foot",
