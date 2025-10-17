@@ -86,6 +86,8 @@ public class VRArmHelper {
         if (!menuHandMain || !menuHandOff) {
             // render the hands
             MC.gameRenderer.getFeatureRenderDispatcher().renderAllFeatures();
+            // need to end the batches to have the hands/items actually render
+            MC.renderBuffers().bufferSource().endBatch();
         }
 
         VREffectsHelper.reAddNausea();
