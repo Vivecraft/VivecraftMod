@@ -1,20 +1,23 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11C;
 import org.lwjgl.openvr.HiddenAreaMesh;
-import org.lwjgl.openvr.HmdMatrix44;
+import org.lwjgl.openvr.Texture;
 import org.lwjgl.openvr.VR;
+import org.lwjgl.openvr.VRVulkanTextureData;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.GraphicsAPI;
+import org.vivecraft.client_vr.render.helpers.vulkan.VulkanHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
+
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_PostPresentHandoff;
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_Submit;
@@ -76,49 +79,79 @@ public class OpenVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip, boolean zZeroToOne) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            if (eyeType == VR.EVREye_Eye_Left) {
-                return OpenVRUtil.Matrix4fFromOpenVR(
-                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Left, nearClip, farClip, HmdMatrix44.calloc(stack)));
-            } else {
-                return OpenVRUtil.Matrix4fFromOpenVR(
-                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Right, nearClip, farClip, HmdMatrix44.calloc(stack)));
-            }
+            FloatBuffer left = stack.callocFloat(1);
+            FloatBuffer right = stack.callocFloat(1);
+            FloatBuffer top = stack.callocFloat(1);
+            FloatBuffer bottom = stack.callocFloat(1);
+            VRSystem_GetProjectionRaw(eyeType == 0 ? VR.EVREye_Eye_Left : VR.EVREye_Eye_Right,
+                left, right, top, bottom);
+
+            return new Matrix4f().setFrustum(
+                left.get() * nearClip, right.get() * nearClip,
+                top.get() * nearClip, bottom.get() * nearClip,
+                nearClip, farClip, zZeroToOne);
         }
     }
 
     @Override
     public void createRenderTexture(int width, int height) {
-        int boundTextureId = GlStateManager._getInteger(GL11C.GL_TEXTURE_BINDING_2D);
-        // generate left eye texture
-        this.LeftEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.LeftEyeTextureId);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, width, height, 0, GL11C.GL_RGBA,
-            GL11C.GL_INT, null);
-        this.openvr.texType0.handle(this.LeftEyeTextureId);
-        this.openvr.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
-        this.openvr.texType0.eType(VR.ETextureType_TextureType_OpenGL);
+        if (this.framebufferEye0 == null || this.framebufferEye1 == null) {
+            throw new RuntimeException("framebuffers need to be initialized first");
+        }
 
-        // generate right eye texture
-        this.RightEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.RightEyeTextureId);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, width, height, 0, GL11C.GL_RGBA,
-            GL11C.GL_INT, null);
-        this.openvr.texType1.handle(this.RightEyeTextureId);
-        this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
-        this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
+        // map left eye texture
+        mapTexture(0, this.framebufferEye0.getColorTexture());
 
-        GlStateManager._bindTexture(boundTextureId);
-        this.lastError = RenderHelper.checkGLError("create VR textures");
+        // map right eye texture
+        mapTexture(1, this.framebufferEye1.getColorTexture());
+
+        this.lastError = GraphicsAPI.getInstance().checkError("create VR textures");
+    }
+
+    private void mapTexture(int eye, GpuTexture framebuffer) {
+        Texture texture = eye == 0 ? this.openvr.texType0 : this.openvr.texType1;
+        texture.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        switch (GraphicsAPI.getInstance().type()) {
+            case OPENGL -> {
+                texture.eType(VR.ETextureType_TextureType_OpenGL);
+                texture.handle(GraphicsAPI.getInstance().getImageHandle(framebuffer));
+            }
+            case VULKAN -> {
+                VRVulkanTextureData data = eye == 0 ? this.openvr.texVulkan0 : this.openvr.texVulkan1;
+                texture.eType(VR.ETextureType_TextureType_Vulkan);
+                texture.handle(data.address());
+                data.m_nImage(GraphicsAPI.getInstance().getImageHandle(framebuffer));
+                // TODO figure out how to query that, in case a mod uses MSAA
+                data.m_nSampleCount(1);
+                data.m_nFormat(GraphicsAPI.getInstance().getFormat(framebuffer.getFormat()));
+                data.m_nWidth(framebuffer.getWidth(0));
+                data.m_nHeight(framebuffer.getHeight(0));
+
+                VulkanHelper.VulkanDeviceData deviceData = ((VulkanHelper) GraphicsAPI.getInstance()).getDeviceData();
+
+                // pipeline data
+                data.m_pDevice(deviceData.device());
+                data.m_pPhysicalDevice(deviceData.physicalDevice());
+                data.m_pInstance(deviceData.instance());
+                data.m_pQueue(deviceData.queue());
+                data.m_nQueueFamilyIndex(deviceData.queueFamilyIndex());
+            }
+            default -> throw new RuntimeException("Unknown GraphicsAPI: " + GraphicsAPI.getInstance().type());
+        }
     }
 
     @Override
     public void endFrame() throws RenderConfigException {
+        GraphicsAPI.getInstance()
+            .changeTexturePurpose(this.framebufferEye0.getColorTexture(), GraphicsAPI.TexturePurpose.TRANSFER);
+        GraphicsAPI.getInstance()
+            .changeTexturePurpose(this.framebufferEye1.getColorTexture(), GraphicsAPI.TexturePurpose.TRANSFER);
+
+        // make sure everything rendered before submitting
+        GraphicsAPI.getInstance().flushPreSubmit();
+
         int leftError = VRCompositor_Submit(VR.EVREye_Eye_Left, this.openvr.texType0, null,
             VR.EVRSubmitFlags_Submit_Default);
         int rightError = VRCompositor_Submit(VR.EVREye_Eye_Right, this.openvr.texType1, null,
@@ -132,8 +165,14 @@ public class OpenVRStereoRenderer extends VRRenderer {
                     getCompositorError(leftError) + "/" + getCompositorError(rightError)));
         }
 
-        // flush, recommended by the openvr docs
-        GL11C.glFlush();
+        // flush, recommended by the openvr docs for opengl
+        // https://github.com/ValveSoftware/openvr/blob/91825305130f446f82054c1ec3d416321ace0072/headers/openvr.h#L3605-L3606
+        GraphicsAPI.getInstance().flushPostSubmit();
+
+        GraphicsAPI.getInstance()
+            .changeTexturePurpose(this.framebufferEye0.getColorTexture(), GraphicsAPI.TexturePurpose.RENDER);
+        GraphicsAPI.getInstance()
+            .changeTexturePurpose(this.framebufferEye1.getColorTexture(), GraphicsAPI.TexturePurpose.RENDER);
     }
 
     public static String getCompositorError(int code) {
@@ -163,20 +202,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
     @Override
     public String getName() {
         return "OpenVR";
-    }
-
-    @Override
-    protected void destroyBuffers() {
-        super.destroyBuffers();
-        if (this.LeftEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.LeftEyeTextureId);
-            this.LeftEyeTextureId = -1;
-        }
-
-        if (this.RightEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.RightEyeTextureId);
-            this.RightEyeTextureId = -1;
-        }
     }
 
     @Override

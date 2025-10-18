@@ -32,6 +32,7 @@ dependencies {
     // modCompileOnly "maven.modrinth:lithium:mc1.20.4-0.12.1"
     // modCompileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
     modCompileOnly "maven.modrinth:resolution-control-plus:3.0.0"
+    modCompileOnly "curse.maven:cinnabar-552238:6800674"
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }

@@ -1444,9 +1444,12 @@ public class MenuWorldRenderer {
                 GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE, FogRenderer.FOG_UBO_SIZE);
             try (MemoryStack memoryStack = MemoryStack.stackPush()) {
                 ByteBuffer byteBuffer = memoryStack.malloc(FogRenderer.FOG_UBO_SIZE);
+                byteBuffer.position(0);
                 Std140Builder.intoBuffer(byteBuffer).putVec4(new Vector4f(0.0f)).putFloat(Float.MAX_VALUE)
                     .putFloat(Float.MAX_VALUE).putFloat(Float.MAX_VALUE).putFloat(Float.MAX_VALUE)
                     .putFloat(Float.MAX_VALUE).putFloat(Float.MAX_VALUE);
+                // make sure everything is written even padding
+                byteBuffer.position(FogRenderer.FOG_UBO_SIZE);
                 this.emptyBuffer = RenderSystem.getDevice()
                     .createBuffer(() -> "Menuworld Empty fog", GpuBuffer.USAGE_UNIFORM, byteBuffer.flip());
             }

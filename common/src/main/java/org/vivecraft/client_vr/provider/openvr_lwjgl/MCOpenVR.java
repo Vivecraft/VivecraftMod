@@ -123,6 +123,8 @@ public class MCOpenVR extends MCVR {
     private final VRTextureBounds texBounds;
     protected final Texture texType0;
     protected final Texture texType1;
+    protected final VRVulkanTextureData texVulkan0;
+    protected final VRVulkanTextureData texVulkan1;
 
     // general error buffer
     private final IntBuffer errorBuffer;
@@ -230,6 +232,8 @@ public class MCOpenVR extends MCVR {
         this.texBounds = VRTextureBounds.calloc();
         this.texType0 = Texture.calloc();
         this.texType1 = Texture.calloc();
+        this.texVulkan0 = VRVulkanTextureData.calloc();
+        this.texVulkan1 = VRVulkanTextureData.calloc();
 
         this.digital = InputDigitalActionData.calloc();
         this.analog = InputAnalogActionData.calloc();
@@ -266,6 +270,8 @@ public class MCOpenVR extends MCVR {
         this.texBounds.free();
         this.texType0.free();
         this.texType1.free();
+        this.texVulkan0.free();
+        this.texVulkan1.free();
 
         this.digital.free();
         this.analog.free();

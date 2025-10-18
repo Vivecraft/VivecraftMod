@@ -66,6 +66,7 @@
     "client_vr.player.LocalPlayerVRMixin",
     "client_vr.renderer.CubeMapVRMixin",
     "client_vr.renderer.GameRendererAccessor",
+    "client_vr.renderer.GameRendererLateVRMixin",
     "client_vr.renderer.GameRendererVRMixin",
     "client_vr.renderer.ItemInHandRendererVRMixin",
     "client_vr.renderer.LevelEventHandlerVRMixin",

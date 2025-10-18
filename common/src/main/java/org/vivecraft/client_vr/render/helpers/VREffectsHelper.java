@@ -33,7 +33,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
-import org.lwjgl.opengl.GL11C;
 import org.vivecraft.Xevents;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
@@ -196,7 +195,7 @@ public class VREffectsHelper {
     public static void drawEyeStencil() {
         if (DATA_HOLDER.vrSettings.vrUseStencil) {
             if (StencilHelper.stencilBufferSupported()) {
-                WAS_STENCIL_ON = GL11C.glIsEnabled(GL11C.GL_STENCIL_TEST);
+                WAS_STENCIL_ON = GraphicsAPI.getInstance().isStencilEnabled();
                 if (WAS_STENCIL_ON && !DATA_HOLDER.showedStencilMessage &&
                     DATA_HOLDER.vrSettings.showChatMessageStencil)
                 {
@@ -244,7 +243,7 @@ public class VREffectsHelper {
     public static void disableStencilTest() {
         // if we did enable the stencil test, disable it
         if (StencilHelper.stencilBufferSupported() && !WAS_STENCIL_ON) {
-            GL11C.glDisable(GL11C.GL_STENCIL_TEST);
+            GraphicsAPI.getInstance().disableStencil();
         }
     }
 

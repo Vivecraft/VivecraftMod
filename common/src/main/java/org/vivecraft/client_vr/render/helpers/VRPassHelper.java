@@ -42,7 +42,7 @@ public class VRPassHelper {
         // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
         MC.levelRenderer.endFrame();
 
-        RenderHelper.checkGLError("post game render " + eye);
+        GraphicsAPI.getInstance().checkError("post game render " + eye);
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
@@ -55,7 +55,7 @@ public class VRPassHelper {
                     DATA_HOLDER.vrRenderer.fsaaFirstPassResultFBO,
                     DATA_HOLDER.vrRenderer.fsaaLastPassResultFBO);
                 rendertarget = DATA_HOLDER.vrRenderer.fsaaLastPassResultFBO;
-                RenderHelper.checkGLError("fsaa " + eye);
+                GraphicsAPI.getInstance().checkError("fsaa " + eye);
                 Profiler.get().pop();
             }
 
@@ -64,7 +64,7 @@ public class VRPassHelper {
                 eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.framebufferEye0 :
                     DATA_HOLDER.vrRenderer.framebufferEye1, deltaTracker.getGameTimeDeltaPartialTick(false));
 
-            RenderHelper.checkGLError("post overlay" + eye);
+            GraphicsAPI.getInstance().checkError("post overlay" + eye);
             Profiler.get().pop();
         }
 
@@ -146,7 +146,7 @@ public class VRPassHelper {
             RenderHelper.drawScreen(RadialHandler.UI, true);
         }
         Profiler.get().pop();
-        RenderHelper.checkGLError("post 2d ");
+        GraphicsAPI.getInstance().checkError("post 2d ");
 
         // done with guis
         Profiler.get().pop();
@@ -222,6 +222,6 @@ public class VRPassHelper {
             VRSettings.LOGGER.error("Vivecraft: error ending frame: {}", exception.error.getString());
         }
         Profiler.get().pop();
-        RenderHelper.checkGLError("post submit");
+        GraphicsAPI.getInstance().checkError("post submit");
     }
 }

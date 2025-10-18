@@ -36,7 +36,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
-import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,17 +50,12 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
-import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.XRCamera;
-import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.helpers.VRArmHelper;
-import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.client_vr.render.helpers.*;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.function.Predicate;
 
@@ -74,11 +68,7 @@ public abstract class GameRendererVRMixin
     @Unique
     private static final ClientDataHolderVR vivecraft$DATA_HOLDER = ClientDataHolderVR.getInstance();
     @Unique
-    private static final float vivecraft$MIN_CLIP_DISTANCE = 0.02F;
-    @Unique
     private Vec3 vivecraft$crossVec;
-    @Unique
-    private Matrix4f vivecraft$thirdPassProjectionMatrix = new Matrix4f();
     @Unique
     private boolean vivecraft$inwater;
     @Unique
@@ -222,61 +212,6 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @WrapOperation(method = "getProjectionMatrix", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;perspective(FFFF)Lorg/joml/Matrix4f;", remap = false), remap = true)
-    private Matrix4f vivecraft$customProjectionMatrix(
-        Matrix4f instance, float fovy, float aspect, float zNear, float zFar, Operation<Matrix4f> original)
-    {
-        if (!RenderPassType.isVanilla()) {
-            zNear = vivecraft$MIN_CLIP_DISTANCE;
-            if (MethodHolder.isInMenuRoom()) {
-                // use 16 Chunks as minimum, to have no issues with clipping in the menuworld
-                zFar = Math.max(zFar, 1024.0F);
-            }
-
-            if (vivecraft$DATA_HOLDER.currentPass == RenderPass.LEFT ||
-                vivecraft$DATA_HOLDER.currentPass == RenderPass.RIGHT)
-            {
-                return instance.mul(vivecraft$DATA_HOLDER.vrRenderer.getCachedProjectionMatrix(
-                    vivecraft$DATA_HOLDER.currentPass.ordinal(), zNear, zFar));
-            }
-
-            aspect = switch (vivecraft$DATA_HOLDER.currentPass) {
-                case THIRD, CENTER -> {
-                    if (vivecraft$DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
-                        yield vivecraft$DATA_HOLDER.vrSettings.mixedRealityAspectRatio;
-                    } else {
-                        if (ShadersHelper.needsSameSizeBuffers()) {
-                            // in this case the default aspect is wrong, since it has the aspect of the vr view
-                            WindowExtension window = (WindowExtension) (Object) this.minecraft.getWindow();
-                            yield (float) window.vivecraft$getActualScreenWidth() /
-                                window.vivecraft$getActualScreenHeight();
-                        } else {
-                            yield aspect;
-                        }
-                    }
-                }
-                case CAMERA -> (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth /
-                    (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight;
-                case SCOPEL, SCOPER -> 1.0F;
-                default -> aspect;
-            };
-
-            fovy = switch (vivecraft$DATA_HOLDER.currentPass) {
-                case THIRD -> Mth.DEG_TO_RAD * vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov;
-                case CAMERA -> Mth.DEG_TO_RAD * vivecraft$DATA_HOLDER.vrSettings.handCameraFov;
-                case SCOPEL, SCOPER -> Mth.DEG_TO_RAD * (70F / 8F);
-                default -> fovy;
-            };
-        }
-
-        Matrix4f proj = original.call(instance, fovy, aspect, zNear, zFar);
-
-        if (VRState.VR_RUNNING && vivecraft$DATA_HOLDER.currentPass == RenderPass.THIRD) {
-            this.vivecraft$thirdPassProjectionMatrix = proj;
-        }
-        return proj;
-    }
-
     @Inject(method = "shouldRenderBlockOutline", at = @At("HEAD"), cancellable = true)
     private void vivecraft$shouldDrawBlockOutline(CallbackInfoReturnable<Boolean> cir) {
         if (!RenderPassType.isVanilla()) {
@@ -356,7 +291,7 @@ public abstract class GameRendererVRMixin
                 // do a popPush
                 Profiler.get().popPush("MainMenu");
             }
-            GL11.glDisable(GL11.GL_STENCIL_TEST);
+            GraphicsAPI.getInstance().disableStencil();
 
             RenderSystem.getModelViewStack().pushMatrix().identity();
             RenderHelper.applyVRModelView(vivecraft$DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
@@ -626,7 +561,7 @@ public abstract class GameRendererVRMixin
             Vec3 cameraPos = vivecraft$DATA_HOLDER.vrPlayer.getVRDataWorld().getEye(vivecraft$DATA_HOLDER.currentPass)
                 .getPosition();
             Triple<Float, BlockState, BlockPos> triple = VREffectsHelper.getNearOpaqueBlock(cameraPos,
-                vivecraft$MIN_CLIP_DISTANCE);
+                this.vivecraft$getMinClipDistance());
 
             if (triple != null &&
                 !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(),
@@ -658,18 +593,6 @@ public abstract class GameRendererVRMixin
     @Unique
     public Vec3 vivecraft$getCrossVec() {
         return this.vivecraft$crossVec;
-    }
-
-    @Override
-    @Unique
-    public float vivecraft$getMinClipDistance() {
-        return vivecraft$MIN_CLIP_DISTANCE;
-    }
-
-    @Override
-    @Unique
-    public Matrix4f vivecraft$getThirdPassProjectionMatrix() {
-        return this.vivecraft$thirdPassProjectionMatrix;
     }
 
     @Override

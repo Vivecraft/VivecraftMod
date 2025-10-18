@@ -41,6 +41,7 @@ public class FileUtils {
 
             if (resource.isPresent()) {
                 try (InputStream is = resource.get().open(); OutputStream os = new FileOutputStream(targetFile)) {
+                    Xloader.getJarPath();
                     IOUtils.copy(is, os);
                 }
             } else {
