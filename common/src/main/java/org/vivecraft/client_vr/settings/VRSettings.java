@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vivecraft.Xloader;
 import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.render.VRPlayerRenderer;
 import org.vivecraft.client.render.armor.VRArmorLayer;
 import org.vivecraft.client.utils.ClientUtils;
@@ -118,6 +119,7 @@ public class VRSettings {
         HMD,
         RUN_IN_PLACE,
         ROOM,
+        WAIST,
         AUTO // only for flying
     }
 
@@ -1403,6 +1405,21 @@ public class VRSettings {
         }
     }
 
+    /**
+     * selects the right FreeMove mode (flying/regular), and adds a fallback for WAIST if no fbt is available
+     *
+     * @param flySwimming if the player is swimming/fall flying
+     * @param fbtMode     active FBT mode
+     * @return the active FreeMove mode
+     */
+    public FreeMove getVrFreeMoveMode(boolean flySwimming, FBTMode fbtMode) {
+        FreeMove freeMoveMode =
+            flySwimming && this.vrFreeMoveFlyMode != FreeMove.AUTO ? this.vrFreeMoveFlyMode : this.vrFreeMoveMode;
+
+        // can't use waist if no fbt
+        return freeMoveMode == FreeMove.WAIST && fbtMode == FBTMode.ARMS_ONLY ? FreeMove.HMD : freeMoveMode;
+    }
+
     record ConfigEntry(Field field, VrOptions vrOption, String configName, boolean separate, boolean fixedSize) {}
 
     public enum VrOptions {
@@ -2114,7 +2131,7 @@ public class VRSettings {
 
             @Override
             Object setOptionValue(Object value) {
-                if (value == FreeMove.ROOM) {
+                if (value == FreeMove.WAIST) {
                     // skip Auto
                     return FreeMove.CONTROLLER;
                 }
@@ -2126,6 +2143,8 @@ public class VRSettings {
             Object setOptionValue(Object value) {
                 if (value == FreeMove.CONTROLLER) {
                     return FreeMove.HMD;
+                } else if (value == FreeMove.HMD) {
+                    return FreeMove.WAIST;
                 } else if (value == FreeMove.AUTO) {
                     return FreeMove.CONTROLLER;
                 } else {
