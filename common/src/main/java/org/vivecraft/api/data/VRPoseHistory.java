@@ -94,7 +94,8 @@ public interface VRPoseHistory {
      * @since 1.3.3
      */
     @Nullable
-    Vec3 netMovement(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
+    Vec3 netMovement(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 
     /**
      * Gets the average velocity in world space in blocks/tick between the most recent VRPose in this instance and the
@@ -127,7 +128,8 @@ public interface VRPoseHistory {
      * @since 1.3.3
      */
     @Nullable
-    Vec3 averageVelocity(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
+    Vec3 averageVelocity(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 
     /**
      * Gets the average speed in world space in blocks/tick between the most recent VRPose in this instance and the
@@ -158,7 +160,8 @@ public interface VRPoseHistory {
      *                                  {@code bodyPart} is supplied.
      * @since 1.3.3
      */
-    double averageSpeed(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
+    double averageSpeed(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 
     /**
      * Gets the average position in world space between the most recent VRPose in this instance and the oldest VRPose
@@ -191,5 +194,6 @@ public interface VRPoseHistory {
      * @since 1.3.3
      */
     @Nullable
-    Vec3 averagePosition(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
+    Vec3 averagePosition(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException;
 }

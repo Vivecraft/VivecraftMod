@@ -458,7 +458,8 @@ public class ServerNetworking {
     public static void sendVrPlayerStateToClients(ServerVivePlayer vivePlayer) {
         // create the packets here, to try to avoid unnecessary memory copies when creating multiple packets
         Packet<?> legacyPacket = Xplat.getS2CPacket(
-            new UberPacketPayloadS2C(vivePlayer.player.getUUID(), new VrPlayerState(vivePlayer.vrPlayerState(), NetworkVersion.LEGACY),
+            new UberPacketPayloadS2C(vivePlayer.player.getUUID(),
+                new VrPlayerState(vivePlayer.vrPlayerState(), NetworkVersion.LEGACY),
                 vivePlayer.worldScale, vivePlayer.heightScale));
         Packet<?> newPacket = Xplat.getS2CPacket(
             new UberPacketPayloadS2C(vivePlayer.player.getUUID(), vivePlayer.vrPlayerState(), vivePlayer.worldScale,

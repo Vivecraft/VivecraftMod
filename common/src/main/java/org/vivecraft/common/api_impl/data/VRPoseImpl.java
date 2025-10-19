@@ -56,7 +56,8 @@ public record VRPoseImpl(VRBodyPartData hmd, VRBodyPartData c0, VRBodyPartData c
         if (vrBodyPartData == null) {
             return null;
         }
-        return new VRBodyPartDataImpl(vrBodyPartData.getPos().subtract(position), vrBodyPartData.getDir(), vrBodyPartData.getRotation());
+        return new VRBodyPartDataImpl(vrBodyPartData.getPos().subtract(position), vrBodyPartData.getDir(),
+            vrBodyPartData.getRotation());
     }
 
     @Override

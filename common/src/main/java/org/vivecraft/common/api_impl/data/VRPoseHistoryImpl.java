@@ -56,7 +56,9 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     @Override
-    public Vec3 netMovement(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException {
+    public Vec3 netMovement(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException
+    {
         checkPartNonNull(bodyPart);
         checkTicksBack(maxTicksBack);
         if (this.dataQueue.size() <= 1) {
@@ -74,7 +76,9 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     @Override
-    public Vec3 averageVelocity(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException {
+    public Vec3 averageVelocity(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException
+    {
         checkPartNonNull(bodyPart);
         checkTicksBack(maxTicksBack);
         if (this.dataQueue.size() <= 1) {
@@ -103,7 +107,9 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     @Override
-    public double averageSpeed(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException {
+    public double averageSpeed(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException
+    {
         checkPartNonNull(bodyPart);
         checkTicksBack(maxTicksBack);
         if (this.dataQueue.size() <= 1) {
@@ -123,7 +129,9 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     @Override
-    public Vec3 averagePosition(VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException {
+    public Vec3 averagePosition(
+        VRBodyPart bodyPart, int maxTicksBack, boolean playerPositionRelative) throws IllegalArgumentException
+    {
         checkPartNonNull(bodyPart);
         checkTicksBack(maxTicksBack);
         if (this.dataQueue.isEmpty()) {
