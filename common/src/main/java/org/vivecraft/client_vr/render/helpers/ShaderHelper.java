@@ -250,7 +250,7 @@ public class ShaderHelper {
             } else {
                 // just clear it
                 RenderSystem.clearColor(0F, 0F, 0F, 1F);
-                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT);
+                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
             }
         } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             if (VRShaders.MIXED_REALITY_SHADER != null) {
