@@ -23,7 +23,9 @@ public class RunTracker implements Tracker {
     public boolean isActive(LocalPlayer player) {
         if (!this.dh.vrPlayer.getFreeMove() || this.dh.vrSettings.seated) {
             return false;
-        } else if (this.dh.vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE) {
+        } else if (this.dh.vrSettings.getVrFreeMoveMode(false, this.dh.vrPlayer.vrdata_world_pre.fbtMode) !=
+            VRSettings.FreeMove.RUN_IN_PLACE)
+        {
             return false;
         } else if (player == null || !player.isAlive()) {
             return false;

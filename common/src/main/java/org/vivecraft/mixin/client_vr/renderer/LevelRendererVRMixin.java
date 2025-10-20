@@ -153,7 +153,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"))
     private boolean vivecraft$noPlayerWhenSleeping(boolean isSleeping) {
         // no self render, we don't want an out-of-body experience
-        return isSleeping && !RenderPassType.isVanilla();
+        return isSleeping && RenderPassType.isVanilla();
     }
 
     @Inject(method = "renderEntity", at = @At("HEAD"))

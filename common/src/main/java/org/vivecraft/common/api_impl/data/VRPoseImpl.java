@@ -1,5 +1,6 @@
 package org.vivecraft.common.api_impl.data;
 
+import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
@@ -38,6 +39,25 @@ public record VRPoseImpl(VRBodyPartData hmd, VRBodyPartData c0, VRBodyPartData c
     @Override
     public FBTMode getFBTMode() {
         return this.fbtMode;
+    }
+
+    public VRPoseImpl relativeToPosition(Vec3 position) {
+        return new VRPoseImpl(
+            relativeToPosition(hmd, position), relativeToPosition(c0, position), relativeToPosition(c1, position),
+            relativeToPosition(rightFoot, position), relativeToPosition(leftFoot, position),
+            relativeToPosition(waist, position),
+            relativeToPosition(rightKnee, position), relativeToPosition(leftKnee, position),
+            relativeToPosition(rightElbow, position), relativeToPosition(leftElbow, position),
+            isSeated, isLeftHanded, fbtMode
+        );
+    }
+
+    private VRBodyPartData relativeToPosition(VRBodyPartData vrBodyPartData, Vec3 position) {
+        if (vrBodyPartData == null) {
+            return null;
+        }
+        return new VRBodyPartDataImpl(vrBodyPartData.getPos().subtract(position), vrBodyPartData.getDir(),
+            ((VRBodyPartDataImpl) vrBodyPartData).rot());
     }
 
     @Override
