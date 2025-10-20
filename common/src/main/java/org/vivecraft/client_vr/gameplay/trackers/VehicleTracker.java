@@ -13,7 +13,6 @@ import org.joml.Vector3f;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ViveItemTags;
 
@@ -93,12 +92,17 @@ public class VehicleTracker implements Tracker {
     }
 
     private static Vector3f getFreeMoveDirection() {
-        if (ClientDataHolderVR.getInstance().vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
-            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.hmd.getDirection();
-        } else {
-            // not exactly sure why we use the main hand for riding, when we use the offhand for regular walking
-            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getController(0).getDirection();
-        }
+        return switch (ClientDataHolderVR.getInstance().vrSettings.getVrFreeMoveMode(false,
+            ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.fbtMode)) {
+            case HMD -> ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.hmd.getDirection();
+            case WAIST -> new Vector3f(0.0F, 0.0F, 1.0F)
+                // use head for up/down
+                .rotateX(-ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.hmd.getPitchRad())
+                .rotateY(-ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.waist.getYawRad());
+            default ->
+                // not exactly sure why we use the main hand for riding, when we use the offhand for regular walking
+                ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getController(0).getDirection();
+        };
     }
 
     private static int getControllerWithFoodStick(LocalPlayer player) {

@@ -37,6 +37,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
     private static final VRSettings.VrOptions[] SINGLE_OPTIONS = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.MIRROR_EYE
     };
+    private static final VRSettings.VrOptions[] OFF_OPTIONS = new VRSettings.VrOptions[]{
+        VRSettings.VrOptions.MIRROR_OFF_TEXT
+    };
     private final VROptionEntry[] MROptions = new VROptionEntry[]{new VROptionEntry(
         "vivecraft.options.screen.mixedreality.button", (button, mousePos) -> {
         Minecraft.getInstance().setScreen(new GuiMixedRealitySettings(this));
@@ -90,6 +93,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
             case THIRD_PERSON -> super.init(THIRD_OPTIONS, false);
             case CROPPED -> super.init(CROP_OPTIONS, false);
             case SINGLE -> super.init(SINGLE_OPTIONS, false);
+            case OFF -> super.init(OFF_OPTIONS, false);
         }
 
         super.addDefaultButtons();

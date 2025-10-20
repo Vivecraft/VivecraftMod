@@ -388,15 +388,14 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                     direction = direction.yRot(-vrplayer.vrdata_world_pre.getController(c).getYawRad());
                 } else {
 
-                    VRSettings.FreeMove freeMoveType = !this.isPassenger() && this.getAbilities().flying &&
-                        this.vivecraft$dataholder.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ?
-                        this.vivecraft$dataholder.vrSettings.vrFreeMoveFlyMode :
-                        this.vivecraft$dataholder.vrSettings.vrFreeMoveMode;
+                    VRSettings.FreeMove freeMoveType = this.vivecraft$dataholder.vrSettings.getVrFreeMoveMode(
+                        !this.isPassenger() && this.getAbilities().flying, vrplayer.vrdata_world_pre.fbtMode);
 
                     if (isFlyingOrSwimming) {
                         direction = switch (freeMoveType) {
                             case CONTROLLER -> direction.xRot(vrplayer.vrdata_world_pre.getController(1).getPitchRad());
-                            case HMD, RUN_IN_PLACE, ROOM -> direction.xRot(vrplayer.vrdata_world_pre.hmd.getPitchRad());
+                            case HMD, RUN_IN_PLACE, ROOM, WAIST ->
+                                direction.xRot(vrplayer.vrdata_world_pre.hmd.getPitchRad());
                             default -> direction;
                         };
                     }
@@ -410,6 +409,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                                 .scale(this.vivecraft$dataholder.runTracker.getSpeed());
                             case ROOM -> direction.yRot(
                                 (180.0F + this.vivecraft$dataholder.vrSettings.worldRotation) * Mth.DEG_TO_RAD);
+                            case WAIST -> direction.yRot(-vrplayer.vrdata_world_pre.waist.getYawRad());
                             default -> direction;
                         };
                     }

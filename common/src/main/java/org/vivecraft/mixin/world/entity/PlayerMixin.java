@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.api.data.VRBodyPart;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.mixin.server.ServerPlayerMixin;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
@@ -90,7 +90,7 @@ public abstract class PlayerMixin extends LivingEntityMixin {
             if (ServerVRPlayers.isVRPlayer(serverPlayer)) {
                 ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
                 // older clients don't reset the active hand
-                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
+                if (NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion) &&
                     vivePlayer.activeBodyPart == VRBodyPart.OFF_HAND)
                 {
                     equipmentSlot = EquipmentSlot.OFFHAND;
