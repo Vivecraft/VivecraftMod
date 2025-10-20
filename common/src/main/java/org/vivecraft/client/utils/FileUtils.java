@@ -16,9 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileUtils {
     private static final int CONNECT_TIMEOUT = 5000;
@@ -101,17 +104,17 @@ public class FileUtils {
      * @param required   if set and an error occurs, it will not be caught
      * @return if a file was unpacked
      */
-    private static boolean unpackFile(String sourcePath, File targetFile, boolean required) {
+    private static boolean unpackFile(Path sourcePath, File targetFile, boolean required) {
         try {
             VRSettings.LOGGER.info("Vivecraft: Unpacking file '{}' ...", sourcePath);
 
             targetFile.getParentFile().mkdirs();
 
-            Files.copy(Xloader.getInJarFile(sourcePath), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(sourcePath, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             return true;
         } catch (Exception exception) {
-            handleAssetException(exception, sourcePath, required);
+            handleAssetException(exception, sourcePath.toString(), required);
             return false;
         }
     }
@@ -125,7 +128,7 @@ public class FileUtils {
      * @return if a file was unpacked
      */
     public static boolean unpackFile(String sourceFile, String targetFile, boolean required) {
-        return unpackFile(sourceFile, new File(targetFile), required);
+        return unpackFile(Xloader.getJarPath().resolve(sourceFile), new File(targetFile), required);
     }
 
     /**
@@ -142,9 +145,9 @@ public class FileUtils {
 
         boolean didExtractSomething = false;
 
-        try {
-            for (Path path : Xloader.getInJarFolderFiles(source)) {
-                didExtractSomething |= unpackFile(path.toString(), new File(target + "/" + path.getFileName()), false);
+        try (Stream<Path> natives = Files.list(Xloader.getJarPath().resolve(source))) {
+            for (Path file : natives.collect(Collectors.toCollection(ArrayList::new))) {
+                didExtractSomething |= unpackFile(file, new File(target + "/" + file.getFileName()), false);
             }
         } catch (IOException e) {
             handleAssetException(e, source, false);
