@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.server.ServerVRPlayers;
 
 @Mixin(FenceGateBlock.class)
@@ -25,7 +25,7 @@ public class FenceGateBlockServerMixin {
             // also do this on the client, but only if we can assume that the server also does this fix
             // since it would cause a wrong block state for a split second
             (player.isLocalPlayer() && VRState.VR_RUNNING &&
-                ClientNetworking.USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_OPTION_TOGGLE
+                NetworkVersion.OPTION_TOGGLE.accepts(ClientNetworking.USED_NETWORK_VERSION)
             ))
         {
             return hitResult.getDirection().getOpposite();

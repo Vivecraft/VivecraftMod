@@ -121,7 +121,9 @@ public class VRState {
                     if (os.getTotalMemorySize() >= 1073741824L * 12L - 1048576L * 256L &&
                         Runtime.getRuntime().availableProcessors() >= 6)
                     {
-                        setScreenAndCache(new GarbageCollectorScreen(garbageCollector));
+                        if (!(Minecraft.getInstance().screen instanceof GarbageCollectorScreen)) {
+                            setScreenAndCache(new GarbageCollectorScreen(garbageCollector));
+                        }
                     }
                 }
             } catch (Throwable e) {

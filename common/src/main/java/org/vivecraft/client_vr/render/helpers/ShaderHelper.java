@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -242,11 +244,15 @@ public class ShaderHelper {
      * draws the desktop mirror to the bound buffer
      */
     public static void drawMirror() {
-        if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF &&
-            DATA_HOLDER.vr.isHMDTracking())
-        {
+        if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF && DATA_HOLDER.vr.isHMDTracking()) {
             // no mirror, only show when headset is not tracking, to be able to see the menu with the headset off
-            MirrorNotification.notify("Mirror is OFF", true, 1000);
+            if (DATA_HOLDER.vrSettings.showMirrorOffText) {
+                MirrorNotification.notify(I18n.get("vivecraft.messages.mirroroff"), true, 1000);
+            } else {
+                // just clear it
+                RenderSystem.clearColor(0F, 0F, 0F, 1F);
+                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
+            }
         } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             if (VRShaders.MIXED_REALITY_SHADER != null) {
                 ShaderHelper.doMixedRealityMirror();

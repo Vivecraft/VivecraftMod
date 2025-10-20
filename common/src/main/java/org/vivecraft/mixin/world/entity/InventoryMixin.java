@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
@@ -50,7 +50,7 @@ public class InventoryMixin {
             if (ServerVRPlayers.isVRPlayer(serverPlayer)) {
                 ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
                 // older clients don't reset the active hand
-                if (vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING) {
+                if (NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion)) {
                     bodyPart = vivePlayer.activeBodyPart;
                 }
             }
