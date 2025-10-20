@@ -49,7 +49,7 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
      * @param other   VrPlayerState to strip down
      * @param version version to strip the packet down to
      */
-    public VrPlayerState(VrPlayerState other, int version) {
+    public VrPlayerState(VrPlayerState other, NetworkVersion version) {
         this(
             other.seated,
             other.hmd,
@@ -57,20 +57,20 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
             other.mainHand,
             other.reverseHands1legacy,
             other.offHand,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? FBTMode.ARMS_ONLY : other.fbtMode,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.waist,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.rightFoot,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.leftFoot,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.rightKnee,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.leftKnee,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.rightElbow,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.leftElbow
+            NetworkVersion.FBT.accepts(version) ? other.fbtMode : FBTMode.ARMS_ONLY,
+            NetworkVersion.FBT.accepts(version) ? other.waist : null,
+            NetworkVersion.FBT.accepts(version) ? other.rightFoot : null,
+            NetworkVersion.FBT.accepts(version) ? other.leftFoot : null,
+            NetworkVersion.FBT.accepts(version) ? other.rightKnee : null,
+            NetworkVersion.FBT.accepts(version) ? other.leftKnee : null,
+            NetworkVersion.FBT.accepts(version) ? other.rightElbow : null,
+            NetworkVersion.FBT.accepts(version) ? other.leftElbow : null
         );
     }
 
     public static VrPlayerState create(VRPlayer vrPlayer) {
         FBTMode fbtMode = vrPlayer.vrdata_world_post.fbtMode;
-        if (ClientNetworking.USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_FBT) {
+        if (!NetworkVersion.FBT.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
             // don't send fbt data to legacy servers
             fbtMode = FBTMode.ARMS_ONLY;
         }

@@ -3,7 +3,7 @@ package org.vivecraft.common.network.packet.c2s;
 import net.minecraft.network.FriendlyByteBuf;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 
 /**
@@ -23,7 +23,7 @@ public record ActiveBodyPartPayloadC2S(VRBodyPart bodyPart, boolean useForAim) i
     public void write(FriendlyByteBuf buffer) {
         buffer.writeByte(payloadId().ordinal());
         buffer.writeByte(this.bodyPart.ordinal());
-        if (ClientNetworking.USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM) {
+        if (NetworkVersion.HEAD_AIM.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
             buffer.writeBoolean(this.useForAim);
         }
     }

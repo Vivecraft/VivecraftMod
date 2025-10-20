@@ -2,6 +2,7 @@ package org.vivecraft.common.api_impl;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
@@ -30,14 +31,14 @@ public final class VRAPIImpl implements VRAPI {
         this.getMap(isClientSide).remove(player);
     }
 
-    public void addPoseToHistory(UUID player, VRPose pose, boolean isClientSide) {
+    public void addPoseToHistory(UUID player, VRPose pose, Vec3 playerPos, boolean isClientSide) {
         Map<UUID, VRPoseHistoryImpl> poseHistories = this.getMap(isClientSide);
         VRPoseHistoryImpl poseHistory = poseHistories.get(player);
         if (poseHistory == null) {
             poseHistory = new VRPoseHistoryImpl();
             poseHistories.put(player, poseHistory);
         }
-        poseHistory.addPose(pose);
+        poseHistory.addPose(pose, playerPos);
     }
 
     public void clearAllPoseHistories() {

@@ -128,7 +128,7 @@ public abstract class LivingEntityMixin extends Entity {
     /**
      * part of {@link #vivecraft$roomscaleShieldBlockingItem}
      */
-    @ModifyArg(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"), index = 3)
+    @ModifyExpressionValue(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getUsedItemHand()Lnet/minecraft/world/InteractionHand;"))
     private InteractionHand vivecraft$roomscaleShieldBlockingHand(
         InteractionHand original, @Local ItemStack itemStack,
         @Share("roomscaleBlockAngle") LocalDoubleRef roomscaleBlockAngle)
