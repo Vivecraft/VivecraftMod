@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -253,8 +254,8 @@ public class ShaderHelper {
                 MirrorNotification.notify(I18n.get("vivecraft.messages.mirroroff"), true, 1000);
             } else {
                 // just clear it
-                RenderSystem.getDevice().createCommandEncoder()
-                    .clearColorTexture(MC.mainRenderTarget.getColorTexture(), 0xFF000000);
+                RenderSystem.clearColor(0F, 0F, 0F, 1F);
+                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT);
             }
         } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             if (MC.getShaderManager().getProgram(VRShaders.MIXED_REALITY_SHADER) != null) {
