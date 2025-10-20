@@ -10,6 +10,7 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.utils.MathUtils;
 
@@ -38,7 +39,8 @@ public class ServerVivePlayer {
     // player this data belongs to
     public ServerPlayer player;
     // network protocol this player is communicating with
-    public int networkVersion = CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION;
+    public NetworkVersion networkVersion = NetworkVersion.fromProtocolVersion(
+        CommonNetworkHelper.MAX_SUPPORTED_NETWORK_PROTOCOL);
     // if the client requested damage direction data
     public boolean wantsDamageDirection = false;
 
@@ -207,7 +209,7 @@ public class ServerVivePlayer {
         this.vrPlayerState = vrPlayerState;
         this.vrPlayerStateAsPose = null;
         VRAPIImpl.INSTANCE.addPoseToHistory(this.player.getUUID(), vrPlayerState.asVRPose(this.player.position()),
-            false);
+            this.player.position(), false);
     }
 
     public VRPose asVRPose() {
