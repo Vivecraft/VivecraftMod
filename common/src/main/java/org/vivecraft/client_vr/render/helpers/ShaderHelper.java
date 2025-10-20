@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.CompiledShaderProgram;
 import net.minecraft.client.renderer.ShaderProgram;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -246,11 +247,15 @@ public class ShaderHelper {
      * draws the desktop mirror to the bound buffer
      */
     public static void drawMirror() {
-        if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF &&
-            DATA_HOLDER.vr.isHMDTracking())
-        {
+        if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF && DATA_HOLDER.vr.isHMDTracking()) {
             // no mirror, only show when headset is not tracking, to be able to see the menu with the headset off
-            MirrorNotification.notify("Mirror is OFF", true, 1000);
+            if (DATA_HOLDER.vrSettings.showMirrorOffText) {
+                MirrorNotification.notify(I18n.get("vivecraft.messages.mirroroff"), true, 1000);
+            } else {
+                // just clear it
+                RenderSystem.getDevice().createCommandEncoder()
+                    .clearColorTexture(MC.mainRenderTarget.getColorTexture(), 0xFF000000);
+            }
         } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             if (MC.getShaderManager().getProgram(VRShaders.MIXED_REALITY_SHADER) != null) {
                 ShaderHelper.doMixedRealityMirror();

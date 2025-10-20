@@ -30,7 +30,7 @@ public class XloaderImpl implements Xloader {
     }
 
     public static Path getJarPath() {
-        return LoadingModList.get().getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
+        return LoadingModList.get().getModFileById("vivecraft").getFile().getSecureJar().getPrimaryPath();
     }
 
     public static boolean isDedicatedServer() {
