@@ -2,7 +2,10 @@ package org.vivecraft;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Xplat for stuff that only references modloader classes
@@ -66,10 +69,18 @@ public interface Xloader {
     }
 
     /**
-     * @return path to access files inside the mod jar
+     * @return InputStream corresponding to the given filepath inside the mod jar
      */
     @ExpectPlatform
-    static Path getJarPath() {
+    static InputStream getInJarFile(String sourcePath) throws IOException {
+        throw new AssertionError();
+    }
+
+    /**
+     * @return List of all files in the given folder inside the mod jar
+     */
+    @ExpectPlatform
+    static List<Path> getInJarFolderFiles(String folder) throws IOException {
         throw new AssertionError();
     }
 

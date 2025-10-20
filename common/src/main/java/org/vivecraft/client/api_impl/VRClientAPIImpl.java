@@ -1,5 +1,6 @@
 package org.vivecraft.client.api_impl;
 
+import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.OpenKeyboardContext;
@@ -34,8 +35,8 @@ public final class VRClientAPIImpl implements VRClientAPI {
         this.poseHistory.clear();
     }
 
-    public void addPoseToHistory(VRPose pose) {
-        this.poseHistory.addPose(pose);
+    public void addPoseToHistory(VRPose pose, Vec3 playerPos) {
+        this.poseHistory.addPose(pose, playerPos);
     }
 
     public void processRegistrationEvent() {

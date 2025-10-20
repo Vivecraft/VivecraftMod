@@ -6,7 +6,11 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.LoadingModList;
 import org.vivecraft.Xloader;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class XloaderImpl implements Xloader {
 
@@ -29,8 +33,22 @@ public class XloaderImpl implements Xloader {
         return FMLPaths.CONFIGDIR.get().resolve(fileName);
     }
 
-    public static Path getJarPath() {
-        return LoadingModList.get().getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
+    public static InputStream getInJarFile(String sourcePath) throws IOException {
+        return FMLLoader.getCurrent().getLoadingModList().getModFileById("vivecraft").getFile().getContents()
+            .openFile(sourcePath);
+    }
+
+    public static List<Path> getInJarFolderFiles(String folder) throws IOException {
+        List<Path> paths = new ArrayList<>();
+        Path target = Path.of(folder);
+        FMLLoader.getCurrent().getLoadingModList().getModFileById("vivecraft").getFile().getContents()
+            .visitContent(folder, (relPath, resource) -> {
+                Path file = Path.of(relPath);
+                if (target.equals(file.getParent())) {
+                    paths.add(file);
+                }
+            });
+        return paths;
     }
 
     public static boolean isDedicatedServer() {
