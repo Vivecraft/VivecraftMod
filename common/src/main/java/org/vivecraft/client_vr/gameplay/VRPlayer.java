@@ -238,7 +238,7 @@ public class VRPlayer {
         if (this.mc.level != null &&
             (this.mc.getSingleplayerServer() == null || !this.mc.isPaused()))
         {
-            VRClientAPIImpl.INSTANCE.addPoseToHistory(this.vrdata_world_pre.asVRPose());
+            VRClientAPIImpl.INSTANCE.addPoseToHistory(this.vrdata_world_pre.asVRPose(), this.mc.player.position());
         }
     }
 
@@ -683,19 +683,21 @@ public class VRPlayer {
         {
             // Server-side movement
             // when swimming/flying adjust player look according to the user setting
-            VRSettings.FreeMove freeMoveType =
-                player.isFallFlying() && this.dh.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ?
-                    this.dh.vrSettings.vrFreeMoveFlyMode : this.dh.vrSettings.vrFreeMoveMode;
-
-            if (freeMoveType == VRSettings.FreeMove.CONTROLLER) {
-                player.setYRot(data.getController(1).getYaw());
-                player.setYHeadRot(player.getYRot());
-                player.setXRot(-data.getController(1).getPitch());
-            } else {
-                player.setYRot(data.hmd.getYaw());
-                player.setYHeadRot(player.getYRot());
-                player.setXRot(-data.hmd.getPitch());
+            switch (this.dh.vrSettings.getVrFreeMoveMode(player.isFallFlying(), data.fbtMode)) {
+                case CONTROLLER -> {
+                    player.setYRot(data.getController(1).getYaw());
+                    player.setXRot(-data.getController(1).getPitch());
+                }
+                case WAIST -> {
+                    player.setYRot(data.waist.getYaw());
+                    player.setXRot(-data.hmd.getPitch()); // use head for up/down
+                }
+                default -> {
+                    player.setYRot(data.hmd.getYaw());
+                    player.setXRot(-data.hmd.getPitch());
+                }
             }
+            player.setYHeadRot(player.getYRot());
         } else if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
             // Look AT the crosshair by default, most compatible with mods.
             Vec3 playerToCrosshair = player.getEyePosition(1)

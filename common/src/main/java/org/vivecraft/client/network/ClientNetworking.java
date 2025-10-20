@@ -26,6 +26,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
@@ -62,7 +63,7 @@ public class ClientNetworking {
     public static Map<String, String> SERVER_VR_CHANGES_LIST;
 
     // assume a legacy server by default, to not send invalid packets
-    public static int USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
+    public static NetworkVersion USED_NETWORK_VERSION = NetworkVersion.LEGACY;
     private static float WORLDSCALE_LAST = 0.0F;
     private static float HEIGHT_LAST = 0.0F;
     public static float OVERRIDDEN_YAW;
@@ -89,7 +90,7 @@ public class ClientNetworking {
         SERVER_ALLOWS_VR_SWITCHING = false;
         SERVER_ALLOWS_DUAL_WIELDING = false;
         SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING = false;
-        USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
+        USED_NETWORK_VERSION = NetworkVersion.LEGACY;
         LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
         BODY_PART_CLIENT_OVERRIDE = null;
         IS_LAST_BODY_PART_AIM = false;
@@ -124,8 +125,8 @@ public class ClientNetworking {
                 new VersionPayloadC2S(
                     CommonDataHolder.getInstance().versionIdentifier,
                     VRState.VR_RUNNING,
-                    CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION,
-                    CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION)));
+                    CommonNetworkHelper.MAX_SUPPORTED_NETWORK_PROTOCOL,
+                    CommonNetworkHelper.MIN_SUPPORTED_NETWORK_PROTOCOL)));
         }
     }
 
@@ -154,7 +155,7 @@ public class ClientNetworking {
 
         var vrPlayerState = VrPlayerState.create(vrPlayer);
 
-        if (USED_NETWORK_VERSION != CommonNetworkHelper.NETWORK_VERSION_LEGACY) {
+        if (USED_NETWORK_VERSION != NetworkVersion.LEGACY) {
             sendServerPacket(new VRPlayerStatePayloadC2S(vrPlayerState));
         } else {
             sendLegacyPackets(vrPlayerState);
@@ -214,7 +215,7 @@ public class ClientNetworking {
 
     public static boolean supportsReversedBow() {
         // old plugins hardcode the hand order
-        return USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING || !SERVER_HAS_VIVECRAFT;
+        return NetworkVersion.DUAL_WIELDING.accepts(USED_NETWORK_VERSION) || !SERVER_HAS_VIVECRAFT;
     }
 
     public static int getTeleportUpLimit() {
@@ -261,8 +262,8 @@ public class ClientNetworking {
      */
     public static void sendActiveBodyPart(VRBodyPart bodyPart, boolean useForAim) {
         if (SERVER_WANTS_DATA) {
-            if ((USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM && bodyPart == VRBodyPart.HEAD) ||
-                (USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
+            if ((!NetworkVersion.HEAD_AIM.accepts(USED_NETWORK_VERSION) && bodyPart == VRBodyPart.HEAD) ||
+                (!NetworkVersion.DUAL_WIELDING.accepts(USED_NETWORK_VERSION) &&
                     !bodyPart.availableInMode(FBTMode.ARMS_ONLY)
                 ))
             {
@@ -423,7 +424,7 @@ public class ClientNetworking {
             case NETWORK_VERSION -> {
                 USED_NETWORK_VERSION = ((NetworkVersionPayloadS2C) s2cPayload).version();
 
-                if (USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM) {
+                if (NetworkVersion.HEAD_AIM.accepts(USED_NETWORK_VERSION)) {
                     HEAD_AIM_WARNING = false;
                 }
             }
