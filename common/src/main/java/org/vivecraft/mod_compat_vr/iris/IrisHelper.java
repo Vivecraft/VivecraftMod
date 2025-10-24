@@ -313,6 +313,7 @@ public class IrisHelper {
             }
         } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e) {
             INIT_FAILED = true;
+            VRSettings.LOGGER.error("Vivecraft: Failed to initialize Iris compat", e);
         }
 
         INITIALIZED = true;
