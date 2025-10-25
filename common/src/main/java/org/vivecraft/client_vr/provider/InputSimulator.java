@@ -38,7 +38,7 @@ public class InputSimulator {
     }
 
     public static void pressKey(int key) {
-        pressKey(key, 0);
+        pressKey(key, getActiveModifier());
     }
 
     public static void releaseKey(int key, int modifiers) {
@@ -47,7 +47,7 @@ public class InputSimulator {
     }
 
     public static void releaseKey(int key) {
-        releaseKey(key, 0);
+        releaseKey(key, getActiveModifier());
     }
 
     public static void pressModifier(int key, int modifiers) {
