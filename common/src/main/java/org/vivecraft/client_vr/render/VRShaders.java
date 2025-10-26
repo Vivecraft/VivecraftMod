@@ -100,11 +100,11 @@ public class VRShaders {
     public static final RenderPipeline SOLID_PANORAMA = RenderPipeline.builder(
             RenderPipelines.MATRICES_PROJECTION_SNIPPET)
         .withLocation("pipeline/panorama")
-        .withVertexShader("core/position_tex")
-        .withFragmentShader("core/position_tex")
+        .withVertexShader("core/panorama")
+        .withFragmentShader("core/panorama")
         .withSampler("Sampler0")
         .withDepthWrite(false)
-        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS).build();
+        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).build();
 
     public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
