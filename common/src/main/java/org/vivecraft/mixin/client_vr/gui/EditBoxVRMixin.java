@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.api.client.data.OpenKeyboardContext;
+import org.vivecraft.client.gui.settings.GuiKeyboardLayoutEditor;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -60,7 +61,9 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
         if (VRState.VR_RUNNING && !ClientDataHolderVR.getInstance().vrSettings.seated && !KeyboardHandler.SHOWING &&
             content.isEmpty())
         {
-            if ((this.hint == null && (this.suggestion == null || this.suggestion.isEmpty())) || this.isFocused()) {
+            if (((this.hint == null && (this.suggestion == null || this.suggestion.isEmpty())) || this.isFocused()) &&
+                !(Minecraft.getInstance().screen instanceof GuiKeyboardLayoutEditor))
+            {
                 // limit text to field size
                 String fullString = I18n.get("vivecraft.message.openKeyboard");
                 String cutString = this.font.plainSubstrByWidth(fullString, this.getInnerWidth());
