@@ -56,7 +56,7 @@ public class GuiKeyboardLayoutEditor extends Screen {
                 char newChar = s.isEmpty() ? '\u0000' : s.charAt(0);
                 if (this.isShift) {
                     char[] array = dh.vrSettings.keyboardKeysShift.toCharArray();
-                    array[key.id()] = newChar;
+                    array[key.id() - 500] = newChar;
                     dh.vrSettings.keyboardKeysShift = new String(array);
                 } else {
                     char[] array = dh.vrSettings.keyboardKeys.toCharArray();
