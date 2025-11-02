@@ -1,7 +1,8 @@
 package org.vivecraft.client.gui.settings;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.screens.GuiOrderedListEditorScreen;
 import org.vivecraft.client.gui.framework.screens.GuiSelectionListScreen;
@@ -62,14 +63,19 @@ public class GuiActiveKeyboardLayoutSelector extends GuiOrderedListEditorScreen<
         return new GuiSelectionListScreen<>(
             Component.translatable("vivecraft.options.screen.keyboardlayoutselection"), parent,
             () -> ClientDataHolderVR.getInstance().vrSettings.keyboardLayouts.values().stream().filter(filter)
-                .sorted(Comparator.comparing(key -> I18n.get("vivecraft.keyboard.keymap." + key.id()))).toList(),
-            key -> Component.translatable("vivecraft.keyboard.keymap." + key.id()),
+                .sorted(Comparator.comparing(key -> getLangComponent(key).getString())).toList(),
+            GuiActiveKeyboardLayoutSelector::getLangComponent,
             null, consumer, hasReset, true, null);
     }
 
     private class KeyboardEntry extends OrderedEntry<VRSettings.KeyboardLayout> {
         public KeyboardEntry(VRSettings.KeyboardLayout layout, int index) {
-            super(Component.translatable("vivecraft.keyboard.keymap." + layout.id()), layout, index);
+            super(getLangComponent(layout), layout, index);
         }
+    }
+
+    private static Component getLangComponent(VRSettings.KeyboardLayout layout) {
+        LanguageInfo info = Minecraft.getInstance().getLanguageManager().getLanguages().get(layout.id());
+        return info != null ? info.toComponent() : Component.literal(layout.fallbackName());
     }
 }

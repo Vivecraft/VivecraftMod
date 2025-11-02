@@ -52,6 +52,7 @@ import java.util.*;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -2572,25 +2573,27 @@ public class VRSettings {
     }
 
     public Map<String, KeyboardLayout> getDefaultKeyboardLayouts() {
-        return Map.of("custom", new KeyboardLayout("custom", () -> this.keyboardKeys, () -> this.keyboardKeysShift),
-            "en_us", new KeyboardLayout("en_us",
+        List<KeyboardLayout> layouts = List.of(
+            new KeyboardLayout("custom", "Custom", () -> this.keyboardKeys, () -> this.keyboardKeysShift),
+            new KeyboardLayout("en_us", "English (US)",
                 "`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>",
                 "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;':\"ZXCVBNM,./?<>"),
-            "en_uk", new KeyboardLayout("en_uk",
+            new KeyboardLayout("en_gb", "English (UK)",
                 "`1234567890-=qwertyuiop[]\\asdfghjkl;:'#zxcvbnm,./?<>",
                 "¬!\"£$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;:@~ZXCVBNM,./?<>"),
-            "de", new KeyboardLayout("de",
+            new KeyboardLayout("de_de", "German",
                 "^1234567890ß´qwertzuiopü+~asdfghjklöä#|yxcvbnm,.-{}<",
                 "°!\"€$%&/()=?`QWERTYUIOPÜ*@ASDFGHJKLÖÄ'\\ZXCVBNM;:_[]>"),
-            "fr_fr", new KeyboardLayout("fr_fr",
+            new KeyboardLayout("fr_fr", "French",
                 "²&é\"'(-è_çà)=azertyuiop^$@qsdfghjklmù*#wxcvbn,;:![]<",
                 "²1234567890°+AZERTYUIOP¨£¤QSDFGHJKLM%µ~WXCVBN?./\\{}>"),
-            "fr_be", new KeyboardLayout("fr_be",
+            new KeyboardLayout("fr_be", "French (Belgium)",
                 "²&é\"'(\\è!çà)-azertyuiop^$@qsdfghjklmùµ#wxcvbn,;:=[]<",
                 "³1234567890°_AZERTYUIOP¨*¤QSDFGHJKLM%£~WXCVBN?./+{}>"),
-            "ru", new KeyboardLayout("ru",
+            new KeyboardLayout("ru_ru", "Russian",
                 "ё1234567890-=йцукенгшщзхъ\\фывапролджэ:\"ячсмитьбю.?<>",
                 "Ё!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭ:\"ЯЧСМИТЬБЮ,?<>"));
+        return layouts.stream().collect(Collectors.toMap(KeyboardLayout::id, layout -> layout));
     }
 
     public int[] getKeyboardCodesDefault() {
@@ -2669,9 +2672,9 @@ public class VRSettings {
         return out;
     }
 
-    public record KeyboardLayout(String id, Supplier<String> regular, Supplier<String> shift) {
-        public KeyboardLayout(String id, String regular, String shift) {
-            this(id, () -> regular, () -> shift);
+    public record KeyboardLayout(String id, String fallbackName, Supplier<String> regular, Supplier<String> shift) {
+        public KeyboardLayout(String id, String fallbackName, String regular, String shift) {
+            this(id, fallbackName, () -> regular, () -> shift);
         }
     }
 

@@ -702,14 +702,6 @@
   "vivecraft.toasts.point_controller.right": "rechten Controller",
   "vivecraft.toasts.teleport": "Teleportiere mit %s",
 
-  "vivecraft.keyboard.keymap.custom": "Benutzerdefiniert",
-  "vivecraft.keyboard.keymap.en_us": "Englisch (US)",
-  "vivecraft.keyboard.keymap.en_uk": "Englisch (UK)",
-  "vivecraft.keyboard.keymap.de": "Deutsch",
-  "vivecraft.keyboard.keymap.fr_fr": "Französisch",
-  "vivecraft.keyboard.keymap.fr_be": "Französisch (Belgien)",
-  "vivecraft.keyboard.keymap.ru": "Russisch",
-
   "vivecraft.keyboard.key.shift": "Shift",
   "vivecraft.keyboard.key.tab": "Tab",
   "vivecraft.keyboard.key.esc": "Esc",

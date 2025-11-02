@@ -61,13 +61,13 @@ public class CustomKeyboardTheme implements KeyboardTheme.IdTheme {
         this.keys.clear();
         RGBAColor color = new RGBAColor(1F, 1F, 1F, 1F);
         int keyCount = KeyboardKeys.COLUMNS * KeyboardKeys.MAX_ROWS;
-        VRSettings.KeyboardLayout layout = new VRSettings.KeyboardLayout("", " ".repeat(keyCount),
+        VRSettings.KeyboardLayout dummy = new VRSettings.KeyboardLayout("", "", " ".repeat(keyCount),
             " ".repeat(keyCount));
-        for (KeyboardKeys.Key key : KeyboardKeys.getRegularKeys(layout, false, () -> {}).keys()) {
+        for (KeyboardKeys.Key key : KeyboardKeys.getRegularKeys(dummy, false, () -> {}).keys()) {
             theme.theme.updateColor(color, key.id(), key.x(), key.y());
             this.keys.put(key.id(), color.copy());
         }
-        for (KeyboardKeys.Key key : KeyboardKeys.getRegularKeys(layout, true, () -> {}).keys()) {
+        for (KeyboardKeys.Key key : KeyboardKeys.getRegularKeys(dummy, true, () -> {}).keys()) {
             theme.theme.updateColor(color, key.id(), key.x(), key.y());
             this.keys.put(key.id(), color.copy());
         }
