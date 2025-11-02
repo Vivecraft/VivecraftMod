@@ -702,6 +702,8 @@
   "vivecraft.toasts.point_controller.right": "rechten Controller",
   "vivecraft.toasts.teleport": "Teleportiere mit %s",
 
+  "vivecraft.keyboard.keymap.custom": "Benutzerdefiniert",
+
   "vivecraft.keyboard.key.shift": "Shift",
   "vivecraft.keyboard.key.tab": "Tab",
   "vivecraft.keyboard.key.esc": "Esc",

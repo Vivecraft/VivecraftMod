@@ -11,6 +11,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -2574,7 +2575,8 @@ public class VRSettings {
 
     public Map<String, KeyboardLayout> getDefaultKeyboardLayouts() {
         List<KeyboardLayout> layouts = List.of(
-            new KeyboardLayout("custom", "Custom", () -> this.keyboardKeys, () -> this.keyboardKeysShift),
+            new KeyboardLayout("custom", Component.translatable("vivecraft.keyboard.keymap.custom"),
+                () -> this.keyboardKeys, () -> this.keyboardKeysShift),
             new KeyboardLayout("en_us", "English (US)",
                 "`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>",
                 "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;':\"ZXCVBNM,./?<>"),
@@ -2678,9 +2680,9 @@ public class VRSettings {
         return out;
     }
 
-    public record KeyboardLayout(String id, String fallbackName, Supplier<String> regular, Supplier<String> shift) {
+    public record KeyboardLayout(String id, Component fallbackName, Supplier<String> regular, Supplier<String> shift) {
         public KeyboardLayout(String id, String fallbackName, String regular, String shift) {
-            this(id, fallbackName, () -> regular, () -> shift);
+            this(id, Component.literal(fallbackName), () -> regular, () -> shift);
         }
     }
 
