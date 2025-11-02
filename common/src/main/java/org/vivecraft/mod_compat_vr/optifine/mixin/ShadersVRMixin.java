@@ -64,7 +64,7 @@ public class ShadersVRMixin {
         }
     }
 
-    @Inject(method = "beginRender", at = @At(value = "INVOKE", target = "Ljava/nio/FloatBuffer;position(I)Ljava/nio/FloatBuffer;", ordinal = 0), remap = false)
+    @Inject(method = "beginRender", at = @At(value = "CONSTANT", args = "stringValue=beginRender"), remap = false)
     private static void vivecraft$updateVivecraftUniforms(CallbackInfo ci) {
         OptifineHelper.updateUniforms();
     }
