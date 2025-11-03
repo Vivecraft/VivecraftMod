@@ -59,11 +59,9 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
         GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci, @Local String content)
     {
         if (VRState.VR_RUNNING && !ClientDataHolderVR.getInstance().vrSettings.seated && !KeyboardHandler.SHOWING &&
-            content.isEmpty())
+            content.isEmpty() && !(Minecraft.getInstance().screen instanceof GuiKeyboardLayoutEditor))
         {
-            if (((this.hint == null && (this.suggestion == null || this.suggestion.isEmpty())) || this.isFocused()) &&
-                !(Minecraft.getInstance().screen instanceof GuiKeyboardLayoutEditor))
-            {
+            if ((this.hint == null && (this.suggestion == null || this.suggestion.isEmpty())) || this.isFocused()) {
                 // limit text to field size
                 String fullString = I18n.get("vivecraft.message.openKeyboard");
                 String cutString = this.font.plainSubstrByWidth(fullString, this.getInnerWidth());
