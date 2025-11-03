@@ -11,6 +11,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -23,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vivecraft.Xloader;
 import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.render.VRPlayerRenderer;
 import org.vivecraft.client.render.armor.VRArmorLayer;
@@ -35,7 +38,7 @@ import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.trackers.DebugRenderTracker;
-import org.vivecraft.client_vr.gui.PhysicalKeyboard;
+import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
 import org.vivecraft.client_vr.provider.ControllerTransform;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.common.utils.math.AngleOrder;
@@ -49,7 +52,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -284,10 +289,17 @@ public class VRSettings {
     public boolean alwaysSimulateKeyboard = false;
     @SettingField(VrOptions.BOW_MODE)
     public BowMode bowMode = BowMode.ON;
+
+    public int currentKeyboardLayout = 0;
+    public final Map<String, KeyboardLayout> keyboardLayouts = getDefaultKeyboardLayouts();
+    @SettingField(fixedSize = false) // custom is by default first to not break old settings
+    public String[] keyboardLayoutOrder = new String[]{"custom", "en_us"};
+
     @SettingField
-    public String keyboardKeys = "`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>";
+    public String keyboardKeys = this.keyboardLayouts.get("en_us").regular.get();
     @SettingField
-    public String keyboardKeysShift = "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;':\"ZXCVBNM,./?<>";
+    public String keyboardKeysShift = this.keyboardLayouts.get("en_us").shift.get();
+
     @SettingField(VrOptions.HRTF_SELECTION)
     public int hrtfSelection = 0;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
@@ -568,7 +580,7 @@ public class VRSettings {
     @SettingField(VrOptions.PHYSICAL_KEYBOARD_SCALE)
     public float physicalKeyboardScale = 1.0f;
     @SettingField(VrOptions.PHYSICAL_KEYBOARD_THEME)
-    public PhysicalKeyboard.KeyboardTheme physicalKeyboardTheme = PhysicalKeyboard.KeyboardTheme.DEFAULT;
+    public KeyboardTheme physicalKeyboardTheme = KeyboardTheme.DEFAULT;
     @SettingField(VrOptions.KEYBOARD_PRESS_BINDS)
     public boolean keyboardPressBinds = false;
     @SettingField(VrOptions.ALLOW_ADVANCED_BINDINGS)
@@ -1420,6 +1432,27 @@ public class VRSettings {
         return freeMoveMode == FreeMove.WAIST && fbtMode == FBTMode.ARMS_ONLY ? FreeMove.HMD : freeMoveMode;
     }
 
+    /**
+     * returns the currently active keyboard layout
+     *
+     * @return the active keyboard layout
+     */
+    public KeyboardLayout getKeyboardLayout() {
+        if (this.keyboardLayoutOrder.length == 0 || this.currentKeyboardLayout >= this.keyboardLayoutOrder.length) {
+            return this.keyboardLayouts.get("en_us");
+        }
+        return this.keyboardLayouts.get(this.keyboardLayoutOrder[this.currentKeyboardLayout]);
+    }
+
+    /**
+     * switches to the next keyboard layout
+     */
+    public void nextKeyboardLayout() {
+        this.currentKeyboardLayout++;
+        this.currentKeyboardLayout = this.currentKeyboardLayout % this.keyboardLayoutOrder.length;
+        KeyboardHandler.reinitKeyboard();
+    }
+
     record ConfigEntry(Field field, VrOptions vrOption, String configName, boolean separate, boolean fixedSize) {}
 
     public enum VrOptions {
@@ -1585,7 +1618,17 @@ public class VRSettings {
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
         RADIAL_NUMBER(false, false, 4, 14, 2, 0), // number of radial buttons
         PHYSICAL_KEYBOARD(false, true, "vivecraft.options.keyboard.physical",
-            "vivecraft.options.keyboard.pointer"), // Keyboard Type
+            "vivecraft.options.keyboard.pointer") { // Keyboard Type
+
+            @Override
+            void onOptionChange() {
+                boolean showing = KeyboardHandler.SHOWING;
+                KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
+                if (showing) {
+                    KeyboardHandler.showOverlay(OpenKeyboardContext.FORCE);
+                }
+            }
+        },
         PHYSICAL_KEYBOARD_SCALE(true, false, 0.75f, 1.5f, 0.01f, -1) { // Keyboard Size
 
             @Override
@@ -1598,7 +1641,7 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                KeyboardHandler.PHYSICAL_KEYBOARD.init();
+                KeyboardHandler.reinitKeyboard();
             }
         },
         KEYBOARD_PRESS_BINDS(false, true), // Keyboard Presses Bindings
@@ -2531,6 +2574,49 @@ public class VRSettings {
         return new String[]{"mc.hypixel.net"};
     }
 
+    public Map<String, KeyboardLayout> getDefaultKeyboardLayouts() {
+        List<KeyboardLayout> layouts = List.of(
+            new KeyboardLayout("custom", Component.translatable("vivecraft.keyboard.keymap.custom"),
+                () -> this.keyboardKeys, () -> this.keyboardKeysShift),
+            new KeyboardLayout("en_us", "English (US)",
+                "`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>",
+                "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;':\"ZXCVBNM,./?<>"),
+            new KeyboardLayout("en_gb", "English (UK)",
+                "`1234567890-=qwertyuiop[]#asdfghjkl;:'\\zxcvbnm,./?<>",
+                "¬!\"£$%^&*()_+QWERTYUIOP{}~ASDFGHJKL;:@|ZXCVBNM,./?<>"),
+            new KeyboardLayout("de_de", "German",
+                "^1234567890ß´qwertzuiopü+#asdfghjklöä~|yxcvbnm,.-{}<",
+                "°!\"€$%&/()=?`QWERTYUIOPÜ*'ASDFGHJKLÖÄ@\\ZXCVBNM;:_[]>"),
+            new KeyboardLayout("fr_fr", "French",
+                "²&é\"'(-è_çà)=azertyuiop^$*qsdfghjklmù@#wxcvbn,;:![]<",
+                "²1234567890°+AZERTYUIOP¨£µQSDFGHJKLM%¤~WXCVBN?./\\{}>"),
+            new KeyboardLayout("fr_be", "French (Belgium)",
+                "²&é\"'(\\è!çà)-azertyuiop^$µqsdfghjklmù@#wxcvbn,;:=[]<",
+                "³1234567890°_AZERTYUIOP¨*£QSDFGHJKLM%¤~WXCVBN?./+{}>"),
+            new KeyboardLayout("be_by", "Belarusian",
+                "ё1234567890-=йцукенгшўзх'\\фывапролджэ:\"ячсмітьбю.?<>",
+                "Ё!\"№;%:?*()_+ЙЦУКЕНГШЎЗХ'/ФЫВАПРОЛДЖЭ:\"ЯЧСМІТЬБЮ,?<>"),
+            new KeyboardLayout("uk_ua", "Ukrainian",
+                "'1234567890-=йцукенгшщзхїґфівапролджє/\"ячсмитьбю.?<>",
+                "'!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЇҐФІВАПРОЛДЖЄ\\\"ЯЧСМИТЬБЮ,?<>"),
+            new KeyboardLayout("ru_ru", "Russian",
+                "ё1234567890-=йцукенгшщзхъ\\фывапролджэ:\"ячсмитьбю.?<>",
+                "Ё!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭ:\"ЯЧСМИТЬБЮ,?<>"),
+            new KeyboardLayout("system", Component.translatable("vivecraft.keyboard.keymap.system"),
+                () -> getSystemKeys(String::toLowerCase, this.keyboardLayouts.get("en_us").regular.get()),
+                () -> getSystemKeys(String::toUpperCase, this.keyboardLayouts.get("en_us").shift.get())));
+        return layouts.stream().collect(Collectors.toMap(KeyboardLayout::id, layout -> layout));
+    }
+
+    private String getSystemKeys(Function<String, String> mapper, String fallback) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.keyboardCodes.length; i++) {
+            String k = GLFW.glfwGetKeyName(this.keyboardCodes[i], -1);
+            sb.append(k != null ? mapper.apply(k).charAt(0) : fallback.charAt(i));
+        }
+        return sb.toString();
+    }
+
     public int[] getKeyboardCodesDefault() {
         // Some keys in the in-game keyboard don't have assignable key codes
         int[] out = new int[]{
@@ -2605,6 +2691,12 @@ public class VRSettings {
             out[i] = new Quaternionf();
         }
         return out;
+    }
+
+    public record KeyboardLayout(String id, Component fallbackName, Supplier<String> regular, Supplier<String> shift) {
+        public KeyboardLayout(String id, String fallbackName, String regular, String shift) {
+            this(id, Component.literal(fallbackName), () -> regular, () -> shift);
+        }
     }
 
     public class ServerOverrides {

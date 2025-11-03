@@ -87,6 +87,16 @@ public class KeyboardHandler {
         return SHOWING;
     }
 
+    public static void reinitKeyboard() {
+        if (SHOWING) {
+            if (DH.vrSettings.physicalKeyboard) {
+                PHYSICAL_KEYBOARD.show();
+            } else {
+                UI.init();
+            }
+        }
+    }
+
     public static void processGui() {
         POINTED_L = false;
         POINTED_R = false;
