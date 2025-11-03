@@ -705,6 +705,7 @@
   "vivecraft.toasts.teleport": "Teleport with %s",
 
   "vivecraft.keyboard.keymap.custom": "Custom",
+  "vivecraft.keyboard.keymap.system": "System",
 
   "vivecraft.keyboard.key.shift": "Shift",
   "vivecraft.keyboard.key.tab": "Tab",

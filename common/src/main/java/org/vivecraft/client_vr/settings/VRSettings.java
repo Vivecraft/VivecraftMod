@@ -52,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -2581,17 +2582,17 @@ public class VRSettings {
                 "`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>",
                 "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;':\"ZXCVBNM,./?<>"),
             new KeyboardLayout("en_gb", "English (UK)",
-                "`1234567890-=qwertyuiop[]\\asdfghjkl;:'#zxcvbnm,./?<>",
-                "¬!\"£$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;:@~ZXCVBNM,./?<>"),
+                "`1234567890-=qwertyuiop[]#asdfghjkl;:'\\zxcvbnm,./?<>",
+                "¬!\"£$%^&*()_+QWERTYUIOP{}~ASDFGHJKL;:@|ZXCVBNM,./?<>"),
             new KeyboardLayout("de_de", "German",
-                "^1234567890ß´qwertzuiopü+~asdfghjklöä#|yxcvbnm,.-{}<",
-                "°!\"€$%&/()=?`QWERTYUIOPÜ*@ASDFGHJKLÖÄ'\\ZXCVBNM;:_[]>"),
+                "^1234567890ß´qwertzuiopü+#asdfghjklöä~|yxcvbnm,.-{}<",
+                "°!\"€$%&/()=?`QWERTYUIOPÜ*'ASDFGHJKLÖÄ@\\ZXCVBNM;:_[]>"),
             new KeyboardLayout("fr_fr", "French",
-                "²&é\"'(-è_çà)=azertyuiop^$@qsdfghjklmù*#wxcvbn,;:![]<",
-                "²1234567890°+AZERTYUIOP¨£¤QSDFGHJKLM%µ~WXCVBN?./\\{}>"),
+                "²&é\"'(-è_çà)=azertyuiop^$*qsdfghjklmù@#wxcvbn,;:![]<",
+                "²1234567890°+AZERTYUIOP¨£µQSDFGHJKLM%¤~WXCVBN?./\\{}>"),
             new KeyboardLayout("fr_be", "French (Belgium)",
-                "²&é\"'(\\è!çà)-azertyuiop^$@qsdfghjklmùµ#wxcvbn,;:=[]<",
-                "³1234567890°_AZERTYUIOP¨*¤QSDFGHJKLM%£~WXCVBN?./+{}>"),
+                "²&é\"'(\\è!çà)-azertyuiop^$µqsdfghjklmù@#wxcvbn,;:=[]<",
+                "³1234567890°_AZERTYUIOP¨*£QSDFGHJKLM%¤~WXCVBN?./+{}>"),
             new KeyboardLayout("be_by", "Belarusian",
                 "ё1234567890-=йцукенгшўзх'\\фывапролджэ:\"ячсмітьбю.?<>",
                 "Ё!\"№;%:?*()_+ЙЦУКЕНГШЎЗХ'/ФЫВАПРОЛДЖЭ:\"ЯЧСМІТЬБЮ,?<>"),
@@ -2600,8 +2601,20 @@ public class VRSettings {
                 "'!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЇҐФІВАПРОЛДЖЄ\\\"ЯЧСМИТЬБЮ,?<>"),
             new KeyboardLayout("ru_ru", "Russian",
                 "ё1234567890-=йцукенгшщзхъ\\фывапролджэ:\"ячсмитьбю.?<>",
-                "Ё!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭ:\"ЯЧСМИТЬБЮ,?<>"));
+                "Ё!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭ:\"ЯЧСМИТЬБЮ,?<>"),
+            new KeyboardLayout("system", Component.translatable("vivecraft.keyboard.keymap.system"),
+                () -> getSystemKeys(String::toLowerCase, this.keyboardLayouts.get("en_us").regular.get()),
+                () -> getSystemKeys(String::toUpperCase, this.keyboardLayouts.get("en_us").shift.get())));
         return layouts.stream().collect(Collectors.toMap(KeyboardLayout::id, layout -> layout));
+    }
+
+    private String getSystemKeys(Function<String, String> mapper, String fallback) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.keyboardCodes.length; i++) {
+            String k = GLFW.glfwGetKeyName(this.keyboardCodes[i], -1);
+            sb.append(k != null ? mapper.apply(k).charAt(0) : fallback.charAt(i));
+        }
+        return sb.toString();
     }
 
     public int[] getKeyboardCodesDefault() {
