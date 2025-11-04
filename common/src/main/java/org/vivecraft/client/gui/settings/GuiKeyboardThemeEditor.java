@@ -116,8 +116,8 @@ public class GuiKeyboardThemeEditor extends Screen {
             this.init();
             this.reinit = false;
         }
-        guiGraphics.drawCenteredString(this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawCenteredString(this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
         guiGraphics.drawCenteredString(this.font, Component.translatable("vivecraft.messages.shifttopickcolor"),
             this.width / 2, 30, 0xFFFFFFFF);
     }
