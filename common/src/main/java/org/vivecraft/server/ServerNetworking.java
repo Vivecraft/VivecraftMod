@@ -179,6 +179,11 @@ public class ServerNetworking {
                     }
                 }
 
+                if (NetworkVersion.OPTION_TOGGLE.accepts(vivePlayer.networkVersion)) {
+                    packetConsumer.accept(
+                        new AttackWhileBlockingPayloadS2C(ServerConfig.ALLOW_ATTACKS_WHILE_BLOCKING.get()));
+                }
+
                 packetConsumer.accept(new NetworkVersionPayloadS2C(vivePlayer.networkVersion));
             }
             case IS_VR_ACTIVE -> {

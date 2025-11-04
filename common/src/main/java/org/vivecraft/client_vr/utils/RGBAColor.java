@@ -40,6 +40,18 @@ public class RGBAColor {
         return new RGBAColor(this.r, this.g, this.b, this.a);
     }
 
+    public void setRGB(float red, float green, float blue) {
+        this.r = red;
+        this.g = green;
+        this.b = blue;
+    }
+
+    public void setRGB(RGBAColor other) {
+        this.r = other.r;
+        this.g = other.g;
+        this.b = other.b;
+    }
+
     /**
      * HSB to RGB conversion, pinched from {@link java.awt.Color}.
      *

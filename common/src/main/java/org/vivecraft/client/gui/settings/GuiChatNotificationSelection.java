@@ -36,7 +36,7 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Resourc
                 }
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
             },
-            true,
+            true, true,
             resourceLocation -> new SilentButton(Component.literal("♫"),
                 b -> BuiltInRegistries.SOUND_EVENT.get(resourceLocation)
                     .ifPresent(soundEvent -> startSound(soundEvent.value(), b)),

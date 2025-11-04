@@ -1,6 +1,7 @@
 package org.vivecraft.client.gui.framework.screens;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -10,102 +11,42 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client.gui.framework.widgets.SettingsList;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-public class GuiStringListEditorScreen extends GuiListScreen {
-
-    private final Supplier<List<String>> valuesSupplier;
-    private final Runnable loadDefaults;
-    private final Consumer<List<String>> save;
-    private final boolean fixedEntryCount;
-
-    private List<String> elements;
+public class GuiStringListEditorScreen extends GuiListEditorScreen<String> {
 
     public GuiStringListEditorScreen(
         Component title, Screen lastScreen, boolean fixedEntryCount, Supplier<List<String>> valuesSupplier,
         Runnable loadDefaults, Consumer<List<String>> save)
     {
-        super(title, lastScreen);
-        this.fixedEntryCount = fixedEntryCount;
-        this.valuesSupplier = valuesSupplier;
-        this.loadDefaults = loadDefaults;
-        this.save = save;
+        super(title, lastScreen, fixedEntryCount, valuesSupplier, loadDefaults, save);
 
         // can't search text boxes
         this.searchable = false;
     }
 
     @Override
-    protected void addLowerButtons(int top) {
-        this.addRenderableWidget(
-            Button.builder(Component.translatable("vivecraft.gui.loaddefaults"), button -> {
-                    this.loadDefaults.run();
-                    this.elements = null;
-                    this.reinit = true;
-                })
-                .bounds(this.width / 2 - 155, top, 150, 20)
-                .build());
-
-        this.addRenderableWidget(
-            Button.builder(Component.translatable("gui.back"), button -> this.onClose())
-                .bounds(this.width / 2 + 5, top, 150, 20)
-                .build());
+    protected void addNewValue() {
+        super.addNewValue();
+        this.elements.add("");
     }
 
     @Override
-    public void onClose() {
-        this.save.accept(this.elements);
-        super.onClose();
+    protected ValueEntry<String> toEntry(String value, int index) {
+        EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, 350, 20, Component.literal(value));
+        box.setMaxLength(1000);
+        box.setValue(value);
+        box.setResponder(s -> this.elements.set(index, s));
+        return new StringValueEntry(Component.empty(), box, button -> {
+            this.elements.remove(index);
+            this.reinit = true;
+        }, !this.fixedEntryCount);
     }
 
-    private List<String> getCurrentValues() {
-        return this.list.children().stream().map(entry -> {
-            if (entry instanceof StringValueEntry listValueEntry) {
-                return listValueEntry.getString();
-            } else {
-                return "";
-            }
-        }).filter(string -> !string.isEmpty()).collect(Collectors.toList());
-    }
-
-    @Override
-    protected List<SettingsList.BaseEntry> getEntries() {
-        List<SettingsList.BaseEntry> entries = new LinkedList<>();
-        if (this.elements == null) {
-            this.elements = new ArrayList<>(this.valuesSupplier.get());
-        }
-        int i = 0;
-        for (String item : this.elements) {
-            EditBox box = new EditBox(this.minecraft.font, 0, 0, 350, 20, Component.literal(item));
-            box.setMaxLength(1000);
-            box.setValue(item);
-            int index = i++;
-            box.setResponder(s -> this.elements.set(index, s));
-            entries.add(new StringValueEntry(Component.empty(), box, button -> {
-                this.elements.remove(index);
-                this.reinit = true;
-            }, !this.fixedEntryCount));
-        }
-
-        if (!this.fixedEntryCount) {
-            entries.add(new SettingsList.WidgetEntry(Component.literal(""),
-                Button.builder(Component.translatable("vivecraft.options.addnew"), button -> {
-                    this.elements = getCurrentValues();
-                    this.elements.add("");
-                    this.reinit = true;
-                }).size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20).build()));
-        }
-        return entries;
-    }
-
-    private static class StringValueEntry extends SettingsList.BaseEntry {
+    private static class StringValueEntry extends ValueEntry<String> {
 
         private final EditBox editBox;
         private final Button deleteButton;
@@ -162,7 +103,7 @@ public class GuiStringListEditorScreen extends GuiListScreen {
             this.deleteButton.active = active;
         }
 
-        public String getString() {
+        public String getValue() {
             return this.editBox.getValue();
         }
     }
