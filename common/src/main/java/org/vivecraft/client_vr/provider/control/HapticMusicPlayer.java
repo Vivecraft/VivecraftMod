@@ -1,7 +1,6 @@
 package org.vivecraft.client_vr.provider.control;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.provider.ControllerType;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

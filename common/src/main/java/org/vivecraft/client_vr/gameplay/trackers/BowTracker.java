@@ -19,7 +19,7 @@ import org.vivecraft.client.utils.ScaleHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.network.packet.c2s.DrawPayloadC2S;
 import org.vivecraft.common.utils.MathUtils;

@@ -20,7 +20,7 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(ClientPacketListener.class)

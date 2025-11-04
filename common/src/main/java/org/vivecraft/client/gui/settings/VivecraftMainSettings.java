@@ -68,6 +68,14 @@ public class VivecraftMainSettings extends GuiListScreen {
                 .build()
         ));
 
+        entries.add(new SettingsList.WidgetEntry(
+            Component.translatable("vivecraft.options.screen.bindings"),
+            Button.builder(Component.translatable("vivecraft.options.screen.bindings"),
+                    button -> this.minecraft.setScreen(new GuiBindings(this)))
+                .size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20)
+                .build()
+        ));
+
         return entries;
     }
 }

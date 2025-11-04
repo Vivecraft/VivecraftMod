@@ -19,7 +19,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.widgets.MultilineComponent;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;

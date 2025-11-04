@@ -9,8 +9,6 @@ import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 
 import javax.annotation.Nullable;
@@ -23,7 +21,7 @@ public class VRInputAction {
     public final KeyMapping keyBinding;
     public final String name;
     public final String requirement;
-    public final String type;
+    public ActionType type;
     public final VRInputActionSet actionSet;
 
     private int priority = 0;
@@ -40,7 +38,7 @@ public class VRInputAction {
     public final DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
     public final AnalogData[] analogData = new AnalogData[ControllerType.values().length];
 
-    public VRInputAction(KeyMapping keyMapping, String requirement, String type, VRInputActionSet actionSetOverride) {
+    public VRInputAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
         this.keyBinding = keyMapping;
         this.requirement = requirement;
         this.type = type;
@@ -55,7 +53,7 @@ public class VRInputAction {
     }
 
     public boolean isButtonPressed() {
-        if (this.type.equals("boolean")) {
+        if (this.type == ActionType.BOOLEAN) {
             return this.digitalData().state;
         } else {
             Vector3fc axis = this.getAxis3D(false);
@@ -64,7 +62,7 @@ public class VRInputAction {
     }
 
     public boolean isButtonChanged() {
-        if (this.type.equals("boolean")) {
+        if (this.type == ActionType.BOOLEAN) {
             return this.digitalData().isChanged;
         } else {
             Vector3fc axis = this.getAxis3D(false);
@@ -77,18 +75,18 @@ public class VRInputAction {
 
     public float getAxis1D(boolean delta) {
         return switch (this.type) {
-            case "boolean" -> this.digitalToAnalog(delta);
-            case "vector1", "vector2", "vector3" -> delta ? this.analogData().deltaX : this.analogData().x;
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalToAnalog(delta);
+            case VEC1, VEC2 -> delta ? this.analogData().deltaX : this.analogData().x;
             default -> 0.0F;
         };
     }
 
     public Vector2fc getAxis2D(boolean delta) {
         return switch (this.type) {
-            case "boolean" -> new Vector2f(this.digitalToAnalog(delta), 0.0F);
-            case "vector1" ->
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector2f(this.digitalToAnalog(delta), 0.0F);
+            case VEC1 ->
                 delta ? new Vector2f(this.analogData().deltaX, 0.0F) : new Vector2f(this.analogData().x, 0.0F);
-            case "vector2", "vector3" -> delta ? new Vector2f(this.analogData().deltaX, this.analogData().deltaY) :
+            case VEC2 -> delta ? new Vector2f(this.analogData().deltaX, this.analogData().deltaY) :
                 new Vector2f(this.analogData().x, this.analogData().y);
             default -> new Vector2f();
         };
@@ -96,14 +94,14 @@ public class VRInputAction {
 
     public Vector3fc getAxis3D(boolean delta) {
         return switch (this.type) {
-            case "boolean" -> new Vector3f(this.digitalToAnalog(delta), 0.0F, 0.0F);
-            case "vector1" -> delta ? new Vector3f(this.analogData().deltaX, 0.0F, 0.0F) :
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector3f(this.digitalToAnalog(delta), 0.0F, 0.0F);
+            case VEC1 -> delta ? new Vector3f(this.analogData().deltaX, 0.0F, 0.0F) :
                 new Vector3f(this.analogData().x, 0.0F, 0.0F);
-            case "vector2" -> delta ? new Vector3f(this.analogData().deltaX, this.analogData().deltaY, 0.0F) :
+            case VEC2 -> delta ? new Vector3f(this.analogData().deltaX, this.analogData().deltaY, 0.0F) :
                 new Vector3f(this.analogData().x, this.analogData().y, 0.0F);
-            case "vector3" ->
-                delta ? new Vector3f(this.analogData().deltaX, this.analogData().deltaY, this.analogData().deltaZ) :
-                    new Vector3f(this.analogData().x, this.analogData().y, this.analogData().z);
+//            case "vector3" ->
+//                delta ? new Vector3f(this.analogData().deltaX, this.analogData().deltaY, this.analogData().deltaZ) :
+//                    new Vector3f(this.analogData().x, this.analogData().y, this.analogData().z);
             default -> new Vector3f();
         };
     }
@@ -167,8 +165,8 @@ public class VRInputAction {
 
     public long getLastOrigin() {
         return switch (this.type) {
-            case "boolean" -> this.digitalData().activeOrigin;
-            case "vector1", "vector2", "vector3" -> this.analogData().activeOrigin;
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().activeOrigin;
+            case VEC1, VEC2 -> this.analogData().activeOrigin;
             default -> 0L;
         };
     }
@@ -189,9 +187,13 @@ public class VRInputAction {
         return this.isHanded() ? this.analogData[this.currentHand.ordinal()] : this.analogData[0];
     }
 
+    public void setType(ActionType type) {
+        this.type = type;
+    }
+
     public void setHandle(long handle) {
         if (this.handle != 0L) {
-            throw new IllegalStateException("Handle already assigned!");
+            //throw new IllegalStateException("Handle already assigned!");
         } else {
             this.handle = handle;
         }
@@ -270,8 +272,8 @@ public class VRInputAction {
 
     public boolean isActive() {
         return switch (this.type) {
-            case "boolean" -> this.digitalData().isActive;
-            case "vector1", "vector2", "vector3" -> this.analogData().isActive;
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().isActive;
+            case VEC1, VEC2 -> this.analogData().isActive;
             default -> false;
         };
     }
@@ -473,6 +475,11 @@ public class VRInputAction {
         public boolean isChanged;
         public boolean isActive;
         public long activeOrigin;
+        public long lastChange;
+        public boolean longPress;
+        public boolean toggle;
+        public boolean doublePress;
+        public boolean hold;
     }
 
     public interface KeyListener {

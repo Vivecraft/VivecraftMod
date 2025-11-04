@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 
 @Mixin(FishingHook.class)

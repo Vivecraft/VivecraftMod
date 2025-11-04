@@ -27,9 +27,7 @@ import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.provider.control.TrackpadSwipeSampler;
-import org.vivecraft.client_vr.provider.control.VRInputAction;
-import org.vivecraft.client_vr.provider.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.control.*;
 import org.vivecraft.client_vr.provider.openxr.DeviceCompat;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -1140,41 +1138,41 @@ public abstract class MCVR {
     public Map<String, ActionParams> getSpecialActionParams() {
         Map<String, ActionParams> map = new HashMap<>();
 
-        this.addActionParams(map, this.mc.options.keyUp, "optional", "vector1", null);
-        this.addActionParams(map, this.mc.options.keyDown, "optional", "vector1", null);
-        this.addActionParams(map, this.mc.options.keyLeft, "optional", "vector1", null);
-        this.addActionParams(map, this.mc.options.keyRight, "optional", "vector1", null);
-        this.addActionParams(map, this.mc.options.keyInventory, "suggested", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, this.mc.options.keyAttack, "suggested", "boolean", null);
-        this.addActionParams(map, this.mc.options.keyUse, "suggested", "boolean", null);
-        this.addActionParams(map, this.mc.options.keyChat, "optional", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyHotbarScroll, "optional", "vector2", null);
-        this.addActionParams(map, MOD.keyHotbarSwipeX, "optional", "vector2", null);
-        this.addActionParams(map, MOD.keyHotbarSwipeY, "optional", "vector2", null);
-        this.addActionParams(map, MOD.keyMenuButton, "suggested", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyTeleportFallback, "suggested", "vector1", null);
-        this.addActionParams(map, MOD.keyFreeMoveRotate, "optional", "vector2", null);
-        this.addActionParams(map, MOD.keyFreeMoveStrafe, "optional", "vector2", null);
-        this.addActionParams(map, MOD.keyRotateLeft, "optional", "vector1", null);
-        this.addActionParams(map, MOD.keyRotateRight, "optional", "vector1", null);
-        this.addActionParams(map, MOD.keyRotateAxis, "optional", "vector2", null);
-        this.addActionParams(map, MOD.keyFlickStick, "optional", "vector2", null);
-        this.addActionParams(map, MOD.keyRadialMenu, "suggested", "boolean", null);
-        this.addActionParams(map, MOD.keySwapMirrorView, "optional", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyToggleKeyboard, "optional", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyMoveThirdPersonCam, "optional", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyToggleHandheldCam, "optional", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyQuickHandheldCam, "optional", "boolean", VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyTrackpadTouch, "optional", "boolean", VRInputActionSet.TECHNICAL);
-        this.addActionParams(map, MOD.keyVRInteract, "suggested", "boolean", VRInputActionSet.CONTEXTUAL);
-        this.addActionParams(map, MOD.keyClimbeyGrab, "suggested", "boolean", null);
-        this.addActionParams(map, MOD.keyClimbeyJump, "suggested", "boolean", null);
-        this.addActionParams(map, GuiHandler.KEY_LEFT_CLICK, "suggested", "boolean", null);
-        this.addActionParams(map, GuiHandler.KEY_SCROLL_AXIS, "optional", "vector2", null);
-        this.addActionParams(map, GuiHandler.KEY_RIGHT_CLICK, "suggested", "boolean", null);
-        this.addActionParams(map, GuiHandler.KEY_SHIFT, "suggested", "boolean", null);
-        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_CLICK, "suggested", "boolean", null);
-        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_SHIFT, "suggested", "boolean", null);
+        this.addActionParams(map, this.mc.options.keyUp, "optional", ActionType.VEC1, null);
+        this.addActionParams(map, this.mc.options.keyDown, "optional", ActionType.VEC1, null);
+        this.addActionParams(map, this.mc.options.keyLeft, "optional", ActionType.VEC1, null);
+        this.addActionParams(map, this.mc.options.keyRight, "optional", ActionType.VEC1, null);
+        this.addActionParams(map, this.mc.options.keyInventory, "suggested", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, this.mc.options.keyAttack, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, this.mc.options.keyUse, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, this.mc.options.keyChat, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyHotbarScroll, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, MOD.keyHotbarSwipeX, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, MOD.keyHotbarSwipeY, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, MOD.keyMenuButton, "suggested", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyTeleportFallback, "suggested", ActionType.VEC1, null);
+        this.addActionParams(map, MOD.keyFreeMoveRotate, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, MOD.keyFreeMoveStrafe, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, MOD.keyRotateLeft, "optional", ActionType.VEC1, null);
+        this.addActionParams(map, MOD.keyRotateRight, "optional", ActionType.VEC1, null);
+        this.addActionParams(map, MOD.keyRotateAxis, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, MOD.keyFlickStick, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, MOD.keyRadialMenu, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, MOD.keySwapMirrorView, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyToggleKeyboard, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyMoveThirdPersonCam, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyToggleHandheldCam, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyQuickHandheldCam, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyTrackpadTouch, "optional", ActionType.BOOLEAN, VRInputActionSet.TECHNICAL);
+        this.addActionParams(map, MOD.keyVRInteract, "suggested", ActionType.BOOLEAN, VRInputActionSet.CONTEXTUAL);
+        this.addActionParams(map, MOD.keyClimbeyGrab, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, MOD.keyClimbeyJump, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, GuiHandler.KEY_LEFT_CLICK, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, GuiHandler.KEY_SCROLL_AXIS, "optional", ActionType.VEC2, null);
+        this.addActionParams(map, GuiHandler.KEY_RIGHT_CLICK, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, GuiHandler.KEY_SHIFT, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_CLICK, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_SHIFT, "suggested", ActionType.BOOLEAN, null);
 
         // users can provide their own action parameters if they want
         // this allows them to split mod KeyMappings into GUI, INGAME and GLOBAL categories
@@ -1210,7 +1208,7 @@ public abstract class MCVR {
                         if (actionSet == null) {
                             VRSettings.LOGGER.warn("Vivecraft: Unknown action set: {}", tokens[1]);
                         } else {
-                            this.addActionParams(map, keyMapping, "optional", "boolean", actionSet);
+                            this.addActionParams(map, keyMapping, "optional", ActionType.BOOLEAN, actionSet);
                         }
                     }
                 }
@@ -1232,7 +1230,7 @@ public abstract class MCVR {
      * @param actionSetOverride actionset this should be in. See {@link ActionParams#actionSetOverride()}
      */
     private void addActionParams(
-        Map<String, ActionParams> map, KeyMapping keyMapping, String requirement, String type,
+        Map<String, ActionParams> map, KeyMapping keyMapping, String requirement, ActionType type,
         VRInputActionSet actionSetOverride)
     {
         ActionParams actionparams = new ActionParams(requirement, type, actionSetOverride);
