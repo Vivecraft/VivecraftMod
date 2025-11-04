@@ -43,12 +43,14 @@ public record VRPoseImpl(VRBodyPartData hmd, VRBodyPartData c0, VRBodyPartData c
 
     public VRPoseImpl relativeToPosition(Vec3 position) {
         return new VRPoseImpl(
-            relativeToPosition(hmd, position), relativeToPosition(c0, position), relativeToPosition(c1, position),
-            relativeToPosition(rightFoot, position), relativeToPosition(leftFoot, position),
-            relativeToPosition(waist, position),
-            relativeToPosition(rightKnee, position), relativeToPosition(leftKnee, position),
-            relativeToPosition(rightElbow, position), relativeToPosition(leftElbow, position),
-            isSeated, isLeftHanded, fbtMode
+            relativeToPosition(this.hmd, position),
+            relativeToPosition(this.c0, position),
+            relativeToPosition(this.c1, position),
+            relativeToPosition(this.rightFoot, position), relativeToPosition(this.leftFoot, position),
+            relativeToPosition(this.waist, position),
+            relativeToPosition(this.rightKnee, position), relativeToPosition(this.leftKnee, position),
+            relativeToPosition(this.rightElbow, position), relativeToPosition(this.leftElbow, position),
+            this.isSeated, this.isLeftHanded, this.fbtMode
         );
     }
 
