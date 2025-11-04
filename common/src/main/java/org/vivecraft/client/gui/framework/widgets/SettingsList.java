@@ -97,10 +97,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         if (!filter.trim().equals(this.activeFilter)) {
             // scroll to the top, to not be in the void
             this.setScrollAmount(0);
-            this.activeFilter = filter.trim();
             String lowerCase = filter.trim().toLowerCase();
             this.replaceEntriesFlatten(this.allEntries.stream().filter(entry -> entry.filter(lowerCase)));
         }
+        this.activeFilter = filter.trim();
     }
 
     /**
@@ -114,7 +114,6 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         } else if (!filter.trim().equals(this.activeFilter)) {
             // scroll to the top, to not be in the void
             this.setScrollAmount(0);
-            this.activeFilter = filter.trim();
             String lowerCase = filter.trim().toLowerCase();
             List<BaseEntry> entries = this.allEntries.stream()
                 .flatMap(child -> child.getEntries().stream())
@@ -126,6 +125,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
             this.replaceEntries(entries);
         }
+        this.activeFilter = filter.trim();
     }
 
     /**

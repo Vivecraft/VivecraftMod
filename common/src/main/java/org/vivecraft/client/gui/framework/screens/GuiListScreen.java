@@ -63,8 +63,9 @@ public abstract class GuiListScreen extends Screen {
         } else {
             this.searchBox = null;
         }
-
-        this.list.setSelected(this.lastSelected != -1 ? this.list.children().get(this.lastSelected) : null);
+        List<SettingsList.BaseEntry> children = this.list.children();
+        this.list.setSelected(
+            this.lastSelected == -1 ? null : children.get(Math.min(children.size() - 1, this.lastSelected)));
         this.list.setFocused(this.list.getSelected());
         this.list.setScrollAmount(scrollAmount);
         this.addWidget(this.list);
