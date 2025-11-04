@@ -39,8 +39,8 @@ public class ShadersVRMixin {
     @ModifyVariable(method = "setCameraShadow", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = true), remap = false)
     private static PoseStack vivecraft$offsetShadow(PoseStack shadowModelViewMat) {
         if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization) {
-            Vec3 offset = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().subtract(
-                ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().hmd.getPosition());
+            Vec3 offset = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition()
+                .subtract(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().hmd.getPosition());
             shadowModelViewMat.translate((float) offset.x, (float) offset.y, (float) offset.z);
         }
         return shadowModelViewMat;
@@ -64,7 +64,17 @@ public class ShadersVRMixin {
         }
     }
 
-    @Inject(method = "beginRender", at = @At(value = "INVOKE", target = "Ljava/nio/FloatBuffer;position(I)Ljava/nio/FloatBuffer;", ordinal = 0), remap = false)
+    @Inject(method = {"beginClouds", "endClouds"}, at = @At("HEAD"), remap = false, cancellable = true)
+    private static void vivecraft$noCloudsInMenu(CallbackInfo ci) {
+        // don't render the clouds with shaders in the menu world
+        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
+            ClientDataHolderVR.getInstance().menuWorldRenderer.isRendering())
+        {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "beginRender", at = @At(value = "CONSTANT", args = "stringValue=beginRender"), remap = false)
     private static void vivecraft$updateVivecraftUniforms(CallbackInfo ci) {
         OptifineHelper.updateUniforms();
     }

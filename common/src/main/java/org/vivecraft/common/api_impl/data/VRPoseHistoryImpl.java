@@ -181,20 +181,20 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     private record PoseData(VRPose pose, Vec3 playerPosition) {
         @Nullable
         public Vec3 getPos(VRBodyPart vrBodyPart, boolean playerPositionRelative) {
-            VRBodyPartData vrBodyPartData = pose.getBodyPartData(vrBodyPart);
+            VRBodyPartData vrBodyPartData = this.pose.getBodyPartData(vrBodyPart);
             if (vrBodyPartData == null) {
                 return null;
             } else if (playerPositionRelative) {
-                return vrBodyPartData.getPos().subtract(playerPosition);
+                return vrBodyPartData.getPos().subtract(this.playerPosition);
             }
             return vrBodyPartData.getPos();
         }
 
         public VRPose getPose(boolean playerPositionRelative) {
             if (playerPositionRelative) {
-                return ((VRPoseImpl) pose).relativeToPosition(playerPosition);
+                return ((VRPoseImpl) this.pose).relativeToPosition(this.playerPosition);
             }
-            return pose;
+            return this.pose;
         }
     }
 }
