@@ -5,7 +5,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -44,9 +43,9 @@ public class GuiKeyboardLayoutEditor extends Screen {
                 buttonWidth, 20, Component.empty())
             {
                 @Override
-                public boolean charTyped(CharacterEvent event) {
+                public boolean charTyped(char codePoint, int modifiers) {
                     this.setValue("");
-                    return super.charTyped(event);
+                    return super.charTyped(codePoint, modifiers);
                 }
             };
             box.setValue(key.label().getString());

@@ -3,7 +3,6 @@ package org.vivecraft.client.gui.framework.widgets;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 import org.vivecraft.client_vr.utils.RGBAColor;
@@ -46,21 +45,21 @@ public class ColorPicker extends AbstractWidget {
 
         int satX = (int) (this.getX() + HUE_WIDTH + 1 + this.saturation * (this.width - HUE_WIDTH - 3));
         int satY = (int) (this.getY() + 1 + (1F - this.brightness) * (this.height - 3));
-        guiGraphics.submitOutline(satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
+        guiGraphics.renderOutline(satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
 
         int hueY = (int) (this.getY() + 1 + this.hue * (this.height - 3));
-        guiGraphics.submitOutline(this.getX(), hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
+        guiGraphics.renderOutline(this.getX(), hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
     }
 
     @Override
-    public void onClick(MouseButtonEvent event, boolean isDoubleClick) {
-        this.clickedHue = event.x() < this.getX() + HUE_WIDTH;
-        this.setColor(event.x(), event.y());
+    public void onClick(double mouseX, double mouseY) {
+        this.clickedHue = mouseX < this.getX() + HUE_WIDTH;
+        this.setColor(mouseX, mouseY);
     }
 
     @Override
-    protected void onDrag(MouseButtonEvent event, double mouseX, double mouseY) {
-        this.setColor(event.x(), event.y());
+    protected void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
+        this.setColor(mouseX, mouseY);
     }
 
     private void setColor(double mouseX, double mouseY) {

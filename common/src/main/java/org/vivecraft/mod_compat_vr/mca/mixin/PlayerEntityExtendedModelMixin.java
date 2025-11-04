@@ -3,7 +3,7 @@ package org.vivecraft.mod_compat_vr.mca.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
@@ -43,7 +43,7 @@ public abstract class PlayerEntityExtendedModelMixin {
     private final Matrix3f vivecraft$rotMatrix = new Matrix3f();
 
     @Inject(method = {"setupAnim", "method_62110"}, at = @At("TAIL"), remap = false)
-    private void vivecraft$moveBreasts(CallbackInfo ci, @Local(argsOnly = true) AvatarRenderState villager) {
+    private void vivecraft$moveBreasts(CallbackInfo ci, @Local(argsOnly = true) PlayerRenderState villager) {
         if (((EntityRenderStateExtension) villager).vivecraft$getRotInfo() != null) {
 
             ModelPart body = ((PlayerModel) (Object) this).body;

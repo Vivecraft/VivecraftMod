@@ -1,7 +1,6 @@
 package org.vivecraft.client.gui.framework.widgets;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.input.InputWithModifiers;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
@@ -30,9 +29,9 @@ public class ColoredKeyButton extends ColoredButton {
     }
 
     @Override
-    public void onPress(InputWithModifiers input) {
+    public void onPress() {
         if (this.onPress != null) {
-            super.onPress(input);
+            super.onPress();
         } else {
             this.key.onPress().run();
             this.key.onRelease().run();

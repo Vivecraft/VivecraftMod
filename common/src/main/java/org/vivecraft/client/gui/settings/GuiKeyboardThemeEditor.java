@@ -1,6 +1,5 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -53,7 +52,7 @@ public class GuiKeyboardThemeEditor extends Screen {
             this.addRenderableWidget(new ColoredKeyButton(key,
                 xMargin + key.x() * (buttonWidth + spacing), yMargin + (y - 1) * (20 + spacing),
                 buttonWidth, 20, b -> {
-                if (Minecraft.getInstance().hasShiftDown()) {
+                if (Screen.hasShiftDown()) {
                     this.colorPicker.setColor(((ColoredButton) b).getColor());
                 } else {
                     this.customTheme.setColor(key.id(), this.colorPicker.getColor());
@@ -67,7 +66,7 @@ public class GuiKeyboardThemeEditor extends Screen {
             this.addRenderableWidget(new ColoredKeyButton(key,
                 xMargin + key.x() * (buttonWidth + spacing), yMargin + (y - 1) * (20 + spacing),
                 key.width() * buttonWidth + (key.width() - 1) * spacing, 20, b -> {
-                if (Minecraft.getInstance().hasShiftDown()) {
+                if (Screen.hasShiftDown()) {
                     this.colorPicker.setColor(((ColoredButton) b).getColor());
                 } else {
                     this.customTheme.setColor(key.id(), this.colorPicker.getColor());
