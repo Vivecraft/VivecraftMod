@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.vivecraft.client_vr.utils.RGBAColor;
 
 public class ColorPicker extends AbstractWidget {
@@ -63,10 +64,10 @@ public class ColorPicker extends AbstractWidget {
 
     private void setColor(double mouseX, double mouseY) {
         if (this.clickedHue) {
-            this.hue = (float) Math.clamp((mouseY - (this.getY() + 1)) / (this.height - 2), 0.0, 1.0);
+            this.hue = (float) Mth.clamp((mouseY - (this.getY() + 1)) / (this.height - 2), 0.0, 1.0);
         } else {
-            this.brightness = 1F - (float) Math.clamp((mouseY - this.getY() - 1) / (this.height - 2), 0.0, 1.0);
-            this.saturation = (float) Math.clamp(
+            this.brightness = 1F - (float) Mth.clamp((mouseY - this.getY() - 1) / (this.height - 2), 0.0, 1.0);
+            this.saturation = (float) Mth.clamp(
                 (mouseX - this.getX() - HUE_WIDTH - 1) / (this.getWidth() - HUE_WIDTH - 2),
                 0.0, 1.0);
         }

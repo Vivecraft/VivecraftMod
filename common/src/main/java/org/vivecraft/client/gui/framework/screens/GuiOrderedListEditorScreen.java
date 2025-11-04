@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -29,7 +30,7 @@ public abstract class GuiOrderedListEditorScreen<T> extends GuiListEditorScreen<
         T value = this.elements.get(from);
         this.elements.remove(from);
         if (!remove) {
-            this.elements.add(Math.clamp(from + offset, 0, this.elements.size()), value);
+            this.elements.add(Mth.clamp(from + offset, 0, this.elements.size()), value);
         }
         this.reinit = true;
     }
