@@ -151,6 +151,8 @@ public class GuiKeyboardLayoutEditor extends Screen {
             this.init();
             this.reinit = false;
         }
+
+        this.renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
     }
