@@ -1,6 +1,7 @@
 package org.vivecraft.mod_compat_vr.optifine.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -43,8 +44,10 @@ public class ShadersRenderVRMixin {
         if (!RenderPassType.isVanilla() && ClientDataHolderVR.getInstance().currentPass != RenderPass.LEFT &&
             !ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization)
         {
+            RenderSystem.backupProjectionMatrix();
             updateActiveRenderInfo(activeRenderInfo, Minecraft.getInstance(), partialTick);
             OptifineHelper.setCameraShadow(new PoseStack(), activeRenderInfo, partialTick);
+            RenderSystem.restoreProjectionMatrix();
             ci.cancel();
         }
     }
