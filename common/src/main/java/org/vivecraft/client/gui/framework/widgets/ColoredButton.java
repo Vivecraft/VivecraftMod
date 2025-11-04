@@ -1,13 +1,12 @@
 package org.vivecraft.client.gui.framework.widgets;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.vivecraft.client_vr.utils.RGBAColor;
 
@@ -35,9 +34,12 @@ public class ColoredButton extends Button {
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
-        guiGraphics.blitSprite(RenderType::guiTextured, SPRITES.get(this.active, this.isHoveredOrFocused()),
-            this.getX(), this.getY(), this.getWidth(), this.getHeight(),
-            ARGB.colorFromFloat(this.alpha, this.color.r, this.color.g, this.color.b));
+        guiGraphics.setColor(this.color.r, this.color.g, this.color.b, this.alpha);
+        RenderSystem.enableBlend();
+        RenderSystem.enableDepthTest();
+        guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(),
+            this.getWidth(), this.getHeight());
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         int i = this.active ? 0xFFFFFF : 0xA0A0A0;
         this.renderString(guiGraphics, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
     }

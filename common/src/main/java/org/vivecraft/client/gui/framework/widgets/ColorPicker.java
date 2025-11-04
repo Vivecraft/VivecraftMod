@@ -4,7 +4,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ARGB;
 import org.vivecraft.client_vr.utils.RGBAColor;
 
 public class ColorPicker extends AbstractWidget {
@@ -30,7 +29,7 @@ public class ColorPicker extends AbstractWidget {
         for (int i = 0; i < this.height - 2; i++) {
             RGBAColor color = RGBAColor.fromHSB(i / (float) (this.height - 2), 1F, 1F);
             guiGraphics.fill(this.getX() + 1, this.getY() + i + 1, this.getX() + HUE_WIDTH - 1,
-                this.getY() + i + 2, ARGB.colorFromFloat(1F, color.r, color.g, color.b));
+                this.getY() + i + 2, color.toIntEncodingARGB());
         }
         for (int x = HUE_WIDTH; x < this.width - 2; x++) {
             for (int y = 0; y < this.height - 2; y++) {
@@ -39,7 +38,7 @@ public class ColorPicker extends AbstractWidget {
                 int xPos = this.getX() + x + 1;
                 int yPos = this.getY() + y + 1;
 
-                guiGraphics.fill(xPos, yPos, xPos + 1, yPos + 1, ARGB.colorFromFloat(1F, color.r, color.g, color.b));
+                guiGraphics.fill(xPos, yPos, xPos + 1, yPos + 1, color.toIntEncodingARGB());
             }
         }
 

@@ -3,15 +3,15 @@ package org.vivecraft.mod_compat_vr.mca.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client.extensions.EntityRenderStateExtension;
+import org.vivecraft.client.ClientVRPlayers;
 
 /**
  * MCA uses a fixed offset for the breasts, this changes it to be relative to the body rotation
@@ -42,9 +42,9 @@ public abstract class PlayerEntityExtendedModelMixin {
     @Unique
     private final Matrix3f vivecraft$rotMatrix = new Matrix3f();
 
-    @Inject(method = {"setupAnim", "method_62110"}, at = @At("TAIL"), remap = false)
-    private void vivecraft$moveBreasts(CallbackInfo ci, @Local(argsOnly = true) PlayerRenderState villager) {
-        if (((EntityRenderStateExtension) villager).vivecraft$getRotInfo() != null) {
+    @Inject(method = {"setupAnim", "method_17087"}, at = @At("TAIL"), remap = false)
+    private void vivecraft$moveBreasts(CallbackInfo ci, @Local(argsOnly = true) LivingEntity villager) {
+        if (ClientVRPlayers.getInstance().isVRPlayer(villager)) {
 
             ModelPart body = ((PlayerModel) (Object) this).body;
             this.vivecraft$rotMatrix.rotationZYX(body.zRot, body.yRot, body.xRot);

@@ -36,6 +36,13 @@ public class RGBAColor {
             ((int) (this.a * 255.0F) << 24);
     }
 
+    public int toIntEncodingARGB() {
+        return (int) (this.b * 255.0F) |
+            ((int) (this.g * 255.0F) << 8) |
+            ((int) (this.r * 255.0F) << 16) |
+            ((int) (this.a * 255.0F) << 24);
+    }
+
     public RGBAColor copy() {
         return new RGBAColor(this.r, this.g, this.b, this.a);
     }
