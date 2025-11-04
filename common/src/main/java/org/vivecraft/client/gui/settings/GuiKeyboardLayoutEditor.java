@@ -50,7 +50,6 @@ public class GuiKeyboardLayoutEditor extends Screen {
             };
             box.setValue(key.label().getString());
             box.setMaxLength(1);
-            box.setCentered(true);
             box.setResponder(s -> {
                 char newChar = s.isEmpty() ? '\u0000' : s.charAt(0);
                 if (this.isShift) {

@@ -131,12 +131,12 @@ public class VRShaders {
     public static final RenderPipeline SOLID_PANORAMA = RenderPipeline.builder(
             RenderPipelines.MATRICES_COLOR_SNIPPET)
         .withLocation("pipeline/panorama")
-        .withVertexShader("core/panorama")
-        .withFragmentShader("core/panorama")
+        .withVertexShader("core/position_tex")
+        .withFragmentShader("core/position_tex")
         .withSampler("Sampler0")
         .withDepthWrite(false)
         .withBlend(BlendFunction.PANORAMA)
-        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).build();
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS).build();
 
     public static final RenderPipeline CROSSHAIR_MENU = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/crosshair_menu_vr")
