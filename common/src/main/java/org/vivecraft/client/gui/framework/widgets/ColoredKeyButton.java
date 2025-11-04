@@ -1,6 +1,6 @@
 package org.vivecraft.client.gui.framework.widgets;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
@@ -39,11 +39,11 @@ public class ColoredKeyButton extends ColoredButton {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         KeyboardTheme theme =
             this.keyboardTheme != null ? this.keyboardTheme : this.dh.vrSettings.physicalKeyboardTheme;
         theme.theme.updateColor(this.getColor(), this.key.id(), this.key.x(),
             this.key.y());
-        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+        super.renderWidget(poseStack, mouseX, mouseY, partialTick);
     }
 }

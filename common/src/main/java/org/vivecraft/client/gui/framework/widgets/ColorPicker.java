@@ -1,6 +1,7 @@
 package org.vivecraft.client.gui.framework.widgets;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -22,14 +23,14 @@ public class ColorPicker extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         // black background
-        guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height,
+        GuiComponent.fill(poseStack, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height,
             0xFF000000);
 
         for (int i = 0; i < this.height - 2; i++) {
             RGBAColor color = RGBAColor.fromHSB(i / (float) (this.height - 2), 1F, 1F);
-            guiGraphics.fill(this.getX() + 1, this.getY() + i + 1, this.getX() + HUE_WIDTH - 1,
+            GuiComponent.fill(poseStack, this.getX() + 1, this.getY() + i + 1, this.getX() + HUE_WIDTH - 1,
                 this.getY() + i + 2, color.toIntEncodingARGB());
         }
         for (int x = HUE_WIDTH; x < this.width - 2; x++) {
@@ -39,16 +40,16 @@ public class ColorPicker extends AbstractWidget {
                 int xPos = this.getX() + x + 1;
                 int yPos = this.getY() + y + 1;
 
-                guiGraphics.fill(xPos, yPos, xPos + 1, yPos + 1, color.toIntEncodingARGB());
+                GuiComponent.fill(poseStack, xPos, yPos, xPos + 1, yPos + 1, color.toIntEncodingARGB());
             }
         }
 
         int satX = (int) (this.getX() + HUE_WIDTH + 1 + this.saturation * (this.width - HUE_WIDTH - 3));
         int satY = (int) (this.getY() + 1 + (1F - this.brightness) * (this.height - 3));
-        guiGraphics.renderOutline(satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
+        renderOutline(poseStack, satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
 
         int hueY = (int) (this.getY() + 1 + this.hue * (this.height - 3));
-        guiGraphics.renderOutline(this.getX(), hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
+        renderOutline(poseStack, this.getX(), hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -146,15 +146,15 @@ public class GuiKeyboardLayoutEditor extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             this.init();
             this.reinit = false;
         }
 
-        this.renderBackground(guiGraphics);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
+        this.renderBackground(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTick);
+        drawCenteredString(poseStack, this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
     }
 
     @Override

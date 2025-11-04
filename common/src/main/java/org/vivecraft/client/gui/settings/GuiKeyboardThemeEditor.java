@@ -1,6 +1,6 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
@@ -111,16 +111,16 @@ public class GuiKeyboardThemeEditor extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             this.init();
             this.reinit = false;
         }
 
-        this.renderBackground(guiGraphics);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
-        guiGraphics.drawCenteredString(this.font, Component.translatable("vivecraft.messages.shifttopickcolor"),
+        this.renderBackground(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTick);
+        drawCenteredString(poseStack, this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
+        drawCenteredString(poseStack, this.font, Component.translatable("vivecraft.messages.shifttopickcolor"),
             this.width / 2, 30, 0xFFFFFFFF);
     }
 
