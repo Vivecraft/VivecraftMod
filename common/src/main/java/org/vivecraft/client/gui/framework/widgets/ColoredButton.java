@@ -17,9 +17,10 @@ public class ColoredButton extends Button {
 
     // copied over from AbstractButton
     private static final WidgetSprites SPRITES = new WidgetSprites(
-        ResourceLocation.withDefaultNamespace("widget/button"),
-        ResourceLocation.withDefaultNamespace("widget/button_disabled"),
-        ResourceLocation.withDefaultNamespace("widget/button_highlighted"));
+        new ResourceLocation("widget/button"),
+        new ResourceLocation("widget/button_disabled"),
+        new ResourceLocation("widget/button_highlighted"));
+
 
     private final RGBAColor color = new RGBAColor();
 
