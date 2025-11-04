@@ -82,10 +82,12 @@ public class OpenVRStereoRenderer extends VRRenderer {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (eyeType == VR.EVREye_Eye_Left) {
                 return OpenVRUtil.Matrix4fFromOpenVR(
-                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Left, nearClip, farClip, HmdMatrix44.calloc(stack)));
+                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Left, nearClip, Math.min(farClip, Float.MAX_VALUE),
+                        HmdMatrix44.calloc(stack)));
             } else {
                 return OpenVRUtil.Matrix4fFromOpenVR(
-                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Right, nearClip, farClip, HmdMatrix44.calloc(stack)));
+                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Right, nearClip, Math.min(farClip, Float.MAX_VALUE),
+                        HmdMatrix44.calloc(stack)));
             }
         }
     }
