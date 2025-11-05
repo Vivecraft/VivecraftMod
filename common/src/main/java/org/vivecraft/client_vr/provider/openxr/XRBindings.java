@@ -40,7 +40,7 @@ public class XRBindings {
         set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.hotbarPrev", "/user/hand/left/input/squeeze/value"));
         set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.hotbarNext", "/user/hand/right/input/squeeze/value"));
         set.add(new MutablePair<>("/actions/ingame/in/key.attack", "/user/hand/right/input/trigger/value"));
-        //set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.teleport", "/user/hand/left/input/trigger/value"));
+        set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.teleport", "/user/hand/left/input/trigger/value"));
         set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.radialMenu", "/user/hand/right/input/b/click"));
         set.add(new MutablePair<>("/actions/ingame/in/key.use", "/user/hand/right/input/a/click"));
         //set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.teleportFallback", "/user/hand/left/input/trigger/value"));

@@ -366,6 +366,7 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_BOOLEAN);
             int error = XR10.xrGetActionStateBoolean(this.session, info, state);
             logError(error, "xrGetActionStateBoolean", action.name);
@@ -400,6 +401,7 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateFloat state = XrActionStateFloat.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_FLOAT);
             int error = XR10.xrGetActionStateFloat(this.session, info, state);
             logError(error, "xrGetActionStateFloat", action.name);
@@ -423,6 +425,7 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_VECTOR2F);
             int error = XR10.xrGetActionStateVector2f(this.session, info, state);
             logError(error, "xrGetActionStateVector2f", action.name);
@@ -1041,7 +1044,7 @@ public class MCOpenXR extends MCVR {
             //TODO select the proper headset
             for (WrappedBinding binding: WrappedBinding.quest2Bindings()) {
                 long action = createAction(binding.path().replace("/","."), binding.path(), binding.type(),
-                    new XrActionSet(actionSet, this.instance), BOTH_HANDS);
+                    new XrActionSet(actionSet, this.instance), binding.path().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
                 mappedBindings.put(binding, action);
                 pathBindings.put(binding.path(), binding);
             }
@@ -1051,21 +1054,21 @@ public class MCOpenXR extends MCVR {
 
         XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
         this.haptics[RIGHT_CONTROLLER] = createAction("righthaptic",
-            "/actions/global/out/righthaptic", ActionType.HAPTIC, actionSet, BOTH_HANDS);
+            "/actions/global/out/righthaptic", ActionType.HAPTIC, actionSet, BOTH_HANDS[1]);
         this.haptics[LEFT_CONTROLLER] = createAction("lefthaptic", "/actions/global/out/lefthaptic",
-            ActionType.HAPTIC, actionSet, BOTH_HANDS);
+            ActionType.HAPTIC, actionSet, BOTH_HANDS[0]);
     }
 
     private void setupControllers() {
         XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
         this.grip[RIGHT_CONTROLLER] = createAction("righthand", "/actions/global/in/righthand",
-            ActionType.POSE, actionSet, BOTH_HANDS);
+            ActionType.POSE, actionSet, BOTH_HANDS[1]);
         this.grip[LEFT_CONTROLLER] = createAction("lefthand", "/actions/global/in/lefthand", ActionType.POSE,
-            actionSet, BOTH_HANDS);
+            actionSet, BOTH_HANDS[0]);
         this.aim[RIGHT_CONTROLLER] = createAction("righthandaim", "/actions/global/in/righthandaim",
-            ActionType.POSE, actionSet, BOTH_HANDS);
+            ActionType.POSE, actionSet, BOTH_HANDS[1]);
         this.aim[LEFT_CONTROLLER] = createAction("lefthandaim", "/actions/global/in/lefthandaim",
-            ActionType.POSE, actionSet, BOTH_HANDS);
+            ActionType.POSE, actionSet, BOTH_HANDS[0]);
     }
 
     private void loadDefaultBindings() {
@@ -1086,6 +1089,7 @@ public class MCOpenXR extends MCVR {
                     long handle = this.mappedBindings.get(this.pathBindings.get(pair.getRight()));
                     binding.setHandle(handle);
                     binding.setType(this.pathBindings.get(pair.getRight()).type());
+                    binding.setHand(this.pathBindings.get(pair.getRight()).path().contains("/left/") ? ControllerType.LEFT : ControllerType.RIGHT);
                     if (binding.handle == 0L) {
                         VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", pair.getLeft(), pair.getRight());
                         continue;
@@ -1192,7 +1196,7 @@ public class MCOpenXR extends MCVR {
     }
 
     private long createAction(
-        String name, String localisedName, ActionType type, XrActionSet actionSet, @Nullable String[] subactionPaths)
+        String name, String localisedName, ActionType type, XrActionSet actionSet, String subactionPath)
     {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             String s = name.replace(".user.hand.", "");
@@ -1207,17 +1211,10 @@ public class MCOpenXR extends MCVR {
                 case POSE -> hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);
                 case HAPTIC -> hands.actionType(XR10.XR_ACTION_TYPE_VIBRATION_OUTPUT);
             }
-            if (subactionPaths != null) {
-                LongBuffer buffer = stackCallocLong(subactionPaths.length);
-                for (String path : subactionPaths) {
-                    buffer.put(getPath(path));
-                }
-                hands.countSubactionPaths(subactionPaths.length);
-                hands.subactionPaths(buffer.rewind());
-            } else {
-                hands.countSubactionPaths(0);
-                hands.subactionPaths(null);
-            }
+            LongBuffer lb = stackCallocLong(1);
+            lb.put(getPath(subactionPath));
+            hands.countSubactionPaths(1);
+            hands.subactionPaths(lb.rewind());
             hands.localizedActionName(memUTF8(s));
             PointerBuffer buffer = stackCallocPointer(1);
 

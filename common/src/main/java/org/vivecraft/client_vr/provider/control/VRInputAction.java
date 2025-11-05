@@ -34,6 +34,7 @@ public class VRInputAction {
     public long handle;
     private final boolean[] pressed = new boolean[ControllerType.values().length];
     protected final int[] unpressInTicks = new int[ControllerType.values().length];
+    private ControllerType hand;
 
     public final DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
     public final AnalogData[] analogData = new AnalogData[ControllerType.values().length];
@@ -456,6 +457,14 @@ public class VRInputAction {
         }
 
         this.keyBinding.release();
+    }
+
+    public void setHand(ControllerType hand) {
+        this.hand = hand;
+    }
+
+    public ControllerType getHand() {
+        return this.hand;
     }
 
     public static class AnalogData {
