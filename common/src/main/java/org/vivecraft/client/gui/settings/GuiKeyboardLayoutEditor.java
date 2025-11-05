@@ -4,7 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
@@ -18,7 +19,7 @@ public class GuiKeyboardLayoutEditor extends Screen {
     private boolean reinit = false;
 
     protected GuiKeyboardLayoutEditor(Screen parent) {
-        super(Component.translatable("vivecraft.options.screen.customkeyboardeditor"));
+        super(new TranslatableComponent("vivecraft.options.screen.customkeyboardeditor"));
         this.parent = parent;
     }
 
@@ -40,7 +41,7 @@ public class GuiKeyboardLayoutEditor extends Screen {
             int y = key.y() < 0 ? layout.rows() - key.y() : key.y();
             EditBox box = new EditBox(this.font,
                 xMargin + key.x() * (buttonWidth + spacing), yMargin + (y - 1) * (20 + spacing),
-                buttonWidth, 20, Component.empty())
+                buttonWidth, 20, TextComponent.EMPTY)
             {
                 @Override
                 public boolean charTyped(char codePoint, int modifiers) {
@@ -86,7 +87,7 @@ public class GuiKeyboardLayoutEditor extends Screen {
         this.addRenderableWidget(new Button(
             (layout.columns() + 2) * (buttonWidth + spacing) + xMargin, yMargin + 3 * (20 + spacing),
             buttonWidth, 20,
-            Component.literal("+"), p -> {
+            new TextComponent("+"), p -> {
             if (this.isShift) {
                 dh.vrSettings.keyboardKeysShift += "\u0000".repeat(layout.columns());
             } else {
@@ -96,13 +97,13 @@ public class GuiKeyboardLayoutEditor extends Screen {
             this.reinit = true;
             KeyboardHandler.reinitKeyboard();
         }, (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
-            Component.translatable("vivecraft.options.screen.addkeyboardrow.tooltip")))).active =
+            new TranslatableComponent("vivecraft.options.screen.addkeyboardrow.tooltip")))).active =
             layout.rows() < KeyboardKeys.MAX_ROWS;
 
         this.addRenderableWidget(new Button(
             (layout.columns() + 3) * (buttonWidth + spacing) + xMargin, yMargin + 3 * (20 + spacing),
             buttonWidth, 20,
-            Component.literal("-"), p -> {
+            new TextComponent("-"), p -> {
             if (this.isShift) {
                 dh.vrSettings.keyboardKeysShift = dh.vrSettings.keyboardKeysShift.substring(0,
                     dh.vrSettings.keyboardKeysShift.length() - layout.columns());
@@ -114,12 +115,12 @@ public class GuiKeyboardLayoutEditor extends Screen {
             this.reinit = true;
             KeyboardHandler.reinitKeyboard();
         }, (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
-            Component.translatable("vivecraft.options.screen.removekeyboardrow.tooltip")))).active =
+            new TranslatableComponent("vivecraft.options.screen.removekeyboardrow.tooltip")))).active =
             layout.rows() > KeyboardKeys.ROWS;
 
         this.addRenderableWidget(new Button(
             this.width / 2 - 155, this.height - 30, 150, 20,
-            Component.translatable("vivecraft.options.screen.loadkeyboardlayout.button"), button ->
+            new TranslatableComponent("vivecraft.options.screen.loadkeyboardlayout.button"), button ->
             this.minecraft.setScreen(GuiActiveKeyboardLayoutSelector.getSelectionScreen(this,
                 keyboard -> !keyboard.id().equals("custom"),
                 keyboard -> {
@@ -135,7 +136,7 @@ public class GuiKeyboardLayoutEditor extends Screen {
 
         this.addRenderableWidget(
             new Button(this.width / 2 + 5, this.height - 30, 150, 20,
-                Component.translatable("gui.back"), p -> onClose()));
+                new TranslatableComponent("gui.back"), p -> onClose()));
     }
 
     private void setShift(boolean shift) {

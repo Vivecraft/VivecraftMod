@@ -52,7 +52,7 @@ public class GuiHelper {
         double y = windowHeight - maxY * scale;
         double width = (maxX - minX) * scale;
         double height = (maxY - minY) * scale;
-        RenderSystem.enableScissor((int)x, (int)y, Math.max(0, (int)width), Math.max(0, (int)height));
+        RenderSystem.enableScissor((int) x, (int) y, Math.max(0, (int) width), Math.max(0, (int) height));
     }
 
     public static void renderOnTooltip(Button button, PoseStack poseStack, int x, int y, Component component) {

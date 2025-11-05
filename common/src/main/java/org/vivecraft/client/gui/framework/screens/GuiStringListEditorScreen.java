@@ -38,11 +38,11 @@ public class GuiStringListEditorScreen extends GuiListEditorScreen<String> {
 
     @Override
     protected ValueEntry<String> toEntry(String value, int index) {
-        EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, 350, 20, Component.literal(value));
+        EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, 350, 20, new TextComponent(value));
         box.setMaxLength(1000);
         box.setValue(value);
         box.setResponder(s -> this.elements.set(index, s));
-        return new StringValueEntry(Component.empty(), box, button -> {
+        return new StringValueEntry(TextComponent.EMPTY, box, button -> {
             this.elements.remove(index);
             this.reinit = true;
         }, !this.fixedEntryCount);

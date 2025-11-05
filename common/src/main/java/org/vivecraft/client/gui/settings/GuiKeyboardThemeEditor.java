@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.screens.GuiSelectionListScreen;
 import org.vivecraft.client.gui.framework.widgets.ColorPicker;
 import org.vivecraft.client.gui.framework.widgets.ColoredButton;
@@ -26,7 +26,7 @@ public class GuiKeyboardThemeEditor extends Screen {
     private final ColorPicker colorPicker;
 
     protected GuiKeyboardThemeEditor(Screen parent) {
-        super(Component.translatable("vivecraft.options.screen.customkeyboardthemeeditor"));
+        super(new TranslatableComponent("vivecraft.options.screen.customkeyboardthemeeditor"));
         this.parent = parent;
         this.colorPicker = new ColorPicker(0, 0, 50, 40);
     }
@@ -80,16 +80,16 @@ public class GuiKeyboardThemeEditor extends Screen {
             CycleButton.onOffBuilder(this.isShift)
                 .create(xMargin + 12 * (buttonWidth + spacing), yMargin - (20 + spacing),
                     3 * buttonWidth + 2 * spacing, 20,
-                    Component.translatable("vivecraft.keyboard.key.shift"),
+                    new TranslatableComponent("vivecraft.keyboard.key.shift"),
                     (p, b) -> this.setShift(!this.isShift)));
 
         this.addRenderableWidget(
             new Button(this.width / 2 - 155, this.height - 30, 150, 20,
-                Component.translatable("vivecraft.options.screen.loadkeyboardtheme.button"), button ->
+                new TranslatableComponent("vivecraft.options.screen.loadkeyboardtheme.button"), button ->
                 this.minecraft.setScreen(new GuiSelectionListScreen<>(
-                    Component.translatable("vivecraft.options.screen.loadkeyboardtheme"), this,
+                    new TranslatableComponent("vivecraft.options.screen.loadkeyboardtheme"), this,
                     () -> Arrays.stream(KeyboardTheme.values()).filter(t -> t != KeyboardTheme.CUSTOM).toList(),
-                    theme -> Component.translatable(theme.getLangKey()),
+                    theme -> new TranslatableComponent(theme.getLangKey()),
                     null,
                     theme -> {
                         this.customTheme.load(theme == null ? KeyboardTheme.DEFAULT : theme);
@@ -98,7 +98,7 @@ public class GuiKeyboardThemeEditor extends Screen {
 
         this.addRenderableWidget(
             new Button(this.width / 2 + 5, this.height - 30, 150, 20,
-                Component.translatable("gui.back"), p -> onClose()));
+                new TranslatableComponent("gui.back"), p -> onClose()));
     }
 
     private void setShift(boolean shift) {
@@ -118,7 +118,7 @@ public class GuiKeyboardThemeEditor extends Screen {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTick);
         drawCenteredString(poseStack, this.font, this.getTitle(), this.width / 2, 15, 0xFFFFFFFF);
-        drawCenteredString(poseStack, this.font, Component.translatable("vivecraft.messages.shifttopickcolor"),
+        drawCenteredString(poseStack, this.font, new TranslatableComponent("vivecraft.messages.shifttopickcolor"),
             this.width / 2, 30, 0xFFFFFFFF);
     }
 

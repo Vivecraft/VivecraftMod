@@ -2,6 +2,8 @@ package org.vivecraft.client_vr.gui.keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -160,7 +162,7 @@ public class KeyboardKeys {
         private Key(
             int id, int x, int y, int width, int height, String label, int keyCode, char keyChar, Runnable afterPress)
         {
-            this(id, x, y, width, height, Component.literal(label), () -> {
+            this(id, x, y, width, height, new TextComponent(label), () -> {
                 InputSimulator.pressKeyForBind(keyCode);
                 if (keyChar != '\u0000') {
                     InputSimulator.typeChar(keyChar);
@@ -187,7 +189,7 @@ public class KeyboardKeys {
          * 1x1 key that always presses a key
          */
         private static Key single(int id, int x, int y, String label, int keyCode) {
-            return new Key(id, x, y, 1, 1, Component.literal(label), () -> InputSimulator.pressKey(keyCode),
+            return new Key(id, x, y, 1, 1, new TextComponent(label), () -> InputSimulator.pressKey(keyCode),
                 () -> InputSimulator.releaseKey(keyCode));
         }
 
@@ -195,7 +197,7 @@ public class KeyboardKeys {
          * 2x1 key that always presses a key
          */
         private static Key wide(int id, int x, int y, String langKey, int keyCode) {
-            return new Key(id, x, y, 2, 1, Component.translatable("vivecraft.keyboard.key." + langKey),
+            return new Key(id, x, y, 2, 1, new TranslatableComponent("vivecraft.keyboard.key." + langKey),
                 () -> InputSimulator.pressKey(keyCode), () -> InputSimulator.releaseKey(keyCode));
         }
 
@@ -203,7 +205,7 @@ public class KeyboardKeys {
          * 2x1 key that does an action
          */
         private static Key wide(int id, int x, int y, String langKey, Runnable onPress) {
-            return new Key(id, x, y, 2, 1, Component.translatable("vivecraft.keyboard.key." + langKey),
+            return new Key(id, x, y, 2, 1, new TranslatableComponent("vivecraft.keyboard.key." + langKey),
                 onPress, () -> {});
         }
 

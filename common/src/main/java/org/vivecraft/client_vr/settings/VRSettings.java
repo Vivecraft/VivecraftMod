@@ -12,6 +12,8 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -2587,7 +2589,7 @@ public class VRSettings {
 
     public Map<String, KeyboardLayout> getDefaultKeyboardLayouts() {
         List<KeyboardLayout> layouts = List.of(
-            new KeyboardLayout("custom", Component.translatable("vivecraft.keyboard.keymap.custom"),
+            new KeyboardLayout("custom", new TranslatableComponent("vivecraft.keyboard.keymap.custom"),
                 () -> this.keyboardKeys, () -> this.keyboardKeysShift),
             new KeyboardLayout("en_us", "English (US)",
                 "`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>",
@@ -2613,7 +2615,7 @@ public class VRSettings {
             new KeyboardLayout("ru_ru", "Russian",
                 "ё1234567890-=йцукенгшщзхъ\\фывапролджэ:\"ячсмитьбю.?<>",
                 "Ё!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭ:\"ЯЧСМИТЬБЮ,?<>"),
-            new KeyboardLayout("system", Component.translatable("vivecraft.keyboard.keymap.system"),
+            new KeyboardLayout("system", new TranslatableComponent("vivecraft.keyboard.keymap.system"),
                 () -> getSystemKeys(String::toLowerCase, this.keyboardLayouts.get("en_us").regular.get()),
                 () -> getSystemKeys(String::toUpperCase, this.keyboardLayouts.get("en_us").shift.get())));
         return layouts.stream().collect(Collectors.toMap(KeyboardLayout::id, layout -> layout));
@@ -2623,7 +2625,7 @@ public class VRSettings {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.keyboardCodes.length; i++) {
             String k = GLFW.glfwGetKeyName(this.keyboardCodes[i], -1);
-            sb.append(k != null ? mapper.apply(k).charAt(0) : fallback.charAt(i));
+            sb.append(k != null && !k.isEmpty() ? mapper.apply(k).charAt(0) : fallback.charAt(i));
         }
         return sb.toString();
     }
@@ -2706,7 +2708,7 @@ public class VRSettings {
 
     public record KeyboardLayout(String id, Component fallbackName, Supplier<String> regular, Supplier<String> shift) {
         public KeyboardLayout(String id, String fallbackName, String regular, String shift) {
-            this(id, Component.literal(fallbackName), () -> regular, () -> shift);
+            this(id, new TextComponent(fallbackName), () -> regular, () -> shift);
         }
     }
 

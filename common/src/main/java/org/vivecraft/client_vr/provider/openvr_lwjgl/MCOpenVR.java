@@ -962,9 +962,9 @@ public class MCOpenVR extends MCVR {
                             continue;
                         }
 
-                    var renderModelComponentState = RenderModelComponentState.callocStack(stack);
-                    boolean valid = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName,
-                        sourceHandle, RenderModelControllerModeState.callocStack(stack), renderModelComponentState);
+                        var renderModelComponentState = RenderModelComponentState.callocStack(stack);
+                        boolean valid = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName,
+                            sourceHandle, RenderModelControllerModeState.callocStack(stack), renderModelComponentState);
 
                         if (!valid) {
                             failed = true;

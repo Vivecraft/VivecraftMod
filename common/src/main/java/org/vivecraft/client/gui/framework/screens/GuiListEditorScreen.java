@@ -3,6 +3,8 @@ package org.vivecraft.client.gui.framework.screens;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
 
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public abstract class GuiListEditorScreen<T> extends GuiListScreen {
     protected void addLowerButtons(int top) {
         this.addRenderableWidget(
             new Button(this.width / 2 - 155, top, 150, 20,
-                Component.translatable("vivecraft.gui.loaddefaults"), button -> {
+                new TranslatableComponent("vivecraft.gui.loaddefaults"), button -> {
                 this.loadDefaults.run();
                 this.elements = null;
                 this.reinit = true;
@@ -46,7 +48,7 @@ public abstract class GuiListEditorScreen<T> extends GuiListScreen {
 
         this.addRenderableWidget(
             new Button(this.width / 2 + 5, top, 150, 20,
-                Component.translatable("gui.back"), button -> this.onClose()));
+                new TranslatableComponent("gui.back"), button -> this.onClose()));
     }
 
     @Override
@@ -78,9 +80,9 @@ public abstract class GuiListEditorScreen<T> extends GuiListScreen {
         }
 
         if (!this.fixedEntryCount) {
-            entries.add(new SettingsList.WidgetEntry(Component.literal(""),
+            entries.add(new SettingsList.WidgetEntry(new TextComponent(""),
                 new Button(0, 0, SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20,
-                    Component.translatable("vivecraft.options.addnew"), button -> {
+                    new TranslatableComponent("vivecraft.options.addnew"), button -> {
                     this.addNewValue();
                 })));
         }

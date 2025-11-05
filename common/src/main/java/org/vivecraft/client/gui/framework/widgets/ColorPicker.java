@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 import org.vivecraft.client_vr.render.helpers.GuiHelper;
 import org.vivecraft.client_vr.utils.RGBAColor;
@@ -20,7 +20,7 @@ public class ColorPicker extends AbstractWidget {
     private boolean clickedHue;
 
     public ColorPicker(int x, int y, int width, int height) {
-        super(x, y, width, height, Component.literal("Color Picker"));
+        super(x, y, width, height, new TextComponent("Color Picker"));
     }
 
     @Override

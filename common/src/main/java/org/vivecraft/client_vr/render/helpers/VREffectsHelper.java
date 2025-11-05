@@ -413,7 +413,7 @@ public class VREffectsHelper {
                 .endVertex();
 
             bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+            BufferUploader.end(bufferBuilder);
             poseStack.popPose();
         }
     }
@@ -911,7 +911,7 @@ public class VREffectsHelper {
             bufferBuilder.vertex(matrix, -width, headHeight, -width)
                 .color(1.0F, 1.0F, 1.0F, 0.9F).uv(u1, v0).endVertex();
             bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+            BufferUploader.end(bufferBuilder);
             posestack.popPose();
         }
 

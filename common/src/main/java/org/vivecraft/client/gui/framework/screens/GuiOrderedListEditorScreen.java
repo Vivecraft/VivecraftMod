@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 
 import java.util.List;
@@ -48,11 +49,11 @@ public abstract class GuiOrderedListEditorScreen<T> extends GuiListEditorScreen<
             super(name, null);
             this.value = value;
             this.index = index;
-            this.upButton = new Button(0, 0, 20, 20, Component.literal("\u2191"),
+            this.upButton = new Button(0, 0, 20, 20, new TextComponent("\u2191"),
                 button -> moveEntry(index, -1, false));
-            this.downButton = new Button(0, 0, 20, 20, Component.literal("\u2193"),
+            this.downButton = new Button(0, 0, 20, 20, new TextComponent("\u2193"),
                 button -> moveEntry(index, 1, false));
-            this.removeButton = new Button(0, 0, 20, 20, Component.literal("-"),
+            this.removeButton = new Button(0, 0, 20, 20, new TextComponent("-"),
                 button -> moveEntry(index, 0, true));
         }
 

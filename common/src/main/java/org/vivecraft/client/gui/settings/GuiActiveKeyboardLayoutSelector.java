@@ -4,6 +4,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.screens.GuiOrderedListEditorScreen;
 import org.vivecraft.client.gui.framework.screens.GuiSelectionListScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -17,7 +19,7 @@ import java.util.function.Predicate;
 
 public class GuiActiveKeyboardLayoutSelector extends GuiOrderedListEditorScreen<VRSettings.KeyboardLayout> {
     public GuiActiveKeyboardLayoutSelector(Screen lastScreen) {
-        super(Component.translatable("vivecraft.options.screen.activekeyboardlayouts"),
+        super(new TranslatableComponent("vivecraft.options.screen.activekeyboardlayouts"),
             lastScreen, false,
             () -> Arrays.stream(ClientDataHolderVR.getInstance().vrSettings.keyboardLayoutOrder)
                 .map(l -> ClientDataHolderVR.getInstance().vrSettings.keyboardLayouts.get(l)).toList(),
@@ -61,7 +63,7 @@ public class GuiActiveKeyboardLayoutSelector extends GuiOrderedListEditorScreen<
         boolean hasReset)
     {
         return new GuiSelectionListScreen<>(
-            Component.translatable("vivecraft.options.screen.keyboardlayoutselection"), parent,
+            new TranslatableComponent("vivecraft.options.screen.keyboardlayoutselection"), parent,
             () -> ClientDataHolderVR.getInstance().vrSettings.keyboardLayouts.values().stream().filter(filter)
                 .sorted(Comparator.comparing(key -> getLangComponent(key).getString())).toList(),
             GuiActiveKeyboardLayoutSelector::getLangComponent,
@@ -77,6 +79,6 @@ public class GuiActiveKeyboardLayoutSelector extends GuiOrderedListEditorScreen<
     private static Component getLangComponent(VRSettings.KeyboardLayout layout) {
         LanguageInfo info = Minecraft.getInstance().getLanguageManager().getLanguages().stream()
             .filter(l -> l.getCode().equals(layout.id())).findFirst().orElse(null);
-        return info != null ? Component.literal(info.toString()) : layout.fallbackName();
+        return info != null ? new TextComponent(info.toString()) : layout.fallbackName();
     }
 }
