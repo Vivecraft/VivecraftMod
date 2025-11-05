@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 import org.vivecraft.client_vr.utils.RGBAColor;
 
 public class ColorPicker extends AbstractWidget {
@@ -23,38 +24,38 @@ public class ColorPicker extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         // black background
-        GuiComponent.fill(poseStack, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height,
+        GuiComponent.fill(poseStack, this.x, this.y, this.x + this.width, this.y + this.height,
             0xFF000000);
 
         for (int i = 0; i < this.height - 2; i++) {
             RGBAColor color = RGBAColor.fromHSB(i / (float) (this.height - 2), 1F, 1F);
-            GuiComponent.fill(poseStack, this.getX() + 1, this.getY() + i + 1, this.getX() + HUE_WIDTH - 1,
-                this.getY() + i + 2, color.toIntEncodingARGB());
+            GuiComponent.fill(poseStack, this.x + 1, this.y + i + 1, this.x + HUE_WIDTH - 1,
+                this.y + i + 2, color.toIntEncodingARGB());
         }
         for (int x = HUE_WIDTH; x < this.width - 2; x++) {
             for (int y = 0; y < this.height - 2; y++) {
                 RGBAColor color = RGBAColor.fromHSB(this.hue, (x - HUE_WIDTH) / (float) (this.width - HUE_WIDTH - 2),
                     1F - y / (float) (this.height - 3));
-                int xPos = this.getX() + x + 1;
-                int yPos = this.getY() + y + 1;
+                int xPos = this.x + x + 1;
+                int yPos = this.y + y + 1;
 
                 GuiComponent.fill(poseStack, xPos, yPos, xPos + 1, yPos + 1, color.toIntEncodingARGB());
             }
         }
 
-        int satX = (int) (this.getX() + HUE_WIDTH + 1 + this.saturation * (this.width - HUE_WIDTH - 3));
-        int satY = (int) (this.getY() + 1 + (1F - this.brightness) * (this.height - 3));
-        renderOutline(poseStack, satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
+        int satX = (int) (this.x + HUE_WIDTH + 1 + this.saturation * (this.width - HUE_WIDTH - 3));
+        int satY = (int) (this.y + 1 + (1F - this.brightness) * (this.height - 3));
+        GuiHelper.renderOutline(poseStack, satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
 
-        int hueY = (int) (this.getY() + 1 + this.hue * (this.height - 3));
-        renderOutline(poseStack, this.getX(), hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
+        int hueY = (int) (this.y + 1 + this.hue * (this.height - 3));
+        GuiHelper.renderOutline(poseStack, this.x, hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
     }
 
     @Override
     public void onClick(double mouseX, double mouseY) {
-        this.clickedHue = mouseX < this.getX() + HUE_WIDTH;
+        this.clickedHue = mouseX < this.x + HUE_WIDTH;
         this.setColor(mouseX, mouseY);
     }
 
@@ -65,17 +66,17 @@ public class ColorPicker extends AbstractWidget {
 
     private void setColor(double mouseX, double mouseY) {
         if (this.clickedHue) {
-            this.hue = (float) Mth.clamp((mouseY - (this.getY() + 1)) / (this.height - 2), 0.0, 1.0);
+            this.hue = (float) Mth.clamp((mouseY - (this.y + 1)) / (this.height - 2), 0.0, 1.0);
         } else {
-            this.brightness = 1F - (float) Mth.clamp((mouseY - this.getY() - 1) / (this.height - 2), 0.0, 1.0);
+            this.brightness = 1F - (float) Mth.clamp((mouseY - this.y - 1) / (this.height - 2), 0.0, 1.0);
             this.saturation = (float) Mth.clamp(
-                (mouseX - this.getX() - HUE_WIDTH - 1) / (this.getWidth() - HUE_WIDTH - 2),
+                (mouseX - this.x - HUE_WIDTH - 1) / (this.getWidth() - HUE_WIDTH - 2),
                 0.0, 1.0);
         }
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {
         this.defaultButtonNarrationText(narrationElementOutput);
     }
 

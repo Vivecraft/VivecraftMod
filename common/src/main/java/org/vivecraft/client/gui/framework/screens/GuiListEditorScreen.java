@@ -37,18 +37,16 @@ public abstract class GuiListEditorScreen<T> extends GuiListScreen {
     @Override
     protected void addLowerButtons(int top) {
         this.addRenderableWidget(
-            Button.builder(Component.translatable("vivecraft.gui.loaddefaults"), button -> {
-                    this.loadDefaults.run();
-                    this.elements = null;
-                    this.reinit = true;
-                })
-                .bounds(this.width / 2 - 155, top, 150, 20)
-                .build());
+            new Button(this.width / 2 - 155, top, 150, 20,
+                Component.translatable("vivecraft.gui.loaddefaults"), button -> {
+                this.loadDefaults.run();
+                this.elements = null;
+                this.reinit = true;
+            }));
 
         this.addRenderableWidget(
-            Button.builder(Component.translatable("gui.back"), button -> this.onClose())
-                .bounds(this.width / 2 + 5, top, 150, 20)
-                .build());
+            new Button(this.width / 2 + 5, top, 150, 20,
+                Component.translatable("gui.back"), button -> this.onClose()));
     }
 
     @Override
@@ -81,9 +79,10 @@ public abstract class GuiListEditorScreen<T> extends GuiListScreen {
 
         if (!this.fixedEntryCount) {
             entries.add(new SettingsList.WidgetEntry(Component.literal(""),
-                Button.builder(Component.translatable("vivecraft.options.addnew"), button -> {
+                new Button(0, 0, SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20,
+                    Component.translatable("vivecraft.options.addnew"), button -> {
                     this.addNewValue();
-                }).size(SettingsList.WidgetEntry.VALUE_BUTTON_WIDTH, 20).build()));
+                })));
         }
         return entries;
     }

@@ -75,7 +75,8 @@ public class GuiActiveKeyboardLayoutSelector extends GuiOrderedListEditorScreen<
     }
 
     private static Component getLangComponent(VRSettings.KeyboardLayout layout) {
-        LanguageInfo info = Minecraft.getInstance().getLanguageManager().getLanguages().get(layout.id());
-        return info != null ? info.toComponent() : layout.fallbackName();
+        LanguageInfo info = Minecraft.getInstance().getLanguageManager().getLanguages().stream()
+            .filter(l -> l.getCode().equals(layout.id())).findFirst().orElse(null);
+        return info != null ? Component.literal(info.toString()) : layout.fallbackName();
     }
 }

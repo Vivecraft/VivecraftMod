@@ -48,15 +48,12 @@ public abstract class GuiOrderedListEditorScreen<T> extends GuiListEditorScreen<
             super(name, null);
             this.value = value;
             this.index = index;
-            this.upButton = Button.builder(Component.literal("\u2191"),
-                    button -> moveEntry(index, -1, false))
-                .bounds(0, 0, 20, 20).build();
-            this.downButton = Button.builder(Component.literal("\u2193"),
-                    button -> moveEntry(index, 1, false))
-                .bounds(0, 0, 20, 20).build();
-            this.removeButton = Button.builder(Component.literal("-"),
-                    button -> moveEntry(index, 0, true))
-                .bounds(0, 0, 20, 20).build();
+            this.upButton = new Button(0, 0, 20, 20, Component.literal("\u2191"),
+                button -> moveEntry(index, -1, false));
+            this.downButton = new Button(0, 0, 20, 20, Component.literal("\u2193"),
+                button -> moveEntry(index, 1, false));
+            this.removeButton = new Button(0, 0, 20, 20, Component.literal("-"),
+                button -> moveEntry(index, 0, true));
         }
 
         @Override
@@ -77,8 +74,8 @@ public abstract class GuiOrderedListEditorScreen<T> extends GuiListEditorScreen<
             int i = 0;
             for (GuiEventListener child : this.children()) {
                 Button b = (Button) child;
-                b.setX(left + width - (2 - i) * 22 - 20);
-                b.setY(top);
+                b.x = left + width - (2 - i) * 22 - 20;
+                b.y = top;
                 b.render(poseStack, mouseX, mouseY, partialTick);
                 i++;
             }

@@ -3,12 +3,12 @@ package org.vivecraft.client.gui.settings;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
+import org.vivecraft.client_vr.render.helpers.GuiHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiKeyboardLayoutEditor extends Screen {
@@ -73,17 +73,20 @@ public class GuiKeyboardLayoutEditor extends Screen {
                 continue;
             }
             int y = key.y() < 0 ? layout.rows() - key.y() : key.y();
-            this.addRenderableWidget(new Button.Builder(key.label(), p -> {
+            this.addRenderableWidget(new Button(
+                xMargin + key.x() * (buttonWidth + spacing), yMargin + (y - 1) * (20 + spacing),
+                key.width() * buttonWidth + (key.width() - 1) * spacing, 20,
+                key.label(), p -> {
                 if (key.isShift()) {
                     this.setShift(!this.isShift);
                 }
-            })
-                .size(key.width() * buttonWidth + (key.width() - 1) * spacing, 20)
-                .pos(xMargin + key.x() * (buttonWidth + spacing), yMargin + (y - 1) * (20 + spacing))
-                .build()).active = key.id() == KeyboardKeys.SHIFT_1.id();
+            })).active = key.id() == KeyboardKeys.SHIFT_1.id();
         }
 
-        this.addRenderableWidget(new Button.Builder(Component.literal("+"), p -> {
+        this.addRenderableWidget(new Button(
+            (layout.columns() + 2) * (buttonWidth + spacing) + xMargin, yMargin + 3 * (20 + spacing),
+            buttonWidth, 20,
+            Component.literal("+"), p -> {
             if (this.isShift) {
                 dh.vrSettings.keyboardKeysShift += "\u0000".repeat(layout.columns());
             } else {
@@ -92,13 +95,14 @@ public class GuiKeyboardLayoutEditor extends Screen {
             dh.vrSettings.saveOptions();
             this.reinit = true;
             KeyboardHandler.reinitKeyboard();
-        })
-            .size(buttonWidth, 20)
-            .pos((layout.columns() + 2) * (buttonWidth + spacing) + xMargin, yMargin + 3 * (20 + spacing))
-            .tooltip(Tooltip.create(Component.translatable("vivecraft.options.screen.addkeyboardrow.tooltip")))
-            .build()).active = layout.rows() < KeyboardKeys.MAX_ROWS;
+        }, (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
+            Component.translatable("vivecraft.options.screen.addkeyboardrow.tooltip")))).active =
+            layout.rows() < KeyboardKeys.MAX_ROWS;
 
-        this.addRenderableWidget(new Button.Builder(Component.literal("-"), p -> {
+        this.addRenderableWidget(new Button(
+            (layout.columns() + 3) * (buttonWidth + spacing) + xMargin, yMargin + 3 * (20 + spacing),
+            buttonWidth, 20,
+            Component.literal("-"), p -> {
             if (this.isShift) {
                 dh.vrSettings.keyboardKeysShift = dh.vrSettings.keyboardKeysShift.substring(0,
                     dh.vrSettings.keyboardKeysShift.length() - layout.columns());
@@ -109,13 +113,12 @@ public class GuiKeyboardLayoutEditor extends Screen {
             dh.vrSettings.saveOptions();
             this.reinit = true;
             KeyboardHandler.reinitKeyboard();
-        })
-            .size(buttonWidth, 20)
-            .pos((layout.columns() + 3) * (buttonWidth + spacing) + xMargin, yMargin + 3 * (20 + spacing))
-            .tooltip(Tooltip.create(Component.translatable("vivecraft.options.screen.removekeyboardrow.tooltip")))
-            .build()).active = layout.rows() > KeyboardKeys.ROWS;
+        }, (button, poseStack, x, y) -> GuiHelper.renderOnTooltip(button, poseStack, x, y,
+            Component.translatable("vivecraft.options.screen.removekeyboardrow.tooltip")))).active =
+            layout.rows() > KeyboardKeys.ROWS;
 
-        this.addRenderableWidget(new Button.Builder(
+        this.addRenderableWidget(new Button(
+            this.width / 2 - 155, this.height - 30, 150, 20,
             Component.translatable("vivecraft.options.screen.loadkeyboardlayout.button"), button ->
             this.minecraft.setScreen(GuiActiveKeyboardLayoutSelector.getSelectionScreen(this,
                 keyboard -> !keyboard.id().equals("custom"),
@@ -128,14 +131,11 @@ public class GuiKeyboardLayoutEditor extends Screen {
                     this.reinit = true;
                     this.isShift = false;
                     KeyboardHandler.reinitKeyboard();
-                }, true)))
-            .bounds(this.width / 2 - 155, this.height - 30, 150, 20)
-            .build());
+                }, true))));
 
         this.addRenderableWidget(
-            new Button.Builder(Component.translatable("gui.back"), p -> onClose())
-                .bounds(this.width / 2 + 5, this.height - 30, 150, 20)
-                .build());
+            new Button(this.width / 2 + 5, this.height - 30, 150, 20,
+                Component.translatable("gui.back"), p -> onClose()));
     }
 
     private void setShift(boolean shift) {

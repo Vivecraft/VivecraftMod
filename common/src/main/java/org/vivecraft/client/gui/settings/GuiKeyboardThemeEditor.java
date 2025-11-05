@@ -44,7 +44,8 @@ public class GuiKeyboardThemeEditor extends Screen {
         int yMargin = 32 + this.height / 2 - (int) ((layout.rows() + 3F) / 2F * (20 + spacing));
         int xMargin = this.width / 2 - ((buttonWidth + spacing) * (layout.columns() + 5)) / 2;
 
-        this.colorPicker.setPosition(xMargin + (buttonWidth + spacing) * 15, yMargin - 42);
+        this.colorPicker.x = xMargin + (buttonWidth + spacing) * 15;
+        this.colorPicker.y = yMargin - 42;
         this.addRenderableWidget(this.colorPicker);
 
         for (KeyboardKeys.Key key : layout.keys()) {
@@ -83,7 +84,7 @@ public class GuiKeyboardThemeEditor extends Screen {
                     (p, b) -> this.setShift(!this.isShift)));
 
         this.addRenderableWidget(
-            new Button.Builder(
+            new Button(this.width / 2 - 155, this.height - 30, 150, 20,
                 Component.translatable("vivecraft.options.screen.loadkeyboardtheme.button"), button ->
                 this.minecraft.setScreen(new GuiSelectionListScreen<>(
                     Component.translatable("vivecraft.options.screen.loadkeyboardtheme"), this,
@@ -93,14 +94,11 @@ public class GuiKeyboardThemeEditor extends Screen {
                     theme -> {
                         this.customTheme.load(theme == null ? KeyboardTheme.DEFAULT : theme);
                         this.customTheme.save();
-                    }, true, true, null)))
-                .bounds(this.width / 2 - 155, this.height - 30, 150, 20)
-                .build());
+                    }, true, true, null))));
 
         this.addRenderableWidget(
-            new Button.Builder(Component.translatable("gui.back"), p -> onClose())
-                .bounds(this.width / 2 + 5, this.height - 30, 150, 20)
-                .build());
+            new Button(this.width / 2 + 5, this.height - 30, 150, 20,
+                Component.translatable("gui.back"), p -> onClose()));
     }
 
     private void setShift(boolean shift) {
