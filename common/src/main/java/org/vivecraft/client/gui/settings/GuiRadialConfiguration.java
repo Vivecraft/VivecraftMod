@@ -93,7 +93,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                     key -> {
                         this.selectedIndex = index;
                         this.setKey(key);
-                    }, false, null
+                    }, true, false, null
                 ));
             }, index, centerX, centerY));
         }

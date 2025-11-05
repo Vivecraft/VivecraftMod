@@ -18,6 +18,7 @@ import org.vivecraft.client.ClientVRPlayers;
  */
 @Pseudo
 @Mixin(targets = {
+    "net.conczin.mca.client.model.PlayerEntityExtendedModel",
     "fabric.net.mca.client.model.PlayerEntityExtendedModel",
     "forge.net.mca.client.model.PlayerEntityExtendedModel",
     "quilt.net.mca.client.model.PlayerEntityExtendedModel"})
@@ -41,7 +42,7 @@ public abstract class PlayerEntityExtendedModelMixin {
     @Unique
     private final Matrix3f vivecraft$rotMatrix = new Matrix3f();
 
-    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
+    @Inject(method = {"m_6973_", "method_17087"}, at = @At("TAIL"), remap = false)
     private void vivecraft$moveBreasts(CallbackInfo ci, @Local(argsOnly = true) LivingEntity villager) {
         if (ClientVRPlayers.getInstance().isVRPlayer(villager)) {
 
