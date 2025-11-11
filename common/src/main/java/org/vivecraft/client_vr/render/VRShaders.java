@@ -40,6 +40,10 @@ public class VRShaders {
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
+    public static final String MIXED_REALITY_GUI_COLOR_SAMPLER = "guiColor";
+    public static final int MIXED_REALITY_GUI_FIRST = 1;
+    public static final int MIXED_REALITY_GUI_THIRD = 2;
+    public static final int MIXED_REALITY_GUI_SEPARATE = 4;
 
     public static final RenderPipeline MIXED_REALITY_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_mixed_reality")
@@ -49,6 +53,7 @@ public class VRShaders {
         .withSampler(MIXED_REALITY_FIRST_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)
+        .withSampler(MIXED_REALITY_GUI_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
@@ -80,6 +85,17 @@ public class VRShaders {
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .build();
+
+    public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_blit")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
+        .withSampler(BLIT_VR_COLOR_SAMPLER)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withBlend(BlendFunction.TRANSLUCENT)
         .build();
 
     // end portal shaders

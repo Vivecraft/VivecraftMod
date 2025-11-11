@@ -277,11 +277,12 @@ public class ShaderHelper {
             int screenHeight = MC.mainRenderTarget.height;
 
             if (leftEye != null) {
-                ShaderHelper.blitToScreen(leftEye, 0, screenWidth, screenHeight, 0, 0.0F, 0.0F, false);
+                ShaderHelper.blitToScreen(leftEye, 0, screenWidth, screenHeight, 0, 0.0F, 0.0F, false, false);
             }
 
             if (rightEye != null) {
-                ShaderHelper.blitToScreen(rightEye, screenWidth, screenWidth, screenHeight, 0, 0.0F, 0.0F, false);
+                ShaderHelper.blitToScreen(rightEye, screenWidth, screenWidth, screenHeight, 0, 0.0F, 0.0F, false,
+                    false);
             }
         } else {
             // general single buffer case
@@ -323,7 +324,10 @@ public class ShaderHelper {
                 ShaderHelper.blitToScreen(source,
                     0, MC.mainRenderTarget.width,
                     MC.mainRenderTarget.height, 0,
-                    xCrop, yCrop, keepAspect);
+                    xCrop, yCrop, keepAspect, false);
+            }
+            if (source != GuiHandler.GUI_FRAMEBUFFER) {
+                blitGui();
             }
         }
 
@@ -344,6 +348,18 @@ public class ShaderHelper {
         boolean alphaMask =
             DATA_HOLDER.vrSettings.mixedRealityUnityLike && DATA_HOLDER.vrSettings.mixedRealityAlphaMask;
 
+        int guiMask = 0;
+        if (DATA_HOLDER.vrSettings.guiOnMirror == VRSettings.MirrorGui.ALWAYS ||
+            (DATA_HOLDER.vrSettings.guiOnMirror == VRSettings.MirrorGui.HUD_ONLY && MC.screen == null))
+        {
+            guiMask = switch (DATA_HOLDER.vrSettings.mixedRealityGui) {
+                case FIRST -> VRShaders.MIXED_REALITY_GUI_FIRST;
+                case THIRD -> VRShaders.MIXED_REALITY_GUI_THIRD;
+                case BOTH -> VRShaders.MIXED_REALITY_GUI_FIRST | VRShaders.MIXED_REALITY_GUI_THIRD;
+                case SEPARATE -> VRShaders.MIXED_REALITY_GUI_SEPARATE;
+            };
+        }
+
         VRShaders.MIXED_REALITY_UBO.updateBuffer(
             ((GameRendererExtension) MC.gameRenderer).vivecraft$getThirdPassProjectionMatrix(),
             viewMatrix,
@@ -353,7 +369,8 @@ public class ShaderHelper {
                 DATA_HOLDER.vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
                 DATA_HOLDER.vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
                 DATA_HOLDER.vrSettings.mixedRealityKeyColor.getBlue() / 255.0F),
-            alphaMask
+            alphaMask,
+            guiMask
         );
 
         GpuTextureView black = RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE);
@@ -367,6 +384,9 @@ public class ShaderHelper {
                 DATA_HOLDER.vrRenderer.framebufferMR.getColorTextureView());
             renderPass.bindSampler(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
                 DATA_HOLDER.vrRenderer.framebufferMR.getDepthTextureView());
+
+            renderPass.bindSampler(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
+                GuiHandler.GUI_FRAMEBUFFER.getColorTextureView());
 
             if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
                 RenderTarget source;
@@ -421,6 +441,47 @@ public class ShaderHelper {
     }
 
     /**
+     * blits the gui to the mirror with alpha blending
+     * the gui is centered in the middle and at the bottom, scaled to completely fit
+     */
+    public static void blitGui() {
+        if (DATA_HOLDER.vrSettings.guiOnMirror == VRSettings.MirrorGui.OFF ||
+            (DATA_HOLDER.vrSettings.guiOnMirror == VRSettings.MirrorGui.HUD_ONLY && MC.screen != null))
+        {
+            return;
+        }
+
+        float mirrorAspect = (float) MC.mainRenderTarget.width / (float) MC.mainRenderTarget.height;
+        float guiAspect = (float) GuiHandler.GUI_FRAMEBUFFER.width / (float) GuiHandler.GUI_FRAMEBUFFER.height;
+
+        float xMin = 0;
+        float yMin = 0;
+        float xMax = 1.0F;
+        float yMax = 1.0F;
+
+        if (mirrorAspect > guiAspect) {
+            // mirror is wider than the gui
+            // limit the width, so the complete height is filled
+            float aspect = (guiAspect / mirrorAspect) * 0.5F;
+
+            xMin = 0.5F - aspect;
+            xMax = 0.5F + aspect;
+        } else {
+            // mirror is taller than the gui
+            // limit the height, so the complete width is filled
+            // and shift the gui to the bottom
+            yMax = (mirrorAspect / guiAspect);
+        }
+
+        int x = (int) (xMin * MC.mainRenderTarget.width);
+        int y = (int) (yMin * MC.mainRenderTarget.height);
+        int width = (int) (xMax * MC.mainRenderTarget.width) - x;
+        int height = (int) (yMax * MC.mainRenderTarget.height) - y;
+
+        blitToScreen(GuiHandler.GUI_FRAMEBUFFER, x, width, height, y, 0, 0, true, true);
+    }
+
+    /**
      * blits the given {@code source} RenderTarget to the screen/bound buffer<br>
      * the {@code source} is drawn to the rectangle at {@code left},{@code top} with a size of {@code width},{@code height}<br>
      * if {@code xCropFactor} or {@code yCropFactor} are non 0 the {@code source} gets zoomed in
@@ -433,10 +494,11 @@ public class ShaderHelper {
      * @param xCropFactor vertical crop factor for the {@code source}
      * @param yCropFactor horizontal crop factor for the {@code source}
      * @param keepAspect  keeps the aspect ratio in takt when cropping the buffer
+     * @param blend       if alpha blending should be used
      */
     public static void blitToScreen(
         RenderTarget source, int left, int width, int height, int top, float xCropFactor, float yCropFactor,
-        boolean keepAspect)
+        boolean keepAspect, boolean blend)
     {
         RenderSystem.assertOnRenderThread();
 
@@ -499,7 +561,11 @@ public class ShaderHelper {
                 .createRenderPass(() -> "Vive Blit", MC.getMainRenderTarget().getColorTextureView(),
                     OptionalInt.empty()))
             {
-                renderPass.setPipeline(VRShaders.BLIT_VR_PIPELINE);
+                if (blend) {
+                    renderPass.setPipeline(VRShaders.BLIT_VR_BLEND_PIPELINE);
+                } else {
+                    renderPass.setPipeline(VRShaders.BLIT_VR_PIPELINE);
+                }
                 renderPass.setVertexBuffer(0, gpuBuffer);
 
                 renderPass.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView());

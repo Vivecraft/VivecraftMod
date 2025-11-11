@@ -113,6 +113,19 @@ public class VRSettings {
         GUI
     }
 
+    public enum MirrorGui implements OptionEnum<MirrorGui> {
+        OFF,
+        HUD_ONLY,
+        ALWAYS
+    }
+
+    public enum MixedRealityGui implements OptionEnum<MixedRealityGui> {
+        FIRST,
+        THIRD,
+        BOTH,
+        SEPARATE
+    }
+
     public enum HUDLock implements OptionEnum<HUDLock> {
         WRIST,
         HAND,
@@ -444,6 +457,8 @@ public class VRSettings {
     public boolean displayMirrorUseScreenshotCamera = false;
     @SettingField(VrOptions.MIRROR_OFF_TEXT)
     public boolean showMirrorOffText = true;
+    @SettingField(VrOptions.MIRROR_GUI)
+    public MirrorGui guiOnMirror = MirrorGui.OFF;
     @SettingField(VrOptions.SHOW_PLAYER_MODEL)
     public boolean shouldRenderSelf = false;
     @SettingField(VrOptions.MAIN_PLAYER_DATA)
@@ -525,6 +540,8 @@ public class VRSettings {
     public float handCameraResScale = 1.0f;
     @SettingField(VrOptions.MIXED_REALITY_RENDER_CAMERA_MODEL)
     public boolean mixedRealityRenderCameraModel = true;
+    @SettingField(VrOptions.MIXED_REALITY_GUI)
+    public MixedRealityGui mixedRealityGui = MixedRealityGui.FIRST;
     //
 
     // HUD/GUI
@@ -1772,6 +1789,8 @@ public class VRSettings {
             }
         },
         MIRROR_OFF_TEXT(false, true), // if text should be shown when the mirror is off
+        MIRROR_GUI(false, true), // if the gui should be overlaid on the mirror
+        MIXED_REALITY_GUI(false, true), // where the gui should show on the mixed reality mirror
         MIRROR_SCREENSHOT_CAMERA(false, true),
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
             private static final List<Pair<Color, String>> COLORS;

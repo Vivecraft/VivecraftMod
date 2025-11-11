@@ -41,6 +41,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
     private static final VRSettings.VrOptions[] OFF_OPTIONS = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.MIRROR_OFF_TEXT
     };
+    private static final VRSettings.VrOptions[] GUI_MIRROR_OPTIONS = new VRSettings.VrOptions[]{
+        VRSettings.VrOptions.MIRROR_GUI
+    };
     private final VROptionEntry[] MROptions = new VROptionEntry[]{new VROptionEntry(
         "vivecraft.options.screen.mixedreality.button", (button, mousePos) -> {
         Minecraft.getInstance().setScreen(new GuiMixedRealitySettings(this));
@@ -90,9 +93,18 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
 
         switch (this.dataHolder.vrSettings.displayMirrorMode) {
             case MIXED_REALITY -> super.init(this.MROptions, false);
-            case FIRST_PERSON -> super.init(UNDISTORTED_OPTIONS, false);
-            case THIRD_PERSON -> super.init(THIRD_OPTIONS, false);
-            case CROPPED -> super.init(CROP_OPTIONS, false);
+            case FIRST_PERSON -> {
+                super.init(UNDISTORTED_OPTIONS, false);
+                super.init(GUI_MIRROR_OPTIONS, false);
+            }
+            case THIRD_PERSON -> {
+                super.init(THIRD_OPTIONS, false);
+                super.init(GUI_MIRROR_OPTIONS, false);
+            }
+            case CROPPED -> {
+                super.init(CROP_OPTIONS, false);
+                super.init(GUI_MIRROR_OPTIONS, false);
+            }
             case SINGLE -> super.init(SINGLE_OPTIONS, false);
             case OFF -> super.init(OFF_OPTIONS, false);
         }
@@ -115,6 +127,15 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
         this.minecraft.options.fov().set(70);
         if (VRState.VR_INITIALIZED) {
             this.dataHolder.vrRenderer.reinitFrameBuffers("Defaults Loaded");
+        }
+    }
+
+    @Override
+    protected void actionPerformed(AbstractWidget widget) {
+        if (widget instanceof GuiVROption guivroption) {
+            if (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal()) {
+                this.reinit = true;
+            }
         }
     }
 
