@@ -862,6 +862,12 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         mouseY);
                     this.mouseHandler.grabMouse();
                 }
+                // unpress any keys we simulated for VR
+                if (MCVR.get() != null) {
+                    for (VRInputAction action : MCVR.get().getInputActions()) {
+                        action.unpressBindingImmediately();
+                    }
+                }
             }
 
             // send new VR state to the server

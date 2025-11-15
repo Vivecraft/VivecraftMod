@@ -834,8 +834,18 @@ public abstract class MCVR {
             }
 
             // single direction keys
-            ax -= Math.abs(this.getInputAction(MOD.keyRotateLeft).getAxis1DUseTracked());
-            ax += Math.abs(this.getInputAction(MOD.keyRotateRight).getAxis1DUseTracked());
+            float leftRot = Math.abs(this.getInputAction(MOD.keyRotateLeft).getAxis1DUseTracked());
+            float rightRot = Math.abs(this.getInputAction(MOD.keyRotateRight).getAxis1DUseTracked());
+
+            if (leftRot == 0 && MOD.keyRotateLeft.isDown()) {
+                leftRot = 1F;
+            }
+            if (rightRot == 0 && MOD.keyRotateRight.isDown()) {
+                rightRot = 1F;
+            }
+
+            ax -= leftRot;
+            ax += rightRot;
 
             if (ax != 0.0F) {
                 float analogRotSpeed = this.dh.vrSettings.worldRotationXSensitivity * 10.0F * ax;
