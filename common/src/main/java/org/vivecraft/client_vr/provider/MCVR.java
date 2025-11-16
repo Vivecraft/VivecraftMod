@@ -32,9 +32,9 @@ import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.provider.control.*;
 import org.vivecraft.client_vr.provider.openxr.DeviceCompat;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRHotkeys;
@@ -372,7 +372,7 @@ public abstract class MCVR {
      * @return position of the given eye, in room space
      */
     public Vector3f getEyePosition(RenderPass eye) {
-        Matrix4fc pose =  switch (eye) {
+        Matrix4fc pose = switch (eye) {
             case LEFT -> this.hmdPoseLeftEye;
             case RIGHT -> this.hmdPoseRightEye;
             default -> this.hmdPose;
@@ -1212,7 +1212,8 @@ public abstract class MCVR {
         this.addActionParams(map, this.mc.options.keyDown, "optional", ActionType.VEC1, null);
         this.addActionParams(map, this.mc.options.keyLeft, "optional", ActionType.VEC1, null);
         this.addActionParams(map, this.mc.options.keyRight, "optional", ActionType.VEC1, null);
-        this.addActionParams(map, this.mc.options.keyInventory, "suggested", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, this.mc.options.keyInventory, "suggested", ActionType.BOOLEAN,
+            VRInputActionSet.GLOBAL);
         this.addActionParams(map, this.mc.options.keyAttack, "suggested", ActionType.BOOLEAN, null);
         this.addActionParams(map, this.mc.options.keyUse, "suggested", ActionType.BOOLEAN, null);
         this.addActionParams(map, this.mc.options.keyChat, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);

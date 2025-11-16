@@ -18,8 +18,6 @@ import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.control.ControllerType;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketListenerImpl {

@@ -21,10 +21,10 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.provider.control.ActionType;
-import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
+import org.vivecraft.client_vr.provider.control.ActionType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openxr.control.WrappedBinding;
@@ -358,7 +358,8 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
-            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+            info.subactionPath(
+                action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_BOOLEAN);
             int error = XR10.xrGetActionStateBoolean(this.session, info, state);
             logError(error, "xrGetActionStateBoolean", action.name);
@@ -366,12 +367,14 @@ public class MCOpenXR extends MCVR {
             if (state.changedSinceLastSync()) {
                 if (state.currentState()) {
                     action.digitalData[i].toggle = !action.digitalData[i].toggle;
-                    action.digitalData[i].doublePress = System.nanoTime() - action.digitalData[i].lastChange > 250_000_000L;
+                    action.digitalData[i].doublePress =
+                        System.nanoTime() - action.digitalData[i].lastChange > 250_000_000L;
                 } else {
-                    action.digitalData[i].longPress = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                    action.digitalData[i].longPress =
+                        System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
                 }
                 action.digitalData[i].lastChange = System.nanoTime();
-            } else if (state.currentState()){
+            } else if (state.currentState()) {
                 action.digitalData[i].hold = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
             }
 
@@ -393,7 +396,8 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
-            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+            info.subactionPath(
+                action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateFloat state = XrActionStateFloat.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_FLOAT);
             int error = XR10.xrGetActionStateFloat(this.session, info, state);
             logError(error, "xrGetActionStateFloat", action.name);
@@ -417,7 +421,8 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
-            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+            info.subactionPath(
+                action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_VECTOR2F);
             int error = XR10.xrGetActionStateVector2f(this.session, info, state);
             logError(error, "xrGetActionStateVector2f", action.name);
@@ -894,12 +899,14 @@ public class MCOpenXR extends MCVR {
     private void initDisplayRefreshRate() {
         if (this.session.getCapabilities().XR_FB_display_refresh_rate) {
             try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer refreshRateCount = stack.callocInt(1);
-            FBDisplayRefreshRate.xrEnumerateDisplayRefreshRatesFB(this.session, refreshRateCount, null);
-            FloatBuffer refreshRateBuffer = stack.callocFloat(refreshRateCount.get(0));
-            FBDisplayRefreshRate.xrEnumerateDisplayRefreshRatesFB(this.session, refreshRateCount, refreshRateBuffer);
-            refreshRateBuffer.rewind();
-            FBDisplayRefreshRate.xrRequestDisplayRefreshRateFB(this.session, refreshRateBuffer.get(refreshRateCount.get(0) -1));
+                IntBuffer refreshRateCount = stack.callocInt(1);
+                FBDisplayRefreshRate.xrEnumerateDisplayRefreshRatesFB(this.session, refreshRateCount, null);
+                FloatBuffer refreshRateBuffer = stack.callocFloat(refreshRateCount.get(0));
+                FBDisplayRefreshRate.xrEnumerateDisplayRefreshRatesFB(this.session, refreshRateCount,
+                    refreshRateBuffer);
+                refreshRateBuffer.rewind();
+                FBDisplayRefreshRate.xrRequestDisplayRefreshRateFB(this.session,
+                    refreshRateBuffer.get(refreshRateCount.get(0) - 1));
             }
         }
     }
@@ -1039,9 +1046,10 @@ public class MCOpenXR extends MCVR {
             this.actionSetHandles.put(vrinputactionset, actionSet);
 
             //TODO select the proper headset
-            for (WrappedBinding binding: WrappedBinding.quest2Bindings()) {
-                long action = createAction(binding.path().replace("/","."), binding.path(), binding.type(),
-                    new XrActionSet(actionSet, this.instance), binding.path().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
+            for (WrappedBinding binding : WrappedBinding.quest2Bindings()) {
+                long action = createAction(binding.path().replace("/", "."), binding.path(), binding.type(),
+                    new XrActionSet(actionSet, this.instance),
+                    binding.path().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
                 this.mappedBindings.put(binding, action);
                 this.pathBindings.put(binding.path(), binding);
             }
@@ -1086,7 +1094,9 @@ public class MCOpenXR extends MCVR {
                     long handle = this.mappedBindings.get(this.pathBindings.get(pair.getRight()));
                     binding.setHandle(handle);
                     binding.setType(this.pathBindings.get(pair.getRight()).type());
-                    binding.setHand(this.pathBindings.get(pair.getRight()).path().contains("/left/") ? ControllerType.LEFT : ControllerType.RIGHT);
+                    binding.setHand(
+                        this.pathBindings.get(pair.getRight()).path().contains("/left/") ? ControllerType.LEFT :
+                            ControllerType.RIGHT);
                     if (binding.handle == 0L) {
                         VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", pair.getLeft(), pair.getRight());
                         continue;
@@ -1202,7 +1212,8 @@ public class MCOpenXR extends MCVR {
             hands.next(NULL);
             hands.actionName(memUTF8(s));
             switch (type) {
-                case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> hands.actionType(XR10.XR_ACTION_TYPE_BOOLEAN_INPUT);
+                case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE ->
+                    hands.actionType(XR10.XR_ACTION_TYPE_BOOLEAN_INPUT);
                 case VEC1 -> hands.actionType(XR10.XR_ACTION_TYPE_FLOAT_INPUT);
                 case VEC2 -> hands.actionType(XR10.XR_ACTION_TYPE_VECTOR2F_INPUT);
                 case POSE -> hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);

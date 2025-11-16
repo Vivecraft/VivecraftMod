@@ -7,7 +7,6 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.vivecraft.client_vr.VRLayeredRenderTarget;
-import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
@@ -53,9 +52,11 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
             for (int i = 0; i < imageCount; i++) {
                 XrSwapchainImageOpenGLKHR openxrImage = swapchainImageBuffer.get(i);
-                this.leftFramebuffers[i] = new VRLayeredRenderTarget("L Eye " + i, width, height, openxrImage.image(), 0);
+                this.leftFramebuffers[i] = new VRLayeredRenderTarget("L Eye " + i, width, height, openxrImage.image(),
+                    0);
                 String leftError = RenderHelper.checkGLError("Left Eye " + i + " framebuffer setup");
-                this.rightFramebuffers[i] = new VRLayeredRenderTarget("R Eye " + i, width, height, openxrImage.image(), 1);
+                this.rightFramebuffers[i] = new VRLayeredRenderTarget("R Eye " + i, width, height, openxrImage.image(),
+                    1);
                 String rightError = RenderHelper.checkGLError("Right Eye " + i + " framebuffer setup");
 
                 if (this.lastError.isEmpty()) {

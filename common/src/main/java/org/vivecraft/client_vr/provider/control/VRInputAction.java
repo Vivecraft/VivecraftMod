@@ -40,7 +40,9 @@ public class VRInputAction {
     public final DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
     public final AnalogData[] analogData = new AnalogData[ControllerType.values().length];
 
-    public VRInputAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+    public VRInputAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+    {
         this.keyBinding = keyMapping;
         this.requirement = requirement;
         this.type = type;
@@ -86,8 +88,7 @@ public class VRInputAction {
     public Vector2fc getAxis2D(boolean delta) {
         return switch (this.type) {
             case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector2f(this.digitalToAnalog(delta), 0.0F);
-            case VEC1 ->
-                delta ? new Vector2f(this.analogData().deltaX, 0.0F) : new Vector2f(this.analogData().x, 0.0F);
+            case VEC1 -> delta ? new Vector2f(this.analogData().deltaX, 0.0F) : new Vector2f(this.analogData().x, 0.0F);
             case VEC2 -> delta ? new Vector2f(this.analogData().deltaX, this.analogData().deltaY) :
                 new Vector2f(this.analogData().x, this.analogData().y);
             default -> new Vector2f();
@@ -96,7 +97,8 @@ public class VRInputAction {
 
     public Vector3fc getAxis3D(boolean delta) {
         return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector3f(this.digitalToAnalog(delta), 0.0F, 0.0F);
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE ->
+                new Vector3f(this.digitalToAnalog(delta), 0.0F, 0.0F);
             case VEC1 -> delta ? new Vector3f(this.analogData().deltaX, 0.0F, 0.0F) :
                 new Vector3f(this.analogData().x, 0.0F, 0.0F);
             case VEC2 -> delta ? new Vector3f(this.analogData().deltaX, this.analogData().deltaY, 0.0F) :

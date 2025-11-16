@@ -14,7 +14,6 @@ import org.lwjgl.system.Struct;
 import org.lwjgl.system.linux.X11;
 import org.lwjgl.system.windows.User32;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.util.VLoader;
 
 import java.util.Objects;
 
@@ -117,7 +116,7 @@ public interface DeviceCompat {
 //                VLoader.getDalvikVM(),
 //                VLoader.getDalvikActivity()
 //            ).address();
-        return NULL;
+            return NULL;
         }
 
         @Override

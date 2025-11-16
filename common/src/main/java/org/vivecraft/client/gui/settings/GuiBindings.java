@@ -91,5 +91,4 @@ public class GuiBindings extends GuiListScreen {
             .tooltip(Tooltip.create(Component.literal(action.name)))
             .build();
     }
-
 }

@@ -154,6 +154,7 @@ public abstract class VRRenderer {
      * @return the right eye rendertarget
      */
     public abstract RenderTarget getRightEyeTarget();
+
     /**
      * gets an array with the vertex info of the stencil mesh, if there is one provided by this renderer
      *

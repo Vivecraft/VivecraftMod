@@ -3,8 +3,8 @@ package org.vivecraft.client_vr.provider.openxr;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.HapticScheduler;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 
 import java.util.concurrent.TimeUnit;
@@ -16,12 +16,13 @@ public class OpenXRHapticScheduler extends HapticScheduler {
     private void triggerHapticPulse(
         ControllerType controller, float durationSeconds, float frequency, float amplitude)
     {
-        try (MemoryStack stack = MemoryStack.stackPush()){
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             int i = controller == ControllerType.RIGHT ? 0 : 1;
             if (ClientDataHolderVR.getInstance().vrSettings.reverseHands) {
                 i = controller == ControllerType.RIGHT ? 1 : 0;
             }
-            XrActionSet actionSet = new XrActionSet(MCOpenXR.get().getActionSetHandle(VRInputActionSet.GLOBAL), MCOpenXR.get().instance);
+            XrActionSet actionSet = new XrActionSet(MCOpenXR.get().getActionSetHandle(VRInputActionSet.GLOBAL),
+                MCOpenXR.get().instance);
             XrHapticActionInfo info = XrHapticActionInfo.calloc(stack);
             info.type(XR10.XR_TYPE_HAPTIC_ACTION_INFO);
             info.next(NULL);
@@ -40,7 +41,9 @@ public class OpenXRHapticScheduler extends HapticScheduler {
     }
 
     @Override
-    public void queueHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude, float delaySeconds) {
+    public void queueHapticPulse(
+        ControllerType controller, float durationSeconds, float frequency, float amplitude, float delaySeconds)
+    {
         this.executor.schedule(() ->
         {
             this.triggerHapticPulse(controller, durationSeconds, frequency, amplitude);
