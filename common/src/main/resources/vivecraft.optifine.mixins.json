@@ -4,8 +4,10 @@
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "OptifineDefaultVertexFormatMixin",
     "OptifineLiquidBlockRendererMixin",
     "OptifineModelBlockRendererMixin",
+    "ShaderMacrosVRMixin",
     "ShaderPackParserVRMixin",
     "ShadersRenderVRMixin",
     "ShadersVRMixin"

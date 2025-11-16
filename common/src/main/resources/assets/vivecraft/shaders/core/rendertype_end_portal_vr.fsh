@@ -1,4 +1,4 @@
-#version 150
+#version 330
 
 /*
 MIT License
@@ -24,15 +24,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#moj_import <matrix.glsl>
+#moj_import <minecraft:fog.glsl>
+#moj_import <minecraft:matrix.glsl>
+#moj_import <minecraft:globals.glsl>
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 
-uniform float GameTime;
-uniform int EndPortalLayers;
-
 in vec3 pos;
+in float sphericalVertexDistance;
+in float cylindricalVertexDistance;
 
 const float PI = 3.14159265359;
 
@@ -92,11 +93,11 @@ void main() {
 
     outColor.rgb = texture(Sampler0, tmppos.xy).rgb * COLORS[0];
 
-    for (int i = 0; i < EndPortalLayers; i++) {
+    for (int i = 0; i < PORTAL_LAYERS; i++) {
         float layer = float(i) + 1.0;
         tmppos = proj_3d_to_2d(mat3(mat2_rotate_z(radians((layer * layer * 4321.0 + layer * 9.0) * 2.0))) * normalize(pos));
         outColor.rgb += texture(Sampler1, (tmppos * end_portal_layer(float(i + 1))).xy).rgb * COLORS[i];
     }
 
-    fragColor = outColor;
+    fragColor = apply_fog(outColor, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
 }

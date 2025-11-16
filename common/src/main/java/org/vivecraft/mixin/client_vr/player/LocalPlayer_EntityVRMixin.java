@@ -70,6 +70,9 @@ public abstract class LocalPlayer_EntityVRMixin {
     @Shadow
     public abstract double getX();
 
+    @Shadow
+    public abstract Vec3 position();
+
     /**
      * dummy to be overridden in {@link LocalPlayerVRMixin}
      */
@@ -77,6 +80,12 @@ public abstract class LocalPlayer_EntityVRMixin {
     protected Vec3 vivecraft$controllerMovement(Vec3 relative, float amount, float facing, Operation<Vec3> original) {
         return original.call(relative, amount, facing);
     }
+
+    /**
+     * dummy to be overridden in {@link LocalPlayerVRMixin}
+     */
+    @Inject(method = "moveRelative", at = @At("TAIL"))
+    protected void vivecraft$afterMoveRelative(CallbackInfo ci) {}
 
     /**
      * dummy to be overridden in {@link LocalPlayerVRMixin}
@@ -89,6 +98,6 @@ public abstract class LocalPlayer_EntityVRMixin {
     /**
      * dummy to be overridden in {@link LocalPlayerVRMixin}
      */
-    @Inject(method = {"absMoveTo(DDDFF)V", "moveTo(DDDFF)V"}, at = @At("TAIL"))
+    @Inject(method = {"absSnapTo(DDDFF)V", "snapTo(DDDFF)V"}, at = @At("TAIL"))
     protected void vivecraft$afterAbsMoveTo(CallbackInfo ci) {}
 }

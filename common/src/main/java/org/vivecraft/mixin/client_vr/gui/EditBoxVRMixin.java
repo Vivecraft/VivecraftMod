@@ -16,10 +16,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
+import org.vivecraft.client.gui.settings.GuiKeyboardLayoutEditor;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 import javax.annotation.Nullable;
 
@@ -40,24 +41,32 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
     @Shadow
     public abstract int getInnerWidth();
 
+    @Shadow
+    private String suggestion;
+
+    @Shadow
+    private int textX;
+
+    @Shadow
+    private int textY;
+
     public EditBoxVRMixin(int x, int y, int width, int height, Component message) {
         super(x, y, width, height, message);
     }
 
     @Inject(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
     private void vivecraft$renderKeyboardHint(
-        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci,
-        @Local String content, @Local(ordinal = 4) int xPos, @Local(ordinal = 5) int yPos)
+        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci, @Local String content)
     {
-        if (VRState.VR_RUNNING && content.isEmpty() && !ClientDataHolderVR.getInstance().vrSettings.seated &&
-            !KeyboardHandler.SHOWING)
+        if (VRState.VR_RUNNING && !ClientDataHolderVR.getInstance().vrSettings.seated && !KeyboardHandler.SHOWING &&
+            content.isEmpty() && !(Minecraft.getInstance().screen instanceof GuiKeyboardLayoutEditor))
         {
-            if (this.hint == null || this.isFocused()) {
+            if ((this.hint == null && (this.suggestion == null || this.suggestion.isEmpty())) || this.isFocused()) {
                 // limit text to field size
                 String fullString = I18n.get("vivecraft.message.openKeyboard");
                 String cutString = this.font.plainSubstrByWidth(fullString, this.getInnerWidth());
-                guiGraphics.drawString(this.font, fullString.equals(cutString) ? cutString : cutString + "...", xPos,
-                    yPos, this.textColorUneditable);
+                guiGraphics.drawString(this.font, fullString.equals(cutString) ? cutString : cutString + "...",
+                    this.textX, this.textY, this.textColorUneditable);
             }
         }
     }
@@ -65,20 +74,16 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
     @Inject(method = "setFocused", at = @At("HEAD"))
     private void vivecraft$autoOpenKeyboard(boolean focused, CallbackInfo ci) {
         if (VRState.VR_RUNNING && focused && !(Minecraft.getInstance().screen instanceof InBedChatScreen)) {
-            if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.ON ||
-                (Minecraft.getInstance().screen instanceof ChatScreen &&
-                    ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.CHAT
-                ))
-            {
-                KeyboardHandler.setOverlayShowing(true);
-            }
+            KeyboardHandler.showOverlay(
+                Minecraft.getInstance().screen instanceof ChatScreen ? OpenKeyboardContext.FOCUS_CHAT :
+                    OpenKeyboardContext.FOCUS);
         }
     }
 
     @Inject(method = "onClick", at = @At(value = "HEAD"))
     private void vivecraft$openKeyboard(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
-            KeyboardHandler.setOverlayShowing(true);
+            KeyboardHandler.showOverlay(OpenKeyboardContext.FORCE);
         }
     }
 }

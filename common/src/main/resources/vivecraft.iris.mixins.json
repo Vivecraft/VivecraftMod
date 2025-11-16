@@ -17,8 +17,10 @@
     "irisshaders.IrisChunkProgramOverridesMixin",
     "irisshaders.IrisChunkProgramOverridesMixinSodium_0_5_8",
     "irisshaders.IrisChunkProgramOverridesMixinSodium_0_6",
+    "irisshaders.IrisCommonUniformsMixin",
     "irisshaders.IrisPipelineManagerVRMixin",
-    "irisshaders.IrisRenderingPipelineVRMixin"
+    "irisshaders.IrisRenderingPipelineVRMixin",
+    "irisshaders.IrisStandardMacrosMixin"
   ],
   "minVersion": "0.8.4",
   "mixins": [

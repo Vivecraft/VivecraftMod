@@ -1,19 +1,22 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.utils.TextUtils;
+import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -40,8 +43,18 @@ public class VRState {
      */
     public static boolean VR_RUNNING = false;
 
+    /**
+     * frame delay flag, to show the connecting message
+     */
+    private static boolean FRAME_DELAY = false;
+
     public static void initializeVR() {
         if (VR_INITIALIZED) {
+            return;
+        }
+        if (!FRAME_DELAY) {
+            // delay one frame, to show the connecting message
+            FRAME_DELAY = true;
             return;
         }
         try {
@@ -73,13 +86,19 @@ public class VRState {
             RenderPassManager.setVanillaRenderPass();
 
             dh.vrPlayer = new VRPlayer();
-            for (Tracker t : dh.getTrackers()) {
-                dh.vrPlayer.registerTracker(t);
+
+            if (Xloader.isModLoaded("hapticcraft")) {
+                VRSettings.LOGGER.info(
+                    "Vivecraft: Not activating bHaptics integration, because the official 'HapticCraft' is loaded!");
+            } else {
+                Haptics.connect();
             }
 
             dh.menuWorldRenderer = new MenuWorldRenderer();
 
             dh.menuWorldRenderer.init();
+
+            VRShaders.init();
 
             try {
                 String garbageCollector = StringUtils.getCommonPrefix(
@@ -107,9 +126,9 @@ public class VRState {
                     if (os.getTotalMemorySize() >= 1073741824L * 12L - 1048576L * 256L &&
                         Runtime.getRuntime().availableProcessors() >= 6)
                     {
-                        // store the garbage collector, as indicator, that the GarbageCollectorScreen should be shown, if it would be discarded
-                        dh.incorrectGarbageCollector = garbageCollector;
-                        Minecraft.getInstance().setScreen(new GarbageCollectorScreen(garbageCollector));
+                        if (!(Minecraft.getInstance().screen instanceof GarbageCollectorScreen)) {
+                            setScreenAndCache(new GarbageCollectorScreen(garbageCollector));
+                        }
                     }
                 }
             } catch (Throwable e) {
@@ -119,14 +138,22 @@ public class VRState {
             VRSettings.LOGGER.error("Vivecraft: Failed to initialize VR: ", exception);
             destroyVR(true);
             if (exception instanceof RenderConfigException renderConfigException) {
-                Minecraft.getInstance()
-                    .setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
+                setScreenAndCache(new ErrorScreen(renderConfigException.title, renderConfigException.error));
             } else {
-                Minecraft.getInstance()
-                    .setScreen(new ErrorScreen(Component.translatable("vivecraft.messages.vriniterror"),
-                        TextUtils.throwableToComponent(exception)));
+                setScreenAndCache(new ErrorScreen(Component.translatable("vivecraft.messages.vriniterror"),
+                    TextUtils.throwableToComponent(exception)));
             }
         }
+    }
+
+    /**
+     * sets the given {@code screen} and caches it, in case it gets discarded when booting up the game
+     *
+     * @param screen Screen to set and cache
+     */
+    private static void setScreenAndCache(Screen screen) {
+        Minecraft.getInstance().setScreen(screen);
+        ClientDataHolderVR.getInstance().cachedScreen = screen;
     }
 
     public static void destroyVR(boolean disableVRSetting) {
@@ -140,24 +167,39 @@ public class VRState {
             dh.vrRenderer.destroy();
             dh.vrRenderer = null;
         }
+        // there are no other renderpasses anymore
+        RenderPassManager.setVanillaRenderPass();
         if (dh.menuWorldRenderer != null) {
             dh.menuWorldRenderer.completeDestroy();
             dh.menuWorldRenderer = null;
         }
+
+        Haptics.disconnect();
+
+        VRShaders.close();
+
         VR_ENABLED = false;
         VR_INITIALIZED = false;
-        VR_RUNNING = false;
+        // VR_RUNNING gets disabled in MinecraftVRMixin.vivecraft$switchVRState
+        FRAME_DELAY = false;
         if (disableVRSetting) {
             dh.vrSettings.vrEnabled = false;
             dh.vrSettings.saveOptions();
 
             // fixes an issue with DH shaders where the depth texture gets stuck
-            if (Xplat.isModLoaded("distanthorizons")) {
+            if (Xloader.isModLoaded("distanthorizons")) {
                 ShadersHelper.maybeReloadShaders();
             }
 
-            // this reloads any PostChain, at least in vanilla
-            Minecraft.getInstance().levelRenderer.onResourceManagerReload(Minecraft.getInstance().getResourceManager());
+            if (ClientDataHolderVR.getInstance().vrSettings.fullReloadOnInit) {
+                // do a full reload
+                Minecraft.getInstance().reloadResourcePacks();
+            } else {
+                // regenerates the outline target
+                Minecraft.getInstance().levelRenderer.onResourceManagerReload(
+                    Minecraft.getInstance().getResourceManager());
+            }
         }
+        VRClientAPIImpl.INSTANCE.clearPoseHistory();
     }
 }

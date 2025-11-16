@@ -2,7 +2,9 @@ package org.vivecraft.mod_compat_vr.mca;
 
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Vector3f;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.ClassUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +22,7 @@ public class MCAHelper {
     private static Method VillagerLike_getHorizontalScaleFactor;
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("mca");
+        return Xloader.isModLoaded("mca");
     }
 
     public static void undoPlayerScale(LivingEntity player, Vector3f pos) {
@@ -58,16 +60,19 @@ public class MCAHelper {
             return !INIT_FAILED;
         } else {
             try {
-                MCAClient_playerData = Class.forName(Xplat.getModloader().name + ".net.mca.MCAClient")
+                MCAClient_playerData = ClassUtils.getClassWithAlternative(
+                        Xloader.getModloader().name + ".net.mca.MCAClient", "net.conczin.mca.MCAClient")
                     .getField("playerData");
 
-                Class<?> VillagerLike = Class.forName(Xplat.getModloader().name + ".net.mca.entity.VillagerLike");
+                Class<?> VillagerLike = ClassUtils.getClassWithAlternative(
+                    Xloader.getModloader().name + ".net.mca.entity.VillagerLike",
+                    "net.conczin.mca.entity.VillagerLike");
 
                 VillagerLike_getRawScaleFactor = VillagerLike.getMethod("getRawScaleFactor");
                 VillagerLike_getHorizontalScaleFactor = VillagerLike.getMethod("getHorizontalScaleFactor");
             } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException e) {
                 INIT_FAILED = true;
-                throw new RuntimeException(e);
+                VRSettings.LOGGER.error("Vivecraft: Failed to initialize MCA compat", e);
             }
         }
 

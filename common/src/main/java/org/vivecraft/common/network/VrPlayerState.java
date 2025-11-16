@@ -2,13 +2,17 @@ package org.vivecraft.common.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.utils.MathUtils;
 
 import javax.annotation.Nullable;
@@ -45,7 +49,7 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
      * @param other   VrPlayerState to strip down
      * @param version version to strip the packet down to
      */
-    public VrPlayerState(VrPlayerState other, int version) {
+    public VrPlayerState(VrPlayerState other, NetworkVersion version) {
         this(
             other.seated,
             other.hmd,
@@ -53,20 +57,20 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
             other.mainHand,
             other.reverseHands1legacy,
             other.offHand,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? FBTMode.ARMS_ONLY : other.fbtMode,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.waist,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.rightFoot,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.leftFoot,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.rightKnee,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.leftKnee,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.rightElbow,
-            version < CommonNetworkHelper.NETWORK_VERSION_FBT ? null : other.leftElbow
+            NetworkVersion.FBT.accepts(version) ? other.fbtMode : FBTMode.ARMS_ONLY,
+            NetworkVersion.FBT.accepts(version) ? other.waist : null,
+            NetworkVersion.FBT.accepts(version) ? other.rightFoot : null,
+            NetworkVersion.FBT.accepts(version) ? other.leftFoot : null,
+            NetworkVersion.FBT.accepts(version) ? other.rightKnee : null,
+            NetworkVersion.FBT.accepts(version) ? other.leftKnee : null,
+            NetworkVersion.FBT.accepts(version) ? other.rightElbow : null,
+            NetworkVersion.FBT.accepts(version) ? other.leftElbow : null
         );
     }
 
     public static VrPlayerState create(VRPlayer vrPlayer) {
         FBTMode fbtMode = vrPlayer.vrdata_world_post.fbtMode;
-        if (ClientNetworking.USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_FBT) {
+        if (!NetworkVersion.FBT.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
             // don't send fbt data to legacy servers
             fbtMode = FBTMode.ARMS_ONLY;
         }
@@ -100,7 +104,7 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
      */
     private static Pose hmdPose(VRPlayer vrPlayer) {
         Vector3f position = MathUtils.subtractToVector3f(
-            vrPlayer.vrdata_world_post.getEye(RenderPass.CENTER).getPosition(),
+            vrPlayer.vrdata_world_post.hmd.getPosition(),
             Minecraft.getInstance().player.position());
 
         Quaternionf orientation = vrPlayer.vrdata_world_post.hmd.getMatrix().getNormalizedRotation(new Quaternionf());
@@ -188,12 +192,13 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
 
     /**
      * gets the Pose for the given body part
+     *
      * @param bodyPart BodyPart to get the pose for
      * @return Pose of the {@code bodyPart}, or {@code null} if the body part is not valid for the current FBT mode
      */
     @Nullable
-    public Pose getBodyPartPose(BodyPart bodyPart) {
-        return switch(bodyPart) {
+    public Pose getBodyPartPose(VRBodyPart bodyPart) {
+        return switch (bodyPart) {
             case MAIN_HAND -> this.mainHand;
             case OFF_HAND -> this.offHand;
             case LEFT_FOOT -> this.leftFoot;
@@ -203,6 +208,7 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
             case LEFT_KNEE -> this.leftKnee;
             case RIGHT_KNEE -> this.rightKnee;
             case WAIST -> this.waist;
+            case HEAD -> this.hmd;
         };
     }
 
@@ -231,5 +237,32 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean leftHanded, Pose m
                 this.leftElbow.serialize(buffer);
             }
         }
+    }
+
+    /**
+     * @param playerPos The current position of the player.
+     * @return This object as a pose for use with the API.
+     */
+    public VRPoseImpl asVRPose(Vec3 playerPos) {
+        return new VRPoseImpl(
+            this.hmd.asBodyPartData(playerPos),
+            this.mainHand.asBodyPartData(playerPos),
+            this.offHand.asBodyPartData(playerPos),
+            getDataOrNull(this.rightFoot, playerPos),
+            getDataOrNull(this.leftFoot, playerPos),
+            getDataOrNull(this.waist, playerPos),
+            getDataOrNull(this.rightKnee, playerPos),
+            getDataOrNull(this.leftKnee, playerPos),
+            getDataOrNull(this.rightElbow, playerPos),
+            getDataOrNull(this.leftElbow, playerPos),
+            this.seated,
+            this.leftHanded,
+            this.fbtMode
+        );
+    }
+
+    @Nullable
+    private static VRBodyPartData getDataOrNull(Pose pose, Vec3 playerPos) {
+        return pose == null ? null : pose.asBodyPartData(playerPos);
     }
 }

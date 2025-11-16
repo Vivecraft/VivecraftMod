@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#forge:rods",
+      "required": false
+    },
+    {
+      "id": "#c:rods",
+      "required": false
+    },
+
+    "minecraft:bone",
+    "minecraft:stick",
+    "minecraft:debug_stick",
+    "minecraft:blaze_rod",
+    "minecraft:breeze_rod",
+    "minecraft:bamboo",
+    "minecraft:torch",
+    "minecraft:redstone_torch",
+    "minecraft:soul_torch"
+  ]
+}

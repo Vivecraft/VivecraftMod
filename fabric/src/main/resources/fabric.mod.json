@@ -20,34 +20,38 @@
   "environment": "*",
   "entrypoints": {
     "mm:early_risers": [
-      "org.vivecraft.VivecraftEarlyEntryForOptifabric"
+      "org.vivecraft.fabric.VivecraftEarlyEntryForOptifabric"
     ],
     "main": [
       "org.vivecraft.fabric.VivecraftMod"
     ],
     "modmenu": [
-      "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
+      "org.vivecraft.fabric.client.VivecraftModMenuApiImpl"
     ]
   },
   "mixins": [
     "vivecraft.mixins.json",
-    "vivecraft.blur.mixins.json",
+    "vivecraft.fabric.mixins.json",
+    "vivecraft.accessories.mixins.json",
+    "vivecraft.alexmobs.mixins.json",
     "vivecraft.bedrockify.mixins.json",
+    "vivecraft.blur.mixins.json",
+    "vivecraft.cataclysm.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.emf.mixins.json",
-    "vivecraft.sodium.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.mca.mixins.json",
     "vivecraft.modmenu.mixins.json",
-    "vivecraft.physicsmod.mixins.json",
+    "vivecraft.optifine.mixins.json",
     "vivecraft.rei.mixins.json",
     "vivecraft.resolutioncontrol.mixins.json",
     "vivecraft.sereneseasons.mixins.json",
-    "vivecraft.fabric.mixins.json"
+    "vivecraft.sodium.mixins.json",
+    "vivecraft.xaerosmimimap.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.1",
-    "minecraft": ["1.21.4"],
+    "minecraft": ["1.21.9","1.21.10"],
     "java": ">=21"
   },
   "breaks": {

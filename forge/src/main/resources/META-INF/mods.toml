@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[54,)"
+loaderVersion = "[1,)"
 issueTrackerURL = "https://github.com/Vivecraft/VivecraftMod/issues"
 license = "LGPLv3"
 
@@ -23,13 +23,13 @@ updateJSONURL = "https://raw.githubusercontent.com/Vivecraft/VivecraftMod/forge-
 [[dependencies.vivecraft]]
 modId = "forge"
 mandatory = true
-versionRange = "[54.0.0,)"
+versionRange = "[59.0.0,60.0.12],[60.0.15,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.21.4]"
+versionRange = "[1.21.9,1.21.10]"
 ordering = "NONE"
 side = "BOTH"

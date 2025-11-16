@@ -3,22 +3,29 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-public class RunTracker extends Tracker {
+public class RunTracker implements Tracker {
     private double direction = 0.0D;
     private float speed = 0.0F;
 
+    private final Minecraft mc;
+    private final ClientDataHolderVR dh;
+
     public RunTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
     public boolean isActive(LocalPlayer player) {
         if (!this.dh.vrPlayer.getFreeMove() || this.dh.vrSettings.seated) {
             return false;
-        } else if (this.dh.vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE) {
+        } else if (this.dh.vrSettings.getVrFreeMoveMode(false, this.dh.vrPlayer.vrdata_world_pre.fbtMode) !=
+            VRSettings.FreeMove.RUN_IN_PLACE)
+        {
             return false;
         } else if (player == null || !player.isAlive()) {
             return false;
@@ -45,12 +52,17 @@ public class RunTracker extends Tracker {
     }
 
     @Override
-    public void reset(LocalPlayer player) {
+    public void inactiveProcess(LocalPlayer player) {
         this.speed = 0.0F;
     }
 
     @Override
-    public void doProcess(LocalPlayer player) {
+    public ProcessType processType() {
+        return ProcessType.PER_TICK;
+    }
+
+    @Override
+    public void activeProcess(LocalPlayer player) {
 
         float c0Move = this.dh.vr.controllerHistory[0].averageSpeed(0.33D);
         float c1Move = this.dh.vr.controllerHistory[1].averageSpeed(0.33D);

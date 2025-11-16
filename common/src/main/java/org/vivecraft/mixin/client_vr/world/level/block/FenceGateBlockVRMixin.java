@@ -16,7 +16,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(FenceGateBlock.class)
 public class FenceGateBlockVRMixin {
 
-    @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
+    @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
     private void vivecraft$hapticFeedbackOnClose1(
         CallbackInfoReturnable<InteractionResult> cir, @Local(argsOnly = true) BlockPos pos,
         @Local boolean opening)
@@ -29,7 +29,7 @@ public class FenceGateBlockVRMixin {
         }
     }
 
-    @Inject(method = "neighborChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
+    @Inject(method = "neighborChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
     private void vivecraft$hapticFeedbackOnClose2(
         CallbackInfo ci, @Local(argsOnly = true, ordinal = 0) BlockPos pos, @Local(ordinal = 1) boolean opening)
     {

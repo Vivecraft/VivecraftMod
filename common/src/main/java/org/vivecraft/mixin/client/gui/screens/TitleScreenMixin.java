@@ -2,8 +2,11 @@ package org.vivecraft.mixin.client.gui.screens;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,6 +58,7 @@ public abstract class TitleScreenMixin extends Screen {
         })
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 72)
+            .tooltip(Tooltip.create(Component.translatable("vivecraft.options.VR_ENABLED.tooltip")))
             .build();
         this.vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
 
@@ -75,26 +79,16 @@ public abstract class TitleScreenMixin extends Screen {
     private void vivecraft$renderToolTip(
         GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
     {
-        this.vivecraft$updateButton.visible = UpdateChecker.HAS_UPDATE;
-
-        if (this.vivecraft$vrModeButton.visible && this.vivecraft$vrModeButton.isMouseOver(mouseX, mouseY)) {
-            guiGraphics.renderTooltip(this.font,
-                this.font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"),
-                    Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+        // some mods cancel the title screen init
+        if (this.vivecraft$updateButton != null) {
+            this.vivecraft$updateButton.visible = UpdateChecker.HAS_UPDATE;
         }
+
         if (VRState.VR_INITIALIZED && !VRState.VR_RUNNING) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
-            guiGraphics.renderTooltip(this.font, this.font.split(hotswitchMessage, 280), this.width / 2 - 140 - 12, 17);
-        }
-    }
-
-    @Inject(method = "renderPanorama", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$maybeNoPanorama(CallbackInfo ci) {
-        if (VRState.VR_RUNNING && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() ||
-            ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama
-        ))
-        {
-            ci.cancel();
+            guiGraphics.renderTooltip(this.font,
+                this.font.split(hotswitchMessage, 280).stream().map(ClientTooltipComponent::create).toList(),
+                this.width / 2 - 140 - 12, 17, DefaultTooltipPositioner.INSTANCE, null);
         }
     }
 }

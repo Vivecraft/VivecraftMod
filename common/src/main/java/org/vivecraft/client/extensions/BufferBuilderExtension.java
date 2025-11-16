@@ -13,5 +13,5 @@ public interface BufferBuilderExtension {
     /**
      * @return size of the underlying buffer
      */
-    int vivecraft$getBufferSize();
+    long vivecraft$getBufferSize();
 }

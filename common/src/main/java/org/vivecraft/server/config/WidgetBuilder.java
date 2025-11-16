@@ -2,8 +2,11 @@ package org.vivecraft.server.config;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
-import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
+import org.vivecraft.client.gui.framework.screens.GuiStringListEditorScreen;
+import org.vivecraft.server.ServerNetworking;
 
 import java.util.Collection;
 import java.util.function.Supplier;
@@ -15,13 +18,12 @@ public class WidgetBuilder {
      * @param value  ConfigValue for this button
      * @param width  width of the button
      * @param height height of the button
-     * @return Button with the value as text, and the comment as tooltip
+     * @return Button with the value as text
      */
     public static Supplier<AbstractWidget> getBaseWidget(ConfigBuilder.ConfigValue<?> value, int width, int height) {
         return () -> Button
             .builder(Component.literal("" + value.get()), button -> {})
             .bounds(0, 0, width, height)
-            .tooltip(Tooltip.create(Component.literal(value.getComment())))
             .build();
     }
 
@@ -31,7 +33,7 @@ public class WidgetBuilder {
      * @param booleanValue BooleanValue for this button
      * @param width        width of the button
      * @param height       height of the button
-     * @return Button with the value as text, and the comment as tooltip
+     * @return Button with the value as text
      */
     public static Supplier<AbstractWidget> getOnOffWidget(
         ConfigBuilder.BooleanValue booleanValue, int width, int height)
@@ -39,9 +41,10 @@ public class WidgetBuilder {
         return () -> CycleButton
             .onOffBuilder(booleanValue.get())
             .displayOnlyValue()
-            .withTooltip((bool) -> booleanValue.getComment() != null ?
-                Tooltip.create(Component.literal(booleanValue.getComment())) : null)
-            .create(0, 0, width, height, Component.empty(), (button, bool) -> booleanValue.set(bool));
+            .create(0, 0, width, height, Component.empty(), (button, bool) -> {
+                booleanValue.set(bool);
+                updateSettingsSinglePlayer(booleanValue);
+            });
     }
 
     /**
@@ -51,7 +54,7 @@ public class WidgetBuilder {
      * @param stringValue StringValue for this editbox
      * @param width       width of the editbox
      * @param height      height of the editbox
-     * @return EditBox with the value as text, and the comment as tooltip
+     * @return EditBox with the value as text
      */
     public static Supplier<AbstractWidget> getEditBoxWidget(
         ConfigBuilder.StringValue stringValue, int width, int height)
@@ -61,22 +64,21 @@ public class WidgetBuilder {
                 Component.literal(stringValue.get()))
             {
                 @Override
-                public boolean charTyped(char character, int modifiers) {
-                    boolean ret = super.charTyped(character, modifiers);
+                public boolean charTyped(CharacterEvent characterEvent) {
+                    boolean ret = super.charTyped(characterEvent);
                     stringValue.set(this.getValue());
                     return ret;
                 }
 
                 @Override
-                public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                    boolean ret = super.keyPressed(keyCode, scanCode, modifiers);
+                public boolean keyPressed(KeyEvent keyEvent) {
+                    boolean ret = super.keyPressed(keyEvent);
                     stringValue.set(this.getValue());
                     return ret;
                 }
             };
             box.setMaxLength(1000);
             box.setValue(stringValue.get());
-            box.setTooltip(Tooltip.create(Component.literal(stringValue.getComment())));
             return box;
         };
     }
@@ -88,20 +90,22 @@ public class WidgetBuilder {
      * @param values      Collection of valid values
      * @param width       width of the button
      * @param height      height of the button
-     * @return Button with the value as text, and the comment as tooltip
+     * @return Button with the value as text
      */
     public static <T> Supplier<AbstractWidget> getCycleWidget(
         ConfigBuilder.ConfigValue<T> configValue, Collection<? extends T> values, int width, int height)
     {
         return () -> CycleButton
-            .builder((newValue) -> Component.literal("" + newValue))
+            .builder((newValue) -> Component.translatable(
+                "vivecraft.serverSettings." + configValue.getPath() + "." + newValue))
             // toArray is needed here, because the button uses Objects, and the collection is of other types
             .withValues(values.toArray())
             .withInitialValue(configValue.get())
             .displayOnlyValue()
-            .withTooltip((bool) -> configValue.getComment() != null ?
-                Tooltip.create(Component.literal(configValue.getComment())) : null)
-            .create(0, 0, width, height, Component.empty(), (button, newValue) -> configValue.set((T) newValue));
+            .create(0, 0, width, height, Component.empty(), (button, newValue) -> {
+                configValue.set((T) newValue);
+                updateSettingsSinglePlayer(configValue);
+            });
     }
 
     /**
@@ -110,27 +114,24 @@ public class WidgetBuilder {
      * @param numberValue NumberValue for this slider
      * @param width       width of the slider
      * @param height      height of the slider
-     * @return Slider with the range of the numberValue, and the comment as tooltip
+     * @return Slider with the range of the numberValue
      */
     public static <E extends Number> Supplier<AbstractWidget> getSliderWidget(
         ConfigBuilder.NumberValue<E> numberValue, int width, int height)
     {
-        return () -> {
-            AbstractSliderButton widget = new AbstractSliderButton(0, 0, width, height,
-                Component.literal("" + numberValue.get()), numberValue.normalize())
-            {
-                @Override
-                protected void updateMessage() {
-                    setMessage(Component.literal("" + numberValue.get()));
-                }
+        return () -> new AbstractSliderButton(0, 0, width, height,
+            Component.literal("" + numberValue.get()), numberValue.normalize())
+        {
+            @Override
+            protected void updateMessage() {
+                setMessage(Component.literal("" + numberValue.get()));
+            }
 
-                @Override
-                protected void applyValue() {
-                    numberValue.fromNormalized(this.value);
-                }
-            };
-            widget.setTooltip(Tooltip.create(Component.literal(numberValue.getComment())));
-            return widget;
+            @Override
+            protected void applyValue() {
+                numberValue.fromNormalized(this.value);
+                updateSettingsSinglePlayer(numberValue);
+            }
         };
     }
 
@@ -140,21 +141,34 @@ public class WidgetBuilder {
      * @param listValue ListValue for this button
      * @param width     width of the button
      * @param height    height of the button
-     * @return Button that opens a screen to edit the list of {@code listValue}, and the comment as tooltip
+     * @return Button that opens a screen to edit the list of {@code listValue}
      */
     public static <T> Supplier<AbstractWidget> getEditListWidget(
         ConfigBuilder.ListValue<T> listValue, int width, int height)
     {
-        // TODO handle other types than String
-        return () -> Button
-            .builder(
-                Component.translatable("vivecraft.options.editlist"),
-                button -> Minecraft.getInstance().setScreen(
-                    new GuiListValueEditScreen(
-                        Component.literal(listValue.getPath().substring(listValue.getPath().lastIndexOf("."))),
-                        Minecraft.getInstance().screen, (ConfigBuilder.ListValue<String>) listValue)))
-            .size(width, height)
-            .tooltip(Tooltip.create(Component.literal(listValue.getComment())))
-            .build();
+        Object first = listValue.get().isEmpty() ? null : listValue.get().getFirst();
+        if (first == null || first instanceof String) {
+            ConfigBuilder.ListValue<String> stringValue = (ConfigBuilder.ListValue<String>) listValue;
+            return () -> Button.builder(Component.translatable("vivecraft.options.editlist"),
+                    button -> Minecraft.getInstance().setScreen(new GuiStringListEditorScreen(
+                        Component.translatable("vivecraft.serverSettings." + listValue.getPath()),
+                        Minecraft.getInstance().screen, false, stringValue::get, stringValue::reset, list -> {
+                        stringValue.set(list);
+                        updateSettingsSinglePlayer(stringValue);
+                    })))
+                .size(width, height)
+                .build();
+        } else {
+            // TODO handle other types than String
+            throw new RuntimeException("Unsupported listvalue type: " + first.getClass().getName());
+        }
+    }
+
+    private static void updateSettingsSinglePlayer(ConfigBuilder.ConfigValue<?> configValue) {
+        // send update to players if we are hosting a singleplayer server
+        if (Minecraft.getInstance().hasSingleplayerServer()) {
+            configValue.onUpdate(Minecraft.getInstance().getSingleplayerServer());
+            ServerNetworking.sendUpdatePacketToAll(Minecraft.getInstance().getSingleplayerServer(), configValue);
+        }
     }
 }

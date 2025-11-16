@@ -11,7 +11,7 @@ public class HandedKeyBinding extends KeyMapping {
     private final boolean[] pressed = new boolean[ControllerType.values().length];
     private final int[] pressTime = new int[ControllerType.values().length];
 
-    public HandedKeyBinding(String name, int keyCode, String category) {
+    public HandedKeyBinding(String name, int keyCode, Category category) {
         super(name, keyCode, category);
     }
 
@@ -36,6 +36,10 @@ public class HandedKeyBinding extends KeyMapping {
 
     public boolean isDown(ControllerType hand) {
         return this.pressed[hand.ordinal()];
+    }
+
+    public int presses(ControllerType hand) {
+        return this.pressTime[hand.ordinal()];
     }
 
     public void pressKey(ControllerType hand) {

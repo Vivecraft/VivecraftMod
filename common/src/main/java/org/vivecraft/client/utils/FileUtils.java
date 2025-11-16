@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.*;
@@ -16,12 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FileUtils {
     private static final int CONNECT_TIMEOUT = 5000;
@@ -53,6 +50,29 @@ public class FileUtils {
     }
 
     /**
+     * loads contents of an asset to a String
+     *
+     * @param sourcePath Path to the source file inside the mods assets
+     * @param required   if set and an error occurs, it will not be caught
+     * @return contents of the asset, or {@code null} if there was an error and {@code required} is false
+     */
+    public static String loadAssetToString(String sourcePath, boolean required) {
+        try {
+            Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
+                .getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", sourcePath));
+
+            if (resource.isPresent()) {
+                try (InputStream is = resource.get().open()) {
+                    return IOUtils.toString(is, StandardCharsets.UTF_8);
+                }
+            }
+        } catch (Exception exception) {
+            handleAssetException(exception, sourcePath, required);
+        }
+        return null;
+    }
+
+    /**
      * unpacks an asset through the Resource manager, this means a resource pack can override the file
      *
      * @param sourcePath   Path to the source file inside the mods assets
@@ -81,17 +101,17 @@ public class FileUtils {
      * @param required   if set and an error occurs, it will not be caught
      * @return if a file was unpacked
      */
-    private static boolean unpackFile(Path sourcePath, File targetFile, boolean required) {
+    private static boolean unpackFile(String sourcePath, File targetFile, boolean required) {
         try {
             VRSettings.LOGGER.info("Vivecraft: Unpacking file '{}' ...", sourcePath);
 
             targetFile.getParentFile().mkdirs();
 
-            Files.copy(sourcePath, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Xloader.getInJarFile(sourcePath), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             return true;
         } catch (Exception exception) {
-            handleAssetException(exception, sourcePath.toString(), required);
+            handleAssetException(exception, sourcePath, required);
             return false;
         }
     }
@@ -105,7 +125,7 @@ public class FileUtils {
      * @return if a file was unpacked
      */
     public static boolean unpackFile(String sourceFile, String targetFile, boolean required) {
-        return unpackFile(Xplat.getJarPath().resolve(sourceFile), new File(targetFile), required);
+        return unpackFile(sourceFile, new File(targetFile), required);
     }
 
     /**
@@ -122,9 +142,9 @@ public class FileUtils {
 
         boolean didExtractSomething = false;
 
-        try (Stream<Path> natives = Files.list(Xplat.getJarPath().resolve(source))) {
-            for (Path file : natives.collect(Collectors.toCollection(ArrayList::new))) {
-                didExtractSomething |= unpackFile(file, new File(target + "/" + file.getFileName()), false);
+        try {
+            for (Path path : Xloader.getInJarFolderFiles(source)) {
+                didExtractSomething |= unpackFile(path.toString(), new File(target + "/" + path.getFileName()), false);
             }
         } catch (IOException e) {
             handleAssetException(e, source, false);

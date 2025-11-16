@@ -1,4 +1,4 @@
-#version 150 core
+#version 330
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;

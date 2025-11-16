@@ -1,5 +1,8 @@
 package org.vivecraft.mod_compat_vr.optifine;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.opengl.GlTexture;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -8,17 +11,33 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.joml.Matrix4fc;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.lwjgl.opengl.GL30C;
+import org.lwjgl.system.MemoryUtil;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
+import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public class OptifineHelper {
 
     private static boolean CHECKED_FOR_OPTIFINE = false;
     private static boolean OPTIFINE_LOADED = false;
+
+    private static final Map<String, Pair<ShadersHelper.UniformType, Object>> SHADER_UNIFORMS = new HashMap<>();
+    private static final Map<String, Object> SHADER_UNIFORMS_DATA = new HashMap<>();
 
     private static Class<?> Config;
     private static Method Config_IsShaders;
@@ -52,8 +71,19 @@ public class OptifineHelper {
     private static Method Shaders_SetCameraShadow;
     private static Field Shaders_DFB;
     private static Field Shaders_isShadowPass;
+    private static Field Shaders_shaderUniforms;
+
+    private static Method GlState_unbindFramebuffer;
 
     private static Method ShadersFramebuffer_BindFramebuffer;
+
+    private static Method ShaderUniforms_make1i;
+    private static Method ShaderUniforms_make3f;
+    private static Method ShaderUniforms_makeM4;
+
+    private static Method ShaderUniform1i_setValue;
+    private static Method ShaderUniform3f_setValue;
+    private static Method ShaderUniformM4_setValue;
 
     private static Field Options_ofRenderRegions;
     private static Field Options_ofCloudHeight;
@@ -108,7 +138,7 @@ public class OptifineHelper {
     }
 
     /**
-     * binds the Shaders_ framebuffer
+     * binds the Shader framebuffer
      *
      * @return if the shader framebuffer got bound
      */
@@ -123,6 +153,42 @@ public class OptifineHelper {
             logError(e, "dfb.BindFramebuffer");
         }
         return false;
+    }
+
+    /**
+     * unbinds the Shader framebuffer
+     */
+    public static void unbindShaderFramebuffer() {
+        try {
+            GlState_unbindFramebuffer.invoke(null);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            logError(e, "GlState.unbindFramebuffer");
+        }
+    }
+
+    /**
+     * copies the depth of the optifine shader frame buffer
+     *
+     * @param renderTarget renderTarget to copy the depth to
+     */
+    public static void copyOptifineShaderDepth(RenderTarget renderTarget) {
+        if (renderTarget.getDepthTexture() instanceof GlTexture glTexture) {
+            if (!bindShaderFramebuffer()) {
+                return;
+            }
+
+            GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
+            GlStateManager._bindTexture(glTexture.glId());
+
+            RenderHelper.checkGLError("pre copy depth");
+            GL30C.glCopyTexSubImage2D(GL30C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, renderTarget.width, renderTarget.height);
+            RenderHelper.checkGLError("post copy depth");
+
+            unbindShaderFramebuffer();
+            GlStateManager._bindTexture(0);
+        } else {
+            throw new IllegalStateException("Vivecraft: only opengl textures are supported");
+        }
     }
 
     /**
@@ -446,6 +512,76 @@ public class OptifineHelper {
     }
 
     /**
+     * creates and updates Optifines shader uniforms added by vivecraft
+     */
+    public static void updateUniforms() {
+        if (!isOptifineLoaded()) return;
+        try {
+            for (Triple<String, ShadersHelper.UniformType, Supplier<?>> uniform : ShadersHelper.getUniforms()) {
+                String name = uniform.getLeft();
+                // create the uniform and data holder, if they aren't created yet
+                if (!SHADER_UNIFORMS.containsKey(name)) {
+                    Method m = switch (uniform.getMiddle()) {
+                        case MATRIX4F -> ShaderUniforms_makeM4;
+                        case VECTOR3F -> ShaderUniforms_make3f;
+                        case BOOLEAN, INTEGER -> ShaderUniforms_make1i;
+                    };
+                    SHADER_UNIFORMS.put(uniform.getLeft(),
+                        Pair.of(uniform.getMiddle(), m.invoke(Shaders_shaderUniforms.get(null), name)));
+                    SHADER_UNIFORMS_DATA.put(name, switch (uniform.getMiddle()) {
+                        case MATRIX4F -> MemoryUtil.memAllocFloat(16);
+                        case VECTOR3F -> new Vector3f();
+                        case BOOLEAN, INTEGER -> 0;
+                    });
+                }
+
+                // update the uniform with the given supplier
+                switch (uniform.getMiddle()) {
+                    case MATRIX4F -> {
+                        FloatBuffer floatBuffer = (FloatBuffer) SHADER_UNIFORMS_DATA.get(name);
+                        floatBuffer.clear();
+                        ((Matrix4fc) uniform.getRight().get()).get(floatBuffer);
+                    }
+                    case VECTOR3F ->
+                        ((Vector3f) SHADER_UNIFORMS_DATA.get(name)).set((Vector3fc) uniform.getRight().get());
+                    case INTEGER -> SHADER_UNIFORMS_DATA.put(name, uniform.getRight().get());
+                    case BOOLEAN -> SHADER_UNIFORMS_DATA.put(name, ((boolean) uniform.getRight().get()) ? 1 : 0);
+                    default -> throw new IllegalStateException("Unexpected uniform type: " + uniform.getMiddle());
+                }
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            VRSettings.LOGGER.error("Vivecraft: error updating shader uniform data:", e);
+        }
+    }
+
+    /**
+     * sets Optifines shader uniforms added by vivecraft
+     */
+    public static void setUniforms() {
+        if (!isOptifineLoaded()) return;
+        try {
+            for (Map.Entry<String, Pair<ShadersHelper.UniformType, Object>> entry : SHADER_UNIFORMS.entrySet()) {
+                String name = entry.getKey();
+                Object data = SHADER_UNIFORMS_DATA.get(name);
+                Object uniform = entry.getValue().getRight();
+
+                switch (entry.getValue().getLeft()) {
+                    case MATRIX4F -> ShaderUniformM4_setValue.invoke(uniform, false, data);
+                    case VECTOR3F -> {
+                        Vector3f vec = (Vector3f) data;
+                        ShaderUniform3f_setValue.invoke(uniform, vec.x, vec.y, vec.z);
+                    }
+                    case BOOLEAN, INTEGER -> ShaderUniform1i_setValue.invoke(uniform, data);
+                    default ->
+                        throw new IllegalStateException("Unexpected uniform type: " + entry.getValue().getLeft());
+                }
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            VRSettings.LOGGER.error("Vivecraft: error updating shader uniform data:", e);
+        }
+    }
+
+    /**
      * initializes all Reflections
      */
     private static void init() {
@@ -486,8 +622,23 @@ public class OptifineHelper {
             Shaders_SetCameraShadow = Shaders.getMethod("setCameraShadow", PoseStack.class, Camera.class, float.class);
             Shaders_isShadowPass = Shaders.getField("isShadowPass");
 
+            Class<?> ShaderUniforms = Class.forName("net.optifine.shaders.uniform.ShaderUniforms");
+            ShaderUniforms_make1i = ShaderUniforms.getMethod("make1i", String.class);
+            ShaderUniforms_make3f = ShaderUniforms.getMethod("make3f", String.class);
+            ShaderUniforms_makeM4 = ShaderUniforms.getMethod("makeM4", String.class);
+
+            ShaderUniform1i_setValue = Class.forName("net.optifine.shaders.uniform.ShaderUniform1i")
+                .getMethod("setValue", int.class);
+            ShaderUniform3f_setValue = Class.forName("net.optifine.shaders.uniform.ShaderUniform3f")
+                .getMethod("setValue", float.class, float.class, float.class);
+            ShaderUniformM4_setValue = Class.forName("net.optifine.shaders.uniform.ShaderUniformM4")
+                .getMethod("setValue", boolean.class, FloatBuffer.class);
+
             Class<?> ShadersFramebuffer = Class.forName("net.optifine.shaders.ShadersFramebuffer");
             ShadersFramebuffer_BindFramebuffer = ShadersFramebuffer.getMethod("bindFramebuffer");
+
+            Class<?> GlState = Class.forName("net.optifine.shaders.GlState");
+            GlState_unbindFramebuffer = GlState.getMethod("unbindFramebuffer");
 
             // private methods
             CustomColors_GetSkyColoEnd = CustomColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
@@ -503,6 +654,8 @@ public class OptifineHelper {
             // private Fields
             Shaders_DFB = Shaders.getDeclaredField("dfb");
             Shaders_DFB.setAccessible(true);
+            Shaders_shaderUniforms = Shaders.getDeclaredField("shaderUniforms");
+            Shaders_shaderUniforms.setAccessible(true);
 
             try {
                 Vertex_renderPositions = ModelPart.Vertex.class.getField("renderPositions");

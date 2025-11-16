@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -22,6 +23,9 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
@@ -32,7 +36,6 @@ import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.control.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -55,25 +58,25 @@ public class GuiHandler {
     private static boolean LAST_PRESSED_ALT;
 
     public static final KeyMapping KEY_LEFT_CLICK = new KeyMapping("vivecraft.key.guiLeftClick", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_RIGHT_CLICK = new KeyMapping("vivecraft.key.guiRightClick", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_MIDDLE_CLICK = new KeyMapping("vivecraft.key.guiMiddleClick", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_SHIFT = new KeyMapping("vivecraft.key.guiShift", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_CTRL = new KeyMapping("vivecraft.key.guiCtrl", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_ALT = new KeyMapping("vivecraft.key.guiAlt", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_SCROLL_UP = new KeyMapping("vivecraft.key.guiScrollUp", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_SCROLL_DOWN = new KeyMapping("vivecraft.key.guiScrollDown", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final KeyMapping KEY_SCROLL_AXIS = new KeyMapping("vivecraft.key.guiScrollAxis", -1,
-        "vivecraft.key.category.gui");
+        VivecraftVRMod.INSTANCE.categoryGui);
     public static final HandedKeyBinding KEY_KEYBOARD_CLICK = new HandedKeyBinding("vivecraft.key.keyboardClick", -1,
-        "vivecraft.key.category.keyboard")
+        VivecraftVRMod.INSTANCE.categoryKeyboard)
     {
         @Override
         public boolean isPriorityOnController(ControllerType type) {
@@ -85,7 +88,7 @@ public class GuiHandler {
         }
     };
     public static final HandedKeyBinding KEY_KEYBOARD_SHIFT = new HandedKeyBinding("vivecraft.key.keyboardShift", -1,
-        "vivecraft.key.category.keyboard")
+        VivecraftVRMod.INSTANCE.categoryKeyboard)
     {
         @Override
         public boolean isPriorityOnController(ControllerType type) {
@@ -106,12 +109,14 @@ public class GuiHandler {
     public static Vector3f GUI_POS_ROOM = null;
     public static Matrix4f GUI_ROTATION_ROOM = null;
 
-    public static Vec3 GUI_POS_WORLD = Vec3.ZERO;
-    public static Vector3f GUI_OFFSET_WORLD = new Vector3f();
-    public static Matrix4f GUI_ROTATION_WORLD = new Matrix4f();
+    public static Vector3f GUI_RENDER_POS_ROOM = null;
+    public static Vector3f GUI_OFFSET_LOCAL = new Vector3f();
+    public static Matrix4f GUI_RENDER_ROTATION_ROOM = new Matrix4f();
 
     public static Matrix4f GUI_ROTATION_PLAYER_MODEL = new Matrix4f();
     public static Vec3 GUI_POS_PLAYER_MODEL = Vec3.ZERO;
+
+    public static boolean HUD_POPUP;
 
     // for GUI scale override
     public static int GUI_WIDTH = 1280;
@@ -391,8 +396,8 @@ public class GuiHandler {
             GUI_ROTATION_ROOM = null;
             GUI_SCALE = 1.0F;
 
-            if (KeyboardHandler.KEYBOARD_FOR_GUI && DH.vrSettings.autoCloseKeyboard) {
-                KeyboardHandler.setOverlayShowing(false);
+            if (KeyboardHandler.KEYBOARD_FOR_GUI) {
+                KeyboardHandler.hideOverlay(CloseKeyboardContext.ACTION_COMPLETE);
             }
         } else {
             RadialHandler.setOverlayShowing(false, null);
@@ -573,7 +578,7 @@ public class GuiHandler {
                         guipos = RenderHelper.getControllerRenderPos(1);
                     }
 
-                    DH.vr.hudPopup = true;
+                    HUD_POPUP = true;
 
                     if (DH.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
                         // hud on hand
@@ -588,7 +593,7 @@ public class GuiHandler {
                         // hud on wrist
                         scale = 0.4F;
 
-                        boolean slim = MC.player.getSkin().model().id().equals("slim");
+                        boolean slim = MC.player.getSkin().model() == PlayerModelType.SLIM;
 
                         float xOffset = -0.136F;
 
@@ -606,7 +611,7 @@ public class GuiHandler {
 
                         guilocal.set(xOffset * side,
                             yOffset + yScaleOffset * (1.0F - armScale),
-                            0.14F * armScale);
+                            (0.12F + 0.02F * DH.vrSettings.vrHudWristOffset) * armScale);
                         guilocal.mul(DH.vrPlayer.vrdata_world_render.worldScale);
 
                         if (modelArms) {
@@ -673,7 +678,7 @@ public class GuiHandler {
             GUI_SCALE = 1.0F;
         }
 
-        Vec3 eye = RenderHelper.getSmoothCameraPosition(currentPass, DH.vrPlayer.vrdata_world_render);
+        Vec3 eye = DH.vrPlayer.vrdata_world_render.getEye(DH.currentPass).getPosition();
 
         Vec3 translation = guipos.subtract(eye);
         poseMatrix.translate((float) translation.x, (float) translation.y, (float) translation.z);
@@ -682,13 +687,14 @@ public class GuiHandler {
         poseMatrix.mul(guirot);
         poseMatrix.translate(guilocal.x, guilocal.y, guilocal.z);
 
+        GUI_SCALE_APPLIED = scale;
+        GUI_OFFSET_LOCAL.set(guilocal).div(DH.vrPlayer.vrdata_world_render.worldScale);
+
         float thescale = scale * DH.vrPlayer.vrdata_world_render.worldScale;
         poseMatrix.scale(thescale, thescale, thescale);
 
-        GUI_SCALE_APPLIED = thescale;
-        GUI_POS_WORLD = guipos;
-        GUI_ROTATION_WORLD.set(guirot);
-        GUI_OFFSET_WORLD.set(guilocal);
+        GUI_RENDER_POS_ROOM = VRPlayer.worldToRoomPos(guipos, DH.vrPlayer.vrdata_world_render);
+        GUI_RENDER_ROTATION_ROOM.rotationY(-DH.vrPlayer.vrdata_world_render.rotation_radians).mul(guirot);
 
         Profiler.get().pop();
 

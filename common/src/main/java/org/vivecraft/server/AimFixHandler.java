@@ -12,6 +12,7 @@ import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.common.network.packet.WrappedPacket;
 import org.vivecraft.server.config.ServerConfig;
 
 public class AimFixHandler extends ChannelInboundHandlerAdapter {
@@ -29,18 +30,19 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ServerPlayer serverPlayer = ((ServerGamePacketListenerImpl) this.netManager.getPacketListener()).player;
+        ServerGamePacketListenerImpl listener = ((ServerGamePacketListenerImpl) this.netManager.getPacketListener());
+        ServerPlayer serverPlayer = listener.player;
         boolean isCapturedPacket = msg instanceof ServerboundUseItemPacket ||
             msg instanceof ServerboundUseItemOnPacket ||
             msg instanceof ServerboundPlayerActionPacket;
 
-        if (!ServerVRPlayers.isVRPlayer(serverPlayer) || !isCapturedPacket || serverPlayer.getServer() == null) {
+        if (!ServerVRPlayers.isVRPlayer(serverPlayer) || !isCapturedPacket) {
             // we don't need to handle this packet, just defer to the next handler in the pipeline
             ctx.fireChannelRead(msg);
             return;
         }
 
-        serverPlayer.getServer().submit(() -> {
+        Runnable task = () -> {
             // Save all the current orientation data
             Vec3 pos = serverPlayer.position();
             Vec3 prevPos = new Vec3(serverPlayer.xo, serverPlayer.yo, serverPlayer.zo);
@@ -54,15 +56,12 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
 
             ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
 
-            ((Packet) msg).handle(this.netManager.getPacketListener());
-            if (true) {
-                return;
-            }
             Vec3 aimPos = null;
             // Check again in case of race condition
             if (vivePlayer != null && vivePlayer.isVR()) {
-                aimPos = vivePlayer.getBodyPartPos(vivePlayer.activeBodyPart, true);
-                Vec3 dir = vivePlayer.getBodyPartDir(vivePlayer.activeBodyPart);
+                // use the aim the client sent
+                aimPos = vivePlayer.getAimPos(false);
+                Vec3 dir = vivePlayer.getAimDir(false);
 
                 // Inject our custom orientation data
                 serverPlayer.setPosRaw(aimPos.x, aimPos.y, aimPos.z);
@@ -80,7 +79,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
                 vivePlayer.offset = pos.subtract(aimPos);
                 if (ServerConfig.DEBUG.get()) {
                     ServerNetworking.LOGGER.info("Vivecraft: AimFix: {} {} {}, {} {}", aimPos.x, aimPos.y, aimPos.z,
-                        Math.toDegrees(Math.asin(-dir.y)), Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                        serverPlayer.getXRot(), serverPlayer.getYRot());
                 }
             }
 
@@ -89,7 +88,13 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             try {
                 if (this.netManager.isConnected()) {
                     try {
-                        ((Packet) msg).handle(this.netManager.getPacketListener());
+                        if (msg instanceof ServerboundUseItemPacket p) {
+                            // need to alter the rotation for this one, for older clients that don't send the right rotation
+                            new ServerboundUseItemPacket(p.getHand(), p.getSequence(), serverPlayer.getYRot(),
+                                serverPlayer.getXRot()).handle(listener);
+                        } else {
+                            ((Packet) msg).handle(this.netManager.getPacketListener());
+                        }
                     } catch (RunningOnDifferentThreadException ignored) {
                         // Apparently might get thrown and can be ignored
                     }
@@ -127,6 +132,10 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             if (vivePlayer != null) {
                 vivePlayer.offset = Vec3.ZERO;
             }
-        });
+        };
+
+        try {
+            new WrappedPacket(task).handle(listener);
+        } catch (RunningOnDifferentThreadException ignored) {}
     }
 }

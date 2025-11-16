@@ -3,13 +3,6 @@ package org.vivecraft.client.extensions;
 public interface RenderTargetExtension {
 
     /**
-     * sets the OpenGL texture id to use, if set, it will be used, instead of generating a new one
-     *
-     * @param texId texture id to use
-     */
-    void vivecraft$setTexId(int texId);
-
-    /**
      * sets if a combined depth/stencil should be used
      *
      * @param stencil if a stencil should be added

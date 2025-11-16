@@ -1,4 +1,4 @@
-#version 150
+#version 330
 /*
 MIT License
 
@@ -23,18 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#moj_import <minecraft:fog.glsl>
+#moj_import <minecraft:dynamictransforms.glsl>
 #moj_import <projection.glsl>
 
 in vec3 Position;
 
-uniform mat4 ModelViewMat;
-uniform mat4 ProjMat;
-uniform mat3 IViewRotMat;
-
 out vec3 pos;
+out float sphericalVertexDistance;
+out float cylindricalVertexDistance;
 
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
 
-    pos = IViewRotMat * Position;
+    pos = Position;
+    sphericalVertexDistance = fog_spherical_distance(Position);
+    cylindricalVertexDistance = fog_cylindrical_distance(Position);
 }

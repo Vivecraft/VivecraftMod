@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends EntityRenderer<T, S> {
@@ -31,7 +32,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     @Inject(method = "addLayer", at = @At("HEAD"))
     protected void vivecraft$onAddLayer(RenderLayer<S, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {}
 
-    @Inject(method = "render(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = At.Shift.AFTER))
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = At.Shift.AFTER))
     private void vivecraft$vrPlayerHeightScale(
         CallbackInfo ci, @Local(argsOnly = true) LivingEntityRenderState renderState,
         @Local(argsOnly = true) PoseStack poseStack)
@@ -42,7 +43,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) renderState).vivecraft$getRotInfo();
         if (rotInfo != null) {
             float scale = rotInfo.heightScale;
-            if (((EntityRenderStateExtension) renderState).vivecraft$isMainPlayer()) {
+            if (((EntityRenderStateExtension) renderState).vivecraft$isFirstPersonPlayer() ||
+                ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale)
+            {
                 // remove entity scale, since the entity is already scaled by that before
                 scale *= rotInfo.worldScale / ((EntityRenderStateExtension) renderState).vivecraft$getTotalScale();
             }

@@ -5,15 +5,17 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.multiplayer.ServerLinksScreen;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.ServerLinks;
+import net.minecraft.server.dialog.Dialog;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,22 +33,25 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.mod_compat_vr.modmenu.ModMenuHelper;
 
-import java.util.function.Supplier;
+import java.util.Optional;
 
 @Mixin(value = PauseScreen.class, priority = 900)
 public abstract class PauseScreenVRMixin extends Screen {
 
-    @Final
     @Shadow
-    private static Component SERVER_LINKS;
+    protected abstract Optional<? extends Holder<Dialog>> getCustomAdditions();
+
+    @Shadow
+    @Final
+    private static Tooltip CUSTOM_OPTIONS_TOOLTIP;
 
     protected PauseScreenVRMixin(Component component) {
         super(component);
     }
 
-    @Inject(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4))
+    @Inject(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 2))
     private void vivecraft$addTopButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
-        if (!VRState.VR_ENABLED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
+        if (!VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             return;
         }
         // reset row to above
@@ -62,13 +67,13 @@ public abstract class PauseScreenVRMixin extends Screen {
         // on a multiplayer server also add the social button
         if (!Minecraft.getInstance().isMultiplayerServer()) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
-                (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(98).build());
+                (p) -> this.minecraft.setScreen(new ChatScreen("", false))).width(98).build());
         } else {
             GridLayout gridWidgetChat_Social = new GridLayout();
-            gridWidgetChat_Social.defaultCellSetting().paddingRight(1);
             GridLayout.RowHelper rowHelperChat_Social = gridWidgetChat_Social.createRowHelper(2);
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
-                (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(48).build());
+                    (p) -> this.minecraft.setScreen(new ChatScreen("", false))).width(48).build(),
+                LayoutSettings.defaults().paddingRight(2));
 
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.social"),
                 (p) -> this.minecraft.setScreen(new SocialInteractionsScreen())).width(48).build());
@@ -82,17 +87,16 @@ public abstract class PauseScreenVRMixin extends Screen {
     // use the disconnect button as an anchor, and shift by -3 to shift before the addChild call
     @Inject(method = "createPauseMenu", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/gui/screens/PauseScreen;disconnectButton:Lnet/minecraft/client/gui/components/Button;", shift = At.Shift.BY, by = -3))
     private void vivecraft$addLowerButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
-        if (!VRState.VR_ENABLED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
+        if (!VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             return;
         }
         GridLayout gridWidgetOverlay_Profiler = new GridLayout();
-        gridWidgetOverlay_Profiler.defaultCellSetting().paddingRight(1);
         GridLayout.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"),
             (p) -> {
-                this.minecraft.gui.getDebugOverlay().toggleOverlay();
+                this.minecraft.debugEntries.toggleF3Visible();
                 this.minecraft.setScreen(null);
-            }).width(48).build());
+            }).width(48).build(), LayoutSettings.defaults().paddingRight(2));
 
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.profiler"),
             (p) -> {
@@ -126,7 +130,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             }
         }
 
-        if (ClientDataHolderVR.KAT_VR) {
+        if (ClientDataHolderVR.getInstance().katVr) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.alignkatwalk"),
                 (p) -> {
                     jkatvr.resetYaw(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
@@ -150,34 +154,26 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     // hide buttons that we replace
-    @WrapOperation(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 2))
-    private LayoutElement vivecraft$hideFeedback(
-        GridLayout.RowHelper rowHelper, LayoutElement child, Operation<LayoutElement> original)
+    @WrapOperation(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4))
+    private LayoutElement vivecraft$linksInsteadOfReport(
+        GridLayout.RowHelper instance, LayoutElement child, Operation<LayoutElement> original)
     {
-        ((Button) child).visible = !VRState.VR_ENABLED ||
-            (ModMenuHelper.shouldOffsetButtons() && !this.minecraft.player.connection.serverLinks().isEmpty()) ||
-            !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
-        return original.call(rowHelper, child);
-    }
-
-    @WrapOperation(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;openScreenButton(Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;)Lnet/minecraft/client/gui/components/Button;", ordinal = 6))
-    private Button vivecraft$linksInsteadOfReport(
-        PauseScreen instance, Component component, Supplier<Screen> supplier, Operation<Button> original)
-    {
-        ServerLinks links = this.minecraft.player.connection.serverLinks();
-        if (VRState.VR_ENABLED && !ModMenuHelper.shouldOffsetButtons() && !links.isEmpty()) {
-            Supplier<Screen> sub = () -> new ServerLinksScreen(this, links);
-            return original.call(instance, Component.empty().append(SERVER_LINKS), sub);
+        Optional<? extends Holder<Dialog>> optional = this.getCustomAdditions();
+        if (VRState.VR_INITIALIZED && !ModMenuHelper.shouldOffsetButtons() && optional.isPresent()) {
+            return original.call(instance, Button.builder((optional.get().value()).common().computeExternalTitle(),
+                    (button) -> this.minecraft.player.connection.showDialog(optional.get(), this)).width(98)
+                .tooltip(CUSTOM_OPTIONS_TOOLTIP).build());
         } else {
-            return original.call(instance, component, supplier);
+            return original.call(instance, child);
         }
     }
 
-    @WrapOperation(method = "addFeedbackButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
+    @WrapOperation(method = {"addFeedbackButtons", "addFeedbackSubscreenAndCustomDialogButtons"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
     private static LayoutElement vivecraft$hideReportBugs(
         GridLayout.RowHelper rowHelper, LayoutElement child, Operation<LayoutElement> original)
     {
-        ((Button) child).visible = !VRState.VR_ENABLED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
+        ((Button) child).visible =
+            !VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
         return original.call(rowHelper, child);
     }
 }

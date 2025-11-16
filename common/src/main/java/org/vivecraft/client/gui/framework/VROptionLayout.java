@@ -2,6 +2,7 @@ package org.vivecraft.client.gui.framework;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.phys.Vec2;
+import org.vivecraft.client.gui.framework.widgets.GuiVROption;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 

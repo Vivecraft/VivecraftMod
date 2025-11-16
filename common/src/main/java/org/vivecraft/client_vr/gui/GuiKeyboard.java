@@ -1,182 +1,51 @@
 package org.vivecraft.client_vr.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client.gui.framework.TwoHandedScreen;
-import org.vivecraft.client_vr.provider.InputSimulator;
+import org.vivecraft.client.gui.framework.screens.TwoHandedScreen;
+import org.vivecraft.client.gui.framework.widgets.ColoredKeyButton;
+import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 
 public class GuiKeyboard extends TwoHandedScreen {
     private boolean isShift = false;
 
     @Override
     public void init() {
-        String keys = this.dh.vrSettings.keyboardKeys;
-        String shiftKeys = this.dh.vrSettings.keyboardKeysShift;
         this.clearWidgets();
 
-        if (this.isShift) {
-            keys = shiftKeys;
-        }
+        KeyboardKeys.Layout layout = KeyboardKeys.getRegularKeys(this.isShift, () -> {});
 
-        int columns = 13;
-        int rows;
         int margin = 32;
         int spacing = 2;
         int buttonWidth = 25;
-        double rowsD = (double) keys.length() / (double) columns;
+        int specialWidth = 30;
 
-        if (Math.floor(rowsD) == rowsD) {
-            rows = (int) rowsD;
-        } else {
-            rows = (int) (rowsD + 1.0D);
+        int offset = specialWidth - (buttonWidth * 2 + spacing);
+
+        for (KeyboardKeys.Key key : layout.keys()) {
+            int y = key.y() < 0 ? layout.rows() - key.y() : key.y();
+            this.addRenderableWidget(new ColoredKeyButton(key,
+                key.x() * (buttonWidth + spacing) + offset,
+                margin + (y - 1) * (20 + spacing), buttonWidth, 20));
         }
 
-        for (int row = 0; row < rows; row++) {
-            for (int column = 0; column < columns; column++) {
-                int index = row * columns + column;
-                char buttonChar = ' ';
-
-                if (index < keys.length()) {
-                    buttonChar = keys.charAt(index);
-                }
-
-                String label = String.valueOf(buttonChar);
-                final int code = index < this.dh.vrSettings.keyboardCodes.length ?
-                    this.dh.vrSettings.keyboardCodes[index] : GLFW.GLFW_KEY_UNKNOWN;
-                this.addRenderableWidget(new Button.Builder(Component.literal(label),
-                    (p) -> {
-                        InputSimulator.pressKeyForBind(code);
-                        InputSimulator.releaseKeyForBind(code);
-                        InputSimulator.typeChars(label);
-                    })
-                    .size(buttonWidth, 20)
-                    .pos(margin + column * (buttonWidth + spacing), margin + row * (20 + spacing))
-                    .build());
+        for (KeyboardKeys.Key key : KeyboardKeys.getSpecialKeys(() -> this.setShift(!this.isShift))) {
+            if (key.width() == 1) {
+                // the arrow keys are on a different spot in the gui keyboard
+                key = new KeyboardKeys.Key(key.id(), key.x() - 2, key.y() + layout.rows() - KeyboardKeys.ROWS,
+                    key.width(), key.height(), key.label(), key.onPress(), key.onRelease());
             }
+            int y = key.y() < 0 ? layout.rows() - key.y() : key.y();
+            int xPos = (key.x() > 0 ? offset : 0) + key.x() * (buttonWidth + spacing);
+            int width = key.x() == 0 ? specialWidth : key.width() * buttonWidth + (key.width() - 1) * spacing;
+            // don't let buttons go offscreen
+            if (xPos + width > this.width) {
+                width -= xPos + width - this.width;
+            }
+            this.addRenderableWidget(new ColoredKeyButton(key,
+                xPos, margin + (y - 1) * (20 + spacing),
+                width, 20));
         }
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("Shift"),
-            (p) -> this.setShift(!this.isShift))
-            .size(30, 20)
-            .pos(0, margin + 3 * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal(" "),
-            (p) -> {
-                InputSimulator.pressKeyForBind(GLFW.GLFW_KEY_SPACE);
-                InputSimulator.releaseKeyForBind(GLFW.GLFW_KEY_SPACE);
-                InputSimulator.typeChars(" ");
-            })
-            .size(5 * (buttonWidth + spacing), 20)
-            .pos(margin + 4 * (buttonWidth + spacing), margin + rows * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("BKSP"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_BACKSPACE);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_BACKSPACE);
-            })
-            .size(35, 20)
-            .pos(columns * (buttonWidth + spacing) + margin, margin)
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("ENTER"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_ENTER);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_ENTER);
-            })
-            .size(35, 20)
-            .pos(columns * (buttonWidth + spacing) + margin, margin + 2 * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("TAB"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_TAB);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_TAB);
-            })
-            .size(30, 20)
-            .pos(0, margin + 20 + spacing)
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("ESC"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_ESCAPE);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
-            })
-            .size(30, 20)
-            .pos(0, margin)
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("\u2191"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_UP);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_UP);
-            })
-            .size(buttonWidth, 20)
-            .pos((columns - 1) * (buttonWidth + spacing) + margin, margin + rows * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("\u2193"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_DOWN);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_DOWN);
-            })
-            .size(buttonWidth, 20)
-            .pos((columns - 1) * (buttonWidth + spacing) + margin, margin + (rows + 1) * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("\u2190"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT);
-            })
-            .size(buttonWidth, 20)
-            .pos((columns - 2) * (buttonWidth + spacing) + margin, margin + (rows + 1) * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("\u2192"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_RIGHT);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_RIGHT);
-            })
-            .size(buttonWidth, 20)
-            .pos(columns * (buttonWidth + spacing) + margin, margin + (rows + 1) * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("CUT"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-                InputSimulator.pressKey(GLFW.GLFW_KEY_X);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_X);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-            })
-            .size(35, 20)
-            .pos(margin, margin + -1 * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("COPY"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-                InputSimulator.pressKey(GLFW.GLFW_KEY_C);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_C);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-            })
-            .size(35, 20)
-            .pos(35 + spacing + margin, margin + -1 * (20 + spacing))
-            .build());
-
-        this.addRenderableWidget(new Button.Builder(Component.literal("PASTE"),
-            (p) -> {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-                InputSimulator.pressKey(GLFW.GLFW_KEY_V);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_V);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-            })
-            .size(35, 20)
-            .pos(2 * (35 + spacing) + margin, margin + -1 * (20 + spacing))
-            .build());
+        this.dh.vrSettings.physicalKeyboardTheme.theme.reload();
     }
 
     public void setShift(boolean shift) {
@@ -189,7 +58,7 @@ public class GuiKeyboard extends TwoHandedScreen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, "Keyboard", this.width / 2, 2, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, "Keyboard", this.width / 2, 2, 0xFFFFFFFF);
         super.render(guiGraphics, 0, 0, partialTick);
     }
 }

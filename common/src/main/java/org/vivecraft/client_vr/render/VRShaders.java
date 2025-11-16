@@ -1,88 +1,247 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.blaze3d.shaders.AbstractUniform;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.platform.DestFactor;
+import com.mojang.blaze3d.platform.SourceFactor;
+import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.CompiledShaderProgram;
-import net.minecraft.client.renderer.ShaderDefines;
-import net.minecraft.client.renderer.ShaderProgram;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
+import org.vivecraft.client_vr.render.ubos.LanczosUBO;
+import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
+import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class VRShaders {
     // FSAA shader and its uniforms
-    public static ShaderProgram LANCZOS_SHADER = new ShaderProgram(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"),
-        DefaultVertexFormat.POSITION_TEX, ShaderDefines.EMPTY);
-    public static AbstractUniform LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM;
-    public static AbstractUniform LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM;
+    public static LanczosUBO LANCZOS_UBO = new LanczosUBO();
+    public static final String LANCZOS_COLOR_SAMPLER = "Sampler0";
+    public static final String LANCZOS_DEPTH_SAMPLER = "Sampler1";
+
+    public static final RenderPipeline LANCZOS_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_lanczos")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
+        .withUniform(LanczosUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
+        .withSampler(LANCZOS_COLOR_SAMPLER)
+        .withSampler(LANCZOS_DEPTH_SAMPLER)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .build();
 
     // mixed reality shader and its uniforms
-    public static ShaderProgram MIXED_REALITY_SHADER = new ShaderProgram(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "core/mixedreality_vr"),
-        DefaultVertexFormat.POSITION_TEX, ShaderDefines.EMPTY);
-    public static AbstractUniform MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM;
-    public static AbstractUniform MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM;
-    public static AbstractUniform MIXED_REALITY_PROJECTION_MATRIX_UNIFORM;
-    public static AbstractUniform MIXED_REALITY_VIEW_MATRIX_UNIFORM;
-    public static AbstractUniform MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM;
-    public static AbstractUniform MIXED_REALITY_KEY_COLOR_UNIFORM;
-    public static AbstractUniform MIXED_REALITY_ALPHA_MODE_UNIFORM;
+    public static MixedRealityUBO MIXED_REALITY_UBO;
+    public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
+    public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
+    public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
+    public static final String MIXED_REALITY_GUI_COLOR_SAMPLER = "guiColor";
+    public static final int MIXED_REALITY_GUI_FIRST = 1;
+    public static final int MIXED_REALITY_GUI_THIRD = 2;
+    public static final int MIXED_REALITY_GUI_SEPARATE = 4;
+
+    public static final RenderPipeline MIXED_REALITY_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_mixed_reality")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/mixedreality_vr"))
+        .withUniform(MixedRealityUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
+        .withSampler(MIXED_REALITY_FIRST_COLOR_SAMPLER)
+        .withSampler(MIXED_REALITY_THIRD_COLOR_SAMPLER)
+        .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)
+        .withSampler(MIXED_REALITY_GUI_COLOR_SAMPLER)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .build();
 
     // vr post shader and its uniforms
-    public static ShaderProgram POST_PROCESSING_SHADER = new ShaderProgram(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "core/postprocessing_vr"),
-        DefaultVertexFormat.POSITION_TEX, ShaderDefines.EMPTY);
-    public static AbstractUniform POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_TIME_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM;
-    public static AbstractUniform POST_PROCESSING_OVERLAY_EYE_UNIFORM;
+    public static PostProcessUBO POST_PROCESS_UBO;
+    public static final String POST_PROCESSING_COLOR_SAMPLER = "Sampler0";
+
+    public static final RenderPipeline POST_PROCESSING_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_post_processing")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/postprocessing_vr"))
+        .withUniform(PostProcessUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
+        .withSampler(POST_PROCESSING_COLOR_SAMPLER)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .build();
+
+    // blit shader
+    public static final String BLIT_VR_COLOR_SAMPLER = "DiffuseSampler";
+
+    public static final RenderPipeline BLIT_VR_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_blit")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
+        .withSampler(BLIT_VR_COLOR_SAMPLER)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .build();
+
+    public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_blit")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
+        .withSampler(BLIT_VR_COLOR_SAMPLER)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withBlend(BlendFunction.TRANSLUCENT)
+        .build();
 
     // end portal shaders
-    public static ShaderProgram RENDERTYPE_END_PORTAL_VR_SHADER = new ShaderProgram(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"),
-        DefaultVertexFormat.POSITION, ShaderDefines.EMPTY);
-    public static ShaderProgram RENDERTYPE_END_GATEWAY_VR_SHADER = new ShaderProgram(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "core/rendertype_end_gateway_vr"),
-        DefaultVertexFormat.POSITION, ShaderDefines.EMPTY);
+    private static final RenderPipeline.Snippet END_PORTAL_SNIPPET = RenderPipeline.builder(
+            RenderPipelines.END_PORTAL_SNIPPET)
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"))
+        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).buildSnippet();
+
+    public static final RenderPipeline END_PORTAL_VR_PIPELINE = RenderPipeline.builder(END_PORTAL_SNIPPET)
+        .withLocation("pipeline/end_portal_vr")
+        .withShaderDefine("PORTAL_LAYERS", 15).build();
+    public static final RenderPipeline END_GATEWAY_VR_PIPELINE = RenderPipeline.builder(END_PORTAL_SNIPPET)
+        .withLocation("pipeline/end_gateway_vr")
+        .withShaderDefine("PORTAL_LAYERS", 16).build();
+
+    // panorama with alpha color mask
+    public static final RenderPipeline SOLID_PANORAMA = RenderPipeline.builder(
+            RenderPipelines.MATRICES_PROJECTION_SNIPPET)
+        .withLocation("pipeline/panorama")
+        .withVertexShader("core/panorama")
+        .withFragmentShader("core/panorama")
+        .withSampler("Sampler0")
+        .withDepthWrite(false)
+        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).build();
+
+    public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
+            RenderPipelines.GUI_TEXTURED_SNIPPET)
+        .withLocation("pipeline/gui_textured_always_vr")
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+
+    public static final RenderPipeline CROSSHAIR_MENU = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+        .withLocation("pipeline/crosshair_menu_vr")
+        .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
+            SourceFactor.ONE, DestFactor.ONE))
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+    private static final RenderPipeline.Snippet ENTITY_SNIPPET = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
+        .withSampler("Sampler1")
+        .withCull(false).buildSnippet();
+
+    public static final RenderPipeline CROSSHAIR_WORLD = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/crosshair_world_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
+            SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA)).build();
+
+    // all those NO_DEPTH_TEST should be ALWAYS_DEPTH_TEST, to also be able to write depth
+    // but 1.21.5 doesn't have that
+    public static final RenderPipeline CROSSHAIR_WORLD_ALWAYS = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/crosshair_world_always_vr")
+        .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
+            SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA))
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+    public static final RenderPipeline ENTITY_SOLID_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_solid_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING").build();
+
+    public static final RenderPipeline ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_translucent_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withBlend(BlendFunction.TRANSLUCENT).build();
+
+    public static final RenderPipeline ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
+            ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_translucent_always_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withBlend(BlendFunction.TRANSLUCENT)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+    public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_cutout_no_cull_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F).build();
+
+    public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
+            ENTITY_SNIPPET)
+        .withLocation("pipeline/entity_cutout_no_cull_always_no_cardinal_light_vr")
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+    public static final RenderPipeline QUADS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+        .withLocation("pipeline/quads_vr")
+        .withCull(false)
+        .build();
+
+    public static final RenderPipeline QUADS_ALWAYS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+        .withLocation("pipeline/quads_always_vr")
+        .withCull(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+    public static final RenderPipeline TRIANGLES_ALWAYS = RenderPipeline.builder(
+            RenderPipelines.DEBUG_FILLED_SNIPPET)
+        .withLocation("pipeline/debug_triangles_vr")
+        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
+        .withCull(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+    public static final RenderPipeline TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
+            RenderPipelines.DEBUG_FILLED_SNIPPET)
+        .withLocation("pipeline/debug_triangle_fan_vr")
+        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_FAN)
+        .withCull(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+
+    public static final RenderPipeline TEXT_NO_CULL = RenderPipeline.builder(
+            RenderPipelines.TEXT_SNIPPET, RenderPipelines.FOG_SNIPPET)
+        .withLocation("pipeline/text_no_cull_vr")
+        .withVertexShader("core/rendertype_text")
+        .withFragmentShader("core/rendertype_text")
+        .withSampler("Sampler0")
+        .withSampler("Sampler2")
+        .withCull(false).build();
+
+    public static final Set<RenderPipeline> DEPTH_ALWAYS_PIPELINES = new HashSet<>(
+        Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT,
+            ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
 
     private VRShaders() {}
 
-    public static void setupDepthMask() {
-        CompiledShaderProgram program = Minecraft.getInstance().getShaderManager().getProgram(MIXED_REALITY_SHADER);
-        MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM = program.safeGetUniform("hmdViewPosition");
-        MIXED_REALITY_HMD_PLANE_NORMAL_UNIFORM = program.safeGetUniform("hmdPlaneNormal");
-        MIXED_REALITY_PROJECTION_MATRIX_UNIFORM = program.safeGetUniform("projectionMatrix");
-        MIXED_REALITY_VIEW_MATRIX_UNIFORM = program.safeGetUniform("viewMatrix");
-        MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM = program.safeGetUniform("firstPersonPass");
-        MIXED_REALITY_KEY_COLOR_UNIFORM = program.safeGetUniform("keyColor");
-        MIXED_REALITY_ALPHA_MODE_UNIFORM = program.safeGetUniform("alphaMode");
+    public static void init() {
+        MIXED_REALITY_UBO = new MixedRealityUBO();
+        POST_PROCESS_UBO = new PostProcessUBO();
+        LANCZOS_UBO = new LanczosUBO();
     }
 
-    public static void setupFSAA() {
-        CompiledShaderProgram program = Minecraft.getInstance().getShaderManager().getProgram(LANCZOS_SHADER);
-        LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM = program.safeGetUniform("texelWidthOffset");
-        LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM = program.safeGetUniform("texelHeightOffset");
-    }
-
-    public static void setupFOVReduction() {
-        CompiledShaderProgram program = Minecraft.getInstance().getShaderManager().getProgram(POST_PROCESSING_SHADER);
-        POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM = program.safeGetUniform("circle_radius");
-        POST_PROCESSING_FOV_REDUCTION_OFFSET_UNIFORM = program.safeGetUniform("circle_offset");
-        POST_PROCESSING_FOV_REDUCTION_BORDER_UNIFORM = program.safeGetUniform("border");
-        POST_PROCESSING_OVERLAY_HEALTH_ALPHA_UNiFORM = program.safeGetUniform("redalpha");
-        POST_PROCESSING_OVERLAY_FREEZE_ALPHA_UNiFORM = program.safeGetUniform("bluealpha");
-        POST_PROCESSING_OVERLAY_WATER_AMPLITUDE_UNIFORM = program.safeGetUniform("water");
-        POST_PROCESSING_OVERLAY_PORTAL_AMPLITUDE_UNIFORM = program.safeGetUniform("portal");
-        POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM = program.safeGetUniform("pumpkin");
-        POST_PROCESSING_OVERLAY_EYE_UNIFORM = program.safeGetUniform("eye");
-        POST_PROCESSING_OVERLAY_TIME_UNIFORM = program.safeGetUniform("portaltime");
-        POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM = program.safeGetUniform("blackalpha");
+    public static void close() {
+        if (MIXED_REALITY_UBO != null) {
+            MIXED_REALITY_UBO.close();
+            MIXED_REALITY_UBO = null;
+        }
+        if (POST_PROCESS_UBO != null) {
+            POST_PROCESS_UBO.close();
+            POST_PROCESS_UBO = null;
+        }
+        if (LANCZOS_UBO != null) {
+            LANCZOS_UBO.close();
+            LANCZOS_UBO = null;
+        }
     }
 }

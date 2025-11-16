@@ -1,20 +1,23 @@
-#version 150 core
+#version 330
 
 uniform sampler2D Sampler0;
-uniform float circle_radius;
-uniform float circle_offset = 0.1;
-uniform float border;
 
-uniform float water;
-uniform float portal;
-uniform float pumpkin;
+layout(std140) uniform PostProcessUbo {
+    float circle_radius;
+    float circle_offset;
+    float border;
 
-uniform float portaltime;
-uniform float redalpha;
-uniform float bluealpha;
-uniform float blackalpha;
+    float water;
+    float pumpkin;
+    float portal;
+    float portaltime;
 
-uniform int eye = 0;
+    float redalpha;
+    float bluealpha;
+    float blackalpha;
+
+    int eye;
+};
 
 in vec2 texCoordinates;
 

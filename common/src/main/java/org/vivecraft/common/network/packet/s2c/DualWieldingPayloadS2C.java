@@ -4,7 +4,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 
 /**
- * indicates that the server supports roomscale crawling
+ * indicates that the server supports dual wielding
+ *
+ * @param allowed if dual wielding is allowed
  */
 public record DualWieldingPayloadS2C(boolean allowed) implements VivecraftPayloadS2C {
 

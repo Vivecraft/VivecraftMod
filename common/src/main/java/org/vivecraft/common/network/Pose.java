@@ -1,8 +1,13 @@
 package org.vivecraft.common.network;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionfc;
+import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.data.VRBodyPartData;
+import org.vivecraft.common.api_impl.data.VRBodyPartDataImpl;
+import org.vivecraft.common.utils.MathUtils;
 
 /**
  * holds a device Pose
@@ -31,5 +36,14 @@ public record Pose(Vector3fc position, Quaternionfc orientation) {
     public void serialize(FriendlyByteBuf buffer) {
         CommonNetworkHelper.serializeF(buffer, this.position);
         CommonNetworkHelper.serialize(buffer, this.orientation);
+    }
+
+    /**
+     * @param playerPos The current position of the player.
+     * @return This Pose as VRBodyPartData for use with the API.
+     */
+    public VRBodyPartData asBodyPartData(Vec3 playerPos) {
+        return new VRBodyPartDataImpl(MathUtils.toMcVec3(this.position).add(playerPos),
+            MathUtils.toMcVec3(this.orientation.transform(MathUtils.BACK, new Vector3f())), this.orientation);
     }
 }

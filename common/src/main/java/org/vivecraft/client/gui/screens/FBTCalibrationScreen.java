@@ -1,28 +1,24 @@
 package org.vivecraft.client.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.CoreShaders;
-import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.gui.widgets.MultilineComponent;
+import org.vivecraft.client.gui.framework.widgets.MultilineComponent;
+import org.vivecraft.client.gui.pip.state.GuiFBTPlayerState;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.control.ControllerType;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
 
 public class FBTCalibrationScreen extends Screen {
 
@@ -161,135 +157,33 @@ public class FBTCalibrationScreen extends Screen {
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        if (this.calibrated && this.usingUnlabeledTrackers) {
+        if (!this.calibrated || !this.usingUnlabeledTrackers) {
+            // arm overlay
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
+                48, 16, 0xFFFFFFFF);
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
+                48, 16, 0xFFFFFFFF);
+
+            // render target rectangles
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
+                48, 16, 0xFFFFFFFF);
+            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
+                48, 16, 0xFFFFFFFF);
+
+            // submit player pip
+            float yRot = 0;
             if (VRState.VR_RUNNING) {
-                ClientDataHolderVR.getInstance().vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract)
-                    .setEnabled(ControllerType.LEFT, false);
-                ClientDataHolderVR.getInstance().vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract)
-                    .setEnabled(ControllerType.RIGHT, false);
-            }
-        } else {
-            checkPosition();
-
-            PoseStack poseStack = guiGraphics.pose();
-            poseStack.pushPose();
-
-            Vec3i color = new Vec3i(128, 64, 64);
-            Vec3i colorActive = new Vec3i(64, 128, 64);
-            byte alpha = (byte) 200;
-
-            if (this.leftHandAtPosition && this.rightHandAtPosition) {
-                color = colorActive;
+                yRot = this.yaw - ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getYawRad();
             }
 
-            // move to screen center
-            float min = Math.min(guiGraphics.guiWidth(), guiGraphics.guiHeight()) / (4F * 16F);
-            poseStack.translate(guiGraphics.guiWidth() / 2F, guiGraphics.guiHeight() - 32F, 0);
-            poseStack.scale(min, -min, min);
-            poseStack.mulPose(Axis.YP.rotation(Mth.PI));
-
-            RenderSystem.setShader(CoreShaders.POSITION_COLOR);
-
-            // arms outline
-            BufferBuilder builder = Tesselator.getInstance()
-                .begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-
-            builder.addVertex(poseStack.last().pose(), 4, 24, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), 16, 24, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), 16, 20, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), 4, 20, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), 4, 24, -100)
-                .setColor(1F, 1F, 1F, 1F);
-
-            // connecting line
-            builder.addVertex(poseStack.last().pose(), 4, 24, -100)
-                .setColor(1F, 1F, 1F, 0F);
-            builder.addVertex(poseStack.last().pose(), -4, 24, -100)
-                .setColor(1F, 1F, 1F, 0F);
-
-            builder.addVertex(poseStack.last().pose(), -4, 24, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), -16, 24, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), -16, 20, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), -4, 20, -100)
-                .setColor(1F, 1F, 1F, 1F);
-            builder.addVertex(poseStack.last().pose(), -4, 24, -100)
-                .setColor(1F, 1F, 1F, 1F);
-
-            BufferUploader.drawWithShader(builder.buildOrThrow());
-
-            if (VRState.VR_RUNNING) {
-                poseStack.mulPose(Axis.YP.rotation(
-                    this.yaw - ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getYawRad()));
-            }
-
-            // body overlay
-            builder = Tesselator.getInstance()
-                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            // legs
-            RenderHelper.renderBox(builder,
-                new Vec3(2, 0, 0), new Vec3(2, 12, 0),
-                4, 4, color, alpha, poseStack.last().pose());
-            RenderHelper.renderBox(builder,
-                new Vec3(-2, 0, 0), new Vec3(-2, 12, 0),
-                4, 4, color, alpha, poseStack.last().pose());
-            // body
-            RenderHelper.renderBox(builder,
-                new Vec3(0, 12, 0), new Vec3(0, 24, 0),
-                8, 4, color, alpha, poseStack.last().pose());
-
-            // head
-            RenderHelper.renderBox(builder,
-                new Vec3(0, 24, 0), new Vec3(0, 32, 0),
-                8, 8, color, alpha, poseStack.last().pose());
-
-            // arms
-            RenderHelper.renderBox(builder,
-                new Vec3(6, 22, 0).subtract(this.leftHand.x * 2F, this.leftHand.y * 2F, this.leftHand.z * 2F),
-                new Vec3(6, 22, 0).add(this.leftHand.x * 10F, this.leftHand.y * 10F, this.leftHand.z * 10F),
-                4, 4, this.leftHandAtPosition ? colorActive : color, (byte) 200, poseStack.last().pose());
-            RenderHelper.renderBox(builder,
-                new Vec3(-6, 22, 0).subtract(this.rightHand.x * 2F, this.rightHand.y * 2F, this.rightHand.z * 2F),
-                new Vec3(-6, 22, 0).add(this.rightHand.x * 10F, this.rightHand.y * 10F, this.rightHand.z * 10F),
-                4, 4, this.rightHandAtPosition ? colorActive : color, (byte) 200, poseStack.last().pose());
-
-            BufferUploader.drawWithShader(builder.buildOrThrow());
-
-            if (VRState.VR_RUNNING) {
-                ClientDataHolderVR.getInstance().vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract)
-                    .setEnabled(ControllerType.LEFT, this.leftHandAtPosition && this.rightHandAtPosition);
-                ClientDataHolderVR.getInstance().vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract)
-                    .setEnabled(ControllerType.RIGHT, this.leftHandAtPosition && this.rightHandAtPosition);
-
-                if (VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.LEFT) &&
-                    VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.RIGHT) &&
-                    VivecraftVRMod.INSTANCE.keyVRInteract.consumeClick())
-                {
-                    AutoCalibration.calibrateManual();
-                    ClientDataHolderVR.getInstance().vr.calibrateFBT(this.yaw + Mth.PI);
-                    ClientDataHolderVR.getInstance().vrSettings.unlabeledTrackersUsed = this.usingUnlabeledTrackers;
-                    ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                    this.minecraft.gui.getChat()
-                        .addMessage(Component.translatable("vivecraft.messages.fbtcalibrationsuccess"));
-                    this.calibrated = true;
-                    if (!this.usingUnlabeledTrackers) {
-                        this.minecraft.setScreen(this.parent);
-                    } else {
-                        this.cancelButton.setMessage(Component.translatable("vivecraft.gui.ok"));
-                        this.resetButton.visible = true;
-                    }
-                }
-            }
+            ((GuiGraphicsAccessor) guiGraphics).getGuiRenderState().submitPicturesInPictureState(
+                new GuiFBTPlayerState(this.rightHandAtPosition, this.leftHandAtPosition, new Vector3f(this.rightHand),
+                    new Vector3f(this.leftHand), yRot, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
         }
     }
 
-    private void checkPosition() {
+    @Override
+    public void tick() {
         if (!VRState.VR_RUNNING) {
             this.rightHand.set(MathUtils.DOWN);
             this.leftHand.set(MathUtils.DOWN);
@@ -301,7 +195,7 @@ public class FBTCalibrationScreen extends Screen {
         Vector3f hmdPosAvg = dataHolder.vr.hmdPivotHistory.averagePosition(0.5D);
 
         float height = hmdPosAvg.y / AutoCalibration.DEFAULT_HEIGHT;
-        float scale = height * 0.9375F * dataHolder.vrPlayer.getVRDataWorld().worldScale;
+        float scale = height * 0.9375F;
 
         int main = dataHolder.vrSettings.reverseHands ? 1 : 0;
 
@@ -329,5 +223,32 @@ public class FBTCalibrationScreen extends Screen {
 
         this.rightHandAtPosition = rightHandNew;
         this.leftHandAtPosition = leftHandNew;
+
+        if (VRState.VR_RUNNING) {
+            if (this.calibrated && this.usingUnlabeledTrackers) {
+                dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).setEnabled(false);
+            } else {
+                dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract)
+                    .setEnabled(this.leftHandAtPosition && this.rightHandAtPosition);
+
+                if (VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.LEFT) &&
+                    VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.RIGHT) &&
+                    VivecraftVRMod.INSTANCE.keyVRInteract.consumeClick())
+                {
+                    AutoCalibration.calibrateManual();
+                    dataHolder.vr.calibrateFBT(this.yaw + Mth.PI);
+                    dataHolder.vrSettings.unlabeledTrackersUsed = this.usingUnlabeledTrackers;
+                    dataHolder.vrSettings.saveOptions();
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.fbtcalibrationsuccess"));
+                    this.calibrated = true;
+                    if (!this.usingUnlabeledTrackers) {
+                        this.minecraft.setScreen(this.parent);
+                    } else {
+                        this.cancelButton.setMessage(Component.translatable("vivecraft.gui.ok"));
+                        this.resetButton.visible = true;
+                    }
+                }
+            }
+        }
     }
 }

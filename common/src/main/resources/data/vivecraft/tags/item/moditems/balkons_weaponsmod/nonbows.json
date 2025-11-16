@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "weaponmod:crossbow",
+      "required": false
+    },
+    {
+      "id": "weaponmod:javelin",
+      "required": false
+    }
+  ]
+}

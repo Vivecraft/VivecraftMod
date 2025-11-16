@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
+
+import javax.annotation.Nullable;
 
 @Mixin(LevelTargetBundle.class)
 public class LevelTargetBundleVRMixin implements LevelTargetBundleExtension {

@@ -1,13 +1,11 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.FogParameters;
-import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.utils.TextUtils;
+import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
+import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
 
 import java.util.ArrayList;
 
@@ -43,27 +41,17 @@ public class MirrorNotification {
     public static void render() {
         if (System.currentTimeMillis() < MIRROR_NOTIFY_START + MIRROR_NOTIFY_LEN) {
             int screenX = MC.mainRenderTarget.width;
-            int screenY = MC.mainRenderTarget.height;
 
-            RenderSystem.viewport(0, 0, screenX, screenY);
-            Matrix4f projection = new Matrix4f().setOrtho(0.0F, screenX,
-                screenY, 0.0F, 1000.0F, 21000.0F);
-            RenderSystem.setProjectionMatrix(projection, ProjectionType.ORTHOGRAPHIC);
+            // override the gui scale, to be in absolute size
+            int backupGuiScale = GuiHandler.GUI_SCALE_FACTOR;
+            GuiHandler.GUI_SCALE_FACTOR = 1;
 
-            RenderSystem.getModelViewStack().pushMatrix();
-            RenderSystem.getModelViewStack().identity();
-            RenderSystem.getModelViewStack().translate(0, 0, -11000);
-
-            RenderSystem.setShaderFog(FogParameters.NO_FOG);
-
-            GuiGraphics guiGraphics = new GuiGraphics(MC, MC.renderBuffers().bufferSource());
-            guiGraphics.pose().scale(3, 3, 3);
+            GuiGraphics guiGraphics = GuiRenderHelper.getGuiGraphics();
+            guiGraphics.pose().scale(3, 3);
 
             if (MIRROR_NOTIFY_CLEAR) {
-                RenderSystem.clearColor(0, 0, 0, 0);
-                RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT);
-            } else {
-                RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT);
+                RenderSystem.getDevice().createCommandEncoder()
+                    .clearColorTexture(MC.mainRenderTarget.getColorTexture(), 0xFF000000);
             }
 
             final int TEXT_WORDWRAP_LEN = screenX / 22;
@@ -77,12 +65,14 @@ public class MirrorNotification {
             final int COLUMN_GAP = 12;
 
             for (String line : wrapped) {
-                guiGraphics.drawString(MC.font, line, 1, column, 0xFFFFFF);
+                guiGraphics.drawString(MC.font, line, 1, column, 0xFFFFFFFF);
                 column += COLUMN_GAP;
             }
-            guiGraphics.flush();
 
-            RenderSystem.getModelViewStack().popMatrix();
+            GuiRenderHelper.finish();
+
+            // reset gui scale
+            GuiHandler.GUI_SCALE_FACTOR = backupGuiScale;
         }
     }
 }

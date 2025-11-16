@@ -2,15 +2,20 @@ package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.GuiKeyboard;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.provider.control.ControllerType;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 
 public class KeyboardHandler {
@@ -34,8 +39,26 @@ public class KeyboardHandler {
     private static boolean LAST_PRESSED_CLICK_R;
     private static boolean LAST_PRESSED_SHIFT;
 
+    public static boolean showOverlay(OpenKeyboardContext context) {
+        if (context == OpenKeyboardContext.FORCE || DH.vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.ON ||
+            (context == OpenKeyboardContext.FOCUS_CHAT &&
+                DH.vrSettings.autoOpenKeyboard == VRSettings.AutoOpenKeyboard.CHAT
+            ))
+        {
+            setOverlayShowing(true);
+        }
+        return SHOWING;
+    }
+
+    public static boolean hideOverlay(CloseKeyboardContext context) {
+        if (context == CloseKeyboardContext.FORCE || DH.vrSettings.autoCloseKeyboard) {
+            setOverlayShowing(false);
+        }
+        return SHOWING;
+    }
+
     public static boolean setOverlayShowing(boolean showingState) {
-        if (ClientDataHolderVR.KIOSK) return false;
+        if (DH.kiosk) return false;
         if (DH.vrSettings.seated) {
             showingState = false;
         }
@@ -62,6 +85,16 @@ public class KeyboardHandler {
         }
 
         return SHOWING;
+    }
+
+    public static void reinitKeyboard() {
+        if (SHOWING) {
+            if (DH.vrSettings.physicalKeyboard) {
+                PHYSICAL_KEYBOARD.show();
+            } else {
+                UI.init();
+            }
+        }
     }
 
     public static void processGui() {
@@ -153,22 +186,22 @@ public class KeyboardHandler {
         int y2 = (int) (Math.min(Math.max((int) UI.cursorY2, 0), GuiHandler.GUI_HEIGHT) * uiScaleY);
 
         if (POINTED_L && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.LEFT)) {
-            UI.mouseClicked(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            UI.mouseClicked(new MouseButtonEvent(x1, y1, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)), false);
             LAST_PRESSED_CLICK_L = true;
         }
 
         if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.LEFT) && LAST_PRESSED_CLICK_L) {
-            UI.mouseReleased(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            UI.mouseReleased(new MouseButtonEvent(x1, y1, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
             LAST_PRESSED_CLICK_L = false;
         }
 
         if (POINTED_R && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.RIGHT)) {
-            UI.mouseClicked(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            UI.mouseClicked(new MouseButtonEvent(x2, y2, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)), false);
             LAST_PRESSED_CLICK_R = true;
         }
 
         if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.RIGHT) && LAST_PRESSED_CLICK_R) {
-            UI.mouseReleased(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            UI.mouseReleased(new MouseButtonEvent(x2, y2, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
             LAST_PRESSED_CLICK_R = false;
         }
 

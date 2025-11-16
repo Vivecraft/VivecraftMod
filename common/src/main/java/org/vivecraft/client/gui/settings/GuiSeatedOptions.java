@@ -1,8 +1,8 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionEntry;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiSeatedOptions extends GuiVROptionsBase {
@@ -16,13 +16,14 @@ public class GuiSeatedOptions extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.VEHICLE_ROTATION),
         new VROptionEntry(VRSettings.VrOptions.REVERSE_HANDS),
         new VROptionEntry(VRSettings.VrOptions.SEATED_FREE_MOVE, true),
-        new VROptionEntry(VRSettings.VrOptions.RIGHT_CLICK_DELAY, false),
-        new VROptionEntry("vivecraft.options.screen.teleport.button", (button, mousePos) -> {
-            this.minecraft.setScreen(new GuiTeleportSettings(this));
-            return true;
-        }),
+        new VROptionEntry(VRSettings.VrOptions.RIGHT_CLICK_DELAY),
+        new VROptionEntry(VRSettings.VrOptions.AIM_DEVICE),
         new VROptionEntry("vivecraft.options.screen.freemove.button", (button, mousePos) -> {
             this.minecraft.setScreen(new GuiFreeMoveSettings(this));
+            return true;
+        }),
+        new VROptionEntry("vivecraft.options.screen.teleport.button", (button, mousePos) -> {
+            this.minecraft.setScreen(new GuiTeleportSettings(this));
             return true;
         })
     };

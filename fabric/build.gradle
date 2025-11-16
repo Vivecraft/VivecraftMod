@@ -26,18 +26,18 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modCompileOnly("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.21.4-0.6.6-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.9-0.7.0-fabric"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.8.5+1.21.4-fabric"
+    modCompileOnly "maven.modrinth:iris:1.9.3+1.21.9-fabric"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
     // for REI compat
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
     modCompileOnly("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
@@ -48,13 +48,14 @@ dependencies {
     // modCompileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:13.0.0-beta.1") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modCompileOnly("com.terraformersmc:modmenu:15.0.0-beta.2") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
+    include(modImplementation(fabricApi.module("fabric-resource-loader-v1", rootProject.fabric_api_version)))
     // commands also needs base
     include(modImplementation(fabricApi.module("fabric-api-base", rootProject.fabric_api_version)))
     include(modImplementation(fabricApi.module("fabric-command-api-v2", rootProject.fabric_api_version)))
@@ -63,10 +64,10 @@ dependencies {
     include(implementation('com.electronwill.night-config:toml:3.6.6'))
     include(implementation('com.electronwill.night-config:core:3.6.6'))
 
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}"))
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux"))
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos"))
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows")) { transitive = false }
 
     // Use custom OpenXR lib for Android and GLES bindings
     //include(implementation("QuestCraftPlusPlus:lwjgl3:${rootProject.lwjgl_version}:lwjgl-openxr-${rootProject.lwjgl_version}"))
@@ -76,6 +77,8 @@ dependencies {
     include(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}:natives-linux"))
 
     include(implementation("com.illposed.osc:javaosc-core:0.9"))
+    include(implementation("com.github.bhaptics:tact-java:0.1.4"))
+    include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
 
 }
 

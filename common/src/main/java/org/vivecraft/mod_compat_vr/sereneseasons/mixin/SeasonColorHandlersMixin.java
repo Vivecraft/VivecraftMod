@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,8 +52,7 @@ public class SeasonColorHandlersMixin {
         CallbackInfoReturnable<Integer> cir)
     {
         if (Minecraft.getInstance().level == null) {
-            // this is now hardcoded since 1.21.4
-            cir.setReturnValue(0xFF80A755);
+            cir.setReturnValue(FoliageColor.FOLIAGE_BIRCH);
         }
     }
 }

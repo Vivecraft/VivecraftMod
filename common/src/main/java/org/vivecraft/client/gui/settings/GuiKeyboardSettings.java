@@ -1,24 +1,34 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROption;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionEntry;
-import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiKeyboardSettings extends GuiVROptionsBase {
-    private static final VROptionEntry[] KEYBOARD_OPTIONS = new VROptionEntry[]{
-        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD, (button, mousePos) -> {
-            KeyboardHandler.setOverlayShowing(false);
-            return false;
-        }),
+    private final VROptionEntry[] keyboardOptions = new VROptionEntry[]{
+        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD),
         new VROptionEntry(VRSettings.VrOptions.KEYBOARD_PRESS_BINDS),
         new VROptionEntry(VRSettings.VrOptions.AUTO_OPEN_KEYBOARD),
         new VROptionEntry(VRSettings.VrOptions.AUTO_CLOSE_KEYBOARD),
         new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_SCALE),
-        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME)
+        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME),
+        new VROptionEntry(
+            "vivecraft.options.screen.customkeyboardeditor.button", (button, mousePos) -> {
+            Minecraft.getInstance().setScreen(new GuiKeyboardLayoutEditor(this));
+            return true;
+        }),
+        new VROptionEntry(
+            "vivecraft.options.screen.customkeyboardthemeeditor.button", (button, mousePos) -> {
+            Minecraft.getInstance().setScreen(new GuiKeyboardThemeEditor(this));
+            return true;
+        }),
+        new VROptionEntry(
+            "vivecraft.options.screen.activekeyboardlayouts.button", (button, mousePos) -> {
+            Minecraft.getInstance().setScreen(new GuiActiveKeyboardLayoutSelector(this));
+            return true;
+        })
     };
 
     public GuiKeyboardSettings(Screen lastScreen) {
@@ -28,21 +38,12 @@ public class GuiKeyboardSettings extends GuiVROptionsBase {
     @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.keyboard";
-        super.init(KEYBOARD_OPTIONS, true);
+        super.init(this.keyboardOptions, true);
         super.addDefaultButtons();
     }
 
     @Override
     protected void loadDefaults() {
         super.loadDefaults();
-    }
-
-    @Override
-    protected void actionPerformed(AbstractWidget widget) {
-        if (widget instanceof GuiVROption button) {
-            if (button.getId() == VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME.ordinal()) {
-                KeyboardHandler.PHYSICAL_KEYBOARD.init();
-            }
-        }
     }
 }

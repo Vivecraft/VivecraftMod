@@ -12,10 +12,17 @@
     "id": "minecraft:shears",
     "count": 1,
     "components": {
-      "minecraft:unbreakable": {
-        "show_in_tooltip": false
+      "minecraft:unbreakable": {},
+      "minecraft:custom_name": {
+        "type": "translatable",
+        "translate": "vivecraft.item.climbclaws",
+        "fallback": "Climb Claws"
       },
-      "minecraft:custom_name": "{\"type\": \"translatable\", \"translate\": \"vivecraft.item.climbclaws\", \"fallback\": \"Climb Claws\"}"
+      "tooltip_display": {
+        "hidden_components": [
+          "minecraft:unbreakable"
+        ]
+      }
     }
   }
 }

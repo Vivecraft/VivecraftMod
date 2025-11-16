@@ -41,7 +41,7 @@ public class SupporterReceiver {
                             userMap.put(bits[0].toLowerCase(), i);
 
                             for (Player player : QUEUED_PLAYERS) {
-                                if (bits[0].equalsIgnoreCase(player.getGameProfile().getName())) {
+                                if (bits[0].equalsIgnoreCase(player.getGameProfile().name())) {
                                     ClientVRPlayers.getInstance().setHMD(player.getUUID(), i);
                                 }
                             }
@@ -62,7 +62,7 @@ public class SupporterReceiver {
     }
 
     public static void addPlayerInfo(Player p) {
-        if (!DOWNLOAD_FAILED) {
+        if (!DOWNLOAD_FAILED && p.getGameProfile().name() != null) {
             synchronized (LOCK) {
                 if (CACHE == null) {
                     QUEUED_PLAYERS.add(p);
@@ -90,7 +90,7 @@ public class SupporterReceiver {
                     }
                 } else {
                     ClientVRPlayers.getInstance()
-                        .setHMD(p.getUUID(), CACHE.getOrDefault(p.getGameProfile().getName().toLowerCase(), 0));
+                        .setHMD(p.getUUID(), CACHE.getOrDefault(p.getGameProfile().name().toLowerCase(), 0));
                 }
             }
         }

@@ -1,12 +1,17 @@
 package org.vivecraft.mod_compat_vr.iris;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.irisshaders.iris.api.v0.IrisApi;
+import net.irisshaders.iris.api.v0.IrisProgram;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xloader;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.common.utils.ClassUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -20,6 +25,15 @@ public class IrisHelper {
     private static Method Iris_getPipelineManager;
     private static Method PipelineManager_getPipeline;
     private static Method WorldRenderingPipeline_shouldRenderUnderwaterOverlay;
+
+    private static Field ImmediateState_skipExtension;
+    private static Method ImmediateState_skipExtension_set;
+    private static Method ImmediateState_skipExtension_get;
+
+    private static Class IrisRenderingPipeline;
+    private static Field IrisRenderingPipeline_shaderStorageBufferHolder;
+    private static Method ShaderStorageBufferHolder_setupBuffers;
+    private static RenderPass lastSSBOPass;
 
     // for iris/dh compat
     private static boolean DH_PRESENT = false;
@@ -38,29 +52,17 @@ public class IrisHelper {
 
     private static Method CapturedRenderingState_getGbufferProjection;
 
-    private static Method WorldRenderingSettings_setUseExtendedVertexFormat;
-    private static Method WorldRenderingSettings_shouldUseExtendedVertexFormat;
-    private static Object WorldRenderingSettings_INSTANCE;
-
     public static boolean SLOW_MODE = false;
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus");
+        return Xloader.isModLoaded("iris") || Xloader.isModLoaded("oculus");
     }
 
     /**
      * @return if a shaderpack is in use
      */
     public static boolean isShaderActive() {
-        try {
-            return IrisApi.getInstance().isShaderPackInUse() ||
-                (WorldRenderingSettings_shouldUseExtendedVertexFormat != null &&
-                    (boolean) WorldRenderingSettings_shouldUseExtendedVertexFormat.invoke(
-                        WorldRenderingSettings_INSTANCE)
-                );
-        } catch (IllegalAccessException | InvocationTargetException ignored) {
-            return false;
-        }
+        return IrisApi.getInstance().isShaderPackInUse();
     }
 
     /**
@@ -77,20 +79,13 @@ public class IrisHelper {
      */
     public static void setShadersActive(boolean enabled) {
         IrisApi.getInstance().getConfig().setShadersEnabledAndApply(enabled);
-        if (!enabled && hasIssuesWithMenuWorld()) {
-            try {
-                WorldRenderingSettings_setUseExtendedVertexFormat.invoke(WorldRenderingSettings_INSTANCE, false);
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                VRSettings.LOGGER.error("Vivecraft: error disabling Iris shaders:", e);
-            }
-        }
     }
 
     /**
      * @return if the currently loaded iris version has issues with building menuworlds while shaders are enabled
      */
     public static boolean hasIssuesWithMenuWorld() {
-        return init() && WorldRenderingSettings_setUseExtendedVertexFormat != null;
+        return false;
     }
 
     /**
@@ -182,6 +177,49 @@ public class IrisHelper {
         return new Matrix4f();
     }
 
+    public static void swapSSBOs(Object newPipeline, RenderPass newPass) {
+        if (init() && IrisRenderingPipeline_shaderStorageBufferHolder != null &&
+            ShaderStorageBufferHolder_setupBuffers != null && IrisRenderingPipeline != null &&
+            IrisRenderingPipeline.isInstance(newPipeline) && newPass != lastSSBOPass)
+        {
+            try {
+                Object ssbos = IrisRenderingPipeline_shaderStorageBufferHolder.get(newPipeline);
+                if (ssbos != null) {
+                    ShaderStorageBufferHolder_setupBuffers.invoke(ssbos);
+                }
+                lastSSBOPass = newPass;
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't swap iris ssbos:", e);
+            }
+        }
+    }
+
+    public static void registerPipeline(RenderPipeline pipeline, String shader) {
+        IrisProgram program = IrisProgram.valueOf(shader);
+        IrisApi.getInstance().assignPipeline(pipeline, program);
+    }
+
+    public static void setSkipBufferExtension(boolean enabled) {
+        if (init()) {
+            try {
+                ImmediateState_skipExtension_set.invoke(ImmediateState_skipExtension.get(null), enabled);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't set iris buffer extension:", e);
+            }
+        }
+    }
+
+    public static boolean getSkipBufferExtension() {
+        if (init()) {
+            try {
+                return (boolean) ImmediateState_skipExtension_get.invoke(ImmediateState_skipExtension.get(null));
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't set iris buffer extension:", e);
+            }
+        }
+        return false;
+    }
+
     /**
      * initializes all Reflections
      *
@@ -192,39 +230,50 @@ public class IrisHelper {
             return !INIT_FAILED;
         }
         try {
-            Class<?> iris = getClassWithAlternative(
+            Class<?> iris = ClassUtils.getClassWithAlternative(
                 "net.coderbot.iris.Iris",
                 "net.irisshaders.iris.Iris");
             Iris_reload = iris.getMethod("reload");
             Iris_getPipelineManager = iris.getMethod("getPipelineManager");
 
-            Class<?> pipelineManager = getClassWithAlternative(
+            Class<?> pipelineManager = ClassUtils.getClassWithAlternative(
                 "net.coderbot.iris.pipeline.PipelineManager",
                 "net.irisshaders.iris.pipeline.PipelineManager");
 
             PipelineManager_getPipeline = pipelineManager.getMethod("getPipeline");
 
-            Class<?> worldRenderingPipeline = getClassWithAlternative(
+            Class<?> worldRenderingPipeline = ClassUtils.getClassWithAlternative(
                 "net.coderbot.iris.pipeline.WorldRenderingPipeline",
                 "net.irisshaders.iris.pipeline.WorldRenderingPipeline");
 
             WorldRenderingPipeline_shouldRenderUnderwaterOverlay = worldRenderingPipeline.getMethod(
                 "shouldRenderUnderwaterOverlay");
 
+            Class<?> immediateState = Class.forName("net.irisshaders.iris.vertices.ImmediateState");
+            ImmediateState_skipExtension = immediateState.getField("skipExtension");
+            ImmediateState_skipExtension_set = ImmediateState_skipExtension.get(null).getClass()
+                .getMethod("set", Object.class);
+            ImmediateState_skipExtension_get = ImmediateState_skipExtension.get(null).getClass()
+                .getMethod("get");
             try {
-                // iris versions that have this have issues with menuworld building when shaders are on
-                Class<?> WorldRenderingSettings = Class.forName(
-                    "net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings");
-                WorldRenderingSettings_setUseExtendedVertexFormat = WorldRenderingSettings.getMethod(
-                    "setUseExtendedVertexFormat", boolean.class);
-                WorldRenderingSettings_shouldUseExtendedVertexFormat = WorldRenderingSettings.getMethod(
-                    "shouldUseExtendedVertexFormat");
-                WorldRenderingSettings_INSTANCE = WorldRenderingSettings.getField("INSTANCE").get(null);
-            } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException ignore) {}
+                // not all iris versions have ssbos so try them separately
+                IrisRenderingPipeline = ClassUtils.getClassWithAlternative(
+                    "net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline",
+                    "net.irisshaders.iris.pipeline.IrisRenderingPipeline");
+                IrisRenderingPipeline_shaderStorageBufferHolder = IrisRenderingPipeline.getDeclaredField(
+                    "shaderStorageBufferHolder");
+                IrisRenderingPipeline_shaderStorageBufferHolder.setAccessible(true);
 
+                Class<?> shaderStorageBufferHolder = ClassUtils.getClassWithAlternative(
+                    "net.coderbot.iris.gl.buffer.ShaderStorageBufferHolder",
+                    "net.irisshaders.iris.gl.buffer.ShaderStorageBufferHolder");
+                ShaderStorageBufferHolder_setupBuffers = shaderStorageBufferHolder.getMethod("setupBuffers");
+            } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException e) {
+                VRSettings.LOGGER.info("Vivecraft: iris has no SSBO support");
+            }
 
             // distant horizon compat
-            if (Xplat.isModLoaded("distanthorizons")) {
+            if (Xloader.isModLoaded("distanthorizons")) {
                 try {
                     Class<?> OverrideInjector = Class.forName(
                         "com.seibel.distanthorizons.coreapi.DependencyInjection.OverrideInjector");
@@ -262,27 +311,12 @@ public class IrisHelper {
                     DH_PRESENT = false;
                 }
             }
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e) {
             INIT_FAILED = true;
+            VRSettings.LOGGER.error("Vivecraft: Failed to initialize Iris compat", e);
         }
 
         INITIALIZED = true;
         return !INIT_FAILED;
-    }
-
-    /**
-     * does a class Lookup with an alternative, for convenience, since iris changed packages
-     *
-     * @param class1 first option
-     * @param class2 alternative option
-     * @return found class
-     * @throws ClassNotFoundException if neither class exists
-     */
-    private static Class<?> getClassWithAlternative(String class1, String class2) throws ClassNotFoundException {
-        try {
-            return Class.forName(class1);
-        } catch (ClassNotFoundException e) {
-            return Class.forName(class2);
-        }
     }
 }

@@ -52,7 +52,7 @@ public abstract class AbstractClientPlayerMixin extends LivingEntityMixin {
             vivecraft$particlesWithRandomOffset(instance, particleData, original, pos, dir);
         } else {
             // remote players
-            ClientVRPlayers.RotInfo rotInfo = ClientVRPlayers.getInstance().getRotationsForPlayer(this.uuid);
+            ClientVRPlayers.RotInfo rotInfo = ClientVRPlayers.getInstance().getLatestRotationsForPlayer(this.uuid);
             if (rotInfo != null) {
                 Vec3 pos;
                 if (this.getUsedItemHand() == InteractionHand.MAIN_HAND) {

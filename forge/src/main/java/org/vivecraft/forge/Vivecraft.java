@@ -1,15 +1,17 @@
 package org.vivecraft.forge;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.EventNetworkChannel;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.packet.WrappedPacket;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 import org.vivecraft.forge.event.ClientEvents;
@@ -29,6 +31,8 @@ public class Vivecraft {
 
     public Vivecraft(FMLJavaModLoadingContext context) {
         // init server config
+        // this is too early for the lang files to be loaded, is needed to register the commands though
+        // server config is validated again later to have the comments
         ServerConfig.init(null);
 
         VIVECRAFT_NETWORK_CHANNEL.addListener(event -> {
@@ -49,8 +53,13 @@ public class Vivecraft {
     }
 
     private static void handleServerVivePacket(FriendlyByteBuf buffer, CustomPayloadEvent.Context context) {
-        context.enqueueWork(
+        // workaround to have the packets run in sync with vanilla
+        new WrappedPacket(
             () -> ServerNetworking.handlePacket(VivecraftPayloadC2S.readPacket(buffer), context.getSender(),
-                p -> context.getConnection().send(Xplat.getS2CPacket(p))));
+                p -> context.getConnection().send(Xplat.getS2CPacket(p)))).handle(
+            (ServerGamePacketListenerImpl) context.getConnection().getPacketListener());
+        /*context.enqueueWork(
+            () -> ServerNetworking.handlePacket(VivecraftPayloadC2S.readPacket(buffer), context.getSender(),
+                p -> context.getConnection().send(Xplat.getS2CPacket(p))));*/
     }
 }

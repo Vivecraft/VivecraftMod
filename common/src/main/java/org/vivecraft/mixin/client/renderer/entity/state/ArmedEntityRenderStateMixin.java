@@ -11,14 +11,11 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client.ClientVRPlayers;
-import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Mixin(ArmedEntityRenderState.class)
 public class ArmedEntityRenderStateMixin {
@@ -41,7 +38,7 @@ public class ArmedEntityRenderStateMixin {
         {
             ItemStack otherStack = original.call(instance, humanoidArm.getOpposite());
             if (ClimbTracker.isClaws(otherStack) &&
-                !ClientVRPlayers.getInstance().getRotationsForPlayer(instance.getUUID()).seated)
+                !ClientVRPlayers.getInstance().isVRAndSeated(instance.getUUID()))
             {
                 return otherStack;
             }
@@ -56,11 +53,7 @@ public class ArmedEntityRenderStateMixin {
         @Local(argsOnly = true) ArmedEntityRenderState renderState)
     {
         ItemStack itemStack = original.call(instance, arm);
-        if (((EntityRenderStateExtension) renderState).vivecraft$isMainPlayer() &&
-            ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
-            RenderPass.isFirstPerson(ClientDataHolderVR.getInstance().currentPass) &&
-            !ShadersHelper.isRenderingShadows() &&
-            !(ImmersivePortalsHelper.isLoaded() && ImmersivePortalsHelper.isRenderingPortal()) &&
+        if (VREffectsHelper.isRenderingFirstPersonPlayer(renderState) &&
             // don't cancel climbing claws, unless menu hand
             (ClientDataHolderVR.getInstance().vrSettings.modelArmsMode != VRSettings.ModelArmsMode.COMPLETE ||
                 ClientDataHolderVR.getInstance().isMenuHand(arm) ||

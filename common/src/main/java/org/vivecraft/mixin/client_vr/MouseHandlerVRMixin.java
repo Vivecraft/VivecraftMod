@@ -1,10 +1,7 @@
 package org.vivecraft.mixin.client_vr;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,11 +24,6 @@ public class MouseHandlerVRMixin {
     @Final
     @Shadow
     private Minecraft minecraft;
-
-    @WrapOperation(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
-    private boolean vivecraft$checkNull(LocalPlayer instance, Operation<Boolean> original) {
-        return instance != null && original.call(instance);
-    }
 
 
     @Inject(method = "turnPlayer", at = @At("HEAD"), cancellable = true)
@@ -87,14 +79,14 @@ public class MouseHandlerVRMixin {
     }
 
     // we change the screen size different from window size, so need to modify the mouse position on grab/release
-    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 2)
+    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(Lcom/mojang/blaze3d/platform/Window;IDD)V"), index = 2)
     private double vivecraft$modifyXCenter(double x) {
         return VRState.VR_RUNNING
             ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenWidth() / 2
             : x;
     }
 
-    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 3)
+    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(Lcom/mojang/blaze3d/platform/Window;IDD)V"), index = 3)
     private double vivecraft$modifyYCenter(double y) {
         return VRState.VR_RUNNING
             ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenHeight() / 2

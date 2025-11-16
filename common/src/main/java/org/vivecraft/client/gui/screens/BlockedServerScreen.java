@@ -41,7 +41,8 @@ public class BlockedServerScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
-        this.message.renderCentered(guiGraphics, this.width / 2, 120);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
+        this.message.render(guiGraphics, MultiLineLabel.Align.CENTER, this.width / 2, 120,
+            this.minecraft.font.lineHeight, true, 0xFFFFFFFF);
     }
 }

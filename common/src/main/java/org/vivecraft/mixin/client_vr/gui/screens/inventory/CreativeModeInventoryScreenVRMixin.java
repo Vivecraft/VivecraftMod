@@ -7,6 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -15,7 +16,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.DyedItemColor;
-import net.minecraft.world.item.component.Unbreakable;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -72,13 +73,18 @@ public abstract class CreativeModeInventoryScreenVRMixin extends AbstractContain
             ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
             boots.set(DataComponents.CUSTOM_NAME,
                 Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
-            boots.set(DataComponents.UNBREAKABLE, new Unbreakable(false));
-            boots.set(DataComponents.DYED_COLOR, new DyedItemColor(0x8CE56F, false));
+            boots.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
+            boots.set(DataComponents.DYED_COLOR, new DyedItemColor(0x8CE56F));
+            boots.set(DataComponents.TOOLTIP_DISPLAY,
+                TooltipDisplay.DEFAULT.withHidden(DataComponents.UNBREAKABLE, true)
+                    .withHidden(DataComponents.DYED_COLOR, true));
 
             ItemStack claws = new ItemStack(Items.SHEARS);
             claws.set(DataComponents.CUSTOM_NAME,
                 Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
-            claws.set(DataComponents.UNBREAKABLE, new Unbreakable(false));
+            claws.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
+            claws.set(DataComponents.TOOLTIP_DISPLAY,
+                TooltipDisplay.DEFAULT.withHidden(DataComponents.UNBREAKABLE, true));
 
             items.add(boots);
             items.add(claws);

@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(AbstractBoat.class)
 public abstract class AbstractBoatMixin extends Entity {
@@ -32,12 +31,12 @@ public abstract class AbstractBoatMixin extends Entity {
 
     @ModifyExpressionValue(method = "controlBoat", at = @At(value = "CONSTANT", args = "floatValue=1F", ordinal = 0))
     private float vivecraft$inputLeft(float leftInput) {
-        return VRState.VR_RUNNING ? Minecraft.getInstance().player.input.leftImpulse : leftInput;
+        return VRState.VR_RUNNING ? Minecraft.getInstance().player.input.getMoveVector().x : leftInput;
     }
 
     @ModifyExpressionValue(method = "controlBoat", at = @At(value = "CONSTANT", args = "floatValue=1F", ordinal = 1))
     private float vivecraft$inputRight(float rightInput) {
-        return VRState.VR_RUNNING ? -Minecraft.getInstance().player.input.leftImpulse : rightInput;
+        return VRState.VR_RUNNING ? -Minecraft.getInstance().player.input.getMoveVector().x : rightInput;
     }
 
     // LOAD also counts the += so we need to skip those 3
@@ -48,9 +47,13 @@ public abstract class AbstractBoatMixin extends Entity {
             // only custom boat controls in standing mode
             if (this.inputUp) {
                 // controller-based
-                float yaw = dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD ?
-                    dataHolder.vrPlayer.vrdata_world_pre.hmd.getYaw() :
-                    dataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
+                float yaw = switch (dataHolder.vrSettings.getVrFreeMoveMode(false,
+                    dataHolder.vrPlayer.vrdata_world_pre.fbtMode)) {
+                    case HMD -> dataHolder.vrPlayer.vrdata_world_pre.hmd.getYaw();
+                    case WAIST -> dataHolder.vrPlayer.vrdata_world_pre.waist.getYaw();
+                    default -> dataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
+                };
+
                 if (dataHolder.vrSettings.vehicleRotation) {
                     // tank controls
                     float end = this.getYRot() % 360F;

@@ -2,8 +2,8 @@ package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROption;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.widgets.GuiVROption;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -15,6 +15,8 @@ public class GuiMixedRealitySettings extends GuiVROptionsBase {
         VRSettings.VrOptions.MIXED_REALITY_KEY_COLOR,
         VRSettings.VrOptions.MIXED_REALITY_FOV,
         VRSettings.VrOptions.MIXED_REALITY_RENDER_CAMERA_MODEL,
+        VRSettings.VrOptions.MIRROR_GUI,
+        VRSettings.VrOptions.MIXED_REALITY_GUI,
         VRSettings.VrOptions.MIXED_REALITY_UNDISTORTED,
         VRSettings.VrOptions.MIRROR_EYE,
         VRSettings.VrOptions.MONO_FOV,
@@ -85,7 +87,7 @@ public class GuiMixedRealitySettings extends GuiVROptionsBase {
     protected void loadDefaults() {
         super.loadDefaults();
         if (VRState.VR_INITIALIZED) {
-            this.dataHolder.vrRenderer.reinitWithoutShaders("Defaults Loaded");
+            this.dataHolder.vrRenderer.reinitFrameBuffersMaybe("Defaults Loaded");
         }
     }
 

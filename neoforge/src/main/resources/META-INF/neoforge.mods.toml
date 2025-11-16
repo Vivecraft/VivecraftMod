@@ -23,25 +23,30 @@ updateJSONURL = "https://raw.githubusercontent.com/Vivecraft/VivecraftMod/forge-
 [[dependencies.vivecraft]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.4.0-beta,)"
+versionRange = "[21.10.24-beta,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.4]"
+versionRange = "[1.21.10]"
 ordering = "NONE"
 side = "BOTH"
 
 [[mixins]]
 config = "vivecraft.mixins.json"
 [[mixins]]
+config = "vivecraft.neoforge.mixins.json"
+
+[[mixins]]
+config = "vivecraft.accessories.mixins.json"
+[[mixins]]
 config = "vivecraft.alexmobs.mixins.json"
 [[mixins]]
-config = "vivecraft.blur.mixins.json"
-[[mixins]]
 config = "vivecraft.bedrockify.mixins.json"
+[[mixins]]
+config = "vivecraft.blur.mixins.json"
 [[mixins]]
 config = "vivecraft.cataclysm.mixins.json"
 [[mixins]]
@@ -49,13 +54,11 @@ config = "vivecraft.dynamicfps.mixins.json"
 [[mixins]]
 config = "vivecraft.emf.mixins.json"
 [[mixins]]
-config = "vivecraft.sodium.mixins.json"
-[[mixins]]
 config = "vivecraft.iris.mixins.json"
 [[mixins]]
 config = "vivecraft.mca.mixins.json"
 [[mixins]]
-config = "vivecraft.physicsmod.mixins.json"
+config = "vivecraft.optifine.mixins.json"
 [[mixins]]
 config = "vivecraft.rei.mixins.json"
 [[mixins]]
@@ -63,6 +66,6 @@ config = "vivecraft.resolutioncontrol.mixins.json"
 [[mixins]]
 config = "vivecraft.sereneseasons.mixins.json"
 [[mixins]]
-config = "vivecraft.optifine.mixins.json"
+config = "vivecraft.sodium.mixins.json"
 [[mixins]]
-config = "vivecraft.neoforge.mixins.json"
+config = "vivecraft.xaerosmimimap.mixins.json"

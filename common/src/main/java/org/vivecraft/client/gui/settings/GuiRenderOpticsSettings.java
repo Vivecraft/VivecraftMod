@@ -3,9 +3,10 @@ package org.vivecraft.client.gui.settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROption;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.vivecraft.client.gui.framework.VROptionEntry;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.widgets.GuiVROption;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -36,6 +37,12 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
     };
     private static final VRSettings.VrOptions[] SINGLE_OPTIONS = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.MIRROR_EYE
+    };
+    private static final VRSettings.VrOptions[] OFF_OPTIONS = new VRSettings.VrOptions[]{
+        VRSettings.VrOptions.MIRROR_OFF_TEXT
+    };
+    private static final VRSettings.VrOptions[] GUI_MIRROR_OPTIONS = new VRSettings.VrOptions[]{
+        VRSettings.VrOptions.MIRROR_GUI
     };
     private final VROptionEntry[] MROptions = new VROptionEntry[]{new VROptionEntry(
         "vivecraft.options.screen.mixedreality.button", (button, mousePos) -> {
@@ -86,10 +93,20 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
 
         switch (this.dataHolder.vrSettings.displayMirrorMode) {
             case MIXED_REALITY -> super.init(this.MROptions, false);
-            case FIRST_PERSON -> super.init(UNDISTORTED_OPTIONS, false);
-            case THIRD_PERSON -> super.init(THIRD_OPTIONS, false);
-            case CROPPED -> super.init(CROP_OPTIONS, false);
+            case FIRST_PERSON -> {
+                super.init(UNDISTORTED_OPTIONS, false);
+                super.init(GUI_MIRROR_OPTIONS, false);
+            }
+            case THIRD_PERSON -> {
+                super.init(THIRD_OPTIONS, false);
+                super.init(GUI_MIRROR_OPTIONS, false);
+            }
+            case CROPPED -> {
+                super.init(CROP_OPTIONS, false);
+                super.init(GUI_MIRROR_OPTIONS, false);
+            }
             case SINGLE -> super.init(SINGLE_OPTIONS, false);
+            case OFF -> super.init(OFF_OPTIONS, false);
         }
 
         super.addDefaultButtons();
@@ -116,29 +133,14 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
     @Override
     protected void actionPerformed(AbstractWidget widget) {
         if (widget instanceof GuiVROption guivroption) {
-            if (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() ||
-                guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() ||
-                guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal())
-            {
-                if (VRState.VR_INITIALIZED) {
-                    if (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() &&
-                        ShadersHelper.isShaderActive())
-                    {
-                        this.dataHolder.vrRenderer.resizeFrameBuffers("Render Setting Changed");
-                    } else {
-                        this.dataHolder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
-                    }
-                }
+            if (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal()) {
                 this.reinit = true;
-            }
-            if (guivroption.getId() == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA.ordinal()) {
-                VRHotkeys.loadExternalCameraConfig(this.vrSettings);
             }
         }
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent mouseEvent) {
         // Hacky way of making the render scale slider only reinit on mouse release
         if (this.vrSettings.renderScaleFactor != this.prevRenderScaleFactor ||
             this.vrSettings.handCameraResScale != this.prevHandCameraResScale)
@@ -152,6 +154,6 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
             }
         }
 
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(mouseEvent);
     }
 }
