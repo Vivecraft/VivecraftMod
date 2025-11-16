@@ -50,18 +50,18 @@ public class XRBindings {
         set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.rotateAxis", "/user/hand/right/input/thumbstick"));
 
         set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/left/input/squeeze/value"));
-        set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/right/input/squeeze/value"));
-        set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/left/input/trigger/value"));
-        set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/right/input/trigger/value"));
+        //set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/right/input/squeeze/value"));
+        //set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/left/input/trigger/value"));
+        //set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/right/input/trigger/value"));
 
-        set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/squeeze/value"));
+        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/squeeze/value"));
         set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/right/input/squeeze/value"));
-        set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/trigger/value"));
-        set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/right/input/trigger/value"));
+        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/trigger/value"));
+        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/right/input/trigger/value"));
 
-        set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/squeeze/value"));
-        set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/right/input/squeeze/value"));
-        set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/trigger/value"));
+        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/squeeze/value"));
+        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/right/input/squeeze/value"));
+        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/trigger/value"));
         set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/right/input/trigger/value"));
         return set;
     }

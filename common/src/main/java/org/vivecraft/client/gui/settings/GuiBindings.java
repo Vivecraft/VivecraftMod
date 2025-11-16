@@ -13,7 +13,6 @@ import org.vivecraft.client.gui.widgets.SettingsList;
 import org.vivecraft.client_vr.provider.control.ActionType;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
-import org.vivecraft.server.config.ConfigBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
