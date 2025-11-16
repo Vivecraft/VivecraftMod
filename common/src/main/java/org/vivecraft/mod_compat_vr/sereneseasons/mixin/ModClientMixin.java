@@ -21,5 +21,4 @@ public class ModClientMixin {
             cir.setReturnValue(FoliageColor.FOLIAGE_BIRCH);
         }
     }
-
 }

@@ -396,6 +396,8 @@ public class VRSettings {
     public boolean allowCrawling = true;
     @SettingField(value = VrOptions.BCB_ON, config = "bcbOn")
     public boolean vrShowBlueCircleBuddy = true;
+    @SettingField(value = VrOptions.FEET_BODY_POSITION)
+    public boolean feetBodyPosition = true;
     @SettingField(VrOptions.VEHICLE_ROTATION)
     public boolean vehicleRotation = true;
     @SettingField(VrOptions.ANALOG_MOVEMENT)
@@ -1923,6 +1925,7 @@ public class VRSettings {
             }
         },
         BCB_ON(false, true), // Show Body Position
+        FEET_BODY_POSITION(false, true), // uses the average of the fbt feet trackers as body position
         WORLD_SCALE(true, false, 0, 29, 1, 2) { // World Scale
 
             @Override
