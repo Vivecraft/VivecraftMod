@@ -52,8 +52,15 @@ public abstract class GuiVROptionsBase extends Screen {
             .sprite(SEARCH_ICON, 15, 15)
             .size(20, 20)
             .build();
-        search.setX(this.width / 2 - 180);
-        search.setY((int) Math.ceil((float) (this.height / 6) - 10.0F));
+        if (this.width > 360) {
+            // but the search to the side
+            search.setX(this.width / 2 - 180);
+            search.setY((int) Math.ceil((float) (this.height / 6) - 10.0F));
+        } else {
+            // but the search above
+            search.setX(this.width / 2 - 155);
+            search.setY((int) Math.ceil((float) (this.height / 6) - 31.0F));
+        }
         search.setTooltip(Tooltip.create(Component.translatable("vivecraft.options.screen.search")));
         this.addRenderableWidget(search);
 
