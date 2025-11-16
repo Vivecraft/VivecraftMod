@@ -71,7 +71,7 @@ public interface DeviceCompat {
             KHROpenGLEnable.xrGetOpenGLGraphicsRequirementsKHR(instance, systemID, graphicsRequirements);
             //Bind the OpenGL context to the OpenXR instance and create the session
             Window window = Minecraft.getInstance().getWindow();
-            long windowHandle = window.getWindow();
+            long windowHandle = window.handle();
             if (Platform.getOSType() == Platform.WINDOWS) {
                 return XrGraphicsBindingOpenGLWin32KHR.calloc(stack).set(
                     KHROpenGLEnable.XR_TYPE_GRAPHICS_BINDING_OPENGL_WIN32_KHR,

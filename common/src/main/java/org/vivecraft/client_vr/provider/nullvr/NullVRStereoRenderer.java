@@ -1,21 +1,22 @@
 package org.vivecraft.client_vr.provider.nullvr;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class NullVRStereoRenderer extends VRRenderer {
 
-    protected int LeftEyeTextureId = -1;
-    protected int RightEyeTextureId = -1;
+    protected int leftEyeTextureId = -1;
+    protected int rightEyeTextureId = -1;
     public RenderTarget framebufferEyeLeft;
     public RenderTarget framebufferEyeRight;
 
@@ -45,41 +46,42 @@ public class NullVRStereoRenderer extends VRRenderer {
     public void createRenderTexture(int width, int height) {
         int boundTextureId = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
 
-        this.LeftEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.LeftEyeTextureId);
+        this.leftEyeTextureId = GlStateManager._genTexture();
+        GlStateManager._bindTexture(this.leftEyeTextureId);
         GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
         GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, width, height, 0, GL11.GL_RGBA, GL11.GL_INT,
             null);
 
-        this.RightEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.RightEyeTextureId);
+        this.rightEyeTextureId = GlStateManager._genTexture();
+        GlStateManager._bindTexture(this.rightEyeTextureId);
         GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
         GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, width, height, 0, GL11.GL_RGBA, GL11.GL_INT,
             null);
 
         this.lastError = RenderHelper.checkGLError("create VR textures");
-
-        this.framebufferEyeLeft = new VRTextureTarget("L Eye", width, height, false, this.LeftEyeTextureId, true, false,
-            false);
-
+        this.framebufferEyeLeft = VRTextureTarget.builder("L Eye")
+            .withSize(width, height)
+            .withTexId(this.leftEyeTextureId)
+            .withLinearFilter()
+            .build();
         VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEyeLeft);
-
         String leftError = RenderHelper.checkGLError("Left Eye framebuffer setup");
 
-        this.framebufferEyeRight = new VRTextureTarget("R Eye", width, height, false, this.RightEyeTextureId, true, false,
-            false);
-
+        this.framebufferEyeRight = VRTextureTarget.builder("R Eye")
+            .withSize(width, height)
+            .withTexId(this.rightEyeTextureId)
+            .withLinearFilter()
+            .build();
         VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEyeRight);
-
         String rightError = RenderHelper.checkGLError("Right Eye framebuffer setup");
 
         if (this.lastError.isEmpty()) {
             this.lastError = !leftError.isEmpty() ? leftError : rightError;
         }
 
-        RenderSystem.bindTexture(boundTextureId);
+        GlStateManager._bindTexture(boundTextureId);
     }
 
     @Override
@@ -126,14 +128,14 @@ public class NullVRStereoRenderer extends VRRenderer {
             this.framebufferEyeRight = null;
         }
 
-        if (this.LeftEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.LeftEyeTextureId);
-            this.LeftEyeTextureId = -1;
+        if (this.leftEyeTextureId > -1) {
+            GlStateManager._deleteTexture(this.leftEyeTextureId);
+            this.leftEyeTextureId = -1;
         }
 
-        if (this.RightEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.RightEyeTextureId);
-            this.RightEyeTextureId = -1;
+        if (this.rightEyeTextureId > -1) {
+            GlStateManager._deleteTexture(this.rightEyeTextureId);
+            this.rightEyeTextureId = -1;
         }
     }
 }

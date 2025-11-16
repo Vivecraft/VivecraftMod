@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.render.helpers;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
@@ -18,12 +17,14 @@ import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.render.ubos.LanczosUBO;
 import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
 import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
@@ -321,8 +322,8 @@ public class ShaderHelper {
             // source = DataHolder.getInstance().vrRenderer.telescopeFramebufferR;
             //
             if (source != null) {
-                blitFramebufferCrop(source, 0, 0, MC.mainRenderTarget.width, MC.mainRenderTarget.height,
-                    xCrop, yCrop, keepAspect, false);
+                ShaderHelper.blitFramebufferCrop(source, 0, 0, MC.mainRenderTarget.width, MC.mainRenderTarget.height,
+                    xCrop, yCrop, keepAspect);
             }
             if (source != GuiHandler.GUI_FRAMEBUFFER) {
                 blitGui();
@@ -334,6 +335,23 @@ public class ShaderHelper {
     }
 
     public static void doMixedRealityMirror() {
+        if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
+            RenderTarget source;
+            if (DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible()) {
+                source = DATA_HOLDER.vrRenderer.cameraFramebuffer;
+            } else if (DATA_HOLDER.vrSettings.mixedRealityUndistorted) {
+                source = DATA_HOLDER.vrRenderer.framebufferUndistorted;
+            } else {
+                if (DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
+                    source = DATA_HOLDER.vrRenderer.getLeftEyeTarget();
+                } else {
+                    source = DATA_HOLDER.vrRenderer.getRightEyeTarget();
+                }
+            }
+            blitFramebuffer(source, MC.mainRenderTarget.width / 2, 0,
+                MC.mainRenderTarget.width, MC.mainRenderTarget.height / 2);
+        }
+
         Vector3f camPlayer = DATA_HOLDER.vrPlayer.vrdata_room_pre.getHeadPivotF()
             .sub(DATA_HOLDER.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPositionF());
 
@@ -371,8 +389,6 @@ public class ShaderHelper {
             guiMask
         );
 
-        GpuTextureView black = RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE);
-
         renderFullscreenQuad(() -> "Vive mixed reality", VRShaders.MIXED_REALITY_PIPELINE, renderPass -> {
             // set uniforms
             renderPass.setUniform(MixedRealityUBO.UBO_NAME, VRShaders.MIXED_REALITY_UBO.getBuffer());
@@ -385,24 +401,6 @@ public class ShaderHelper {
 
             renderPass.bindSampler(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
                 GuiHandler.GUI_FRAMEBUFFER.getColorTextureView());
-
-            if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
-                RenderTarget source;
-                if (DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible()) {
-                    source = DATA_HOLDER.vrRenderer.cameraFramebuffer;
-                } else if (DATA_HOLDER.vrSettings.mixedRealityUndistorted) {
-                    source = DATA_HOLDER.vrRenderer.framebufferUndistorted;
-                } else {
-                    if (DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
-                        source = DATA_HOLDER.vrRenderer.getLeftEyeTarget();
-                    } else {
-                        source = DATA_HOLDER.vrRenderer.getRightEyeTarget();
-                    }
-                }
-                renderPass.bindSampler(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, source.getColorTextureView());
-            } else {
-                renderPass.bindSampler(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, black);
-            }
         }, null);
         VRShaders.MIXED_REALITY_UBO.endFrame();
     }
@@ -452,46 +450,80 @@ public class ShaderHelper {
         float mirrorAspect = (float) MC.mainRenderTarget.width / (float) MC.mainRenderTarget.height;
         float guiAspect = (float) GuiHandler.GUI_FRAMEBUFFER.width / (float) GuiHandler.GUI_FRAMEBUFFER.height;
 
-        float xMin = 0;
-        float yMin = 0;
+        float xMin = -1.0F;
+        float yMin = -1.0F;
         float xMax = 1.0F;
         float yMax = 1.0F;
 
         if (mirrorAspect > guiAspect) {
             // mirror is wider than the gui
             // limit the width, so the complete height is filled
-            float aspect = (guiAspect / mirrorAspect) * 0.5F;
+            float aspect = guiAspect / mirrorAspect;
 
-            xMin = 0.5F - aspect;
-            xMax = 0.5F + aspect;
+            xMin = -aspect;
+            xMax = aspect;
         } else {
             // mirror is taller than the gui
             // limit the height, so the complete width is filled
             // and shift the gui to the bottom
-            yMax = (mirrorAspect / guiAspect);
+            yMax = (mirrorAspect / guiAspect) * 2F - 1F;
         }
 
-        int x = (int) (xMin * MC.mainRenderTarget.width);
-        int y = (int) (yMin * MC.mainRenderTarget.height);
-        int width = (int) (xMax * MC.mainRenderTarget.width) - x;
-        int height = (int) (yMax * MC.mainRenderTarget.height) - y;
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.QUADS, VRShaders.BLIT_VR_BLEND_PIPELINE.getVertexFormat());
 
-        blitToScreen(GuiHandler.GUI_FRAMEBUFFER, x, width, height, y, 0, 0, true, true);
+        // position quad
+        bufferBuilder.addVertex(xMin, yMin, 0.0F).setUv(xMin, yMin);
+        bufferBuilder.addVertex(xMax, yMin, 0.0F).setUv(xMax, yMin);
+        bufferBuilder.addVertex(xMax, yMax, 0.0F).setUv(xMax, yMax);
+        bufferBuilder.addVertex(xMin, yMax, 0.0F).setUv(xMin, yMax);
+
+        try (MeshData meshData = bufferBuilder.buildOrThrow()) {
+            GpuBuffer gpuBuffer = VRShaders.BLIT_VR_BLEND_PIPELINE.getVertexFormat()
+                .uploadImmediateVertexBuffer(meshData.vertexBuffer());
+
+            GpuBuffer indexBuffer;
+            VertexFormat.IndexType indexType;
+            if (meshData.indexBuffer() == null) {
+                RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(
+                    VertexFormat.Mode.QUADS);
+                indexBuffer = autoStorageIndexBuffer.getBuffer(6);
+                indexType = autoStorageIndexBuffer.type();
+            } else {
+                indexBuffer = VRShaders.BLIT_VR_BLEND_PIPELINE.getVertexFormat()
+                    .uploadImmediateIndexBuffer(meshData.indexBuffer());
+                indexType = meshData.drawState().indexType();
+            }
+
+            try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
+                .createRenderPass(() -> "Vive Blit", MC.getMainRenderTarget().getColorTextureView(),
+                    OptionalInt.empty()))
+            {
+                renderPass.setPipeline(VRShaders.BLIT_VR_BLEND_PIPELINE);
+                renderPass.setVertexBuffer(0, gpuBuffer);
+
+                renderPass.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER,
+                    GuiHandler.GUI_FRAMEBUFFER.getColorTextureView());
+
+                renderPass.setIndexBuffer(indexBuffer, indexType);
+                renderPass.drawIndexed(0, 0, 6, 1);
+            }
+        }
     }
 
     /**
      * blits the given {@code source} RenderTarget to the bound framebuffer<br>
      * the {@code source} is drawn to the rectangle at {@code left},{@code top} with a size of {@code width},{@code height}<br>
      * if {@code xCropFactor} or {@code yCropFactor} are non 0 the {@code source} gets zoomed in
-     * @param source RenderTarget to draw to the screen
-     * @param left left edge of the target area
-     * @param top top edge of the target area
-     * @param right right edge width of the target area
-     * @param bottom bottom edge of the target area
+     *
+     * @param source      RenderTarget to draw to the screen
+     * @param left        left edge of the target area
+     * @param top         top edge of the target area
+     * @param right       right edge width of the target area
+     * @param bottom      bottom edge of the target area
      * @param xCropFactor vertical crop factor for the {@code source}
      * @param yCropFactor horizontal crop factor for the {@code source}
-     * @param keepAspect keeps the aspect ratio in takt when cropping the buffer
-     * @param blend       if alpha blending should be used
+     * @param keepAspect  keeps the aspect ratio in takt when cropping the buffer
      */
     private static void blitFramebufferCrop(
         RenderTarget source, int left, int top, int right, int bottom,
@@ -499,7 +531,7 @@ public class ShaderHelper {
     {
         if (keepAspect) {
             float drawAspect = (float) MC.mainRenderTarget.width / (float) MC.mainRenderTarget.height;
-            float bufferAspect = (float) source.viewWidth / (float) source.viewHeight;
+            float bufferAspect = (float) source.width / (float) source.height;
             if (drawAspect > bufferAspect) {
                 // destination is wider than the buffer
                 float heightAspect = (bufferAspect / drawAspect) * (0.5F - yCropFactor);
@@ -518,29 +550,29 @@ public class ShaderHelper {
         int xMax = source.width - xMin;
         int yMax = source.height - yMin;
 
-        GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, source.frameBufferId);
-        GlStateManager._glBlitFrameBuffer(
+        OpenGLHelper.blitFramebuffer(
+            source.getColorTexture(), MC.mainRenderTarget.getColorTexture(),
             xMin, yMin, xMax, yMax,
             left, top, right, bottom,
             GL11C.GL_COLOR_BUFFER_BIT, GL11C.GL_LINEAR);
-        GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, 0);
     }
+
     /**
      * blits the given {@code source} RenderTarget to the bound framebuffer
+     *
      * @param source RenderTarget to draw to the screen
-     * @param left left edge of the target area
-     * @param top top edge of the target area
-     * @param right right edge width of the target area
+     * @param left   left edge of the target area
+     * @param top    top edge of the target area
+     * @param right  right edge width of the target area
      * @param bottom bottom edge of the target area
      */
     private static void blitFramebuffer(
         RenderTarget source, int left, int top, int right, int bottom)
     {
-        GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, source.frameBufferId);
-        GlStateManager._glBlitFrameBuffer(
+        OpenGLHelper.blitFramebuffer(
+            source.getColorTexture(), MC.mainRenderTarget.getColorTexture(),
             0, 0, source.width, source.height,
             left, top, right, bottom,
             GL11C.GL_COLOR_BUFFER_BIT, GL11C.GL_LINEAR);
-        GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, 0);
     }
 }

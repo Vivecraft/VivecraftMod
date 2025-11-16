@@ -15,6 +15,7 @@ import org.lwjgl.opengl.GL31;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -27,7 +28,6 @@ import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openxr.control.WrappedBinding;
-import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.nio.ByteBuffer;
@@ -166,13 +166,6 @@ public class MCOpenXR extends MCVR {
             if (!this.dh.vrSettings.seated) {
                 Profiler.get().push("controllers");
                 Profiler.get().push("gui");
-
-                if (this.mc.screen == null && this.dh.vrSettings.vrTouchHotbar) {
-
-                    if (this.dh.vrSettings.vrHudLockMode != VRSettings.HUDLock.HEAD && this.hudPopup) {
-                        this.processHotbar();
-                    }
-                }
 
                 Profiler.get().pop();
             }
@@ -579,6 +572,11 @@ public class MCOpenXR extends MCVR {
             logError(error, "xrGetReferenceSpaceBoundsRect", "");
             return new Vector2f(vec.width(), vec.height());
         }
+    }
+
+    @Override
+    public void refreshControllerTransforms() {
+        // TODO controller type overrides
     }
 
     @Override
@@ -1044,8 +1042,8 @@ public class MCOpenXR extends MCVR {
             for (WrappedBinding binding: WrappedBinding.quest2Bindings()) {
                 long action = createAction(binding.path().replace("/","."), binding.path(), binding.type(),
                     new XrActionSet(actionSet, this.instance), binding.path().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
-                mappedBindings.put(binding, action);
-                pathBindings.put(binding.path(), binding);
+                this.mappedBindings.put(binding, action);
+                this.pathBindings.put(binding.path(), binding);
             }
         }
 

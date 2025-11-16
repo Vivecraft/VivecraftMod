@@ -6,6 +6,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
+import org.vivecraft.client_vr.VRLayeredRenderTarget;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -17,8 +18,8 @@ import java.nio.IntBuffer;
 public class OpenXRStereoRenderer extends VRRenderer {
     private final MCOpenXR openxr;
     private int swapIndex;
-    private VRTextureTarget[] leftFramebuffers;
-    private VRTextureTarget[] rightFramebuffers;
+    private VRLayeredRenderTarget[] leftFramebuffers;
+    private VRLayeredRenderTarget[] rightFramebuffers;
     private boolean render;
     private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
     private boolean recalculateProjectionMatrix = true;
@@ -47,14 +48,14 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 XrSwapchainImageBaseHeader.create(swapchainImageBuffer.address(), swapchainImageBuffer.capacity()));
             this.openxr.logError(error, "xrEnumerateSwapchainImages", "get images");
 
-            this.leftFramebuffers = new VRTextureTarget[imageCount];
-            this.rightFramebuffers = new VRTextureTarget[imageCount];
+            this.leftFramebuffers = new VRLayeredRenderTarget[imageCount];
+            this.rightFramebuffers = new VRLayeredRenderTarget[imageCount];
 
             for (int i = 0; i < imageCount; i++) {
                 XrSwapchainImageOpenGLKHR openxrImage = swapchainImageBuffer.get(i);
-                this.leftFramebuffers[i] = new VRTextureTarget("L Eye " + i, width, height, openxrImage.image(), 0);
+                this.leftFramebuffers[i] = new VRLayeredRenderTarget("L Eye " + i, width, height, openxrImage.image(), 0);
                 String leftError = RenderHelper.checkGLError("Left Eye " + i + " framebuffer setup");
-                this.rightFramebuffers[i] = new VRTextureTarget("R Eye " + i, width, height, openxrImage.image(), 1);
+                this.rightFramebuffers[i] = new VRLayeredRenderTarget("R Eye " + i, width, height, openxrImage.image(), 1);
                 String rightError = RenderHelper.checkGLError("Right Eye " + i + " framebuffer setup");
 
                 if (this.lastError.isEmpty()) {
@@ -190,14 +191,14 @@ public class OpenXRStereoRenderer extends VRRenderer {
         super.destroy();
 
         if (this.leftFramebuffers != null) {
-            for (VRTextureTarget leftFramebuffer : this.leftFramebuffers) {
+            for (VRLayeredRenderTarget leftFramebuffer : this.leftFramebuffers) {
                 leftFramebuffer.destroyBuffers();
             }
             this.leftFramebuffers = null;
         }
 
         if (this.rightFramebuffers != null) {
-            for (VRTextureTarget rightFramebuffer : this.rightFramebuffers) {
+            for (VRLayeredRenderTarget rightFramebuffer : this.rightFramebuffers) {
                 rightFramebuffer.destroyBuffers();
             }
             this.rightFramebuffers = null;

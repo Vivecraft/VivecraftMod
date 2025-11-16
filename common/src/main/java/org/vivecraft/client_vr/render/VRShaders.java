@@ -37,7 +37,6 @@ public class VRShaders {
 
     // mixed reality shader and its uniforms
     public static MixedRealityUBO MIXED_REALITY_UBO;
-    public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
     public static final String MIXED_REALITY_GUI_COLOR_SAMPLER = "guiColor";
@@ -50,13 +49,13 @@ public class VRShaders {
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/mixedreality_vr"))
         .withUniform(MixedRealityUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
-        .withSampler(MIXED_REALITY_FIRST_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)
         .withSampler(MIXED_REALITY_GUI_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withBlend(BlendFunction.TRANSLUCENT)
         .build();
 
     // vr post shader and its uniforms
@@ -76,16 +75,6 @@ public class VRShaders {
 
     // blit shader
     public static final String BLIT_VR_COLOR_SAMPLER = "DiffuseSampler";
-
-    public static final RenderPipeline BLIT_VR_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_blit")
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
-        .withSampler(BLIT_VR_COLOR_SAMPLER)
-        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .build();
 
     public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_blit")

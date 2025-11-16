@@ -220,7 +220,6 @@ public class VRPassHelper {
         Profiler.get().push("vrMirror");
         // use the vanilla target for the mirror
         RenderPassManager.setMirrorRenderPass();
-        MC.mainRenderTarget.bindWrite(true);
         ShaderHelper.drawMirror();
         RenderHelper.checkGLError("post-mirror");
 

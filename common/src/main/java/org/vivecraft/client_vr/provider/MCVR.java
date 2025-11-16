@@ -145,6 +145,10 @@ public abstract class MCVR {
     protected int quickTorchPreviousSlot;
     protected Map<String, VRInputAction> inputActions = new HashMap<>();
     protected Map<String, VRInputAction> inputActionsByKeyBinding = new HashMap<>();
+
+    private final Map<VRInputActionSet, Set<VRInputAction>> unpressedSetKeys = new EnumMap<>(VRInputActionSet.class);
+    private List<VRInputActionSet> activeActionSets = new ArrayList<>();
+
     protected final Map<String, TrackpadSwipeSampler> trackpadSwipeSamplers = new HashMap<>();
     protected boolean inputInitialized;
     public final DeviceCompat device;
@@ -183,6 +187,10 @@ public abstract class MCVR {
         }
 
         this.oscTrackers = new OSCTrackerReceiver(this);
+
+        for (VRInputActionSet set : VRInputActionSet.values()) {
+            this.unpressedSetKeys.put(set, new HashSet<>());
+        }
     }
 
     /**
@@ -448,6 +456,15 @@ public abstract class MCVR {
      */
     public boolean isControllerTracking(ControllerType controller) {
         return this.isControllerTracking(controller.ordinal());
+    }
+
+    protected void updateActiveActionSets(List<VRInputActionSet> activeSets) {
+        // clear any sets that got deactivated
+        this.activeActionSets.removeAll(activeSets);
+        for (VRInputActionSet set : this.activeActionSets) {
+            this.unpressedSetKeys.get(set).clear();
+        }
+        this.activeActionSets = activeSets;
     }
 
     /**
@@ -1442,7 +1459,10 @@ public abstract class MCVR {
      * processes the fetched inputs from the VR runtime, and maps them to the ingame keys
      */
     public void processInputs() {
-        if (this.dh.vrSettings.seated || ClientDataHolderVR.VIEW_ONLY || !this.inputInitialized) return;
+        if (this.dh.vrSettings.seated || this.dh.viewOnly || !this.inputInitialized) {
+            this.ignorePressesNextFrame = false;
+            return;
+        }
 
         for (VRInputAction action : this.inputActions.values()) {
             if (action.isHanded()) {
@@ -1480,8 +1500,8 @@ public abstract class MCVR {
             // try to prevent double left clicks
             (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui ||
                 !(action.actionSet == VRInputActionSet.INGAME &&
-                    action.keyBinding.key.getType() == InputConstants.Type.MOUSE &&
-                    action.keyBinding.key.getValue() == GLFW.GLFW_MOUSE_BUTTON_LEFT && this.mc.screen != null
+                    action.keyBinding.key == InputConstants.Type.MOUSE.getOrCreate(GLFW.GLFW_MOUSE_BUTTON_LEFT) &&
+                    this.mc.screen != null
                 )
             ))
         {
@@ -1489,16 +1509,64 @@ public abstract class MCVR {
                 if (action.isButtonPressed() && action.isEnabled()) {
                     // We do this, so shit like closing a GUI by clicking a button won't
                     // also click in the world immediately after.
-                    if (!this.ignorePressesNextFrame) {
-                        action.pressBinding();
+                    if (!this.ignorePressesNextFrame || canActionBeRepressed(action)) {
+                        pressAction(action);
                     }
                 } else {
-                    action.unpressBinding();
+                    unpressAction(action);
                 }
+            } else if (action.isButtonPressed() && action.isEnabled() && !action.keyBinding.isDown() &&
+                canActionBeRepressed(action))
+            {
+                // allow repressing ingame buttons that were held before
+                pressAction(action);
             }
-        } else {
-            action.unpressBinding();
+        } else if (checkIfNotMovement(action)) {
+            unpressAction(action);
         }
+    }
+
+    /**
+     * @param action VRInputAction to check
+     * @return if the given VRInputAction was pressed before actionset changes and can be repressed
+     */
+    private boolean canActionBeRepressed(VRInputAction action) {
+        // allow repressing ingame buttons that were held before the set change
+        return action.actionSet == VRInputActionSet.INGAME &&
+            this.unpressedSetKeys.get(action.actionSet).contains(action);
+    }
+
+    /**
+     * presses the given VRInputActions binding and removes it from the unpressed keys
+     *
+     * @param action VRInputAction to press
+     */
+    private void pressAction(VRInputAction action) {
+        action.pressBinding();
+        this.unpressedSetKeys.get(action.actionSet).remove(action);
+    }
+
+    /**
+     * unpresses the given VRInputActions binding and adds it to the unpressed keys, if its actionSet is not active right now
+     *
+     * @param action VRInputAction to press
+     */
+    private void unpressAction(VRInputAction action) {
+        if (!this.activeActionSets.contains(action.actionSet) && action.isButtonChanged()) {
+            this.unpressedSetKeys.get(action.actionSet).add(action);
+        }
+        action.unpressBinding();
+    }
+
+    /**
+     * @param action VRInputAction to check for
+     * @return if the given action does not correspond to one of the movement keys, or if the player didn't move
+     */
+    private boolean checkIfNotMovement(VRInputAction action) {
+        return action.keyBinding != this.mc.options.keyLeft &&
+            action.keyBinding != this.mc.options.keyRight &&
+            action.keyBinding != this.mc.options.keyUp &&
+            action.keyBinding != this.mc.options.keyDown || !this.isMovement;
     }
 
     /**

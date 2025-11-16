@@ -65,7 +65,11 @@ void main(void) {
         vec2 sampleTexCoord = fract(texCoordinates * 2.0);
         if (texCoordinates.x >= 0.5 && texCoordinates.y < 0.5) {
             // first person
-            out_Color.rgb = sampleTexture(firstPersonColor, sampleTexCoord, GUI_FIRST).rgb;
+            if ((GUI_FIRST & guiMask) != 0) {
+                out_Color = texture(guiColor, sampleTexCoord);
+            } else {
+                out_Color = vec4(0);
+            }
         } else {
             vec4 thirdColor = sampleTexture(thirdPersonColor, sampleTexCoord, GUI_THIRD);
             if (texCoordinates.x < 0.5 && texCoordinates.y < 0.5) {

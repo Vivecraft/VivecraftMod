@@ -75,6 +75,7 @@ import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -302,6 +303,20 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             return false;
         } else {
             return renderLevel;
+        }
+    }
+
+    @WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
+    private void vivecraft$blitMirror(RenderTarget instance, Operation<Void> original) {
+        if (VRState.VR_RUNNING) {
+            original.call(this.mainRenderTarget);
+            RenderPassManager.setGUIRenderPass();
+        } else {
+            if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
+                // show message that the game is connecting to the vr runtime
+                RenderHelper.drawVRConnectingMessage();
+            }
+            original.call(instance);
         }
     }
 

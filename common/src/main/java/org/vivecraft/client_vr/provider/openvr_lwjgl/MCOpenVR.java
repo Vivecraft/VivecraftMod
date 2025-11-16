@@ -76,9 +76,6 @@ public class MCOpenVR extends MCVR {
     private final Map<VRInputActionSet, Long> actionSetHandles = new EnumMap<>(VRInputActionSet.class);
     private VRActiveActionSet.Buffer activeActionSetsBuffer;
 
-    private final Map<VRInputActionSet, Set<VRInputAction>> unpressedSetKeys = new EnumMap<>(VRInputActionSet.class);
-    private List<VRInputActionSet> activeActionSets = new ArrayList<>();
-
     private Map<Long, String> controllerComponentNames;
     private Map<String, Matrix4f[]> controllerComponentTransforms;
 
@@ -211,10 +208,6 @@ public class MCOpenVR extends MCVR {
         for (int i = 0; i < k_unMaxTrackedDeviceCount; i++) {
             this.poseMatrices[i] = new Matrix4f();
             this.deviceVelocity[i] = new Vector3f();
-        }
-
-        for (VRInputActionSet set : VRInputActionSet.values()) {
-            this.unpressedSetKeys.put(set, new HashSet<>());
         }
 
         // allocate memory
@@ -782,12 +775,7 @@ public class MCOpenVR extends MCVR {
                 .set(this.getActionSetHandle(activeSets.get(i)), k_ulInvalidInputValueHandle, 0, 0);
         }
 
-        // clear any sets that got deactivated
-        this.activeActionSets.removeAll(activeSets);
-        for (VRInputActionSet set : this.activeActionSets) {
-            this.unpressedSetKeys.get(set).clear();
-        }
-        this.activeActionSets = activeSets;
+        this.updateActiveActionSets(activeSets);
 
         return !activeSets.isEmpty();
     }

@@ -9,7 +9,8 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.vivecraft.client.gui.widgets.SettingsList;
+import org.vivecraft.client.gui.framework.screens.GuiListScreen;
+import org.vivecraft.client.gui.framework.widgets.SettingsList;
 import org.vivecraft.client_vr.provider.control.ActionType;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
@@ -56,13 +57,12 @@ public class GuiBindings extends GuiListScreen {
         }
 
         @Override
-        public void render(
-            GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY,
-            boolean hovering, float partialTick)
+        public void renderContent(
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            super.render(guiGraphics, index, top, left, width, height, mouseX, mouseY, hovering, partialTick);
-            this.resetButton.setX(left + 230);
-            this.resetButton.setY(top);
+            super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
+            this.resetButton.setX(this.getContentRight() - 20);
+            this.resetButton.setY(this.getContentY());
             this.resetButton.active = this.canReset.getAsBoolean();
             this.resetButton.render(guiGraphics, mouseX, mouseY, partialTick);
         }
