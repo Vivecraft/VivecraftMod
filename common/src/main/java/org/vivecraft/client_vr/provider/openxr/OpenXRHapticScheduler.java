@@ -3,7 +3,7 @@ package org.vivecraft.client_vr.provider.openxr;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.HapticScheduler;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 

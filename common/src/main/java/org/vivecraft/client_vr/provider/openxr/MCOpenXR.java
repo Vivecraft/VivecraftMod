@@ -20,15 +20,16 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ActionType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.openxr.control.WrappedBinding;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -70,6 +71,9 @@ public class MCOpenXR extends MCVR {
     public boolean shouldRender = true;
     public long[] haptics = new long[2];
     public String systemName;
+
+    public Map<WrappedBinding, Long> mappedBindings = new HashMap<>();
+    public Map<String, WrappedBinding> pathBindings = new HashMap<>();
 
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
@@ -314,8 +318,11 @@ public class MCOpenXR extends MCVR {
     }
 
     public void readNewData(VRInputAction action) {
+        if (action.handle == 0) {
+            return;
+        }
         switch (action.type) {
-            case "boolean" -> {
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
                 if (action.isHanded()) {
                     for (ControllerType controllertype1 : ControllerType.values()) {
                         this.readBoolean(action, controllertype1);
@@ -325,7 +332,7 @@ public class MCOpenXR extends MCVR {
                 }
             }
 
-            case "vector1" -> {
+            case VEC1 -> {
                 if (action.isHanded()) {
                     for (ControllerType controllertype : ControllerType.values()) {
                         this.readFloat(action, controllertype);
@@ -335,7 +342,7 @@ public class MCOpenXR extends MCVR {
                 }
             }
 
-            case "vector2" -> {
+            case VEC2 -> {
                 if (action.isHanded()) {
                     for (ControllerType controllertype : ControllerType.values()) {
                         this.readVecData(action, controllertype);
@@ -358,9 +365,22 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_BOOLEAN);
             int error = XR10.xrGetActionStateBoolean(this.session, info, state);
             logError(error, "xrGetActionStateBoolean", action.name);
+
+            if (state.changedSinceLastSync()) {
+                if (state.currentState()) {
+                    action.digitalData[i].toggle = !action.digitalData[i].toggle;
+                    action.digitalData[i].doublePress = System.nanoTime() - action.digitalData[i].lastChange > 250_000_000L;
+                } else {
+                    action.digitalData[i].longPress = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                }
+                action.digitalData[i].lastChange = System.nanoTime();
+            } else if (state.currentState()){
+                action.digitalData[i].hold = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+            }
 
             action.digitalData[i].state = state.currentState();
             action.digitalData[i].isActive = state.isActive();
@@ -380,6 +400,7 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateFloat state = XrActionStateFloat.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_FLOAT);
             int error = XR10.xrGetActionStateFloat(this.session, info, state);
             logError(error, "xrGetActionStateFloat", action.name);
@@ -403,6 +424,7 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle,
                 new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
             XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_VECTOR2F);
             int error = XR10.xrGetActionStateVector2f(this.session, info, state);
             logError(error, "xrGetActionStateVector2f", action.name);
@@ -1017,33 +1039,35 @@ public class MCOpenXR extends MCVR {
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
             long actionSet = makeActionSet(this.instance, vrinputactionset.name, vrinputactionset.localizedName, 0);
             this.actionSetHandles.put(vrinputactionset, actionSet);
-        }
 
-        for (VRInputAction vrinputaction : this.inputActions.values()) {
-            long action = createAction(vrinputaction.name, vrinputaction.name, vrinputaction.type,
-                new XrActionSet(this.actionSetHandles.get(vrinputaction.actionSet), this.instance), BOTH_HANDS);
-            vrinputaction.setHandle(action);
+            //TODO select the proper headset
+            for (WrappedBinding binding: WrappedBinding.quest2Bindings()) {
+                long action = createAction(binding.path().replace("/","."), binding.path(), binding.type(),
+                    new XrActionSet(actionSet, this.instance), binding.path().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
+                mappedBindings.put(binding, action);
+                pathBindings.put(binding.path(), binding);
+            }
         }
 
         setupControllers();
 
         XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
-        this.haptics[RIGHT_CONTROLLER] = createAction("/actions/global/out/righthaptic",
-            "/actions/global/out/righthaptic", "haptic", actionSet, BOTH_HANDS);
-        this.haptics[LEFT_CONTROLLER] = createAction("/actions/global/out/lefthaptic", "/actions/global/out/lefthaptic",
-            "haptic", actionSet, BOTH_HANDS);
+        this.haptics[RIGHT_CONTROLLER] = createAction("righthaptic",
+            "/actions/global/out/righthaptic", ActionType.HAPTIC, actionSet, BOTH_HANDS[1]);
+        this.haptics[LEFT_CONTROLLER] = createAction("lefthaptic", "/actions/global/out/lefthaptic",
+            ActionType.HAPTIC, actionSet, BOTH_HANDS[0]);
     }
 
     private void setupControllers() {
         XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
-        this.grip[RIGHT_CONTROLLER] = createAction("/actions/global/in/righthand", "/actions/global/in/righthand",
-            "pose", actionSet, BOTH_HANDS);
-        this.grip[LEFT_CONTROLLER] = createAction("/actions/global/in/lefthand", "/actions/global/in/lefthand", "pose",
-            actionSet, BOTH_HANDS);
-        this.aim[RIGHT_CONTROLLER] = createAction("/actions/global/in/righthandaim", "/actions/global/in/righthandaim",
-            "pose", actionSet, BOTH_HANDS);
-        this.aim[LEFT_CONTROLLER] = createAction("/actions/global/in/lefthandaim", "/actions/global/in/lefthandaim",
-            "pose", actionSet, BOTH_HANDS);
+        this.grip[RIGHT_CONTROLLER] = createAction("righthand", "/actions/global/in/righthand",
+            ActionType.POSE, actionSet, BOTH_HANDS[1]);
+        this.grip[LEFT_CONTROLLER] = createAction("lefthand", "/actions/global/in/lefthand", ActionType.POSE,
+            actionSet, BOTH_HANDS[0]);
+        this.aim[RIGHT_CONTROLLER] = createAction("righthandaim", "/actions/global/in/righthandaim",
+            ActionType.POSE, actionSet, BOTH_HANDS[1]);
+        this.aim[LEFT_CONTROLLER] = createAction("lefthandaim", "/actions/global/in/lefthandaim",
+            ActionType.POSE, actionSet, BOTH_HANDS[0]);
     }
 
     private void loadDefaultBindings() {
@@ -1051,6 +1075,9 @@ public class MCOpenXR extends MCVR {
             int error;
             for (String headset : XRBindings.supportedHeadsets()) {
                 VRSettings.LOGGER.info("loading defaults for {}", headset);
+                if (!"/interaction_profiles/oculus/touch_controller".equals(headset)) {
+                    continue;
+                }
                 Pair<String, String>[] defaultBindings = XRBindings.getBinding(headset).toArray(new Pair[0]);
                 XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 6,
                     stack); //TODO different way of adding controller poses
@@ -1058,6 +1085,10 @@ public class MCOpenXR extends MCVR {
                 for (int i = 0; i < defaultBindings.length; i++) {
                     Pair<String, String> pair = defaultBindings[i];
                     VRInputAction binding = this.getInputActionByName(pair.getLeft());
+                    long handle = this.mappedBindings.get(this.pathBindings.get(pair.getRight()));
+                    binding.setHandle(handle);
+                    binding.setType(this.pathBindings.get(pair.getRight()).type());
+                    binding.setHand(this.pathBindings.get(pair.getRight()).path().contains("/left/") ? ControllerType.LEFT : ControllerType.RIGHT);
                     if (binding.handle == 0L) {
                         VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", pair.getLeft(), pair.getRight());
                         continue;
@@ -1164,37 +1195,30 @@ public class MCOpenXR extends MCVR {
     }
 
     private long createAction(
-        String name, String localisedName, String type, XrActionSet actionSet, @Nullable String[] subactionPaths)
+        String name, String localisedName, ActionType type, XrActionSet actionSet, String subactionPath)
     {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            String s = name.split("/")[name.split("/").length - 1].toLowerCase();
+            String s = name.replace(".user.hand.", "");
             XrActionCreateInfo hands = XrActionCreateInfo.calloc(stack);
             hands.type(XR10.XR_TYPE_ACTION_CREATE_INFO);
             hands.next(NULL);
             hands.actionName(memUTF8(s));
             switch (type) {
-                case "boolean" -> hands.actionType(XR10.XR_ACTION_TYPE_BOOLEAN_INPUT);
-                case "vector1" -> hands.actionType(XR10.XR_ACTION_TYPE_FLOAT_INPUT);
-                case "vector2" -> hands.actionType(XR10.XR_ACTION_TYPE_VECTOR2F_INPUT);
-                case "pose" -> hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);
-                case "haptic" -> hands.actionType(XR10.XR_ACTION_TYPE_VIBRATION_OUTPUT);
+                case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> hands.actionType(XR10.XR_ACTION_TYPE_BOOLEAN_INPUT);
+                case VEC1 -> hands.actionType(XR10.XR_ACTION_TYPE_FLOAT_INPUT);
+                case VEC2 -> hands.actionType(XR10.XR_ACTION_TYPE_VECTOR2F_INPUT);
+                case POSE -> hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);
+                case HAPTIC -> hands.actionType(XR10.XR_ACTION_TYPE_VIBRATION_OUTPUT);
             }
-            if (subactionPaths != null) {
-                LongBuffer buffer = stackCallocLong(subactionPaths.length);
-                for (String path : subactionPaths) {
-                    buffer.put(getPath(path));
-                }
-                hands.countSubactionPaths(subactionPaths.length);
-                hands.subactionPaths(buffer.rewind());
-            } else {
-                hands.countSubactionPaths(0);
-                hands.subactionPaths(null);
-            }
+            LongBuffer lb = stackCallocLong(1);
+            lb.put(getPath(subactionPath));
+            hands.countSubactionPaths(1);
+            hands.subactionPaths(lb.rewind());
             hands.localizedActionName(memUTF8(s));
             PointerBuffer buffer = stackCallocPointer(1);
 
             int error = XR10.xrCreateAction(actionSet, hands, buffer);
-            logError(error, "xrCreateAction", "name:", name, "type:", type);
+            logError(error, "xrCreateAction", "name:", name, "type:", type.name());
             return buffer.get(0);
         }
     }

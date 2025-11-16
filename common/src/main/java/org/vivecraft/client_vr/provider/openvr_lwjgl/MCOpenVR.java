@@ -28,7 +28,7 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.*;
-import org.vivecraft.client_vr.provider.control.TrackpadSwipeSampler;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -1507,7 +1507,7 @@ public class MCOpenVR extends MCVR {
      */
     private void readNewData(VRInputAction action) {
         switch (action.type) {
-            case "boolean" -> {
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
                 if (action.isHanded()) {
                     for (ControllerType type : ControllerType.values()) {
                         this.readDigitalData(action, type);
@@ -1517,7 +1517,7 @@ public class MCOpenVR extends MCVR {
                 }
             }
 
-            case "vector1", "vector2", "vector3" -> {
+            case VEC1, VEC2 -> {
                 if (action.isHanded()) {
                     for (ControllerType type : ControllerType.values()) {
                         this.readAnalogData(action, type);

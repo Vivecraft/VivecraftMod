@@ -4,7 +4,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.HandedKeyBinding;
+import org.vivecraft.client_vr.provider.control.HandedKeyBinding;
 
 import java.util.*;
 
