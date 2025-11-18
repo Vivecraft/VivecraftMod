@@ -30,10 +30,10 @@ public class GuiBindings extends GuiListScreen {
     @Override
     protected List<SettingsList.BaseEntry> getEntries() {
         List<SettingsList.BaseEntry> list = new LinkedList<>();
-        for (var entry : MCOpenXR.get().pathBindings.entrySet()) {
+        for (var entry : MCOpenXR.get().getBinds().entrySet()) {
             var input = MCOpenXR.get().getInputActionByName(entry.getKey());
             if (input == null) continue;
-            list.add(new ResettableEntry(Component.translatable(entry.getKey()), input));
+            list.add(new ResettableEntry(Component.translatable(input.name), input));
         }
         return list;
     }

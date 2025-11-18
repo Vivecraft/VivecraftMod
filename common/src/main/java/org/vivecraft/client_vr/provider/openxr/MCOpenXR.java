@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.provider.openxr;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.Profiler;
-import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -27,7 +26,8 @@ import org.vivecraft.client_vr.provider.control.ActionType;
 import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
-import org.vivecraft.client_vr.provider.openxr.control.WrappedBinding;
+import org.vivecraft.client_vr.provider.openxr.control.ControllerMapping;
+import org.vivecraft.client_vr.provider.openxr.control.XRBinding;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.nio.ByteBuffer;
@@ -72,9 +72,9 @@ public class MCOpenXR extends MCVR {
     public long[] haptics = new long[2];
     public String systemName;
 
-    public Map<WrappedBinding, Long> mappedBindings = new HashMap<>();
-    public Map<String, WrappedBinding> pathBindings = new HashMap<>();
+    public record ActionBind(VRInputActionSet actionSet, String path) {}
 
+    public Map<ActionBind, Long> mappedBindings = new HashMap<>();
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -1046,12 +1046,11 @@ public class MCOpenXR extends MCVR {
             this.actionSetHandles.put(vrinputactionset, actionSet);
 
             //TODO select the proper headset
-            for (WrappedBinding binding : WrappedBinding.quest2Bindings()) {
-                long action = createAction(binding.path().replace("/", "."), binding.path(), binding.type(),
+            for (var binding : ControllerMapping.quest2Bindings().entrySet()) {
+                long action = createAction(binding.getKey().replace("/", "."), binding.getKey(), binding.getValue(),
                     new XrActionSet(actionSet, this.instance),
-                    binding.path().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
-                this.mappedBindings.put(binding, action);
-                this.pathBindings.put(binding.path(), binding);
+                    binding.getKey().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
+                this.mappedBindings.put(new ActionBind(vrinputactionset, binding.getKey()), action);
             }
         }
 
@@ -1079,32 +1078,35 @@ public class MCOpenXR extends MCVR {
     private void loadDefaultBindings() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int error;
-            for (String headset : XRBindings.supportedHeadsets()) {
+            for (String headset : XRBinding.supportedHeadsets()) {
                 VRSettings.LOGGER.info("loading defaults for {}", headset);
                 if (!"/interaction_profiles/oculus/touch_controller".equals(headset)) {
                     continue;
                 }
-                Pair<String, String>[] defaultBindings = XRBindings.getBinding(headset).toArray(new Pair[0]);
+                XRBinding[] defaultBindings = XRBinding.getBinding(headset).toArray(new XRBinding[0]);
                 XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 6,
                     stack); //TODO different way of adding controller poses
 
                 for (int i = 0; i < defaultBindings.length; i++) {
-                    Pair<String, String> pair = defaultBindings[i];
-                    VRInputAction binding = this.getInputActionByName(pair.getLeft());
-                    long handle = this.mappedBindings.get(this.pathBindings.get(pair.getRight()));
-                    binding.setHandle(handle);
-                    binding.setType(this.pathBindings.get(pair.getRight()).type());
-                    binding.setHand(
-                        this.pathBindings.get(pair.getRight()).path().contains("/left/") ? ControllerType.LEFT :
+                    XRBinding binding = defaultBindings[i];
+                    VRInputAction inputAction = this.getInputActionByName(binding.key());
+                    if (binding.actionSet() != null) {
+                        //inputAction.actionSet = binding.actionSet(); TODO?
+                    }
+                    long handle = this.mappedBindings.get(new ActionBind(inputAction.actionSet, binding.controller()));
+                    inputAction.setHandle(handle);
+                    inputAction.setType(ControllerMapping.quest2Bindings().get(binding.controller()));
+                    inputAction.setHand(
+                        binding.controller().contains("/left/") ? ControllerType.LEFT :
                             ControllerType.RIGHT);
-                    if (binding.handle == 0L) {
-                        VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", pair.getLeft(), pair.getRight());
+                    if (inputAction.handle == 0L) {
+                        VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", binding.key(), binding.controller());
                         continue;
                     }
                     bindings.get(i).set(
-                        new XrAction(binding.handle,
-                            new XrActionSet(this.actionSetHandles.get(binding.actionSet), this.instance)),
-                        getPath(pair.getRight())
+                        new XrAction(inputAction.handle,
+                            new XrActionSet(this.actionSetHandles.get(inputAction.actionSet), this.instance)),
+                        getPath(binding.controller())
                     );
                 }
 
@@ -1346,5 +1348,10 @@ public class MCOpenXR extends MCVR {
         if (xrResult < 0) {
             VRSettings.LOGGER.error("{} for {} errored: {}", caller, String.join(" ", args), getResultName(xrResult));
         }
+    }
+
+    //TODO remove/rework
+    public Map<String, VRInputAction> getBinds() {
+        return inputActions;
     }
 }
