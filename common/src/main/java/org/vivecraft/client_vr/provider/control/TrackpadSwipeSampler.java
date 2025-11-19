@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
+import org.vivecraft.client_vr.provider.openxr.control.XRInputAction;
 
 public class TrackpadSwipeSampler {
     private static final int UP = 0;

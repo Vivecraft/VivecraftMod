@@ -33,7 +33,7 @@ public class GuiBindings extends GuiListScreen {
         for (var entry : MCOpenXR.get().getBinds().entrySet()) {
             var input = MCOpenXR.get().getInputActionByName(entry.getKey());
             if (input == null) continue;
-            list.add(new ResettableEntry(Component.translatable(input.name), input));
+            //list.add(new ResettableEntry(Component.translatable(input.name), input));
         }
         return list;
     }

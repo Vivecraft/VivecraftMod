@@ -52,7 +52,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class MCVR {
+public abstract class MCVR<T extends InputAction> {
     public static final int MAIN_CONTROLLER = 0;
     public static final int OFFHAND_CONTROLLER = 1;
 
@@ -71,7 +71,7 @@ public abstract class MCVR {
 
     protected Minecraft mc;
     protected ClientDataHolderVR dh;
-    protected static MCVR ME;
+    protected static MCVR<? extends InputAction> ME;
     protected static VivecraftVRMod MOD;
 
     protected HardwareType detectedHardware = HardwareType.VIVE;
@@ -143,10 +143,10 @@ public abstract class MCVR {
     protected float hmdForwardYaw = 180;
     public boolean ignorePressesNextFrame = false;
     protected int quickTorchPreviousSlot;
-    protected Map<String, VRInputAction> inputActions = new HashMap<>();
-    protected Map<String, VRInputAction> inputActionsByKeyBinding = new HashMap<>();
+    protected Map<String, T> inputActions = new HashMap<>();
+    protected Map<String, T> inputActionsByKeyBinding = new HashMap<>();
 
-    private final Map<VRInputActionSet, Set<VRInputAction>> unpressedSetKeys = new EnumMap<>(VRInputActionSet.class);
+    private final Map<VRInputActionSet, Set<T>> unpressedSetKeys = new EnumMap<>(VRInputActionSet.class);
     private List<VRInputActionSet> activeActionSets = new ArrayList<>();
 
     protected final Map<String, TrackpadSwipeSampler> trackpadSwipeSamplers = new HashMap<>();
@@ -196,7 +196,7 @@ public abstract class MCVR {
     /**
      * @return the current active MCVR implementation
      */
-    public static MCVR get() {
+    public static MCVR<? extends InputAction> get() {
         return ME;
     }
 
@@ -409,35 +409,35 @@ public abstract class MCVR {
     }
 
     /**
-     * @param keyMapping KeyMapping to get the VRInputAction for
-     * @return VRInputAction that is linked to the given KeyMapping
+     * @param keyMapping KeyMapping to get the InputAction for
+     * @return InputAction that is linked to the given KeyMapping
      */
-    public VRInputAction getInputAction(KeyMapping keyMapping) {
+    public T getInputAction(KeyMapping keyMapping) {
         return this.getInputAction(keyMapping.getName());
     }
 
     /**
-     * @param name name of the KeyMapping to get the VRInputAction for
-     * @return VRInputAction that is linked to the given KeyMapping
+     * @param name name of the KeyMapping to get the InputAction for
+     * @return InputAction that is linked to the given KeyMapping
      */
-    public VRInputAction getInputAction(String name) {
+    public T getInputAction(String name) {
         return this.inputActionsByKeyBinding.get(name);
     }
 
     /**
-     * gets the VRInputAction by name, a VRInputAction name is built like "(action set)/in/(keyMapping name)"
+     * gets the InputAction by name, a InputAction name is built like "(action set)/in/(keyMapping name)"
      *
-     * @param name name of the VRInputAction to get
-     * @return VRInputAction that is linked to the given action name
+     * @param name name of the InputAction to get
+     * @return InputAction that is linked to the given action name
      */
-    public VRInputAction getInputActionByName(String name) {
+    public T getInputActionByName(String name) {
         return this.inputActions.get(name);
     }
 
     /**
      * @return unmodifiable collection of all loaded VRInputActions
      */
-    public Collection<VRInputAction> getInputActions() {
+    public Collection<T> getInputActions() {
         return Collections.unmodifiableCollection(this.inputActions.values());
     }
 
@@ -445,7 +445,7 @@ public abstract class MCVR {
      * @param set VRInputActionSet to get the VRInputActions for
      * @return unmodifiable collection of all VRInputActions in the given set
      */
-    public Collection<VRInputAction> getInputActionsInSet(VRInputActionSet set) {
+    public Collection<T> getInputActionsInSet(VRInputActionSet set) {
         return Collections.unmodifiableCollection(this.inputActions.values().stream().filter((action) ->
             action.actionSet == set).collect(Collectors.toList()));
     }
@@ -1174,6 +1174,8 @@ public abstract class MCVR {
         }
     }
 
+    public abstract T createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride);
+
     /**
      * creates VRInputActions for all registered keyMappings, should be called in {@link #init}
      */
@@ -1184,15 +1186,17 @@ public abstract class MCVR {
         for (KeyMapping keyMapping : Stream.concat(Arrays.stream(this.mc.options.keyMappings),
             MOD.getHiddenKeyBindings().stream()).toList()) {
             ActionParams params = actionParams.getOrDefault(keyMapping.getName(), ActionParams.DEFAULT);
-            VRInputAction action = new VRInputAction(keyMapping, params.requirement(), params.type(),
+            T action = createAction(keyMapping, params.requirement(), params.type(),
                 params.actionSetOverride());
 
             this.inputActions.put(action.name, action);
             this.inputActionsByKeyBinding.put(action.keyBinding.getName(), action);
         }
 
-        this.getInputAction(MOD.keyVRInteract).setPriority(5).setEnabled(false);
-        this.getInputAction(MOD.keyClimbeyGrab).setPriority(10).setEnabled(false);
+        this.getInputAction(MOD.keyVRInteract).setPriority(5);
+        this.getInputAction(MOD.keyVRInteract).setEnabled(false);
+        this.getInputAction(MOD.keyClimbeyGrab).setPriority(10);
+        this.getInputAction(MOD.keyClimbeyGrab).setEnabled(false);
         this.getInputAction(MOD.keyClimbeyJump).setEnabled(false);
         this.getInputAction(GuiHandler.KEY_KEYBOARD_CLICK).setPriority(50);
         this.getInputAction(GuiHandler.KEY_KEYBOARD_SHIFT).setPriority(50);
@@ -1465,7 +1469,7 @@ public abstract class MCVR {
             return;
         }
 
-        for (VRInputAction action : this.inputActions.values()) {
+        for (T action : this.inputActions.values()) {
             if (action.isHanded()) {
                 for (ControllerType controllertype : ControllerType.values()) {
                     action.setCurrentHand(controllertype);
@@ -1492,11 +1496,11 @@ public abstract class MCVR {
     }
 
     /**
-     * updates the KeyMapping state that is linked to the given VRInputAction
+     * updates the KeyMapping state that is linked to the given InputAction
      *
-     * @param action VRInputAction to process
+     * @param action InputAction to process
      */
-    private void processInputAction(VRInputAction action) {
+    private void processInputAction(T action) {
         if (action.isActive() && action.isEnabledRaw() &&
             // try to prevent double left clicks
             (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui ||
@@ -1528,10 +1532,10 @@ public abstract class MCVR {
     }
 
     /**
-     * @param action VRInputAction to check
-     * @return if the given VRInputAction was pressed before actionset changes and can be repressed
+     * @param action InputAction to check
+     * @return if the given InputAction was pressed before actionset changes and can be repressed
      */
-    private boolean canActionBeRepressed(VRInputAction action) {
+    private boolean canActionBeRepressed(T action) {
         // allow repressing ingame buttons that were held before the set change
         return action.actionSet == VRInputActionSet.INGAME &&
             this.unpressedSetKeys.get(action.actionSet).contains(action);
@@ -1540,9 +1544,9 @@ public abstract class MCVR {
     /**
      * presses the given VRInputActions binding and removes it from the unpressed keys
      *
-     * @param action VRInputAction to press
+     * @param action InputAction to press
      */
-    private void pressAction(VRInputAction action) {
+    private void pressAction(T action) {
         action.pressBinding();
         this.unpressedSetKeys.get(action.actionSet).remove(action);
     }
@@ -1550,9 +1554,9 @@ public abstract class MCVR {
     /**
      * unpresses the given VRInputActions binding and adds it to the unpressed keys, if its actionSet is not active right now
      *
-     * @param action VRInputAction to press
+     * @param action InputAction to press
      */
-    private void unpressAction(VRInputAction action) {
+    private void unpressAction(T action) {
         if (!this.activeActionSets.contains(action.actionSet) && action.isButtonChanged()) {
             this.unpressedSetKeys.get(action.actionSet).add(action);
         }
@@ -1560,10 +1564,10 @@ public abstract class MCVR {
     }
 
     /**
-     * @param action VRInputAction to check for
+     * @param action InputAction to check for
      * @return if the given action does not correspond to one of the movement keys, or if the player didn't move
      */
-    private boolean checkIfNotMovement(VRInputAction action) {
+    private boolean checkIfNotMovement(T action) {
         return action.keyBinding != this.mc.options.keyLeft &&
             action.keyBinding != this.mc.options.keyRight &&
             action.keyBinding != this.mc.options.keyUp &&
@@ -1571,14 +1575,14 @@ public abstract class MCVR {
     }
 
     /**
-     * checks the axis input of the VRInputAction linked to {@code keyMapping} and runs the callbacks when it's non 0
+     * checks the axis input of the InputAction linked to {@code keyMapping} and runs the callbacks when it's non 0
      *
      * @param keyMapping   KeyMapping to check
      * @param upCallback   action to do when the axis input is positive
      * @param downCallback action to do when the axis input is negative
      */
     private void processScrollInput(KeyMapping keyMapping, Runnable upCallback, Runnable downCallback) {
-        VRInputAction action = this.getInputAction(keyMapping);
+        T action = this.getInputAction(keyMapping);
         /** {@link org.lwjgl.openvr.VR.k_ulInvalidInputValueHandle} and {@link org.lwjgl.system.MemoryUtil.NULL} are both 0 */
         if (action.isEnabled() && action.getLastOrigin() != 0L) {
             float value = action.getAxis2D(false).y();
@@ -1605,7 +1609,7 @@ public abstract class MCVR {
         KeyMapping keyMapping, Runnable leftCallback, Runnable rightCallback, Runnable upCallback,
         Runnable downCallback)
     {
-        VRInputAction action = this.getInputAction(keyMapping);
+        T action = this.getInputAction(keyMapping);
 
         /**  {@link org.lwjgl.openvr.VR.k_ulInvalidInputValueHandle} and {@link org.lwjgl.system.MemoryUtil.NULL} are both 0 */
         if (action.isEnabled() && action.getLastOrigin() != 0L) {
@@ -1708,7 +1712,7 @@ public abstract class MCVR {
      * @param action VRInputAction to query origins for
      * @return a list containing all currently active origin handles for that action
      */
-    public abstract List<Long> getOrigins(VRInputAction action);
+    public abstract <I extends InputAction> List<Long> getOrigins(I action);
 
     /**
      * @param origin the origin handle of an input action

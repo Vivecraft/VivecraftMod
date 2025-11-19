@@ -17,8 +17,7 @@ import org.vivecraft.client_vr.provider.ControllerTransform;
 import org.vivecraft.client_vr.provider.DeviceSource;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.provider.control.ControllerType;
-import org.vivecraft.client_vr.provider.control.VRInputAction;
+import org.vivecraft.client_vr.provider.control.*;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -29,7 +28,7 @@ import java.util.List;
 /**
  * MCVR implementation that does not interact with any runtime.
  */
-public class NullVR extends MCVR {
+public class NullVR extends MCVR<InputAction> {
     private static final float IPD = 0.1F;
 
     protected static NullVR OME;
@@ -87,6 +86,11 @@ public class NullVR extends MCVR {
     public void destroy() {
         super.destroy();
         this.initialized = false;
+    }
+
+    @Override
+    public InputAction createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+        return new InputAction(keyMapping, requirement, type, actionSetOverride);
     }
 
     @Override
@@ -265,7 +269,7 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public List<Long> getOrigins(VRInputAction action) {
+    public List<Long> getOrigins(InputAction action) {
         return List.of();
     }
 

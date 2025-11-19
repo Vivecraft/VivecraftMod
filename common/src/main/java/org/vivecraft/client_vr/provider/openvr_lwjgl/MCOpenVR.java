@@ -28,9 +28,7 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.*;
-import org.vivecraft.client_vr.provider.control.ControllerType;
-import org.vivecraft.client_vr.provider.control.VRInputAction;
-import org.vivecraft.client_vr.provider.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.control.*;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
@@ -63,7 +61,7 @@ import static org.lwjgl.openvr.VRSystem.*;
 /**
  * MCVR implementation to communicate with OpenVR/SteamVR
  */
-public class MCOpenVR extends MCVR {
+public class MCOpenVR extends MCVR<VRInputAction> {
     protected static MCOpenVR OME;
 
     // action paths
@@ -262,6 +260,11 @@ public class MCOpenVR extends MCVR {
         if (this.activeActionSetsBuffer != null) {
             this.activeActionSetsBuffer.free();
         }
+    }
+
+    @Override
+    public VRInputAction createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+        return new VRInputAction(keyMapping, requirement, type, actionSetOverride);
     }
 
     /**
@@ -1667,12 +1670,12 @@ public class MCOpenVR extends MCVR {
     }
 
     @Override
-    public List<Long> getOrigins(VRInputAction action) {
+    public <I extends InputAction> List<Long> getOrigins(I action) {
         List<Long> list = new ArrayList<>();
         if (OpenVR.VRInput != null) {
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 LongBuffer longRef = stack.callocLong(16);
-                int error = VRInput_GetActionOrigins(this.getActionSetHandle(action.actionSet), action.handle, longRef);
+                int error = VRInput_GetActionOrigins(this.getActionSetHandle(action.actionSet), ((VRInputAction)action).handle, longRef);
 
                 if (error != 0) {
                     throw new RuntimeException(

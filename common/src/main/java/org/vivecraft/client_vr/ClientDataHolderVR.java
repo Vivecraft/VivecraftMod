@@ -14,6 +14,7 @@ import org.vivecraft.client_vr.gameplay.trackers.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
+import org.vivecraft.client_vr.provider.control.InputAction;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -41,7 +42,7 @@ public class ClientDataHolderVR {
     public boolean isFpHand;
 
     public VRPlayer vrPlayer;
-    public MCVR vr;
+    public MCVR<? extends InputAction> vr;
     public VRRenderer vrRenderer;
     public MenuWorldRenderer menuWorldRenderer;
 

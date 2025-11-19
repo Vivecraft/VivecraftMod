@@ -70,6 +70,7 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
 import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.control.InputAction;
 import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -560,7 +561,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             dataHolder.vr.processBindings();
 
             Profiler.get().popPush("vrInputActionsTick");
-            for (VRInputAction vrinputaction : dataHolder.vr.getInputActions()) {
+            for (InputAction vrinputaction : dataHolder.vr.getInputActions()) {
                 vrinputaction.tick();
             }
 
@@ -863,7 +864,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 }
                 // unpress any keys we simulated for VR
                 if (MCVR.get() != null) {
-                    for (VRInputAction action : MCVR.get().getInputActions()) {
+                    for (InputAction action : MCVR.get().getInputActions()) {
                         action.unpressBindingImmediately();
                     }
                 }

@@ -24,22 +24,21 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.provider.control.ActionType;
 import org.vivecraft.client_vr.provider.control.ControllerType;
-import org.vivecraft.client_vr.provider.control.VRInputAction;
+import org.vivecraft.client_vr.provider.control.InputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openxr.control.ControllerMapping;
 import org.vivecraft.client_vr.provider.openxr.control.XRBinding;
+import org.vivecraft.client_vr.provider.openxr.control.XRInputAction;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
+import java.nio.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-public class MCOpenXR extends MCVR {
+public class MCOpenXR extends MCVR<XRInputAction> {
 
     private static MCOpenXR OME;
     public XrInstance instance;
@@ -60,6 +59,7 @@ public class MCOpenXR extends MCVR {
     private XrActiveActionSet.Buffer activeActionSetsBuffer;
     private boolean isActive;
     private final HashMap<String, Long> paths = new HashMap<>();
+    private final HashMap<Long, String> strings = new HashMap<>(); //TODO bimap?
     private final long[] grip = new long[2];
     private final long[] aim = new long[2];
     private final XrSpace[] gripSpace = new XrSpace[2];
@@ -71,6 +71,7 @@ public class MCOpenXR extends MCVR {
     public boolean shouldRender = true;
     public long[] haptics = new long[2];
     public String systemName;
+    private String activeController;
 
     public record ActionBind(VRInputActionSet actionSet, String path) {}
 
@@ -119,6 +120,11 @@ public class MCOpenXR extends MCVR {
             logError(error, "xrDestroyInstance", "");
         }
         this.eventDataBuffer.close();
+    }
+
+    @Override
+    public XRInputAction createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+        return new XRInputAction(keyMapping, requirement, type, actionSetOverride);
     }
 
     @Override
@@ -245,7 +251,13 @@ public class MCOpenXR extends MCVR {
                     logError(error, "xrSyncActions", "");
                 }
 
-                this.inputActions.values().forEach(this::readNewData);
+                XrInteractionProfileState state = XrInteractionProfileState.calloc(stack);
+                state.type(XR10.XR_TYPE_INTERACTION_PROFILE_STATE);
+                error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/left"), state); //TODO left and right can be different
+                logError(error, "xrGetCurrentInteractionProfile");
+                this.activeController = getString(state.interactionProfile());
+
+                this.inputActions.values().forEach(a -> this.readNewData(a, activeController));
 
                 //TODO Not needed it seems? Poses come from the action space
                 XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL),
@@ -310,130 +322,187 @@ public class MCOpenXR extends MCVR {
         }
     }
 
-    public void readNewData(VRInputAction action) {
-        if (action.handle == 0) {
+    public void readNewData(XRInputAction action, String controller) {
+        if (action.getHandle(controller).isEmpty()) {
             return;
         }
         switch (action.type) {
             case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
                 if (action.isHanded()) {
                     for (ControllerType controllertype1 : ControllerType.values()) {
-                        this.readBoolean(action, controllertype1);
+                        this.readBoolean(action, controllertype1, controller);
                     }
                 } else {
-                    this.readBoolean(action, null);
+                    this.readBoolean(action, null, controller);
                 }
             }
 
             case VEC1 -> {
                 if (action.isHanded()) {
                     for (ControllerType controllertype : ControllerType.values()) {
-                        this.readFloat(action, controllertype);
+                        this.readFloat(action, controllertype, controller);
                     }
                 } else {
-                    this.readFloat(action, null);
+                    this.readFloat(action, null, controller);
                 }
             }
 
             case VEC2 -> {
                 if (action.isHanded()) {
                     for (ControllerType controllertype : ControllerType.values()) {
-                        this.readVecData(action, controllertype);
+                        this.readVecData(action, controllertype, controller);
                     }
                 } else {
-                    this.readVecData(action, null);
+                    this.readVecData(action, null, controller);
                 }
             }
         }
     }
 
-    private void readBoolean(VRInputAction action, ControllerType hand) {
+    private void readBoolean(XRInputAction action, ControllerType hand, String controller) {
         int i = 0;
 
         if (hand != null) {
             i = hand.ordinal();
         }
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
-            info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
-            info.action(new XrAction(action.handle,
-                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
-            info.subactionPath(
-                action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
-            XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_BOOLEAN);
-            int error = XR10.xrGetActionStateBoolean(this.session, info, state);
-            logError(error, "xrGetActionStateBoolean", action.name);
+            for (long handle : action.getHandle(controller)) {
+                XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+                info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
+                info.action(new XrAction(handle,
+                    new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+                info.subactionPath(
+                    action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+                XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_BOOLEAN);
+                int error = XR10.xrGetActionStateBoolean(this.session, info, state);
+                logError(error, "xrGetActionStateBoolean", action.name);
 
-            if (state.changedSinceLastSync()) {
-                if (state.currentState()) {
-                    action.digitalData[i].toggle = !action.digitalData[i].toggle;
-                    action.digitalData[i].doublePress =
-                        System.nanoTime() - action.digitalData[i].lastChange > 250_000_000L;
-                } else {
-                    action.digitalData[i].longPress =
-                        System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                if (state.changedSinceLastSync()) {
+                    if (state.currentState()) {
+                        action.digitalData[i].toggle = !action.digitalData[i].toggle;
+                        action.digitalData[i].doublePress =
+                            System.nanoTime() - action.digitalData[i].lastChange > 250_000_000L;
+                    } else {
+                        action.digitalData[i].longPress =
+                            System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                    }
+                    action.digitalData[i].lastChange = System.nanoTime();
+                } else if (state.currentState()) {
+                    action.digitalData[i].hold = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
                 }
-                action.digitalData[i].lastChange = System.nanoTime();
-            } else if (state.currentState()) {
-                action.digitalData[i].hold = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+
+                action.digitalData[i].state = state.currentState();
+                action.digitalData[i].isActive = state.isActive();
+                action.digitalData[i].isChanged = state.changedSinceLastSync();
+                action.digitalData[i].activeOrigin = getOrigins(action).get(0);
+
+                action.analogData[i].deltaX = state.changedSinceLastSync() ? state.currentState() ? 1.0F : -1.0F : 0.0F;
+                action.analogData[i].x = state.currentState() ? 1.0f : 0.0f;
+                action.analogData[i].activeOrigin = getOrigins(action).get(0);
+                action.analogData[i].isActive = state.isActive();
+                action.analogData[i].isChanged = state.changedSinceLastSync();
             }
-
-            action.digitalData[i].state = state.currentState();
-            action.digitalData[i].isActive = state.isActive();
-            action.digitalData[i].isChanged = state.changedSinceLastSync();
-            action.digitalData[i].activeOrigin = getOrigins(action).get(0);
         }
     }
 
-    private void readFloat(VRInputAction action, ControllerType hand) {
+    private void readFloat(XRInputAction action, ControllerType hand, String controller) {
         int i = 0;
 
         if (hand != null) {
             i = hand.ordinal();
         }
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
-            info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
-            info.action(new XrAction(action.handle,
-                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
-            info.subactionPath(
-                action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
-            XrActionStateFloat state = XrActionStateFloat.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_FLOAT);
-            int error = XR10.xrGetActionStateFloat(this.session, info, state);
-            logError(error, "xrGetActionStateFloat", action.name);
+            for (long handle : action.getHandle(controller)) {
+                XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+                info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
+                info.action(new XrAction(handle,
+                    new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+                info.subactionPath(
+                    action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+                XrActionStateFloat state = XrActionStateFloat.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_FLOAT);
+                int error = XR10.xrGetActionStateFloat(this.session, info, state);
+                logError(error, "xrGetActionStateFloat", action.name);
 
-            action.analogData[i].deltaX = state.currentState() - action.analogData[i].x;
-            action.analogData[i].x = state.currentState();
-            action.analogData[i].activeOrigin = getOrigins(action).get(0);
-            action.analogData[i].isActive = state.isActive();
-            action.analogData[i].isChanged = state.changedSinceLastSync();
+                action.analogData[i].deltaX = state.currentState() - action.analogData[i].x;
+                action.analogData[i].x = state.currentState();
+                action.analogData[i].activeOrigin = getOrigins(action).get(0);
+                action.analogData[i].isActive = state.isActive();
+                action.analogData[i].isChanged = state.changedSinceLastSync();
+
+                //Write digital data
+                boolean on = Math.abs(state.currentState()) > 0.5F;
+                boolean changed = Math.abs(action.analogData[i].x - action.analogData[i].deltaX) > 0.5F != on;
+                if (changed) {
+                    if (on) {
+                        action.digitalData[i].toggle = !action.digitalData[i].toggle;
+                        action.digitalData[i].doublePress =
+                            System.nanoTime() - action.digitalData[i].lastChange > 250_000_000L;
+                    } else {
+                        action.digitalData[i].longPress =
+                            System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                    }
+                    action.digitalData[i].lastChange = System.nanoTime();
+                } else if (on) {
+                    action.digitalData[i].hold = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                }
+
+                action.digitalData[i].state = on;
+                action.digitalData[i].isActive = state.isActive();
+                action.digitalData[i].isChanged = changed;
+                action.digitalData[i].activeOrigin = getOrigins(action).get(0);
+            }
         }
     }
 
-    private void readVecData(VRInputAction action, ControllerType hand) {
+    private void readVecData(XRInputAction action, ControllerType hand, String controller) {
         int i = 0;
 
         if (hand != null) {
             i = hand.ordinal();
         }
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
-            info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
-            info.action(new XrAction(action.handle,
-                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
-            info.subactionPath(
-                action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
-            XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_VECTOR2F);
-            int error = XR10.xrGetActionStateVector2f(this.session, info, state);
-            logError(error, "xrGetActionStateVector2f", action.name);
+            for (long handle : action.getHandle(controller)) {
+                XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+                info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
+                info.action(new XrAction(handle,
+                    new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+                info.subactionPath(
+                    action.getHand() == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+                XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_VECTOR2F);
+                int error = XR10.xrGetActionStateVector2f(this.session, info, state);
+                logError(error, "xrGetActionStateVector2f", action.name);
 
-            action.analogData[i].deltaX = state.currentState().x() - action.analogData[i].x;
-            action.analogData[i].deltaY = state.currentState().y() - action.analogData[i].y;
-            action.analogData[i].x = state.currentState().x();
-            action.analogData[i].y = state.currentState().y();
-            action.analogData[i].activeOrigin = getOrigins(action).get(0);
-            action.analogData[i].isActive = state.isActive();
-            action.analogData[i].isChanged = state.changedSinceLastSync();
+                action.analogData[i].deltaX = state.currentState().x() - action.analogData[i].x;
+                action.analogData[i].deltaY = state.currentState().y() - action.analogData[i].y;
+                action.analogData[i].x = state.currentState().x();
+                action.analogData[i].y = state.currentState().y();
+                action.analogData[i].activeOrigin = getOrigins(action).get(0);
+                action.analogData[i].isActive = state.isActive();
+                action.analogData[i].isChanged = state.changedSinceLastSync();
+
+                //Write digital data
+                boolean on = Math.abs(state.currentState().x()) > 0.5F || Math.abs(state.currentState().y()) > 0.5F;
+                boolean changed = Math.abs(action.analogData[i].x - action.analogData[i].deltaX) > 0.5F != Math.abs(action.analogData[i].x) > 0.5F ||
+                    Math.abs(action.analogData[i].y - action.analogData[i].deltaY) > 0.5F != Math.abs(action.analogData[i].y) > 0.5F;
+                if (changed) {
+                    if (on) {
+                        action.digitalData[i].toggle = !action.digitalData[i].toggle;
+                        action.digitalData[i].doublePress =
+                            System.nanoTime() - action.digitalData[i].lastChange > 250_000_000L;
+                    } else {
+                        action.digitalData[i].longPress =
+                            System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                    }
+                    action.digitalData[i].lastChange = System.nanoTime();
+                } else if (on) {
+                    action.digitalData[i].hold = System.nanoTime() - action.digitalData[i].lastChange > 500_000_000L;
+                }
+
+                action.digitalData[i].state = on;
+                action.digitalData[i].isActive = state.isActive();
+                action.digitalData[i].isChanged = changed;
+                action.digitalData[i].activeOrigin = getOrigins(action).get(0);
+            }
         }
     }
 
@@ -948,39 +1017,44 @@ public class MCOpenXR extends MCVR {
     }
 
     @Override
-    public List<Long> getOrigins(VRInputAction action) {
+    public <I extends InputAction> List<Long> getOrigins(I action) {
+        List<Long> origins = new ArrayList<>();
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            XrBoundSourcesForActionEnumerateInfo info = XrBoundSourcesForActionEnumerateInfo.calloc(stack);
-            info.type(XR10.XR_TYPE_BOUND_SOURCES_FOR_ACTION_ENUMERATE_INFO);
-            info.next(NULL);
-            info.action(new XrAction(action.handle,
-                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
-            IntBuffer buf = stack.callocInt(1);
-            int error = XR10.xrEnumerateBoundSourcesForAction(this.session, info, buf, null);
-            logError(error, "xrEnumerateBoundSourcesForAction", action.name);
+            for (long handle : ((XRInputAction)action).getHandle(this.activeController)) {
+                XrBoundSourcesForActionEnumerateInfo info = XrBoundSourcesForActionEnumerateInfo.calloc(stack);
+                info.type(XR10.XR_TYPE_BOUND_SOURCES_FOR_ACTION_ENUMERATE_INFO);
+                info.next(NULL);
+                info.action(new XrAction(handle,
+                    new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+                IntBuffer buf = stack.callocInt(1);
+                int error = XR10.xrEnumerateBoundSourcesForAction(this.session, info, buf, null);
+                logError(error, "xrEnumerateBoundSourcesForAction", action.name);
 
-            int size = buf.get();
-            if (size <= 0) {
-                return List.of(0L);
-            }
-
-            buf = stack.callocInt(size);
-            LongBuffer longbuf = stack.callocLong(size);
-            error = XR10.xrEnumerateBoundSourcesForAction(this.session, info, buf, longbuf);
-            logError(error, "xrEnumerateBoundSourcesForAction", action.name);
-            long[] array;
-            if (longbuf.hasArray()) { //TODO really?
-                array = longbuf.array();
-            } else {
-                longbuf.rewind();
-                array = new long[longbuf.remaining()];
-                int index = 0;
-                while (longbuf.hasRemaining()) {
-                    array[index++] = longbuf.get();
+                int size = buf.get();
+                if (size <= 0) {
+                    continue;
                 }
+
+                buf = stack.callocInt(size);
+                LongBuffer longbuf = stack.callocLong(size);
+                error = XR10.xrEnumerateBoundSourcesForAction(this.session, info, buf, longbuf);
+                logError(error, "xrEnumerateBoundSourcesForAction", action.name);
+                long[] array;
+                if (longbuf.hasArray()) { //TODO really?
+                    array = longbuf.array();
+                } else {
+                    longbuf.rewind();
+                    array = new long[longbuf.remaining()];
+                    int index = 0;
+                    while (longbuf.hasRemaining()) {
+                        array[index++] = longbuf.get();
+                    }
+                }
+                origins.addAll(Arrays.stream(array).boxed().toList());
             }
-            return Arrays.stream(array).boxed().toList();
         }
+        origins.add(0L);
+        return origins;
     }
 
     @Override
@@ -1089,22 +1163,22 @@ public class MCOpenXR extends MCVR {
 
                 for (int i = 0; i < defaultBindings.length; i++) {
                     XRBinding binding = defaultBindings[i];
-                    VRInputAction inputAction = this.getInputActionByName(binding.key());
+                    XRInputAction inputAction = this.getInputActionByName(binding.key());
                     if (binding.actionSet() != null) {
                         //inputAction.actionSet = binding.actionSet(); TODO?
                     }
                     long handle = this.mappedBindings.get(new ActionBind(inputAction.actionSet, binding.controller()));
-                    inputAction.setHandle(handle);
+                    inputAction.addHandle(headset, handle);
                     inputAction.setType(ControllerMapping.quest2Bindings().get(binding.controller()));
                     inputAction.setHand(
                         binding.controller().contains("/left/") ? ControllerType.LEFT :
                             ControllerType.RIGHT);
-                    if (inputAction.handle == 0L) {
+                    if (inputAction.getHandle(headset).isEmpty() || handle == 0L) {
                         VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", binding.key(), binding.controller());
                         continue;
                     }
                     bindings.get(i).set(
-                        new XrAction(inputAction.handle,
+                        new XrAction(handle,
                             new XrActionSet(this.actionSetHandles.get(inputAction.actionSet), this.instance)),
                         getPath(binding.controller())
                     );
@@ -1200,6 +1274,27 @@ public class MCOpenXR extends MCVR {
                 int error = XR10.xrStringToPath(this.instance, pathString, buf);
                 logError(error, "getPath", pathString);
                 return buf.get();
+            }
+        });
+    }
+
+    public String getString(long path) {
+        if (path == 0L) { //Quest takes some time to loas what controller is used
+            return "";
+        }
+        return this.strings.computeIfAbsent(path, l -> {
+            try (MemoryStack ignored = stackPush()) {
+                IntBuffer size = stackCallocInt(1);
+                int error = XR10.xrPathToString(this.instance, l, size, null);
+                logError(error, "getString", l.toString());
+                int i = size.get(0);
+                size.put(0, i);
+                ByteBuffer string = stackCalloc(i);
+                error = XR10.xrPathToString(this.instance, l, size, string);
+                logError(error, "getString", l.toString());
+                byte[] data = new byte[i];
+                string.get(data);
+                return new String(data).trim();
             }
         });
     }
@@ -1351,7 +1446,7 @@ public class MCOpenXR extends MCVR {
     }
 
     //TODO remove/rework
-    public Map<String, VRInputAction> getBinds() {
+    public Map<String, XRInputAction> getBinds() {
         return inputActions;
     }
 }

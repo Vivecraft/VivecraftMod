@@ -17,37 +17,16 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class VRInputAction {
-    public final KeyMapping keyBinding;
-    public final String name;
-    public final String requirement;
-    public ActionType type;
-    public final VRInputActionSet actionSet;
-
-    private int priority = 0;
-    private final boolean[] enabled = new boolean[ControllerType.values().length];
-    private final List<KeyListener> listeners = new ArrayList<>();
-    private ControllerType currentHand = ControllerType.RIGHT;
-    // Only used for the UseTracked axis methods
-    private boolean currentlyInUse;
+public class VRInputAction extends InputAction {
 
     public long handle;
-    private final boolean[] pressed = new boolean[ControllerType.values().length];
-    private final boolean[] held = new boolean[ControllerType.values().length];
-    protected final int[] unpressInTicks = new int[ControllerType.values().length];
-    private ControllerType hand;
-
     public final DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
     public final AnalogData[] analogData = new AnalogData[ControllerType.values().length];
 
     public VRInputAction(
         KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
     {
-        this.keyBinding = keyMapping;
-        this.requirement = requirement;
-        this.type = type;
-        this.actionSet = actionSetOverride != null ? actionSetOverride : VRInputActionSet.fromKeyBinding(keyMapping);
-        this.name = this.actionSet.name + "/in/" + keyMapping.getName().replace('/', '_');
+        super(keyMapping, requirement, type, actionSetOverride);
 
         for (int c = 0; c < ControllerType.values().length; c++) {
             this.enabled[c] = true;
@@ -56,6 +35,7 @@ public class VRInputAction {
         }
     }
 
+    @Override
     public boolean isButtonPressed() {
         if (this.type == ActionType.BOOLEAN) {
             return this.digitalData().state;
@@ -65,6 +45,7 @@ public class VRInputAction {
         }
     }
 
+    @Override
     public boolean isButtonChanged() {
         if (this.type == ActionType.BOOLEAN) {
             return this.digitalData().isChanged;
@@ -77,6 +58,7 @@ public class VRInputAction {
         }
     }
 
+    @Override
     public float getAxis1D(boolean delta) {
         return switch (this.type) {
             case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalToAnalog(delta);
@@ -85,6 +67,7 @@ public class VRInputAction {
         };
     }
 
+    @Override
     public Vector2fc getAxis2D(boolean delta) {
         return switch (this.type) {
             case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector2f(this.digitalToAnalog(delta), 0.0F);
@@ -95,6 +78,7 @@ public class VRInputAction {
         };
     }
 
+    //TODO remove
     public Vector3fc getAxis3D(boolean delta) {
         return switch (this.type) {
             case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE ->
@@ -115,6 +99,7 @@ public class VRInputAction {
      * to give an output even after disabled until the user lets go of the input.
      * Cannot provide delta values as it wouldn't make any sense.
      */
+    @Override
     public float getAxis1DUseTracked() {
         if (this.currentlyInUse || this.isEnabled()) {
             float axis = this.getAxis1D(false);
@@ -130,6 +115,7 @@ public class VRInputAction {
      * to give an output even after disabled until the user lets go of the input.
      * Cannot provide delta values as it wouldn't make any sense.
      */
+    @Override
     public Vector2fc getAxis2DUseTracked() {
         if (this.currentlyInUse || this.isEnabled()) {
             Vector2fc axis = this.getAxis2D(false);
@@ -137,21 +123,6 @@ public class VRInputAction {
             return axis;
         } else {
             return new Vector2f();
-        }
-    }
-
-    /**
-     * This special variant of getAxis3D internally handles the isEnabled check and will continue
-     * to give an output even after disabled until the user lets go of the input.
-     * Cannot provide delta values as it wouldn't make any sense.
-     */
-    public Vector3fc getAxis3DUseTracked() {
-        if (this.currentlyInUse || this.isEnabled()) {
-            Vector3fc axis = this.getAxis3D(false);
-            this.currentlyInUse = axis.x() != 0.0F || axis.y() != 0.0F || axis.z() != 0.0F;
-            return axis;
-        } else {
-            return new Vector3f();
         }
     }
 
@@ -170,20 +141,13 @@ public class VRInputAction {
     /**
      * @return the last origin the vr runtime sent, if the VRInputAction is not currently in an active set this is likely 0
      */
+    @Override
     public long getLastOrigin() {
         return switch (this.type) {
             case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().activeOrigin;
             case VEC1, VEC2 -> this.analogData().activeOrigin;
             default -> 0L;
         };
-    }
-
-    public ControllerType getCurrentHand() {
-        return this.currentHand;
-    }
-
-    public void setCurrentHand(ControllerType currentHand) {
-        this.currentHand = currentHand;
     }
 
     private DigitalData digitalData() {
@@ -194,338 +158,21 @@ public class VRInputAction {
         return this.isHanded() ? this.analogData[this.currentHand.ordinal()] : this.analogData[0];
     }
 
-    public void setType(ActionType type) {
-        this.type = type;
-    }
-
     public void setHandle(long handle) {
         if (this.handle != 0L) {
-            //throw new IllegalStateException("Handle already assigned!");
+            throw new IllegalStateException("Handle already assigned!");
         } else {
             this.handle = handle;
         }
     }
 
-    public int getPriority() {
-        return this.priority;
-    }
-
-    public VRInputAction setPriority(int priority) {
-        this.priority = priority;
-        return this;
-    }
-
-    /**
-     * check if the InputAction is enabled, if it is handed, checks for {@link VRInputAction#currentHand} <br>
-     * also checks if any other InputAction with higher priority is active, then this InputAction is treated as disabled
-     */
-    public boolean isEnabled() {
-        if (!this.isEnabledRaw(this.currentHand)) return false;
-        if (ClientDataHolderVR.getInstance().vr == null) return false;
-
-        long lastOrigin = this.getLastOrigin();
-        ControllerType hand = ClientDataHolderVR.getInstance().vr.getOriginControllerType(lastOrigin);
-
-        if (hand == null && this.isHanded()) return false;
-
-        // iterate over all actions, and check if another action has a higher priority
-        for (VRInputAction action : ClientDataHolderVR.getInstance().vr.getInputActions()) {
-            if (action != this && action.isEnabledRaw(hand) && action.isActive() &&
-                action.getPriority() > this.getPriority() &&
-                ClientDataHolderVR.getInstance().vr.getOrigins(action).contains(lastOrigin))
-            {
-                if (action.isHanded()) {
-                    return !((HandedKeyBinding) action.keyBinding).isPriorityOnController(hand);
-                }
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public boolean isEnabledRaw(ControllerType hand) {
-        if (this.isHanded()) {
-            return hand != null && this.enabled[hand.ordinal()];
-        } else {
-            return this.enabled[0];
-        }
-    }
-
-    public boolean isEnabledRaw() {
-        return Arrays.stream(ControllerType.values()).anyMatch(this::isEnabledRaw);
-    }
-
-    public VRInputAction setEnabled(ControllerType hand, boolean enabled) {
-        if (!this.isHanded()) {
-            throw new IllegalStateException("Not a handed key binding!");
-        } else {
-            this.enabled[hand.ordinal()] = enabled;
-            return this;
-        }
-    }
-
-    public VRInputAction setEnabled(boolean enabled) {
-        if (this.isHanded()) {
-            for (ControllerType controllertype : ControllerType.values()) {
-                this.enabled[controllertype.ordinal()] = enabled;
-            }
-        } else {
-            this.enabled[0] = enabled;
-        }
-
-        return this;
-    }
-
+    @Override
     public boolean isActive() {
         return switch (this.type) {
             case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().isActive;
             case VEC1, VEC2 -> this.analogData().isActive;
             default -> false;
         };
-    }
-
-    public boolean isHanded() {
-        return this.keyBinding instanceof HandedKeyBinding;
-    }
-
-    /**
-     * adds a KeyListener that gets notified for state changes
-     *
-     * @param listener KeyListener to register
-     */
-    public void registerListener(KeyListener listener) {
-        this.listeners.add(listener);
-        this.listeners.sort(Comparator.comparingInt(KeyListener::getPriority).reversed());
-    }
-
-    /**
-     * removes the specified KeyListeners
-     */
-    public void unregisterListener(KeyListener listener) {
-        this.listeners.remove(listener);
-    }
-
-    /**
-     * notifies all registered KeyListener in priority order
-     *
-     * @param pressed if presses or released
-     * @param hand    controller this was triggered by
-     * @return if any KeyListener triggered
-     */
-    public boolean notifyListeners(boolean pressed, ControllerType hand) {
-        for (KeyListener listener : this.listeners) {
-            if (pressed) {
-                if (listener.onPressed(hand)) {
-                    return true;
-                }
-            } else if (listener.onUnpressed(hand)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public void tick() {
-        if (this.isHanded()) {
-            for (int c = 0; c < ControllerType.values().length; c++) {
-                ControllerType type = ControllerType.values()[c];
-                HandedKeyBinding handedKeyBinding = (HandedKeyBinding) this.keyBinding;
-                if ((!this.held[c] && this.unpressInTicks[c] > 0 && --this.unpressInTicks[c] == 0) ||
-                    (this.held[c] && (!handedKeyBinding.isDown(type) || handedKeyBinding.presses(type) == 0)))
-                {
-                    this.unpressBindingImmediately(type);
-                }
-            }
-        } else {
-            if ((!this.held[0] && this.unpressInTicks[0] > 0 && --this.unpressInTicks[0] == 0) ||
-                (this.held[0] && (!this.keyBinding.isDown() || this.keyBinding.clickCount == 0)))
-            {
-                this.unpressBindingImmediately(null);
-            }
-        }
-    }
-
-    public void setPressed(boolean pressed) {
-        if (pressed) {
-            this.pressBinding();
-        } else {
-            this.unpressBinding();
-        }
-    }
-
-    public void holdBinding() {
-        this.holdBinding(this.currentHand);
-    }
-
-    public void holdBinding(ControllerType hand) {
-        if (this.isHanded()) {
-            this.held[hand.ordinal()] = true;
-        } else {
-            this.held[0] = true;
-        }
-        this.pressBinding(this.currentHand);
-    }
-
-    public void stopHoldingBinding(int unpressInTicks) {
-        this.stopHoldingBinding(unpressInTicks, this.currentHand);
-    }
-
-    public void stopHoldingBinding(int unpressInTicks, ControllerType hand) {
-        if (this.isHanded()) {
-            this.held[hand.ordinal()] = false;
-        } else {
-            this.held[0] = false;
-        }
-        this.unpressBinding(unpressInTicks, this.currentHand);
-    }
-
-    private void pressBinding(ControllerType hand) {
-        if (this.isHanded()) {
-            if (hand == null || this.pressed[hand.ordinal()]) return;
-
-            this.pressed[hand.ordinal()] = true;
-
-            if (this.notifyListeners(true, hand)) return;
-
-            ((HandedKeyBinding) this.keyBinding).pressKey(hand);
-        } else {
-            if (this.pressed[0]) return;
-
-            this.pressed[0] = true;
-
-            if (this.notifyListeners(true, null)) return;
-
-            this.pressKey();
-        }
-    }
-
-    public void pressBinding() {
-        this.pressBinding(this.currentHand);
-    }
-
-    public void unpressBinding(int unpressInTicks, ControllerType hand) {
-        if (this.isHanded()) {
-            if (hand == null || !this.pressed[hand.ordinal()]) return;
-
-            this.unpressInTicks[hand.ordinal()] = unpressInTicks;
-        } else {
-            if (!this.pressed[0]) return;
-
-            this.unpressInTicks[0] = unpressInTicks;
-        }
-    }
-
-    public void unpressBinding(int unpressInTicks) {
-        this.unpressBinding(unpressInTicks, this.currentHand);
-    }
-
-    public void unpressBinding() {
-        this.unpressBinding(1);
-    }
-
-    public void unpressBindingImmediately() {
-        if (this.isHanded()) {
-            for (int c = 0; c < ControllerType.values().length; c++) {
-                this.unpressBindingImmediately(ControllerType.values()[c]);
-            }
-        } else {
-
-            this.unpressBindingImmediately(null);
-        }
-    }
-
-    public void unpressBindingImmediately(ControllerType hand) {
-        if (this.isHanded()) {
-            if (hand == null || !this.pressed[hand.ordinal()]) return;
-
-            this.pressed[hand.ordinal()] = false;
-            this.held[hand.ordinal()] = false;
-
-            if (this.notifyListeners(false, hand)) return;
-
-            ((HandedKeyBinding) this.keyBinding).unpressKey(hand);
-        } else {
-            if (!this.pressed[0]) return;
-
-            this.pressed[0] = false;
-            this.held[0] = false;
-
-            if (this.notifyListeners(false, null)) return;
-
-            this.unpressKey();
-        }
-    }
-
-    public static void setKeyBindState(KeyMapping keyMapping, boolean pressed) {
-        if (keyMapping != null) {
-            keyMapping.setDown(pressed);
-            keyMapping.clickCount += 1;
-        }
-    }
-
-    /**
-     * presses the KeyMapping assigned to this InputAction <br>
-     * if the KeyMapping has a modifier key also presses that
-     */
-    private void pressKey() {
-        InputConstants.Key key = this.keyBinding.key;
-
-        // need to simulate the modifier or the binding wouldn't be pressed
-        if (key.getValue() != -1 &&
-            (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.hasKeyModifier(this.keyBinding)))
-        {
-            if (key.getType() == InputConstants.Type.KEYSYM) {
-                if (Xplat.hasKeyModifier(this.keyBinding)) {
-                    InputSimulator.pressModifier(Xplat.getKeyModifierKey(this.keyBinding));
-                }
-                InputSimulator.pressKey(key.getValue(), Xplat.getKeyModifier(this.keyBinding));
-                return;
-            }
-
-            if (key.getType() == InputConstants.Type.MOUSE) {
-                InputSimulator.pressMouse(key.getValue());
-                return;
-            }
-        }
-
-        setKeyBindState(this.keyBinding, true);
-    }
-
-    /**
-     * unpresses the KeyMapping assigned to this InputAction <br>
-     * if the KeyMapping has a modifier key also unpresses that
-     */
-    public void unpressKey() {
-        InputConstants.Key key = this.keyBinding.key;
-
-        if (key.getValue() != -1 &&
-            (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.hasKeyModifier(this.keyBinding)))
-        {
-            if (key.getType() == InputConstants.Type.KEYSYM) {
-                InputSimulator.releaseKey(key.getValue());
-                if (Xplat.hasKeyModifier(this.keyBinding)) {
-                    InputSimulator.releaseModifier(Xplat.getKeyModifierKey(this.keyBinding));
-                }
-                return;
-            }
-
-            if (key.getType() == InputConstants.Type.MOUSE) {
-                InputSimulator.releaseMouse(key.getValue());
-                return;
-            }
-        }
-
-        this.keyBinding.release();
-    }
-
-    public void setHand(ControllerType hand) {
-        this.hand = hand;
-    }
-
-    public ControllerType getHand() {
-        return this.hand;
     }
 
     public static class AnalogData {
@@ -546,17 +193,5 @@ public class VRInputAction {
         public boolean isActive;
         public long activeOrigin;
         public long lastChange;
-        public boolean longPress;
-        public boolean toggle;
-        public boolean doublePress;
-        public boolean hold;
-    }
-
-    public interface KeyListener {
-        boolean onPressed(@Nullable ControllerType controllerType);
-
-        boolean onUnpressed(@Nullable ControllerType controllerType);
-
-        int getPriority();
     }
 }
