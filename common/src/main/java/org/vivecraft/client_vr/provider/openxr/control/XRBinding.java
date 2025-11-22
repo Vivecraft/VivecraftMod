@@ -53,7 +53,7 @@ public record XRBinding(@Nullable VRInputActionSet actionSet, String key, String
         set.add(new XRBinding(null, "/actions/ingame/in/vivecraft.key.teleport", "/user/hand/left/input/trigger/value", ActionType.VEC1));
         set.add(new XRBinding(null, "/actions/ingame/in/vivecraft.key.radialMenu", "/user/hand/right/input/b/click", ActionType.BOOLEAN));
         set.add(new XRBinding(null, "/actions/ingame/in/key.use", "/user/hand/right/input/a/click", ActionType.BOOLEAN));
-        //set.add(new XRBinding(null, "/actions/ingame/in/vivecraft.key.teleportFallback", "/user/hand/left/input/trigger/value", ActionType.VEC1));
+        set.add(new XRBinding(null, "/actions/ingame/in/vivecraft.key.teleportFallback", "/user/hand/left/input/trigger/value", ActionType.VEC1));
         set.add(new XRBinding(null, "/actions/ingame/in/key.jump", "/user/hand/left/input/thumbstick/click", ActionType.BOOLEAN));
         set.add(
             new XRBinding(null, "/actions/ingame/in/vivecraft.key.freeMoveStrafe", "/user/hand/left/input/thumbstick", ActionType.VEC2));
@@ -62,19 +62,19 @@ public record XRBinding(@Nullable VRInputActionSet actionSet, String key, String
 
         set.add(new XRBinding(null, "/actions/keyboard/in/vivecraft.key.keyboardShift",
             "/user/hand/left/input/squeeze/value", ActionType.VEC1));
-        //set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/right/input/squeeze/value"));
-        //set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/left/input/trigger/value"));
-        //set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/right/input/trigger/value"));
+        set.add(new XRBinding(null, "/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/right/input/squeeze/value", ActionType.VEC1));
+        set.add(new XRBinding(null, "/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/left/input/trigger/value", ActionType.VEC1));
+        set.add(new XRBinding(null, "/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/right/input/trigger/value", ActionType.VEC1));
 
-        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/squeeze/value"));
+        set.add(new XRBinding(null,"/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/squeeze/value", ActionType.VEC1));
         set.add(new XRBinding(null, "/actions/contextual/in/vivecraft.key.vrInteract",
             "/user/hand/right/input/squeeze/value", ActionType.VEC1));
-        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/trigger/value"));
-        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/right/input/trigger/value"));
+        set.add(new XRBinding(null,"/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/left/input/trigger/value", ActionType.VEC1));
+        set.add(new XRBinding(null,"/actions/contextual/in/vivecraft.key.vrInteract", "/user/hand/right/input/trigger/value", ActionType.VEC1));
 
-        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/squeeze/value"));
-        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/right/input/squeeze/value"));
-        //set.add(new MutablePair<>("/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/trigger/value"));
+        set.add(new XRBinding(null,"/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/squeeze/value", ActionType.VEC1));
+        set.add(new XRBinding(null,"/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/right/input/squeeze/value", ActionType.VEC1));
+        set.add(new XRBinding(null,"/actions/contextual/in/vivecraft.key.climbeyGrab", "/user/hand/left/input/trigger/value", ActionType.VEC1));
         set.add(new XRBinding(null, "/actions/contextual/in/vivecraft.key.climbeyGrab",
             "/user/hand/right/input/trigger/value", ActionType.VEC1));
         return set;

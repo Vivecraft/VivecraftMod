@@ -20,8 +20,8 @@ public class ControllerMapping {
         bindings.put("/user/hand/left/input/squeeze/value", ActionType.VEC1);
         bindings.put("/user/hand/left/input/trigger/value", ActionType.VEC1);
         bindings.put("/user/hand/left/input/trigger/touch", ActionType.BOOLEAN);
-        bindings.put("/user/hand/left/input/trigger/proximity", ActionType.BOOLEAN);
-        bindings.put("/user/hand/left/input/thumb_resting_surfaces/proximity", ActionType.BOOLEAN);
+        //bindings.put("/user/hand/left/input/trigger/proximity", ActionType.BOOLEAN); openxr 1.1
+        //bindings.put("/user/hand/left/input/thumb_resting_surfaces/proximity", ActionType.BOOLEAN); openxr 1.1
         bindings.put("/user/hand/left/input/thumbstick", ActionType.VEC2);
         bindings.put("/user/hand/left/input/thumbstick/click", ActionType.BOOLEAN);
         bindings.put("/user/hand/left/input/thumbstick/touch", ActionType.BOOLEAN);
@@ -37,8 +37,8 @@ public class ControllerMapping {
         bindings.put("/user/hand/right/input/squeeze/value", ActionType.VEC1);
         bindings.put("/user/hand/right/input/trigger/value", ActionType.VEC1);
         bindings.put("/user/hand/right/input/trigger/touch", ActionType.BOOLEAN);
-        bindings.put("/user/hand/right/input/trigger/proximity", ActionType.BOOLEAN);
-        bindings.put("/user/hand/right/input/thumb_resting_surfaces/proximity", ActionType.BOOLEAN);
+        //bindings.put("/user/hand/right/input/trigger/proximity", ActionType.BOOLEAN); openxr 1.1
+        //bindings.put("/user/hand/right/input/thumb_resting_surfaces/proximity", ActionType.BOOLEAN); openxr 1.1
         bindings.put("/user/hand/right/input/thumbstick", ActionType.VEC2);
         bindings.put("/user/hand/right/input/thumbstick/click", ActionType.BOOLEAN);
         bindings.put("/user/hand/right/input/thumbstick/touch", ActionType.BOOLEAN);

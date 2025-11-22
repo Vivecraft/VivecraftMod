@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.provider.openxr.control;
 import net.minecraft.client.KeyMapping;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
-import org.joml.Vector3fc;
 import org.vivecraft.client_vr.provider.control.*;
 
 import java.util.ArrayList;
@@ -13,87 +12,164 @@ import java.util.Map;
 
 public class XRInputAction extends InputAction {
 
-    private ControllerType hand;
-    private final Map<String, List<Long>> handles = new HashMap<>();
+    private final Map<String, List<HandedAction>> handles = new HashMap<>();
+    public int activeAction;
 
-    public final DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
-    public final AnalogData[] analogData = new AnalogData[ControllerType.values().length];
+    public record HandedAction(Long handle, ControllerType hand, ActionType action) {}
+
+    public final List<DigitalData> digitalData = new ArrayList<>();
+    public final List<AnalogData> analogData = new ArrayList<>();
 
     public XRInputAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
         super(keyMapping, requirement, type, actionSetOverride);
+        this.type = null; //No global type, type is part of the
 
         for (int c = 0; c < ControllerType.values().length; c++) {
             this.enabled[c] = true;
-            this.analogData[c] = new AnalogData();
-            this.digitalData[c] = new DigitalData();
         }
     }
 
-    public ControllerType getHand() {
-        return hand;
-    }
-
-    public void setHand(ControllerType hand) {
-        this.hand = hand;
-    }
-
-    public List<Long> getHandle(String controller) {
+    public List<HandedAction> getHandle(String controller) {
         return handles.getOrDefault(controller, List.of());
     }
 
-    public void addHandle(String controller, Long handle) {
+    public void addHandle(String controller, Long handle, ControllerType hand, ActionType actionType) {
         if (!handles.containsKey(controller)) {
-            var list = new ArrayList<Long>();
-            list.add(handle);
+            var list = new ArrayList<HandedAction>();
+            list.add(new HandedAction(handle, hand, actionType));
             handles.put(controller, list);
         } else {
-            handles.get(controller).add(handle);
+            handles.get(controller).add(new HandedAction(handle, hand, actionType));
         }
+        this.analogData.add(new AnalogData());
+        this.digitalData.add(new DigitalData());
     }
 
-    private DigitalData digitalData() {
-        return this.isHanded() ? this.digitalData[this.currentHand.ordinal()] : this.digitalData[0];
+    private List<DigitalData> digitalData() {
+        return this.digitalData;
     }
 
-    private AnalogData analogData() {
-        return this.isHanded() ? this.analogData[this.currentHand.ordinal()] : this.analogData[0];
+    private List<AnalogData> analogData() {
+        return this.analogData;
+    }
+
+    public HandedAction getActiveAction(String[] controllers) {
+        return this.handles.get(controllers[this.digitalData().get(this.activeAction).hand.ordinal()]).get(this.activeAction);
     }
 
     @Override
     public boolean isActive() {
-        return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().isActive;
-            case VEC1, VEC2 -> this.analogData().isActive;
-            default -> false;
-        };
+        for (int i = 0; i < this.digitalData().size(); i++) {
+            switch (this.type) {
+                case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
+                    if (this.digitalData().get(i).isActive) {
+                        this.activeAction = i;
+                        return true;
+                    }
+                }
+                case VEC1, VEC2 -> {
+                    if (this.analogData().get(i).isActive) {
+                        this.activeAction = i;
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean isButtonPressed() {
-        return this.digitalData().state;
+        for (int i = 0; i < this.digitalData().size(); i++) {
+            DigitalData data = this.digitalData().get(i);
+            switch (data.type) {
+                case DOUBLE_PRESS -> {
+                    if (data.doublePress) {
+                        this.activeAction = i;
+                        return true;
+                    }
+                }
+                case LONG_PRESS -> {
+                    if (data.longPress) {
+                        this.activeAction = i;
+                        return true;
+                    }
+                }
+                case HOLD -> {
+                    if (data.hold) {
+                        this.activeAction = i;
+                        return true;
+                    }
+                }
+                case TOGGLE -> {
+                    if (data.toggle) {
+                        this.activeAction = i;
+                        return true;
+                    }
+                }
+            }
+            if (data.state) {
+                this.activeAction = i;
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean isButtonChanged() {
-        return this.digitalData().isChanged;
+        for (int i = 0; i < this.digitalData().size(); i++) {
+            if (this.digitalData().get(i).isChanged) {
+                this.activeAction = i;
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public long getLastOrigin() {
         return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().activeOrigin;
-            case VEC1, VEC2 -> this.analogData().activeOrigin;
+            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
+                if (this.activeAction == 0) {
+                    yield 0;
+                }
+                if (this.digitalData().isEmpty()) {
+                    yield 0;
+                }
+                yield this.digitalData().get(activeAction).activeOrigin;
+            }
+            case VEC1, VEC2 -> {
+                if (this.activeAction == 0) {
+                yield 0;
+                }
+                if (this.analogData().isEmpty()) {
+                    yield 0;
+                }
+                yield this.analogData().get(activeAction).activeOrigin;
+            }
             default -> 0L;
         };
     }
 
+    //Multi-binds are a bit messy
     @Override
     public float getAxis1D(boolean delta) {
-        return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.analogData().x;
-            case VEC1, VEC2 -> delta ? this.analogData().deltaX : this.analogData().x;
-            default -> 0.0F;
-        };
+        for (int i = 0; i < this.analogData().size(); i++) {
+            AnalogData data = this.analogData().get(i);
+            if (delta) {
+                if (Math.abs(data.deltaX) > 0.0f) {
+                    this.activeAction = i;
+                    return data.deltaX;
+                }
+            } else {
+                if (Math.abs(data.x) > 0.0f) {
+                    this.activeAction = i;
+                    return data.x;
+                }
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -107,15 +183,24 @@ public class XRInputAction extends InputAction {
         }
     }
 
+    //Multi-binds are a bit messy
     @Override
     public Vector2fc getAxis2D(boolean delta) {
-        return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector2f(this.analogData().x, 0.0F);
-            case VEC1 -> delta ? new Vector2f(this.analogData().deltaX, 0.0F) : new Vector2f(this.analogData().x, 0.0F);
-            case VEC2 -> delta ? new Vector2f(this.analogData().deltaX, this.analogData().deltaY) :
-                new Vector2f(this.analogData().x, this.analogData().y);
-            default -> new Vector2f();
-        };
+        for (int i = 0; i < this.analogData().size(); i++) {
+            AnalogData data = this.analogData().get(i);
+            if (delta) {
+                if (Math.abs(data.deltaX) > 0.0f || Math.abs(data.deltaY) > 0.0f) {
+                    this.activeAction = i;
+                    return new Vector2f(data.deltaX, data.deltaY);
+                }
+            } else {
+                if (Math.abs(data.x) > 0.0f || Math.abs(data.y) > 0.0f) {
+                    this.activeAction = i;
+                    return new Vector2f(data.x, data.y);
+                }
+            }
+        }
+        return new Vector2f();
     }
 
     @Override
@@ -143,11 +228,13 @@ public class XRInputAction extends InputAction {
         public boolean state;
         public boolean isChanged;
         public boolean isActive;
-        public long activeOrigin;
         public long lastChange;
         public boolean longPress;
         public boolean toggle;
         public boolean doublePress;
         public boolean hold;
+        public long activeOrigin;
+        public ActionType type;
+        public ControllerType hand;
     }
 }
