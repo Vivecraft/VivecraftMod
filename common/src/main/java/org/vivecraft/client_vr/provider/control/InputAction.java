@@ -23,7 +23,7 @@ public class InputAction {
     public final VRInputActionSet actionSet;
 
     protected int priority = 0;
-    protected final List<VRInputAction.KeyListener> listeners = new ArrayList<>();
+    protected final List<InputAction.KeyListener> listeners = new ArrayList<>();
     protected ControllerType currentHand = ControllerType.RIGHT;
     // Only used for the UseTracked axis methods
     protected boolean currentlyInUse;
@@ -66,7 +66,7 @@ public class InputAction {
     }
 
     /**
-     * check if the InputAction is enabled, if it is handed, checks for {@link VRInputAction#currentHand} <br>
+     * check if the InputAction is enabled, if it is handed, checks for {@link InputAction#currentHand} <br>
      * also checks if any other InputAction with higher priority is active, then this InputAction is treated as disabled
      */
     public boolean isEnabled() {
@@ -368,7 +368,7 @@ public class InputAction {
     }
 
     /**
-     * @return the last origin the vr runtime sent, if the VRInputAction is not currently in an active set this is likely 0
+     * @return the last origin the vr runtime sent, if the InputAction is not currently in an active set this is likely 0
      */
     public long getLastOrigin() {
         return 0;

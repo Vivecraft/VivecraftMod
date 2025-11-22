@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.screens.GuiListScreen;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
 import org.vivecraft.client_vr.provider.control.ActionType;
-import org.vivecraft.client_vr.provider.control.VRInputAction;
+import org.vivecraft.client_vr.provider.control.InputAction;
 import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
 
 import java.util.LinkedList;
@@ -44,7 +44,7 @@ public class GuiBindings extends GuiListScreen {
         private final Button resetButton;
         private final BooleanSupplier canReset;
 
-        public ResettableEntry(Component name, VRInputAction action) {
+        public ResettableEntry(Component name, InputAction action) {
             super(name, getBaseWidget(action, VALUE_BUTTON_WIDTH, 20).get());
 
             this.canReset = () -> action.type != ActionType.BOOLEAN;
@@ -84,7 +84,7 @@ public class GuiBindings extends GuiListScreen {
         }
     }
 
-    public static Supplier<AbstractWidget> getBaseWidget(VRInputAction action, int width, int height) {
+    public static Supplier<AbstractWidget> getBaseWidget(InputAction action, int width, int height) {
         return () -> Button
             .builder(Component.literal("" + action.type), button -> {})
             .bounds(0, 0, width, height)

@@ -1,9 +1,13 @@
 package org.vivecraft.client_vr.provider.openxr.control;
 
 import net.minecraft.client.KeyMapping;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
-import org.vivecraft.client_vr.provider.control.*;
+import org.vivecraft.client_vr.provider.control.ActionType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
+import org.vivecraft.client_vr.provider.control.InputAction;
+import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,14 +57,22 @@ public class XRInputAction extends InputAction {
         return this.analogData;
     }
 
+    @Nullable
     public HandedAction getActiveAction(String[] controllers) {
+        if (this.activeAction == 0) {
+            return null;
+        }
         return this.handles.get(controllers[this.digitalData().get(this.activeAction).hand.ordinal()]).get(this.activeAction);
     }
 
     @Override
     public boolean isActive() {
         for (int i = 0; i < this.digitalData().size(); i++) {
-            switch (this.type) {
+            DigitalData data = this.digitalData().get(i);
+            if (data.type == null) {
+                continue;
+            }
+            switch (data.type) {
                 case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
                     if (this.digitalData().get(i).isActive) {
                         this.activeAction = i;
@@ -82,6 +94,9 @@ public class XRInputAction extends InputAction {
     public boolean isButtonPressed() {
         for (int i = 0; i < this.digitalData().size(); i++) {
             DigitalData data = this.digitalData().get(i);
+            if (data.type == null) {
+                continue;
+            }
             switch (data.type) {
                 case DOUBLE_PRESS -> {
                     if (data.doublePress) {
@@ -129,27 +144,10 @@ public class XRInputAction extends InputAction {
 
     @Override
     public long getLastOrigin() {
-        return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
-                if (this.activeAction == 0) {
-                    yield 0;
-                }
-                if (this.digitalData().isEmpty()) {
-                    yield 0;
-                }
-                yield this.digitalData().get(activeAction).activeOrigin;
-            }
-            case VEC1, VEC2 -> {
-                if (this.activeAction == 0) {
-                yield 0;
-                }
-                if (this.analogData().isEmpty()) {
-                    yield 0;
-                }
-                yield this.analogData().get(activeAction).activeOrigin;
-            }
-            default -> 0L;
-        };
+        if(this.activeAction == 0) {
+            return 0;
+        }
+        return digitalData().get(this.activeAction).activeOrigin;
     }
 
     //Multi-binds are a bit messy

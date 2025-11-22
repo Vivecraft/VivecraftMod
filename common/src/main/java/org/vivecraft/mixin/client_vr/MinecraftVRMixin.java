@@ -71,7 +71,6 @@ import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
 import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.control.InputAction;
-import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;

@@ -10,7 +10,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.control.InputAction;
-import org.vivecraft.client_vr.provider.control.VRInputAction;
 
 import java.util.Arrays;
 

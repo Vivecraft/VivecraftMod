@@ -32,7 +32,10 @@ import org.vivecraft.client_vr.provider.openxr.control.XRBinding;
 import org.vivecraft.client_vr.provider.openxr.control.XRInputAction;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.nio.*;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.*;
 
 import static org.lwjgl.system.MemoryStack.*;
@@ -1014,11 +1017,13 @@ public class MCOpenXR extends MCVR<XRInputAction> {
         }
     }
 
-    //TODO fix me! Origins needs to be done differently
     @Override
     public <I extends InputAction> List<Long> getOrigins(I action) {
         if (action instanceof XRInputAction xrAction) {
-            return getOrigins(xrAction.getActiveAction(this.activeController), xrAction);
+            var handedAction = xrAction.getActiveAction(this.activeController);
+            if (handedAction != null) {
+                return getOrigins(handedAction, xrAction);
+            }
         }
         return List.of(0L);
     }
@@ -1085,12 +1090,13 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             long actionSet = makeActionSet(this.instance, vrinputactionset.name, vrinputactionset.localizedName, 0);
             this.actionSetHandles.put(vrinputactionset, actionSet);
 
-            //TODO select the proper headset
-            for (var binding : ControllerMapping.quest2Bindings().entrySet()) {
-                long action = createAction(binding.getKey().replace("/", "."), binding.getKey(), binding.getValue(),
-                    new XrActionSet(actionSet, this.instance),
-                    binding.getKey().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
-                this.mappedBindings.put(new ActionBind(vrinputactionset, binding.getKey()), action);
+            for (String headset: XRBinding.supportedHeadsets()) {
+                for (var binding : ControllerMapping.getMapping(headset).entrySet()) {
+                    long action = createAction((binding.getKey()+ "." + headset.replace("/interaction_profiles/","")).replace("/", ".") , binding.getKey(), binding.getValue(),
+                        new XrActionSet(actionSet, this.instance),
+                        binding.getKey().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
+                    this.mappedBindings.put(new ActionBind(vrinputactionset, binding.getKey()), action);
+                }
             }
         }
 
@@ -1120,9 +1126,9 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             int error;
             for (String headset : XRBinding.supportedHeadsets()) {
                 VRSettings.LOGGER.info("loading defaults for {}", headset);
-                if (!"/interaction_profiles/oculus/touch_controller".equals(headset)) {
-                    continue;
-                }
+//                if (!"/interaction_profiles/oculus/touch_controller".equals(headset)) {
+//                    continue;
+//                }
                 XRBinding[] defaultBindings = XRBinding.getBinding(headset).toArray(new XRBinding[0]);
                 XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 6,
                     stack); //TODO different way of adding controller poses
@@ -1131,10 +1137,10 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                     XRBinding binding = defaultBindings[i];
                     XRInputAction inputAction = this.getInputActionByName(binding.key());
                     if (binding.actionSet() != null) {
-                        //inputAction.actionSet = binding.actionSet(); TODO?
+                        //inputAction.actionSet = binding.actionSet(); //TODO?
                     }
                     long handle = this.mappedBindings.get(new ActionBind(inputAction.actionSet, binding.controller()));
-                    ActionType type = ControllerMapping.quest2Bindings().get(binding.controller());
+                    ActionType type = ControllerMapping.getMapping(headset).get(binding.controller());
                     inputAction.addHandle(headset, handle, binding.controller().contains("/left/") ? ControllerType.LEFT :
                         ControllerType.RIGHT, type);
                     inputAction.setType(binding.actionType());

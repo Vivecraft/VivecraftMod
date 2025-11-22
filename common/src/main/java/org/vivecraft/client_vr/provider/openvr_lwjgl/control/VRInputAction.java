@@ -1,21 +1,14 @@
-package org.vivecraft.client_vr.provider.control;
+package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.vivecraft.Xplat;
-import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.provider.InputSimulator;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import org.vivecraft.client_vr.provider.control.ActionType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
+import org.vivecraft.client_vr.provider.control.InputAction;
+import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 
 public class VRInputAction extends InputAction {
 
@@ -24,7 +17,7 @@ public class VRInputAction extends InputAction {
     public final AnalogData[] analogData = new AnalogData[ControllerType.values().length];
 
     public VRInputAction(
-        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+            KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
     {
         super(keyMapping, requirement, type, actionSetOverride);
 
