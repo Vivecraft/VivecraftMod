@@ -1174,7 +1174,8 @@ public abstract class MCVR<T extends InputAction> {
         }
     }
 
-    public abstract T createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride);
+    public abstract T createAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride);
 
     /**
      * creates VRInputActions for all registered keyMappings, should be called in {@link #init}

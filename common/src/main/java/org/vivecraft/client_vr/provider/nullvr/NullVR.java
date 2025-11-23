@@ -92,7 +92,9 @@ public class NullVR extends MCVR<InputAction> {
     }
 
     @Override
-    public InputAction createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+    public InputAction createAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+    {
         return new InputAction(keyMapping, requirement, type, actionSetOverride);
     }
 

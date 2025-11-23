@@ -24,7 +24,9 @@ public class XRInputAction extends InputAction {
     public final List<DigitalData> digitalData = new ArrayList<>();
     public final List<AnalogData> analogData = new ArrayList<>();
 
-    public XRInputAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+    public XRInputAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+    {
         super(keyMapping, requirement, type, actionSetOverride);
         this.type = null; //No global type, type is part of the
 
@@ -62,7 +64,8 @@ public class XRInputAction extends InputAction {
         if (this.activeAction == 0) {
             return null;
         }
-        return this.handles.get(controllers[this.digitalData().get(this.activeAction).hand.ordinal()]).get(this.activeAction);
+        return this.handles.get(controllers[this.digitalData().get(this.activeAction).hand.ordinal()])
+            .get(this.activeAction);
     }
 
     @Override
@@ -144,7 +147,7 @@ public class XRInputAction extends InputAction {
 
     @Override
     public long getLastOrigin() {
-        if(this.activeAction == 0) {
+        if (this.activeAction == 0) {
             return 0;
         }
         return digitalData().get(this.activeAction).activeOrigin;

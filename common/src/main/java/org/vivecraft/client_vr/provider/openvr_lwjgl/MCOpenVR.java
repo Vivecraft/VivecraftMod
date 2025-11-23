@@ -267,7 +267,9 @@ public class MCOpenVR extends MCVR<VRInputAction> {
     }
 
     @Override
-    public VRInputAction createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+    public VRInputAction createAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+    {
         return new VRInputAction(keyMapping, requirement, type, actionSetOverride);
     }
 
@@ -1679,7 +1681,8 @@ public class MCOpenVR extends MCVR<VRInputAction> {
         if (OpenVR.VRInput != null) {
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 LongBuffer longRef = stack.callocLong(16);
-                int error = VRInput_GetActionOrigins(this.getActionSetHandle(action.actionSet), ((VRInputAction)action).handle, longRef);
+                int error = VRInput_GetActionOrigins(this.getActionSetHandle(action.actionSet),
+                    ((VRInputAction) action).handle, longRef);
 
                 if (error != 0) {
                     throw new RuntimeException(

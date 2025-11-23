@@ -17,7 +17,7 @@ public class VRInputAction extends InputAction {
     public final AnalogData[] analogData = new AnalogData[ControllerType.values().length];
 
     public VRInputAction(
-            KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
     {
         super(keyMapping, requirement, type, actionSetOverride);
 

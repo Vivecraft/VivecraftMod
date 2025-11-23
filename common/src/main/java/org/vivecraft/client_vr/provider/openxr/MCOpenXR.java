@@ -125,7 +125,9 @@ public class MCOpenXR extends MCVR<XRInputAction> {
     }
 
     @Override
-    public XRInputAction createAction(KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride) {
+    public XRInputAction createAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+    {
         return new XRInputAction(keyMapping, requirement, type, actionSetOverride);
     }
 
@@ -137,7 +139,8 @@ public class MCOpenXR extends MCVR<XRInputAction> {
         } else {
             var action = this.getInputAction(keyMapping);
             for (ControllerType controllerType : ControllerType.values()) {
-                var handedaction = action.getHandle(this.activeController[controllerType.ordinal()]).get(action.activeAction);
+                var handedaction = action.getHandle(this.activeController[controllerType.ordinal()])
+                    .get(action.activeAction);
                 if (handedaction.hand() != controllerType) {
                     continue;
                 }
@@ -367,19 +370,21 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                 }
                 action.digitalData.get(index).lastChange = System.nanoTime();
             } else if (state.currentState()) {
-                action.digitalData.get(index).hold = System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+                action.digitalData.get(index).hold =
+                    System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
             }
 
             action.digitalData.get(index).state = state.currentState();
             action.digitalData.get(index).isActive = state.isActive();
             action.digitalData.get(index).isChanged = state.changedSinceLastSync();
-            action.digitalData.get(index).activeOrigin = getOrigins(handedAction,action).getFirst();
+            action.digitalData.get(index).activeOrigin = getOrigins(handedAction, action).getFirst();
             action.digitalData.get(index).type = handedAction.action();
             action.digitalData.get(index).hand = handedAction.hand();
 
-            action.analogData.get(index).deltaX = state.changedSinceLastSync() ? state.currentState() ? 1.0F : -1.0F : 0.0F;
+            action.analogData.get(index).deltaX =
+                state.changedSinceLastSync() ? state.currentState() ? 1.0F : -1.0F : 0.0F;
             action.analogData.get(index).x = state.currentState() ? 1.0f : 0.0f;
-            action.analogData.get(index).activeOrigin = getOrigins(handedAction,action).getFirst();
+            action.analogData.get(index).activeOrigin = getOrigins(handedAction, action).getFirst();
             action.analogData.get(index).isActive = state.isActive();
             action.analogData.get(index).isChanged = state.changedSinceLastSync();
         }
@@ -407,7 +412,8 @@ public class MCOpenXR extends MCVR<XRInputAction> {
 
             //Write digital data
             boolean on = Math.abs(state.currentState()) > 0.5F;
-            boolean changed = Math.abs(action.analogData.get(index).x - action.analogData.get(index).deltaX) > 0.5F != on;
+            boolean changed =
+                Math.abs(action.analogData.get(index).x - action.analogData.get(index).deltaX) > 0.5F != on;
             if (changed) {
                 if (on) {
                     action.digitalData.get(index).toggle = !action.digitalData.get(index).toggle;
@@ -419,7 +425,8 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                 }
                 action.digitalData.get(index).lastChange = System.nanoTime();
             } else if (on) {
-                action.digitalData.get(index).hold = System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+                action.digitalData.get(index).hold =
+                    System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
             }
 
             action.digitalData.get(index).state = on;
@@ -455,8 +462,10 @@ public class MCOpenXR extends MCVR<XRInputAction> {
 
             //Write digital data
             boolean on = Math.abs(state.currentState().x()) > 0.5F || Math.abs(state.currentState().y()) > 0.5F;
-            boolean changed = Math.abs(action.analogData.get(index).x - action.analogData.get(index).deltaX) > 0.5F != Math.abs(action.analogData.get(index).x) > 0.5F ||
-                Math.abs(action.analogData.get(index).y - action.analogData.get(index).deltaY) > 0.5F != Math.abs(action.analogData.get(index).y) > 0.5F;
+            boolean changed = Math.abs(action.analogData.get(index).x - action.analogData.get(index).deltaX) > 0.5F !=
+                Math.abs(action.analogData.get(index).x) > 0.5F ||
+                Math.abs(action.analogData.get(index).y - action.analogData.get(index).deltaY) > 0.5F !=
+                    Math.abs(action.analogData.get(index).y) > 0.5F;
             if (changed) {
                 if (on) {
                     action.digitalData.get(index).toggle = !action.digitalData.get(index).toggle;
@@ -468,7 +477,8 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                 }
                 action.digitalData.get(index).lastChange = System.nanoTime();
             } else if (on) {
-                action.digitalData.get(index).hold = System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+                action.digitalData.get(index).hold =
+                    System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
             }
 
             action.digitalData.get(index).state = on;
@@ -1090,9 +1100,11 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             long actionSet = makeActionSet(this.instance, vrinputactionset.name, vrinputactionset.localizedName, 0);
             this.actionSetHandles.put(vrinputactionset, actionSet);
 
-            for (String headset: XRBinding.supportedHeadsets()) {
+            for (String headset : XRBinding.supportedHeadsets()) {
                 for (var binding : ControllerMapping.getMapping(headset).entrySet()) {
-                    long action = createAction((binding.getKey()+ "." + headset.replace("/interaction_profiles/","")).replace("/", ".") , binding.getKey(), binding.getValue(),
+                    long action = createAction(
+                        (binding.getKey() + "." + headset.replace("/interaction_profiles/", "")).replace("/", "."),
+                        binding.getKey(), binding.getValue(),
                         new XrActionSet(actionSet, this.instance),
                         binding.getKey().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
                     this.mappedBindings.put(new ActionBind(vrinputactionset, binding.getKey()), action);
@@ -1141,8 +1153,9 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                     }
                     long handle = this.mappedBindings.get(new ActionBind(inputAction.actionSet, binding.controller()));
                     ActionType type = ControllerMapping.getMapping(headset).get(binding.controller());
-                    inputAction.addHandle(headset, handle, binding.controller().contains("/left/") ? ControllerType.LEFT :
-                        ControllerType.RIGHT, type);
+                    inputAction.addHandle(headset, handle,
+                        binding.controller().contains("/left/") ? ControllerType.LEFT :
+                            ControllerType.RIGHT, type);
                     inputAction.setType(binding.actionType());
                     if (inputAction.getHandle(headset).isEmpty() || handle == 0L) {
                         VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", binding.key(), binding.controller());
