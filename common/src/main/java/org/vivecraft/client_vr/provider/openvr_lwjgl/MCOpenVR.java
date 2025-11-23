@@ -566,7 +566,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
         for (VRInputAction action : sortedActions) {
             actions.add(
                 ImmutableMap.<String, Object>builder().put("name", action.name).put("requirement", action.requirement)
-                    .put("type", action.type).build());
+                    .put("type", action.type.getSteamName()).build());
         }
 
         // controller poses
