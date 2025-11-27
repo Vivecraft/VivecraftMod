@@ -216,6 +216,8 @@ public abstract class MCVR<T extends InputAction> {
         ME = null;
     }
 
+    public void prerender() {}
+
     /**
      * triggers a haptic pulse on the give controller, as soon as possible
      *
