@@ -3,10 +3,14 @@ package org.vivecraft.client.api_impl;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.vivecraft.api.client.VRRenderingAPI;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.api.data.VRPose;
+import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
@@ -56,5 +60,14 @@ public class VRRenderingAPIImpl implements VRRenderingAPI {
     @Override
     public void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix) {
         RenderHelper.setupRenderingAtController(hand.ordinal(), matrix);
+    }
+
+    @Override
+    public @Nullable VRPose getWorldRenderPose(Player player) {
+        if (player.isLocalPlayer()) {
+            return VRClientAPIImpl.INSTANCE.getWorldRenderPose();
+        } else {
+            return ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID()).asVRPose(player.position());
+        }
     }
 }
