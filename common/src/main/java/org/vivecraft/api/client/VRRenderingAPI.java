@@ -102,7 +102,7 @@ public interface VRRenderingAPI {
      *
      * @param player Player to get the VR pose interpolated for rendering of.
      * @return The VR pose representing the provided player in Minecraft space post-tick interpolated for rendering, or
-     * {@code null} if the local player isn't in VR.
+     * {@code null} if the player isn't in VR.
      * @since 1.3.5
      */
     @Nullable
