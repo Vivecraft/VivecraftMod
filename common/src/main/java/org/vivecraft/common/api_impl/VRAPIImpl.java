@@ -66,7 +66,8 @@ public final class VRAPIImpl implements VRAPI {
         } else if (player.isLocalPlayer()) {
             return VRClientAPIImpl.INSTANCE.getPreTickWorldPose();
         } else {
-            return ClientVRPlayers.getInstance().getLatestRotationsForPlayer(player.getUUID()).asVRPose(player.position());
+            return ClientVRPlayers.getInstance().getLatestRotationsForPlayer(player.getUUID())
+                .asVRPose(player.position());
         }
     }
 
