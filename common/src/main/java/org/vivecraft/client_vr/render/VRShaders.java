@@ -124,7 +124,7 @@ public class VRShaders {
 
     public static final RenderPipeline GUI_TEXTURED = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
-        .withLocation("pipeline/gui_textured_always_vr")
+        .withLocation("pipeline/gui_textured_vr")
         .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST).build();
 
     public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
