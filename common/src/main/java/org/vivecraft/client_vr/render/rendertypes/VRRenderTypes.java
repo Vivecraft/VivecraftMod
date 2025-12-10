@@ -51,7 +51,7 @@ public class VRRenderTypes {
 
     private static final Function<ResourceLocation, RenderType> GUI_TEXTURED = Util.memoize(
         resourceLocation -> RenderType.create("gui_textured_vr", 1536, false, false,
-            RenderPipelines.GUI_TEXTURED, RenderType.CompositeState.builder()
+            VRShaders.GUI_TEXTURED, RenderType.CompositeState.builder()
                 .setTextureState(getTextureState(resourceLocation))
                 .createCompositeState(false)));
 
