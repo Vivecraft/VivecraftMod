@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -17,7 +17,7 @@ import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ViveItemTags;
 
 public class TelescopeTracker implements ItemInUseTracker {
-    public static final ResourceLocation SCOPE_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
+    public static final Identifier SCOPE_MODEL = Identifier.fromNamespaceAndPath("vivecraft",
         "spyglass_in_hand");
     private static final float LENS_DIST_MAX = 0.05F;
     private static final float LENS_DIST_MIN = 0.185F;

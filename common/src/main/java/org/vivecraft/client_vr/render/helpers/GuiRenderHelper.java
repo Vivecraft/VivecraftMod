@@ -14,7 +14,7 @@ public class GuiRenderHelper {
     public static GuiGraphics getGuiGraphics() {
         GuiRenderState guiRenderState = ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).getGuiRenderState();
         guiRenderState.reset();
-        return new GuiGraphics(Minecraft.getInstance(), guiRenderState);
+        return new GuiGraphics(Minecraft.getInstance(), guiRenderState, 0, 0);
     }
 
     public static void renderScreen(Screen screen) {

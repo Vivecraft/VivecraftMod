@@ -424,7 +424,7 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
     }
 
     @Override
-    protected ModelPart getArm(HumanoidArm side) {
+    public ModelPart getArm(HumanoidArm side) {
         return side == HumanoidArm.RIGHT ? this.rightHand : this.leftHand;
     }
 

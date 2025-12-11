@@ -7,14 +7,15 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MapRenderer;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.PatchedDataComponentMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -57,18 +58,18 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 public abstract class ItemInHandRendererVRMixin {
 
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderType.entityCutoutNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background.png"), false);
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderTypes.entityCutoutNoCull(
+        Identifier.withDefaultNamespace("textures/map/map_background.png"), false);
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderType.entityCutoutNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background_checkerboard.png"), false);
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderTypes.entityCutoutNoCull(
+        Identifier.withDefaultNamespace("textures/map/map_background_checkerboard.png"), false);
 
     @Unique
     private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL_TEXT = VRRenderTypes.textNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background.png"));
+        Identifier.withDefaultNamespace("textures/map/map_background.png"));
     @Unique
     private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL_TEXT = VRRenderTypes.textNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background_checkerboard.png"));
+        Identifier.withDefaultNamespace("textures/map/map_background_checkerboard.png"));
 
     @Final
     @Shadow
@@ -176,7 +177,7 @@ public abstract class ItemInHandRendererVRMixin {
         }
     }
 
-    @ModifyArg(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V"))
+    @ModifyArg(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V"))
     private RenderType vivecraft$overrideMapVanilla(RenderType renderType) {
         if (VRState.VR_RUNNING) {
             return renderType == MAP_BACKGROUND ? VIVECRAFT$MAP_BACKGROUND_NO_CULL_TEXT :
@@ -380,7 +381,7 @@ public abstract class ItemInHandRendererVRMixin {
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
 
         vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY);
-        ResourceLocation skin = player.getSkin().body().texturePath();
+        Identifier skin = player.getSkin().body().texturePath();
 
         if (rightHand) {
             vrArmRenderer.renderRightHand(poseStack, collector, combinedLight, skin, true);

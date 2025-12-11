@@ -2,7 +2,7 @@ package org.vivecraft.client;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
@@ -29,13 +29,13 @@ public class VivecraftVRMod {
     private Set<KeyMapping> vanillaBindingSet;
 
     public final KeyMapping.Category categoryClimbey = KeyMapping.Category.register(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "key.category.climbey"));
+        Identifier.fromNamespaceAndPath("vivecraft", "key.category.climbey"));
 
     public final KeyMapping.Category categoryGui = KeyMapping.Category.register(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "key.category.gui"));
+        Identifier.fromNamespaceAndPath("vivecraft", "key.category.gui"));
 
     public final KeyMapping.Category categoryKeyboard = KeyMapping.Category.register(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "key.category.keyboard"));
+        Identifier.fromNamespaceAndPath("vivecraft", "key.category.keyboard"));
 
     public final HandedKeyBinding keyClimbeyGrab = new HandedKeyBinding("vivecraft.key.climbeyGrab", -1,
         this.categoryClimbey);

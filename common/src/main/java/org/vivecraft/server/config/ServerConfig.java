@@ -4,10 +4,10 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.vivecraft.Xloader;
@@ -339,12 +339,12 @@ public class ServerConfig {
                 boolean valid = true;
                 try {
                     // check if valid block
-                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse((String) s))
+                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(Identifier.parse((String) s))
                         .orElseGet(() -> null);
                     if (b == null || b.value() == Blocks.AIR) {
                         valid = false;
                     }
-                } catch (ResourceLocationException e) {
+                } catch (IdentifierException e) {
                     valid = false;
                 }
                 if (!valid) {

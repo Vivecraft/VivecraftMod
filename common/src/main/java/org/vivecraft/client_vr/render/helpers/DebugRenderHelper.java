@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -83,14 +83,14 @@ public class DebugRenderHelper {
     public static void renderPlayerAxes(float partialTick) {
         if (MC.player != null) {
             VertexConsumer consumer = null;
-            Vec3 camPos = MC.gameRenderer.getMainCamera().getPosition();
+            Vec3 camPos = MC.gameRenderer.getMainCamera().position();
 
             for (Player p : MC.player.level().players()) {
                 if (ClientVRPlayers.getInstance().isVRPlayer(p)) {
                     ClientVRPlayers.RotInfo info = ClientVRPlayers.getInstance().getRotationsForPlayer(p.getUUID());
 
                     if (consumer == null) {
-                        consumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+                        consumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
                     }
 
                     Vector3f playerPos = MathUtils.subtractToVector3f(p.getPosition(partialTick), camPos);
@@ -133,7 +133,7 @@ public class DebugRenderHelper {
      * @param data VRData to get the devices from
      */
     public static void renderDeviceAxes(VRData data) {
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         List<VRData.VRDevicePose> list = new ArrayList<>();
 
@@ -236,7 +236,7 @@ public class DebugRenderHelper {
     public static void renderLocalAxes(Matrix4f matrix) {
         RenderSystem.getModelViewStack().pushMatrix().mul(matrix);
 
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         Vector3f position = new Vector3f();
 
@@ -333,7 +333,7 @@ public class DebugRenderHelper {
      * @param points list of points the line should follow, at least 2
      */
     public static void renderLine(Vector3fc color, Vector3fc... points) {
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         for (Vector3fc point : points) {
             vertexConsumer.addVertex(point.x(), point.y(), point.z())
@@ -350,7 +350,7 @@ public class DebugRenderHelper {
      * @param color  color of the line
      */
     public static void renderLine(List<Pair<Vector3fc, Boolean>> points, Vector3fc color) {
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         Pair<Vector3fc, Boolean> prev = null;
 
@@ -379,7 +379,7 @@ public class DebugRenderHelper {
      * @param points list of points the line should follow
      */
     public static void renderLine(Vector3fc color, Vec3 camPos, Iterable<Vec3> points) {
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         for (Vec3 point : points) {
             vertexConsumer.addVertex((float) (point.x() - camPos.x()), (float) (point.y() - camPos.y()),
@@ -530,7 +530,7 @@ public class DebugRenderHelper {
      * @param color   circle color
      */
     public static void renderCircle(Vector3fc center, Vector3fc forward, float radius, Vector3fc color) {
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         addCircle(vertexConsumer, center, forward, radius, color);
 
@@ -545,7 +545,7 @@ public class DebugRenderHelper {
      * @param color  sphere color
      */
     public static void renderSphere(Vector3fc center, float radius, Vector3fc color) {
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         addCircle(vertexConsumer, center, MathUtils.LEFT, radius, color);
         addCircle(vertexConsumer, center, MathUtils.FORWARD, radius, color);
@@ -564,7 +564,7 @@ public class DebugRenderHelper {
      * @param color  sphere color
      */
     public static void renderCone(Vector3fc tip, Vector3fc dir, float angle, float length, Vector3fc color) {
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         Vector3f center = dir.normalize(new Vector3f()).mul(length).add(tip);
         float radius = length * (float) Math.tan(Math.toRadians(angle));
@@ -597,7 +597,7 @@ public class DebugRenderHelper {
      * @param color  sphere color
      */
     public static void renderCylinder(Vector3fc bottom, Vector3fc topDir, float radius, Vector3fc color) {
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.debugLineStrip(2F));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(VRRenderTypes.linesStrip());
 
         Vector3f dir = topDir.normalize(new Vector3f());
 

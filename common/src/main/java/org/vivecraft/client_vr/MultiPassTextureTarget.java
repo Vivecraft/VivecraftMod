@@ -104,15 +104,6 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
-    public void setFilterMode(FilterMode filterMode) {
-        if (this.vrTargets == null) {
-            super.setFilterMode(filterMode);
-            return;
-        }
-        callOnTarget(r -> r.setFilterMode(filterMode));
-    }
-
-    @Override
     public void blitToScreen() {
         if (this.vrTargets == null) {
             super.blitToScreen();
@@ -210,6 +201,5 @@ public class MultiPassTextureTarget extends TextureTarget {
         this.last = current;
         this.width = current.width;
         this.height = current.height;
-        this.filterMode = current.filterMode;
     }
 }

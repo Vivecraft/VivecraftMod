@@ -3,7 +3,7 @@ package org.vivecraft.client_vr;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.HumanoidArm;
 import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.api.client.Tracker;
@@ -24,9 +24,9 @@ import java.util.function.BiFunction;
 
 public class ClientDataHolderVR {
 
-    public static final ResourceLocation THIRD_PERSON_CAMERA_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
+    public static final Identifier THIRD_PERSON_CAMERA_MODEL = Identifier.fromNamespaceAndPath("vivecraft",
         "camcorder");
-    public static final ResourceLocation THIRD_PERSON_CAMERA_DISPLAY_MODEL = ResourceLocation.fromNamespaceAndPath(
+    public static final Identifier THIRD_PERSON_CAMERA_DISPLAY_MODEL = Identifier.fromNamespaceAndPath(
         "vivecraft", "camcorder_display");
 
     private static ClientDataHolderVR INSTANCE = new ClientDataHolderVR();

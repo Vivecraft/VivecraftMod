@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.gameplay.interact_modules;
 
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 
 public class ThirdPersonCameraModule implements DebugRenderModule, HeldInteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft",
+    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft",
         "third_person_camera");
 
     private static final float INTERACT_DIST = 0.15F;
@@ -33,7 +33,7 @@ public class ThirdPersonCameraModule implements DebugRenderModule, HeldInteractM
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 

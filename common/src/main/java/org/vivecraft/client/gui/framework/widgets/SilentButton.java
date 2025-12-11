@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 /**
  * Button that doesn't play a click sound
  */
-public class SilentButton extends Button {
+public class SilentButton extends Button.Plain {
     public SilentButton(Component message, OnPress onPress, int width, int height) {
         super(0, 0, width, height, message, onPress, DEFAULT_NARRATION);
     }

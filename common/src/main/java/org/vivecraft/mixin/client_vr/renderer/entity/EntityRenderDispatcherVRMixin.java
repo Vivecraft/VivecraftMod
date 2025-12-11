@@ -56,7 +56,7 @@ public abstract class EntityRenderDispatcherVRMixin implements EntityRenderDispa
         CallbackInfoReturnable<EntityRenderState> cir, @Local(argsOnly = true) Entity entity,
         @Share("capturedEntity") LocalRef<Entity> capturedEntity)
     {
-        if (!RenderPassType.isVanilla() && this.camera != null && entity == this.camera.getEntity()) {
+        if (!RenderPassType.isVanilla() && this.camera != null && entity == this.camera.entity()) {
             capturedEntity.set(entity);
             ((GameRendererExtension) Minecraft.getInstance().gameRenderer).vivecraft$restoreRVEPos(
                 capturedEntity.get());

@@ -46,10 +46,10 @@ public class ColorPicker extends AbstractWidget {
 
         int satX = (int) (this.getX() + HUE_WIDTH + 1 + this.saturation * (this.width - HUE_WIDTH - 3));
         int satY = (int) (this.getY() + 1 + (1F - this.brightness) * (this.height - 3));
-        guiGraphics.submitOutline(satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
+        guiGraphics.renderOutline(satX - 2, satY - 2, 5, 5, 0xFFFFFFFF);
 
         int hueY = (int) (this.getY() + 1 + this.hue * (this.height - 3));
-        guiGraphics.submitOutline(this.getX(), hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
+        guiGraphics.renderOutline(this.getX(), hueY - 2, HUE_WIDTH, 5, 0xFFFFFFFF);
     }
 
     @Override

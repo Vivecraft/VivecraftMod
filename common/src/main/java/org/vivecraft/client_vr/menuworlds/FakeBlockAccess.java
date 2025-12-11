@@ -1,12 +1,14 @@
 package org.vivecraft.client_vr.menuworlds;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.*;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.world.attribute.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -22,9 +24,11 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,12 +56,13 @@ public class FakeBlockAccess implements LevelReader {
     private final boolean thunder;
 
     private final BiomeManager biomeManager;
-    private final DimensionSpecialEffects dimensionInfo;
+    private final EnvironmentAttributeSystem environmentAttributes;
+    private final MenuWorldRenderer renderer;
 
     public FakeBlockAccess(
         int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap,
         short[][] heightmap, int xSize, int ySize, int zSize, int ground, DimensionType dimensionType, boolean isFlat,
-        float rotation, boolean rain, boolean thunder)
+        float rotation, boolean rain, boolean thunder, MenuWorldRenderer renderer)
     {
         this.version = version;
         this.seed = seed;
@@ -78,13 +83,62 @@ public class FakeBlockAccess implements LevelReader {
         this.thunder = thunder;
 
         this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(seed));
-        this.dimensionInfo = DimensionSpecialEffects.forType(dimensionType);
+        this.renderer = renderer;
 
         // set the ground to the height of the center block
         BlockPos pos = new BlockPos(0, (int) this.ground, 0);
         BlockState standing = blocks[encodeCoords(pos)];
         this.ground += (float) Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
         this.effectiveGround = this.ground;
+        this.environmentAttributes = addEnvironmentAttributeLayers(EnvironmentAttributeSystem.builder()).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private EnvironmentAttributeSystem.Builder addEnvironmentAttributeLayers(
+        EnvironmentAttributeSystem.Builder builder)
+    {
+        // this is taken from EnvironmentAttributeSystem.addDefaultLayers
+        builder.addConstantLayer(this.dimensionType.attributes());
+
+        Arrays.stream(this.biomemap).flatMap(biome -> biome.getAttributes().keySet().stream()).distinct().forEach(
+            (environmentAttribute) -> builder.addPositionalLayer((EnvironmentAttribute) environmentAttribute,
+                (object, vec3, spatialAttributeInterpolator) -> {
+                    if (spatialAttributeInterpolator != null && environmentAttribute.isSpatiallyInterpolated()) {
+                        return spatialAttributeInterpolator.applyAttributeLayer(
+                            (EnvironmentAttribute) environmentAttribute, object);
+                    } else {
+                        Holder<Biome> holder = this.biomeManager.getNoiseBiomeAtPosition(vec3.x, vec3.y, vec3.z);
+                        return holder.value().getAttributes()
+                            .applyModifier((EnvironmentAttribute) environmentAttribute, object);
+                    }
+                }));
+
+        if (this.dimensionType().hasSkyLight() && !this.dimensionType().hasCeiling() &&
+            this.dimensionType().skybox() != DimensionType.Skybox.END)
+        {
+            WeatherAttributes.addBuiltinLayers(builder, new WeatherAttributes.WeatherAccess() {
+                @Override
+                public float rainLevel() {
+                    return FakeBlockAccess.this.renderer.getRainLevel();
+                }
+
+                @Override
+                public float thunderLevel() {
+                    return FakeBlockAccess.this.renderer.getThunderLevel();
+                }
+            });
+        }
+
+        this.dimensionType.timelines().forEach((timeline) -> builder.addTimelineLayer(timeline, () -> this.renderer.time));
+
+        int flashColor = ARGB.color(204, 204, 255);
+        builder.addTimeBasedLayer(EnvironmentAttributes.SKY_COLOR, (skyColor, cacheTickId) -> {
+            if (this.renderer.getSkyFlashTime() <= 0) return skyColor;
+            return ARGB.srgbLerp(0.22f, skyColor, flashColor);
+        });
+        builder.addTimeBasedLayer(EnvironmentAttributes.SKY_LIGHT_FACTOR,
+            (skyFactor, cacheTickId) -> this.renderer.getSkyFlashTime() > 0 ? 1.0f : skyFactor);
+        return builder;
     }
 
     private int encodeCoords(int x, int z) {
@@ -150,8 +204,9 @@ public class FakeBlockAccess implements LevelReader {
         return this.dimensionType;
     }
 
-    public DimensionSpecialEffects getDimensionReaderInfo() {
-        return this.dimensionInfo;
+    @Override
+    public EnvironmentAttributeReader environmentAttributes() {
+        return this.environmentAttributes;
     }
 
     public double getVoidFogYFactor() {
@@ -249,14 +304,15 @@ public class FakeBlockAccess implements LevelReader {
 
     @Override
     public float getShade(Direction face, boolean shade) {
-        boolean flag = this.dimensionInfo.constantAmbientLight(); // isNether?? yeah mate nice hard-coding
+        // isNether?? yeah mate nice hard-coding
+        DimensionType.CardinalLightType type = this.dimensionType().cardinalLightType();
 
         if (!shade) {
-            return flag ? 0.9F : 1.0F;
+            return type == DimensionType.CardinalLightType.NETHER ? 0.9F : 1.0F;
         } else {
             return switch (face) {
-                case DOWN -> flag ? 0.9F : 0.5F;
-                case UP -> flag ? 0.9F : 1.0F;
+                case DOWN -> type == DimensionType.CardinalLightType.NETHER ? 0.9F : 0.5F;
+                case UP -> type == DimensionType.CardinalLightType.NETHER ? 0.9F : 1.0F;
                 case NORTH, SOUTH -> 0.8F;
                 case WEST, EAST -> 0.6F;
             };

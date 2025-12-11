@@ -1,7 +1,7 @@
 package org.vivecraft.data;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -46,6 +46,6 @@ public class ViveItemTags {
     public static final TagKey<Item> VIVECRAFT_BOW_EXCLUSION = tag("bow_exclusion");
 
     private static TagKey<Item> tag(String name) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("vivecraft", name));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("vivecraft", name));
     }
 }

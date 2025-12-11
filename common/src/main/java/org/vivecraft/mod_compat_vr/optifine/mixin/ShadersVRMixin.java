@@ -39,7 +39,7 @@ public class ShadersVRMixin {
     @ModifyVariable(method = "setCameraShadow", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = true), remap = false)
     private static PoseStack vivecraft$offsetShadow(PoseStack shadowModelViewMat) {
         if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization) {
-            Vec3 offset = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition()
+            Vec3 offset = Minecraft.getInstance().gameRenderer.getMainCamera().position()
                 .subtract(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().hmd.getPosition());
             shadowModelViewMat.translate((float) offset.x, (float) offset.y, (float) offset.z);
         }

@@ -78,8 +78,6 @@ public abstract class GameRendererVRMixin
     @Unique
     private static final float vivecraft$MIN_CLIP_DISTANCE = 0.02F;
     @Unique
-    private Vec3 vivecraft$crossVec;
-    @Unique
     private Matrix4f vivecraft$thirdPassProjectionMatrix = new Matrix4f();
     @Unique
     private boolean vivecraft$inwater;
@@ -185,26 +183,6 @@ public abstract class GameRendererVRMixin
         } else {
             // call the vanilla method
             original.call(partialTick);
-        }
-    }
-
-    @ModifyArg(method = "pick(Lnet/minecraft/world/entity/Entity;DDF)Lnet/minecraft/world/phys/HitResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;pick(DFZ)Lnet/minecraft/world/phys/HitResult;"), index = 0)
-    private double vivecraft$getCrossVec(double hitDistance) {
-        if (VRState.VR_RUNNING) {
-            // get the end of the reach point here, to have the correct reach distance
-            this.vivecraft$crossVec = vivecraft$DATA_HOLDER.vrPlayer.AimedPointAtDistance(
-                vivecraft$DATA_HOLDER.vrPlayer.vrdata_world_render.getAim(), hitDistance);
-        }
-        return hitDistance;
-    }
-
-    @ModifyArg(method = "pick(Lnet/minecraft/world/entity/Entity;DDF)Lnet/minecraft/world/phys/HitResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ProjectileUtil;getEntityHitResult(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;D)Lnet/minecraft/world/phys/EntityHitResult;"))
-    private Predicate<Entity> vivecraft$dontHitRiddenEntity(Predicate<Entity> filter) {
-        // it is technically possible to hit the ridden entity when the distance is 0, we don't want that
-        if (VRState.VR_RUNNING) {
-            return filter.and(entity -> entity != Minecraft.getInstance().getCameraEntity().getVehicle());
-        } else {
-            return filter;
         }
     }
 
@@ -435,7 +413,7 @@ public abstract class GameRendererVRMixin
             original.call(instance, partialTick);
 
             if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != HitResult.Type.MISS) {
-                this.vivecraft$crossVec = this.minecraft.hitResult.getLocation();
+                vivecraft$DATA_HOLDER.vrPlayer.crossVec = this.minecraft.hitResult.getLocation();
             }
 
             if (this.minecraft.screen == null) {
@@ -653,12 +631,6 @@ public abstract class GameRendererVRMixin
     @Unique
     public float vivecraft$isInBlock() {
         return this.vivecraft$inBlock;
-    }
-
-    @Override
-    @Unique
-    public Vec3 vivecraft$getCrossVec() {
-        return this.vivecraft$crossVec;
     }
 
     @Override

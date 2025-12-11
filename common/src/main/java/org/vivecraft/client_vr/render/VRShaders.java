@@ -9,7 +9,7 @@ import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.vivecraft.client_vr.render.ubos.LanczosUBO;
 import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
 import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
@@ -25,8 +25,8 @@ public class VRShaders {
 
     public static final RenderPipeline LANCZOS_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_lanczos")
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
         .withUniform(LanczosUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
         .withSampler(LANCZOS_COLOR_SAMPLER)
         .withSampler(LANCZOS_DEPTH_SAMPLER)
@@ -47,8 +47,8 @@ public class VRShaders {
 
     public static final RenderPipeline MIXED_REALITY_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_mixed_reality")
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/mixedreality_vr"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/mixedreality_vr"))
         .withUniform(MixedRealityUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
         .withSampler(MIXED_REALITY_FIRST_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_COLOR_SAMPLER)
@@ -65,8 +65,8 @@ public class VRShaders {
 
     public static final RenderPipeline POST_PROCESSING_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_post_processing")
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/postprocessing_vr"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/postprocessing_vr"))
         .withUniform(PostProcessUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
         .withSampler(POST_PROCESSING_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
@@ -79,8 +79,8 @@ public class VRShaders {
 
     public static final RenderPipeline BLIT_VR_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_blit")
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
@@ -89,8 +89,8 @@ public class VRShaders {
 
     public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_blit")
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
@@ -101,8 +101,8 @@ public class VRShaders {
     // end portal shaders
     private static final RenderPipeline.Snippet END_PORTAL_SNIPPET = RenderPipeline.builder(
             RenderPipelines.END_PORTAL_SNIPPET)
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).buildSnippet();
 
     public static final RenderPipeline END_PORTAL_VR_PIPELINE = RenderPipeline.builder(END_PORTAL_SNIPPET)
@@ -189,14 +189,23 @@ public class VRShaders {
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
+    public static final RenderPipeline LINE_STRIP = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+        .withLocation("pipeline/debug_line_strip_vr")
+        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINE_STRIP)
+        .withCull(false)
+        .withDepthWrite(true)
+        .build();
+
     public static final RenderPipeline QUADS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/quads_vr")
         .withCull(false)
+        .withDepthWrite(true)
         .build();
 
     public static final RenderPipeline QUADS_ALWAYS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/quads_always_vr")
         .withCull(false)
+        .withDepthWrite(true)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline TRIANGLES_ALWAYS = RenderPipeline.builder(
@@ -204,6 +213,7 @@ public class VRShaders {
         .withLocation("pipeline/debug_triangles_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
         .withCull(false)
+        .withDepthWrite(true)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
@@ -211,6 +221,7 @@ public class VRShaders {
         .withLocation("pipeline/debug_triangle_fan_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_FAN)
         .withCull(false)
+        .withDepthWrite(true)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline TEXT_NO_CULL = RenderPipeline.builder(

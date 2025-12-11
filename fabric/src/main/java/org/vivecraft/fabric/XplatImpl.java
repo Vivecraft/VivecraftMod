@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -77,7 +77,7 @@ public class XplatImpl implements Xplat {
         return biome.getSpecialEffects();
     }
 
-    public static boolean serverAcceptsPacket(ClientPacketListener connection, ResourceLocation id) {
+    public static boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
         return true;
     }
 

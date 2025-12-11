@@ -4,7 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.tuple.Triple;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -48,12 +48,13 @@ public class ShadersHelper {
     /**
      * binds the given texture to texture slot 0, only if shaders are active
      *
-     * @param resourceLocation ResourceLocation of the texture to bind
+     * @param identifier Identifier of the texture to bind
      */
-    public static void bindTexture(ResourceLocation resourceLocation) {
+    public static void bindTexture(Identifier identifier) {
         if (isShaderActive()) {
-            GpuTextureView view = RenderHelper.getGpuTexture(resourceLocation);
-            RenderSystem.setShaderTexture(0, view);
+            GpuTextureView view = RenderHelper.getGpuTexture(identifier);
+            // TODO 1.21.11 do we still need this?
+            //RenderSystem.setShaderTexture(0, view);
             OpenGLHelper.bindTexture(0, view);
         }
     }
@@ -117,7 +118,7 @@ public class ShadersHelper {
             // main hand
             UNIFORMS.add(Triple.of("vivecraftRelativeMainHandPos", UniformType.VECTOR3F, () -> {
                 if (VRState.VR_RUNNING) {
-                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().getPosition(),
+                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().position(),
                         RenderHelper.getControllerRenderPos(0));
                 } else {
                     return MathUtils.ZERO;
@@ -134,7 +135,7 @@ public class ShadersHelper {
             // offhand
             UNIFORMS.add(Triple.of("vivecraftRelativeOffHandPos", UniformType.VECTOR3F, () -> {
                 if (VRState.VR_RUNNING) {
-                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().getPosition(),
+                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().position(),
                         RenderHelper.getControllerRenderPos(1));
                 } else {
                     return MathUtils.ZERO;
@@ -177,6 +178,7 @@ public class ShadersHelper {
             consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES");
             consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, "ENTITIES");
 
+            consumer.accept(VRShaders.LINE_STRIP, "BASIC");
             consumer.accept(VRShaders.QUADS, "BASIC");
             consumer.accept(VRShaders.QUADS_ALWAYS, "BASIC");
             consumer.accept(VRShaders.TRIANGLES_ALWAYS, "BASIC");

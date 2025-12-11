@@ -1,7 +1,7 @@
 package org.vivecraft.common.network;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
@@ -9,7 +9,7 @@ import org.joml.Vector3fc;
 
 public class CommonNetworkHelper {
 
-    public static final ResourceLocation CHANNEL = ResourceLocation.parse("vivecraft:data");
+    public static final Identifier CHANNEL = Identifier.parse("vivecraft:data");
 
     // maximum supported network version
     public static final int MAX_SUPPORTED_NETWORK_PROTOCOL = NetworkVersion.values()

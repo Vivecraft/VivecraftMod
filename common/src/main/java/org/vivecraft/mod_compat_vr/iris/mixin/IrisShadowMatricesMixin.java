@@ -31,7 +31,7 @@ public class IrisShadowMatricesMixin {
         float xOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
         if (!RenderPassType.isVanilla() && !IrisHelper.SLOW_MODE) {
-            curPos.set(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+            curPos.set(Minecraft.getInstance().gameRenderer.getMainCamera().position());
             if (ClientDataHolderVR.getInstance().isFirstPass) {
                 vivecraft$FIRST_PASS_POS = curPos.get();
             }

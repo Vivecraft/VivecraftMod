@@ -1,11 +1,11 @@
 package org.vivecraft.client.render.armor;
 
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
 import org.vivecraft.client.render.VRPlayerModel_WithArms;
 import org.vivecraft.client_vr.ClientDataHolderVR;

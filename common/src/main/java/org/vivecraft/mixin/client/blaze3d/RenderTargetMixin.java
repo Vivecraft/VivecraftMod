@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client.blaze3d;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,8 +20,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     @Shadow
     public int height;
     @Unique
-    private boolean vivecraft$linearFilter;
-    @Unique
     private boolean vivecraft$mipmaps;
     @Unique
     private boolean vivecraft$stencil = false;
@@ -37,12 +34,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     @Unique
     public boolean vivecraft$hasStencil() {
         return this.vivecraft$stencil;
-    }
-
-    @Override
-    @Unique
-    public void vivecraft$setLinearFilter(boolean linearFilter) {
-        this.vivecraft$linearFilter = linearFilter;
     }
 
     @Override
@@ -64,15 +55,5 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     {
         return this.vivecraft$mipmaps && !textureFormat.hasDepthAspect() ?
             Math.max(Mth.log2(this.width), Mth.log2(this.height)) : mipLevels;
-    }
-
-    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;setFilterMode(Lcom/mojang/blaze3d/textures/FilterMode;Z)V"))
-    private FilterMode vivecraft$linearFilter(FilterMode filterMode) {
-        return this.vivecraft$linearFilter ? FilterMode.LINEAR : filterMode;
-    }
-
-    @ModifyArg(method = "setFilterMode(Lcom/mojang/blaze3d/textures/FilterMode;Z)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;setTextureFilter(Lcom/mojang/blaze3d/textures/FilterMode;Z)V", remap = false), index = 1, remap = true)
-    private boolean vivecraft$useMipMaps(boolean mipmaps) {
-        return mipmaps || this.vivecraft$mipmaps;
     }
 }

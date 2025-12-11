@@ -7,7 +7,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 
 import javax.annotation.Nullable;
 
-public class GuiVROptionButton extends Button implements GuiVROption {
+public class GuiVROptionButton extends Button.Plain implements GuiVROption {
     @Nullable
     private final VRSettings.VrOptions enumOptions;
     private int id = -1;

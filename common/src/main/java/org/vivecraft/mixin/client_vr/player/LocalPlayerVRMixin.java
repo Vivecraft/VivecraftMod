@@ -41,6 +41,8 @@ import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.common.network.packet.c2s.TeleportPayloadC2S;
 import org.vivecraft.data.ViveModifiers;
 
+import java.util.function.Predicate;
+
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin implements PlayerExtension {
 
@@ -227,14 +229,14 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         ci.cancel();
     }
 
-    @ModifyArg(method = "updateAutoJump", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;sin(F)F"))
-    private float vivecraft$modifyAutoJumpSin(float original) {
+    @ModifyArg(method = "updateAutoJump", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;sin(D)F"))
+    private double vivecraft$modifyAutoJumpSin(double original) {
         return VRState.VR_RUNNING ? ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYawRad() :
             original;
     }
 
-    @ModifyArg(method = "updateAutoJump", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(F)F"))
-    private float vivecraft$modifyAutoJumpCos(float original) {
+    @ModifyArg(method = "updateAutoJump", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(D)F"))
+    private double vivecraft$modifyAutoJumpCos(double original) {
         return VRState.VR_RUNNING ? ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYawRad() :
             original;
     }
@@ -254,6 +256,27 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         if (VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) {
             // vanilla rop position is fixed to the view in first person, so attached it to the hand instead
             cir.setReturnValue(RenderHelper.getControllerRenderPos(0));
+        }
+    }
+
+    @ModifyArg(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;pick(DFZ)Lnet/minecraft/world/phys/HitResult;"), index = 0)
+    private static double vivecraft$getCrossVec(double hitDistance) {
+        if (VRState.VR_RUNNING) {
+            // TODO 1.21.11 check if this is an okay spot for spear attacks
+            VRPlayer vrPlayer = ClientDataHolderVR.getInstance().vrPlayer;
+            // get the end of the reach point here, to have the correct reach distance
+            vrPlayer.crossVec = vrPlayer.AimedPointAtDistance(vrPlayer.vrdata_world_render.getAim(), hitDistance);
+        }
+        return hitDistance;
+    }
+
+    @ModifyArg(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ProjectileUtil;getEntityHitResult(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;D)Lnet/minecraft/world/phys/EntityHitResult;"))
+    private static Predicate<Entity> vivecraft$dontHitRiddenEntity(Predicate<Entity> filter) {
+        // it is technically possible to hit the ridden entity when the distance is 0, we don't want that
+        if (VRState.VR_RUNNING) {
+            return filter.and(entity -> entity != Minecraft.getInstance().getCameraEntity().getVehicle());
+        } else {
+            return filter;
         }
     }
 

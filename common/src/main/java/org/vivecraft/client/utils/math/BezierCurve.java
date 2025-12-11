@@ -2,9 +2,11 @@ package org.vivecraft.client.utils.math;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -82,7 +84,7 @@ public class BezierCurve {
         double y = player.yOld + (player.getY() - player.yOld) * partialTick;
         double z = player.zOld + (player.getZ() - player.zOld) * partialTick;
 
-        RenderType renderType = RenderType.debugLineStrip(2F);
+        RenderType renderType = VRRenderTypes.linesStrip();
         VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
         Vec3[] avec3 = this.getLinearInterpolation(vertexCount / this.nodes.size());

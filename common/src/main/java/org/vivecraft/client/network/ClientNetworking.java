@@ -6,7 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
@@ -346,7 +346,7 @@ public class ClientNetworking {
 
                 if (packet.blocks() != null) {
                     for (String blockId : packet.blocks()) {
-                        BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockId)).ifPresent(block -> {
+                        BuiltInRegistries.BLOCK.get(Identifier.parse(blockId)).ifPresent(block -> {
                             if (block.value() != Blocks.AIR) {
                                 dataholder.climbTracker.blocklist.add(block.value());
                             }
@@ -416,7 +416,7 @@ public class ClientNetworking {
                 }
                 if (Minecraft.getInstance().screen != null) {
                     // reinit screen, since overrides affect some option availability
-                    Minecraft.getInstance().screen.init(Minecraft.getInstance(),
+                    Minecraft.getInstance().screen.init(
                         Minecraft.getInstance().getWindow().getGuiScaledWidth(),
                         Minecraft.getInstance().getWindow().getGuiScaledHeight());
                 }

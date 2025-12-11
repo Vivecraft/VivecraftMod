@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client_vr.renderer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import net.minecraft.client.renderer.LevelTargetBundle;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,15 +29,15 @@ public class LevelTargetBundleVRMixin implements LevelTargetBundleExtension {
 
     @Inject(method = "replace", at = @At("HEAD"), cancellable = true)
     private void vivecraft$replace(
-        ResourceLocation resourceLocation, ResourceHandle<RenderTarget> resourceHandle, CallbackInfo ci)
+        Identifier identifier, ResourceHandle<RenderTarget> resourceHandle, CallbackInfo ci)
     {
-        if (resourceLocation.equals(OCCLUDED_TARGET_ID)) {
+        if (identifier.equals(OCCLUDED_TARGET_ID)) {
             this.vivecraft$occluded = resourceHandle;
             ci.cancel();
-        } else if (resourceLocation.equals(UNOCCLUDED_TARGET_ID)) {
+        } else if (identifier.equals(UNOCCLUDED_TARGET_ID)) {
             this.vivecraft$unoccluded = resourceHandle;
             ci.cancel();
-        } else if (resourceLocation.equals(HANDS_TARGET_ID)) {
+        } else if (identifier.equals(HANDS_TARGET_ID)) {
             this.vivecraft$hands = resourceHandle;
             ci.cancel();
         }
@@ -45,13 +45,13 @@ public class LevelTargetBundleVRMixin implements LevelTargetBundleExtension {
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
     private void vivecraft$get(
-        ResourceLocation resourceLocation, CallbackInfoReturnable<ResourceHandle<RenderTarget>> cir)
+        Identifier identifier, CallbackInfoReturnable<ResourceHandle<RenderTarget>> cir)
     {
-        if (resourceLocation.equals(OCCLUDED_TARGET_ID)) {
+        if (identifier.equals(OCCLUDED_TARGET_ID)) {
             cir.setReturnValue(this.vivecraft$occluded);
-        } else if (resourceLocation.equals(UNOCCLUDED_TARGET_ID)) {
+        } else if (identifier.equals(UNOCCLUDED_TARGET_ID)) {
             cir.setReturnValue(this.vivecraft$unoccluded);
-        } else if (resourceLocation.equals(HANDS_TARGET_ID)) {
+        } else if (identifier.equals(HANDS_TARGET_ID)) {
             cir.setReturnValue(this.vivecraft$hands);
         }
     }

@@ -5,7 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -22,7 +22,7 @@ import org.vivecraft.common.utils.MathUtils;
 
 public class InteractiveHotbarModule implements DebugRenderModule, InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "interactive_hotbar");
+    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft", "interactive_hotbar");
 
     private final ClientDataHolderVR dh;
     private final Minecraft mc;
@@ -37,7 +37,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 

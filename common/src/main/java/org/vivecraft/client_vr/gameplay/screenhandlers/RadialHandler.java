@@ -43,7 +43,7 @@ public class RadialHandler {
             }
 
             if (showingState) {
-                UI.init(Minecraft.getInstance(), GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
+                UI.init(GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
                 SHOWING = true;
                 ACTIVE_CONTROLLER = controller;
                 orientOverlay(ACTIVE_CONTROLLER);

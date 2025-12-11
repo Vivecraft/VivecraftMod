@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 

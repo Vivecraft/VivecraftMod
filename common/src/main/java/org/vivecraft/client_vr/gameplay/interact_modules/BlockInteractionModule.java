@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -21,7 +21,7 @@ import java.util.HashSet;
 
 public class BlockInteractionModule implements InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "block_interact");
+    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft", "block_interact");
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -40,7 +40,7 @@ public class BlockInteractionModule implements InteractModule {
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 

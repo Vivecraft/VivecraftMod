@@ -12,7 +12,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -1594,7 +1594,7 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 try {
-                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse((String) value)).get()
+                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(Identifier.parse((String) value)).get()
                         .value();
                     return prefix + ClientUtils.getNameFromSoundEvent(se.location()).getString();
                 } catch (Exception e) {
@@ -1604,7 +1604,7 @@ public class VRSettings {
 
             @Override
             Object setOptionValue(Object value) {
-                SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse((String) value)).get().value();
+                SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(Identifier.parse((String) value)).get().value();
                 int i = BuiltInRegistries.SOUND_EVENT.getId(se);
                 if (++i >= BuiltInRegistries.SOUND_EVENT.keySet().size()) {
                     i = 0;

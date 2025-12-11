@@ -121,7 +121,7 @@ public class TextScrollWidget extends AbstractWidget {
             if (style != null && style.getClickEvent() != null) {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.player != null) {
-                    mc.screen.handleComponentClicked(style);
+                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), mc, mc.screen);
                 } else {
                     // skip the ingame click events and directly call the general ones
                     Screen.defaultHandleClickEvent(style.getClickEvent(), mc, mc.screen);
@@ -182,8 +182,10 @@ public class TextScrollWidget extends AbstractWidget {
         int lineIndex = this.getLineIndex(mouseX, mouseY);
         if (lineIndex >= 0 && lineIndex < this.formattedChars.size()) {
             FormattedCharSequence line = this.formattedChars.get(lineIndex);
-            return Minecraft.getInstance().font.getSplitter()
-                .componentStyleAtWidth(line, Mth.floor(mouseX - this.getX()));
+            // TODO 1.21.11
+            return null;
+            //return Minecraft.getInstance().font.getSplitter()
+            //    .componentStyleAtWidth(line, Mth.floor(mouseX - this.getX()));
         }
         return null;
     }

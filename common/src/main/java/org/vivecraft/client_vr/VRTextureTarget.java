@@ -3,8 +3,6 @@ package org.vivecraft.client_vr;
 import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.AddressMode;
-import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.util.ARGB;
@@ -29,12 +27,11 @@ public class VRTextureTarget extends RenderTarget {
     private final Vector4fc clearColor;
 
     private VRTextureTarget(
-        String name, int width, int height, boolean useDepth, int texId, boolean linearFilter, boolean mipmaps,
+        String name, int width, int height, boolean useDepth, int texId, boolean mipmaps,
         boolean anisotropicFiltering, boolean useStencil, @Nullable Vector4fc clearColor)
     {
         super(name, useDepth);
         RenderSystem.assertOnRenderThread();
-        ((RenderTargetExtension) this).vivecraft$setLinearFilter(linearFilter);
         ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
         this.anisotropicFiltering = anisotropicFiltering;
         this.clearColor = clearColor;
@@ -56,8 +53,6 @@ public class VRTextureTarget extends RenderTarget {
                         GpuTexture.USAGE_RENDER_ATTACHMENT, TextureFormat.RGBA8, width, height, 1,
                     mipmaps ? Math.max(Mth.log2(width), Mth.log2(height)) : 1, texId);
                 this.colorTextureView = glDevice.createTextureView(this.colorTexture);
-                this.colorTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
-                this.setFilterMode(linearFilter ? FilterMode.LINEAR : FilterMode.NEAREST);
             } else {
                 throw new IllegalStateException("Only Opengl is currently supported by Vivecraft");
             }
@@ -83,9 +78,6 @@ public class VRTextureTarget extends RenderTarget {
         }
 
         if (((RenderTargetExtension) this).vivecraft$hasMipmaps()) {
-            if (this.anisotropicFiltering) {
-                OpenGLHelper.enableAnisotropicFiltering(this.colorTexture);
-            }
             // generate mipmaps so they are initialized
             OpenGLHelper.genMipmaps(this.colorTexture);
         }
@@ -117,8 +109,6 @@ public class VRTextureTarget extends RenderTarget {
         private boolean useDepth;
         private int texId = -1;
 
-        private boolean linearFilter;
-
         private boolean mipmaps;
         private boolean anisotropicFiltering;
 
@@ -143,11 +133,6 @@ public class VRTextureTarget extends RenderTarget {
 
         public Builder withDepth() {
             this.useDepth = true;
-            return this;
-        }
-
-        public Builder withLinearFilter() {
-            this.linearFilter = true;
             return this;
         }
 
@@ -180,7 +165,6 @@ public class VRTextureTarget extends RenderTarget {
                 this.width, this.height,
                 this.useDepth,
                 this.texId,
-                this.linearFilter,
                 this.mipmaps,
                 this.anisotropicFiltering,
                 this.stencil,

@@ -13,8 +13,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.HappyGhast;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.happyghast.HappyGhast;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.ClipContext;
@@ -68,6 +68,8 @@ public class VRPlayer {
     private float rawWorldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
     public Vec3 roomOrigin = Vec3.ZERO;
+
+    public Vec3 crossVec;
 
     // based on a heuristic of which locomotion type was last used
     private boolean isFreeMoveCurrent = true;
@@ -631,9 +633,9 @@ public class VRPlayer {
     public Vec3 getRightClickLookOverride(Player entity, int c) {
         Vec3 out = entity.getLookAngle();
 
-        if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
+        if (this.crossVec != null) {
             out = entity.getEyePosition(1.0F)
-                .subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec())
+                .subtract(this.crossVec)
                 .normalize().reverse(); // backwards
         }
 
@@ -721,10 +723,9 @@ public class VRPlayer {
                 }
             }
             player.setYHeadRot(player.getYRot());
-        } else if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
+        } else if (this.crossVec != null) {
             // Look AT the crosshair by default, most compatible with mods.
-            Vec3 playerToCrosshair = player.getEyePosition(1)
-                .subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec()); // backwards
+            Vec3 playerToCrosshair = player.getEyePosition(1).subtract(this.crossVec); // backwards
             double what = playerToCrosshair.y / playerToCrosshair.length();
             if (what > 1) {
                 what = 1;

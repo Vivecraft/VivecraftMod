@@ -2,13 +2,13 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -52,7 +52,7 @@ public class VivecraftItemRendering {
             if (block instanceof BaseTorchBlock) {
                 itemTransformType = VivecraftItemTransformType.BLOCK_STICK;
             } else {
-                ResourceLocation modelName = itemStack.get(DataComponents.ITEM_MODEL);
+                Identifier modelName = itemStack.get(DataComponents.ITEM_MODEL);
                 if (modelName != null) {
                     ItemModel model = Minecraft.getInstance().getModelManager().getItemModel(modelName);
                     if (model instanceof BlockModelWrapperExtension blockModel && blockModel.vivecraft$isGenerated()) {

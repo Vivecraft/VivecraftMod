@@ -37,7 +37,8 @@ public abstract class PlayerMixin extends LivingEntityMixin {
     /**
      * dummy to be overridden in {@link ServerPlayerMixin}
      */
-    @WrapOperation(method = "sweepAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;sendParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"))
+    // no remap because of neoforge
+    @WrapOperation(method = {"doSweepAttack*", "method_7263"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;sendParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I", remap = true), remap = false)
     protected int vivecraft$modifySweepParticleSpawnPos(
         ServerLevel instance, ParticleOptions type, double posX, double posY, double posZ, int particleCount,
         double xOffset, double yOffset, double zOffset, double speed, Operation<Integer> original)
