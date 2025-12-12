@@ -34,10 +34,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
-import net.minecraft.world.attribute.EnvironmentAttribute;
-import net.minecraft.world.attribute.EnvironmentAttributes;
-import net.minecraft.world.attribute.GaussianSampler;
-import net.minecraft.world.attribute.SpatialAttributeInterpolator;
+import net.minecraft.world.attribute.*;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.MoonPhase;
@@ -95,6 +92,7 @@ public class MenuWorldRenderer {
 
     private final Minecraft mc;
     private FakeBlockAccess blockAccess;
+    private EnvironmentAttributeSystem environmentAttributes;
     private final GpuTexture lightMap;
     public final GpuTextureView lightMapView;
     private final MappableRingBuffer lightMapUbo;
@@ -190,7 +188,7 @@ public class MenuWorldRenderer {
             this.getWorldTask = CompletableFuture.supplyAsync(() -> {
                 try (InputStream inputStream = MenuWorldDownloader.getRandomWorld()) {
                     VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Loading world data...");
-                    return inputStream != null ? MenuWorldExporter.loadWorld(inputStream, this) : null;
+                    return inputStream != null ? MenuWorldExporter.loadWorld(inputStream) : null;
                 } catch (Exception e) {
                     VRSettings.LOGGER.error(
                         "Vivecraft: Exception thrown when loading main menu world, falling back to old menu room.", e);
@@ -665,6 +663,7 @@ public class MenuWorldRenderer {
         this.animatedSprites = null;
         this.endFlashState = null;
         this.ready = false;
+        this.environmentAttributes = null;
         this.biomeInterpolator.clear();
         this.valueProbes.clear();
     }
@@ -735,6 +734,7 @@ public class MenuWorldRenderer {
         // for environment value probes
         this.valueProbes.values().removeIf(ValueProbe::tick);
         this.biomeInterpolator.clear();
+        this.environmentAttributes.invalidateTickCache();
         GaussianSampler.sample(this.getEyePos().scale(0.25),
             (x, y, z) -> this.blockAccess.getBiomeManager().getNoiseBiomeAtQuart(x, y, z),
             (weight, biome) -> this.biomeInterpolator.accumulate(weight, biome.value().getAttributes()));
@@ -747,6 +747,7 @@ public class MenuWorldRenderer {
     public void setWorld(FakeBlockAccess blockAccess) {
         this.blockAccess = blockAccess;
         if (blockAccess != null) {
+            this.environmentAttributes = blockAccess.buildEnvironmentAttribute(this);
             this.lightmapUpdateNeeded = true;
             this.renderDistance = blockAccess.getXSize() / 2;
             this.renderDistanceChunks = this.renderDistance / 16;
@@ -890,11 +891,11 @@ public class MenuWorldRenderer {
             // CustomSky.renderSky(this.world, poseStack, ClientUtils.getCurrentPartialTick());
             // }
 
-            poseStack.rotate(Axis.XP.rotationDegrees(this.getSunAngle()));
             TextureAtlas celestialsAtlas = this.mc.getAtlasManager().getAtlasOrThrow(AtlasIds.CELESTIALS);
 
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()) {
                 poseStack.pushMatrix();
+                poseStack.rotate(Axis.XP.rotation(this.getSunAngle()));
                 poseStack.translate(0.0f, 100.0f, 0.0f);
                 poseStack.scale(30.0f, 1.0f, 30.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
@@ -921,7 +922,9 @@ public class MenuWorldRenderer {
                 int moonPhase = this.getMoonPhase() & 7;
                 int startIndex = moonPhase * 4;
                 poseStack.pushMatrix();
-                poseStack.translate(0.0f, -100.0f, 0.0f);
+                poseStack.rotate(Axis.XP.rotation(
+                    getValue(EnvironmentAttributes.MOON_ANGLE, ClientUtils.getCurrentPartialTick()) * Mth.DEG_TO_RAD));
+                poseStack.translate(0.0f, 100.0f, 0.0f);
                 poseStack.scale(20.0f, 1.0f, 20.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
                     .writeTransform(poseStack, new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility), new Vector3f(),
@@ -949,6 +952,9 @@ public class MenuWorldRenderer {
             if (starBrightness > 0.0F && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isStarsEnabled()
             ) /*&& !CustomSky.hasSkyLayers(this.world)*/)
             {
+                poseStack.pushMatrix();
+                poseStack.rotate(Axis.XP.rotation(
+                    getValue(EnvironmentAttributes.STAR_ANGLE, ClientUtils.getCurrentPartialTick()) * Mth.DEG_TO_RAD));
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
                     .writeTransform(poseStack, new Vector4f(starBrightness), new Vector3f(), new Matrix4f());
                 GpuBuffer indexBuffer = this.starIndices.getBuffer(this.starIndexCount);
@@ -964,6 +970,7 @@ public class MenuWorldRenderer {
                     renderPass.setIndexBuffer(indexBuffer, this.starIndices.type());
                     renderPass.drawIndexed(0, 0, this.starIndexCount, 1);
                 }
+                poseStack.popMatrix();
             }
 
             poseStack.popMatrix();
@@ -1182,7 +1189,7 @@ public class MenuWorldRenderer {
 
     public float getSkyDarken() {
         return
-            (15.0F - this.blockAccess.environmentAttributes().getDimensionValue(EnvironmentAttributes.SKY_LIGHT_LEVEL)
+            (15.0F - this.environmentAttributes.getDimensionValue(EnvironmentAttributes.SKY_LIGHT_LEVEL)
             ) / 15.0F;
     }
 
@@ -1574,7 +1581,7 @@ public class MenuWorldRenderer {
         }
 
         private Value getValueFromLevel(EnvironmentAttribute<Value> attribute) {
-            return MenuWorldRenderer.this.blockAccess.environmentAttributes()
+            return MenuWorldRenderer.this.environmentAttributes
                 .getValue(attribute, MenuWorldRenderer.this.getEyePos(), MenuWorldRenderer.this.biomeInterpolator);
         }
 

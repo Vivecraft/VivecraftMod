@@ -31,7 +31,11 @@ public class ViveItemTags {
 
     public static final TagKey<Item> VIVECRAFT_SHIELDS = tag("shields");
 
+    // these ones are throwable
     public static final TagKey<Item> VIVECRAFT_SPEARS = tag("spears");
+
+    // these ones are held
+    public static final TagKey<Item> VIVECRAFT_LANCES = tag("lances");
 
     public static final TagKey<Item> VIVECRAFT_SWORDS = tag("swords");
 

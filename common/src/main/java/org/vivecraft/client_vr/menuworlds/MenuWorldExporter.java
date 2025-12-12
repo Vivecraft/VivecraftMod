@@ -187,9 +187,7 @@ public class MenuWorldExporter {
         Files.write(bytes, file);
     }
 
-    public static FakeBlockAccess loadWorld(
-        byte[] data, MenuWorldRenderer renderer) throws IOException, DataFormatException
-    {
+    public static FakeBlockAccess loadWorld(byte[] data) throws IOException, DataFormatException {
         Header header = new Header();
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data))) {
             header.read(dis);
@@ -317,7 +315,6 @@ public class MenuWorldExporter {
             attributes.set(EnvironmentAttributes.CLOUD_COLOR, ARGB.white(0.8f));
             attributes.set(EnvironmentAttributes.CLOUD_HEIGHT, cloudHeight.get() + 0.33F);
         }
-        // TODO 1.21.11 day cycle
 
         HolderGetter<Timeline> timelines = VanillaRegistries.createLookup().lookup(Registries.TIMELINE).orElse(null);
         HolderSet<Timeline> timeline = HolderSet.empty();
@@ -424,19 +421,17 @@ public class MenuWorldExporter {
         }
 
         return new FakeBlockAccess(header.version, seed, blocks, skylightmap, blocklightmap, biomemap, heightmap, xSize,
-            ySize, zSize, ground, dimensionType, isFlat, rotation, rain, thunder, renderer);
+            ySize, zSize, ground, dimensionType, isFlat, rotation, rain, thunder);
     }
 
-    public static FakeBlockAccess loadWorld(
-        InputStream is, MenuWorldRenderer renderer) throws IOException, DataFormatException
-    {
+    public static FakeBlockAccess loadWorld(InputStream is) throws IOException, DataFormatException {
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         byte[] buffer = new byte[1048576];
         int count;
         while ((count = is.read(buffer)) != -1) {
             data.write(buffer, 0, count);
         }
-        return loadWorld(data.toByteArray(), renderer);
+        return loadWorld(data.toByteArray());
     }
 
     public static int readVersion(File file) throws IOException {

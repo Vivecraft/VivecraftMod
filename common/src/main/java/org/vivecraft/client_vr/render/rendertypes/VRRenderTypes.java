@@ -63,7 +63,7 @@ public class VRRenderTypes {
             ((RenderSetupExtension) (Object) RenderSetup.builder(VRShaders.GUI_TEXTURED_ALWAYS)
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST))))));
+                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
 
     private static final Function<Identifier, RenderType> GUI_TEXTURED = Util.memoize(
         identifier -> RenderType.create("gui_textured_vr",

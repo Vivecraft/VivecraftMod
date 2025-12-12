@@ -530,8 +530,6 @@ public class VREffectsHelper {
                 (long) (DATA_HOLDER.menuWorldRenderer.ticks * 10L + 10.0F * ClientUtils.getCurrentPartialTick()) :
                 (long) ((System.currentTimeMillis() + tzOffset - 21600000) / 86400000D * 24000D);
 
-            DATA_HOLDER.menuWorldRenderer.time = 0;
-
             // clear sky
             DATA_HOLDER.menuWorldRenderer.fogRenderer.setupFogColor();
             DATA_HOLDER.menuWorldRenderer.fogRenderer.updateFog();

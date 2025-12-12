@@ -2,6 +2,8 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.model.effects.SpearAnimations;
+import net.minecraft.util.Ease;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -13,6 +15,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.KineticWeapon;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.BaseTorchBlock;
 import net.minecraft.world.level.block.Block;
@@ -103,6 +106,8 @@ public class VivecraftItemRendering {
             }
         } else if (TelescopeTracker.isTelescope(itemStack)) {
             itemTransformType = VivecraftItemTransformType.TELESCOPE;
+        } else if (itemStack.is(ItemTags.SPEARS) || itemStack.is(ViveItemTags.VIVECRAFT_LANCES)) {
+            itemTransformType = VivecraftItemTransformType.LANCE;
         }
         return itemTransformType;
     }
@@ -411,6 +416,38 @@ public class VivecraftItemRendering {
                 translateZ = -0.06F;
                 scale = 0.56F;
             }
+            case LANCE -> {
+                translateX = -0.135F;
+
+                KineticWeapon kineticWeapon = itemStack.get(DataComponents.KINETIC_WEAPON);
+                if (kineticWeapon != null) {
+                    float progress =
+                        itemStack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTick + 1.0F);
+                    rotation.identity();
+                    int startTick = kineticWeapon.delayTicks();
+                    int finishTick =
+                        kineticWeapon.damageConditions().map(KineticWeapon.Condition::maxDurationTicks).orElse(0) +
+                            startTick;
+                    float xRotation = Mth.clamp(Mth.inverseLerp(progress, 0F, startTick), 0.0F, 1.0F) -
+                        Mth.clamp(Mth.inverseLerp(progress, finishTick - 5, finishTick), 0.0F, 1.0F);
+
+                    // rotate sideways when using
+                    preRotation.mul(Axis.XP.rotationDegrees(10F));
+                    preRotation.rotateLocalY(xRotation * 90F * Mth.DEG_TO_RAD);
+                    preRotation.rotateLocalX((-110.0F + 20 + gunAngle - gunAngle*xRotation) * Mth.DEG_TO_RAD);
+                    translateZ -= 0.02F * xRotation;
+                    translateX -= 0.03F * xRotation;
+
+                    // move back when hitting
+                    float tickSinceLastHit = player.getTicksSinceLastKineticHitFeedback(partialTick);
+                    float hitOffset = 0.2F * (Ease.outQuart(SpearAnimations.progress(tickSinceLastHit, 1F, 3F)) -
+                        Ease.inOutSine(SpearAnimations.progress(tickSinceLastHit, 3F, 10F))
+                    );
+                    poseStack.translate(0, /*-hitOffset*/0, hitOffset);
+                } else {
+                    rotation.mul(Axis.XP.rotationDegrees(30));
+                }
+            }
             // case Sword -> {}
             default -> {}
         }
@@ -441,6 +478,7 @@ public class VivecraftItemRendering {
         COMPASS,
         HORN,
         MACE,
-        ROTATED_TOOL
+        ROTATED_TOOL,
+        LANCE
     }
 }

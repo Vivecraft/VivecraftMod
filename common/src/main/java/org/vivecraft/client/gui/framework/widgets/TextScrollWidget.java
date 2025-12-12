@@ -1,6 +1,7 @@
 package org.vivecraft.client.gui.framework.widgets;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -73,10 +74,12 @@ public class TextScrollWidget extends AbstractWidget {
             getY() + this.height - 1,
             0xFF000000);
 
+        ActiveTextCollector textRenderer = guiGraphics.textRenderer(GuiGraphics.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+
         // draw text
         for (int line = 0; line + this.currentLine < this.formattedChars.size() && line < this.maxLines; line++) {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.formattedChars.get(line + this.currentLine),
-                getX() + this.padding, getY() + this.padding + line * 12, 0xFFFFFFFF);
+            textRenderer.accept(getX() + this.padding, getY() + this.padding + line * 12,
+                this.formattedChars.get(line + this.currentLine));
         }
 
         float scrollbarStart =
@@ -181,11 +184,11 @@ public class TextScrollWidget extends AbstractWidget {
     public Style getMouseoverStyle(double mouseX, double mouseY) {
         int lineIndex = this.getLineIndex(mouseX, mouseY);
         if (lineIndex >= 0 && lineIndex < this.formattedChars.size()) {
-            FormattedCharSequence line = this.formattedChars.get(lineIndex);
-            // TODO 1.21.11
-            return null;
-            //return Minecraft.getInstance().font.getSplitter()
-            //    .componentStyleAtWidth(line, Mth.floor(mouseX - this.getX()));
+            ActiveTextCollector.ClickableStyleFinder finder = new ActiveTextCollector.ClickableStyleFinder(
+                Minecraft.getInstance().font, (int) mouseX, (int) mouseY);
+            finder.accept(getX() + this.padding, getY() + this.padding + lineIndex * 12,
+                this.formattedChars.get(lineIndex));
+            return finder.result();
         }
         return null;
     }

@@ -56,13 +56,12 @@ public class FakeBlockAccess implements LevelReader {
     private final boolean thunder;
 
     private final BiomeManager biomeManager;
-    private final EnvironmentAttributeSystem environmentAttributes;
-    private final MenuWorldRenderer renderer;
+    private EnvironmentAttributeSystem environmentAttributes;
 
     public FakeBlockAccess(
         int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap,
         short[][] heightmap, int xSize, int ySize, int zSize, int ground, DimensionType dimensionType, boolean isFlat,
-        float rotation, boolean rain, boolean thunder, MenuWorldRenderer renderer)
+        float rotation, boolean rain, boolean thunder)
     {
         this.version = version;
         this.seed = seed;
@@ -83,20 +82,17 @@ public class FakeBlockAccess implements LevelReader {
         this.thunder = thunder;
 
         this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(seed));
-        this.renderer = renderer;
 
         // set the ground to the height of the center block
         BlockPos pos = new BlockPos(0, (int) this.ground, 0);
         BlockState standing = blocks[encodeCoords(pos)];
         this.ground += (float) Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
         this.effectiveGround = this.ground;
-        this.environmentAttributes = addEnvironmentAttributeLayers(EnvironmentAttributeSystem.builder()).build();
     }
 
     @SuppressWarnings("unchecked")
-    private EnvironmentAttributeSystem.Builder addEnvironmentAttributeLayers(
-        EnvironmentAttributeSystem.Builder builder)
-    {
+    protected EnvironmentAttributeSystem buildEnvironmentAttribute(MenuWorldRenderer renderer) {
+        EnvironmentAttributeSystem.Builder builder = EnvironmentAttributeSystem.builder();
         // this is taken from EnvironmentAttributeSystem.addDefaultLayers
         builder.addConstantLayer(this.dimensionType.attributes());
 
@@ -119,26 +115,27 @@ public class FakeBlockAccess implements LevelReader {
             WeatherAttributes.addBuiltinLayers(builder, new WeatherAttributes.WeatherAccess() {
                 @Override
                 public float rainLevel() {
-                    return FakeBlockAccess.this.renderer.getRainLevel();
+                    return renderer.getRainLevel();
                 }
 
                 @Override
                 public float thunderLevel() {
-                    return FakeBlockAccess.this.renderer.getThunderLevel();
+                    return renderer.getThunderLevel();
                 }
             });
         }
 
-        this.dimensionType.timelines().forEach((timeline) -> builder.addTimelineLayer(timeline, () -> this.renderer.time));
+        this.dimensionType.timelines().forEach((timeline) -> builder.addTimelineLayer(timeline, () -> renderer.time));
 
         int flashColor = ARGB.color(204, 204, 255);
         builder.addTimeBasedLayer(EnvironmentAttributes.SKY_COLOR, (skyColor, cacheTickId) -> {
-            if (this.renderer.getSkyFlashTime() <= 0) return skyColor;
+            if (renderer.getSkyFlashTime() <= 0) return skyColor;
             return ARGB.srgbLerp(0.22f, skyColor, flashColor);
         });
         builder.addTimeBasedLayer(EnvironmentAttributes.SKY_LIGHT_FACTOR,
-            (skyFactor, cacheTickId) -> this.renderer.getSkyFlashTime() > 0 ? 1.0f : skyFactor);
-        return builder;
+            (skyFactor, cacheTickId) -> renderer.getSkyFlashTime() > 0 ? 1.0f : skyFactor);
+        this.environmentAttributes = builder.build();
+        return this.environmentAttributes;
     }
 
     private int encodeCoords(int x, int z) {
