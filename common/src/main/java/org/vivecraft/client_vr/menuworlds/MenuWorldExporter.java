@@ -20,7 +20,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TimelineTags;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.util.StringRepresentable;
@@ -98,9 +97,10 @@ public class MenuWorldExporter {
         dos.writeInt(ySize);
         dos.writeInt(zSize);
         dos.writeInt(ground);
-        // TODO 1.21.11 how do I get the dimension id?
-        //dos.writeUTF(level.dimensionType().effectsLocation().toString());
-        dos.writeUTF(BuiltinDimensionTypes.OVERWORLD.identifier().toString());
+        dos.writeUTF(level.dimensionTypeRegistration().unwrapKey().orElseGet(() -> {
+            VRSettings.LOGGER.error("couldn't export dimension id, falling back to overworld");
+            return BuiltinDimensionTypes.OVERWORLD;
+        }).identifier().toString());
 
         if (level instanceof ServerLevel) {
             dos.writeBoolean(((ServerLevel) level).isFlat());
@@ -120,7 +120,7 @@ public class MenuWorldExporter {
 
         dos.writeBoolean(level.dimensionType().hasFixedTime());
         if (level.dimensionType().hasFixedTime()) {
-            // TODO 1.21.11 is there a fixed time value anymore?
+            // TODO 1.21.11 ther is no value for this anymore, just a boolean
             dos.writeLong(0);
         }
         dos.writeBoolean(level.dimensionType().hasCeiling());
@@ -262,7 +262,6 @@ public class MenuWorldExporter {
         Optional<Integer> cloudHeight = Optional.empty();
         DimensionType.Skybox skybox = DimensionType.Skybox.OVERWORLD;
         DimensionType.CardinalLightType cardinalLightType = DimensionType.CardinalLightType.DEFAULT;
-        EnvironmentAttributeMap.Builder attributes = EnvironmentAttributeMap.builder();
 
         if (header.version < 5) { // fill in missing values
             if (BuiltinDimensionTypes.NETHER.identifier().equals(dimName)) {
@@ -297,7 +296,7 @@ public class MenuWorldExporter {
                 cardinalLightType = DimensionType.CardinalLightType.NETHER;
             } else if (dimFixedTime.isPresent()) {
                 // end
-                skybox = DimensionType.Skybox.NONE;
+                skybox = DimensionType.Skybox.END;
             }
         }
 
@@ -311,6 +310,8 @@ public class MenuWorldExporter {
             }
         }
 
+        // TODO 1.21.11 store those?
+        EnvironmentAttributeMap.Builder attributes = EnvironmentAttributeMap.builder();
         if (cloudHeight.isPresent()) {
             attributes.set(EnvironmentAttributes.CLOUD_COLOR, ARGB.white(0.8f));
             attributes.set(EnvironmentAttributes.CLOUD_HEIGHT, cloudHeight.get() + 0.33F);
@@ -319,7 +320,6 @@ public class MenuWorldExporter {
         HolderGetter<Timeline> timelines = VanillaRegistries.createLookup().lookup(Registries.TIMELINE).orElse(null);
         HolderSet<Timeline> timeline = HolderSet.empty();
 
-        // TODO 1.21.11 store those?
         switch (skybox) {
             case NONE -> {
                 attributes.set(EnvironmentAttributes.FOG_START_DISTANCE, 10.0f);

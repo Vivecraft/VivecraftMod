@@ -3,7 +3,6 @@ package org.vivecraft.client.utils.math;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;

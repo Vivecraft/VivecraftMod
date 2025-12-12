@@ -1391,14 +1391,13 @@ public class MenuWorldRenderer {
             BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
                 DefaultVertexFormat.POSITION_TEX);
             // 8 moonphases
-            for(MoonPhase moonPhase : MoonPhase.values()) {
+            for (MoonPhase moonPhase : MoonPhase.values()) {
                 TextureAtlasSprite sprite = this.mc.getAtlasManager().getAtlasOrThrow(AtlasIds.CELESTIALS)
                     .getSprite(Identifier.withDefaultNamespace("moon/" + moonPhase.getSerializedName()));
                 bufferBuilder.addVertex(-1.0F, 0.0F, -1.0F).setUv(sprite.getU1(), sprite.getV1());
                 bufferBuilder.addVertex(1.0F, 0.0F, -1.0F).setUv(sprite.getU0(), sprite.getV1());
                 bufferBuilder.addVertex(1.0F, 0.0F, 1.0F).setUv(sprite.getU0(), sprite.getV0());
                 bufferBuilder.addVertex(-1.0F, 0.0F, 1.0F).setUv(sprite.getU1(), sprite.getV0());
-
             }
             try (MeshData meshData = bufferBuilder.buildOrThrow()) {
                 this.moonVBO = RenderSystem.getDevice()
@@ -1409,7 +1408,8 @@ public class MenuWorldRenderer {
 
     private GpuBuffer buildCelestialQuad(String name, TextureAtlasSprite sprite) {
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-            4 * DefaultVertexFormat.POSITION_TEX.getVertexSize())) {
+            4 * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
+        {
             BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
                 DefaultVertexFormat.POSITION_TEX);
             bufferBuilder.addVertex(-1.0F, 0.0F, -1.0F).setUv(sprite.getU0(), sprite.getV0());

@@ -65,8 +65,6 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
-import java.util.function.Predicate;
-
 // higher priority to apply before iris modelview alteration
 @Mixin(value = GameRenderer.class, priority = 900)
 public abstract class GameRendererVRMixin

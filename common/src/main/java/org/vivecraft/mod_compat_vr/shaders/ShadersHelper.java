@@ -1,7 +1,6 @@
 package org.vivecraft.mod_compat_vr.shaders;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;

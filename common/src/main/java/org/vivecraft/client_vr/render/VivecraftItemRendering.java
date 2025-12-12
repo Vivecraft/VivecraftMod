@@ -2,17 +2,17 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.model.effects.SpearAnimations;
-import net.minecraft.util.Ease;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.effects.SpearAnimations;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Ease;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.KineticWeapon;
@@ -434,7 +434,7 @@ public class VivecraftItemRendering {
                     // rotate sideways when using
                     preRotation.mul(Axis.XP.rotationDegrees(10F));
                     preRotation.rotateLocalY(xRotation * 90F * Mth.DEG_TO_RAD);
-                    preRotation.rotateLocalX((-110.0F + 20 + gunAngle - gunAngle*xRotation) * Mth.DEG_TO_RAD);
+                    preRotation.rotateLocalX((-110.0F + 20 + gunAngle - gunAngle * xRotation) * Mth.DEG_TO_RAD);
                     translateZ -= 0.02F * xRotation;
                     translateX -= 0.03F * xRotation;
 

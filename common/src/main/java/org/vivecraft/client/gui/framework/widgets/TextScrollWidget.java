@@ -11,7 +11,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;

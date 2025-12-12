@@ -36,7 +36,6 @@ import org.vivecraft.client.utils.ScaleHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;

@@ -2,7 +2,6 @@ package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;

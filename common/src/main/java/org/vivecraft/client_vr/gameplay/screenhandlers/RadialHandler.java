@@ -1,7 +1,6 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.util.Mth;

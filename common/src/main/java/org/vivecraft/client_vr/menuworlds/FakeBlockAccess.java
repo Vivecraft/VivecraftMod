@@ -8,7 +8,6 @@ import net.minecraft.world.attribute.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -24,7 +23,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;

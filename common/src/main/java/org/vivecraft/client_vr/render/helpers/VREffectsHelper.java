@@ -12,9 +12,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.fog.FogRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -960,12 +960,14 @@ public class VREffectsHelper {
             {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityTranslucentNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways),
+                    VRRenderTypes.entityTranslucentNoCardinalLightLinear(framebuffer.getColorTextureView(),
+                        depthAlways),
                     false);
             } else {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityCutoutNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways), false);
+                    VRRenderTypes.entityCutoutNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways),
+                    false);
             }
         } else {
             RenderHelper.drawSizedQuad(
