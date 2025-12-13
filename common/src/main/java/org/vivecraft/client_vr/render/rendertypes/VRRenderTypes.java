@@ -34,7 +34,7 @@ public class VRRenderTypes {
                 .sortOnUpload()
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
+                VRShaders.getGuiSampler())))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_SOLID_NO_CARDINAL_LIGHT = Util.memoize(
         (gpuTexture, linear) -> RenderType.create("entity_solid_vr",
@@ -56,14 +56,14 @@ public class VRRenderTypes {
                 .affectsCrumbling()
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
+                VRShaders.getGuiSampler())))));
 
     private static final Function<GpuTextureView, RenderType> GUI_TEXTURED_ALWAYS = Util.memoize(
         gpuTexture -> RenderType.create("gui_textured_always_vr",
             ((RenderSetupExtension) (Object) RenderSetup.builder(VRShaders.GUI_TEXTURED_ALWAYS)
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
+                VRShaders.getGuiSampler())))));
 
     private static final Function<Identifier, RenderType> GUI_TEXTURED = Util.memoize(
         identifier -> RenderType.create("gui_textured_vr",

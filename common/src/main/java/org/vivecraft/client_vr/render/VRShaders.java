@@ -6,15 +6,21 @@ import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.platform.DestFactor;
 import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.ubos.LanczosUBO;
 import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
 import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
 
 import java.util.HashSet;
+import java.util.OptionalDouble;
 import java.util.Set;
 
 public class VRShaders {
@@ -237,6 +243,26 @@ public class VRShaders {
         Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT,
             ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
 
+    private static GpuSampler GUI_SAMPLER;
+
+    public static GpuSampler getGuiSampler() {
+        if (GUI_SAMPLER == null) {
+            updateGuiSampler();
+        }
+        return GUI_SAMPLER;
+    }
+
+    public static void updateGuiSampler() {
+        if (GUI_SAMPLER != null) {
+            GUI_SAMPLER.close();
+            GUI_SAMPLER = null;
+        }
+        GUI_SAMPLER = RenderSystem.getDevice()
+            .createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.LINEAR, FilterMode.LINEAR,
+                ClientDataHolderVR.getInstance().vrSettings.guiAnisotropicFiltering ?
+                    RenderSystem.getDevice().getMaxSupportedAnisotropy() : 1, OptionalDouble.empty());
+    }
+
     private VRShaders() {}
 
     public static void init() {
@@ -257,6 +283,10 @@ public class VRShaders {
         if (LANCZOS_UBO != null) {
             LANCZOS_UBO.close();
             LANCZOS_UBO = null;
+        }
+        if (GUI_SAMPLER != null) {
+            GUI_SAMPLER.close();
+            GUI_SAMPLER = null;
         }
     }
 }

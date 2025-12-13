@@ -21,19 +21,16 @@ import javax.annotation.Nullable;
  */
 public class VRTextureTarget extends RenderTarget {
 
-    public boolean anisotropicFiltering;
-
     @Nullable
     private final Vector4fc clearColor;
 
     private VRTextureTarget(
-        String name, int width, int height, boolean useDepth, int texId, boolean mipmaps,
-        boolean anisotropicFiltering, boolean useStencil, @Nullable Vector4fc clearColor)
+        String name, int width, int height, boolean useDepth, int texId, boolean mipmaps, boolean useStencil,
+        @Nullable Vector4fc clearColor)
     {
         super(name, useDepth);
         RenderSystem.assertOnRenderThread();
         ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
-        this.anisotropicFiltering = anisotropicFiltering;
         this.clearColor = clearColor;
 
         // need to set this first, because the forge/neoforge stencil enabled does a resize
@@ -110,7 +107,6 @@ public class VRTextureTarget extends RenderTarget {
         private int texId = -1;
 
         private boolean mipmaps;
-        private boolean anisotropicFiltering;
 
         private boolean stencil;
 
@@ -141,11 +137,6 @@ public class VRTextureTarget extends RenderTarget {
             return this;
         }
 
-        public Builder withAnisotropicFiltering(boolean useAF) {
-            this.anisotropicFiltering = useAF;
-            return this;
-        }
-
         public Builder withStencil(boolean useStencil) {
             this.stencil = useStencil;
             return this;
@@ -166,7 +157,6 @@ public class VRTextureTarget extends RenderTarget {
                 this.useDepth,
                 this.texId,
                 this.mipmaps,
-                this.anisotropicFiltering,
                 this.stencil,
                 this.clearColor);
         }

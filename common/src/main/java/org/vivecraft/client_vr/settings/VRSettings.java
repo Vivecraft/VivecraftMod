@@ -41,6 +41,7 @@ import org.vivecraft.client_vr.gameplay.trackers.DebugRenderTracker;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
 import org.vivecraft.client_vr.provider.ControllerTransform;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.common.utils.math.AngleOrder;
 
 import java.awt.*;
@@ -1693,9 +1694,7 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                if (VRState.VR_INITIALIZED && ClientDataHolderVR.getInstance().vrSettings.guiMipmaps) {
-                    ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Anisotropic filtering Changed");
-                }
+                VRShaders.updateGuiSampler();
             }
         },
         GUI_SCALE(true, true, 0, 6, 1, 0) { // GUI Scale

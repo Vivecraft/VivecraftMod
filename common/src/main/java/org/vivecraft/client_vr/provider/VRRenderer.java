@@ -573,21 +573,16 @@ public abstract class VRRenderer {
 
             // resize gui, if changed
             boolean mipmaps = dataholder.vrSettings.guiMipmaps;
-            boolean anisotropicFiltering = dataholder.vrSettings.guiAnisotropicFiltering;
             boolean mipmapChanged =
-                mipmaps != ((RenderTargetExtension) GuiHandler.GUI_FRAMEBUFFER).vivecraft$hasMipmaps() ||
-                    anisotropicFiltering != ((VRTextureTarget) GuiHandler.GUI_FRAMEBUFFER).anisotropicFiltering;
+                mipmaps != ((RenderTargetExtension) GuiHandler.GUI_FRAMEBUFFER).vivecraft$hasMipmaps();
             if (GuiHandler.updateResolution() || mipmapChanged) {
                 ((RenderTargetExtension) GuiHandler.GUI_FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
-                ((VRTextureTarget) GuiHandler.GUI_FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
                 GuiHandler.GUI_FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
 
                 ((RenderTargetExtension) RadialHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
-                ((VRTextureTarget) RadialHandler.FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
                 RadialHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
 
                 ((RenderTargetExtension) KeyboardHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
-                ((VRTextureTarget) KeyboardHandler.FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
                 KeyboardHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
                 if (minecraft.screen != null) {
                     int guiWidth = minecraft.getWindow().getGuiScaledWidth();
@@ -738,7 +733,6 @@ public abstract class VRRenderer {
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
                 .withDepth()
                 .withMipmaps(dataholder.vrSettings.guiMipmaps)
-                .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", GuiHandler.GUI_FRAMEBUFFER);
             RenderHelper.checkGLError("GUI framebuffer setup");
@@ -747,7 +741,6 @@ public abstract class VRRenderer {
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
                 .withDepth()
                 .withMipmaps(dataholder.vrSettings.guiMipmaps)
-                .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", KeyboardHandler.FRAMEBUFFER);
             RenderHelper.checkGLError("Keyboard framebuffer setup");
@@ -756,7 +749,6 @@ public abstract class VRRenderer {
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
                 .withDepth()
                 .withMipmaps(dataholder.vrSettings.guiMipmaps)
-                .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", RadialHandler.FRAMEBUFFER);
             RenderHelper.checkGLError("Radial framebuffer setup");

@@ -534,7 +534,7 @@ public class MenuWorldExporter {
             for (int i = 0; i < size; i++) {
                 Biome.BiomeBuilder builder = new Biome.BiomeBuilder();
 
-                dis.readUTF(); // registry key, not actually used though, just for reference
+                String biomeId = dis.readUTF(); // registry key, not actually used though, just for reference
 
                 builder.hasPrecipitation(dis.readBoolean());
                 builder.temperature(dis.readFloat());
@@ -542,10 +542,16 @@ public class MenuWorldExporter {
                 builder.downfall(dis.readFloat());
 
                 BiomeSpecialEffects.Builder effectsBuilder = new BiomeSpecialEffects.Builder();
-                builder.setAttribute(EnvironmentAttributes.FOG_COLOR, dis.readInt());
+                int fogColor = dis.readInt();
+                if (fogColor != 10518688 || !isEndBiome(biomeId)) {
+                    builder.setAttribute(EnvironmentAttributes.FOG_COLOR, fogColor);
+                }
                 effectsBuilder.waterColor(dis.readInt());
                 builder.setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, dis.readInt());
-                builder.setAttribute(EnvironmentAttributes.SKY_COLOR, dis.readInt());
+                int skyColor = dis.readInt();
+                if (skyColor != 7254527 || !isNetherBiome(biomeId)) {
+                    builder.setAttribute(EnvironmentAttributes.SKY_COLOR, skyColor);
+                }
 
                 if (dis.readBoolean()) {
                     effectsBuilder.foliageColorOverride(dis.readInt());
@@ -628,6 +634,22 @@ public class MenuWorldExporter {
             } else {
                 return attribute.defaultValue();
             }
+        }
+
+        private boolean isEndBiome(String biomeId) {
+            return "the_end".equals(biomeId) ||
+                "small_end_islands".equals(biomeId) ||
+                "end_midlands".equals(biomeId) ||
+                "end_highlands".equals(biomeId) ||
+                "end_barrens".equals(biomeId);
+        }
+
+        private boolean isNetherBiome(String biomeId) {
+            return "nether_wastes".equals(biomeId) ||
+                "soul_sand_valley".equals(biomeId) ||
+                "crimson_forest".equals(biomeId) ||
+                "warped_forest".equals(biomeId) ||
+                "basalt_deltas".equals(biomeId);
         }
     }
 
@@ -718,14 +740,12 @@ public class MenuWorldExporter {
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
                 .setAttribute(EnvironmentAttributes.FOG_COLOR, 3344392)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011).build());
             // the_end
             MAP.put(9, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 10518688)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
                 .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
             // frozen_ocean
@@ -981,7 +1001,6 @@ public class MenuWorldExporter {
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 10518688)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
                 .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
             // end_midlands
@@ -989,7 +1008,6 @@ public class MenuWorldExporter {
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 10518688)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
                 .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
             // end_highlands
@@ -997,7 +1015,6 @@ public class MenuWorldExporter {
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 10518688)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
                 .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
             // end_barrens
@@ -1005,7 +1022,6 @@ public class MenuWorldExporter {
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 10518688)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
                 .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
             // warm_ocean
@@ -1264,7 +1280,6 @@ public class MenuWorldExporter {
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
                 .setAttribute(EnvironmentAttributes.FOG_COLOR, 1787717)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527)
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES, AmbientParticle.of(
                     (ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(Identifier.parse("minecraft:ash"))
                         .orElseThrow().value(),
@@ -1276,7 +1291,6 @@ public class MenuWorldExporter {
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
                 .setAttribute(EnvironmentAttributes.FOG_COLOR, 3343107)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527)
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES,
                     AmbientParticle.of((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(
                         Identifier.parse("minecraft:crimson_spore")).orElseThrow().value(), 0.025000f)).build());
@@ -1287,7 +1301,6 @@ public class MenuWorldExporter {
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
                 .setAttribute(EnvironmentAttributes.FOG_COLOR, 1705242)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527)
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES,
                     AmbientParticle.of((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(
                         Identifier.parse("minecraft:warped_spore")).orElseThrow().value(), 0.014280f)).build());
@@ -1299,7 +1312,6 @@ public class MenuWorldExporter {
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
                 .setAttribute(EnvironmentAttributes.FOG_COLOR, 6840176)
                 .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 4341314)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527)
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES,
                     AmbientParticle.of((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(
                         Identifier.parse("minecraft:white_ash")).orElseThrow().value(), 0.118093f)).build());

@@ -663,7 +663,6 @@ public class MenuWorldRenderer {
         this.animatedSprites = null;
         this.endFlashState = null;
         this.ready = false;
-        this.environmentAttributes = null;
         this.biomeInterpolator.clear();
         this.valueProbes.clear();
     }
@@ -1871,7 +1870,7 @@ public class MenuWorldRenderer {
                     (this.menuWorldRenderer.blockAccess.getBrightness(LightLayer.SKY, center) - 8.0f
                     ) / 7.0f, 0.0f, 1.0f);
                 float fog = this.menuWorldRenderer.rainLevel * lightAmount * (biome.hasPrecipitation() ? 1.0f : 0.5f);
-                fogData.environmentalStart = Math.min(10, fogData.environmentalStart + fog * -160.0f);
+                fogData.environmentalStart = Math.min(10, fogData.environmentalStart - 160.0f * fog);
                 float minRainFogEnd = Math.min(96.0f, fogData.environmentalEnd);
                 fogData.environmentalEnd = Math.max(minRainFogEnd, fogData.environmentalEnd - 256.0f * fog);
                 fogData.skyEnd = Math.min(this.menuWorldRenderer.renderDistance,
