@@ -61,6 +61,8 @@ accessible method net/minecraft/client/renderer/ScreenEffectRenderer renderItemA
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
 # to accesss the spear progress interpolation
 accessible method net/minecraft/client/model/effects/SpearAnimations progress (FFF)F
+accessible method net/minecraft/client/model/effects/SpearAnimations hitFeedbackAmount (F)F
+accessible class net/minecraft/client/model/effects/SpearAnimations$UseParams
 
 # for correct vr rendering
 accessible field net/minecraft/world/entity/Entity eyeHeight F

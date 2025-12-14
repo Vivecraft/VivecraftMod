@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
@@ -13,6 +14,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.AttackRange;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.*;
@@ -190,6 +192,7 @@ public class SwingTracker implements DebugRenderTracker {
                 Item item = itemstack.getItem();
                 boolean isTool = false;
                 boolean isSword = false;
+                boolean isLance = false;
 
                 if (this.dh.vrSettings.onlySwordCollision &&
                     !(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)))
@@ -198,27 +201,31 @@ public class SwingTracker implements DebugRenderTracker {
                     continue;
                 }
 
-                if (!(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)) &&
-                    !(item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS)))
+                if (itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS) ||
+                    item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS))
                 {
-                    if (isTool(itemstack)) {
-                        isTool = true;
-                    }
-                } else {
                     isSword = true;
+                    isTool = true;
+                } else if (itemstack.is(ItemTags.SPEARS) || itemstack.is(ViveItemTags.VIVECRAFT_LANCES)) {
+                    isLance = true;
+                    isTool = true;
+                } else if (isTool(itemstack)) {
                     isTool = true;
                 }
 
                 float weaponLength = 0.0F;
                 float entityReachAdd = 0.3F;
 
+                AttackRange range = itemstack.get(DataComponents.ATTACK_RANGE);
+
                 if (isHand) {
-                    double playerEntityReach = player.entityInteractionRange();
+                    double playerEntityReach =
+                        range != null ? range.effectiveMaxRange(player) : player.entityInteractionRange();
 
                     // subtract arm length and clamp it to 6 meters
                     playerEntityReach = Math.min(playerEntityReach, 6.0) - 0.5;
 
-                    if (isSword) {
+                    if (isSword || isLance) {
                         weaponLength = 0.6F;
                         // in default situations a total reach of 2.5
                         entityReachAdd = (float) playerEntityReach - weaponLength;
@@ -231,6 +238,7 @@ public class SwingTracker implements DebugRenderTracker {
                         // in default situations a total reach of 0.4
                         entityReachAdd = (float) playerEntityReach * 0.16F - weaponLength;
                     }
+                    entityReachAdd += range != null ? range.hitboxMargin() : 0.0F;
                 }
 
                 weaponLength *= this.dh.vrPlayer.vrdata_world_pre.worldScale;
@@ -248,6 +256,18 @@ public class SwingTracker implements DebugRenderTracker {
 
                 // at a 0.3m offset on index controllers a speed of 3m/s is an intended smack, 7 m/s is about as high as your arm can go.
                 float speed = this.tipHistory[i].averageSpeed(0.33D);
+                // speed boost when hitting straight with lances/fists
+                if (isLance || !isTool) {
+                    Vector3f deviceDirection = this.dh.vrPlayer.vrdata_world_pre.getDevice(c)
+                        .getCustomVector(MathUtils.BACK);
+                    // tip history is in room space, so rotate to world direction
+                    Vector3f tipTravelDirection = this.tipHistory[i].netMovement(0.33D).normalize()
+                        .rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians);
+                    float dot = Math.max(tipTravelDirection.dot(isLance ? handDirection : deviceDirection), 0F);
+                    // boos speed if the tip travel in teh forward direction of hte hand/lance
+                    speed *= 1.0F + dot * dot * 0.5F;
+                }
+
                 boolean inAnEntity = false;
                 this.canAct[i] = speed > speedTreshhold && !this.lastWeaponSolid[i];
 
@@ -274,8 +294,15 @@ public class SwingTracker implements DebugRenderTracker {
                 // no hitting through blocks
                 this.weaponTip[i] = this.constrain(handPos, this.weaponTip[i]);
 
-                AABB weaponBB = new AABB(handPos, this.attackingPoint[i]);
-                AABB weaponTipBB = new AABB(handPos, this.weaponTip[i]);
+                // -0.5 to subtract arm length
+                float weaponStartOffset = range != null ?
+                    Math.max(0.0F, range.effectiveMinRange(player) - range.hitboxMargin() - 0.5F) :
+                    0.0F;
+                Vector3fc weaponEntityStart = handDirection.mul(weaponStartOffset, new Vector3f());
+                Vec3 entityStartPos = handPos.add(weaponEntityStart.x(), weaponEntityStart.y(), weaponEntityStart.z());
+
+                AABB weaponBB = new AABB(entityStartPos, this.attackingPoint[i]);
+                AABB weaponTipBB = new AABB(entityStartPos, this.weaponTip[i]);
 
                 // make sure the last attack point is also in, for better collision on fast swings
                 if (lastAttackPoint != null) {

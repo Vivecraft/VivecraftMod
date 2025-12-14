@@ -417,34 +417,43 @@ public class VivecraftItemRendering {
                 scale = 0.56F;
             }
             case LANCE -> {
-                translateX = -0.135F;
-
                 KineticWeapon kineticWeapon = itemStack.get(DataComponents.KINETIC_WEAPON);
                 if (kineticWeapon != null) {
-                    float progress =
-                        itemStack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTick + 1.0F);
                     rotation.identity();
-                    int startTick = kineticWeapon.delayTicks();
-                    int finishTick =
-                        kineticWeapon.damageConditions().map(KineticWeapon.Condition::maxDurationTicks).orElse(0) +
-                            startTick;
-                    float xRotation = Mth.clamp(Mth.inverseLerp(progress, 0F, startTick), 0.0F, 1.0F) -
-                        Mth.clamp(Mth.inverseLerp(progress, finishTick - 5, finishTick), 0.0F, 1.0F);
+                    translateX = 0;
+                    translateY = 0;
 
-                    // rotate sideways when using
-                    preRotation.mul(Axis.XP.rotationDegrees(10F));
-                    preRotation.rotateLocalY(xRotation * 90F * Mth.DEG_TO_RAD);
-                    preRotation.rotateLocalX((-110.0F + 20 + gunAngle - gunAngle * xRotation) * Mth.DEG_TO_RAD);
-                    translateZ -= 0.02F * xRotation;
-                    translateX -= 0.03F * xRotation;
+                    // copied from SpearAnimations.firstPersonUse, without  the sway translation and adjusted for the gun angle
+                    float timeHeld =
+                        itemStack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTick + 1.0F);
+                    float tickSinceLastHit = player.getTicksSinceLastKineticHitFeedback(partialTick);
+
+                    SpearAnimations.UseParams params = SpearAnimations.UseParams.fromKineticWeapon(kineticWeapon,
+                        timeHeld);
+                    float sideRotation =
+                        SpearAnimations.progress(params.raiseProgress(), 0.5F, 0.55F) - params.swayProgress();
+
+                    // position at hand
+                    poseStack.translate(-0.1375F + sideRotation * 0.01F, 0.005F + sideRotation * 0.01F, 0);
+
+                    // state rotation
+                    poseStack.rotateAround(Axis.XP.rotationDegrees(
+                            -90.0F + gunAngle *
+                                (1.0F - Ease.inOutBack(params.raiseProgress()) - params.lowerProgress() * 0.333F +
+                                    params.raiseBackProgress() * 1.33F
+                                ) + -0.5F * params.swayScaleFast()),
+                        0.0F, 0.0F, 0.0F);
+                    poseStack.rotateAround(
+                        Axis.YN.rotationDegrees(90.0F * sideRotation + 2.0F * params.swayScaleSlow()),
+                        0.15F, 0.0F, 0.0F);
+
+                    // cancel item rotation
+                    poseStack.mulPose(Axis.XP.rotationDegrees(10));
 
                     // move back when hitting
-                    float tickSinceLastHit = player.getTicksSinceLastKineticHitFeedback(partialTick);
-                    float hitOffset = 0.2F * (Ease.outQuart(SpearAnimations.progress(tickSinceLastHit, 1F, 3F)) -
-                        Ease.inOutSine(SpearAnimations.progress(tickSinceLastHit, 3F, 10F))
-                    );
-                    poseStack.translate(0, /*-hitOffset*/0, hitOffset);
+                    poseStack.translate(0.0F, -SpearAnimations.hitFeedbackAmount(tickSinceLastHit) * 0.2F, 0.0F);
                 } else {
+                    translateX = -0.1375F;
                     rotation.mul(Axis.XP.rotationDegrees(30));
                 }
             }
