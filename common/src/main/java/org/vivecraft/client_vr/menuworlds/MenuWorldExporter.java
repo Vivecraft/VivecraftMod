@@ -290,6 +290,7 @@ public class MenuWorldExporter {
             dimMinY = dis.readInt();
             dimAmbientLight = dis.readFloat();
 
+            // TODO 1.21.11 store those?
             if (dimHasCeiling && !dimHasSkyLight) {
                 // nether
                 skybox = DimensionType.Skybox.NONE;

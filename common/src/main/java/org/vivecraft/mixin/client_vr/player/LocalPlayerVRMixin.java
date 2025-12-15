@@ -252,7 +252,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     }
 
     protected void vivecraft$spearHaptic(CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().vr.triggerHapticPulse(this.getUsedItemHand().ordinal(), 2000);
+        if (VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(this.getUsedItemHand().ordinal(), 2000);
+        }
     }
 
     @Inject(method = "getRopeHoldPosition", at = @At("HEAD"), cancellable = true)
