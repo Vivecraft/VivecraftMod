@@ -159,7 +159,7 @@ public class VRWidgetHelper {
 
         if (!ITEM_STACK_RENDER_STATE.isEmpty() && !ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList().isEmpty()) {
             // we use block models, so the camera texture is on the regular block atlas
-            RenderType renderType = RenderTypes.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS);
+            RenderType renderType = RenderTypes.entityCutoutNoCull(TextureAtlas.LOCATION_ITEMS);
             ItemRenderer.renderItem(ItemDisplayContext.GROUND, poseStack, MC.renderBuffers().bufferSource(),
                 combinedLight, OverlayTexture.NO_OVERLAY, new int[]{},
                 ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList(), renderType, ItemStackRenderState.FoilType.NONE);
