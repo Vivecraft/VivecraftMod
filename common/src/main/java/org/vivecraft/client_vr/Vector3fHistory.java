@@ -124,14 +124,13 @@ public class Vector3fHistory {
                 break;
             }
 
-            if (last == null) {
-                last = current;
-            } else {
+            if (last != null) {
                 count++;
                 float timeDelta = 0.001F * (last.ts - current.ts);
                 float positionDelta = last.vec.distance(current.vec);
                 speedTotal += positionDelta / timeDelta;
             }
+            last = current;
         }
 
         return count == 0 ? speedTotal : speedTotal / (float) count;

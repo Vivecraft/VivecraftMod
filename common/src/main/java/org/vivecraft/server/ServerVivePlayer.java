@@ -26,6 +26,7 @@ public class ServerVivePlayer {
     public float worldScale = 1.0F;
     public float heightScale = 1.0F;
     public VRBodyPart activeBodyPart = VRBodyPart.MAIN_HAND;
+    public Vector3fc aimDirOverride = null;
     // we need to keep a copy of this, in case the item breaks during dualwielding
     public ItemStack activeItemOverride = ItemStack.EMPTY;
     // when a player mines a block too fast, the destroy is delayed, need to keep track of the bodypart that actually destroyed it
@@ -81,7 +82,9 @@ public class ServerVivePlayer {
      * @return the direction the player is aiming, accounts for the roomscale bow
      */
     public Vec3 getAimDir(boolean ignoreUseForAim) {
-        if (!this.isSeated() && this.draw > 0.0F) {
+        if (this.aimDirOverride != null) {
+            return new Vec3(this.aimDirOverride);
+        } else if (!this.isSeated() && this.draw > 0.0F) {
             return this.getBodyPartPos(this.activeBodyPart.opposite())
                 .subtract(this.getBodyPartPos(this.activeBodyPart)).normalize();
         } else if (ignoreUseForAim || this.useBodyPartForAim) {

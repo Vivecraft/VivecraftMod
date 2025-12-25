@@ -343,6 +343,8 @@ public class VRSettings {
     public boolean onlySwordCollision = false;
     @SettingField(VrOptions.REDUCED_PLAYER_REACH)
     public boolean reducedPlayerReach = true;
+    @SettingField(VrOptions.ROOMSCALE_SPEAR_LUNGE)
+    public boolean roomscaleSpearLunge = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
     @SettingField(VrOptions.FREEMOVE_MODE)
@@ -1898,6 +1900,7 @@ public class VRSettings {
         SWORD_BLOCK_COLLISION(false, true), // lets swords hit blocks that can be mined or instabroken
         ONLY_SWORD_COLLISION(false, true), // only let swords hit stuff
         REDUCED_PLAYER_REACH(false, true), // reduces roomscale reach to hit players
+        ROOMSCALE_SPEAR_LUNGE(false, true), // allose using a spear with lunge by swinging forward
         // VIVE END - new options
         // JRBUDDA VIVE
         ALLOW_CRAWLING(false, true), // Roomscale Crawling

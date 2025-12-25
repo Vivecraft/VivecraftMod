@@ -13,7 +13,7 @@ import org.vivecraft.server.config.ServerConfig;
 
 @Mixin(Mob.class)
 public class MobMixin {
-    @ModifyArg(method = "isWithinMeleeAttackRange", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;getAttackBoundingBox(D)Lnet/minecraft/world/phys/AABB;"))
+    @ModifyArg(method = "isWithinMeleeAttackRange", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;getAttackBoundingBox(D)Lnet/minecraft/world/phys/AABB;", ordinal = 0))
     private double vivecraft$adjustRange(double distance, @Local(argsOnly = true) LivingEntity other)
     {
         if (other instanceof ServerPlayer player && ServerConfig.MOB_ATTACK_RANGE_ADJUSTMENT.get() < 0) {

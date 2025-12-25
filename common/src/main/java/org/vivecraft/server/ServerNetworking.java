@@ -243,6 +243,9 @@ public class ServerNetworking {
                 }
             }
             case DAMAGE_DIRECTION -> vivePlayer.wantsDamageDirection = true;
+            case AIM_OVERRIDE_RESET -> vivePlayer.aimDirOverride = null;
+            case AIM_DIRECTION_OVERRIDE ->
+                vivePlayer.aimDirOverride = ((AimDirOverridePayloadC2S) c2sPayload).direction();
             // legacy support
             case CONTROLLER0DATA, CONTROLLER1DATA, HEADDATA -> {
                 Map<PayloadIdentifier, VivecraftPayloadC2S> playerData;

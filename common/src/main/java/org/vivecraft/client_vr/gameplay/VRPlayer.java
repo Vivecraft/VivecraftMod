@@ -629,13 +629,19 @@ public class VRPlayer {
             this.vrdata_world_render);
     }
 
-    public Vec3 getRightClickLookOverride(Player entity, int c) {
-        Vec3 out = entity.getLookAngle();
+    /**
+     * calculates the look override for servers without Vivecraft
+     *
+     * @param entity the local player
+     * @param c      the hand that caused an action
+     * @return the direction the player should look at
+     */
+    public Vector3fc getRightClickLookOverride(Player entity, int c) {
+        Vector3fc out = entity.getLookAngle().toVector3f();
 
         if (this.crossVec != null) {
-            out = entity.getEyePosition(1.0F)
-                .subtract(this.crossVec)
-                .normalize().reverse(); // backwards
+            out = MathUtils.subtractToVector3f(entity.getEyePosition(1.0F), this.crossVec)
+                .normalize().mul(-1F); // backwards
         }
 
         ItemStack itemStack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
@@ -658,16 +664,16 @@ public class VRPlayer {
             Vector3fc aim = this.dh.bowTracker.getAimVector();
 
             if (this.dh.bowTracker.isNotched() && aim != null && aim.lengthSquared() > 0.0F) {
-                out = new Vec3(aim.x(), aim.y(), aim.z());
+                out = aim;
             } else if (this.dh.vrSettings.aimDevice != VRSettings.AimDevice.HMD) {
-                out = new Vec3(data.getController(c).getDirection());
+                out = data.getController(c).getDirection();
             }
         } else if (itemStack.getItem() == Items.BUCKET && this.dh.blockModule.bukkit[c] &&
             ClientNetworking.getActiveBodyPart().ordinal() == c && ClientNetworking.IS_LAST_BODY_PART_AIM)
         {
-            out = entity.getEyePosition(1.0F)
-                .subtract(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition())
-                .normalize().reverse(); // backwards
+            out = MathUtils.subtractToVector3f(entity.getEyePosition(1.0F),
+                    this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition())
+                .normalize().mul(-1F); // backwards
         }
 
         return out;

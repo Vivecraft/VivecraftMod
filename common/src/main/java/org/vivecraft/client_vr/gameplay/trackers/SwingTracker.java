@@ -15,7 +15,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.AttackRange;
+import net.minecraft.world.item.component.PiercingWeapon;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,7 +56,8 @@ import java.util.List;
 public class SwingTracker implements DebugRenderTracker {
     private static final int[] CONTROLLER_AND_FEET = new int[]{MCVR.MAIN_CONTROLLER, MCVR.OFFHAND_CONTROLLER, MCVR.RIGHT_FOOT_TRACKER, MCVR.LEFT_FOOT_TRACKER};
     private static final VRBodyPart[] BODYPARTS = new VRBodyPart[]{VRBodyPart.MAIN_HAND, VRBodyPart.OFF_HAND, VRBodyPart.RIGHT_FOOT, VRBodyPart.LEFT_FOOT};
-    private static final float SPEED_THRESH = 3.0F;
+    // at a 0.3m offset on index controllers a speed of 2.5m/s is an intended smack, 7 m/s is about as high as your arm can go.
+    private static final float SPEED_THRESH = 2.5F;
 
     public int disableSwing = 3;
 
@@ -69,6 +73,8 @@ public class SwingTracker implements DebugRenderTracker {
     private final Vec3[] attackingPoint = new Vec3[4];
     private final Vec3[] weaponTip = new Vec3[4];
     private final Vector3fHistory[] tipHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
+    private final Vector3fHistory[] tipDirHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
+    private final Vector3fHistory[] baseHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
     private final boolean[] canAct = new boolean[4];
 
     // debug render stuff
@@ -167,7 +173,7 @@ public class SwingTracker implements DebugRenderTracker {
 
     @Override
     public void activeProcess(LocalPlayer player) {
-        float speedTreshhold = SPEED_THRESH;
+        float speedTreshhold = 2.5F;//SPEED_THRESH;
 
         if (player.isCreative()) {
             speedTreshhold *= 1.5F;
@@ -250,26 +256,36 @@ public class SwingTracker implements DebugRenderTracker {
                 this.miningPoint[i] = handPos.add(weaponEnd.x, weaponEnd.y, weaponEnd.z);
 
                 // do speed calc in actual room coords
-                Vector3f tip = this.dh.vrPlayer.vrdata_room_pre.getDevice(c).getPositionF()
-                    .add(this.dh.vrPlayer.vrdata_room_pre.getHand(c).getCustomVector(MathUtils.BACK).mul(0.3F));
+                Vector3f base = this.dh.vrPlayer.vrdata_room_pre.getDevice(c).getPositionF();
+                Vector3f tip = this.dh.vrPlayer.vrdata_room_pre.getHand(c).getCustomVector(MathUtils.BACK).mul(0.3F)
+                    .add(base);
+                this.baseHistory[i].add(base);
                 this.tipHistory[i].add(tip);
+                this.tipDirHistory[i].add(isTool ? this.dh.vrPlayer.vrdata_room_pre.getHand(c).getDirection() :
+                    this.dh.vrPlayer.vrdata_room_pre.getDevice(c).getDirection());
 
-                // at a 0.3m offset on index controllers a speed of 3m/s is an intended smack, 7 m/s is about as high as your arm can go.
                 float speed = this.tipHistory[i].averageSpeed(0.33D);
-                // speed boost when hitting straight with lances/fists
-                if (isLance || !isTool) {
-                    Vector3f deviceDirection = this.dh.vrPlayer.vrdata_world_pre.getDevice(c)
-                        .getCustomVector(MathUtils.BACK);
-                    // tip history is in room space, so rotate to world direction
-                    Vector3f tipTravelDirection = this.tipHistory[i].netMovement(0.33D).normalize()
-                        .rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians);
-                    float dot = Math.max(tipTravelDirection.dot(isLance ? handDirection : deviceDirection), 0F);
-                    // boos speed if the tip travel in teh forward direction of hte hand/lance
-                    speed *= 1.0F + dot * dot * 0.5F;
-                }
 
                 boolean inAnEntity = false;
-                this.canAct[i] = speed > speedTreshhold && !this.lastWeaponSolid[i];
+                this.canAct[i] =
+                    speed > speedTreshhold && !this.lastWeaponSolid[i] && !player.cannotAttackWithItem(itemstack, 0);
+
+                boolean canLunge = false;
+                Vector3f deviceDirection = this.tipDirHistory[i].averagePosition(0.33D).normalize();
+                // speed boost when hitting straight with lances/fists
+                if (this.canAct[i] && isLance && this.dh.vrSettings.roomscaleSpearLunge) {
+                    // this is on purpose not checking averageSpeed, to get the linear speed
+                    Vector3f baseTravelDirection = this.baseHistory[i].netMovement(0.33D);
+                    // divide by time to make it m/s
+                    baseTravelDirection.div(0.33F);
+                    // speed in the pointing direction
+                    float dotSpeed = Math.max(baseTravelDirection.dot(deviceDirection), 0F);
+                    // check if the item has a lunge that could be triggered
+                    canLunge = dotSpeed > speedTreshhold && isLance && player.hasEnoughFoodToDoExhaustiveManoeuvres() &&
+                        EnchantmentHelper.getItemEnchantmentLevel(
+                            player.level().registryAccess().getOrThrow(Enchantments.LUNGE), itemstack) > 0 &&
+                        !player.isPassenger() && !player.isFallFlying() && !player.isInWater();
+                }
 
                 // Check EntityCollisions first
                 boolean entityAct = this.canAct[i];
@@ -299,7 +315,8 @@ public class SwingTracker implements DebugRenderTracker {
                     Math.max(0.0F, range.effectiveMinRange(player) - range.hitboxMargin() - 0.5F) :
                     0.0F;
                 Vector3fc weaponEntityStart = handDirection.mul(weaponStartOffset, new Vector3f());
-                Vec3 entityStartPos = handPos.add(weaponEntityStart.x(), weaponEntityStart.y(), weaponEntityStart.z());
+                Vec3 entityStartPos = this.constrain(handPos,
+                    handPos.add(weaponEntityStart.x(), weaponEntityStart.y(), weaponEntityStart.z()));
 
                 AABB weaponBB = new AABB(entityStartPos, this.attackingPoint[i]);
                 AABB weaponTipBB = new AABB(entityStartPos, this.weaponTip[i]);
@@ -323,6 +340,11 @@ public class SwingTracker implements DebugRenderTracker {
                     mobs.addAll(players);
                 }
 
+                // piercing attacks
+                PiercingWeapon piercingWeapon = itemstack.get(DataComponents.PIERCING_WEAPON);
+                Vec3 averageTargetPosition = Vec3.ZERO;
+                int targetCount = 0;
+
                 for (Entity entity : mobs) {
                     if (entity.isPickable() &&
                         entity != this.mc.getCameraEntity().getVehicle() && // don't hit ridden entity
@@ -330,8 +352,10 @@ public class SwingTracker implements DebugRenderTracker {
                     {
                         if (entityAct) {
                             // this.mc.physicalGuiManager.preClickAction();
-
-                            if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
+                            if (piercingWeapon != null) {
+                                averageTargetPosition = averageTargetPosition.add(entity.getBoundingBox().getCenter());
+                                targetCount++;
+                            } else if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
                                 ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
                                 // only attack if epic fight didn't trigger
                                 this.mc.gameMode.attack(player, entity);
@@ -351,6 +375,18 @@ public class SwingTracker implements DebugRenderTracker {
                 } else {
                     // since we couldn't act, we also didn't hit anything
                     this.lastHitEntities[i] = Collections.emptyList();
+                }
+
+                if (piercingWeapon != null && this.canAct[i] && (inAnEntity || canLunge)) {
+                    // piercing attacks have their own logic
+                    ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
+                    ClientNetworking.overrideAimDir(inAnEntity ?
+                        MathUtils.subtractToVector3f(averageTargetPosition.scale(1F / targetCount), handPos)
+                            .normalize() :
+                        deviceDirection.rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians, new Vector3f()));
+                    this.mc.gameMode.piercingAttack(piercingWeapon);
+                    ClientNetworking.resetAimDir();
+                    continue;
                 }
 
                 // can't hit anything else if we hit an entity
