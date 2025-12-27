@@ -72,11 +72,8 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
-            // set alpha, because the blit does not copy it anymore
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTexture(), 0xFF000000);
-            DATA_HOLDER.vrRenderer.cameraRenderFramebuffer.blitAndBlendToTexture(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTextureView());
+            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, DATA_HOLDER.vrRenderer.cameraFramebuffer,
+                false);
             Profiler.get().pop();
         }
 

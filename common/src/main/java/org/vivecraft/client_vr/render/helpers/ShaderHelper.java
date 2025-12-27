@@ -587,4 +587,23 @@ public class ShaderHelper {
             }
         }
     }
+
+    /**
+     * blits the given {@code source} RenderTarget to the given {@code target} RenderTarget buffer
+     *
+     * @param source RenderTarget to copy
+     * @param target RenderTarget to draw to
+     * @param blend  if alpha blending should be used
+     */
+    public static void blit(
+        RenderTarget source, RenderTarget target, boolean blend)
+    {
+        RenderSystem.assertOnRenderThread();
+
+        renderFullscreenQuad(() -> "Vive Blit",
+            blend ? VRShaders.BLIT_VR_BLEND_PIPELINE : VRShaders.BLIT_VR_PIPELINE,
+            pass -> pass.bindTexture(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView(),
+                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)),
+            target.getColorTextureView());
+    }
 }
