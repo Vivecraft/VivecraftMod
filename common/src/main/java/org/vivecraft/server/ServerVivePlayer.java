@@ -26,7 +26,11 @@ public class ServerVivePlayer {
     public float worldScale = 1.0F;
     public float heightScale = 1.0F;
     public VRBodyPart activeBodyPart = VRBodyPart.MAIN_HAND;
+    // custom aim override, instead of using the active bodypart
     public Vector3fc aimDirOverride = null;
+    public Vec3 aimPosOverride = null;
+    // ticks when to reset the aim override
+    public int aimReset;
     // we need to keep a copy of this, in case the item breaks during dualwielding
     public ItemStack activeItemOverride = ItemStack.EMPTY;
     // when a player mines a block too fast, the destroy is delayed, need to keep track of the bodypart that actually destroyed it
@@ -99,7 +103,9 @@ public class ServerVivePlayer {
      * @return the position from which the player is aiming
      */
     public Vec3 getAimPos(boolean ignoreUseForAim) {
-        if (ignoreUseForAim || this.useBodyPartForAim) {
+        if (this.aimPosOverride != null) {
+            return this.aimPosOverride;
+        } else if (ignoreUseForAim || this.useBodyPartForAim) {
             return this.getBodyPartPos(this.activeBodyPart);
         } else {
             return this.getBodyPartPos(VRBodyPart.MAIN_HAND);
@@ -223,5 +229,12 @@ public class ServerVivePlayer {
             this.vrPlayerStateAsPose = this.vrPlayerState.asVRPose(this.player.position());
         }
         return this.vrPlayerStateAsPose;
+    }
+
+    public void tick() {
+        if (this.aimReset > 0 && --this.aimReset == 0) {
+            this.aimDirOverride = null;
+            this.aimPosOverride = null;
+        }
     }
 }

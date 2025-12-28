@@ -70,6 +70,9 @@ public class VRPlayer {
 
     public Vec3 crossVec;
 
+    private int lookAtPosTicks;
+    private Vec3 lookAtPos = null;
+
     // based on a heuristic of which locomotion type was last used
     private boolean isFreeMoveCurrent = true;
 
@@ -404,6 +407,10 @@ public class VRPlayer {
             this.initDone = true;
         }
 
+        if (this.lookAtPosTicks > 0 && --this.lookAtPosTicks == 0) {
+            this.lookAtPos = null;
+        }
+
         this.doPlayerMoveInRoom(player);
         for (Tracker tracker : this.dh.getTrackers()) {
             if (tracker.processType() == Tracker.ProcessType.PER_TICK) {
@@ -639,9 +646,9 @@ public class VRPlayer {
     public Vector3fc getRightClickLookOverride(Player entity, int c) {
         Vector3fc out = entity.getLookAngle().toVector3f();
 
-        if (this.crossVec != null) {
-            out = MathUtils.subtractToVector3f(entity.getEyePosition(1.0F), this.crossVec)
-                .normalize().mul(-1F); // backwards
+        if (this.lookAtPos != null || this.crossVec != null) {
+            out = MathUtils.subtractToVector3f(this.lookAtPos != null ? this.lookAtPos : this.crossVec,
+                entity.getEyePosition(1.0F)).normalize();
         }
 
         ItemStack itemStack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
@@ -671,9 +678,8 @@ public class VRPlayer {
         } else if (itemStack.getItem() == Items.BUCKET && this.dh.blockModule.bukkit[c] &&
             ClientNetworking.getActiveBodyPart().ordinal() == c && ClientNetworking.IS_LAST_BODY_PART_AIM)
         {
-            out = MathUtils.subtractToVector3f(entity.getEyePosition(1.0F),
-                    this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition())
-                .normalize().mul(-1F); // backwards
+            out = MathUtils.subtractToVector3f(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition(),
+                entity.getEyePosition(1.0F)).normalize();
         }
 
         return out;
@@ -728,9 +734,10 @@ public class VRPlayer {
                 }
             }
             player.setYHeadRot(player.getYRot());
-        } else if (this.crossVec != null) {
+        } else if (this.lookAtPos != null || this.crossVec != null) {
             // Look AT the crosshair by default, most compatible with mods.
-            Vec3 playerToCrosshair = player.getEyePosition(1).subtract(this.crossVec); // backwards
+            Vec3 playerToCrosshair = player.getEyePosition(1)
+                .subtract(this.lookAtPos != null ? this.lookAtPos : this.crossVec); // backwards
             double what = playerToCrosshair.y / playerToCrosshair.length();
             if (what > 1) {
                 what = 1;
@@ -805,5 +812,16 @@ public class VRPlayer {
     public void updateTeleportKeys() {
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleport).setEnabled(this.isTeleportEnabled());
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
+    }
+
+    /**
+     * sets the lookAtPos, the player will look at that position for the given amount of ticks
+     *
+     * @param worldPos position to look at
+     * @param ticks    how long the player should look at it
+     */
+    public void setLookAtPos(Vec3 worldPos, int ticks) {
+        this.lookAtPos = worldPos;
+        this.lookAtPosTicks = ticks;
     }
 }

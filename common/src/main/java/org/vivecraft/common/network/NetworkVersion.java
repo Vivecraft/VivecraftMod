@@ -19,7 +19,7 @@ public enum NetworkVersion {
     DAMAGE_DIRECTION,
     // adds possibility to toggle settings after initial connection
     OPTION_TOGGLE,
-    // adds packet to override the aim direction
+    // adds packet to override the aim direction/position
     AIM_OVERRIDE;
 
     public static NetworkVersion fromProtocolVersion(int protocolVersion) {

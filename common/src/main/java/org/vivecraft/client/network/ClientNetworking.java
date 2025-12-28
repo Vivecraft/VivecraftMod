@@ -30,6 +30,7 @@ import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
+import org.vivecraft.common.utils.MathUtils;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -239,19 +240,22 @@ public class ClientNetworking {
     }
 
     /**
-     * resets the aim direction override
+     * resets the aim override
      */
-    public static void resetAimDir() {
+    public static void resetAim(int ticks) {
         if (!SERVER_WANTS_DATA) {
             restoreLook();
         } else if (NetworkVersion.AIM_OVERRIDE.accepts(USED_NETWORK_VERSION)) {
-            sendServerPacket(new AimOverrideResetPayloadC2S());
-            AIM_DIR_OVERRIDE = null;
+            sendServerPacket(new AimOverrideResetPayloadC2S(ticks));
+            if (ticks == 0) {
+                AIM_DIR_OVERRIDE = null;
+                AIM_POS_OVERRIDE = null;
+            }
         }
     }
 
     /**
-     * overrides the aim of the player to the given direction. position is still based on active bodypart
+     * overrides the aim of the player to the given direction. Position is still based on active bodypart
      *
      * @param dirOverride direction to override the aim to
      */
@@ -275,6 +279,20 @@ public class ClientNetworking {
                 ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ? VRBodyPart.HEAD :
                     VRBodyPart.MAIN_HAND;
             return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(bp).getDirection();
+        }
+    }
+
+    /**
+     * overrides the aim position of the player to the given position.
+     *
+     * @param posOverride position to override the aim to
+     */
+    public static void overrideAimPos(Vec3 posOverride) {
+        // this is only for modded servers, can't handle this on vanilla ones
+        if (SERVER_WANTS_DATA && NetworkVersion.AIM_OVERRIDE.accepts(USED_NETWORK_VERSION)) {
+            sendServerPacket(new AimPosOverridePayloadC2S(
+                MathUtils.subtractToVector3f(posOverride, Minecraft.getInstance().player.position())));
+            AIM_POS_OVERRIDE = posOverride;
         }
     }
 
@@ -369,6 +387,7 @@ public class ClientNetworking {
 
     public static void restoreLook() {
         AIM_DIR_OVERRIDE = null;
+        AIM_POS_OVERRIDE = null;
     }
 
     public static void handlePacket(VivecraftPayloadS2C s2cPayload) {

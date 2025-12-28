@@ -243,9 +243,20 @@ public class ServerNetworking {
                 }
             }
             case DAMAGE_DIRECTION -> vivePlayer.wantsDamageDirection = true;
-            case AIM_OVERRIDE_RESET -> vivePlayer.aimDirOverride = null;
+            case AIM_OVERRIDE_RESET -> {
+                AimOverrideResetPayloadC2S reset = (AimOverrideResetPayloadC2S) c2sPayload;
+                if (reset.ticks() == 0) {
+                    vivePlayer.aimDirOverride = null;
+                    vivePlayer.aimPosOverride = null;
+                }
+                vivePlayer.aimReset = reset.ticks();
+            }
             case AIM_DIRECTION_OVERRIDE ->
                 vivePlayer.aimDirOverride = ((AimDirOverridePayloadC2S) c2sPayload).direction();
+            case AIM_POSITION_OVERRIDE -> vivePlayer.aimPosOverride = player.position()
+                .add(((AimPosOverridePayloadC2S) c2sPayload).position().x(),
+                    ((AimPosOverridePayloadC2S) c2sPayload).position().y(),
+                    ((AimPosOverridePayloadC2S) c2sPayload).position().z());
             // legacy support
             case CONTROLLER0DATA, CONTROLLER1DATA, HEADDATA -> {
                 Map<PayloadIdentifier, VivecraftPayloadC2S> playerData;
