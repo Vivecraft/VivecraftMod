@@ -301,7 +301,7 @@ public class ClientNetworking {
      */
     @Nullable
     public static Vec3 getActiveAimPos() {
-        if (SERVER_WANTS_DATA) {
+        if (!SERVER_WANTS_DATA) {
             // no overrides on servers without the plugin
             return null;
         } else if (AIM_POS_OVERRIDE != null) {

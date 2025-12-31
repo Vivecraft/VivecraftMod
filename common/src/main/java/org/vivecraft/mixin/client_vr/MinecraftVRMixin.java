@@ -35,6 +35,8 @@ import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BoatItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
@@ -49,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.VivecraftClickEvent;
@@ -404,7 +407,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     {
         if (VRState.VR_RUNNING) {
             if (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemstack)) {
-                ClientNetworking.sendActiveHand(hand, false);
+                if (ClientDataHolderVR.getInstance().vrSettings.seated &&
+                    (itemstack.getItem() instanceof BucketItem || itemstack.getItem() instanceof BoatItem))
+                {
+                    // these need to aim from the head or they mismatch
+                    ClientNetworking.sendActiveBodyPart(VRBodyPart.HEAD, true);
+                } else {
+                    ClientNetworking.sendActiveHand(hand, false);
+                }
             } else {
                 // no telescope use in standing vr
                 return null;
