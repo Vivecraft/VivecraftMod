@@ -88,7 +88,8 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(Minecraft.class)
+// inject late, to let other mods disable the hud rendering
+@Mixin(value = Minecraft.class, priority = 1100)
 public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     // keeps track if an attack was initiated by pressing the attack key
