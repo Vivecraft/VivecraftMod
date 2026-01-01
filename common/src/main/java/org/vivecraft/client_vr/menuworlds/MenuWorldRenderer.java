@@ -55,6 +55,7 @@ import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.extensions.StateHolderExtension;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -228,7 +229,8 @@ public class MenuWorldRenderer {
         // temporarily disable fabulous to render the menu world
         boolean usingImprovedTransparency = this.mc.options.improvedTransparency().get();
         if (usingImprovedTransparency) {
-            this.mc.options.improvedTransparency().set(false);
+            ((OptionInstanceExtension<Boolean>) (Object) this.mc.options.improvedTransparency()).vivecraft$setWithoutUpdate(
+                false);
         }
 
         // reset camera position to 0, since this is used by the terrain shader
@@ -292,7 +294,8 @@ public class MenuWorldRenderer {
         renderSnowAndRain(eyePosition.x, 0, eyePosition.z);
 
         poseStack.popMatrix();
-        this.mc.options.improvedTransparency().set(usingImprovedTransparency);
+        ((OptionInstanceExtension<Boolean>) (Object) this.mc.options.improvedTransparency()).vivecraft$setWithoutUpdate(
+            usingImprovedTransparency);
         this.fogRenderer.setFog(FogRenderer.FogMode.NONE);
         this.rendering = false;
     }
