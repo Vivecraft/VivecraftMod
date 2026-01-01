@@ -29,12 +29,12 @@ dependencies {
     modCompileOnly("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.21.9-0.7.0-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.9.3+1.21.9-fabric"
+    modCompileOnly "maven.modrinth:iris:1.10.4+1.21.11-fabric"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
-    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
+    modRuntimeOnly 'io.github.douira:glsl-transformer:3.0.0-pre3' //temp iris
 
     // for REI compat
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
@@ -48,7 +48,7 @@ dependencies {
     // modCompileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
 
     //mod menu
-    modCompileOnly("com.terraformersmc:modmenu:15.0.0-beta.2") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modCompileOnly("com.terraformersmc:modmenu:17.0.0-beta.1") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
