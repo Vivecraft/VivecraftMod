@@ -146,7 +146,7 @@ public class MenuWorldExporter {
         dos.writeBoolean(level.getThunderLevel(1.0f) > 0.0f);
 
         blockStateMapper.writePalette(dos);
-        biomeMapper.writePalette(dos, level.registryAccess());
+        biomeMapper.writePalette(dos, level.registryAccess(), level.dimensionType());
 
         for (int i = 0; i < blocks.length; i++) {
             dos.writeInt(blocks[i]);
@@ -583,7 +583,9 @@ public class MenuWorldExporter {
             }
         }
 
-        void writePalette(DataOutputStream dos, RegistryAccess registryAccess) throws IOException {
+        void writePalette(
+            DataOutputStream dos, RegistryAccess registryAccess, DimensionType dimensionType) throws IOException
+        {
             dos.writeInt(this.paletteMap.size());
 
             for (int i = 0; i < this.paletteMap.size(); i++) {
@@ -600,10 +602,10 @@ public class MenuWorldExporter {
 
                 BiomeSpecialEffects specialEffects = Xplat.getBiomeEffects(biome);
 
-                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.FOG_COLOR));
+                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.FOG_COLOR, dimensionType));
                 dos.writeInt(specialEffects.waterColor());
-                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.WATER_FOG_COLOR));
-                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.SKY_COLOR));
+                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.WATER_FOG_COLOR, dimensionType));
+                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.SKY_COLOR, dimensionType));
 
                 dos.writeBoolean(specialEffects.foliageColorOverride().isPresent());
                 if (specialEffects.foliageColorOverride().isPresent()) {
@@ -620,7 +622,8 @@ public class MenuWorldExporter {
                 dos.writeBoolean(biome.getAttributes().get(EnvironmentAttributes.AMBIENT_PARTICLES) != null);
                 if (biome.getAttributes().get(EnvironmentAttributes.AMBIENT_PARTICLES) != null) {
                     // TODO 1.21.11 there can be multiple particles now
-                    List<AmbientParticle> particles = getAttributeValue(biome, EnvironmentAttributes.AMBIENT_PARTICLES);
+                    List<AmbientParticle> particles = getAttributeValue(biome, EnvironmentAttributes.AMBIENT_PARTICLES,
+                        dimensionType);
                     dos.writeUTF(BuiltInRegistries.PARTICLE_TYPE.getKey(particles.getFirst().particle().getType())
                         .toString());
                     dos.writeFloat(particles.getFirst().probability());
@@ -628,13 +631,17 @@ public class MenuWorldExporter {
             }
         }
 
-        private <Value> Value getAttributeValue(Biome biome, EnvironmentAttribute<Value> attribute) {
-            EnvironmentAttributeMap.Entry<Value, ?> entry = biome.getAttributes().get(attribute);
-            if (entry != null) {
-                return entry.applyModifier(attribute.defaultValue());
-            } else {
-                return attribute.defaultValue();
+        private <Value> Value getAttributeValue(
+            Biome biome, EnvironmentAttribute<Value> attribute, DimensionType dimensionType)
+        {
+            Value val = attribute.defaultValue();
+            if (dimensionType.attributes().get(attribute) != null) {
+                val = dimensionType.attributes().get(attribute).applyModifier(val);
             }
+            if (biome.getAttributes().get(attribute) != null) {
+                val = biome.getAttributes().get(attribute).applyModifier(val);
+            }
+            return val;
         }
 
         private boolean isEndBiome(String biomeId) {
