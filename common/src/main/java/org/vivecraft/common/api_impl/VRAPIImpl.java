@@ -86,4 +86,12 @@ public final class VRAPIImpl implements VRAPI {
     private Map<UUID, VRPoseHistoryImpl> getMap(boolean isClientSide) {
         return isClientSide ? this.clientPoseHistories : this.serverPoseHistories;
     }
+
+    @SuppressWarnings("removal")
+    public static class LegacyApi implements org.vivecraft.api_beta.VivecraftAPI {
+        public boolean isVRPlayer(Player player) {
+            return
+                VRAPI.instance().isVRPlayer(player);
+        }
+    }
 }
