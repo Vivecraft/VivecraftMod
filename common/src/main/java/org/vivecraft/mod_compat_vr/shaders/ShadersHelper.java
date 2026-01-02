@@ -162,27 +162,27 @@ public class ShadersHelper {
      * registers the vr RenderPipelines to be mapped to the shader ones
      */
     public static void registerPipelines() {
-        BiConsumer<RenderPipeline, String> consumer = null;
+        BiConsumer<RenderPipeline, ShaderType> consumer = null;
         if (IrisHelper.isLoaded()) {
             consumer = IrisHelper::registerPipeline;
         }
         // optifine does this still automatically, based on the shader name of the pipeline
         if (consumer != null) {
-            consumer.accept(VRShaders.CROSSHAIR_WORLD, "ENTITIES");
-            consumer.accept(VRShaders.CROSSHAIR_WORLD_ALWAYS, "ENTITIES");
+            consumer.accept(VRShaders.CROSSHAIR_WORLD, ShaderType.ENTITIES_CUTOUT);
+            consumer.accept(VRShaders.CROSSHAIR_WORLD_ALWAYS, ShaderType.ENTITIES_CUTOUT);
 
-            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
-            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
-            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT, "ENTITIES");
-            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES");
-            consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, "ENTITIES");
+            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_TRANSLUCENT);
+            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_TRANSLUCENT);
+            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_CUTOUT);
+            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_CUTOUT);
+            consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_SOLID);
 
-            consumer.accept(VRShaders.LINE_STRIP, "BASIC");
-            consumer.accept(VRShaders.QUADS, "BASIC");
-            consumer.accept(VRShaders.QUADS_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TRIANGLES_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TRIANGLE_FAN_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TEXT_NO_CULL, "ENTITIES_TRANSLUCENT");
+            consumer.accept(VRShaders.LINE_STRIP, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.QUADS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.QUADS_ALWAYS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.TRIANGLES_ALWAYS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.TRIANGLE_FAN_ALWAYS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.TEXT_NO_CULL, ShaderType.ENTITIES_TRANSLUCENT);
         }
     }
 }

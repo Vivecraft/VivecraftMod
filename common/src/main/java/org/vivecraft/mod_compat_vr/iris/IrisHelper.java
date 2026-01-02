@@ -10,6 +10,7 @@ import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.ClassUtils;
+import org.vivecraft.mod_compat_vr.shaders.ShaderType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +35,12 @@ public class IrisHelper {
     private static Field IrisRenderingPipeline_shaderStorageBufferHolder;
     private static Method ShaderStorageBufferHolder_setupBuffers;
     private static RenderPass lastSSBOPass;
+
+    private static Method IrisPipelines_assignPipeline;
+    private static Object ShaderKey_ENTITIES_SOLID;
+    private static Object ShaderKey_ENTITIES_CUTOUT;
+    private static Object ShaderKey_ENTITIES_TRANSLUCENT;
+    private static Object ShaderKey_BASIC_COLOR;
 
     // for iris/dh compat
     private static boolean DH_PRESENT = false;
@@ -194,8 +201,24 @@ public class IrisHelper {
         }
     }
 
-    public static void registerPipeline(RenderPipeline pipeline, String shader) {
-        IrisProgram program = IrisProgram.valueOf(shader);
+    public static void registerPipeline(RenderPipeline pipeline, ShaderType type) {
+        if (init() && IrisPipelines_assignPipeline != null) {
+            try {
+                IrisPipelines_assignPipeline.invoke(null, pipeline,
+                    switch (type) {
+                        case ENTITIES_CUTOUT -> ShaderKey_ENTITIES_CUTOUT;
+                        case ENTITIES_SOLID -> ShaderKey_ENTITIES_SOLID;
+                        case ENTITIES_TRANSLUCENT -> ShaderKey_ENTITIES_TRANSLUCENT;
+                        case BASIC_COLOR -> ShaderKey_BASIC_COLOR;
+                    });
+                return;
+            } catch (IllegalAccessException | InvocationTargetException ignore) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't assign pipeline {} to type '{}'", pipeline, type);
+            }
+        }
+
+        // fallback to regular api if something failed
+        IrisProgram program = IrisProgram.valueOf(type.name());
         IrisApi.getInstance().assignPipeline(pipeline, program);
     }
 
@@ -310,6 +333,19 @@ public class IrisHelper {
                     VRSettings.LOGGER.error("Vivecraft: DH present but compat init failed:", e);
                     DH_PRESENT = false;
                 }
+            }
+            try {
+                Class<?> ShaderKey = Class.forName("net.irisshaders.iris.pipeline.programs.ShaderKey");
+                IrisPipelines_assignPipeline = Class.forName("net.irisshaders.iris.pipeline.IrisPipelines")
+                    .getMethod("assignPipeline", RenderPipeline.class, ShaderKey);
+                ShaderKey_ENTITIES_SOLID = ShaderKey.getField("ENTITIES_SOLID").get(null);
+                ShaderKey_ENTITIES_CUTOUT = ShaderKey.getField("ENTITIES_CUTOUT").get(null);
+                ShaderKey_ENTITIES_TRANSLUCENT = ShaderKey.getField("ENTITIES_TRANSLUCENT").get(null);
+                ShaderKey_BASIC_COLOR = ShaderKey.getField("BASIC_COLOR").get(null);
+            } catch (NoSuchMethodException | NoSuchFieldException | NullPointerException e) {
+                VRSettings.LOGGER.error("Vivecraft: Failed to init iris pipeline compat, falling back to official API.",
+                    e);
+                IrisPipelines_assignPipeline = null;
             }
         } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e) {
             INIT_FAILED = true;
