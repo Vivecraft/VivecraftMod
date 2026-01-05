@@ -9,6 +9,7 @@ import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.utils.MathUtils;
@@ -112,7 +113,9 @@ public class CameraTracker implements Tracker {
      * @return position relative to the room origin
      */
     public Vector3f getRoomPosition(Vec3 roomOrigin) {
-        if (roomOrigin == Vec3.ZERO && this.dh.vrPlayer != null) {
+        if (!isVisible()) {
+            return this.dh.vr.getEyePosition(RenderPass.CENTER).add(0, 1, 0);
+        } else if (roomOrigin == Vec3.ZERO && this.dh.vrPlayer != null) {
             return MathUtils.subtractToVector3f(this.position, this.dh.vrPlayer.roomOrigin);
         } else {
             return MathUtils.subtractToVector3f(this.position, roomOrigin);

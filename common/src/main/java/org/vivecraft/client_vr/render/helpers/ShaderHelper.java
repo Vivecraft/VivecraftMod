@@ -255,7 +255,31 @@ public class ShaderHelper {
      * draws the desktop mirror to the bound buffer
      */
     public static void drawMirror() {
-        if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF && DATA_HOLDER.vr.isHMDTracking()) {
+        if (DATA_HOLDER.vrSettings.renderAllPasses) {
+            int screenWidth = MC.mainRenderTarget.width / 4;
+            int screenHeight = MC.mainRenderTarget.height / 2;
+            for (int x = 0; x < 4; x++) {
+                for (int y = 0; y < 2; y++) {
+                    RenderTarget target = switch (RenderPass.values()[x + 4 * y]) {
+                        case LEFT -> DATA_HOLDER.vrRenderer.framebufferEye0;
+                        case RIGHT -> DATA_HOLDER.vrRenderer.framebufferEye1;
+                        case CENTER -> DATA_HOLDER.vrRenderer.framebufferUndistorted;
+                        case THIRD -> DATA_HOLDER.vrRenderer.framebufferMR;
+                        case GUI -> GuiHandler.GUI_FRAMEBUFFER;
+                        case SCOPER -> DATA_HOLDER.vrRenderer.telescopeFramebufferR;
+                        case SCOPEL -> DATA_HOLDER.vrRenderer.telescopeFramebufferL;
+                        case CAMERA -> DATA_HOLDER.vrRenderer.cameraFramebuffer;
+                        default -> null;
+                    };
+                    if (target != null) {
+                        ShaderHelper.blitToScreen(target, screenWidth * x, screenWidth,
+                            screenHeight, screenHeight * y, 0.0F, 0.0F, false, false);
+                    }
+                }
+            }
+        } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF &&
+            DATA_HOLDER.vr.isHMDTracking())
+        {
             // no mirror, only show when headset is not tracking, to be able to see the menu with the headset off
             if (DATA_HOLDER.vrSettings.showMirrorOffText) {
                 MirrorNotification.notify(I18n.get("vivecraft.messages.mirroroff"), true, 1000);

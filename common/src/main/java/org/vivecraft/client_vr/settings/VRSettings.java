@@ -509,6 +509,8 @@ public class VRSettings {
     public boolean renderGameplayTrackers = false;
     @SettingField(VrOptions.GAMEPLAY_TRACKER_TO_RENDER)
     public String gameplayTrackerToRender = "";
+    @SettingField(VrOptions.RENDER_DEBUG_ALL_PASSES)
+    public boolean renderAllPasses = false;
 
     // other debug settings
     @SettingField(VrOptions.CONTROLLER_TRANSFORM)
@@ -2418,6 +2420,15 @@ public class VRSettings {
                 }
                 String s = ((String) value);
                 return prefix + s.substring(s.lastIndexOf(".") + 1);
+            }
+        },
+        RENDER_DEBUG_ALL_PASSES(false, true) { // renders, and shows all possible render passes
+
+            @Override
+            void onOptionChange() {
+                if (VRState.VR_INITIALIZED) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffersMaybe("All Passes option changed");
+                }
             }
         };
         private final boolean enumFloat;
