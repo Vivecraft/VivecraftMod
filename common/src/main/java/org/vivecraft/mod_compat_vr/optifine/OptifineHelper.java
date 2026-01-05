@@ -160,7 +160,9 @@ public class OptifineHelper {
      */
     public static void unbindShaderFramebuffer() {
         try {
-            GlState_unbindFramebuffer.invoke(null);
+            if (GlState_unbindFramebuffer != null) {
+                GlState_unbindFramebuffer.invoke(null);
+            }
         } catch (InvocationTargetException | IllegalAccessException e) {
             logError(e, "GlState.unbindFramebuffer");
         }
@@ -637,8 +639,12 @@ public class OptifineHelper {
             Class<?> ShadersFramebuffer = Class.forName("net.optifine.shaders.ShadersFramebuffer");
             ShadersFramebuffer_BindFramebuffer = ShadersFramebuffer.getMethod("bindFramebuffer");
 
-            Class<?> GlState = Class.forName("net.optifine.shaders.GlState");
-            GlState_unbindFramebuffer = GlState.getMethod("unbindFramebuffer");
+            try {
+                Class<?> GlState = Class.forName("net.optifine.shaders.GlState");
+                GlState_unbindFramebuffer = GlState.getMethod("unbindFramebuffer");
+            } catch(ClassNotFoundException | NoSuchMethodException e){
+                VRSettings.LOGGER.warn("Vivecraft: Optifine detected with no framebuffer unbinding");
+            }
 
             // private methods
             CustomColors_GetSkyColoEnd = CustomColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
