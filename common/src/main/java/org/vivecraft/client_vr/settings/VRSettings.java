@@ -43,6 +43,7 @@ import org.vivecraft.client_vr.provider.ControllerTransform;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.common.utils.math.AngleOrder;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.awt.*;
 import java.io.*;
@@ -1672,7 +1673,15 @@ public class VRSettings {
         SHADER_SHADOW_MODEL_LIMB_SCALE(false,
             false), // Shaders if player shadows should use full size limbs or first person size
         SHADER_SLOW(false, true, "options.off",
-            "vivecraft.options.disableshaderoptimization.auto"), // disables shader optimizations
+            "vivecraft.options.disableshaderoptimization.auto") { // disables shader optimizations
+
+            @Override
+            void onOptionChange() {
+                if (VRState.VR_INITIALIZED) {
+                    ShadersHelper.maybeReloadShaders();
+                }
+            }
+        },
         SHADER_PATCHING(false, true), // automatic shader patching for known incompatibilites
         DOUBLE_GUI_RESOLUTION(false, true) { // 1440p GUI
 

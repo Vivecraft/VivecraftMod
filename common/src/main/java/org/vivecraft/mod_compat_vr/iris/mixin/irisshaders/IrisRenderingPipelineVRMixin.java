@@ -14,10 +14,9 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.Set;
 import java.util.function.Supplier;
@@ -45,11 +44,9 @@ public class IrisRenderingPipelineVRMixin {
     // store shadowTargets of the first pipeline
     @Inject(method = "<init>", at = @At("TAIL"), remap = false)
     private void vivecraft$storeShadowTargets(ProgramSet programSet, CallbackInfo ci) {
-        IrisHelper.SLOW_MODE =
-            ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization || !this.customImages.isEmpty() ||
-                this.shaderStorageBufferHolder != null;
+        ShadersHelper.SLOW_MODE = !this.customImages.isEmpty() || this.shaderStorageBufferHolder != null;
 
-        if (!IrisHelper.SLOW_MODE &&
+        if (!ShadersHelper.isSlowMode() &&
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() == null)
         {
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$setShadowRenderTargets(
@@ -62,7 +59,7 @@ public class IrisRenderingPipelineVRMixin {
         IrisRenderingPipeline instance, Supplier<ShadowRenderTargets> value, Operation<Void> original)
     {
         Supplier<ShadowRenderTargets> wrappedSupplier = () -> {
-            if (!IrisHelper.SLOW_MODE && !RenderPassType.isVanilla() && this.shadowRenderTargets == null &&
+            if (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() && this.shadowRenderTargets == null &&
                 ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null)
             {
                 return (ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets();
@@ -75,7 +72,7 @@ public class IrisRenderingPipelineVRMixin {
 
     @ModifyReturnValue(method = "shouldDisableVanillaEntityShadows()Z", at = @At("RETURN"), remap = false)
     private boolean vivecraft$shouldDisableEntityShadows(boolean noEntityShadows) {
-        return noEntityShadows || (!IrisHelper.SLOW_MODE && !RenderPassType.isVanilla() &&
+        return noEntityShadows || (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() &&
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null
         );
     }

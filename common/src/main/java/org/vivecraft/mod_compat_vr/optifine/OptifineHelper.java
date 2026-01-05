@@ -36,6 +36,8 @@ public class OptifineHelper {
     private static boolean CHECKED_FOR_OPTIFINE = false;
     private static boolean OPTIFINE_LOADED = false;
 
+    public static boolean UNIFORMS_UPDATED = false;
+
     private static final Map<String, Pair<ShadersHelper.UniformType, Object>> SHADER_UNIFORMS = new HashMap<>();
     private static final Map<String, Object> SHADER_UNIFORMS_DATA = new HashMap<>();
 
@@ -517,7 +519,7 @@ public class OptifineHelper {
      * creates and updates Optifines shader uniforms added by vivecraft
      */
     public static void updateUniforms() {
-        if (!isOptifineLoaded()) return;
+        if (!isOptifineLoaded() || UNIFORMS_UPDATED) return;
         try {
             for (Triple<String, ShadersHelper.UniformType, Supplier<?>> uniform : ShadersHelper.getUniforms()) {
                 String name = uniform.getLeft();
@@ -554,6 +556,7 @@ public class OptifineHelper {
         } catch (IllegalAccessException | InvocationTargetException e) {
             VRSettings.LOGGER.error("Vivecraft: error updating shader uniform data:", e);
         }
+        UNIFORMS_UPDATED = true;
     }
 
     /**
@@ -642,7 +645,7 @@ public class OptifineHelper {
             try {
                 Class<?> GlState = Class.forName("net.optifine.shaders.GlState");
                 GlState_unbindFramebuffer = GlState.getMethod("unbindFramebuffer");
-            } catch(ClassNotFoundException | NoSuchMethodException e){
+            } catch (ClassNotFoundException | NoSuchMethodException e) {
                 VRSettings.LOGGER.warn("Vivecraft: Optifine detected with no framebuffer unbinding");
             }
 
