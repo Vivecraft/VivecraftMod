@@ -246,6 +246,13 @@ public class VRSettings {
     public int smoothRunTickCount = 20;
     @SettingField
     public boolean smoothTick = false;
+
+    @SettingField(VrOptions.NULLVR_IPD)
+    public float nullvrIPD = 0.1F;
+    @SettingField(VrOptions.NULLVR_EYE_ANGLE)
+    public float nullvrEyeAngle = 2F;
+    @SettingField(VrOptions.NULLVR_FOV)
+    public float nullvrFOV = 110F;
     // Jrbudda's Options
 
     @SettingField(config = "QUICKCOMMAND", separate = true)
@@ -455,6 +462,10 @@ public class VRSettings {
     public MirrorMode displayMirrorMode = MirrorMode.CROPPED;
     @SettingField(VrOptions.MIRROR_CROP)
     public float mirrorCrop = 0.15F;
+    @SettingField(VrOptions.MIRROR_DUAL_SWAP)
+    public boolean dualMirrorSwap = false;
+    @SettingField(VrOptions.MIRROR_DUAL_CROP)
+    public boolean dualMirrorCrop = false;
     @SettingField(VrOptions.MIRROR_EYE)
     public boolean displayMirrorLeftEye = false;
     @SettingField(VrOptions.MIRROR_CENTER_SMOOTH)
@@ -1791,6 +1802,8 @@ public class VRSettings {
             }
         },
         MIRROR_CROP(true, false, 0.0f, 0.25f, 0.01f, -1), // crop amount for mirror,
+        MIRROR_DUAL_SWAP(false, true),
+        MIRROR_DUAL_CROP(false, true),
         MIRROR_EYE(false, true, "vivecraft.options.left", "vivecraft.options.right"), // Mirror Eye
         MIRROR_CENTER_SMOOTH(true, false, 0.0f, 1.0f, 0.1f, 1) {
             @Override
@@ -2430,7 +2443,10 @@ public class VRSettings {
                     ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffersMaybe("All Passes option changed");
                 }
             }
-        };
+        },
+        NULLVR_IPD(true, false, 0.05F, 0.2F, 0.001F, 3),
+        NULLVR_EYE_ANGLE(true, false, 0F, 25F, 0.5F, 1),
+        NULLVR_FOV(true, false, 50F, 120F, 1F, 0);
         private final boolean enumFloat;
         private final boolean enumBoolean;
         private final float valueStep;
