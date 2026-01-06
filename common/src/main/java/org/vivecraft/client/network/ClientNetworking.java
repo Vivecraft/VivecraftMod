@@ -31,6 +31,7 @@ import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mod_compat_vr.ReplayHelper;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -137,9 +138,16 @@ public class ClientNetworking {
     }
 
     public static void sendVRPlayerPositions(VRPlayer vrPlayer) {
-        if (!SERVER_WANTS_DATA || Minecraft.getInstance().getConnection() == null ||
+        if (Minecraft.getInstance().getConnection() == null ||
             Minecraft.getInstance().getCameraEntity() != Minecraft.getInstance().player)
         {
+            return;
+        }
+        if (ReplayHelper.isLoaded()) {
+            // replay mod / flashback compat, on servers without the plugin
+            ReplayHelper.storePlayerData(vrPlayer);
+        }
+        if (!SERVER_WANTS_DATA) {
             return;
         }
 

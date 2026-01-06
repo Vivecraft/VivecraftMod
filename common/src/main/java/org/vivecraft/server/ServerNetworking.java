@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vivecraft.Xloader;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
@@ -32,6 +31,7 @@ import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.mixin.server.TrackedEntityAccessor;
+import org.vivecraft.mod_compat_vr.ReplayHelper;
 import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.config.enums.ClimbeyBlockmode;
@@ -531,9 +531,7 @@ public class ServerNetworking {
             }
             trackedPlayer.send(packetProvider.apply(vivePlayer.networkVersion));
         }
-        if (ServerConfig.SEND_DATA_TO_OWNER.get() || Xloader.isModLoaded("replaymod") ||
-            Xloader.isModLoaded("reforgedplaymod") || Xloader.isModLoaded("flashback"))
-        {
+        if (ServerConfig.SEND_DATA_TO_OWNER.get() || ReplayHelper.isLoaded()) {
             // force on when a replay mod is loaded
             vivePlayer.player.connection.send(packetProvider.apply(vivePlayer.networkVersion));
         }
