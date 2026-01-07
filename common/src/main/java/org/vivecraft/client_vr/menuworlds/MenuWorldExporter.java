@@ -120,7 +120,7 @@ public class MenuWorldExporter {
 
         dos.writeBoolean(level.dimensionType().hasFixedTime());
         if (level.dimensionType().hasFixedTime()) {
-            // TODO 1.21.11 ther is no value for this anymore, just a boolean
+            // TODO 1.21.11 there is no value for this anymore, just a boolean
             dos.writeLong(0);
         }
         dos.writeBoolean(level.dimensionType().hasCeiling());

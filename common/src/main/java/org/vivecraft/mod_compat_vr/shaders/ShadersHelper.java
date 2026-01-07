@@ -70,7 +70,7 @@ public class ShadersHelper {
     public static void bindTexture(Identifier identifier) {
         if (isShaderActive()) {
             GpuTextureView view = RenderHelper.getGpuTexture(identifier);
-            // TODO 1.21.11 do we still need this?
+            // TODO 1.21.11 do we still need this for optifine?
             //RenderSystem.setShaderTexture(0, view);
             OpenGLHelper.bindTexture(0, view);
         }

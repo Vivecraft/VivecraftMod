@@ -268,7 +268,6 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     @ModifyArg(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;pick(DFZ)Lnet/minecraft/world/phys/HitResult;"), index = 0)
     private static double vivecraft$getCrossVec(double hitDistance) {
         if (VRState.VR_RUNNING) {
-            // TODO 1.21.11 check if this is an okay spot for spear attacks
             VRPlayer vrPlayer = ClientDataHolderVR.getInstance().vrPlayer;
             // get the end of the reach point here, to have the correct reach distance
             vrPlayer.crossVec = vrPlayer.AimedPointAtDistance(vrPlayer.vrdata_world_render.getAim(), hitDistance);
