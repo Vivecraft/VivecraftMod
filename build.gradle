@@ -17,6 +17,9 @@ subprojects {
 
     loom {
         silentMojangMappingsLicense()
+        mixin {
+            useLegacyMixinAp = true
+        }
     }
 
     dependencies {
