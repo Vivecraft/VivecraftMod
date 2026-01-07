@@ -91,6 +91,7 @@ public class VRShaders {
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withColorWrite(true, false)
         .build();
 
     public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()

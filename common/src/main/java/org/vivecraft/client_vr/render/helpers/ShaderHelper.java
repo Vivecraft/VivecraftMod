@@ -623,9 +623,7 @@ public class ShaderHelper {
      * @param target RenderTarget to draw to
      * @param blend  if alpha blending should be used
      */
-    public static void blit(
-        RenderTarget source, RenderTarget target, boolean blend)
-    {
+    public static void blit(RenderTarget source, RenderTarget target, boolean blend) {
         RenderSystem.assertOnRenderThread();
 
         renderFullscreenQuad(() -> "Vive Blit",
