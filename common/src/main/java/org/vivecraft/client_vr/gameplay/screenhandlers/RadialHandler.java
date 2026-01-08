@@ -44,7 +44,7 @@ public class RadialHandler {
             if (showingState) {
                 UI.init(GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
                 SHOWING = true;
-                ACTIVE_CONTROLLER = controller;
+                ACTIVE_CONTROLLER = controller != null ? controller : ControllerType.RIGHT;
                 orientOverlay(ACTIVE_CONTROLLER);
             } else {
                 SHOWING = false;
