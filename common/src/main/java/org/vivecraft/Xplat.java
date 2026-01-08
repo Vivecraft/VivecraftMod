@@ -7,7 +7,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
@@ -88,7 +88,7 @@ public interface Xplat {
      * @return if the connection accepts packets of the given id
      */
     @ExpectPlatform
-    static boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
+    static boolean serverAcceptsPacket(ClientPacketListener connection, ResourceLocation id) {
         return true;
     }
 

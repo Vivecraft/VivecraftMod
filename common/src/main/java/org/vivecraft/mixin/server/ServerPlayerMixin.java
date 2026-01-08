@@ -21,8 +21,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -99,7 +99,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
     }
 
     /**
-     * inject into {@link Player#doSweepAttack}
+     * inject into {@link Player#sweepAttack}
      */
     @Override
     protected int vivecraft$modifySweepParticleSpawnPos(

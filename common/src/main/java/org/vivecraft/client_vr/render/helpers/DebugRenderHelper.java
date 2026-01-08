@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -83,7 +83,7 @@ public class DebugRenderHelper {
     public static void renderPlayerAxes(float partialTick) {
         if (MC.player != null) {
             VertexConsumer consumer = null;
-            Vec3 camPos = MC.gameRenderer.getMainCamera().position();
+            Vec3 camPos = MC.gameRenderer.getMainCamera().getPosition();
 
             for (Player p : MC.player.level().players()) {
                 if (ClientVRPlayers.getInstance().isVRPlayer(p)) {

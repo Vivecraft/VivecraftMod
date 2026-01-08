@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gameplay.interact_modules;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.AABB;
@@ -15,7 +15,7 @@ import org.vivecraft.common.utils.MathUtils;
 
 public class EntityInteractionModule implements InteractModule {
 
-    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft", "entity_interact");
+    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "entity_interact");
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -28,7 +28,7 @@ public class EntityInteractionModule implements InteractModule {
     }
 
     @Override
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return ID;
     }
 

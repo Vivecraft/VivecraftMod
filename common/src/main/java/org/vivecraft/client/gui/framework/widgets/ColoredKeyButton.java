@@ -40,11 +40,11 @@ public class ColoredKeyButton extends ColoredButton {
     }
 
     @Override
-    protected void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         KeyboardTheme theme =
             this.keyboardTheme != null ? this.keyboardTheme : this.dh.vrSettings.physicalKeyboardTheme;
         theme.theme.updateColor(this.getColor(), this.key.id(), this.key.x(),
             this.key.y());
-        super.renderContents(guiGraphics, mouseX, mouseY, partialTick);
+        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
     }
 }

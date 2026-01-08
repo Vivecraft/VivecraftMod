@@ -1,9 +1,10 @@
 package org.vivecraft.mod_compat_vr.shaders;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Vector3f;
@@ -65,11 +66,12 @@ public class ShadersHelper {
     /**
      * binds the given texture to texture slot 0, only if shaders are active
      *
-     * @param identifier Identifier of the texture to bind
+     * @param resourceLocation ResourceLocation of the texture to bind
      */
-    public static void bindTexture(Identifier identifier) {
+    public static void bindTexture(ResourceLocation resourceLocation) {
         if (isShaderActive()) {
-            GpuTextureView view = RenderHelper.getGpuTexture(identifier);
+            GpuTextureView view = RenderHelper.getGpuTexture(resourceLocation);
+            RenderSystem.setShaderTexture(0, view);
             OpenGLHelper.bindTexture(0, view);
         }
     }
@@ -170,7 +172,7 @@ public class ShadersHelper {
             // main hand
             UNIFORMS.add(Triple.of("vivecraftRelativeMainHandPos", UniformType.VECTOR3F, () -> {
                 if (VRState.VR_RUNNING) {
-                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().position(),
+                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().getPosition(),
                         RenderHelper.getControllerRenderPos(0));
                 } else {
                     return MathUtils.ZERO;
@@ -187,7 +189,7 @@ public class ShadersHelper {
             // offhand
             UNIFORMS.add(Triple.of("vivecraftRelativeOffHandPos", UniformType.VECTOR3F, () -> {
                 if (VRState.VR_RUNNING) {
-                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().position(),
+                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().getPosition(),
                         RenderHelper.getControllerRenderPos(1));
                 } else {
                     return MathUtils.ZERO;
@@ -217,7 +219,7 @@ public class ShadersHelper {
                 Triple.of("vivecraftShadowCameraOffset", UniformType.VECTOR3F, () -> {
                     if (VRState.VR_RUNNING) {
                         return MathUtils.subtractToVector3f(SHADOW_CAMERA_POSITION,
-                            Minecraft.getInstance().gameRenderer.getMainCamera().position());
+                            Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
                     } else {
                         return MathUtils.ZERO;
                     }
@@ -245,7 +247,6 @@ public class ShadersHelper {
             consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_CUTOUT);
             consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_SOLID);
 
-            consumer.accept(VRShaders.LINE_STRIP, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.QUADS, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.QUADS_ALWAYS, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.TRIANGLES_ALWAYS, ShaderType.BASIC_COLOR);

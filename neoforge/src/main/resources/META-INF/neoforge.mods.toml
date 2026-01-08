@@ -23,14 +23,14 @@ updateJSONURL = "https://raw.githubusercontent.com/Vivecraft/VivecraftMod/forge-
 [[dependencies.vivecraft]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.11.0-beta,)"
+versionRange = "[21.10.24-beta,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.11]"
+versionRange = "[1.21.10]"
 ordering = "NONE"
 side = "BOTH"
 

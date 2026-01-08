@@ -2,7 +2,6 @@ package org.vivecraft.client_vr;
 
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -21,10 +20,6 @@ public class ReloadListener implements ResourceManagerReloadListener {
     // stores the list of resourcePacks that were loaded before a reload, to know if the menuworld should be rebuilt
     private List<String> resourcePacks;
 
-    private TextureFilteringMethod lastTextureFiltering = null;
-    private int lastMipmaps = -1;
-    private int lastAnisotropy = -1;
-
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
         List<String> newPacks = resourceManager.listPacks().map(PackResources::packId).toList();
@@ -41,11 +36,8 @@ public class ReloadListener implements ResourceManagerReloadListener {
                     Minecraft.getInstance().reloadResourcePacks();
                 }
             }
-        } else if ((!this.resourcePacks.equals(newPacks) ||
-            this.lastTextureFiltering != Minecraft.getInstance().options.textureFiltering().get() ||
-            this.lastMipmaps != Minecraft.getInstance().options.mipmapLevels().get() ||
-            this.lastAnisotropy != Minecraft.getInstance().options.maxAnisotropyBit().get()
-        ) && ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
+        } else if (!this.resourcePacks.equals(newPacks) &&
+            ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.isReady())
         {
             this.resourcePacks = newPacks;
@@ -58,9 +50,5 @@ public class ReloadListener implements ResourceManagerReloadListener {
         }
         // reinit on reload to update the language
         ServerConfig.init(null);
-
-        this.lastTextureFiltering = Minecraft.getInstance().options.textureFiltering().get();
-        this.lastMipmaps = Minecraft.getInstance().options.mipmapLevels().get();
-        this.lastAnisotropy = Minecraft.getInstance().options.maxAnisotropyBit().get();
     }
 }

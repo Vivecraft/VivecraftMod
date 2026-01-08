@@ -1,6 +1,11 @@
 {
   "sources": [
     {
+      "type": "directory",
+      "source": "blocks",
+      "prefix": "blocks/"
+    },
+    {
       "type": "single",
       "resource": "vivecraft:black_hmd"
     },

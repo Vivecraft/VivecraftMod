@@ -54,6 +54,7 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
@@ -64,6 +65,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
+
+import java.util.function.Predicate;
 
 // higher priority to apply before iris modelview alteration
 @Mixin(value = GameRenderer.class, priority = 900)
@@ -181,6 +184,26 @@ public abstract class GameRendererVRMixin
         } else {
             // call the vanilla method
             original.call(partialTick);
+        }
+    }
+
+    @ModifyArg(method = "pick(Lnet/minecraft/world/entity/Entity;DDF)Lnet/minecraft/world/phys/HitResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;pick(DFZ)Lnet/minecraft/world/phys/HitResult;"), index = 0)
+    private double vivecraft$getCrossVec(double hitDistance) {
+        if (VRState.VR_RUNNING) {
+            VRPlayer vrPlayer = ClientDataHolderVR.getInstance().vrPlayer;
+            // get the end of the reach point here, to have the correct reach distance
+            vrPlayer.crossVec = vrPlayer.AimedPointAtDistance(vrPlayer.vrdata_world_render.getAim(), hitDistance);
+        }
+        return hitDistance;
+    }
+
+    @ModifyArg(method = "pick(Lnet/minecraft/world/entity/Entity;DDF)Lnet/minecraft/world/phys/HitResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ProjectileUtil;getEntityHitResult(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;D)Lnet/minecraft/world/phys/EntityHitResult;"))
+    private Predicate<Entity> vivecraft$dontHitRiddenEntity(Predicate<Entity> filter) {
+        // it is technically possible to hit the ridden entity when the distance is 0, we don't want that
+        if (VRState.VR_RUNNING) {
+            return filter.and(entity -> entity != Minecraft.getInstance().getCameraEntity().getVehicle());
+        } else {
+            return filter;
         }
     }
 

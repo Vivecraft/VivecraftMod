@@ -16,11 +16,10 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.BlockOutlineRenderState;
 import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.profiling.Profiler;
@@ -57,7 +56,7 @@ import java.util.Set;
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable {
 
     @Unique
-    private static final Identifier vivecraft$VR_TRANSPARENCY_POST_CHAIN_ID = Identifier.fromNamespaceAndPath(
+    private static final ResourceLocation vivecraft$VR_TRANSPARENCY_POST_CHAIN_ID = ResourceLocation.fromNamespaceAndPath(
         "vivecraft", "vrtransparency");
 
     @Unique
@@ -72,8 +71,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @Shadow
     protected abstract void renderHitOutline(
-        PoseStack poseStack, VertexConsumer builder, double camX, double camY, double camZ,
-        BlockOutlineRenderState state, int color, float width);
+        PoseStack poseStack, VertexConsumer consumer, double camX, double camY, double camZ,
+        BlockOutlineRenderState state, int color);
 
     @Shadow
     @Final
@@ -201,17 +200,16 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             if (outlines[c] != null) {
                 if (sort == outlines[c].isTranslucent()) {
                     this.renderHitOutline(poseStack,
-                        this.renderBuffers.bufferSource().getBuffer(RenderTypes.lines()),
+                        this.renderBuffers.bufferSource().getBuffer(RenderType.lines()),
                         levelRenderState.cameraRenderState.pos.x,
                         levelRenderState.cameraRenderState.pos.y,
                         levelRenderState.cameraRenderState.pos.z,
                         outlines[c],
-                        0x66FFFFFF,
-                        Minecraft.getInstance().getWindow().getAppropriateLineWidth());
+                        0x66FFFFFF);
                 }
             }
         }
-        this.renderBuffers.bufferSource().endBatch(RenderTypes.lines());
+        this.renderBuffers.bufferSource().endBatch(RenderType.lines());
         if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
             OptifineHelper.endOutlineShader();
         }
@@ -234,7 +232,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
                 ((LevelRenderStateExtension) levelRenderState).vivecraft$setInteractOutlineState(c,
                     new BlockOutlineRenderState(blockPos,
                         ItemBlockRenderTypes.getChunkRenderType(blockState).sortOnUpload(), false,
-                        blockState.getShape(this.level, blockPos, CollisionContext.of(camera.entity()))));
+                        blockState.getShape(this.level, blockPos, CollisionContext.of(camera.getEntity()))));
             } else {
                 ((LevelRenderStateExtension) levelRenderState).vivecraft$setInteractOutlineState(c, null);
             }
@@ -317,9 +315,9 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    @WrapOperation(method = "getTransparencyChain", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderManager;getPostChain(Lnet/minecraft/resources/Identifier;Ljava/util/Set;)Lnet/minecraft/client/renderer/PostChain;"))
+    @WrapOperation(method = "getTransparencyChain", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderManager;getPostChain(Lnet/minecraft/resources/ResourceLocation;Ljava/util/Set;)Lnet/minecraft/client/renderer/PostChain;"))
     private PostChain vivecraft$vrTransparency(
-        ShaderManager instance, Identifier id, Set<Identifier> externalTargets,
+        ShaderManager instance, ResourceLocation id, Set<ResourceLocation> externalTargets,
         Operation<PostChain> original)
     {
         if (VRState.VR_RUNNING) {

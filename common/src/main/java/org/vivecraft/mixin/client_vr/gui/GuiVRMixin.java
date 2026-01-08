@@ -10,7 +10,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.HumanoidArm;
@@ -41,7 +41,7 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Shadow
     @Final
-    private static Identifier HOTBAR_SELECTION_SPRITE;
+    private static ResourceLocation HOTBAR_SELECTION_SPRITE;
 
     @Shadow
     protected abstract Player getCameraPlayer();
@@ -117,7 +117,7 @@ public abstract class GuiVRMixin implements GuiExtension {
         }
     }
 
-    @Inject(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 1, shift = At.Shift.AFTER))
+    @Inject(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/ResourceLocation;IIII)V", ordinal = 1, shift = At.Shift.AFTER))
     private void vivecraft$hotbarContextIndicator(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
@@ -141,17 +141,17 @@ public abstract class GuiVRMixin implements GuiExtension {
         );
     }
 
-    @WrapOperation(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 2))
+    @WrapOperation(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/ResourceLocation;IIII)V", ordinal = 2))
     private void vivecraft$renderVRHotbarLeftIndicator(
-        GuiGraphics instance, RenderPipeline renderPipeline, Identifier sprite, int x,
+        GuiGraphics instance, RenderPipeline renderPipeline, ResourceLocation sprite, int x,
         int y, int width, int height, Operation<Void> original)
     {
         vivecraft$renderColoredIcon(instance, renderPipeline, sprite, x, y, width, height, original);
     }
 
-    @WrapOperation(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 3))
+    @WrapOperation(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/ResourceLocation;IIII)V", ordinal = 3))
     private void vivecraft$renderVRHotbarRightIndicator(
-        GuiGraphics instance, RenderPipeline renderPipeline, Identifier sprite, int x,
+        GuiGraphics instance, RenderPipeline renderPipeline, ResourceLocation sprite, int x,
         int y, int width, int height, Operation<Void> original)
     {
         vivecraft$renderColoredIcon(instance, renderPipeline, sprite, x, y, width, height, original);
@@ -159,7 +159,7 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Unique
     private void vivecraft$renderColoredIcon(
-        GuiGraphics instance, RenderPipeline renderPipeline, Identifier sprite, int x,
+        GuiGraphics instance, RenderPipeline renderPipeline, ResourceLocation sprite, int x,
         int y, int width, int height, Operation<Void> original)
     {
         boolean changeColor =

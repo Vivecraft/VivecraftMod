@@ -16,8 +16,6 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.apache.commons.lang3.tuple.Pair;
 import org.vivecraft.client.utils.StringSimilarity;
@@ -262,16 +260,16 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         public CategoryEntry(Component name) {
             super(name, null);
-            this.width = Minecraft.getInstance().font.width(this.getMessage());
+            this.width = Minecraft.getInstance().font.width(this.name);
         }
 
         @Override
         public void renderContent(
             GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(),
+            guiGraphics.drawString(Minecraft.getInstance().font, this.name,
                 Minecraft.getInstance().screen.width / 2 - this.width / 2,
-                this.getContentBottom() - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFFFF);
+                this.getContentBottom() - Minecraft.getInstance().font.lineHeight - 1, this.textColor());
         }
 
         @Override
@@ -295,7 +293,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
                 @Override
                 public void updateNarration(NarrationElementOutput narrationElementOutput) {
-                    narrationElementOutput.add(NarratedElementType.TITLE, CategoryEntry.this.getMessage());
+                    narrationElementOutput.add(NarratedElementType.TITLE, CategoryEntry.this.name);
                 }
             });
         }
@@ -481,15 +479,16 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         {
             super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
 
-            int textWidth = Minecraft.getInstance().font.width(this.getMessage());
+            int textWidth = Minecraft.getInstance().font.width(this.name);
             int textY = this.getY() + this.getHeight() / 2 - Minecraft.getInstance().font.lineHeight / 2 + 2;
             if (textWidth < this.getContentWidth() - VALUE_BUTTON_WIDTH) {
-                guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getContentX(),
-                    textY, 0xFFFFFFFF);
+                guiGraphics.drawString(Minecraft.getInstance().font, this.name, this.getContentX(),
+                    textY, this.textColor());
             } else {
-                guiGraphics.textRenderer().acceptScrollingWithDefaultCenter(this.getMessage(),
-                    this.getContentX(), this.getContentRight() - VALUE_BUTTON_WIDTH - 5,
-                    textY, textY + Minecraft.getInstance().font.lineHeight - 1);
+                AbstractWidget.renderScrollingString(guiGraphics, Minecraft.getInstance().font, this.name,
+                    this.getContentX(),
+                    textY, this.getContentRight() - VALUE_BUTTON_WIDTH - 5,
+                    textY + Minecraft.getInstance().font.lineHeight - 1, this.textColor());
             }
 
             this.valueWidget.setX(this.getContentRight() - VALUE_BUTTON_WIDTH);
@@ -517,15 +516,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     public static abstract class BaseEntry extends Entry<BaseEntry> {
 
-        private final Component name;
-        private final Component inactiveName;
+        protected final Component name;
         private final Supplier<String> tooltip;
         private boolean active = true;
         private boolean parentActive = true;
 
         public BaseEntry(Component name, Supplier<String> tooltipSupplier) {
             this.name = name;
-            this.inactiveName = ComponentUtils.mergeStyles(this.name, Style.EMPTY.withColor(0xFFA0A0A0));
             this.tooltip = tooltipSupplier == null ? () -> "" : tooltipSupplier;
         }
 
@@ -554,8 +551,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             return ComponentPath.path(this, componentPath);
         }
 
-        protected Component getMessage() {
-            return this.isActive() ? this.name : this.inactiveName;
+        protected int textColor() {
+            return this.isActive() ? 0xFFFFFFFF : 0xFFA0A0A0;
         }
 
         public boolean isActive() {

@@ -2,20 +2,17 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.effects.SpearAnimations;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.Ease;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.KineticWeapon;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.BaseTorchBlock;
 import net.minecraft.world.level.block.Block;
@@ -55,7 +52,7 @@ public class VivecraftItemRendering {
             if (block instanceof BaseTorchBlock) {
                 itemTransformType = VivecraftItemTransformType.BLOCK_STICK;
             } else {
-                Identifier modelName = itemStack.get(DataComponents.ITEM_MODEL);
+                ResourceLocation modelName = itemStack.get(DataComponents.ITEM_MODEL);
                 if (modelName != null) {
                     ItemModel model = Minecraft.getInstance().getModelManager().getItemModel(modelName);
                     if (model instanceof BlockModelWrapperExtension blockModel && blockModel.vivecraft$isGenerated()) {
@@ -106,8 +103,6 @@ public class VivecraftItemRendering {
             }
         } else if (TelescopeTracker.isTelescope(itemStack)) {
             itemTransformType = VivecraftItemTransformType.TELESCOPE;
-        } else if (itemStack.is(ItemTags.SPEARS) || itemStack.is(ViveItemTags.VIVECRAFT_LANCES)) {
-            itemTransformType = VivecraftItemTransformType.LANCE;
         }
         return itemTransformType;
     }
@@ -418,47 +413,6 @@ public class VivecraftItemRendering {
                 translateY = 0.0125F;
                 translateZ = -0.06F;
                 scale = 0.56F;
-            }
-            case LANCE -> {
-                KineticWeapon kineticWeapon = itemStack.get(DataComponents.KINETIC_WEAPON);
-                if (kineticWeapon != null) {
-                    rotation.identity();
-                    translateX = 0;
-                    translateY = 0;
-
-                    // copied from SpearAnimations.firstPersonUse, without  the sway translation and adjusted for the gun angle
-                    float timeHeld =
-                        itemStack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTick + 1.0F);
-                    float tickSinceLastHit = player.getTicksSinceLastKineticHitFeedback(partialTick);
-
-                    SpearAnimations.UseParams params = SpearAnimations.UseParams.fromKineticWeapon(kineticWeapon,
-                        timeHeld);
-                    float sideRotation =
-                        SpearAnimations.progress(params.raiseProgress(), 0.5F, 0.55F) - params.swayProgress();
-
-                    // position at hand
-                    poseStack.translate(-0.1375F + sideRotation * 0.01F, 0.005F + sideRotation * 0.01F, 0);
-
-                    // state rotation
-                    poseStack.rotateAround(Axis.XP.rotationDegrees(
-                            -90.0F + gunAngle *
-                                (1.0F - Ease.inOutBack(params.raiseProgress()) - params.lowerProgress() * 0.333F +
-                                    params.raiseBackProgress() * 1.33F
-                                ) + -0.5F * params.swayScaleFast()),
-                        0.0F, 0.0F, 0.0F);
-                    poseStack.rotateAround(
-                        Axis.YN.rotationDegrees(90.0F * sideRotation + 2.0F * params.swayScaleSlow()),
-                        0.15F, 0.0F, 0.0F);
-
-                    // cancel item rotation
-                    poseStack.mulPose(Axis.XP.rotationDegrees(10));
-
-                    // move back when hitting
-                    poseStack.translate(0.0F, -SpearAnimations.hitFeedbackAmount(tickSinceLastHit) * 0.2F, 0.0F);
-                } else {
-                    translateX = -0.1375F;
-                    rotation.mul(Axis.XP.rotationDegrees(30));
-                }
             }
             // case Sword -> {}
             default -> {}

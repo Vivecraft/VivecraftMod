@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr;
 
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 

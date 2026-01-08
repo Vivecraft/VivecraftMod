@@ -9,7 +9,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 @Mixin(ItemBlockRenderTypes.class)
 public class ItemBlockRenderTypesMixin {
     // always use fancy leaves for menuworld
-    @ModifyExpressionValue(method = "getChunkRenderType", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/ItemBlockRenderTypes;cutoutLeaves:Z"))
+    @ModifyExpressionValue(method = "getChunkRenderType", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/ItemBlockRenderTypes;renderCutout:Z"))
     private static boolean vivecraft$fancyLeavesForMenuWorld(boolean original) {
         return original || (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread()

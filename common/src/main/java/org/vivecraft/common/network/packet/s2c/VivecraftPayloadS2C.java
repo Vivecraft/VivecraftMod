@@ -19,7 +19,7 @@ public interface VivecraftPayloadS2C extends VivecraftPayload {
     Type<VivecraftPayloadS2C> TYPE = new Type<>(CommonNetworkHelper.CHANNEL);
 
     /**
-     * @return Identifier identifying this packet
+     * @return ResourceLocation identifying this packet
      */
     @Override
     default Type<VivecraftPayloadS2C> type() {

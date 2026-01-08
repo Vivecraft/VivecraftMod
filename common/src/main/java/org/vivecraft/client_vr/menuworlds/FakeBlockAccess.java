@@ -1,10 +1,9 @@
 package org.vivecraft.client_vr.menuworlds;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.*;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraft.world.attribute.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ColorResolver;
@@ -26,7 +25,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,7 +52,7 @@ public class FakeBlockAccess implements LevelReader {
     private final boolean thunder;
 
     private final BiomeManager biomeManager;
-    private EnvironmentAttributeSystem environmentAttributes;
+    private final DimensionSpecialEffects dimensionInfo;
 
     public FakeBlockAccess(
         int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap,
@@ -80,60 +78,13 @@ public class FakeBlockAccess implements LevelReader {
         this.thunder = thunder;
 
         this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(seed));
+        this.dimensionInfo = DimensionSpecialEffects.forType(dimensionType);
 
         // set the ground to the height of the center block
         BlockPos pos = new BlockPos(0, (int) this.ground, 0);
         BlockState standing = blocks[encodeCoords(pos)];
         this.ground += (float) Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
         this.effectiveGround = this.ground;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected EnvironmentAttributeSystem buildEnvironmentAttribute(MenuWorldRenderer renderer) {
-        EnvironmentAttributeSystem.Builder builder = EnvironmentAttributeSystem.builder();
-        // this is taken from EnvironmentAttributeSystem.addDefaultLayers
-        builder.addConstantLayer(this.dimensionType.attributes());
-
-        Arrays.stream(this.biomemap).flatMap(biome -> biome.getAttributes().keySet().stream()).distinct().forEach(
-            (environmentAttribute) -> builder.addPositionalLayer((EnvironmentAttribute) environmentAttribute,
-                (object, vec3, spatialAttributeInterpolator) -> {
-                    if (spatialAttributeInterpolator != null && environmentAttribute.isSpatiallyInterpolated()) {
-                        return spatialAttributeInterpolator.applyAttributeLayer(
-                            (EnvironmentAttribute) environmentAttribute, object);
-                    } else {
-                        Holder<Biome> holder = this.biomeManager.getNoiseBiomeAtPosition(vec3.x, vec3.y, vec3.z);
-                        return holder.value().getAttributes()
-                            .applyModifier((EnvironmentAttribute) environmentAttribute, object);
-                    }
-                }));
-
-        if (this.dimensionType().hasSkyLight() && !this.dimensionType().hasCeiling() &&
-            this.dimensionType().skybox() != DimensionType.Skybox.END)
-        {
-            WeatherAttributes.addBuiltinLayers(builder, new WeatherAttributes.WeatherAccess() {
-                @Override
-                public float rainLevel() {
-                    return renderer.getRainLevel();
-                }
-
-                @Override
-                public float thunderLevel() {
-                    return renderer.getThunderLevel();
-                }
-            });
-        }
-
-        this.dimensionType.timelines().forEach((timeline) -> builder.addTimelineLayer(timeline, () -> renderer.time));
-
-        int flashColor = ARGB.color(204, 204, 255);
-        builder.addTimeBasedLayer(EnvironmentAttributes.SKY_COLOR, (skyColor, cacheTickId) -> {
-            if (renderer.getSkyFlashTime() <= 0) return skyColor;
-            return ARGB.srgbLerp(0.22f, skyColor, flashColor);
-        });
-        builder.addTimeBasedLayer(EnvironmentAttributes.SKY_LIGHT_FACTOR,
-            (skyFactor, cacheTickId) -> renderer.getSkyFlashTime() > 0 ? 1.0f : skyFactor);
-        this.environmentAttributes = builder.build();
-        return this.environmentAttributes;
     }
 
     private int encodeCoords(int x, int z) {
@@ -199,9 +150,8 @@ public class FakeBlockAccess implements LevelReader {
         return this.dimensionType;
     }
 
-    @Override
-    public EnvironmentAttributeReader environmentAttributes() {
-        return this.environmentAttributes;
+    public DimensionSpecialEffects getDimensionReaderInfo() {
+        return this.dimensionInfo;
     }
 
     public double getVoidFogYFactor() {
@@ -299,15 +249,14 @@ public class FakeBlockAccess implements LevelReader {
 
     @Override
     public float getShade(Direction face, boolean shade) {
-        // isNether?? yeah mate nice hard-coding
-        DimensionType.CardinalLightType type = this.dimensionType().cardinalLightType();
+        boolean isNether = this.dimensionInfo.constantAmbientLight(); // isNether?? yeah mate nice hard-coding
 
         if (!shade) {
-            return type == DimensionType.CardinalLightType.NETHER ? 0.9F : 1.0F;
+            return isNether ? 0.9F : 1.0F;
         } else {
             return switch (face) {
-                case DOWN -> type == DimensionType.CardinalLightType.NETHER ? 0.9F : 0.5F;
-                case UP -> type == DimensionType.CardinalLightType.NETHER ? 0.9F : 1.0F;
+                case DOWN -> isNether ? 0.9F : 0.5F;
+                case UP -> isNether ? 0.9F : 1.0F;
                 case NORTH, SOUTH -> 0.8F;
                 case WEST, EAST -> 0.6F;
             };

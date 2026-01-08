@@ -65,8 +65,8 @@ public abstract class GuiOrderedListEditorScreen<T> extends GuiListEditorScreen<
             super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
 
             int textY = this.getY() + this.getHeight() / 2 - Minecraft.getInstance().font.lineHeight / 2 + 2;
-            guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getContentX(), textY,
-                0xFFFFFFFF);
+            guiGraphics.drawString(Minecraft.getInstance().font, this.name, this.getContentX(), textY,
+                this.textColor());
 
             this.upButton.active = this.isActive() && this.index != 0;
             this.downButton.active =

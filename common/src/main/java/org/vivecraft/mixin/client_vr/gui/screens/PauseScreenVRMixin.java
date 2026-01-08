@@ -94,7 +94,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         GridLayout.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"),
             (p) -> {
-                this.minecraft.debugEntries.toggleDebugOverlay();
+                this.minecraft.debugEntries.toggleF3Visible();
                 this.minecraft.setScreen(null);
             }).width(48).build(), LayoutSettings.defaults().paddingRight(2));
 

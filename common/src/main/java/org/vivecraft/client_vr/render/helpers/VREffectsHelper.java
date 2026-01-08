@@ -12,10 +12,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.fog.FogRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -23,8 +22,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -73,7 +73,7 @@ public class VREffectsHelper {
 
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
     private static final Minecraft MC = Minecraft.getInstance();
-    private static final Identifier SCOPE_TEXTURE = Identifier.withDefaultNamespace(
+    private static final ResourceLocation SCOPE_TEXTURE = ResourceLocation.withDefaultNamespace(
         "textures/misc/spyglass_scope.png");
 
     /**
@@ -174,7 +174,7 @@ public class VREffectsHelper {
         float alpha = TelescopeTracker.viewPercent(c);
         // draw spyglass view
         RenderHelper.drawSizedQuadFullbright(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1},
-            poseStack.last().pose(), VRRenderTypes.entitySolidNoCardinalLight(scopeView, false));
+            poseStack.last().pose(), VRRenderTypes.entitySolidNoCardinalLight(scopeView));
 
         // draw spyglass overlay
         // slight offset to not cause z fighting
@@ -184,7 +184,7 @@ public class VREffectsHelper {
             DATA_HOLDER.vrPlayer.vrdata_world_render.getController(c).getPosition()));
         // draw the overlay, and flip it vertically
         RenderHelper.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, poseStack.last().pose(),
-            RenderTypes.entityTranslucent(SCOPE_TEXTURE), true);
+            RenderType.entityTranslucent(SCOPE_TEXTURE), true);
 
         poseStack.popPose();
     }
@@ -250,21 +250,21 @@ public class VREffectsHelper {
     }
 
     // textures for the panorama menu
-    private static final Identifier CUBE_FRONT = Identifier.withDefaultNamespace(
+    private static final ResourceLocation CUBE_FRONT = ResourceLocation.withDefaultNamespace(
         "textures/gui/title/background/panorama_0.png");
-    private static final Identifier CUBE_RIGHT = Identifier.withDefaultNamespace(
+    private static final ResourceLocation CUBE_RIGHT = ResourceLocation.withDefaultNamespace(
         "textures/gui/title/background/panorama_1.png");
-    private static final Identifier CUBE_BACK = Identifier.withDefaultNamespace(
+    private static final ResourceLocation CUBE_BACK = ResourceLocation.withDefaultNamespace(
         "textures/gui/title/background/panorama_2.png");
-    private static final Identifier CUBE_LEFT = Identifier.withDefaultNamespace(
+    private static final ResourceLocation CUBE_LEFT = ResourceLocation.withDefaultNamespace(
         "textures/gui/title/background/panorama_3.png");
-    private static final Identifier CUBE_UP = Identifier.withDefaultNamespace(
+    private static final ResourceLocation CUBE_UP = ResourceLocation.withDefaultNamespace(
         "textures/gui/title/background/panorama_4.png");
-    private static final Identifier CUBE_DOWN = Identifier.withDefaultNamespace(
+    private static final ResourceLocation CUBE_DOWN = ResourceLocation.withDefaultNamespace(
         "textures/gui/title/background/panorama_5.png");
-    private static final Identifier DIRT = Identifier.withDefaultNamespace(
+    private static final ResourceLocation DIRT = ResourceLocation.withDefaultNamespace(
         "textures/block/dirt.png");
-    private static final Identifier GRASS = Identifier.withDefaultNamespace(
+    private static final ResourceLocation GRASS = ResourceLocation.withDefaultNamespace(
         "textures/block/grass_block_top.png");
 
     /**
@@ -708,7 +708,7 @@ public class VREffectsHelper {
                 MC.screen == null &&
                 !KeyboardHandler.SHOWING &&
                 !RadialHandler.isShowing() &&
-                !isInsideOpaqueBlock(MC.gameRenderer.getMainCamera().position());
+                !isInsideOpaqueBlock(MC.gameRenderer.getMainCamera().getPosition());
         }
     }
 
@@ -764,7 +764,7 @@ public class VREffectsHelper {
         AABB aabb = MC.player.getBoundingBox();
 
         if (DATA_HOLDER.vrSettings.vrShowBlueCircleBuddy && aabb != null) {
-            Vec3 cameraPos = MC.gameRenderer.getMainCamera().position();
+            Vec3 cameraPos = MC.gameRenderer.getMainCamera().getPosition();
 
             Vec3 interpolatedPlayerPos = ((GameRendererExtension) MC.gameRenderer).vivecraft$getRvePos(partialTick);
 
@@ -813,9 +813,18 @@ public class VREffectsHelper {
 
         float uMin = fireSprite.getU0();
         float uMax = fireSprite.getU1();
+        float uMid = (uMin + uMax) / 2.0F;
 
         float vMin = fireSprite.getV0();
         float vMax = fireSprite.getV1();
+        float vMid = (vMin + vMax) / 2.0F;
+
+        float ShrinkRatio = fireSprite.uvShrinkRatio();
+
+        float u0 = Mth.lerp(ShrinkRatio, uMin, uMid);
+        float u1 = Mth.lerp(ShrinkRatio, uMax, uMid);
+        float v0 = Mth.lerp(ShrinkRatio, vMin, vMid);
+        float v1 = Mth.lerp(ShrinkRatio, vMax, vMid);
 
         float width = 0.3F;
         float headHeight = (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.getHeadPivot().y -
@@ -829,7 +838,7 @@ public class VREffectsHelper {
             renderType = VRRenderTypes.guiTextured(textureAtlasSprite.atlasLocation());
         } else {
             // without depthtest
-            renderType = RenderTypes.fireScreenEffect(textureAtlasSprite.atlasLocation());
+            renderType = RenderType.fireScreenEffect(textureAtlasSprite.atlasLocation());
         }
 
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
@@ -842,13 +851,13 @@ public class VREffectsHelper {
 
             Matrix4f matrix = posestack.last().pose();
             consumer.addVertex(matrix, -width, 0.0F, -width)
-                .setUv(uMax, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                .setUv(u1, v1).setColor(1.0F, 1.0F, 1.0F, 0.9F);
             consumer.addVertex(matrix, width, 0.0F, -width)
-                .setUv(uMin, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                .setUv(u0, v1).setColor(1.0F, 1.0F, 1.0F, 0.9F);
             consumer.addVertex(matrix, width, headHeight, -width)
-                .setUv(uMin, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                .setUv(u0, v0).setColor(1.0F, 1.0F, 1.0F, 0.9F);
             consumer.addVertex(matrix, -width, headHeight, -width)
-                .setUv(uMax, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                .setUv(u1, v0).setColor(1.0F, 1.0F, 1.0F, 0.9F);
 
             posestack.popPose();
         }
@@ -960,14 +969,12 @@ public class VREffectsHelper {
             {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityTranslucentNoCardinalLightLinear(framebuffer.getColorTextureView(),
-                        depthAlways),
+                    VRRenderTypes.entityTranslucentNoCardinalLight(framebuffer.getColorTextureView(), depthAlways),
                     false);
             } else {
                 RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityCutoutNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways),
-                    false);
+                    VRRenderTypes.entityCutoutNoCardinalLight(framebuffer.getColorTextureView(), depthAlways), false);
             }
         } else {
             RenderHelper.drawSizedQuad(
@@ -1185,7 +1192,7 @@ public class VREffectsHelper {
         Matrix4f modelView = new Matrix4f();
 
         Vector3f translate = MathUtils.subtractToVector3f(crosshairRenderPos,
-            MC.gameRenderer.getMainCamera().position());
+            MC.gameRenderer.getMainCamera().getPosition());
         modelView.translate(translate.x, translate.y, translate.z);
 
         if (MC.hitResult != null && MC.hitResult.getType() == HitResult.Type.BLOCK) {

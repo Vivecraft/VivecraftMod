@@ -25,7 +25,7 @@ public class SparkParticleMixin implements SparkParticleExtension {
         QuadParticleRenderState quadParticleRenderState, Camera camera, float f, CallbackInfo ci)
     {
         if (!ClientDataHolderVR.getInstance().vrSettings.selfButtSparklesInFirstPerson &&
-            camera.entity().getUUID().equals(this.vivecraft$playerUUID) &&
+            camera.getEntity().getUUID().equals(this.vivecraft$playerUUID) &&
             ((!VRState.VR_RUNNING && !camera.isDetached()) || (VRState.VR_RUNNING &&
                 Stream.of(RenderPass.LEFT, RenderPass.RIGHT, RenderPass.CENTER)
                     .anyMatch(pass -> ClientDataHolderVR.getInstance().currentPass == pass)

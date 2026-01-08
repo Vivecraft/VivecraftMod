@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gameplay.interact_modules;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.HeldInteractModule;
@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
  */
 public class BowModule implements HeldInteractModule {
 
-    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft", "roomscale_bow");
+    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "roomscale_bow");
 
     private final ClientDataHolderVR dh;
     private final boolean[] isPressed = new boolean[2];
@@ -29,7 +29,7 @@ public class BowModule implements HeldInteractModule {
     }
 
     @Override
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return ID;
     }
 

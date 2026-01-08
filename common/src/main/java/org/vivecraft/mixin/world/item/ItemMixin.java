@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.server.ServerVRPlayers;
 
 @Mixin(Item.class)
@@ -33,7 +34,7 @@ public class ItemMixin {
         if (player instanceof ServerPlayer serverPlayer && ServerVRPlayers.isVRPlayer(serverPlayer)) {
             return ServerVRPlayers.getVivePlayer(serverPlayer).getAimDir(false);
         } else if (player.isLocalPlayer() && VRState.VR_RUNNING) {
-            return new Vec3(ClientNetworking.getActiveAimDir());
+            return MathUtils.toMcVec3(ClientNetworking.getActiveAimDir());
         }
         return original.call(player, xRot, yRot);
     }

@@ -12,11 +12,11 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -45,11 +45,11 @@ public class RenderHelper {
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
     private static final Minecraft MC = Minecraft.getInstance();
 
-    public static final Identifier WHITE_TEXTURE = Identifier.parse("vivecraft:textures/white.png");
-    public static final Identifier BLACK_TEXTURE = Identifier.parse("vivecraft:textures/black.png");
+    public static final ResourceLocation WHITE_TEXTURE = ResourceLocation.parse("vivecraft:textures/white.png");
+    public static final ResourceLocation BLACK_TEXTURE = ResourceLocation.parse("vivecraft:textures/black.png");
 
-    public static GpuTextureView getGpuTexture(Identifier identifier) {
-        return MC.getTextureManager().getTexture(identifier).getTextureView();
+    public static GpuTextureView getGpuTexture(ResourceLocation resourceLocation) {
+        return MC.getTextureManager().getTexture(resourceLocation).getTextureView();
     }
 
     /**
@@ -245,7 +245,7 @@ public class RenderHelper {
 
         // black background with border
         guiGraphics.fill(x, y, x + width, y + height, 0xFF000000);
-        guiGraphics.renderOutline(x, y, width, height, 0xFFFFFFFF);
+        guiGraphics.submitOutline(x, y, width, height, 0xFFFFFFFF);
 
         for (int line = 0; line < formattedChars.size(); line++) {
             guiGraphics.drawCenteredString(MC.font, formattedChars.get(line), guiGraphics.guiWidth() / 2,

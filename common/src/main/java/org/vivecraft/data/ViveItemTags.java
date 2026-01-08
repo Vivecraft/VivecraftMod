@@ -1,7 +1,7 @@
 package org.vivecraft.data;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -34,9 +34,6 @@ public class ViveItemTags {
     // these ones are throwable
     public static final TagKey<Item> VIVECRAFT_SPEARS = tag("spears");
 
-    // these ones are held
-    public static final TagKey<Item> VIVECRAFT_LANCES = tag("lances");
-
     public static final TagKey<Item> VIVECRAFT_SWORDS = tag("swords");
 
     public static final TagKey<Item> VIVECRAFT_TELESCOPE = tag("telescope");
@@ -50,6 +47,6 @@ public class ViveItemTags {
     public static final TagKey<Item> VIVECRAFT_BOW_EXCLUSION = tag("bow_exclusion");
 
     private static TagKey<Item> tag(String name) {
-        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("vivecraft", name));
+        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("vivecraft", name));
     }
 }

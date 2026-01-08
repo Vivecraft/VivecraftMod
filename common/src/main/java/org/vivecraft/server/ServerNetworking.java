@@ -1,11 +1,11 @@
 package org.vivecraft.server;
 
-import net.minecraft.IdentifierException;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerPlayer;
@@ -336,13 +336,13 @@ public class ServerNetworking {
             blocks = new ArrayList<>();
             for (String block : ServerConfig.CLIMBEY_BLOCKLIST.get()) {
                 try {
-                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(Identifier.parse(block))
+                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(block))
                         .orElseGet(() -> null);
                     // only send valid blocks
                     if (b != null && b.value() != Blocks.AIR) {
                         blocks.add(block);
                     }
-                } catch (IdentifierException ignore) {}
+                } catch (ResourceLocationException ignore) {}
             }
         }
         return new ClimbingPayloadS2C(ServerConfig.CLIMBEY_ENABLED.get(), ServerConfig.CLIMBEY_BLOCKMODE.get(), blocks);

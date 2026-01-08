@@ -1,8 +1,8 @@
 {
   "credit": "Made with Blockbench, a free, modern block model editor by JannisX11",
   "textures": {
-    "0": "vivecraft:item/mini_crafting",
-    "particle": "vivecraft:item/mini_crafting"
+    "0": "vivecraft:blocks/mini_crafting",
+    "particle": "vivecraft:blocks/mini_crafting"
   },
   "elements": [
     {

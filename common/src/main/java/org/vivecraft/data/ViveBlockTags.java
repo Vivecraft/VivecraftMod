@@ -1,7 +1,7 @@
 package org.vivecraft.data;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 
@@ -16,6 +16,6 @@ public class ViveBlockTags {
     public static final TagKey<Block> VIVECRAFT_MUSIC_BLOCKS = tag("music_blocks");
 
     private static TagKey<Block> tag(String name) {
-        return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("vivecraft", name));
+        return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("vivecraft", name));
     }
 }

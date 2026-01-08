@@ -11,16 +11,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.VRState;
 
-import java.util.function.IntFunction;
-import java.util.stream.Stream;
-
 @Mixin(Options.class)
 public abstract class OptionsVRMixin {
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;toArray(Ljava/util/function/IntFunction;)[Ljava/lang/Object;", remap = false), remap = true)
-    private Object[] vivecraft$processKeyMappings(
-        Stream instance, IntFunction<Object[]> intFunction, Operation<Object[]> original)
-    {
-        return VivecraftVRMod.INSTANCE.initializeBindings((KeyMapping[]) original.call(instance, intFunction));
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/apache/commons/lang3/ArrayUtils;addAll([Ljava/lang/Object;[Ljava/lang/Object;)[Ljava/lang/Object;", remap = false), remap = true)
+    private Object[] vivecraft$processKeyMappings(Object[] array1, Object[] array2, Operation<Object[]> original) {
+        return VivecraftVRMod.INSTANCE.initializeBindings((KeyMapping[]) original.call(array1, array2));
     }
 
     @ModifyExpressionValue(method = "buildPlayerInformation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;", ordinal = 3))

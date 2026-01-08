@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +32,7 @@ import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 import java.util.*;
 
 public class ClimbTracker implements Tracker {
-    public static final Identifier CLAWS_MODEL = Identifier.fromNamespaceAndPath("vivecraft",
+    public static final ResourceLocation CLAWS_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
         "climb_claws");
 
     public Set<Block> blocklist = new HashSet<>();

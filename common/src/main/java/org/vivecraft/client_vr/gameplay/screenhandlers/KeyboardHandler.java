@@ -67,7 +67,7 @@ public class KeyboardHandler {
             if (DH.vrSettings.physicalKeyboard) {
                 PHYSICAL_KEYBOARD.show();
             } else {
-                UI.init(GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
+                UI.init(Minecraft.getInstance(), GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
             }
 
             SHOWING = true;

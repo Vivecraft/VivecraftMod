@@ -1,7 +1,6 @@
 package org.vivecraft.client.gui.framework.widgets;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -11,6 +10,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -73,12 +73,10 @@ public class TextScrollWidget extends AbstractWidget {
             getY() + this.height - 1,
             0xFF000000);
 
-        ActiveTextCollector textRenderer = guiGraphics.textRenderer(GuiGraphics.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-
         // draw text
         for (int line = 0; line + this.currentLine < this.formattedChars.size() && line < this.maxLines; line++) {
-            textRenderer.accept(getX() + this.padding, getY() + this.padding + line * 12,
-                this.formattedChars.get(line + this.currentLine));
+            guiGraphics.drawString(Minecraft.getInstance().font, this.formattedChars.get(line + this.currentLine),
+                getX() + this.padding, getY() + this.padding + line * 12, 0xFFFFFFFF);
         }
 
         float scrollbarStart =
@@ -123,7 +121,7 @@ public class TextScrollWidget extends AbstractWidget {
             if (style != null && style.getClickEvent() != null) {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.player != null) {
-                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), mc, mc.screen);
+                    mc.screen.handleComponentClicked(style);
                 } else {
                     // skip the ingame click events and directly call the general ones
                     Screen.defaultHandleClickEvent(style.getClickEvent(), mc, mc.screen);
@@ -183,11 +181,9 @@ public class TextScrollWidget extends AbstractWidget {
     public Style getMouseoverStyle(double mouseX, double mouseY) {
         int lineIndex = this.getLineIndex(mouseX, mouseY);
         if (lineIndex >= 0 && lineIndex < this.formattedChars.size()) {
-            ActiveTextCollector.ClickableStyleFinder finder = new ActiveTextCollector.ClickableStyleFinder(
-                Minecraft.getInstance().font, (int) mouseX, (int) mouseY);
-            finder.accept(getX() + this.padding, getY() + this.padding + lineIndex * 12,
-                this.formattedChars.get(lineIndex));
-            return finder.result();
+            FormattedCharSequence line = this.formattedChars.get(lineIndex);
+            return Minecraft.getInstance().font.getSplitter()
+                .componentStyleAtWidth(line, Mth.floor(mouseX - this.getX()));
         }
         return null;
     }

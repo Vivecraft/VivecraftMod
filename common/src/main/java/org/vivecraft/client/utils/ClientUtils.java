@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
@@ -148,7 +148,7 @@ public class ClientUtils {
         }
     }
 
-    public static Component getNameFromSoundEvent(Identifier soundLocation) {
+    public static Component getNameFromSoundEvent(ResourceLocation soundLocation) {
         String key = soundLocation.getPath();
         if (I18n.exists(key)) {
             return Component.translatable(key);
@@ -194,7 +194,7 @@ public class ClientUtils {
                 DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
             {
                 Vec3 controllerPos = DH.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                BuiltInRegistries.SOUND_EVENT.get(Identifier.parse(DH.vrSettings.chatNotificationSound))
+                BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse(DH.vrSettings.chatNotificationSound))
                     .ifPresent(soundEvent -> {
                         if (MC.level != null) {
                             MC.level.playLocalSound(controllerPos.x(), controllerPos.y(), controllerPos.z(),

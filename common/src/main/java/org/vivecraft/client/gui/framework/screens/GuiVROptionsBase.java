@@ -8,7 +8,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
@@ -26,8 +26,8 @@ import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
 import java.util.ArrayList;
 
 public abstract class GuiVROptionsBase extends Screen {
-    private static final Identifier SEARCH_ICON =
-        Identifier.fromNamespaceAndPath("vivecraft", "icon/search");
+    private static final ResourceLocation SEARCH_ICON =
+        ResourceLocation.fromNamespaceAndPath("vivecraft", "icon/search");
 
     protected ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
     protected final Screen lastScreen;

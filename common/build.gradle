@@ -15,13 +15,13 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.10-0.7.3-fabric"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.10.4+1.21.11-fabric"
+    modCompileOnly "maven.modrinth:iris:1.9.7+1.21.10-fabric"
 
     // for REI compat
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:21.9.812") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
     modApi("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }

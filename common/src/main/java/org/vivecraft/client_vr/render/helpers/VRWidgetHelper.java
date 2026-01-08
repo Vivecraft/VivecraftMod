@@ -5,16 +5,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +39,7 @@ public class VRWidgetHelper {
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
 
     private static final RandomSource RANDOM = RandomSource.create();
-    private static final Identifier TRANSPARENT_TEXTURE = Identifier.parse("vivecraft:transparent");
+    private static final ResourceLocation TRANSPARENT_TEXTURE = ResourceLocation.parse("vivecraft:transparent");
     private static final ItemStackRenderState ITEM_STACK_RENDER_STATE = new ItemStackRenderState();
     public static boolean DEBUG = false;
 
@@ -114,8 +113,8 @@ public class VRWidgetHelper {
      * @param displayFaceFunc function that specifies if the view should be mirrored, normal or not shown at all
      */
     public static void renderVRCameraWidget(
-        float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, Identifier model,
-        Identifier displayModel, Supplier<GpuTextureView> displaySupFunc,
+        float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, ResourceLocation model,
+        ResourceLocation displayModel, Supplier<GpuTextureView> displaySupFunc,
         Function<Direction, DisplayFace> displayFaceFunc)
     {
 
@@ -123,7 +122,7 @@ public class VRWidgetHelper {
 
         // model position relative to the view position
         Vec3 widgetPosition = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
-        Vec3 eye = MC.gameRenderer.getMainCamera().position();
+        Vec3 eye = MC.gameRenderer.getMainCamera().getPosition();
         Vector3f widgetOffset = MathUtils.subtractToVector3f(widgetPosition, eye);
 
         // orient and scale model
@@ -159,7 +158,7 @@ public class VRWidgetHelper {
 
         if (!ITEM_STACK_RENDER_STATE.isEmpty() && !ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList().isEmpty()) {
             // we use block models, so the camera texture is on the regular block atlas
-            RenderType renderType = RenderTypes.entityCutoutNoCull(TextureAtlas.LOCATION_ITEMS);
+            RenderType renderType = RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS);
             ItemRenderer.renderItem(ItemDisplayContext.GROUND, poseStack, MC.renderBuffers().bufferSource(),
                 combinedLight, OverlayTexture.NO_OVERLAY, new int[]{},
                 ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList(), renderType, ItemStackRenderState.FoilType.NONE);
@@ -174,7 +173,7 @@ public class VRWidgetHelper {
                 null, null, 0);
 
         if (!ITEM_STACK_RENDER_STATE.isEmpty() && !ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList().isEmpty()) {
-            RenderType renderType = VRRenderTypes.entitySolidNoCardinalLight(displaySupFunc.get(), true);
+            RenderType renderType = VRRenderTypes.entitySolidNoCardinalLight(displaySupFunc.get());
             consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
             // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen
@@ -182,12 +181,14 @@ public class VRWidgetHelper {
                 if (displayFaceFunc.apply(bakedquad.direction()) != DisplayFace.NONE &&
                     bakedquad.sprite().contents().name().equals(TRANSPARENT_TEXTURE))
                 {
+                    int[] vertexList = bakedquad.vertices();
                     boolean mirrored = displayFaceFunc.apply(bakedquad.direction()) == DisplayFace.MIRROR;
+                    int step = vertexList.length / 4;
                     consumer.addVertex(
                             poseStack.last().pose(),
-                            bakedquad.position(0).x(),
-                            bakedquad.position(0).y(),
-                            bakedquad.position(0).z())
+                            Float.intBitsToFloat(vertexList[0]),
+                            Float.intBitsToFloat(vertexList[1]),
+                            Float.intBitsToFloat(vertexList[2]))
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 1.0F : 0.0F, 1.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)
@@ -195,9 +196,9 @@ public class VRWidgetHelper {
                         .setNormal(0.0F, 1.0F, 0.0F);
                     consumer.addVertex(
                             poseStack.last().pose(),
-                            bakedquad.position(1).x(),
-                            bakedquad.position(1).y(),
-                            bakedquad.position(1).z())
+                            Float.intBitsToFloat(vertexList[step]),
+                            Float.intBitsToFloat(vertexList[step + 1]),
+                            Float.intBitsToFloat(vertexList[step + 2]))
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 1.0F : 0.0F, 0.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)
@@ -205,9 +206,9 @@ public class VRWidgetHelper {
                         .setNormal(0.0F, 1.0F, 0.0F);
                     consumer.addVertex(
                             poseStack.last().pose(),
-                            bakedquad.position(2).x(),
-                            bakedquad.position(2).y(),
-                            bakedquad.position(2).z())
+                            Float.intBitsToFloat(vertexList[step * 2]),
+                            Float.intBitsToFloat(vertexList[step * 2 + 1]),
+                            Float.intBitsToFloat(vertexList[step * 2 + 2]))
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 0.0F : 1.0F, 0.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)
@@ -215,9 +216,9 @@ public class VRWidgetHelper {
                         .setNormal(0.0F, 1.0F, 0.0F);
                     consumer.addVertex(
                             poseStack.last().pose(),
-                            bakedquad.position(3).x(),
-                            bakedquad.position(3).y(),
-                            bakedquad.position(3).z())
+                            Float.intBitsToFloat(vertexList[step * 3]),
+                            Float.intBitsToFloat(vertexList[step * 3 + 1]),
+                            Float.intBitsToFloat(vertexList[step * 3 + 2]))
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 0.0F : 1.0F, 1.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)

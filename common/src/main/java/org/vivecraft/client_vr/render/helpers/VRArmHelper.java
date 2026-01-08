@@ -2,12 +2,12 @@ package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -380,7 +380,7 @@ public class VRArmHelper {
 
             double segmentProgress = 1.0D / (double) segments;
 
-            Vec3 cameraPosition = MC.gameRenderer.getMainCamera().position();
+            Vec3 cameraPosition = MC.gameRenderer.getMainCamera().getPosition();
 
             // arc
             for (int i = 0; i < segments; i++) {

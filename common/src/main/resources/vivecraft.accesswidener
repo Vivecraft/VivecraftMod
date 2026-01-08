@@ -7,7 +7,7 @@ accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List
 accessible field net/minecraft/client/model/geom/ModelPart$Cube polygons [Lnet/minecraft/client/model/geom/ModelPart$Polygon;
 
 # custom player modle rendering
-accessible field net/minecraft/client/model/player/PlayerModel slim Z
+accessible field net/minecraft/client/model/PlayerModel slim Z
 
 # modded layer supports
 accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
@@ -33,7 +33,7 @@ accessible field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/bla
 
 # XR Camera
 accessible field net/minecraft/client/Camera initialized Z
-accessible field net/minecraft/client/Camera level Lnet/minecraft/world/level/Level;
+accessible field net/minecraft/client/Camera level Lnet/minecraft/world/level/BlockGetter;
 accessible field net/minecraft/client/Camera entity Lnet/minecraft/world/entity/Entity;
 
 # to set reset camera before tick
@@ -59,32 +59,25 @@ accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWith
 accessible method net/minecraft/client/renderer/ScreenEffectRenderer renderItemActivationAnimation (Lcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/client/renderer/SubmitNodeCollector;)V
 # to disable destroy delay, on roomscale hitting
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
-# to accesss the spear progress interpolation
-accessible method net/minecraft/client/model/effects/SpearAnimations progress (FFF)F
-accessible method net/minecraft/client/model/effects/SpearAnimations hitFeedbackAmount (F)F
-accessible class net/minecraft/client/model/effects/SpearAnimations$UseParams
 
 # for correct vr rendering
 accessible field net/minecraft/world/entity/Entity eyeHeight F
-
-# to check if the player can lunge forward
-accessible method net/minecraft/world/entity/player/Player hasEnoughFoodToDoExhaustiveManoeuvres ()Z
 
 # to add vivecraft items in the creative menus
 accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/minecraft/resources/ResourceKey;
 
 # to render crosshair
-accessible field net/minecraft/client/gui/Gui CROSSHAIR_SPRITE Lnet/minecraft/resources/Identifier;
+accessible field net/minecraft/client/gui/Gui CROSSHAIR_SPRITE Lnet/minecraft/resources/ResourceLocation;
 
-# to handle click events
-accessible method net/minecraft/client/gui/screens/Screen defaultHandleGameClickEvent (Lnet/minecraft/network/chat/ClickEvent;Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;)V
+# to handle click events outside a level
 accessible method net/minecraft/client/gui/screens/Screen defaultHandleClickEvent (Lnet/minecraft/network/chat/ClickEvent;Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;)V
 
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
+accessible field net/minecraft/world/level/biome/AmbientParticleSettings probability F
 extendable class net/minecraft/world/level/material/FluidState
 accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
 
@@ -102,7 +95,20 @@ accessible field net/minecraft/server/network/ServerGamePacketListenerImpl above
 accessible field net/minecraft/client/renderer/item/ItemStackRenderState layers [Lnet/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState;
 
 # for custom rendertypes / to create custom END shader
-accessible method net/minecraft/client/renderer/rendertype/RenderType create (Ljava/lang/String;Lnet/minecraft/client/renderer/rendertype/RenderSetup;)Lnet/minecraft/client/renderer/rendertype/RenderType;
+accessible field net/minecraft/client/renderer/RenderStateShard LIGHTMAP Lnet/minecraft/client/renderer/RenderStateShard$LightmapStateShard;
+accessible field net/minecraft/client/renderer/RenderStateShard OVERLAY Lnet/minecraft/client/renderer/RenderStateShard$OverlayStateShard;
+
+accessible class net/minecraft/client/renderer/RenderStateShard$MultiTextureStateShard
+accessible class net/minecraft/client/renderer/RenderStateShard$EmptyTextureStateShard
+accessible class net/minecraft/client/renderer/RenderStateShard$TextureStateShard
+
+accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;IZZLcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
+
+accessible class net/minecraft/client/renderer/RenderType$CompositeState
+accessible method net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder setTextureState (Lnet/minecraft/client/renderer/RenderStateShard$EmptyTextureStateShard;)Lnet/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder;
+accessible method net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder setLightmapState (Lnet/minecraft/client/renderer/RenderStateShard$LightmapStateShard;)Lnet/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder;
+accessible method net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder setOverlayState (Lnet/minecraft/client/renderer/RenderStateShard$OverlayStateShard;)Lnet/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder;
+accessible method net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder createCompositeState (Z)Lnet/minecraft/client/renderer/RenderType$CompositeState;
 
 accessible field net/minecraft/client/renderer/RenderPipelines DEBUG_FILLED_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
 accessible field net/minecraft/client/renderer/RenderPipelines END_PORTAL_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;

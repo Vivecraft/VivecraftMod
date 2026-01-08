@@ -1,11 +1,12 @@
 package org.vivecraft.client.gui.framework.widgets;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import org.vivecraft.client_vr.utils.RGBAColor;
 
@@ -16,9 +17,9 @@ public class ColoredButton extends Button {
 
     // copied over from AbstractButton
     private static final WidgetSprites SPRITES = new WidgetSprites(
-        Identifier.withDefaultNamespace("widget/button"),
-        Identifier.withDefaultNamespace("widget/button_disabled"),
-        Identifier.withDefaultNamespace("widget/button_highlighted"));
+        ResourceLocation.withDefaultNamespace("widget/button"),
+        ResourceLocation.withDefaultNamespace("widget/button_disabled"),
+        ResourceLocation.withDefaultNamespace("widget/button_highlighted"));
 
     private final RGBAColor color = new RGBAColor();
 
@@ -31,10 +32,11 @@ public class ColoredButton extends Button {
     }
 
     @Override
-    protected void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(this.active, this.isHoveredOrFocused()),
             this.getX(), this.getY(), this.getWidth(), this.getHeight(),
             ARGB.colorFromFloat(this.alpha, this.color.r, this.color.g, this.color.b));
-        this.renderDefaultLabel(guiGraphics.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE));
+        int color = ARGB.color(this.alpha, this.active ? 0xFFFFFFFF : 0xFFA0A0A0);
+        this.renderString(guiGraphics, Minecraft.getInstance().font, color);
     }
 }

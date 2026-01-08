@@ -34,7 +34,4 @@ public abstract class LocalPlayer_LivingEntityVRMixin extends LocalPlayer_Entity
      */
     @Inject(method = "releaseUsingItem", at = @At("HEAD"))
     protected void vivecraft$beforeReleaseUsingItem(CallbackInfo ci) {}
-
-    @Inject(method = "onKineticHit", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/KineticWeapon;makeLocalHitSound(Lnet/minecraft/world/entity/Entity;)V"))
-    protected void vivecraft$spearHaptic(CallbackInfo ci) {}
 }

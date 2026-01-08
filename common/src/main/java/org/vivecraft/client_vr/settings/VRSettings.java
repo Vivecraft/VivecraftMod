@@ -12,7 +12,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -351,8 +351,6 @@ public class VRSettings {
     public boolean onlySwordCollision = false;
     @SettingField(VrOptions.REDUCED_PLAYER_REACH)
     public boolean reducedPlayerReach = true;
-    @SettingField(VrOptions.ROOMSCALE_SPEAR_LUNGE)
-    public boolean roomscaleSpearLunge = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
     @SettingField(VrOptions.FREEMOVE_MODE)
@@ -1611,7 +1609,7 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 try {
-                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(Identifier.parse((String) value)).get()
+                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse((String) value)).get()
                         .value();
                     return prefix + ClientUtils.getNameFromSoundEvent(se.location()).getString();
                 } catch (Exception e) {
@@ -1621,7 +1619,7 @@ public class VRSettings {
 
             @Override
             Object setOptionValue(Object value) {
-                SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(Identifier.parse((String) value)).get().value();
+                SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse((String) value)).get().value();
                 int i = BuiltInRegistries.SOUND_EVENT.getId(se);
                 if (++i >= BuiltInRegistries.SOUND_EVENT.keySet().size()) {
                     i = 0;
@@ -1718,7 +1716,9 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                VRShaders.updateGuiSampler();
+                if (VRState.VR_INITIALIZED && ClientDataHolderVR.getInstance().vrSettings.guiMipmaps) {
+                    ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Anisotropic filtering Changed");
+                }
             }
         },
         GUI_SCALE(true, true, 0, 6, 1, 0) { // GUI Scale
@@ -1924,7 +1924,6 @@ public class VRSettings {
         SWORD_BLOCK_COLLISION(false, true), // lets swords hit blocks that can be mined or instabroken
         ONLY_SWORD_COLLISION(false, true), // only let swords hit stuff
         REDUCED_PLAYER_REACH(false, true), // reduces roomscale reach to hit players
-        ROOMSCALE_SPEAR_LUNGE(false, true), // allose using a spear with lunge by swinging forward
         // VIVE END - new options
         // JRBUDDA VIVE
         ALLOW_CRAWLING(false, true), // Roomscale Crawling

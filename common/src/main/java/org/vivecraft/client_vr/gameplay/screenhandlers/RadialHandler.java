@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.util.Mth;
@@ -42,7 +43,7 @@ public class RadialHandler {
             }
 
             if (showingState) {
-                UI.init(GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
+                UI.init(Minecraft.getInstance(), GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
                 SHOWING = true;
                 ACTIVE_CONTROLLER = controller != null ? controller : ControllerType.RIGHT;
                 orientOverlay(ACTIVE_CONTROLLER);

@@ -146,8 +146,8 @@ public class InputSimulator {
     }
 
     private static boolean controlDown() {
-        return MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT_CONTROL) ||
-            MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL);
+        return MethodHolder.isKeyDown(InputQuirks.EDIT_SHORTCUT_KEY_LEFT) ||
+            MethodHolder.isKeyDown(InputQuirks.EDIT_SHORTCUT_KEY_RIGHT);
     }
 
     private static boolean altDown() {

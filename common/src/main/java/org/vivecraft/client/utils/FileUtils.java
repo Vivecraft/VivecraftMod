@@ -1,7 +1,7 @@
 package org.vivecraft.client.utils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
 import org.vivecraft.Xloader;
@@ -34,7 +34,7 @@ public class FileUtils {
     public static void unpackAsset(String sourcePath, String targetFile, boolean required) {
         try {
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
-                .getResource(Identifier.fromNamespaceAndPath("vivecraft", sourcePath));
+                .getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", sourcePath));
 
             if (resource.isPresent()) {
                 try (InputStream is = resource.get().open(); OutputStream os = new FileOutputStream(targetFile)) {
@@ -59,7 +59,7 @@ public class FileUtils {
     public static String loadAssetToString(String sourcePath, boolean required) {
         try {
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
-                .getResource(Identifier.fromNamespaceAndPath("vivecraft", sourcePath));
+                .getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", sourcePath));
 
             if (resource.isPresent()) {
                 try (InputStream is = resource.get().open()) {

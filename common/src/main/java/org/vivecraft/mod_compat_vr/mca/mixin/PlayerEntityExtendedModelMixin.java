@@ -1,8 +1,8 @@
 package org.vivecraft.mod_compat_vr.mca.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3f;

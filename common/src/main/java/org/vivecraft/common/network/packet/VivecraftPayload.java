@@ -2,7 +2,7 @@ package org.vivecraft.common.network.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.common.network.CommonNetworkHelper;
 
 public interface VivecraftPayload extends CustomPacketPayload {
@@ -23,9 +23,9 @@ public interface VivecraftPayload extends CustomPacketPayload {
 
 
     /**
-     * @return Identifier identifying this packet
+     * @return ResourceLocation identifying this packet
      */
-    default Identifier id() {
+    default ResourceLocation id() {
         return CommonNetworkHelper.CHANNEL;
     }
 }

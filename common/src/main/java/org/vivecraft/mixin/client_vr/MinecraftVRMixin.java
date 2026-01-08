@@ -795,7 +795,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             // resize the screen for the new gui scale
             if (VRState.VR_RUNNING && this.screen != null) {
-                this.screen.resize(GuiHandler.SCALED_WIDTH, GuiHandler.SCALED_HEIGHT);
+                this.screen.resize(Minecraft.getInstance(), GuiHandler.SCALED_WIDTH, GuiHandler.SCALED_HEIGHT);
             }
         }
     }

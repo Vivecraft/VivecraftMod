@@ -87,7 +87,7 @@ public class ServerVivePlayer {
      */
     public Vec3 getAimDir(boolean ignoreUseForAim) {
         if (this.aimDirOverride != null) {
-            return new Vec3(this.aimDirOverride);
+            return MathUtils.toMcVec3(this.aimDirOverride);
         } else if (!this.isSeated() && this.draw > 0.0F) {
             return this.getBodyPartPos(this.activeBodyPart.opposite())
                 .subtract(this.getBodyPartPos(this.activeBodyPart)).normalize();

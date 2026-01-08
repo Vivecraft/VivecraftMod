@@ -1,10 +1,10 @@
 package org.vivecraft.common.network.packet.s2c;
 
-import net.minecraft.IdentifierException;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
@@ -38,13 +38,13 @@ public record ClimbingPayloadS2C(boolean allowed, ClimbeyBlockmode blockmode,
         if (this.blocks != null) {
             for (String block : this.blocks) {
                 try {
-                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(Identifier.parse(block))
+                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(block))
                         .orElseGet(() -> null);
                     // only send valid blocks
                     if (b != null && b.value() != Blocks.AIR) {
                         buffer.writeUtf(block);
                     }
-                } catch (IdentifierException ignore) {}
+                } catch (ResourceLocationException ignore) {}
             }
         }
     }

@@ -3,7 +3,7 @@ package org.vivecraft.client_vr.render;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.material.FogType;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -26,7 +26,7 @@ public class XRCamera extends Camera {
      */
     @Override
     public void setup(
-        Level level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick)
+        BlockGetter level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick)
     {
         if (RenderPassType.isVanilla()) {
             super.setup(level, entity, detached, thirdPersonReverse, partialTick);
@@ -54,11 +54,9 @@ public class XRCamera extends Camera {
      */
     @Override
     public void tick() {
-        if (!RenderPassType.isVanilla()) {
-            this.setPosition(
-                ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition());
+        if (RenderPassType.isVanilla()) {
+            super.tick();
         }
-        super.tick();
     }
 
     /**
@@ -74,7 +72,7 @@ public class XRCamera extends Camera {
         boolean renderSelf = RenderPass.renderPlayer(ClientDataHolderVR.getInstance().currentPass);
         // don't render the player in first person when sleeping
         renderSelf &= !(RenderPass.isFirstPerson(ClientDataHolderVR.getInstance().currentPass) &&
-            this.entity() instanceof LivingEntity && ((LivingEntity) this.entity()).isSleeping()
+            this.getEntity() instanceof LivingEntity && ((LivingEntity) this.getEntity()).isSleeping()
         );
         return renderSelf;
     }

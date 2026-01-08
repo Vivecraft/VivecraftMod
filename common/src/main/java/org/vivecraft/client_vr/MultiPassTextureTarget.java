@@ -2,6 +2,7 @@ package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
@@ -103,6 +104,15 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
+    public void setFilterMode(FilterMode filterMode) {
+        if (this.vrTargets == null) {
+            super.setFilterMode(filterMode);
+            return;
+        }
+        callOnTarget(r -> r.setFilterMode(filterMode));
+    }
+
+    @Override
     public void blitToScreen() {
         if (this.vrTargets == null) {
             super.blitToScreen();
@@ -200,5 +210,6 @@ public class MultiPassTextureTarget extends TextureTarget {
         this.last = current;
         this.width = current.width;
         this.height = current.height;
+        this.filterMode = current.filterMode;
     }
 }

@@ -5,16 +5,17 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.Util;
 import org.joml.Matrix4f;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
@@ -69,7 +70,7 @@ public abstract class VRRenderer {
     protected float[][] hiddenMeshVertices = new float[2][];
 
     // variables to check setting changes that need framebuffers reinits/resizes
-    private boolean improvedTransparency = false;
+    private GraphicsStatus previousGraphics = null;
     protected VRSettings.MirrorMode lastMirror;
     public long lastWindow = 0L;
     public int mirrorFBHeight;
@@ -516,9 +517,9 @@ public abstract class VRRenderer {
         if ((this.framebufferMR == null || this.framebufferUndistorted == null) && this.allFramebuffersInitialized()) {
             this.reinitFrameBuffers("All buffers needed, but some buffers not initialized");
         }
-        if (minecraft.options.improvedTransparency().get() != this.improvedTransparency) {
-            this.improvedTransparency = minecraft.options.improvedTransparency().get();
-            this.reinitFrameBuffers("improvedTransparency setting changed to: " + this.improvedTransparency);
+        if (minecraft.options.graphicsMode().get() != this.previousGraphics) {
+            this.previousGraphics = minecraft.options.graphicsMode().get();
+            this.reinitFrameBuffers("gfx setting changed to: " + this.previousGraphics);
         }
 
         if (this.resizeFrameBuffers && !this.reinitFrameBuffers) {
@@ -576,21 +577,26 @@ public abstract class VRRenderer {
 
             // resize gui, if changed
             boolean mipmaps = dataholder.vrSettings.guiMipmaps;
+            boolean anisotropicFiltering = dataholder.vrSettings.guiAnisotropicFiltering;
             boolean mipmapChanged =
-                mipmaps != ((RenderTargetExtension) GuiHandler.GUI_FRAMEBUFFER).vivecraft$hasMipmaps();
+                mipmaps != ((RenderTargetExtension) GuiHandler.GUI_FRAMEBUFFER).vivecraft$hasMipmaps() ||
+                    anisotropicFiltering != ((VRTextureTarget) GuiHandler.GUI_FRAMEBUFFER).anisotropicFiltering;
             if (GuiHandler.updateResolution() || mipmapChanged) {
                 ((RenderTargetExtension) GuiHandler.GUI_FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
+                ((VRTextureTarget) GuiHandler.GUI_FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
                 GuiHandler.GUI_FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
 
                 ((RenderTargetExtension) RadialHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
+                ((VRTextureTarget) RadialHandler.FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
                 RadialHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
 
                 ((RenderTargetExtension) KeyboardHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
+                ((VRTextureTarget) KeyboardHandler.FRAMEBUFFER).anisotropicFiltering = anisotropicFiltering;
                 KeyboardHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
                 if (minecraft.screen != null) {
                     int guiWidth = minecraft.getWindow().getGuiScaledWidth();
                     int guiHeight = minecraft.getWindow().getGuiScaledHeight();
-                    minecraft.screen.init(guiWidth, guiHeight);
+                    minecraft.screen.init(minecraft, guiWidth, guiHeight);
                 }
             }
             // need to recall this, for PostChains to get the right resize
@@ -667,6 +673,7 @@ public abstract class VRRenderer {
                 this.framebufferEye0 = VRTextureTarget.builder("L Eye")
                     .withSize(eyew, eyeh)
                     .withTexId(this.LeftEyeTextureId)
+                    .withLinearFilter()
                     .build();
                 VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye0);
                 RenderHelper.checkGLError("Left Eye framebuffer setup");
@@ -676,6 +683,7 @@ public abstract class VRRenderer {
                 this.framebufferEye1 = VRTextureTarget.builder("R Eye")
                     .withSize(eyew, eyeh)
                     .withTexId(this.RightEyeTextureId)
+                    .withLinearFilter()
                     .build();
                 VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye1);
                 RenderHelper.checkGLError("Right Eye framebuffer setup");
@@ -691,6 +699,7 @@ public abstract class VRRenderer {
             this.framebufferVrRender = VRTextureTarget.builder("3D Render")
                 .withSize(eyeFBWidth, eyeFBHeight)
                 .withDepth()
+                .withLinearFilter()
                 .withStencil(dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported())
                 .build();
             WorldRenderPass.STEREO_XR = new WorldRenderPass(this.framebufferVrRender);
@@ -709,6 +718,7 @@ public abstract class VRRenderer {
                 this.framebufferMR = VRTextureTarget.builder("Mixed Reality Render")
                     .withSize(Math.max(1, this.mirrorFBWidth), Math.max(1, this.mirrorFBHeight))
                     .withDepth()
+                    .withLinearFilter()
                     .build();
                 WorldRenderPass.MIXED_REALITY = new WorldRenderPass(this.framebufferMR);
                 VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferMR);
@@ -719,6 +729,7 @@ public abstract class VRRenderer {
                 this.framebufferUndistorted = VRTextureTarget.builder("Undistorted View Render")
                     .withSize(Math.max(1, this.mirrorFBWidth), Math.max(1, this.mirrorFBHeight))
                     .withDepth()
+                    .withLinearFilter()
                     .build();
                 WorldRenderPass.CENTER = new WorldRenderPass(this.framebufferUndistorted);
                 VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferUndistorted);
@@ -735,7 +746,9 @@ public abstract class VRRenderer {
             GuiHandler.GUI_FRAMEBUFFER = VRTextureTarget.builder("GUI")
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
                 .withDepth()
+                .withLinearFilter()
                 .withMipmaps(dataholder.vrSettings.guiMipmaps)
+                .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", GuiHandler.GUI_FRAMEBUFFER);
             RenderHelper.checkGLError("GUI framebuffer setup");
@@ -743,7 +756,9 @@ public abstract class VRRenderer {
             KeyboardHandler.FRAMEBUFFER = VRTextureTarget.builder("Keyboard")
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
                 .withDepth()
+                .withLinearFilter()
                 .withMipmaps(dataholder.vrSettings.guiMipmaps)
+                .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", KeyboardHandler.FRAMEBUFFER);
             RenderHelper.checkGLError("Keyboard framebuffer setup");
@@ -751,7 +766,9 @@ public abstract class VRRenderer {
             RadialHandler.FRAMEBUFFER = VRTextureTarget.builder("Radial Menu")
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
                 .withDepth()
+                .withLinearFilter()
                 .withMipmaps(dataholder.vrSettings.guiMipmaps)
+                .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", RadialHandler.FRAMEBUFFER);
             RenderHelper.checkGLError("Radial framebuffer setup");
@@ -796,6 +813,7 @@ public abstract class VRRenderer {
             this.cameraRenderFramebuffer = VRTextureTarget.builder("Handheld Camera Render")
                 .withSize(cameraRenderFBwidth, cameraRenderFBheight)
                 .withDepth()
+                .withLinearFilter()
                 .build();
             WorldRenderPass.CAMERA = new WorldRenderPass(this.cameraRenderFramebuffer);
             VRSettings.LOGGER.info("Vivecraft: {}", this.cameraRenderFramebuffer);
@@ -834,7 +852,7 @@ public abstract class VRRenderer {
             if (minecraft.screen != null) {
                 int w = minecraft.getWindow().getGuiScaledWidth();
                 int h = minecraft.getWindow().getGuiScaledHeight();
-                minecraft.screen.init(w, h);
+                minecraft.screen.init(minecraft, w, h);
             }
 
             long windowPixels =
