@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath ("net.fabricmc:tiny-remapper:0.12.2")
+    }
+}
+
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
@@ -17,9 +23,6 @@ subprojects {
 
     loom {
         silentMojangMappingsLicense()
-        mixin {
-            useLegacyMixinAp = true
-        }
     }
 
     dependencies {
