@@ -23,14 +23,14 @@ public class ShadersRenderVRMixin {
     @Shadow(remap = false)
     public static void updateActiveRenderInfo(Camera activeRenderInfo, Minecraft mc, float partialTick) {}
 
-    @Inject(method = "renderHand0", at = @At("HEAD"), remap = false, cancellable = true)
+    @Inject(method = {"renderHandTranslucent", "renderHand0"}, at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$noTranslucentHandsInVR(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "renderHand1", at = @At("HEAD"), remap = false, cancellable = true)
+    @Inject(method = {"renderHandSolid", "renderHand1"}, at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$noSolidHandsInVR(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             ci.cancel();

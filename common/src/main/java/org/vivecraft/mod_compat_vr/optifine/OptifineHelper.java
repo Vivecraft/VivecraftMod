@@ -350,9 +350,9 @@ public class OptifineHelper {
      * @param z           player position z
      * @return altered skyColor
      */
-    public static Vec3 getCustomSkyColor(Vec3 skyColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
+    public static int getCustomSkyColor(int skyColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
         try {
-            return (Vec3) CustomColors_GetSkyColor.invoke(CustomColors, skyColor, blockAccess, x, y, z);
+            return (int) CustomColors_GetSkyColor.invoke(CustomColors, skyColor, blockAccess, x, y, z);
         } catch (IllegalAccessException | InvocationTargetException e) {
             logError(e, "getSkyColor");
             return skyColor;
@@ -609,7 +609,7 @@ public class OptifineHelper {
             Options_ofAoLevel = Options.class.getField("ofAoLevel");
 
             CustomColors = Class.forName("net.optifine.CustomColors");
-            CustomColors_GetSkyColor = CustomColors.getMethod("getSkyColor", Vec3.class, BlockAndTintGetter.class,
+            CustomColors_GetSkyColor = CustomColors.getMethod("getSkyColor", int.class, BlockAndTintGetter.class,
                 double.class, double.class, double.class);
 
             CustomColors_GetUnderwaterColor = CustomColors.getMethod("getUnderwaterColor", BlockAndTintGetter.class,
