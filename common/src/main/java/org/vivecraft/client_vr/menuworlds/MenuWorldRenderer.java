@@ -97,6 +97,7 @@ public class MenuWorldRenderer {
     private final GpuTexture lightMap;
     public final GpuTextureView lightMapView;
     private final MappableRingBuffer lightMapUbo;
+    private final GpuBuffer globalSettingsUbo;
     private boolean lightmapUpdateNeeded;
     private float blockLightRedFlicker;
     private int waterVisionTime;
@@ -108,8 +109,6 @@ public class MenuWorldRenderer {
     private int lastMaxAnisotropy = -1;
     private GpuSampler chunkLayerSampler;
     private GpuBuffer starVBO;
-    private final RenderSystem.AutoStorageIndexBuffer starIndices = RenderSystem.getSequentialBuffer(
-        VertexFormat.Mode.QUADS);
     private int starIndexCount;
     private GpuBuffer skyVBO;
     private GpuBuffer sky2VBO;
@@ -171,6 +170,9 @@ public class MenuWorldRenderer {
             GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
             new Std140SizeCalculator().putFloat().putFloat().putFloat().putFloat().putFloat().putFloat()
                 .putFloat().putVec3().putVec3().get());
+        this.globalSettingsUbo = RenderSystem.getDevice()
+            .createBuffer(() -> "Menuworld Global Settings UBO", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_UNIFORM,
+                GlobalSettingsUniform.UBO_SIZE);
 
         this.fogRenderer = new MenuFogRenderer(this);
         this.rand = new Random();
@@ -233,8 +235,7 @@ public class MenuWorldRenderer {
                 false);
         }
 
-        // reset camera position to 0, since this is used by the terrain shader
-        this.mc.gameRenderer.getMainCamera().setPosition(Vec3.ZERO);
+        this.updateGlobalSettings();
 
         poseStack.pushMatrix();
 
@@ -705,6 +706,7 @@ public class MenuWorldRenderer {
         this.lightMap.close();
         this.lightMapView.close();
         this.lightMapUbo.close();
+        this.globalSettingsUbo.close();
         this.ready = false;
     }
 
@@ -959,7 +961,7 @@ public class MenuWorldRenderer {
                     getValue(EnvironmentAttributes.STAR_ANGLE, ClientUtils.getCurrentPartialTick()) * Mth.DEG_TO_RAD));
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
                     .writeTransform(poseStack, new Vector4f(starBrightness), new Vector3f(), new Matrix4f());
-                GpuBuffer indexBuffer = this.starIndices.getBuffer(this.starIndexCount);
+                GpuBuffer indexBuffer = this.quadIndices.getBuffer(this.starIndexCount);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Menuworld Stars", this.mc.getMainRenderTarget().getColorTextureView(),
                         OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
@@ -969,7 +971,7 @@ public class MenuWorldRenderer {
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
                     renderPass.setVertexBuffer(0, this.starVBO);
-                    renderPass.setIndexBuffer(indexBuffer, this.starIndices.type());
+                    renderPass.setIndexBuffer(indexBuffer, this.quadIndices.type());
                     renderPass.drawIndexed(0, 0, this.starIndexCount, 1);
                 }
                 poseStack.popMatrix();
@@ -1511,6 +1513,23 @@ public class MenuWorldRenderer {
             this.lightMapUbo.rotate();
             this.lightmapUpdateNeeded = false;
         }
+    }
+
+    private void updateGlobalSettings() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            ByteBuffer data = Std140Builder.onStack(stack, GlobalSettingsUniform.UBO_SIZE)
+                .putIVec3(0, 0, 0)
+                .putVec3(0F, 0F, 0F)
+                .putVec2(this.mc.getWindow().getWidth(), this.mc.getWindow().getHeight())
+                .putFloat(this.mc.options.glintStrength().get().floatValue())
+                .putFloat(
+                    ((this.ticks % 24000L) + this.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false)) / 24000.0F)
+                .putInt(0)
+                .putInt(this.mc.options.textureFiltering().get() == TextureFilteringMethod.RGSS ? 1 : 0)
+                .get();
+            RenderSystem.getDevice().createCommandEncoder().writeToBuffer(this.globalSettingsUbo.slice(), data);
+        }
+        RenderSystem.setGlobalSettingsUniform(this.globalSettingsUbo);
     }
 
     private float notGamma(float f) {
