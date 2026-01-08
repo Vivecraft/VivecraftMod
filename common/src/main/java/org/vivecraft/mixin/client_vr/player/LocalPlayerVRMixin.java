@@ -251,6 +251,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         }
     }
 
+    @Override
     protected void vivecraft$spearHaptic(CallbackInfo ci) {
         if (VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) {
             ClientDataHolderVR.getInstance().vr.triggerHapticPulse(this.getUsedItemHand().ordinal(), 2000);

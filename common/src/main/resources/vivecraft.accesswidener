@@ -67,7 +67,7 @@ accessible class net/minecraft/client/model/effects/SpearAnimations$UseParams
 # for correct vr rendering
 accessible field net/minecraft/world/entity/Entity eyeHeight F
 
-# to checkif the palyer can lunge forward
+# to check if the player can lunge forward
 accessible method net/minecraft/world/entity/player/Player hasEnoughFoodToDoExhaustiveManoeuvres ()Z
 
 # to add vivecraft items in the creative menus

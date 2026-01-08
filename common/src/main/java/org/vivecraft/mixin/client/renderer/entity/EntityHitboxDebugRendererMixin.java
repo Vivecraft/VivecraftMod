@@ -15,7 +15,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.utils.Utils;
 
 @Mixin(EntityHitboxDebugRenderer.class)
-public class EntityRendererMixin {
+public class EntityHitboxDebugRendererMixin {
     @Inject(method = "showHitboxes", at = @At("TAIL"))
     private void vivecraft$headHitbox(
         CallbackInfo ci, @Local(argsOnly = true) Entity entity, @Local(argsOnly = true) boolean isServerSide,

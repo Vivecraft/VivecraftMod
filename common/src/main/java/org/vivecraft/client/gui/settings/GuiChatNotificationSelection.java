@@ -26,10 +26,10 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Identif
         super(Component.translatable("vivecraft.options.CHAT_NOTIFICATION_SOUND"), lastScreen,
             () -> BuiltInRegistries.SOUND_EVENT.keySet().stream().sorted().toList(),
             ClientUtils::getNameFromSoundEvent,
-            Identifier -> "",
-            Identifier -> {
-                if (Identifier != null) {
-                    ClientDataHolderVR.getInstance().vrSettings.chatNotificationSound = Identifier.getPath();
+            identifier -> "",
+            identifier -> {
+                if (identifier != null) {
+                    ClientDataHolderVR.getInstance().vrSettings.chatNotificationSound = identifier.getPath();
                 } else {
                     ClientDataHolderVR.getInstance().vrSettings.loadDefault(
                         VRSettings.VrOptions.CHAT_NOTIFICATION_SOUND);
@@ -37,8 +37,8 @@ public class GuiChatNotificationSelection extends GuiSelectionListScreen<Identif
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
             },
             true, true,
-            Identifier -> new SilentButton(Component.literal("♫"),
-                b -> BuiltInRegistries.SOUND_EVENT.get(Identifier)
+            identifier -> new SilentButton(Component.literal("♫"),
+                b -> BuiltInRegistries.SOUND_EVENT.get(identifier)
                     .ifPresent(soundEvent -> startSound(soundEvent.value(), b)),
                 20, 20)
         );

@@ -282,7 +282,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
 
                 boolean canLunge = false;
                 Vector3f deviceDirection = this.tipDirHistory[i].averagePosition(0.33D).normalize();
-                // speed boost when hitting straight with lances/fists
+                // roomscale spear lunge
                 if (this.canAct[i] && isLance && this.dh.vrSettings.roomscaleSpearLunge) {
                     // this is on purpose not checking averageSpeed, to get the linear speed
                     Vector3f baseTravelDirection = this.baseHistory[i].netMovement(0.33D);
