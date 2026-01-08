@@ -69,3 +69,5 @@ config = "vivecraft.sereneseasons.mixins.json"
 config = "vivecraft.sodium.mixins.json"
 [[mixins]]
 config = "vivecraft.xaerosmimimap.mixins.json"
+[[mixins]]
+config = "vivecraft.xaerosworldmap.mixins.json"

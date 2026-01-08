@@ -34,7 +34,7 @@ public class ShaderPatchingTest {
                 charmap.put(c, charmap.getOrDefault(c, 0) + 1);
             }
             String msg = p.getClass().getSimpleName() + ": unequal amounts of '%s' and '%s'";
-            Assertions.assertEquals(charmap.get('('), charmap.get('('), msg.formatted("(", ")"));
+            Assertions.assertEquals(charmap.get('('), charmap.get(')'), msg.formatted("(", ")"));
             Assertions.assertEquals(charmap.get('['), charmap.get(']'), msg.formatted("[", "]"));
             Assertions.assertEquals(charmap.get('{'), charmap.get('}'), msg.formatted("{", "}"));
         }

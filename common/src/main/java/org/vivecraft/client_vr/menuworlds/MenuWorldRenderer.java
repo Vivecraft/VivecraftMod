@@ -57,6 +57,7 @@ import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.extensions.StateHolderExtension;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -78,8 +79,6 @@ public class MenuWorldRenderer {
         "textures/environment/moon_phases.png");
     private static final ResourceLocation SUN_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/environment/sun.png");
-    private static final ResourceLocation CLOUDS_LOCATION = ResourceLocation.withDefaultNamespace(
-        "textures/environment/clouds.png");
     private static final ResourceLocation END_SKY_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/environment/end_sky.png");
 
@@ -107,8 +106,6 @@ public class MenuWorldRenderer {
     public boolean fastTime;
     private HashMap<ChunkSectionLayer, List<Pair<Integer, GpuBuffer>>> vertexBuffers;
     private GpuBuffer starVBO;
-    private final RenderSystem.AutoStorageIndexBuffer starIndices = RenderSystem.getSequentialBuffer(
-        VertexFormat.Mode.QUADS);
     private int starIndexCount;
     private GpuBuffer skyVBO;
     private GpuBuffer sky2VBO;
@@ -217,9 +214,10 @@ public class MenuWorldRenderer {
         this.rendering = true;
 
         // temporarily disable fabulous to render the menu world
-        GraphicsStatus current = this.mc.options.graphicsMode().get();
-        if (current == GraphicsStatus.FABULOUS) {
-            this.mc.options.graphicsMode().set(GraphicsStatus.FANCY);
+        GraphicsStatus currentGraphics = this.mc.options.graphicsMode().get();
+        if (currentGraphics == GraphicsStatus.FABULOUS) {
+            ((OptionInstanceExtension<GraphicsStatus>) (Object) this.mc.options.graphicsMode()).vivecraft$setWithoutUpdate(
+                GraphicsStatus.FANCY);
         }
 
         poseStack.pushMatrix();
@@ -265,7 +263,8 @@ public class MenuWorldRenderer {
 
         poseStack.popMatrix();
         turnOffLightLayer();
-        this.mc.options.graphicsMode().set(current);
+        ((OptionInstanceExtension<GraphicsStatus>) (Object) this.mc.options.graphicsMode()).vivecraft$setWithoutUpdate(
+            currentGraphics);
         this.fogRenderer.setFog(FogRenderer.FogMode.NONE);
         this.rendering = false;
     }
@@ -851,8 +850,8 @@ public class MenuWorldRenderer {
             ) /*&& !CustomSky.hasSkyLayers(this.world)*/)
             {
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(poseStack, new Vector4f(starBrightness), new Vector3f(), new Matrix4f(), 0F);
-                GpuBuffer indexBuffer = this.starIndices.getBuffer(this.starIndexCount);
+                    .writeTransform(poseStack, new Vector4f(starBrightness), new Vector3f(), new Matrix4f(), 0.0f);
+                GpuBuffer indexBuffer = this.quadIndices.getBuffer(this.starIndexCount);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Menuworld Stars", this.mc.getMainRenderTarget().getColorTextureView(),
                         OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
@@ -862,7 +861,7 @@ public class MenuWorldRenderer {
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
                     renderPass.setVertexBuffer(0, this.starVBO);
-                    renderPass.setIndexBuffer(indexBuffer, this.starIndices.type());
+                    renderPass.setIndexBuffer(indexBuffer, this.quadIndices.type());
                     renderPass.drawIndexed(0, 0, this.starIndexCount, 1);
                 }
             }
@@ -877,7 +876,7 @@ public class MenuWorldRenderer {
                 stack.pushMatrix();
                 stack.translate(0.0f, 12.0f, 0.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(stack, new Vector4f(0F, 0F, 0F, 1F), new Vector3f(), new Matrix4f(), 0F);
+                    .writeTransform(stack, new Vector4f(0F, 0F, 0F, 1F), new Vector3f(), new Matrix4f(), 0.0f);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Menuworld Dark Kky", this.mc.getMainRenderTarget().getColorTextureView(),
                         OptionalInt.empty(),
@@ -942,10 +941,7 @@ public class MenuWorldRenderer {
         int yFloor = Mth.floor(inY);
         int zFloor = Mth.floor(inZ);
         VertexConsumer vertexConsumer;
-        int rainDistance = 5;
-        if (Minecraft.useFancyGraphics()) {
-            rainDistance = 10;
-        }
+        int rainDistance = Minecraft.useFancyGraphics() ? 10 : 5;
         float rainAnimationTime = this.ticks + ClientUtils.getCurrentPartialTick();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         MultiBufferSource.BufferSource bufferSource = this.mc.renderBuffers().bufferSource();

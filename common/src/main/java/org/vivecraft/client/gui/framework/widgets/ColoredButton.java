@@ -33,11 +33,10 @@ public class ColoredButton extends Button {
 
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        Minecraft minecraft = Minecraft.getInstance();
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(this.active, this.isHoveredOrFocused()),
             this.getX(), this.getY(), this.getWidth(), this.getHeight(),
             ARGB.colorFromFloat(this.alpha, this.color.r, this.color.g, this.color.b));
-        int i = ARGB.color(this.alpha, this.active ? 0xFFFFFFFF : 0xFFA0A0A0);
-        this.renderString(guiGraphics, minecraft.font, i);
+        int color = ARGB.color(this.alpha, this.active ? 0xFFFFFFFF : 0xFFA0A0A0);
+        this.renderString(guiGraphics, Minecraft.getInstance().font, color);
     }
 }

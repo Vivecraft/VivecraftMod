@@ -9,6 +9,7 @@ import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 /**
  * an extension of the Camera, to correctly set up the camera position for the current pass
@@ -42,6 +43,10 @@ public class XRCamera extends Camera {
         // we cannot set the rotation to the full matrix, because particles would rotate with the head
         // instead of being world up oriented
         this.setRotation(eye.getYaw(), -eye.getPitch());
+
+        if (ClientDataHolderVR.getInstance().isFirstPass || ShadersHelper.isSlowMode()) {
+            ShadersHelper.SHADOW_CAMERA_POSITION = this.position();
+        }
     }
 
     /**
@@ -67,7 +72,7 @@ public class XRCamera extends Camera {
         boolean renderSelf = RenderPass.renderPlayer(ClientDataHolderVR.getInstance().currentPass);
         // don't render the player in first person when sleeping
         renderSelf &= !(RenderPass.isFirstPerson(ClientDataHolderVR.getInstance().currentPass) &&
-            getEntity() instanceof LivingEntity && ((LivingEntity) getEntity()).isSleeping()
+            this.getEntity() instanceof LivingEntity && ((LivingEntity) this.getEntity()).isSleeping()
         );
         return renderSelf;
     }
