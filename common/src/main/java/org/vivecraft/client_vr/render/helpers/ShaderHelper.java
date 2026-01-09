@@ -376,7 +376,7 @@ public class ShaderHelper {
         boolean alphaMask =
             DATA_HOLDER.vrSettings.mixedRealityUnityLike && DATA_HOLDER.vrSettings.mixedRealityAlphaMask;
 
-        int guiMask = 0;
+        int guiMask;
         if (DATA_HOLDER.vrSettings.guiOnMirror == VRSettings.MirrorGui.ALWAYS ||
             (DATA_HOLDER.vrSettings.guiOnMirror == VRSettings.MirrorGui.HUD_ONLY && MC.screen == null))
         {
@@ -386,6 +386,8 @@ public class ShaderHelper {
                 case BOTH -> VRShaders.MIXED_REALITY_GUI_FIRST | VRShaders.MIXED_REALITY_GUI_THIRD;
                 case SEPARATE -> VRShaders.MIXED_REALITY_GUI_SEPARATE;
             };
+        } else {
+            guiMask = 0;
         }
 
         renderFullscreenQuad(VRShaders.MIXED_REALITY_PIPELINE, renderPass -> {
@@ -411,6 +413,7 @@ public class ShaderHelper {
 
             renderPass.setUniform(VRShaders.MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM,
                 DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
+            renderPass.setUniform(VRShaders.MIXED_REALITY_GUI_MASK_UNIFORM, guiMask);
 
 
             // bind textures
@@ -420,7 +423,7 @@ public class ShaderHelper {
                 DATA_HOLDER.vrRenderer.framebufferMR.getDepthTexture());
 
             renderPass.bindSampler(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
-                GuiHandler.GUI_FRAMEBUFFER.getColorTextureView());
+                GuiHandler.GUI_FRAMEBUFFER.getColorTexture());
 
             if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
                 RenderTarget source;
@@ -616,9 +619,8 @@ public class ShaderHelper {
     public static void blit(RenderTarget source, RenderTarget target, boolean blend) {
         RenderSystem.assertOnRenderThread();
 
-        renderFullscreenQuad(() -> "Vive Blit",
-            blend ? VRShaders.BLIT_VR_BLEND_PIPELINE : VRShaders.BLIT_VR_PIPELINE,
-            pass -> pass.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView()),
-            target.getColorTextureView());
+        renderFullscreenQuad(blend ? VRShaders.BLIT_VR_BLEND_PIPELINE : VRShaders.BLIT_VR_PIPELINE,
+            pass -> pass.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTexture()),
+            target.getColorTexture());
     }
 }

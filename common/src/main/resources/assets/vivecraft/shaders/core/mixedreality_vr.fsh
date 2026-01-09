@@ -20,6 +20,7 @@ uniform vec3 hmdPlaneNormal;
 uniform vec3 keyColor;
 uniform int alphaMode;
 uniform int firstPersonPass;
+uniform int guiMask;
 
 in vec2 texCoordinates;
 

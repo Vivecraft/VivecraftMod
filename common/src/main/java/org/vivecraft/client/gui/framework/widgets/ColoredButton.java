@@ -37,7 +37,7 @@ public class ColoredButton extends Button {
         guiGraphics.blitSprite(RenderType::guiTextured, SPRITES.get(this.active, this.isHoveredOrFocused()),
             this.getX(), this.getY(), this.getWidth(), this.getHeight(),
             ARGB.colorFromFloat(this.alpha, this.color.r, this.color.g, this.color.b));
-        int i = this.active ? 0xFFFFFF : 0xA0A0A0;
-        this.renderString(guiGraphics, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
+        int color = this.active ? 0xFFFFFF : 0xA0A0A0;
+        this.renderString(guiGraphics, Minecraft.getInstance().font, color | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 }
