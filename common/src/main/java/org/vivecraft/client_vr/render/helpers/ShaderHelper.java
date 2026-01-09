@@ -414,7 +414,7 @@ public class ShaderHelper {
         VRShaders.MIXED_REALITY_ALPHA_MODE_UNIFORM.set(alphaMask ? 1 : 0);
 
         VRShaders.MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM.set(DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
-            renderPass.setUniform(VRShaders.MIXED_REALITY_GUI_MASK_UNIFORM, guiMask);
+        VRShaders.MIXED_REALITY_GUI_MASK_UNIFORM.set(guiMask);
 
         CompiledShaderProgram mixedRealityShader = Objects.requireNonNull(
             RenderSystem.setShader(VRShaders.MIXED_REALITY_SHADER), "mixed reality shader not loaded");
@@ -425,8 +425,8 @@ public class ShaderHelper {
         mixedRealityShader.bindSampler(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
             DATA_HOLDER.vrRenderer.framebufferMR.getDepthTextureId());
 
-            renderPass.bindSampler(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
-                GuiHandler.GUI_FRAMEBUFFER.getColorTexture());
+        mixedRealityShader.bindSampler(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
+            GuiHandler.GUI_FRAMEBUFFER.getColorTextureId());
 
         if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
             RenderTarget source;
@@ -562,10 +562,15 @@ public class ShaderHelper {
         boolean keepAspect, boolean blend)
     {
         RenderSystem.assertOnRenderThread();
-        RenderSystem.colorMask(true, true, true, false);
+        RenderSystem.colorMask(true, true, true, blend);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        RenderSystem.disableBlend();
+        if (!blend) {
+            RenderSystem.disableBlend();
+        } else {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+        }
 
         float drawAspect = (float) width / (float) height;
         float bufferAspect = (float) source.viewWidth / (float) source.viewHeight;
@@ -619,17 +624,34 @@ public class ShaderHelper {
     }
 
     /**
-     * blits the given {@code source} RenderTarget to the given {@code target} RenderTarget buffer
+     * blits the given {@code source} RenderTarget to the bound buffer
      *
      * @param source RenderTarget to copy
-     * @param target RenderTarget to draw to
      * @param blend  if alpha blending should be used
      */
-    public static void blit(RenderTarget source, RenderTarget target, boolean blend) {
+    public static void blit(RenderTarget source, boolean blend) {
         RenderSystem.assertOnRenderThread();
 
-        renderFullscreenQuad(blend ? VRShaders.BLIT_VR_BLEND_PIPELINE : VRShaders.BLIT_VR_PIPELINE,
-            pass -> pass.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTexture()),
-            target.getColorTexture());
+        RenderSystem.assertOnRenderThread();
+        RenderSystem.colorMask(true, true, true, blend);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        if (!blend) {
+            RenderSystem.disableBlend();
+        } else {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+        }
+
+        CompiledShaderProgram blitShader = Objects.requireNonNull(
+            RenderSystem.setShader(VRShaders.BLIT_VR_SHADER), "Vivecraft blit shader not loaded");
+        blitShader.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureId());
+
+        blitShader.apply();
+        drawFullscreenQuad(VRShaders.BLIT_VR_SHADER.vertexFormat());
+        blitShader.clear();
+
+        RenderSystem.depthMask(true);
+        RenderSystem.colorMask(true, true, true, true);
     }
 }

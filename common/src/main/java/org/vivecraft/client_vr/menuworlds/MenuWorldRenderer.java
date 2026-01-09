@@ -901,10 +901,7 @@ public class MenuWorldRenderer {
             RenderSystem.disableCull();
             RenderSystem.enableBlend();
             RenderSystem.enableDepthTest();
-            int rainDistance = 5;
-            if (Minecraft.useFancyGraphics()) {
-                rainDistance = 10;
-            }
+            int rainDistance = Minecraft.useFancyGraphics() ? 10 : 5;
             RenderSystem.depthMask(true);
             int count = -1;
             float rainAnimationTime = this.ticks + ClientUtils.getCurrentPartialTick();

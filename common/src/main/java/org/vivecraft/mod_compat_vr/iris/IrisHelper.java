@@ -8,7 +8,6 @@ import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.ClassUtils;
-import org.vivecraft.mod_compat_vr.shaders.ShaderType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

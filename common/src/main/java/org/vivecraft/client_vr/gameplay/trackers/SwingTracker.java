@@ -207,7 +207,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                     continue;
                 }
 
-                if (itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS) ||
+                if (item instanceof SwordItem || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS) ||
                     item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS))
                 {
                     isSword = true;

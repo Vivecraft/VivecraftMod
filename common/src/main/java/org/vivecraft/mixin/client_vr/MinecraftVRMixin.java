@@ -83,7 +83,6 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;

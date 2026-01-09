@@ -21,7 +21,7 @@ dependencies {
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.4-fabric"
 
     // for REI compat
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:19.0.809") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.808") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
     modApi("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }

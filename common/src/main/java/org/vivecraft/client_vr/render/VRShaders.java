@@ -39,6 +39,7 @@ public class VRShaders {
     public static AbstractUniform MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM;
     public static AbstractUniform MIXED_REALITY_KEY_COLOR_UNIFORM;
     public static AbstractUniform MIXED_REALITY_ALPHA_MODE_UNIFORM;
+    public static AbstractUniform MIXED_REALITY_GUI_MASK_UNIFORM;
     public static final String MIXED_REALITY_HMD_VIEW_POSITION = "hmdViewPosition";
     public static final String MIXED_REALITY_HMD_PLANE_NORMAL = "hmdPlaneNormal";
     public static final String MIXED_REALITY_PROJECTION_MATRIX = "projectionMatrix";
@@ -46,7 +47,7 @@ public class VRShaders {
     public static final String MIXED_REALITY_FIRST_PERSON_PASS = "firstPersonPass";
     public static final String MIXED_REALITY_KEY_COLOR = "keyColor";
     public static final String MIXED_REALITY_ALPHA_MODE = "alphaMode";
-    public static final String MIXED_REALITY_GUI_MASK_UNIFORM = "guiMask";
+    public static final String MIXED_REALITY_GUI_MASK = "guiMask";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
@@ -88,17 +89,6 @@ public class VRShaders {
         ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"),
         DefaultVertexFormat.POSITION_TEX, ShaderDefines.EMPTY);
     public static final String BLIT_VR_COLOR_SAMPLER = "DiffuseSampler";
-
-    public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_blit")
-        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
-        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
-        .withSampler(BLIT_VR_COLOR_SAMPLER)
-        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withBlend(BlendFunction.TRANSLUCENT)
-        .build();
 
     // end portal shaders
     public static final ShaderProgram RENDERTYPE_END_PORTAL_VR_SHADER = new ShaderProgram(
@@ -168,6 +158,7 @@ public class VRShaders {
         MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM = program.safeGetUniform(MIXED_REALITY_FIRST_PERSON_PASS);
         MIXED_REALITY_KEY_COLOR_UNIFORM = program.safeGetUniform(MIXED_REALITY_KEY_COLOR);
         MIXED_REALITY_ALPHA_MODE_UNIFORM = program.safeGetUniform(MIXED_REALITY_ALPHA_MODE);
+        MIXED_REALITY_GUI_MASK_UNIFORM = program.safeGetUniform(MIXED_REALITY_GUI_MASK);
     }
 
     private static void setupFSAA() throws NullPointerException {

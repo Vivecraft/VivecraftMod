@@ -80,8 +80,8 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
-            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, DATA_HOLDER.vrRenderer.cameraFramebuffer,
-                false);
+            DATA_HOLDER.vrRenderer.cameraFramebuffer.bindWrite(true);
+            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, false);
             Profiler.get().pop();
         }
 
