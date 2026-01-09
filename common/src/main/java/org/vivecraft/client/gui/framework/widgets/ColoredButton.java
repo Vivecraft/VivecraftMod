@@ -25,7 +25,6 @@ public class ColoredButton extends Button {
 
     @Override
     public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.setShaderColor(this.color.r, this.color.g, this.color.b, this.alpha);
         RenderSystem.enableBlend();
@@ -34,8 +33,8 @@ public class ColoredButton extends Button {
             TEXTURE_BORDER_X, TEXTURE_BORDER_Y, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, this.getTextureY());
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        int i = this.active ? 0xFFFFFF : 0xA0A0A0;
-        this.renderString(poseStack, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
+        int color = this.active ? 0xFFFFFF : 0xA0A0A0;
+        this.renderString(guiGraphics, Minecraft.getInstance().font, color | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 
     // copied from AbstractButton

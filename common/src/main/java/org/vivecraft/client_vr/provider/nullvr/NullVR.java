@@ -25,7 +25,6 @@ import java.util.List;
  * MCVR implementation that does not interact with any runtime.
  */
 public class NullVR extends MCVR {
-    private static final float IPD = 0.1F;
 
     protected static NullVR OME;
 
@@ -107,9 +106,9 @@ public class NullVR extends MCVR {
             this.hmdPose.identity();
             this.hmdPose.m31(1.62F);
 
-            // eye offset, 10cm total distance
-            this.hmdPoseLeftEye.m30(-IPD * 0.5F);
-            this.hmdPoseRightEye.m30(IPD * 0.5F);
+            // eye offset, half in each direction
+            this.hmdPoseLeftEye.m30(-this.dh.vrSettings.nullvrIPD * 0.5F);
+            this.hmdPoseRightEye.m30(this.dh.vrSettings.nullvrIPD * 0.5F);
 
             this.populateInputActions();
 
@@ -150,6 +149,10 @@ public class NullVR extends MCVR {
 
             this.hmdPose.rotation(this.deviceRotations[HEAD_TRACKER]);
             this.hmdPose.setTranslation(this.deviceOffsets[HEAD_TRACKER]);
+
+            // update each frame to make the setting work
+            this.hmdPoseLeftEye.m30(-this.dh.vrSettings.nullvrIPD * 0.5F);
+            this.hmdPoseRightEye.m30(this.dh.vrSettings.nullvrIPD * 0.5F);
 
             // fbt trackers index 3-9
             for (int i = 3; i < TRACKABLE_DEVICE_COUNT; i++) {
@@ -275,7 +278,7 @@ public class NullVR extends MCVR {
 
     @Override
     public float getIPD() {
-        return IPD;
+        return this.dh.vrSettings.nullvrIPD;
     }
 
     @Override

@@ -14,10 +14,9 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -45,13 +44,11 @@ public class IrisNewWorldRenderingPipelineVRMixin {
                 "net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline");
             Field customImages = renderingPipeline.getDeclaredField("customImages");
             Field shaderStorageBufferHolde = renderingPipeline.getDeclaredField("shaderStorageBufferHolder");
-            IrisHelper.SLOW_MODE = ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization ||
+            ShadersHelper.SLOW_MODE =
                 !((Set<?>) customImages.get(this)).isEmpty() || shaderStorageBufferHolde.get(this) != null;
-        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
-            IrisHelper.SLOW_MODE = ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization;
-        }
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {}
 
-        if (!IrisHelper.SLOW_MODE &&
+        if (!ShadersHelper.isSlowMode() &&
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() == null)
         {
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$setShadowRenderTargets(
@@ -65,7 +62,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
         NewWorldRenderingPipeline instance, Supplier<ShadowRenderTargets> value, Operation<Void> original)
     {
         Supplier<ShadowRenderTargets> wrappedSupplier = () -> {
-            if (!IrisHelper.SLOW_MODE && !RenderPassType.isVanilla() && this.shadowRenderTargets == null &&
+            if (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() && this.shadowRenderTargets == null &&
                 ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null)
             {
                 return (ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets();
@@ -78,7 +75,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
 
     @ModifyReturnValue(method = "shouldDisableVanillaEntityShadows()Z", at = @At("RETURN"), remap = false)
     private boolean vivecraft$shouldDisableEntityShadows(boolean noEntityShadows) {
-        return noEntityShadows || (!IrisHelper.SLOW_MODE && !RenderPassType.isVanilla() &&
+        return noEntityShadows || (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() &&
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null
         );
     }
@@ -104,7 +101,9 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
     private Object vivecraft$rerouteShadowTarget(Object obj) {
         // make sure we only change ShadowRenderTargets, since this might also inject into other lambdas
-        if (!IrisHelper.SLOW_MODE && !RenderPassType.isVanilla() && obj instanceof ShadowRenderTargets || obj == null) {
+        if (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() && obj instanceof ShadowRenderTargets ||
+            obj == null)
+        {
             return Objects.requireNonNullElse(
                 ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj);
         } else {
