@@ -45,7 +45,7 @@ public class XRCamera extends Camera {
         this.setRotation(eye.getYaw(), -eye.getPitch());
 
         if (ClientDataHolderVR.getInstance().isFirstPass || ShadersHelper.isSlowMode()) {
-            ShadersHelper.SHADOW_CAMERA_POSITION = this.position();
+            ShadersHelper.SHADOW_CAMERA_POSITION = this.getPosition();
         }
     }
 
