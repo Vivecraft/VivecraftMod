@@ -46,9 +46,14 @@ public class VRShaders {
     public static final String MIXED_REALITY_FIRST_PERSON_PASS = "firstPersonPass";
     public static final String MIXED_REALITY_KEY_COLOR = "keyColor";
     public static final String MIXED_REALITY_ALPHA_MODE = "alphaMode";
+    public static final String MIXED_REALITY_GUI_MASK_UNIFORM = "guiMask";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
+    public static final String MIXED_REALITY_GUI_COLOR_SAMPLER = "guiColor";
+    public static final int MIXED_REALITY_GUI_FIRST = 1;
+    public static final int MIXED_REALITY_GUI_THIRD = 2;
+    public static final int MIXED_REALITY_GUI_SEPARATE = 4;
 
     // vr post shader and its uniforms
     public static final ShaderProgram POST_PROCESSING_SHADER = new ShaderProgram(
@@ -83,6 +88,17 @@ public class VRShaders {
         ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"),
         DefaultVertexFormat.POSITION_TEX, ShaderDefines.EMPTY);
     public static final String BLIT_VR_COLOR_SAMPLER = "DiffuseSampler";
+
+    public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_blit")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
+        .withSampler(BLIT_VR_COLOR_SAMPLER)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withBlend(BlendFunction.TRANSLUCENT)
+        .build();
 
     // end portal shaders
     public static final ShaderProgram RENDERTYPE_END_PORTAL_VR_SHADER = new ShaderProgram(

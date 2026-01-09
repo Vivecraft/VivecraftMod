@@ -8,6 +8,7 @@ import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.ClassUtils;
+import org.vivecraft.mod_compat_vr.shaders.ShaderType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +30,12 @@ public class IrisHelper {
     private static Method ShaderStorageBufferHolder_setupBuffers;
     private static RenderPass lastSSBOPass;
 
+    private static Method IrisPipelines_assignPipeline;
+    private static Object ShaderKey_ENTITIES_SOLID;
+    private static Object ShaderKey_ENTITIES_CUTOUT;
+    private static Object ShaderKey_ENTITIES_TRANSLUCENT;
+    private static Object ShaderKey_BASIC_COLOR;
+
     // for iris/dh compat
     private static boolean DH_PRESENT = false;
     private static Object dhOverrideInjector;
@@ -45,8 +52,6 @@ public class IrisHelper {
     private static Method DHCompatInternal_getGenericShader;
 
     private static Method CapturedRenderingState_getGbufferProjection;
-
-    public static boolean SLOW_MODE = false;
 
     public static boolean isLoaded() {
         return Xloader.isModLoaded("iris") || Xloader.isModLoaded("oculus");

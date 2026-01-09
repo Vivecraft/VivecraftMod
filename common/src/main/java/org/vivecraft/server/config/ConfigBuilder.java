@@ -171,7 +171,7 @@ public class ConfigBuilder {
      * @param validValues  Collection of values that are accepted
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
-    public <T> InListValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
+    public <T> InListValue<T> defineInList(T defaultValue, Collection<T> validValues) {
         List<String> path = this.stack.stream().toList();
         this.spec.defineInList(path, defaultValue, validValues);
         this.stack.removeLast();
@@ -375,16 +375,16 @@ public class ConfigBuilder {
     }
 
     public static class InListValue<T> extends ConfigValue<T> {
-        private final Collection<? extends T> validValues;
+        private final Collection<T> validValues;
 
         public InListValue(
-            CommentedConfig config, List<String> path, T defaultValue, Collection<? extends T> validValues)
+            CommentedConfig config, List<String> path, T defaultValue, Collection<T> validValues)
         {
             super(config, path, defaultValue);
             this.validValues = validValues;
         }
 
-        public Collection<? extends T> getValidValues() {
+        public Collection<T> getValidValues() {
             return this.validValues;
         }
 
@@ -410,7 +410,7 @@ public class ConfigBuilder {
             }
         }
 
-        public Collection<? extends T> getValidValues() {
+        public Collection<T> getValidValues() {
             return EnumSet.allOf(this.enumClass);
         }
 
