@@ -272,7 +272,7 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
         if (this.isDrawing() || this.dh.vrSettings.seated) {
             // aim dir
             Vector3f arrowPos = MathUtils.subtractToVector3f(world.getController(1 - bowHand).getPosition(), cam);
-            DebugRenderHelper.renderLine(MathUtils.RED, arrowPos, this.aim.add(arrowPos, new Vector3f()));
+            DebugRenderHelper.renderLine(poseStack, MathUtils.RED, arrowPos, this.aim.add(arrowPos, new Vector3f()));
         } else {
             Vector3f bowPos = MathUtils.subtractToVector3f(world.getController(bowHand).getPosition(), cam);
             float dist = 0.15F * world.worldScale;

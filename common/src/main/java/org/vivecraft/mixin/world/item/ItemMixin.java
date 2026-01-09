@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.world.item;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -31,33 +30,15 @@ public class ItemMixin {
         return original.call(player);
     }
 
-    @ModifyExpressionValue(method = "getPlayerPOVHitResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getXRot()F"))
-    private static float vivecraft$localXRot(float xRot, @Local(argsOnly = true) Player player) {
-        if (player.isLocalPlayer() && VRState.VR_RUNNING && ClientNetworking.OVERRIDE_ACTIVE) {
-            return ClientNetworking.OVERRIDDEN_PITCH;
-        } else {
-            return xRot;
-        }
-    }
-
-    @ModifyExpressionValue(method = "getPlayerPOVHitResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getYRot()F"))
-    private static float vivecraft$localYRot(float yRot, @Local(argsOnly = true) Player player) {
-        if (player.isLocalPlayer() && VRState.VR_RUNNING && ClientNetworking.OVERRIDE_ACTIVE) {
-            return ClientNetworking.OVERRIDDEN_YAW;
-        } else {
-            return yRot;
-        }
-    }
-
     @WrapOperation(method = "getPlayerPOVHitResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;add(DDD)Lnet/minecraft/world/phys/Vec3;"))
     private static Vec3 vivecraft$modifyAimDir(
         Vec3 instance, double x, double y, double z, Operation<Vec3> original, @Local(argsOnly = true) Player player)
     {
         Vec3 aim = null;
         if (player instanceof ServerPlayer serverPlayer && ServerVRPlayers.isVRPlayer(serverPlayer)) {
-            return ServerVRPlayers.getVivePlayer(serverPlayer).getAimDir(false);
+            aim = ServerVRPlayers.getVivePlayer(serverPlayer).getAimDir(false);
         } else if (player.isLocalPlayer() && VRState.VR_RUNNING) {
-            return MathUtils.toMcVec3(ClientNetworking.getActiveAimDir());
+            aim = MathUtils.toMcVec3(ClientNetworking.getActiveAimDir());
         }
         if (aim != null) {
             double length = Math.sqrt(x * x + y * y + z * z);
