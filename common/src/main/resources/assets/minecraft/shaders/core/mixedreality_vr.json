@@ -16,6 +16,9 @@
     },
     {
       "name": "thirdPersonDepth"
+    },
+    {
+      "name": "guiColor"
     }
   ],
   "uniforms": [
@@ -57,6 +60,12 @@
     },
     {
       "name": "alphaMode",
+      "type": "int",
+      "count": 1,
+      "values": [1]
+    },
+    {
+      "name": "guiMask",
       "type": "int",
       "count": 1,
       "values": [1]

@@ -2,11 +2,14 @@ package org.vivecraft.api.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.api_impl.VRRenderingAPIImpl;
+
+import javax.annotation.Nullable;
 
 /**
  * The main interface for interacting with Vivecraft from rendering code. For other client-side code, one should use
@@ -93,4 +96,15 @@ public interface VRRenderingAPI {
      * @since Minecraft 1.20.5
      */
     void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix);
+
+    /**
+     * Gets the VR pose representing the player in Minecraft world coordinates interpolated for rendering.
+     *
+     * @param player Player to get the VR pose interpolated for rendering of.
+     * @return The VR pose representing the provided player in Minecraft space post-tick interpolated for rendering, or
+     * {@code null} if the player isn't in VR.
+     * @since 1.3.5
+     */
+    @Nullable
+    VRPose getWorldRenderPose(Player player);
 }
