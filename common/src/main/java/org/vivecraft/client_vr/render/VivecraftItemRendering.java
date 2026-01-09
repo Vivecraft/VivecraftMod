@@ -210,7 +210,7 @@ public class VivecraftItemRendering {
                     DH.vrPlayer.vrdata_world_render.getController(bowHand).getMatrix().transpose()));
 
                 // offset the bow model to be in line with the aim vector
-                Vector3f up = aim.cross(forward, new Vector3f()).cross(aim).normalize().mul(0.1F);
+                org.joml.Vector3f up = aim.cross(forward, new org.joml.Vector3f()).cross(aim).normalize().mul(0.1F);
                 poseStack.translate(up.x(), up.y(), up.z());
 
                 // align with controller

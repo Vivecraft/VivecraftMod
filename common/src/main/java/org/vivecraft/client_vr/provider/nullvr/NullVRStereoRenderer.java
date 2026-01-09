@@ -35,7 +35,7 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public Matrix4f getCachedProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    public com.mojang.math.Matrix4f getCachedProjectionMatrix(int eyeType, float nearClip, float farClip) {
         if (this.lastFov != ClientDataHolderVR.getInstance().vrSettings.nullvrFOV ||
             this.lastAngle != ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle)
         {

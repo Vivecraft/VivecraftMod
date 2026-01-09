@@ -55,6 +55,16 @@ public class MathUtils {
     }
 
     /**
+     * Converts a {@link Vec3} to a joml {@link Vector3f}.
+     *
+     * @param v The original Vec3.
+     * @return The joml Vector3f.
+     */
+    public static Vector3f toJomlVector3f(Vec3 v) {
+        return new Vector3f((float) v.x, (float) v.y, (float) v.z);
+    }
+
+    /**
      * Converts a {@link Vector3fc} to a {@link com.mojang.math.Vector3f}.
      *
      * @param v The original Vector3fc.

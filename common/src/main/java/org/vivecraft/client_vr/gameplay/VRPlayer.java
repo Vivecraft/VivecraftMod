@@ -639,7 +639,7 @@ public class VRPlayer {
      * @return the direction the player should look at
      */
     public Vector3fc getRightClickLookOverride(Player entity, int c) {
-        Vector3fc out = entity.getLookAngle().toVector3f();
+        Vector3fc out = MathUtils.toJomlVector3f(entity.getLookAngle());
 
         if (this.lookAtPos != null || this.crossVec != null) {
             out = MathUtils.subtractToVector3f(this.lookAtPos != null ? this.lookAtPos : this.crossVec,
