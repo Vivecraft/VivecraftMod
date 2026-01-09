@@ -51,6 +51,7 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
@@ -75,8 +76,6 @@ public abstract class GameRendererVRMixin
     private static final ClientDataHolderVR vivecraft$DATA_HOLDER = ClientDataHolderVR.getInstance();
     @Unique
     private static final float vivecraft$MIN_CLIP_DISTANCE = 0.02F;
-    @Unique
-    private Vec3 vivecraft$crossVec;
     @Unique
     private Matrix4f vivecraft$thirdPassProjectionMatrix = new Matrix4f();
     @Unique
@@ -185,9 +184,9 @@ public abstract class GameRendererVRMixin
     @ModifyArg(method = "pick(Lnet/minecraft/world/entity/Entity;DDF)Lnet/minecraft/world/phys/HitResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;pick(DFZ)Lnet/minecraft/world/phys/HitResult;"), index = 0)
     private double vivecraft$getCrossVec(double hitDistance) {
         if (VRState.VR_RUNNING) {
+            VRPlayer vrPlayer = ClientDataHolderVR.getInstance().vrPlayer;
             // get the end of the reach point here, to have the correct reach distance
-            this.vivecraft$crossVec = vivecraft$DATA_HOLDER.vrPlayer.AimedPointAtDistance(
-                vivecraft$DATA_HOLDER.vrPlayer.vrdata_world_render.getAim(), hitDistance);
+            vrPlayer.crossVec = vrPlayer.AimedPointAtDistance(vrPlayer.vrdata_world_render.getAim(), hitDistance);
         }
         return hitDistance;
     }
@@ -474,7 +473,7 @@ public abstract class GameRendererVRMixin
             original.call(instance, partialTick);
 
             if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != HitResult.Type.MISS) {
-                this.vivecraft$crossVec = this.minecraft.hitResult.getLocation();
+                vivecraft$DATA_HOLDER.vrPlayer.crossVec = this.minecraft.hitResult.getLocation();
             }
 
             if (this.minecraft.screen == null) {
@@ -672,12 +671,6 @@ public abstract class GameRendererVRMixin
     @Unique
     public float vivecraft$isInBlock() {
         return this.vivecraft$inBlock;
-    }
-
-    @Override
-    @Unique
-    public Vec3 vivecraft$getCrossVec() {
-        return this.vivecraft$crossVec;
     }
 
     @Override

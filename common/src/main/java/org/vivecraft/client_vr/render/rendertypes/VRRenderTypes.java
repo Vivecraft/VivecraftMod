@@ -122,6 +122,10 @@ public class VRRenderTypes {
         return CROSSHAIR_WORLD.apply(resourceLocation, depthAlways);
     }
 
+    public static RenderType linesStrip() {
+        return RenderType.debugLineStrip(2F);
+    }
+
     public static RenderType quads(boolean depthAlways) {
         return depthAlways ? QUADS_ALWAYS : QUADS;
     }

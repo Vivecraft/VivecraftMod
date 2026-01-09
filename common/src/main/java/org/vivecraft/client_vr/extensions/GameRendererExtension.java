@@ -43,11 +43,6 @@ public interface GameRendererExtension {
     Vec3 vivecraft$getRvePos(float partialTick);
 
     /**
-     * @return the point the player is pointing at
-     */
-    Vec3 vivecraft$getCrossVec();
-
-    /**
      * resets the projection matrix
      *
      * @param partialTick partial ticks to interpolate fov changes

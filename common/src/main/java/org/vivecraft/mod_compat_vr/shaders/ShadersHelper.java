@@ -5,7 +5,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
+import org.joml.Vector3f;
+import org.vivecraft.Xloader;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -17,6 +20,7 @@ import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -26,6 +30,20 @@ import java.util.function.Supplier;
  * helper to wrap general shader related task in one class, independent if running Optifine or iris
  */
 public class ShadersHelper {
+
+    public static boolean SLOW_MODE = false;
+
+    public static Vec3 SHADOW_CAMERA_POSITION = Vec3.ZERO;
+    private static final EnumMap<RenderPass, Vector3f> WRAPPED_SHADOW_CAMERA_POSITION = new EnumMap<>(RenderPass.class);
+    private static final EnumMap<RenderPass, Vector3f> PREVIOUS_WRAPPED_SHADOW_CAMERA_POSITION = new EnumMap<>(
+        RenderPass.class);
+
+    static {
+        for (RenderPass pass : RenderPass.values()) {
+            WRAPPED_SHADOW_CAMERA_POSITION.put(pass, new Vector3f());
+            PREVIOUS_WRAPPED_SHADOW_CAMERA_POSITION.put(pass, new Vector3f());
+        }
+    }
 
     public enum UniformType {
         MATRIX4F,
@@ -93,15 +111,52 @@ public class ShadersHelper {
     }
 
     /**
+     * @return if the shadow pass is run for each pass, instead of just once
+     */
+    public static boolean isSlowMode() {
+        return SLOW_MODE || ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization;
+    }
+
+    /**
+     * updates the position of the camera during the shadow pass
+     *
+     * @param setAll sets the position for all passes
+     * @param x      X position
+     * @param y      Y position
+     * @param z      Z position
+     */
+    public static void setShadowCameraPosition(boolean setAll, float x, float y, float z) {
+        if (isSlowMode() && !setAll) {
+            // set just for current
+            RenderPass current = ClientDataHolderVR.getInstance().currentPass;
+            PREVIOUS_WRAPPED_SHADOW_CAMERA_POSITION.get(current)
+                .set(WRAPPED_SHADOW_CAMERA_POSITION.get(current));
+            WRAPPED_SHADOW_CAMERA_POSITION.get(current).set(x, y, z);
+        } else {
+            for (RenderPass pass : RenderPass.values()) {
+                PREVIOUS_WRAPPED_SHADOW_CAMERA_POSITION.get(pass).set(WRAPPED_SHADOW_CAMERA_POSITION.get(pass));
+                WRAPPED_SHADOW_CAMERA_POSITION.get(pass).set(x, y, z);
+            }
+        }
+    }
+
+    /**
      * adds the vivecraft macros, using the provided consumers
      *
      * @param createMacro      a consumer that defines a name as existent
      * @param createValueMacro a consumer that defines a name with a value
      */
     public static void addMacros(Consumer<String> createMacro, BiConsumer<String, Integer> createValueMacro) {
-        createMacro.accept("VIVECRAFT");
-        for (RenderPass pass : RenderPass.values()) {
-            createValueMacro.accept("VIVECRAFT_PASS_" + pass.toString(), pass.ordinal());
+        if (Xloader.isModLoadedSuccess()) {
+            createMacro.accept("VIVECRAFT");
+            String[] modVersion = Xloader.getModVersion().split("-", 3)[1].split("\\.");
+            int version = Integer.parseInt(modVersion[0]) * 10000 +
+                Integer.parseInt(modVersion[1]) * 100 +
+                Integer.parseInt(modVersion[2]);
+            createValueMacro.accept("VIVECRAFT_VERSION", version);
+            for (RenderPass pass : RenderPass.values()) {
+                createValueMacro.accept("VIVECRAFT_PASS_" + pass.toString(), pass.ordinal());
+            }
         }
     }
 
@@ -152,8 +207,23 @@ public class ShadersHelper {
             UNIFORMS.add(Triple.of("vivecraftIsVR", UniformType.BOOLEAN, () -> VRState.VR_RUNNING));
 
             // renderpass
-            UNIFORMS.add(Triple.of("vivecraftRenderpass", UniformType.INTEGER,
-                () -> ClientDataHolderVR.getInstance().currentPass.ordinal()));
+            UNIFORMS.add(Triple.of("vivecraftRenderpass", UniformType.INTEGER, () -> dh.currentPass.ordinal()));
+
+            // shadow camera position
+            UNIFORMS.add(Triple.of("vivecraftShadowCameraPosition", UniformType.VECTOR3F,
+                () -> WRAPPED_SHADOW_CAMERA_POSITION.get(dh.currentPass)));
+            UNIFORMS.add(Triple.of("vivecraftPreviousShadowCameraPosition", UniformType.VECTOR3F,
+                () -> PREVIOUS_WRAPPED_SHADOW_CAMERA_POSITION.get(dh.currentPass)));
+
+            UNIFORMS.add(
+                Triple.of("vivecraftShadowCameraOffset", UniformType.VECTOR3F, () -> {
+                    if (VRState.VR_RUNNING) {
+                        return MathUtils.subtractToVector3f(SHADOW_CAMERA_POSITION,
+                            Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+                    } else {
+                        return MathUtils.ZERO;
+                    }
+                }));
         }
         return UNIFORMS;
     }
@@ -162,26 +232,26 @@ public class ShadersHelper {
      * registers the vr RenderPipelines to be mapped to the shader ones
      */
     public static void registerPipelines() {
-        BiConsumer<RenderPipeline, String> consumer = null;
+        BiConsumer<RenderPipeline, ShaderType> consumer = null;
         if (IrisHelper.isLoaded()) {
             consumer = IrisHelper::registerPipeline;
         }
         // optifine does this still automatically, based on the shader name of the pipeline
         if (consumer != null) {
-            consumer.accept(VRShaders.CROSSHAIR_WORLD, "ENTITIES");
-            consumer.accept(VRShaders.CROSSHAIR_WORLD_ALWAYS, "ENTITIES");
+            consumer.accept(VRShaders.CROSSHAIR_WORLD, ShaderType.ENTITIES_CUTOUT);
+            consumer.accept(VRShaders.CROSSHAIR_WORLD_ALWAYS, ShaderType.ENTITIES_CUTOUT);
 
-            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
-            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT, "ENTITIES_TRANSLUCENT");
-            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT, "ENTITIES");
-            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, "ENTITIES");
-            consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, "ENTITIES");
+            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_TRANSLUCENT);
+            consumer.accept(VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_TRANSLUCENT);
+            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_CUTOUT);
+            consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_CUTOUT);
+            consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_SOLID);
 
-            consumer.accept(VRShaders.QUADS, "BASIC");
-            consumer.accept(VRShaders.QUADS_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TRIANGLES_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TRIANGLE_FAN_ALWAYS, "BASIC");
-            consumer.accept(VRShaders.TEXT_NO_CULL, "ENTITIES_TRANSLUCENT");
+            consumer.accept(VRShaders.QUADS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.QUADS_ALWAYS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.TRIANGLES_ALWAYS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.TRIANGLE_FAN_ALWAYS, ShaderType.BASIC_COLOR);
+            consumer.accept(VRShaders.TEXT_NO_CULL, ShaderType.ENTITIES_TRANSLUCENT);
         }
     }
 }

@@ -1,11 +1,18 @@
 package org.vivecraft.client_vr;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.*;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.provider.InputSimulator;
 
 public abstract class MethodHolder {
+
+
+    public static boolean isKeyDown(InputConstants.Key key) {
+        return key.getType() == InputConstants.Type.KEYSYM && key.getValue() != GLFW.GLFW_KEY_UNKNOWN &&
+            isKeyDown(key.getValue());
+    }
 
     public static boolean isKeyDown(int i) {
         return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), i) == 1 || InputSimulator.isKeyDown(i);

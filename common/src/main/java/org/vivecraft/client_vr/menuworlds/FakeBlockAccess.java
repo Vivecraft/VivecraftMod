@@ -249,14 +249,14 @@ public class FakeBlockAccess implements LevelReader {
 
     @Override
     public float getShade(Direction face, boolean shade) {
-        boolean flag = this.dimensionInfo.constantAmbientLight(); // isNether?? yeah mate nice hard-coding
+        boolean isNether = this.dimensionInfo.constantAmbientLight(); // isNether?? yeah mate nice hard-coding
 
         if (!shade) {
-            return flag ? 0.9F : 1.0F;
+            return isNether ? 0.9F : 1.0F;
         } else {
             return switch (face) {
-                case DOWN -> flag ? 0.9F : 0.5F;
-                case UP -> flag ? 0.9F : 1.0F;
+                case DOWN -> isNether ? 0.9F : 0.5F;
+                case UP -> isNether ? 0.9F : 1.0F;
                 case NORTH, SOUTH -> 0.8F;
                 case WEST, EAST -> 0.6F;
             };

@@ -3,6 +3,7 @@ package org.vivecraft.api_beta.client;
 import com.google.common.annotations.Beta;
 import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.client.VRRenderingAPI;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 
 /**
  * @deprecated since 1.3.0, use {@link VRClientAPI} and {@link VRRenderingAPI} instead
@@ -11,22 +12,7 @@ import org.vivecraft.api.client.VRRenderingAPI;
 public interface VivecraftClientAPI {
 
     @Deprecated(since = "1.3.0", forRemoval = true)
-    VivecraftClientAPI INSTANCE = new VivecraftClientAPI() {
-        @Override
-        public boolean isVrInitialized() {
-            return VRClientAPI.instance().isVRInitialized();
-        }
-
-        @Override
-        public boolean isVrActive() {
-            return VRClientAPI.instance().isVRActive();
-        }
-
-        @Override
-        public boolean isVanillaRenderPass() {
-            return VRRenderingAPI.instance().isVanillaRenderPass();
-        }
-    };
+    VivecraftClientAPI INSTANCE = new VRClientAPIImpl.LegacyApi();
 
     /**
      * @deprecated since 1.3.0, use {@link VRClientAPI#instance()} and {@link VRRenderingAPI#instance()} instead

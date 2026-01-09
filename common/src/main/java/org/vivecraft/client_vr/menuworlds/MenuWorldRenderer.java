@@ -51,6 +51,7 @@ import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.extensions.StateHolderExtension;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -70,8 +71,6 @@ public class MenuWorldRenderer {
         "textures/environment/moon_phases.png");
     private static final ResourceLocation SUN_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/environment/sun.png");
-    private static final ResourceLocation CLOUDS_LOCATION = ResourceLocation.withDefaultNamespace(
-        "textures/environment/clouds.png");
     private static final ResourceLocation END_SKY_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/environment/end_sky.png");
 
@@ -200,9 +199,10 @@ public class MenuWorldRenderer {
         this.rendering = true;
 
         // temporarily disable fabulous to render the menu world
-        GraphicsStatus current = this.mc.options.graphicsMode().get();
-        if (current == GraphicsStatus.FABULOUS) {
-            this.mc.options.graphicsMode().set(GraphicsStatus.FANCY);
+        GraphicsStatus currentGraphics = this.mc.options.graphicsMode().get();
+        if (currentGraphics == GraphicsStatus.FABULOUS) {
+            ((OptionInstanceExtension<GraphicsStatus>) (Object) this.mc.options.graphicsMode()).vivecraft$setWithoutUpdate(
+                GraphicsStatus.FANCY);
         }
 
         turnOnLightLayer();
@@ -254,7 +254,8 @@ public class MenuWorldRenderer {
 
         poseStack.popMatrix();
         turnOffLightLayer();
-        this.mc.options.graphicsMode().set(current);
+        ((OptionInstanceExtension<GraphicsStatus>) (Object) this.mc.options.graphicsMode()).vivecraft$setWithoutUpdate(
+            currentGraphics);
         this.rendering = false;
     }
 
@@ -914,10 +915,7 @@ public class MenuWorldRenderer {
         int yFloor = Mth.floor(inY);
         int zFloor = Mth.floor(inZ);
         VertexConsumer vertexConsumer;
-        int rainDistance = 5;
-        if (Minecraft.useFancyGraphics()) {
-            rainDistance = 10;
-        }
+        int rainDistance = Minecraft.useFancyGraphics() ? 10 : 5;
         float rainAnimationTime = this.ticks + ClientUtils.getCurrentPartialTick();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         MultiBufferSource.BufferSource bufferSource = this.mc.renderBuffers().bufferSource();

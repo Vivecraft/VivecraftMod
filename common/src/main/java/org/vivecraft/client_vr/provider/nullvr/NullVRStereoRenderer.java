@@ -5,12 +5,17 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class NullVRStereoRenderer extends VRRenderer {
+
+    private float lastFov = -1;
+    private float lastAngle = -1;
+
     public NullVRStereoRenderer(MCVR vr) {
         super(vr);
     }
@@ -28,9 +33,24 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
+    public Matrix4f getCachedProjectionMatrix(int eyeType, float nearClip, float farClip) {
+        if (this.lastFov != ClientDataHolderVR.getInstance().vrSettings.nullvrFOV ||
+            this.lastAngle != ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle)
+        {
+            // reset far clip plane to force a projection fetch
+            this.lastFarClip = 0F;
+            this.lastFov = ClientDataHolderVR.getInstance().vrSettings.nullvrFOV;
+            this.lastAngle = ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle;
+        }
+        return super.getCachedProjectionMatrix(eyeType, nearClip, farClip);
+    }
+
+    @Override
     protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
-        return new Matrix4f().setPerspectiveOffCenter(Mth.DEG_TO_RAD * 110.0F,
-            Mth.DEG_TO_RAD * (eyeType == 0 ? -2F : 2F), 0F, 1.0F, nearClip, farClip);
+        return new Matrix4f().setPerspectiveOffCenter(
+            Mth.DEG_TO_RAD * ClientDataHolderVR.getInstance().vrSettings.nullvrFOV,
+            Mth.DEG_TO_RAD * ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle * (eyeType == 0 ? -1F : 1F), 0F,
+            1.0F, nearClip, farClip);
     }
 
     @Override
