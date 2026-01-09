@@ -106,6 +106,8 @@ public class MenuWorldRenderer {
     public boolean fastTime;
     private HashMap<ChunkSectionLayer, List<Pair<Integer, GpuBuffer>>> vertexBuffers;
     private GpuBuffer starVBO;
+    private final RenderSystem.AutoStorageIndexBuffer starIndices = RenderSystem.getSequentialBuffer(
+        VertexFormat.Mode.QUADS);
     private int starIndexCount;
     private GpuBuffer skyVBO;
     private GpuBuffer sky2VBO;
@@ -851,7 +853,7 @@ public class MenuWorldRenderer {
             {
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
                     .writeTransform(poseStack, new Vector4f(starBrightness), new Vector3f(), new Matrix4f(), 0.0f);
-                GpuBuffer indexBuffer = this.quadIndices.getBuffer(this.starIndexCount);
+                GpuBuffer indexBuffer = this.starIndices.getBuffer(this.starIndexCount);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Menuworld Stars", this.mc.getMainRenderTarget().getColorTextureView(),
                         OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
@@ -861,7 +863,7 @@ public class MenuWorldRenderer {
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
                     renderPass.setVertexBuffer(0, this.starVBO);
-                    renderPass.setIndexBuffer(indexBuffer, this.quadIndices.type());
+                    renderPass.setIndexBuffer(indexBuffer, this.starIndices.type());
                     renderPass.drawIndexed(0, 0, this.starIndexCount, 1);
                 }
             }
