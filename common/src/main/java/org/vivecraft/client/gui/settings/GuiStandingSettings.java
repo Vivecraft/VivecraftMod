@@ -12,8 +12,9 @@ public class GuiStandingSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.WALK_MULTIPLIER),
         new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_INCREMENT),
         new VROptionEntry(VRSettings.VrOptions.BCB_ON),
-        new VROptionEntry(VRSettings.VrOptions.ALLOW_STANDING_ORIGIN_OFFSET),
+        new VROptionEntry(VRSettings.VrOptions.FEET_BODY_POSITION),
         new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_X_SENSITIVITY),
+        new VROptionEntry(VRSettings.VrOptions.ALLOW_STANDING_ORIGIN_OFFSET),
         new VROptionEntry(VRSettings.VrOptions.FORCE_STANDING_FREE_MOVE, true),
         new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
         new VROptionEntry("vivecraft.options.screen.teleport.button", (button, mousePos) -> {

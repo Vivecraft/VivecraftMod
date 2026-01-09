@@ -206,10 +206,13 @@ public class VivecraftItemRendering {
                     translateX += 0.003F * Mth.sin(j);
                 }
 
-                poseStack.translate(0.0F, 0.0F, 0.1F);
                 // un-do controller tracking
                 poseStack.last().pose()
                     .mul(DH.vrPlayer.vrdata_world_render.getController(bowHand).getMatrix().transpose());
+
+                // offset the bow model to be in line with the aim vector
+                Vector3f up = aim.cross(forward, new Vector3f()).cross(aim).normalize().mul(0.1F);
+                poseStack.translate(up.x(), up.y(), up.z());
 
                 // align with controller
                 preRotation = new Quaternionf().lookAlong(aim, forward).conjugate();
@@ -437,6 +440,7 @@ public class VivecraftItemRendering {
         COMPASS,
         HORN,
         MACE,
-        ROTATED_TOOL
+        ROTATED_TOOL,
+        LANCE
     }
 }
