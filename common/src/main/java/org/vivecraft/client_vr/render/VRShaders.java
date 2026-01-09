@@ -39,6 +39,7 @@ public class VRShaders {
     public static AbstractUniform MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM;
     public static AbstractUniform MIXED_REALITY_KEY_COLOR_UNIFORM;
     public static AbstractUniform MIXED_REALITY_ALPHA_MODE_UNIFORM;
+    public static AbstractUniform MIXED_REALITY_GUI_MASK_UNIFORM;
     public static final String MIXED_REALITY_HMD_VIEW_POSITION = "hmdViewPosition";
     public static final String MIXED_REALITY_HMD_PLANE_NORMAL = "hmdPlaneNormal";
     public static final String MIXED_REALITY_PROJECTION_MATRIX = "projectionMatrix";
@@ -46,9 +47,14 @@ public class VRShaders {
     public static final String MIXED_REALITY_FIRST_PERSON_PASS = "firstPersonPass";
     public static final String MIXED_REALITY_KEY_COLOR = "keyColor";
     public static final String MIXED_REALITY_ALPHA_MODE = "alphaMode";
+    public static final String MIXED_REALITY_GUI_MASK = "guiMask";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
+    public static final String MIXED_REALITY_GUI_COLOR_SAMPLER = "guiColor";
+    public static final int MIXED_REALITY_GUI_FIRST = 1;
+    public static final int MIXED_REALITY_GUI_THIRD = 2;
+    public static final int MIXED_REALITY_GUI_SEPARATE = 4;
 
     // vr post shader and its uniforms
     public static final ShaderProgram POST_PROCESSING_SHADER = new ShaderProgram(
@@ -152,6 +158,7 @@ public class VRShaders {
         MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM = program.safeGetUniform(MIXED_REALITY_FIRST_PERSON_PASS);
         MIXED_REALITY_KEY_COLOR_UNIFORM = program.safeGetUniform(MIXED_REALITY_KEY_COLOR);
         MIXED_REALITY_ALPHA_MODE_UNIFORM = program.safeGetUniform(MIXED_REALITY_ALPHA_MODE);
+        MIXED_REALITY_GUI_MASK_UNIFORM = program.safeGetUniform(MIXED_REALITY_GUI_MASK);
     }
 
     private static void setupFSAA() throws NullPointerException {

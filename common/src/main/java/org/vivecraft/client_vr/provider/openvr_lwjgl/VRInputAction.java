@@ -36,6 +36,7 @@ public class VRInputAction {
 
     public long handle;
     private final boolean[] pressed = new boolean[ControllerType.values().length];
+    private final boolean[] held = new boolean[ControllerType.values().length];
     protected final int[] unpressInTicks = new int[ControllerType.values().length];
 
     public final DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
@@ -324,12 +325,20 @@ public class VRInputAction {
     public void tick() {
         if (this.isHanded()) {
             for (int c = 0; c < ControllerType.values().length; c++) {
-                if (this.unpressInTicks[c] > 0 && --this.unpressInTicks[c] == 0) {
-                    this.unpressBindingImmediately(ControllerType.values()[c]);
+                ControllerType type = ControllerType.values()[c];
+                HandedKeyBinding handedKeyBinding = (HandedKeyBinding) this.keyBinding;
+                if ((!this.held[c] && this.unpressInTicks[c] > 0 && --this.unpressInTicks[c] == 0) ||
+                    (this.held[c] && (!handedKeyBinding.isDown(type) || handedKeyBinding.presses(type) == 0)))
+                {
+                    this.unpressBindingImmediately(type);
                 }
             }
-        } else if (this.unpressInTicks[0] > 0 && --this.unpressInTicks[0] == 0) {
-            this.unpressBindingImmediately(null);
+        } else {
+            if ((!this.held[0] && this.unpressInTicks[0] > 0 && --this.unpressInTicks[0] == 0) ||
+                (this.held[0] && (!this.keyBinding.isDown() || this.keyBinding.clickCount == 0)))
+            {
+                this.unpressBindingImmediately(null);
+            }
         }
     }
 
@@ -339,6 +348,32 @@ public class VRInputAction {
         } else {
             this.unpressBinding();
         }
+    }
+
+    public void holdBinding() {
+        this.holdBinding(this.currentHand);
+    }
+
+    public void holdBinding(ControllerType hand) {
+        if (this.isHanded()) {
+            this.held[hand.ordinal()] = true;
+        } else {
+            this.held[0] = true;
+        }
+        this.pressBinding(this.currentHand);
+    }
+
+    public void stopHoldingBinding(int unpressInTicks) {
+        this.stopHoldingBinding(unpressInTicks, this.currentHand);
+    }
+
+    public void stopHoldingBinding(int unpressInTicks, ControllerType hand) {
+        if (this.isHanded()) {
+            this.held[hand.ordinal()] = false;
+        } else {
+            this.held[0] = false;
+        }
+        this.unpressBinding(unpressInTicks, this.currentHand);
     }
 
     private void pressBinding(ControllerType hand) {
@@ -385,11 +420,23 @@ public class VRInputAction {
         this.unpressBinding(1);
     }
 
+    public void unpressBindingImmediately() {
+        if (this.isHanded()) {
+            for (int c = 0; c < ControllerType.values().length; c++) {
+                this.unpressBindingImmediately(ControllerType.values()[c]);
+            }
+        } else {
+
+            this.unpressBindingImmediately(null);
+        }
+    }
+
     public void unpressBindingImmediately(ControllerType hand) {
         if (this.isHanded()) {
             if (hand == null || !this.pressed[hand.ordinal()]) return;
 
             this.pressed[hand.ordinal()] = false;
+            this.held[hand.ordinal()] = false;
 
             if (this.notifyListeners(false, hand)) return;
 
@@ -398,6 +445,7 @@ public class VRInputAction {
             if (!this.pressed[0]) return;
 
             this.pressed[0] = false;
+            this.held[0] = false;
 
             if (this.notifyListeners(false, null)) return;
 

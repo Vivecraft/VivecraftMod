@@ -81,11 +81,7 @@ public class VRPassHelper {
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
             DATA_HOLDER.vrRenderer.cameraFramebuffer.bindWrite(true);
-            RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-            RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT | GL13C.GL_DEPTH_BUFFER_BIT);
-            DATA_HOLDER.vrRenderer.cameraRenderFramebuffer.blitToScreen(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth,
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight);
+            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, false);
             Profiler.get().pop();
         }
 
