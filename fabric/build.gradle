@@ -34,7 +34,7 @@ dependencies {
     // for iris compat
     modCompileOnly "maven.modrinth:iris:1.7.6+1.20.1"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
-    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
+    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.1' //temp iris
 
     // for REI compat
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:12.1.785") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }

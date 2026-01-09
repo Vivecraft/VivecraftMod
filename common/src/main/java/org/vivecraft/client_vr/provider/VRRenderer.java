@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public abstract class VRRenderer {
     // projection matrices
     public Matrix4f[] eyeProj = new Matrix4f[2];
-    private float lastFarClip = 0F;
+    protected float lastFarClip = 0F;
 
     // render buffers
     public RenderTarget framebufferEye0;
@@ -334,7 +334,10 @@ public abstract class VRRenderer {
         if (includeNonRendered ||
             window.vivecraft$getActualScreenWidth() > 0 && window.vivecraft$getActualScreenHeight() > 0)
         {
-            if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
+            if (dataholder.vrSettings.renderAllPasses) {
+                passes.add(RenderPass.CENTER);
+                passes.add(RenderPass.THIRD);
+            } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
                 passes.add(RenderPass.CENTER);
             } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
                 if (dataholder.vrSettings.mixedRealityUndistorted && dataholder.vrSettings.mixedRealityUnityLike) {
@@ -356,7 +359,7 @@ public abstract class VRRenderer {
                 passes.add(RenderPass.SCOPEL);
             }
 
-            if (dataholder.cameraTracker.isVisible()) {
+            if (dataholder.cameraTracker.isVisible() || dataholder.vrSettings.renderAllPasses) {
                 passes.add(RenderPass.CAMERA);
             }
         }
@@ -814,6 +817,7 @@ public abstract class VRRenderer {
             this.cameraFramebuffer = VRTextureTarget.builder("Handheld Camera")
                 .withSize(cameraSize.getA(), cameraSize.getB())
                 .withDepth()
+                .withClearColor(0F, 0F, 0F, 1F)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", this.cameraFramebuffer);
             RenderHelper.checkGLError("Camera framebuffer setup");
