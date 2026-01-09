@@ -808,6 +808,7 @@ public abstract class VRRenderer {
             this.cameraFramebuffer = VRTextureTarget.builder("Handheld Camera")
                 .withSize(cameraSize.getA(), cameraSize.getB())
                 .withDepth()
+                .withClearColor(0F, 0F, 0F, 1F)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", this.cameraFramebuffer);
             RenderHelper.checkGLError("Camera framebuffer setup");
