@@ -93,6 +93,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
     @Inject(method = "doTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER))
     private void vivecraft$overridePose(CallbackInfo ci) {
         ServerVRPlayers.overridePose((ServerPlayer) (Object) this);
+        ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
+        if (serverVivePlayer != null) {
+            serverVivePlayer.tick();
+        }
     }
 
     /**

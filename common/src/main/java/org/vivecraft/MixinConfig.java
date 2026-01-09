@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client_vr.extensions.ClassDependentMixin;
+import org.vivecraft.client_vr.extensions.FieldDependentMixin;
 import org.vivecraft.client_vr.extensions.MethodDependentMixin;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
@@ -49,6 +50,8 @@ public class MixinConfig implements IMixinConfigPlugin {
         "L" + ClassDependentMixin.class.getName().replace(".", "/") + ";";
     private static final String METHOD_DEPENDENT_MIXIN =
         "L" + MethodDependentMixin.class.getName().replace(".", "/") + ";";
+    private static final String FIELD_DEPENDENT_MIXIN =
+        "L" + FieldDependentMixin.class.getName().replace(".", "/") + ";";
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
@@ -84,6 +87,14 @@ public class MixinConfig implements IMixinConfigPlugin {
                         if (MixinService.getService().getBytecodeProvider()
                             .getClassNode(targetClassName).methods.stream()
                             .noneMatch(m -> neededMethod.equals(m.name)))
+                        {
+                            return false;
+                        }
+                    } else if (annotation.desc.equals(FIELD_DEPENDENT_MIXIN)) {
+                        String neededField = (String) annotation.values.get(1);
+                        if (MixinService.getService().getBytecodeProvider()
+                            .getClassNode(targetClassName).fields.stream()
+                            .noneMatch(f -> neededField.equals(f.name)))
                         {
                             return false;
                         }
