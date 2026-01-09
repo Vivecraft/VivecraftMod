@@ -417,7 +417,7 @@ public class ShaderHelper {
         VRShaders.MIXED_REALITY_SHADER.setSampler(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
             DATA_HOLDER.vrRenderer.framebufferMR.getDepthTextureId());
 
-        mixedRealityShader.bindSampler(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
+        VRShaders.MIXED_REALITY_SHADER.setSampler(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
             GuiHandler.GUI_FRAMEBUFFER.getColorTextureId());
 
         if (DATA_HOLDER.vrSettings.mixedRealityUnityLike) {
@@ -631,13 +631,11 @@ public class ShaderHelper {
             RenderSystem.defaultBlendFunc();
         }
 
-        CompiledShaderProgram blitShader = Objects.requireNonNull(
-            RenderSystem.setShader(VRShaders.BLIT_VR_SHADER), "Vivecraft blit shader not loaded");
-        blitShader.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureId());
+        VRShaders.BLIT_VR_SHADER.setSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureId());
 
-        blitShader.apply();
-        drawFullscreenQuad(VRShaders.BLIT_VR_SHADER.vertexFormat());
-        blitShader.clear();
+        VRShaders.BLIT_VR_SHADER.apply();
+        drawFullscreenQuad(VRShaders.BLIT_VR_SHADER.getVertexFormat());
+        VRShaders.BLIT_VR_SHADER.clear();
 
         RenderSystem.depthMask(true);
         RenderSystem.colorMask(true, true, true, true);

@@ -141,7 +141,6 @@ public class VRShaders {
             RENDERTYPE_END_PORTAL_VR_SHADER = null;
         }
         READY = false;
-        MIXED_REALITY_GUI_MASK_UNIFORM = program.safeGetUniform(MIXED_REALITY_GUI_MASK);
     }
 
     private static void setupDepthMask(ResourceManager resourceManager) throws IOException {
@@ -154,6 +153,7 @@ public class VRShaders {
         MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_FIRST_PERSON_PASS);
         MIXED_REALITY_KEY_COLOR_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_KEY_COLOR);
         MIXED_REALITY_ALPHA_MODE_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_ALPHA_MODE);
+        MIXED_REALITY_GUI_MASK_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_GUI_MASK);
     }
 
     private static void setupFSAA(ResourceManager resourceManager) throws IOException {

@@ -13,11 +13,13 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -75,5 +77,29 @@ public class IrisRenderingPipelineVRMixin {
         return noEntityShadows || (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() &&
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null
         );
+    }
+
+    /**
+     * needed because shadowRenderTargets never gets set for sub pipelines
+     * this should give the own shadow targets, for the main pipeline and the first RenderPass,
+     * and for all other pipelines the one from the first RenderPass
+     * no min, because iris 1.8 only has 2, and those might also get removed, and are not needed
+     */
+    @ModifyArg(method = {
+        "lambda$new$6*",
+        "lambda$new$7*",
+        "lambda$new$9*",
+        "lambda$new$11*"
+    }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0, require = 0)
+    private Object vivecraft$rerouteShadowTarget(Object obj) {
+        // make sure we only change ShadowRenderTargets, since this might also inject into other lambdas
+        if (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() && obj instanceof ShadowRenderTargets ||
+            obj == null)
+        {
+            return Objects.requireNonNullElse(
+                ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj);
+        } else {
+            return obj;
+        }
     }
 }

@@ -68,6 +68,8 @@ public class MenuWorldRenderer {
         "textures/environment/moon_phases.png");
     private static final ResourceLocation SUN_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/environment/sun.png");
+    private static final ResourceLocation CLOUDS_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/environment/clouds.png");
     private static final ResourceLocation END_SKY_LOCATION = ResourceLocation.withDefaultNamespace(
         "textures/environment/end_sky.png");
 
