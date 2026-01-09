@@ -488,14 +488,11 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                     else if (isHand && (item instanceof BrushItem || itemstack.is(ViveItemTags.VIVECRAFT_BRUSHES))) {
                         // local visuals/sound
                         if (item instanceof BrushItem brush) {
-                            brush.spawnDustParticles(player.level(), blockHit, blockstate,
-                                player.getViewVector(0.0F),
-                                c == 0 ? player.getMainArm() : player.getMainArm().getOpposite());
+                            brush.spawnDustParticles(player.level, blockHit, blockstate,
+                                player.getViewVector(0.0F));
                         }
-                        player.level().playSound(player, blockHit.getBlockPos(),
-                            blockstate.getBlock() instanceof BrushableBlock ?
-                                ((BrushableBlock) blockstate.getBlock()).getBrushSound() :
-                                SoundEvents.BRUSH_GENERIC, SoundSource.BLOCKS);
+                        player.level.playSound(player, blockHit.getBlockPos(), SoundEvents.BRUSH_BRUSHING,
+                            SoundSource.BLOCKS);
 
                         // server logic
                         // need to look at it for longer, this will modify the player look direction

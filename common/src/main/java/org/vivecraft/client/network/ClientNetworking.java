@@ -386,7 +386,7 @@ public class ClientNetworking {
         Vector3fc view = viewSupplier.get();
         float pitch = (float) Math.toDegrees(Math.asin(-view.y() / view.length()));
         float yaw = (float) Math.toDegrees(Math.atan2(-view.x(), view.z()));
-        ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(yaw, pitch, player.onGround()));
+        ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(yaw, pitch, player.isOnGround()));
         AIM_DIR_OVERRIDE = view;
     }
 

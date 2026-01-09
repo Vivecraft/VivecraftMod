@@ -34,7 +34,7 @@ public class ColoredButton extends Button {
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         int color = this.active ? 0xFFFFFF : 0xA0A0A0;
-        this.renderString(guiGraphics, Minecraft.getInstance().font, color | Mth.ceil(this.alpha * 255.0F) << 24);
+        this.renderString(poseStack, Minecraft.getInstance().font, color | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 
     // copied from AbstractButton
