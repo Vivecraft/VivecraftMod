@@ -18,7 +18,7 @@ public class ModClientMixin {
     @Inject(method = "lambda$registerBlockColors$0", at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$grassColor(CallbackInfoReturnable<Integer> cir) {
         if (Minecraft.getInstance().player == null) {
-            cir.setReturnValue(FoliageColor.FOLIAGE_BIRCH);
+            cir.setReturnValue(FoliageColor.getBirchColor());
         }
     }
 }
