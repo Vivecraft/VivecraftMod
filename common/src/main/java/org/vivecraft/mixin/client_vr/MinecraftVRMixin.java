@@ -38,6 +38,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BoatItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
@@ -53,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.Xloader;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.VivecraftClickEvent;
@@ -84,11 +87,13 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
+import org.vivecraft.mod_compat_vr.ReplayHelper;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(Minecraft.class)
+// inject late, to let other mods disable the hud rendering
+@Mixin(value = Minecraft.class, priority = 1100)
 public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     // keeps track if an attack was initiated by pressing the attack key
@@ -458,7 +463,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     {
         if (VRState.VR_RUNNING) {
             if (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemstack)) {
-                ClientNetworking.sendActiveHand(hand, false);
+                if (ClientDataHolderVR.getInstance().vrSettings.seated &&
+                    (itemstack.getItem() instanceof BucketItem || itemstack.getItem() instanceof BoatItem))
+                {
+                    // these need to aim from the head or they mismatch
+                    ClientNetworking.sendActiveBodyPart(VRBodyPart.HEAD, true);
+                } else {
+                    ClientNetworking.sendActiveHand(hand, false);
+                }
             } else {
                 // no telescope use in standing vr
                 return null;
@@ -922,10 +934,20 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         mouseY);
                     this.mouseHandler.grabMouse();
                 }
+                // unpress any keys we simulated for VR
+                if (MCVR.get() != null) {
+                    for (VRInputAction action : MCVR.get().getInputActions()) {
+                        action.unpressBindingImmediately();
+                    }
+                }
             }
 
             // send new VR state to the server
             ClientNetworking.sendServerPacket(new VRActivePayloadC2S(vrActive));
+            if (ReplayHelper.isLoaded()) {
+                // replay mod / flashback compat, on servers without the plugin
+                ReplayHelper.storeVRActive(vrActive);
+            }
 
             // send options, since we override the main hand setting
             this.options.broadcastOptions();

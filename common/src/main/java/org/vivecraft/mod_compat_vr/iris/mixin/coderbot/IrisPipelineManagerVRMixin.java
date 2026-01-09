@@ -23,6 +23,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -124,7 +125,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                     WorldRenderingPipeline pipe = this.pipelineFactory.apply(newDimension);
                     this.vivecraft$vrPipelinesPerDimension.get(newDimension).put(renderPass, pipe);
 
-                    if (first && IrisHelper.SLOW_MODE &&
+                    if (first && ShadersHelper.isSlowMode() &&
                         !ClientDataHolderVR.getInstance().vrSettings.disableShaderOptimization)
                     {
                         first = false;

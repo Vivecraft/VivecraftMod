@@ -41,7 +41,9 @@ import org.vivecraft.client_vr.gameplay.trackers.DebugRenderTracker;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
 import org.vivecraft.client_vr.provider.ControllerTransform;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.common.utils.math.AngleOrder;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.awt.*;
 import java.io.*;
@@ -111,6 +113,19 @@ public class VRSettings {
         THIRD_PERSON,
         MIXED_REALITY,
         GUI
+    }
+
+    public enum MirrorGui implements OptionEnum<MirrorGui> {
+        OFF,
+        HUD_ONLY,
+        ALWAYS
+    }
+
+    public enum MixedRealityGui implements OptionEnum<MixedRealityGui> {
+        FIRST,
+        THIRD,
+        BOTH,
+        SEPARATE
     }
 
     public enum HUDLock implements OptionEnum<HUDLock> {
@@ -231,6 +246,13 @@ public class VRSettings {
     public int smoothRunTickCount = 20;
     @SettingField
     public boolean smoothTick = false;
+
+    @SettingField(VrOptions.NULLVR_IPD)
+    public float nullvrIPD = 0.1F;
+    @SettingField(VrOptions.NULLVR_EYE_ANGLE)
+    public float nullvrEyeAngle = 2F;
+    @SettingField(VrOptions.NULLVR_FOV)
+    public float nullvrFOV = 110F;
     // Jrbudda's Options
 
     @SettingField(config = "QUICKCOMMAND", separate = true)
@@ -383,6 +405,8 @@ public class VRSettings {
     public boolean allowCrawling = true;
     @SettingField(value = VrOptions.BCB_ON, config = "bcbOn")
     public boolean vrShowBlueCircleBuddy = true;
+    @SettingField(value = VrOptions.FEET_BODY_POSITION)
+    public boolean feetBodyPosition = true;
     @SettingField(VrOptions.VEHICLE_ROTATION)
     public boolean vehicleRotation = true;
     @SettingField(VrOptions.ANALOG_MOVEMENT)
@@ -436,6 +460,10 @@ public class VRSettings {
     public MirrorMode displayMirrorMode = MirrorMode.CROPPED;
     @SettingField(VrOptions.MIRROR_CROP)
     public float mirrorCrop = 0.15F;
+    @SettingField(VrOptions.MIRROR_DUAL_SWAP)
+    public boolean dualMirrorSwap = false;
+    @SettingField(VrOptions.MIRROR_DUAL_CROP)
+    public boolean dualMirrorCrop = false;
     @SettingField(VrOptions.MIRROR_EYE)
     public boolean displayMirrorLeftEye = false;
     @SettingField(VrOptions.MIRROR_CENTER_SMOOTH)
@@ -444,6 +472,8 @@ public class VRSettings {
     public boolean displayMirrorUseScreenshotCamera = false;
     @SettingField(VrOptions.MIRROR_OFF_TEXT)
     public boolean showMirrorOffText = true;
+    @SettingField(VrOptions.MIRROR_GUI)
+    public MirrorGui guiOnMirror = MirrorGui.OFF;
     @SettingField(VrOptions.SHOW_PLAYER_MODEL)
     public boolean shouldRenderSelf = false;
     @SettingField(VrOptions.MAIN_PLAYER_DATA)
@@ -488,6 +518,8 @@ public class VRSettings {
     public boolean renderGameplayTrackers = false;
     @SettingField(VrOptions.GAMEPLAY_TRACKER_TO_RENDER)
     public String gameplayTrackerToRender = "";
+    @SettingField(VrOptions.RENDER_DEBUG_ALL_PASSES)
+    public boolean renderAllPasses = false;
 
     // other debug settings
     @SettingField(VrOptions.CONTROLLER_TRANSFORM)
@@ -525,6 +557,8 @@ public class VRSettings {
     public float handCameraResScale = 1.0f;
     @SettingField(VrOptions.MIXED_REALITY_RENDER_CAMERA_MODEL)
     public boolean mixedRealityRenderCameraModel = true;
+    @SettingField(VrOptions.MIXED_REALITY_GUI)
+    public MixedRealityGui mixedRealityGui = MixedRealityGui.FIRST;
     //
 
     // HUD/GUI
@@ -1649,7 +1683,15 @@ public class VRSettings {
         SHADER_SHADOW_MODEL_LIMB_SCALE(false,
             false), // Shaders if player shadows should use full size limbs or first person size
         SHADER_SLOW(false, true, "options.off",
-            "vivecraft.options.disableshaderoptimization.auto"), // disables shader optimizations
+            "vivecraft.options.disableshaderoptimization.auto") { // disables shader optimizations
+
+            @Override
+            void onOptionChange() {
+                if (VRState.VR_INITIALIZED) {
+                    ShadersHelper.maybeReloadShaders();
+                }
+            }
+        },
         SHADER_PATCHING(false, true), // automatic shader patching for known incompatibilites
         DOUBLE_GUI_RESOLUTION(false, true) { // 1440p GUI
 
@@ -1759,6 +1801,8 @@ public class VRSettings {
             }
         },
         MIRROR_CROP(true, false, 0.0f, 0.25f, 0.01f, -1), // crop amount for mirror,
+        MIRROR_DUAL_SWAP(false, true),
+        MIRROR_DUAL_CROP(false, true),
         MIRROR_EYE(false, true, "vivecraft.options.left", "vivecraft.options.right"), // Mirror Eye
         MIRROR_CENTER_SMOOTH(true, false, 0.0f, 1.0f, 0.1f, 1) {
             @Override
@@ -1771,6 +1815,8 @@ public class VRSettings {
             }
         },
         MIRROR_OFF_TEXT(false, true), // if text should be shown when the mirror is off
+        MIRROR_GUI(false, true), // if the gui should be overlaid on the mirror
+        MIXED_REALITY_GUI(false, true), // where the gui should show on the mixed reality mirror
         MIRROR_SCREENSHOT_CAMERA(false, true),
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
             private static final List<Pair<Color, String>> COLORS;
@@ -1903,6 +1949,7 @@ public class VRSettings {
             }
         },
         BCB_ON(false, true), // Show Body Position
+        FEET_BODY_POSITION(false, true), // uses the average of the fbt feet trackers as body position
         WORLD_SCALE(true, false, 0, 29, 1, 2) { // World Scale
 
             @Override
@@ -2385,7 +2432,19 @@ public class VRSettings {
                 String s = ((String) value);
                 return prefix + s.substring(s.lastIndexOf(".") + 1);
             }
-        };
+        },
+        RENDER_DEBUG_ALL_PASSES(false, true) { // renders, and shows all possible render passes
+
+            @Override
+            void onOptionChange() {
+                if (VRState.VR_INITIALIZED) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffersMaybe("All Passes option changed");
+                }
+            }
+        },
+        NULLVR_IPD(true, false, 0.05F, 0.2F, 0.001F, 3),
+        NULLVR_EYE_ANGLE(true, false, 0F, 25F, 0.5F, 1),
+        NULLVR_FOV(true, false, 50F, 120F, 1F, 0);
         private final boolean enumFloat;
         private final boolean enumBoolean;
         private final float valueStep;

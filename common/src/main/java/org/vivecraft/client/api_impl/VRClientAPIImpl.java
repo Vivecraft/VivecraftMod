@@ -2,6 +2,7 @@ package org.vivecraft.client.api_impl;
 
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.VRClientAPI;
+import org.vivecraft.api.client.VRRenderingAPI;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.api.client.event.VivecraftClientRegistrationEvent;
@@ -173,5 +174,23 @@ public final class VRClientAPIImpl implements VRClientAPI {
     @Override
     public boolean closeKeyboard(CloseKeyboardContext context) {
         return isVRActive() && KeyboardHandler.hideOverlay(context);
+    }
+
+    @SuppressWarnings("removal")
+    public static class LegacyApi implements org.vivecraft.api_beta.client.VivecraftClientAPI {
+        @Override
+        public boolean isVrInitialized() {
+            return VRClientAPI.instance().isVRInitialized();
+        }
+
+        @Override
+        public boolean isVrActive() {
+            return VRClientAPI.instance().isVRActive();
+        }
+
+        @Override
+        public boolean isVanillaRenderPass() {
+            return VRRenderingAPI.instance().isVanillaRenderPass();
+        }
     }
 }

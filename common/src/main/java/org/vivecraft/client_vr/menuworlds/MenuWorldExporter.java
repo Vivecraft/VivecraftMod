@@ -446,7 +446,7 @@ public class MenuWorldExporter {
             for (int i = 0; i < size; i++) {
                 Biome.BiomeBuilder builder = new Biome.BiomeBuilder();
 
-                dis.readUTF(); // registry key, not actually used though, just for reference
+                String biomeId = dis.readUTF(); // registry key, not actually used though, just for reference
 
                 boolean hasPrecipitation = dis.readBoolean();
                 float temperature = dis.readFloat();

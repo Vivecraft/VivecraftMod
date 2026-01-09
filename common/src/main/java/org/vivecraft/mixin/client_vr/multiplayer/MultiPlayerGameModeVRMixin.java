@@ -9,7 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.api.data.VRBodyPart;
@@ -49,7 +49,7 @@ public class MultiPlayerGameModeVRMixin {
     }
 
     @Unique
-    private <T> T vivecraft$wrapWithLookOverride(Supplier<T> useCall, Player player, Supplier<Vec3> viewSupplier) {
+    private <T> T vivecraft$wrapWithLookOverride(Supplier<T> useCall, Player player, Supplier<Vector3fc> viewSupplier) {
         if (VRState.VR_RUNNING) {
             ClientNetworking.overrideLook(player, viewSupplier);
         }

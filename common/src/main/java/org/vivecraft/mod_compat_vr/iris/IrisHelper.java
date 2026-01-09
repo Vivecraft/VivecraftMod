@@ -28,6 +28,12 @@ public class IrisHelper {
     private static Method ShaderStorageBufferHolder_setupBuffers;
     private static RenderPass lastSSBOPass;
 
+    private static Method IrisPipelines_assignPipeline;
+    private static Object ShaderKey_ENTITIES_SOLID;
+    private static Object ShaderKey_ENTITIES_CUTOUT;
+    private static Object ShaderKey_ENTITIES_TRANSLUCENT;
+    private static Object ShaderKey_BASIC_COLOR;
+
     // for iris/dh compat
     private static boolean DH_PRESENT = false;
     private static Object dhOverrideInjector;
@@ -44,8 +50,6 @@ public class IrisHelper {
     private static Method DHCompatInternal_getGenericShader;
 
     private static Method CapturedRenderingState_getGbufferProjection;
-
-    public static boolean SLOW_MODE = false;
 
     public static boolean isLoaded() {
         return Xloader.isModLoaded("iris") || Xloader.isModLoaded("oculus");
