@@ -30,6 +30,7 @@ loom {
         mixinConfig "vivecraft.resolutioncontrol.mixins.json"
         mixinConfig "vivecraft.sereneseasons.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
+        mixinConfig "vivecraft.voxy.mixins.json"
         mixinConfig "vivecraft.xaerosmimimap.mixins.json"
         mixinConfig "vivecraft.xaerosworldmap.mixins.json"
     }

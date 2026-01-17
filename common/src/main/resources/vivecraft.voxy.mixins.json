@@ -1,0 +1,15 @@
+{
+  "required": false,
+  "package": "org.vivecraft.mod_compat_vr.voxy.mixin",
+  "plugin": "org.vivecraft.MixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "AbstractRenderPipelineVRMixin",
+    "IrisVoxyRenderPipelineDataVRMixin",
+    "IrisVoxyRenderPipelineVRMixin",
+    "VoxyRenderSystemVRMixin"
+  ],
+  "minVersion": "0.8.4",
+  "mixins": [
+  ]
+}
