@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -418,7 +419,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                 } else {
 
                     VRSettings.FreeMove freeMoveType = this.vivecraft$dataholder.vrSettings.getVrFreeMoveMode(
-                        !this.isPassenger() && this.getAbilities().flying, vrplayer.vrdata_world_pre.fbtMode);
+                        !this.isPassenger() && this.getAbilities().flying);
 
                     if (isFlyingOrSwimming) {
                         direction = switch (freeMoveType) {
@@ -438,7 +439,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                                 .scale(this.vivecraft$dataholder.runTracker.getSpeed());
                             case ROOM -> direction.yRot(
                                 (180.0F + this.vivecraft$dataholder.vrSettings.worldRotation) * Mth.DEG_TO_RAD);
-                            case WAIST -> direction.yRot(-vrplayer.vrdata_world_pre.waist.getYawRad());
+                            case WAIST -> direction.yRot(vrplayer.vrdata_world_pre.fbtMode == FBTMode.ARMS_ONLY ?
+                                -vrplayer.vrdata_world_pre.getBodyYawRad() :
+                                -vrplayer.vrdata_world_pre.waist.getYawRad());
                             default -> direction;
                         };
                     }

@@ -26,7 +26,6 @@ import org.vivecraft.Xloader;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.OpenKeyboardContext;
-import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.render.VRPlayerRenderer;
 import org.vivecraft.client.render.armor.VRArmorLayer;
 import org.vivecraft.client.utils.ClientUtils;
@@ -1454,18 +1453,13 @@ public class VRSettings {
     }
 
     /**
-     * selects the right FreeMove mode (flying/regular), and adds a fallback for WAIST if no fbt is available
+     * selects the right FreeMove mode (flying/regular)
      *
      * @param flySwimming if the player is swimming/fall flying
-     * @param fbtMode     active FBT mode
      * @return the active FreeMove mode
      */
-    public FreeMove getVrFreeMoveMode(boolean flySwimming, FBTMode fbtMode) {
-        FreeMove freeMoveMode =
-            flySwimming && this.vrFreeMoveFlyMode != FreeMove.AUTO ? this.vrFreeMoveFlyMode : this.vrFreeMoveMode;
-
-        // can't use waist if no fbt
-        return freeMoveMode == FreeMove.WAIST && fbtMode == FBTMode.ARMS_ONLY ? FreeMove.HMD : freeMoveMode;
+    public FreeMove getVrFreeMoveMode(boolean flySwimming) {
+        return flySwimming && this.vrFreeMoveFlyMode != FreeMove.AUTO ? this.vrFreeMoveFlyMode : this.vrFreeMoveMode;
     }
 
     /**

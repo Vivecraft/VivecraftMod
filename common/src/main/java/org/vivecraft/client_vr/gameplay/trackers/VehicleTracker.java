@@ -12,6 +12,7 @@ import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.utils.MathUtils;
@@ -93,16 +94,16 @@ public class VehicleTracker implements Tracker {
     }
 
     private static Vector3f getFreeMoveDirection() {
-        return switch (ClientDataHolderVR.getInstance().vrSettings.getVrFreeMoveMode(false,
-            ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.fbtMode)) {
-            case HMD -> ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.hmd.getDirection();
+        VRData data = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre;
+        return switch (ClientDataHolderVR.getInstance().vrSettings.getVrFreeMoveMode(false)) {
+            case HMD -> data.hmd.getDirection();
             case WAIST -> new Vector3f(0.0F, 0.0F, 1.0F)
                 // use head for up/down
-                .rotateX(-ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.hmd.getPitchRad())
-                .rotateY(-ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.waist.getYawRad());
+                .rotateX(-data.hmd.getPitchRad())
+                .rotateY(data.fbtMode == FBTMode.ARMS_ONLY ? -data.getBodyYawRad() : -data.waist.getYawRad());
             default ->
                 // not exactly sure why we use the main hand for riding, when we use the offhand for regular walking
-                ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getController(0).getDirection();
+                data.getController(0).getDirection();
         };
     }
 

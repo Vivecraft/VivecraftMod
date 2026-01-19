@@ -719,13 +719,13 @@ public class VRPlayer {
         {
             // Server-side movement
             // when swimming/flying adjust player look according to the user setting
-            switch (this.dh.vrSettings.getVrFreeMoveMode(player.isFallFlying(), data.fbtMode)) {
+            switch (this.dh.vrSettings.getVrFreeMoveMode(player.isFallFlying())) {
                 case CONTROLLER -> {
                     player.setYRot(data.getController(1).getYaw());
                     player.setXRot(-data.getController(1).getPitch());
                 }
                 case WAIST -> {
-                    player.setYRot(data.waist.getYaw());
+                    player.setYRot(data.fbtMode == FBTMode.ARMS_ONLY ? data.getBodyYawRad() : data.waist.getYaw());
                     player.setXRot(-data.hmd.getPitch()); // use head for up/down
                 }
                 default -> {
