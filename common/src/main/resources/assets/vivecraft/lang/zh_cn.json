@@ -304,7 +304,7 @@
   "vivecraft.options.RIGHT_CLICK_DELAY.tooltip": "按住扳机时，作右键连击判定，此设置更改右键连击之间游戏刻(tick)的数量\n1刻(tick)=1/20秒(sec)",
   "vivecraft.options.ANIMAL_TOUCHING.tooltip": "如果开启了这个设置，在你手上未持有武器时，触碰一只被动(passive)的生物(mob)的动作将会判定为鼠标右键（使用物品），而不是鼠标左键（攻击）。\n——妈妈再也不用担心我一巴掌掴死半个农场的动物了（草）",
   "vivecraft.options.HANDHELD_CAMERA_FOV.tooltip": "手持摄像机视野",
-  "vivecraft.options.HANDHELD_CAMERA_RENDER_SCALE.tooltip": "设定手持摄像机的解析度，越大的设置会导致更大的图片大小。\n当光影启用时不可使用。\n§c警告：过高的设置可能会烧坏你的显卡！\n谁他妈写的翻译？烧显卡过分了啊",
+  "vivecraft.options.HANDHELD_CAMERA_RENDER_SCALE.tooltip": "设定手持摄像机的解析度，越大的设置会导致更大的图片大小。\n当光影启用时不可使用。\n§c警告：过高的设置可能会烧坏你的显卡！",
   "vivecraft.options.MIXED_REALITY_RENDER_CAMERA_MODEL.tooltip": "显示摄像机的模型（仅在 HMD 视图中）以表示混合现实或第三人称摄像机当前所在的位置。 也可以使用交互绑定来抓取它来移动它。",
   "vivecraft.options.PHYSICAL_KEYBOARD_THEME.tooltip": "为物理键盘预设的配色方案。 自定义主题可以通过游戏目录中的keyboardtheme.txt 进行编辑。 每次打开键盘时都会重新加载，以允许实时调整。",
   "_comment40": "vivecraft.options.KEYBOARD_PRESS_BINDS.tooltip=Whether the keyboard should activate key bindings when typing into thin air.\\nBe careful! You might activate things you don't intend to.",
