@@ -39,6 +39,7 @@
     "vivecraft.cataclysm.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.emf.mixins.json",
+    "vivecraft.epicfight.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.mca.mixins.json",
     "vivecraft.modmenu.mixins.json",
