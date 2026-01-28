@@ -331,12 +331,12 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             if (entity != this.getCameraEntity()) {
                 // snap to entity, if it changed
                 ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(entity, true, false);
-            }
-            if (entity != this.player) {
-                // ride the new camera entity
-                ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity);
-            } else {
-                ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding();
+                if (entity != this.player) {
+                    // ride the new camera entity
+                    ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity);
+                } else {
+                    ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding();
+                }
             }
         }
     }
