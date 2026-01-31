@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -121,6 +122,16 @@ public class ClimbTracker implements Tracker {
                     translatableContent.getKey().equals("vivecraft.item.climbclaws")
                 );
         }
+    }
+
+    /**
+     * check if the player is climbing and climbey claws are equipped on the given hand
+     *
+     * @param hand hand to check for climbing claws
+     * @return if the player is climbing
+     */
+    public boolean isClimbingWith(InteractionHand hand) {
+        return this.dh.climbTracker.isGrabbingLadder() && ClimbTracker.isClaws(this.mc.player.getItemInHand(hand));
     }
 
     private static boolean canStand(BlockPos blockPos, LocalPlayer player) {
