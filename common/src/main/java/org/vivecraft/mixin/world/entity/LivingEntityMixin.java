@@ -30,9 +30,6 @@ import org.vivecraft.server.ServerVivePlayer;
 public abstract class LivingEntityMixin extends Entity {
 
     @Shadow
-    protected ItemStack useItem;
-
-    @Shadow
     public abstract ItemStack getItemBySlot(EquipmentSlot slot);
 
     @Shadow

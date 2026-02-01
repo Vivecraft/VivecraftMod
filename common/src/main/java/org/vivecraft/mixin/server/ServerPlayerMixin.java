@@ -179,7 +179,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                 Vec3 travelDir = entity.getDeltaMovement().normalize();
                 dmgPos = entity.getBoundingBox().getCenter();
                 if (isProjectile) {
-                    // move the projectile check position half the bounding box size + 1m away from the player center
+                    // move the projectile check position half the bounding box size + 1.5m away from the player center
                     float scale = this.getBbWidth() * 0.5F + 1.5F;
                     float dist = (float) dmgPos.subtract(this.position()).dot(travelDir);
                     dmgPos = dmgPos.add(travelDir.scale(-dist - scale));
