@@ -11,13 +11,16 @@ public class GuiRoomscaleSettings extends GuiVROptionsBase {
             this.minecraft.setScreen(new GuiWeaponCollisionSettings(this));
             return true;
         }),
+        new VROptionEntry("vivecraft.options.screen.backpackswitching.button", (button, mousePos) -> {
+            this.minecraft.setScreen(new GuiBackpackSwitchingSettings(this));
+            return true;
+        }),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_JUMP),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_SNEAK),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_CLIMB),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_ROW),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_SWIM),
         new VROptionEntry(VRSettings.VrOptions.BOW_MODE),
-        new VROptionEntry(VRSettings.VrOptions.BACKPACK_SWITCH),
         new VROptionEntry(VRSettings.VrOptions.ALLOW_CRAWLING),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_DISMOUNT),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_BLOCK_INTERACT),
