@@ -727,7 +727,7 @@ public class VRPlayer {
                     player.setXRot(-data.getController(1).getPitch());
                 }
                 case WAIST -> {
-                    player.setYRot(data.fbtMode == FBTMode.ARMS_ONLY ? data.getBodyYawRad() : data.waist.getYaw());
+                    player.setYRot(data.fbtMode == FBTMode.ARMS_ONLY ? data.getBodyYaw() : data.waist.getYaw());
                     player.setXRot(-data.hmd.getPitch()); // use head for up/down
                 }
                 default -> {
