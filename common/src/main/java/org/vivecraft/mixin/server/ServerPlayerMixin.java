@@ -176,7 +176,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             // if the hit is from an entity, move it back in the movement direction, to get a better source direction
             if (damageSource.getDirectEntity() instanceof Entity entity && dmgPos == entity.position()) {
                 isProjectile = entity instanceof Projectile;
-                dmgPos = entity.getBoundingBox().getCenter().subtract(entity.getDeltaMovement().normalize());
+                Vec3 travelDir = entity.getDeltaMovement().normalize();
+                dmgPos = entity.getBoundingBox().getCenter();
+                if (isProjectile) {
+                    // move the projectile check position half the bounding box size + 1m away from the player center
+                    float scale = this.getBbWidth() * 0.5F + 1.5F;
+                    float dist = (float) dmgPos.subtract(this.position()).dot(travelDir);
+                    dmgPos = dmgPos.add(travelDir.scale(-dist - scale));
+                } else {
+                    dmgPos = dmgPos.subtract(travelDir);
+                }
             }
             // check if any hand is holding a shield
             for (int i = 0; i < 2; i++) {
