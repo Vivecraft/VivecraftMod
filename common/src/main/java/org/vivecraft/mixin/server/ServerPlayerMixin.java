@@ -181,7 +181,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                 if (isProjectile) {
                     // move the projectile check position half the bounding box size + 1.5m away from the player center
                     float scale = this.getBbWidth() * 0.5F + 1.5F;
-                    float dist = (float) dmgPos.subtract(this.position()).dot(travelDir);
+                    float dist = (float) dmgPos.subtract(this.getBoundingBox().getCenter()).dot(travelDir);
                     dmgPos = dmgPos.add(travelDir.scale(-dist - scale));
                 } else {
                     dmgPos = dmgPos.subtract(travelDir);
