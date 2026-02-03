@@ -352,6 +352,8 @@ public class VRSettings {
     public boolean onlySwordCollision = false;
     @SettingField(VrOptions.REDUCED_PLAYER_REACH)
     public boolean reducedPlayerReach = true;
+    @SettingField(VrOptions.ALLOW_BREAKING_CLIMBABLE)
+    public boolean allowBreakingClimbable = true;
     @SettingField(VrOptions.ROOMSCALE_SPEAR_LUNGE)
     public boolean roomscaleSpearLunge = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
@@ -386,6 +388,10 @@ public class VRSettings {
     public boolean realisticSneakEnabled = true;
     @SettingField(VrOptions.REALISTIC_CLIMB)
     public boolean realisticClimbEnabled = true;
+    @SettingField(VrOptions.REALISTIC_CLIMB_AUTOGRAB)
+    public boolean climbingAutoGrab = true;
+    @SettingField(VrOptions.VANILLA_CLIMBING)
+    public boolean vanillaClimbing = true;
     @SettingField(VrOptions.REALISTIC_SWIM)
     public boolean realisticSwimEnabled = true;
     @SettingField(VrOptions.REALISTIC_ROW)
@@ -1949,6 +1955,7 @@ public class VRSettings {
         SWORD_BLOCK_COLLISION(OptionType.BOOLEAN), // lets swords hit blocks that can be mined or instabroken
         ONLY_SWORD_COLLISION(OptionType.BOOLEAN), // only let swords hit stuff
         REDUCED_PLAYER_REACH(OptionType.BOOLEAN), // reduces roomscale reach to hit players
+        ALLOW_BREAKING_CLIMBABLE(OptionType.BOOLEAN), // allows breaking climbable blocks when crouching
         ROOMSCALE_SPEAR_LUNGE(OptionType.BOOLEAN), // allose using a spear with lunge by swinging forward
         // VIVE END - new options
         // JRBUDDA VIVE
@@ -2221,6 +2228,8 @@ public class VRSettings {
             }
         },
         REALISTIC_CLIMB(OptionType.BOOLEAN), // Roomscale Climbing
+        REALISTIC_CLIMB_AUTOGRAB(OptionType.BOOLEAN), // autograb blocks or not
+        VANILLA_CLIMBING(OptionType.BOOLEAN), // if vanilla walk into wall climbing should be active
         REALISTIC_SWIM(OptionType.BOOLEAN), // Roomscale Swimming
         REALISTIC_ROW(OptionType.BOOLEAN), // Roomscale Rowing
         REALISTIC_DISMOUNT(OptionType.BOOLEAN), // Roomscale Dismounting

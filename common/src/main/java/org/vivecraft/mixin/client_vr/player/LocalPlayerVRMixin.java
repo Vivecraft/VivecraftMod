@@ -357,6 +357,16 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         }
     }
 
+    /**
+     * modify into {@link LivingEntity#handleRelativeFrictionAndCalculateMovement}
+     */
+    @Override
+    protected boolean vivecraft$disableVanillaClimbing(boolean original) {
+        return original && (!(VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) ||
+            this.vivecraft$dataholder.vrSettings.vanillaClimbing
+        );
+    }
+
     @Unique
     private boolean vivecraft$isLocalPlayer(Object player) {
         return player.getClass().equals(LocalPlayer.class) || Minecraft.getInstance().player == player;

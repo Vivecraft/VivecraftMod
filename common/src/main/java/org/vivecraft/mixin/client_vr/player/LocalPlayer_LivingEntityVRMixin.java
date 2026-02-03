@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client_vr.player;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -37,4 +38,9 @@ public abstract class LocalPlayer_LivingEntityVRMixin extends LocalPlayer_Entity
 
     @Inject(method = "onKineticHit", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/KineticWeapon;makeLocalHitSound(Lnet/minecraft/world/entity/Entity;)V"))
     protected void vivecraft$spearHaptic(CallbackInfo ci) {}
+
+    @ModifyExpressionValue(method = "handleRelativeFrictionAndCalculateMovement", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;horizontalCollision:Z"))
+    protected boolean vivecraft$disableVanillaClimbing(boolean original) {
+        return original;
+    }
 }

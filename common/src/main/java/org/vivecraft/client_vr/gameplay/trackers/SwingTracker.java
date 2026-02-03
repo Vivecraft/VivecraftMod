@@ -483,6 +483,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         // don't break climbable blocks
                         // if this block shouldn't be breakable with roomscale mining
                         boolean protectedBlock = this.dh.vrSettings.realisticClimbEnabled &&
+                            (!player.isShiftKeyDown() || !this.dh.vrSettings.allowBreakingClimbable) &&
                             (blockstate.getBlock() instanceof LadderBlock ||
                                 blockstate.getBlock() instanceof VineBlock ||
                                 blockstate.is(ViveBlockTags.VIVECRAFT_CLIMBABLE)

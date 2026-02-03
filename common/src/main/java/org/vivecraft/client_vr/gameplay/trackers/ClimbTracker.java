@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -185,10 +186,10 @@ public class ClimbTracker implements Tracker {
         }
 
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyGrab)
-            .setEnabled(ControllerType.RIGHT, this.isClimbeyClimb() &&
+            .setEnabled(ControllerType.RIGHT, (this.isClimbeyClimb() || !this.dh.vrSettings.climbingAutoGrab) &&
                 (this.isGrabbingLadder() || this.inBlock[0] || this.forceActivate));
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyGrab)
-            .setEnabled(ControllerType.LEFT, this.isClimbeyClimb() &&
+            .setEnabled(ControllerType.LEFT, (this.isClimbeyClimb() || !this.dh.vrSettings.climbingAutoGrab) &&
                 (this.isGrabbingLadder() || this.inBlock[1] || this.forceActivate));
     }
 
@@ -238,21 +239,15 @@ public class ClimbTracker implements Tracker {
                     .subtract(controllerDir.x * 0.2F, controllerDir.y * 0.2F, controllerDir.z * 0.2F);
                 AABB controllerBB = new AABB(controllerPos[c], controllerPosNear);
                 ladder = true;
-                boolean ok = block instanceof LadderBlock ||
-                    isClimbableTrapdoor(this.mc.level, blockPos, blockState) ||
-                    block instanceof VineBlock ||
-                    blockState.is(ViveBlockTags.VIVECRAFT_CLIMBABLE);
+                boolean ok = this.isClimbableBlock(this.mc.level, blockPos, blockState);
 
                 if (!ok) { // check other end of controllerBB.
                     BlockPos blockPos2 = BlockPos.containing(controllerPosNear);
                     BlockState blockState2 = this.mc.level.getBlockState(blockPos2);
                     Block block2 = blockState2.getBlock();
 
-                    if (block2 instanceof LadderBlock ||
-                        isClimbableTrapdoor(this.mc.level, blockPos2, blockState2) ||
-                        block2 instanceof VineBlock ||
-                        blockState2.is(ViveBlockTags.VIVECRAFT_CLIMBABLE))
-                    {
+                    if (this.isClimbableBlock(this.mc.level, blockPos2, blockState2)) {
+                        ok = true;
                         blockPos = blockPos2;
                         blockState = blockState2;
                         block = block2;
@@ -262,12 +257,12 @@ public class ClimbTracker implements Tracker {
                         if (voxelShape2.isEmpty()) {
                             this.box[c] = null;
                         } else {
-                            ok = true;
                             this.box[c] = voxelShape2.bounds();
                         }
                     }
                 }
 
+                boolean wasOk = ok;
                 if (ok) {
                     List<AABB> BBs = new ArrayList<>();
 
@@ -279,10 +274,8 @@ public class ClimbTracker implements Tracker {
                             case WEST -> BBs.add(this.westBB);
                             default -> ok = false;
                         }
-                    }
-
-                    if (block instanceof VineBlock) {
-                        this.box[c] = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+                    } else if (block instanceof VineBlock) {
+                        this.box[c] = this.fullBB;
 
                         // Not vanilla-y to allow climbing on top vines.
                         // if (blockState.getValue(VineBlock.UP) &&
@@ -314,6 +307,9 @@ public class ClimbTracker implements Tracker {
                         {
                             BBs.add(this.eastBB);
                         }
+                    } else if (!this.dh.vrSettings.climbingAutoGrab) {
+                        // only do full block stuff when not auto grabbing
+                        BBs.add(this.fullBB);
                     }
 
                     this.inBlock[c] = false;
@@ -335,7 +331,9 @@ public class ClimbTracker implements Tracker {
                             }
                         }
                     }
-                } else {
+                }
+                // don't let go that easily when not auto grabbing
+                if (!wasOk || (!this.inBlock[c] && !this.dh.vrSettings.climbingAutoGrab)) {
                     Vec3 handToLatch = this.latchStart[c].subtract(controllerPos[c]);
                     if (handToLatch.length() > 0.5D) {
                         this.inBlock[c] = false;
@@ -343,13 +341,13 @@ public class ClimbTracker implements Tracker {
                         BlockPos latchBlockPos = BlockPos.containing(this.latchStart[c]);
                         BlockState latchBlockState = this.mc.level.getBlockState(latchBlockPos);
                         this.inBlock[c] = this.wasInBlock[c] &&
-                            latchBlockState.getBlock() instanceof LadderBlock ||
-                            latchBlockState.getBlock() instanceof VineBlock ||
-                            latchBlockState.is(ViveBlockTags.VIVECRAFT_CLIMBABLE);
+                            this.isClimbableBlock(this.mc.level, latchBlockPos, latchBlockState);
                     }
                 }
 
-                button[c] = this.inBlock[c];
+                button[c] = this.inBlock[c] && (this.dh.vrSettings.climbingAutoGrab ||
+                    VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.values()[c])
+                );
                 allowed[c] = this.inBlock[c];
             } else {
                 // Climbey
@@ -357,11 +355,7 @@ public class ClimbTracker implements Tracker {
                     this.mc.player.setOnGround(!this.latched[0] && !this.latched[1]);
                 }
 
-                if (c == 0) {
-                    button[c] = VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT);
-                } else {
-                    button[c] = VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT);
-                }
+                button[c] = VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.values()[c]);
 
                 this.inBlock[c] = this.box[c] != null && this.box[c].move(blockPos).contains(controllerPos[c]);
 
@@ -528,7 +522,7 @@ public class ClimbTracker implements Tracker {
 
             BlockPos blockPos = BlockPos.containing(this.latchStart[this.latchStartController]);
 
-            if (!ladder) {
+            if (!ladder || !this.dh.vrSettings.climbingAutoGrab) {
                 newX = x - delta.x;
                 newZ = z - delta.z;
             } else {
@@ -661,6 +655,14 @@ public class ClimbTracker implements Tracker {
             this.dh.vrPlayer.snapRoomOriginToPlayerEntity(player, false, false);
             this.mc.player.causeFoodExhaustion(0.3F);
         }
+    }
+
+    public boolean isClimbableBlock(Level level, BlockPos pos, BlockState state) {
+        return state.getBlock() instanceof LadderBlock ||
+            this.isClimbableTrapdoor(level, pos, state) ||
+            state.getBlock() instanceof VineBlock ||
+            state.is(BlockTags.CLIMBABLE) ||
+            state.is(ViveBlockTags.VIVECRAFT_CLIMBABLE);
     }
 
     /**
