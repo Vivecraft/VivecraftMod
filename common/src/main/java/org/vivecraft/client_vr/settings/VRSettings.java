@@ -248,6 +248,8 @@ public class VRSettings {
     @SettingField
     public boolean smoothTick = false;
 
+    @SettingField(VrOptions.NULLVR_HAPTICS)
+    public boolean nullvrHaptics = true;
     @SettingField(VrOptions.NULLVR_IPD)
     public float nullvrIPD = 0.1F;
     @SettingField(VrOptions.NULLVR_EYE_ANGLE)
@@ -2500,6 +2502,7 @@ public class VRSettings {
                 }
             }
         },
+        NULLVR_HAPTICS(OptionType.BOOLEAN),
         NULLVR_IPD(0.05F, 0.2F, 0.001F, 3),
         NULLVR_EYE_ANGLE(0F, 25F, 0.5F, 1),
         NULLVR_FOV(50F, 120F, 1F, 0);
