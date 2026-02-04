@@ -826,6 +826,7 @@
 
   "vivecraft.serverSettings.climbey": "Climbey Motion Settings",
   "vivecraft.serverSettings.climbey.enabled": "Allow Climbey Climb/Jump",
+  "vivecraft.serverSettings.climbey.foodExhaustion": "Climbey Climb/Jump exhaustion",
   "vivecraft.serverSettings.climbey.blockmode": "Climbable Blockmode",
   "vivecraft.serverSettings.climbey.blockmode.DISABLED": "Disabled",
   "vivecraft.serverSettings.climbey.blockmode.WHITELIST": "Whitelist",
@@ -837,6 +838,7 @@
 
   "vivecraft.serverSettings.teleport": "Teleport Settings",
   "vivecraft.serverSettings.teleport.enabled": "Allow Teleporting",
+  "vivecraft.serverSettings.teleport.foodExhaustion": "Teleport exhaustion",
   "vivecraft.serverSettings.teleport.limitedSurvival": "Force Limit Survival Teleport range",
   "vivecraft.serverSettings.teleport.upLimit": "Forced Up Teleport Limit",
   "vivecraft.serverSettings.teleport.downLimit": "Forced Down Teleport Limit",
@@ -910,12 +912,14 @@
   "vivecraft.serverSettings.pvp.SEATEDVRvsNONVR.tooltip": "Allows Seated VR players and Non VR players to damage each other.",
 
   "vivecraft.serverSettings.climbey.enabled.tooltip": "Allows the use of 'Jump Boots' and 'Climb Claws'.",
+  "vivecraft.serverSettings.climbey.foodExhaustion.tooltip": "If enabled, hanging on walls with the 'Climb Claws', or jumping with the 'Jump Boots' will cause exhaustion.",
   "vivecraft.serverSettings.climbey.blockmode.tooltip": "Specifies how the blocks in the blocklist are interpreted. Options are:\n \"DISABLED\": List is ignored. All blocks are climbable.\n \"WHITELIST\": Only blocks on the list are climbable.\n \"BLACKLIST\": All blocks are climbable except those on the list",
   "vivecraft.serverSettings.climbey.blocklist.tooltip": "List of block names for use with WHITELIST/BLACKLIST block mode.\n Blocks can be of the form 'blockid' for vanilla or 'modid:blockid' for modded blocks",
 
   "vivecraft.serverSettings.crawling.enabled.tooltip": "Allows VR players to get into the crawl state by getting low to the ground. Disabling does not prevent vanilla crawling.",
 
   "vivecraft.serverSettings.teleport.enabled.tooltip": "Allows VR players to use teleport movement. It is recommended to leave this enabled for players prone to VR sickness.\n Disabling this only works for Vivecraft 1.3.0+ clients.",
+  "vivecraft.serverSettings.teleport.foodExhaustion.tooltip": "If enabled, teleporting up blocks will cause exhaustion.",
   "vivecraft.serverSettings.teleport.limitedSurvival.tooltip": "Enforces limited teleport range and frequency in Survival.",
   "vivecraft.serverSettings.teleport.upLimit.tooltip": "Maximum number of blocks players in Survival mode can teleport up. Set to 0 to disable.",
   "vivecraft.serverSettings.teleport.downLimit.tooltip": "Maximum number of blocks players in Survival mode can teleport down. Set to 0 to disable.",

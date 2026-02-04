@@ -824,6 +824,7 @@
 
   "vivecraft.serverSettings.climbey": "Climbey Motion Einstellungen",
   "vivecraft.serverSettings.climbey.enabled": "Erlaube Climbey Klettern/Springen",
+  "vivecraft.serverSettings.climbey.foodExhaustion": "Climbey Klettern/Springen Erschöpfung",
   "vivecraft.serverSettings.climbey.blockmode": "Kletterbar Blockmodus",
   "vivecraft.serverSettings.climbey.blockmode.DISABLED": "Ausgeschaltet",
   "vivecraft.serverSettings.climbey.blockmode.WHITELIST": "Erlaubt",
@@ -835,6 +836,7 @@
 
   "vivecraft.serverSettings.teleport": "Teleport Einstellungen",
   "vivecraft.serverSettings.teleport.enabled": "Erlaube Teleportieren",
+  "vivecraft.serverSettings.teleport.foodExhaustion": "Teleport Erschöpfung",
   "vivecraft.serverSettings.teleport.limitedSurvival": "Erzwinge limitierte Überlebens Teleportreichweite",
   "vivecraft.serverSettings.teleport.upLimit": "Erzwungenes nach oben Teleportlimit",
   "vivecraft.serverSettings.teleport.downLimit": "Erzwungenes nach unten Teleportlimit",
@@ -908,6 +910,7 @@
   "vivecraft.serverSettings.pvp.SEATEDVRvsNONVR.tooltip": "Erlaubt es sitzenden VR Spielern und nicht VR Spielern sich gegenseitig zu schaden.",
 
   "vivecraft.serverSettings.climbey.enabled.tooltip": "Erlaubt es 'Sprung-Schuhe' und 'Kletterkrallen' zu verwenden.",
+  "vivecraft.serverSettings.climbey.foodExhaustion.tooltip": "Wenn aktiviert, verursacht das Hängen an Wänden mit den 'Kletterkrallen' oder das Springen mit den 'Sprung-Schuhe' erschöpfung.",
   "vivecraft.serverSettings.climbey.blockmode.tooltip": "Definiert wie Blöcke in der Blockliste interpretiert werden. Die Möglichkeiten sind:\n \"DISABLED\"(Ausgeschaltet): Liste wird ignoriert, alle Blöcke sind kletterbar.\n \"WHITELIST\"(Erlaubt): Nur Blöcke in der Liste sind kletterbar.\n \"BLACKLIST\"(Verboten): Alle Blöcke, ausgenommen die in der Liste, sind kletterbar",
 
   "vivecraft.serverSettings.climbey.blocklist.tooltip": "Liste von Blöcken zum verwendend mit dem WHITELIST/BLACKLIST Modus.\n Blöcke können in der Form von 'blockid' für Vanilla oder 'modid:blockid' für Blöcke von Mods gelistet werden.",
@@ -915,6 +918,7 @@
   "vivecraft.serverSettings.crawling.enabled.tooltip": "Erlaubt es VR Spielern in den krabbel Zustand zu gelagen, indem sie nahe dem Boden sind. Das Deaktivieren dieser Einstellung verhindert nicht das Vanilla krabbeln.",
 
   "vivecraft.serverSettings.teleport.enabled.tooltip": "Erlaubt es VR Spielern sich mittels Teleportieren fortzubewegen. Es ist empfohlen dies aktiv zu lassen, für VR Spieler die anfällig auf VR Übelkeit sind.",
+  "vivecraft.serverSettings.teleport.foodExhaustion.tooltip": "Wenn aktiviert, verursacht das Teleportieren nach oben erschöpfung.",
   "vivecraft.serverSettings.teleport.limitedSurvival.tooltip": "Erzwingt limitierte Teleport Reichweite und Häufigkeit im Überlebens Modus.",
   "vivecraft.serverSettings.teleport.upLimit.tooltip": "Maximale Anzahl an Blöcken die sich Spieler im Überlebens Modus hinauf teleportieren können. Auf 0 setzen zum Deaktivieren.",
   "vivecraft.serverSettings.teleport.downLimit.tooltip": "Maximale Anzahl an Blöcken die sich Spieler im Überlebens Modus hinunter teleportieren können. Auf 0 setzen zum Deaktivieren.",

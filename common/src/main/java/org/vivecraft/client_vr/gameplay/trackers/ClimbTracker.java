@@ -27,7 +27,9 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.packet.c2s.ClimbingPayloadC2S;
+import org.vivecraft.common.network.packet.c2s.JumpingPayloadC2S;
 import org.vivecraft.data.ViveBlockTags;
 import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 
@@ -477,16 +479,12 @@ public class ClimbTracker implements Tracker {
             return; // fly u fools
         }
 
-        if ((this.latched[0] || this.latched[1]) && this.rand.nextInt(20) == 10) {
-            this.mc.player.causeFoodExhaustion(0.1F);
-
-            if (!ladder) {
-                BlockPos blockPos = BlockPos.containing(this.latchStart[this.latchStartController]);
-                BlockState blockState = this.mc.level.getBlockState(blockPos);
-                this.dh.vrPlayer.blockDust(this.latchStart[this.latchStartController].x,
-                    this.latchStart[this.latchStartController].y, this.latchStart[this.latchStartController].z, 1,
-                    blockPos, blockState, 0.1F, 0.2F);
-            }
+        if ((this.latched[0] || this.latched[1]) && !ladder && this.rand.nextInt(20) == 10) {
+            BlockPos blockPos = BlockPos.containing(this.latchStart[this.latchStartController]);
+            BlockState blockState = this.mc.level.getBlockState(blockPos);
+            this.dh.vrPlayer.blockDust(this.latchStart[this.latchStartController].x,
+                this.latchStart[this.latchStartController].y, this.latchStart[this.latchStartController].z, 1,
+                blockPos, blockState, 0.1F, 0.2F);
         }
 
         Vec3 now = this.dh.vrPlayer.vrdata_world_pre.getController(this.latchStartController).getPosition();
@@ -577,60 +575,21 @@ public class ClimbTracker implements Tracker {
                 }
             }
 
-            boolean free = false;
+            // find a a valid new position that doesn't clip into stuff
+            player.setPos(this.findValidPlayerPos(player, newX, newY, newZ, true));
 
-            for (int i = 0; i < 8; i++) {
-                double ax = newX;
-                double ay = newY;
-                double az = newZ;
-
-                switch (i) {
-                    case 2 -> ay = y;
-                    case 3 -> az = z;
-                    case 4 -> ax = x;
-                    case 5 -> {
-                        ax = x;
-                        az = z;
-                    }
-                    case 6 -> {
-                        ax = x;
-                        ay = y;
-                    }
-                    case 7 -> {
-                        ay = y;
-                        az = z;
-                    }
-                    default -> {} // 0 and 1 do the same?
-                }
-
-                player.setPos(ax, ay, az);
-                AABB bb = player.getBoundingBox();
-                free = this.mc.level.noCollision(player, bb);
-
-                if (free) {
-                    if (i > 1) {
-                        // ouch!
-                        this.dh.vr.triggerHapticPulse(0, 100);
-                        this.dh.vr.triggerHapticPulse(1, 100);
-                    }
-
-                    break;
-                }
-            }
-
-            if (!free) {
-                player.setPos(x, y, z);
-                // ouch!
-                this.dh.vr.triggerHapticPulse(0, 100);
-                this.dh.vr.triggerHapticPulse(1, 100);
-            }
-
-            // reset fall distance and above ground ticks
+            // reset fall distance and above ground ticks, and food exhaustion
             ClientNetworking.sendServerPacket(new ClimbingPayloadC2S());
         } else {
             // jump!
             this.wantJump = false;
-            Vec3 p1 = player.position().subtract(delta);
+
+            // make sure we do not start in a block
+            Vec3 p1 = this.findValidPlayerPos(player,
+                player.getX() - delta.x,
+                player.getY() - delta.y,
+                player.getZ() - delta.z, false);
+
             Vector3f movement = this.dh.vr.controllerHistory[this.latchStartController].netMovement(0.3D);
             float speed = this.dh.vr.controllerHistory[this.latchStartController].averageSpeed(0.3F);
             movement.mul(0.66F * speed);
@@ -646,15 +605,83 @@ public class ClimbTracker implements Tracker {
             }
 
             movement.rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians);
+
             player.setDeltaMovement(-movement.x, -movement.y, -movement.z);
             player.xOld = p1.x;
             player.yOld = p1.y;
             player.zOld = p1.z;
-            p1 = p1.add(player.getDeltaMovement().x, player.getDeltaMovement().y, player.getDeltaMovement().z);
             player.setPos(p1.x, p1.y, p1.z);
+
+            // move the player one tick, but make sure it doesn't move into a wall
+            p1 = p1.add(player.getDeltaMovement().x, player.getDeltaMovement().y, player.getDeltaMovement().z);
+            Vec3 finalPos = this.findValidPlayerPos(player, p1.x, p1.y, p1.z, false);
+            player.setPos(finalPos.x, finalPos.y, finalPos.z);
+
             this.dh.vrPlayer.snapRoomOriginToPlayerEntity(player, false, false);
-            this.mc.player.causeFoodExhaustion(0.3F);
+
+            // tell the server we did a jump for food exhaustion
+            if (NetworkVersion.CLIMBEY_JUMP.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
+                ClientNetworking.sendServerPacket(new JumpingPayloadC2S());
+            }
         }
+    }
+
+    /**
+     * tries to fiend a valid new position that doesn't clip into blocks
+     *
+     * @param player   player to get the new position of
+     * @param newX     new X position
+     * @param newY     new Y position
+     * @param newZ     new Z position
+     * @param feedback if haptic feedback should be given when the position was moved
+     * @return validated position that does not clip into blocks
+     */
+    private Vec3 findValidPlayerPos(LocalPlayer player, double newX, double newY, double newZ, boolean feedback) {
+        Vec3 old = player.position();
+        for (int i = 0; i < 8; i++) {
+            double checkX = newX;
+            double checkY = newY;
+            double checkZ = newZ;
+
+            switch (i) {
+                case 1 -> checkY = old.y; // no Y offset
+                case 2 -> checkZ = old.z; // no Z offset
+                case 3 -> checkX = old.x; // no X offset
+                case 4 -> {
+                    // no X,Z offset
+                    checkZ = old.z;
+                    checkX = old.x;
+                }
+                case 5 -> {
+                    // no X,Y offset
+                    checkX = old.x;
+                    checkY = old.y;
+                }
+                case 6 -> {
+                    // no Y,Z offset
+                    checkY = old.y;
+                    checkZ = old.z;
+                }
+                case 7 -> {
+                    // just use the old position
+                    checkX = old.x;
+                    checkY = old.y;
+                    checkZ = old.z;
+                }
+                default -> {} // use the full new position
+            }
+
+            AABB bb = player.getBoundingBox().move(checkX - old.x, checkY - old.y, checkZ - old.z);
+            if (player.level().noCollision(player, bb)) {
+                if (feedback && i > 1) {
+                    // ouch!
+                    this.dh.vr.triggerHapticPulse(0, 100);
+                    this.dh.vr.triggerHapticPulse(1, 100);
+                }
+                return new Vec3(checkX, checkY, checkZ);
+            }
+        }
+        return old;
     }
 
     public boolean isClimbableBlock(Level level, BlockPos pos, BlockState state) {
