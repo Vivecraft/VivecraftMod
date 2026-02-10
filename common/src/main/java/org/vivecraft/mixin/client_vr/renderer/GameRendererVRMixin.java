@@ -565,7 +565,7 @@ public abstract class GameRendererVRMixin
             this.vivecraft$rveprevZ = entity.zo;
             this.vivecraft$rvepitch = entity.getXRot();
             this.vivecraft$rvelastpitch = entity.xRotO;
-            this.vivecraft$rveHeight = entity.getEyeHeight();
+            this.vivecraft$rveHeight = entity.eyeHeight;
             if (entity instanceof LivingEntity livingEntity) {
                 this.vivecraft$rveyaw = livingEntity.yHeadRot;
                 this.vivecraft$rvelastyaw = livingEntity.yHeadRotO;

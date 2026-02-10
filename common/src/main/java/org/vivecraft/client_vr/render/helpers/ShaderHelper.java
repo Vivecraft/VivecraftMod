@@ -50,6 +50,7 @@ public class ShaderHelper {
     private static float BLUE;
     private static float TIME;
 
+    private static GpuBuffer SCREEN_UV_VBO;
     private static GpuBuffer SCREEN_VBO;
 
     /**
@@ -65,11 +66,7 @@ public class ShaderHelper {
         @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
         @Nullable GpuTextureView target)
     {
-        if (instance.getVertexFormat() != DefaultVertexFormat.POSITION_TEX) {
-            throw new IllegalStateException("Vertex format needs to be 'POSITION_TEX'");
-        }
-
-        GpuBuffer quad = getFullscreenQuad();
+        GpuBuffer quad = getFullscreenQuad(instance.getVertexFormat());
         RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
         GpuBuffer indexGpuBuffer = indexBuffer.getBuffer(6);
 
@@ -89,21 +86,41 @@ public class ShaderHelper {
     /**
      * tessellates a fullscreen quad and returns it
      */
-    private static GpuBuffer getFullscreenQuad() {
-        if (SCREEN_VBO == null) {
-            BufferBuilder builder = Tesselator.getInstance()
-                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
-            builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
-            builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
-            builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
+    private static GpuBuffer getFullscreenQuad(VertexFormat format) {
+        if (format == DefaultVertexFormat.POSITION_TEX) {
+            if (SCREEN_UV_VBO == null) {
+                BufferBuilder builder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
+                builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
+                builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
+                builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
 
-            try (MeshData meshData = builder.buildOrThrow()) {
-                SCREEN_VBO = RenderSystem.getDevice()
-                    .createBuffer(() -> "fullscreen vr vertex buffer", GpuBuffer.USAGE_VERTEX, meshData.vertexBuffer());
+                try (MeshData meshData = builder.buildOrThrow()) {
+                    SCREEN_UV_VBO = RenderSystem.getDevice()
+                        .createBuffer(() -> "fullscreen uv vr vertex buffer", GpuBuffer.USAGE_VERTEX,
+                            meshData.vertexBuffer());
+                }
             }
+            return SCREEN_UV_VBO;
+        } else if (format == DefaultVertexFormat.POSITION) {
+            if (SCREEN_VBO == null) {
+                BufferBuilder builder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+                builder.addVertex(-1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, 1.0F, 0.0F);
+                builder.addVertex(-1.0F, 1.0F, 0.0F);
+
+                try (MeshData meshData = builder.buildOrThrow()) {
+                    SCREEN_VBO = RenderSystem.getDevice()
+                        .createBuffer(() -> "fullscreen vr vertex buffer", GpuBuffer.USAGE_VERTEX,
+                            meshData.vertexBuffer());
+                }
+            }
+            return SCREEN_VBO;
         }
-        return SCREEN_VBO;
+        throw new IllegalStateException("Unsupported Vertex format: " + format);
     }
 
     /**

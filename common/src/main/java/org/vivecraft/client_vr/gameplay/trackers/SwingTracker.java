@@ -106,8 +106,8 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
             return false;
         } else if (this.dh.vrSettings.seated) {
             return false;
-        } else if (this.dh.vrSettings.getVrFreeMoveMode(false, this.dh.vrPlayer.vrdata_world_pre.fbtMode) ==
-            VRSettings.FreeMove.RUN_IN_PLACE && player.zza > 0.0F)
+        } else if (this.dh.vrSettings.getVrFreeMoveMode(false) == VRSettings.FreeMove.RUN_IN_PLACE &&
+            player.zza > 0.0F)
         {
             return false; // don't hit things while RIPing.
         } else if (player.isBlocking() && !ClientNetworking.SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING) {
@@ -418,6 +418,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         // don't break climbable blocks
                         // if this block shouldn't be breakable with roomscale mining
                         boolean protectedBlock = this.dh.vrSettings.realisticClimbEnabled &&
+                            (!player.isShiftKeyDown() || !this.dh.vrSettings.allowBreakingClimbable) &&
                             (blockstate.getBlock() instanceof LadderBlock ||
                                 blockstate.getBlock() instanceof VineBlock ||
                                 blockstate.is(ViveBlockTags.VIVECRAFT_CLIMBABLE)

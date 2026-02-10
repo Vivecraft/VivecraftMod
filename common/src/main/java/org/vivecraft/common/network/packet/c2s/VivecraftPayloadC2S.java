@@ -45,6 +45,7 @@ public interface VivecraftPayloadC2S extends VivecraftPayload {
                 case DRAW -> DrawPayloadC2S.read(buffer);
                 case TELEPORT -> TeleportPayloadC2S.read(buffer);
                 case CLIMBING -> new ClimbingPayloadC2S();
+                case JUMPING -> new JumpingPayloadC2S();
                 case HEIGHT -> HeightPayloadC2S.read(buffer);
                 case ACTIVEHAND -> ActiveBodyPartPayloadC2S.read(buffer);
                 case CRAWL -> CrawlPayloadC2S.read(buffer);
