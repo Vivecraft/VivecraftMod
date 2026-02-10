@@ -190,6 +190,8 @@ public class NullVR extends MCVR {
 
             Profiler.get().pop();
         }
+
+        ((NullVRHapticScheduler) this.hapticScheduler).tick();
     }
 
     @Override
@@ -290,15 +292,21 @@ public class NullVR extends MCVR {
     @Override
     public boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
         boolean triggered = false;
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && action == GLFW.GLFW_PRESS &&
+            key == GLFW.GLFW_KEY_KP_ADD)
+        {
+            MOD.keyVRInteract.pressKey(ControllerType.LEFT);
+            MOD.keyVRInteract.pressKey(ControllerType.RIGHT);
+        } else if (!MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) ||
+            !MethodHolder.isKeyDown(GLFW.GLFW_KEY_KP_ADD))
+        {
+            MOD.keyVRInteract.unpressKey(ControllerType.LEFT);
+            MOD.keyVRInteract.unpressKey(ControllerType.RIGHT);
+        }
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
             if (action == GLFW.GLFW_PRESS) {
                 if (key == GLFW.GLFW_KEY_F6) {
                     this.vrActive = !this.vrActive;
-                    return true;
-                }
-                if (key == GLFW.GLFW_KEY_KP_ADD) {
-                    MOD.keyVRInteract.pressKey(ControllerType.LEFT);
-                    MOD.keyVRInteract.pressKey(ControllerType.RIGHT);
                     return true;
                 }
 

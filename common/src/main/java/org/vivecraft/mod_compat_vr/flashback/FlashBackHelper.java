@@ -46,6 +46,7 @@ public class FlashBackHelper {
             );
         } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException e) {
             INIT_FAILED = true;
+            VRSettings.LOGGER.error("Vivecraft: Failed to initialize FlashBack compat", e);
         }
         INITIALIZED = true;
         return !INIT_FAILED;

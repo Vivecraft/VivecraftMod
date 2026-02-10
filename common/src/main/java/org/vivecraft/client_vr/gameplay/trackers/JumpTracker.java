@@ -17,6 +17,8 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.network.NetworkVersion;
+import org.vivecraft.common.network.packet.c2s.JumpingPayloadC2S;
 
 public class JumpTracker implements Tracker {
     // in room space
@@ -212,8 +214,12 @@ public class JumpTracker implements Tracker {
                     player.setPos(lastPosition.x, lastPosition.y, lastPosition.z);
 
                     this.dh.vrPlayer.snapRoomOriginToPlayerEntity(player, false, true);
-                    this.mc.player.causeFoodExhaustion(0.3F);
                     this.mc.player.setOnGround(false);
+
+                    // tell the server we did a jump for food exhaustion
+                    if (NetworkVersion.CLIMBEY_JUMP.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
+                        ClientNetworking.sendServerPacket(new JumpingPayloadC2S());
+                    }
                 } else {
                     this.dh.vrPlayer.snapRoomOriginToPlayerEntity(player, false, true);
                 }

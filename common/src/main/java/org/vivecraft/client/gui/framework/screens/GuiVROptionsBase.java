@@ -110,7 +110,7 @@ public abstract class GuiVROptionsBase extends Screen {
         }
 
         for (final VROptionLayout layout : settings) {
-            if (layout.getOption() != null && layout.getOption().getEnumFloat()) {
+            if (layout.getOption() != null && layout.getOption().getType() == VRSettings.OptionType.LIMITED_FLOAT) {
                 // Option Slider
                 this.addRenderableWidget(
                     new GuiVROptionSlider(layout.getOrdinal(), layout.getX(this.width), layout.getY(this.height),

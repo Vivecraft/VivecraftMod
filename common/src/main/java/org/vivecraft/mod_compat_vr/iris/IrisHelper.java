@@ -109,26 +109,31 @@ public class IrisHelper {
         }
     }
 
+    public static Optional<?> getPipeline() {
+        if (init()) {
+            try {
+                return (Optional<?>) PipelineManager_getPipeline.invoke(Iris_getPipelineManager.invoke(null));
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't get iris pipeline:", e);
+            }
+        }
+        return Optional.empty();
+    }
+
     /**
      * @return if the active shader has the vanilla water overlay enabled or disabled
      */
     public static boolean hasWaterEffect() {
         if (init()) {
-            try {
-                // Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderUnderwaterOverlay).orElse(true);
-                return (boolean) ((Optional<?>) PipelineManager_getPipeline.invoke(
-                    Iris_getPipelineManager.invoke(null))
-                ).map(o -> {
-                    try {
-                        return WorldRenderingPipeline_shouldRenderUnderwaterOverlay.invoke(o);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        VRSettings.LOGGER.error("Vivecraft: Iris water effect check failed:", e);
-                        return true;
-                    }
-                }).orElse(true);
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                VRSettings.LOGGER.error("Vivecraft: Iris water effect check failed:", e);
-            }
+            // Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderUnderwaterOverlay).orElse(true);
+            return (boolean) getPipeline().map(o -> {
+                try {
+                    return WorldRenderingPipeline_shouldRenderUnderwaterOverlay.invoke(o);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    VRSettings.LOGGER.error("Vivecraft: Iris water effect check failed:", e);
+                    return true;
+                }
+            }).orElse(true);
         }
         return true;
     }
