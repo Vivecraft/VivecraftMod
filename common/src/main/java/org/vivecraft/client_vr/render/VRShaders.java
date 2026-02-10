@@ -101,8 +101,8 @@ public class VRShaders {
 
     public static final RenderPipeline SOLID_ALPHA_PIPELINE = RenderPipeline.builder()
         .withLocation("pipeline/vivecraft_solid_alpha")
-        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
-        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/black_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
         .withColorWrite(false, true)
