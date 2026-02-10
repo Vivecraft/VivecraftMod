@@ -41,7 +41,6 @@ import org.vivecraft.client_vr.gameplay.trackers.DebugRenderTracker;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
 import org.vivecraft.client_vr.provider.ControllerTransform;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.common.utils.math.AngleOrder;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 

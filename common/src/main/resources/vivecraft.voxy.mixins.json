@@ -6,6 +6,7 @@
   "client": [
     "AbstractRenderPipelineVRMixin",
     "IrisVoxyRenderPipelineDataVRMixin",
+    "IrisVoxyRenderPipelineFrameBufferVRMixin",
     "IrisVoxyRenderPipelineVRMixin",
     "VoxyRenderSystemVRMixin"
   ],
