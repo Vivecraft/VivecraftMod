@@ -20,7 +20,7 @@ public class KeymappingSelectionScreen extends GuiSelectionListScreen<KeyMapping
         super(title, lastScreen,
             () -> Arrays.stream(Minecraft.getInstance().options.keyMappings).sorted().toList(),
             key -> Component.translatable(key.getName()),
-            key -> key.getCategory().id().toLanguageKey("key.category"),
+            KeyMapping::getCategory,
             consumer,
             true, false, null);
     }

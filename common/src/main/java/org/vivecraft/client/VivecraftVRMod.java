@@ -82,7 +82,7 @@ public class VivecraftVRMod {
     public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch", -1,
         "key.categories.gameplay");
     public final KeyMapping keyQuickSwap = new KeyMapping("vivecraft.key.quickSwap", -1,
-        KeyMapping.Category.INVENTORY);
+        "key.categories.inventory");
     public final KeyMapping keyRadialMenu = new KeyMapping("vivecraft.key.radialMenu", -1,
         "key.categories.ui");
     public final KeyMapping keyRotateAxis = new KeyMapping("vivecraft.key.rotateAxis", -1,

@@ -138,7 +138,7 @@ public abstract class LivingEntityMixin extends Entity {
     /**
      * dummy to be overridden in {@link ServerPlayerMixin}
      */
-    @ModifyVariable(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F", shift = At.Shift.AFTER))
+    @ModifyExpressionValue(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getUseItem()Lnet/minecraft/world/item/ItemStack;"))
     protected ItemStack vivecraft$roomscaleShieldActualBlockingItem(ItemStack original) {
         return original;
     }
