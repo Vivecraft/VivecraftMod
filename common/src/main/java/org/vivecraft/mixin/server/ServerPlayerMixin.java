@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.server;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
@@ -181,7 +182,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             Entity entity = damageSource.getDirectEntity();
             if (entity != null && dmgPos == entity.position()) {
                 isProjectile = entity instanceof Projectile;
-                dmgPos = entity.getBoundingBox().getCenter().subtract(entity.getDeltaMovement().normalize());
+                Vec3 travelDir = entity.getDeltaMovement().normalize();
+                dmgPos = entity.getBoundingBox().getCenter();
+                if (isProjectile) {
+                    // move the projectile check position half the bounding box size + 1.5m away from the player center
+                    float scale = this.getBbWidth() * 0.5F + 1.5F;
+                    float dist = (float) dmgPos.subtract(this.getBoundingBox().getCenter()).dot(travelDir);
+                    dmgPos = dmgPos.add(travelDir.scale(-dist - scale));
+                } else {
+                    dmgPos = dmgPos.subtract(travelDir);
+                }
             }
             // check if any hand is holding a shield
             for (int i = 0; i < 2; i++) {
@@ -239,8 +249,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             this.useItem = this.vivecraft$roomscaleShieldItem;
             original.call(damageAmount);
             this.useItem = backup;
-            this.vivecraft$roomscaleShieldItem = null;
-            this.vivecraft$roomscaleShieldHand = null;
         } else {
             original.call(damageAmount);
         }
@@ -253,6 +261,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
     protected InteractionHand vivecraft$roomscaleShieldHand(InteractionHand original) {
         return ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldHand != null ?
             this.vivecraft$roomscaleShieldHand : original;
+    }
+
+    @WrapMethod(method = "hurt")
+    protected boolean vivecraft$roomscaleShieldBlockingItemReset(
+        DamageSource source, float amount, Operation<Boolean> original)
+    {
+        boolean hurt = original.call(source, amount);
+        this.vivecraft$roomscaleShieldItem = null;
+        this.vivecraft$roomscaleShieldHand = null;
+        return hurt;
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)

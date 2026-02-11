@@ -11,7 +11,8 @@ public class GuiWeaponCollisionSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.REALISTIC_OPENING,
         VRSettings.VrOptions.SWORD_BLOCK_COLLISION,
         VRSettings.VrOptions.ONLY_SWORD_COLLISION,
-        VRSettings.VrOptions.REDUCED_PLAYER_REACH
+        VRSettings.VrOptions.REDUCED_PLAYER_REACH,
+        VRSettings.VrOptions.ALLOW_BREAKING_CLIMBABLE
     };
 
     public GuiWeaponCollisionSettings(Screen lastScreen) {

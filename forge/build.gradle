@@ -24,6 +24,7 @@ loom {
         mixinConfig "vivecraft.cataclysm.mixins.json"
         mixinConfig "vivecraft.dynamicfps.mixins.json"
         mixinConfig "vivecraft.emf.mixins.json"
+        mixinConfig "vivecraft.epicfight.mixins.json"
         mixinConfig "vivecraft.iris.mixins.json"
         mixinConfig "vivecraft.mca.mixins.json"
         mixinConfig "vivecraft.optifine.mixins.json"
@@ -32,6 +33,7 @@ loom {
         mixinConfig "vivecraft.sereneseasons.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
         mixinConfig "vivecraft.trinkets.mixins.json"
+        mixinConfig "vivecraft.voxy.mixins.json"
         mixinConfig "vivecraft.xaerosmimimap.mixins.json"
     }
 }
@@ -124,19 +126,5 @@ sourcesJar {
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
-    }
-}
-
-publishing {
-    publications {
-        mavenForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
     }
 }

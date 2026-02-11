@@ -26,10 +26,10 @@ import org.vivecraft.server.ServerVivePlayer;
 public abstract class LivingEntityMixin extends Entity {
 
     @Shadow
-    protected ItemStack useItem;
+    public abstract boolean isBlocking();
 
     @Shadow
-    public abstract boolean isBlocking();
+    protected ItemStack useItem;
 
     public LivingEntityMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
