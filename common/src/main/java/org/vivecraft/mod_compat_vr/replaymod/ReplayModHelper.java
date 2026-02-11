@@ -48,6 +48,7 @@ public class ReplayModHelper {
             RecordingEventHandler_onPacket = RecordingEventHandler.getMethod("onPacket", Packet.class);
         } catch (ClassNotFoundException | NoSuchMethodException e) {
             INIT_FAILED = true;
+            VRSettings.LOGGER.error("Vivecraft: Failed to initialize ReplayMod compat", e);
         }
         INITIALIZED = true;
         return !INIT_FAILED;
