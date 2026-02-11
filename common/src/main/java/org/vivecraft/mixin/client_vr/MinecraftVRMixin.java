@@ -30,7 +30,6 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.util.profiling.ProfileResults;
@@ -41,7 +40,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
@@ -71,10 +69,9 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
+import org.vivecraft.client_vr.gameplay.KeybindHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
-import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.render.MirrorNotification;
@@ -87,9 +84,6 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
-
-import java.io.File;
-import java.util.concurrent.CompletableFuture;
 
 // inject late, to let other mods disable the hud rendering
 @Mixin(value = Minecraft.class, priority = 1100)
@@ -176,6 +170,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     public abstract float getFrameTime();
+
+    @Shadow
+    public HitResult hitResult;
 
     @Shadow
     @Final
@@ -370,12 +367,12 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             if (entity != this.getCameraEntity()) {
                 // snap to entity, if it changed
                 ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(entity, true, false);
-            }
-            if (entity != this.player) {
-                // ride the new camera entity
-                ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity);
-            } else {
-                ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding();
+                if (entity != this.player) {
+                    // ride the new camera entity
+                    ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity);
+                } else {
+                    ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding();
+                }
             }
         }
     }
@@ -606,6 +603,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
 
         if (VRState.VR_RUNNING) {
+            // process keybinds before ticking input actions, to make sure they are processed before they are unpressed
+            this.profiler.push("Vivecraft Keybindings");
+            KeybindHandler.processKeybindings();
+            this.profiler.pop();
+        }
+
+        if (VRState.VR_RUNNING) {
             if (dataHolder.menuWorldRenderer.isReady() && MethodHolder.isInMenuRoom()) {
                 dataHolder.menuWorldRenderer.tick();
                 if (this.level == null) {
@@ -632,89 +636,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         this.profiler.push("vrPlayers");
         ClientVRPlayers.getInstance().tick();
 
-        this.profiler.popPush("Vivecraft Keybindings");
-        vivecraft$processAlwaysAvailableKeybindings();
-
         this.profiler.pop();
-    }
-
-    @Unique
-    private void vivecraft$processAlwaysAvailableKeybindings() {
-        // menuworld export
-        if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && this.level != null && this.player != null) {
-            Throwable error = null;
-            try {
-                final BlockPos blockpos = this.player.blockPosition();
-                int size = 320;
-                int offset = size / 2;
-                File dir = new File(MenuWorldDownloader.CUSTOM_WORLD_FOLDER);
-                dir.mkdirs();
-
-                File foundFile;
-                for (int i = 0; ; i++) {
-                    foundFile = new File(dir, "world" + i + ".mmw");
-                    if (!foundFile.exists()) break;
-                }
-
-                VRSettings.LOGGER.info("Vivecraft: Exporting world... area size: {}", size);
-                VRSettings.LOGGER.info("Vivecraft: Saving to {}", foundFile.getAbsolutePath());
-
-                if (isLocalServer()) {
-                    final Level level = getSingleplayerServer().getLevel(this.player.level().dimension());
-                    File finalFoundFile = foundFile;
-                    CompletableFuture<Throwable> completablefuture = getSingleplayerServer().submit(() -> {
-                        try {
-                            MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset,
-                                size, size, blockpos.getY(), finalFoundFile);
-                        } catch (Throwable throwable) {
-                            VRSettings.LOGGER.error("Vivecraft: error exporting menuworld:", throwable);
-                            return throwable;
-                        }
-                        return null;
-                    });
-
-                    error = completablefuture.get();
-                } else {
-                    MenuWorldExporter.saveAreaToFile(this.level, blockpos.getX() - offset, blockpos.getZ() - offset,
-                        size, size, blockpos.getY(), foundFile);
-                    ClientUtils.addChatMessage(
-                        Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
-                }
-
-                if (error == null) {
-                    ClientUtils.addChatMessage(
-                        Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2",
-                        foundFile.getAbsolutePath()));
-                }
-            } catch (Throwable throwable) {
-                VRSettings.LOGGER.error("Vivecraft: Error exporting Menuworld:", throwable);
-                error = throwable;
-            } finally {
-                if (error != null) {
-                    ClientUtils.addChatMessage(
-                        Component.translatable("vivecraft.messages.menuworldexporterror", error.getMessage()));
-                }
-            }
-        }
-
-        // quick commands
-        for (int i = 0; i < VivecraftVRMod.INSTANCE.keyQuickCommands.length; i++) {
-            if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
-                String command = ClientDataHolderVR.getInstance().vrSettings.vrQuickCommands[i];
-                if (command.startsWith("/")) {
-                    this.player.connection.sendCommand(command.substring(1));
-                } else {
-                    this.player.connection.sendChat(command);
-                }
-            }
-        }
     }
 
     @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"))
     private boolean vivecraft$removePick(GameRenderer instance, float partialTicks) {
         // not exactly why we remove that, probably to safe some performance
-        return !VRState.VR_RUNNING;
+        // don't cancel it though if the hitresult is null
+        return !VRState.VR_RUNNING || this.hitResult == null;
     }
 
     @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"))

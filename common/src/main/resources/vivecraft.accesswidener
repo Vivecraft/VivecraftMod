@@ -70,6 +70,8 @@ accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDel
 
 # for correct vr rendering
 accessible field net/minecraft/world/entity/Entity eyeHeight F
+# for cutom drag
+accessible method net/minecraft/world/entity/Entity getBlockPosBelowThatAffectsMyMovement ()Lnet/minecraft/core/BlockPos;
 
 # to add vivecraft items in the creative menus
 accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/resources/ResourceKey;

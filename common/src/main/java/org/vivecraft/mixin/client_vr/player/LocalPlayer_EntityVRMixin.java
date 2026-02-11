@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client_vr.player;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.core.BlockPos;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
@@ -21,8 +21,6 @@ import javax.annotation.Nullable;
 public abstract class LocalPlayer_EntityVRMixin {
 
     @Shadow
-    protected boolean wasTouchingWater;
-    @Shadow
     protected Vec3 stuckSpeedMultiplier;
 
     @Shadow
@@ -32,16 +30,7 @@ public abstract class LocalPlayer_EntityVRMixin {
     public abstract boolean isSilent();
 
     @Shadow
-    protected abstract BlockPos getBlockPosBelowThatAffectsMyMovement();
-
-    @Shadow
     public abstract Level level();
-
-    @Shadow
-    public abstract boolean onGround();
-
-    @Shadow
-    public abstract void setDeltaMovement(double x, double y, double z);
 
     @Shadow
     public abstract @Nullable Entity getVehicle();
@@ -88,7 +77,7 @@ public abstract class LocalPlayer_EntityVRMixin {
      * dummy to be overridden in {@link LocalPlayerVRMixin}
      */
     @Inject(method = "moveRelative", at = @At("TAIL"))
-    protected void vivecraft$afterMoveRelative(CallbackInfo ci) {}
+    protected void vivecraft$afterMoveRelative(CallbackInfo ci, @Local(ordinal = 1) Vec3 movement) {}
 
     /**
      * dummy to be overridden in {@link LocalPlayerVRMixin}
