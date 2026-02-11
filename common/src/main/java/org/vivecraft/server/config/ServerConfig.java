@@ -82,6 +82,7 @@ public class ServerConfig {
 
     // climbey
     public static ConfigBuilder.BooleanValue CLIMBEY_ENABLED;
+    public static ConfigBuilder.BooleanValue CLIMBEY_FOOD_EXHAUSTION;
     public static ConfigBuilder.EnumValue<ClimbeyBlockmode> CLIMBEY_BLOCKMODE;
     public static ConfigBuilder.ListValue<String> CLIMBEY_BLOCKLIST;
 
@@ -90,6 +91,7 @@ public class ServerConfig {
 
     // teleport
     public static ConfigBuilder.BooleanValue TELEPORT_ENABLED;
+    public static ConfigBuilder.BooleanValue TELEPORT_FOOD_EXHAUSTION;
     public static ConfigBuilder.BooleanValue TELEPORT_LIMITED_SURVIVAL;
     public static ConfigBuilder.IntValue TELEPORT_UP_LIMIT;
     public static ConfigBuilder.IntValue TELEPORT_DOWN_LIMIT;
@@ -328,6 +330,9 @@ public class ServerConfig {
             .push("enabled")
             .define(true)
             .setPacketFunction(v -> ServerNetworking.getClimbeyServerPayload());
+        CLIMBEY_FOOD_EXHAUSTION = BUILDER
+            .push("foodExhaustion")
+            .define(true);
         CLIMBEY_BLOCKMODE = BUILDER
             .push("blockmode")
             .defineEnum(ClimbeyBlockmode.DISABLED, ClimbeyBlockmode.class)
@@ -372,6 +377,9 @@ public class ServerConfig {
             .push("enabled")
             .define(true)
             .setPacketFunction(v -> new TeleportPayloadS2C(ServerConfig.TELEPORT_ENABLED.get(), v.networkVersion));
+        TELEPORT_FOOD_EXHAUSTION = BUILDER
+            .push("foodExhaustion")
+            .define(false);
         TELEPORT_LIMITED_SURVIVAL = BUILDER
             .push("limitedSurvival")
             .define(false)

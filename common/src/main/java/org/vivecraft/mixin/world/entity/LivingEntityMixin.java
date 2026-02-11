@@ -18,6 +18,8 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.mixin.server.ServerPlayerMixin;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
@@ -26,10 +28,10 @@ import org.vivecraft.server.ServerVivePlayer;
 public abstract class LivingEntityMixin extends Entity {
 
     @Shadow
-    protected ItemStack useItem;
+    public abstract boolean isBlocking();
 
     @Shadow
-    public abstract boolean isBlocking();
+    protected ItemStack useItem;
 
     public LivingEntityMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
@@ -79,4 +81,10 @@ public abstract class LivingEntityMixin extends Entity {
     {
         return blocked || roomscaleBlocked.get();
     }
+
+    /**
+     * dummy to be overridden in {@link ServerPlayerMixin}
+     */
+    @Inject(method = "getItemBlockingWith", at = @At(value = "HEAD"), cancellable = true)
+    protected void vivecraft$roomscaleShieldActualBlockingItem(CallbackInfoReturnable<ItemStack> cir) {}
 }

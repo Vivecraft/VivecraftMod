@@ -41,6 +41,7 @@
     "vivecraft.curios.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.emf.mixins.json",
+    "vivecraft.epicfight.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.mca.mixins.json",
     "vivecraft.modmenu.mixins.json",
@@ -50,6 +51,7 @@
     "vivecraft.sereneseasons.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.trinkets.mixins.json",
+    "vivecraft.voxy.mixins.json",
     "vivecraft.xaerosmimimap.mixins.json"
   ],
   "depends": {

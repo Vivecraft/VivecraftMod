@@ -58,6 +58,8 @@ config = "vivecraft.dynamicfps.mixins.json"
 [[mixins]]
 config = "vivecraft.emf.mixins.json"
 [[mixins]]
+config = "vivecraft.epicfight.mixins.json"
+[[mixins]]
 config = "vivecraft.iris.mixins.json"
 [[mixins]]
 config = "vivecraft.mca.mixins.json"
@@ -73,5 +75,7 @@ config = "vivecraft.sereneseasons.mixins.json"
 config = "vivecraft.sodium.mixins.json"
 [[mixins]]
 config = "vivecraft.trinkets.mixins.json"
+[[mixins]]
+config = "vivecraft.voxy.mixins.json"
 [[mixins]]
 config = "vivecraft.xaerosmimimap.mixins.json"
