@@ -359,8 +359,6 @@ public class TeleportTracker implements Tracker {
         this.dh.swingTracker.disableSwing = 3;
 
         if (ClientNetworking.isLimitedSurvivalTeleport()) {
-            this.mc.player.causeFoodExhaustion((float) (this.movementTeleportDistance / 16.0D * 1.2D));
-
             if (this.mc.gameMode.hasMissTime() && this.vrMovementStyle.arcAiming) {
                 this.teleportEnergy -= (float) this.movementTeleportDistance * 4.0F;
             }

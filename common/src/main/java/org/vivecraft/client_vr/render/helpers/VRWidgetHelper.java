@@ -156,6 +156,7 @@ public class VRWidgetHelper {
             RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
         }
         MC.gameRenderer.lightTexture().turnOnLightLayer();
+        MC.gameRenderer.overlayTexture().setupOverlayColor();
 
         // render camera model
         BufferBuilder bufferBuilder = Tesselator.getInstance()

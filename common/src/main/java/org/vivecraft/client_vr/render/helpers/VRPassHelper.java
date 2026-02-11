@@ -16,11 +16,13 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.List;
 
@@ -49,6 +51,14 @@ public class VRPassHelper {
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
         RenderHelper.checkGLError("post game render " + eye);
+
+        if (ShadersHelper.isShaderActive()) {
+            // some shaders don't write an alpha value to the final image
+            RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+            RenderSystem.colorMask(false, false, false, true);
+            RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT);
+            RenderSystem.colorMask(true, true, true, true);
+        }
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.

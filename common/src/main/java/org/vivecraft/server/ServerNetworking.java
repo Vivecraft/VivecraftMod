@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.NetworkVersion;
@@ -205,12 +206,28 @@ public class ServerNetworking {
             case TELEPORT -> {
                 if (!ServerConfig.TELEPORT_ENABLED.get()) break;
                 TeleportPayloadC2S payload = (TeleportPayloadC2S) c2sPayload;
+
+                if (ServerConfig.TELEPORT_FOOD_EXHAUSTION.get() && payload.y() > player.getY()) {
+                    // cause food exhaustion when tping up blocks, to mimic jumping up
+                    player.causeFoodExhaustion(0.05F);
+                }
+
                 player.absMoveTo(payload.x(), payload.y(), payload.z(), player.getYRot(), player.getXRot());
             }
             case CLIMBING -> {
                 if (!ServerConfig.CLIMBEY_ENABLED.get()) break;
                 player.fallDistance = 0.0F;
                 player.connection.aboveGroundTickCount = 0;
+                if (ServerConfig.CLIMBEY_FOOD_EXHAUSTION.get() &&
+                    (ClimbTracker.isClaws(player.getMainHandItem()) || ClimbTracker.isClaws(player.getOffhandItem())))
+                {
+                    player.causeFoodExhaustion(0.005F);
+                }
+            }
+            case JUMPING -> {
+                if (ServerConfig.CLIMBEY_FOOD_EXHAUSTION.get()) {
+                    player.causeFoodExhaustion(0.3F);
+                }
             }
             case ACTIVEHAND -> {
                 ActiveBodyPartPayloadC2S activeBodypart = (ActiveBodyPartPayloadC2S) c2sPayload;
