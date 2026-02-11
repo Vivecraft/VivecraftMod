@@ -232,12 +232,30 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
      * inject into {@link LivingEntity#hurtServer}
      */
     @Override
-    protected ItemStack vivecraft$roomscaleShieldActualBlockingItem(ItemStack original) {
+    protected ItemStack vivecraft$roomscaleShieldActualBlockingItemHurt(ItemStack original) {
         if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldItem != null) {
             return this.vivecraft$roomscaleShieldItem;
         } else {
             return original;
         }
+    }
+
+    /**
+     * inject into {@link LivingEntity#getItemBlockingWith}
+     */
+    @Override
+    protected void vivecraft$roomscaleShieldActualBlockingItem(CallbackInfoReturnable<ItemStack> cir) {
+        if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldItem != null) {
+            cir.setReturnValue(this.vivecraft$roomscaleShieldItem);
+        }
+    }
+
+    /**
+     * inject at end of {@link LivingEntity#hurtServer}
+     */
+    @Override
+    protected void vivecraft$roomscaleShieldBlockingItemReset(CallbackInfoReturnable<ItemStack> cir) {
+        this.vivecraft$roomscaleShieldItem = null;
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
