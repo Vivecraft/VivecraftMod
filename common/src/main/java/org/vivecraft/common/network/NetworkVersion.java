@@ -20,7 +20,9 @@ public enum NetworkVersion {
     // adds possibility to toggle settings after initial connection
     OPTION_TOGGLE,
     // adds packet to override the aim direction/position
-    AIM_OVERRIDE;
+    AIM_OVERRIDE,
+    // adds a packet to indicate to the server that the client did a climbey jump
+    CLIMBEY_JUMP;
 
     public static NetworkVersion fromProtocolVersion(int protocolVersion) {
         return values()[protocolVersion + 1];

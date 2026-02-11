@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-        classpath ("net.fabricmc:tiny-remapper:0.12.2")
+        classpath("net.fabricmc:tiny-remapper:0.12.2")
     }
 }
 
@@ -95,7 +95,7 @@ subprojects {
         options.jFlags("-Duser.country=US", "-Duser.language=en")
     }
 
-   tasks.named('test', Test) {
+    tasks.named('test', Test) {
         useJUnitPlatform()
 
         // always run tests
@@ -105,11 +105,109 @@ subprojects {
             events "passed"
         }
     }
+
+    // only do these for the api
+    if (project.name in ["fabric", "neoforge"]) {
+        tasks.register('apiJar', Jar) {
+            archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
+            dependsOn tasks.named('remapJar')
+            archiveBaseName = rootProject.archives_base_name + '-api'
+            if (project.name == "neoforge") {
+                archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
+            }
+
+            from(tasks.named('remapJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
+                include 'org/vivecraft/api/**'
+            }
+
+            manifest {
+                from(tasks.named('remapJar').flatMap { it.archiveFile }.map {
+                    zipTree(it).matching {
+                        include 'META-INF/MANIFEST.MF'
+                    }.singleFile
+                })
+            }
+            finalizedBy copyJarToMain
+        }
+
+        tasks.register('apiSourcesJar', Jar) {
+            archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
+            archiveClassifier.set('sources')
+            dependsOn tasks.named('remapSourcesJar')
+            archiveBaseName = rootProject.archives_base_name + '-api'
+            if (project.name == "neoforge") {
+                archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
+            }
+
+            from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
+                include 'org/vivecraft/api/**'
+            }
+
+            manifest {
+                from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map {
+                    zipTree(it).matching {
+                        include 'META-INF/MANIFEST.MF'
+                    }.singleFile
+                })
+            }
+            finalizedBy copyJarToMain
+        }
+
+        tasks.register('buildApi', Copy) {
+            dependsOn tasks.named('apiJar')
+            dependsOn tasks.named('apiSourcesJar')
+
+            from(tasks.named('apiJar'))
+            from(tasks.named('apiSourcesJar'))
+            into rootProject.layout.buildDirectory.dir("libs")
+        }
+    }
+
+
+    if (!(project.name in ["stubs"])) {
+        apply plugin: "maven-publish"
+
+        publishing {
+            publications {
+                Mod(MavenPublication) {
+                    groupId = 'org.vivecraft'
+                    artifactId = rootProject.archives_base_name + "-" + project.name
+                    from components.java
+                }
+
+                if (project.name in ["fabric", "neoforge"]) {
+                    Api(MavenPublication) {
+                        version = rootProject.minecraft_version + "-" + rootProject.api_version
+                        groupId = 'org.vivecraft'
+
+                        artifactId = rootProject.archives_base_name + '-api'
+                        if (project.name == "neoforge") {
+                            artifactId += '-mojmap'
+                        }
+
+                        artifact(tasks.named('apiJar'))
+                        artifact(tasks.named('apiSourcesJar'))
+                    }
+                }
+            }
+
+//            repositories {
+//                maven {
+//                    name = "github-packages"
+//                    var repoUrl = System.getenv("TARGET_REPOSITORY")
+//                    url = uri("https://maven.pkg.github.com/" + (repoUrl != null ? repoUrl : "").toLowerCase())
+//                    credentials {
+//                        username = System.getenv("GITHUB_ACTOR")
+//                        password = System.getenv("GITHUB_TOKEN")
+//                    }
+//                }
+//            }
+        }
+    }
 }
 
 allprojects {
     apply plugin: "architectury-plugin"
-    apply plugin: "maven-publish"
 
     repositories {
         // Add repositories to retrieve artifacts from in here.

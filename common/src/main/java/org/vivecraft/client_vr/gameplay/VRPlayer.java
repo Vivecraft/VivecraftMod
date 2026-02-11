@@ -41,6 +41,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.VehicleTracker;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.utils.external.jinfinadeck;
+import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ViveItemTags;
@@ -714,13 +716,13 @@ public class VRPlayer {
         {
             // Server-side movement
             // when swimming/flying adjust player look according to the user setting
-            switch (this.dh.vrSettings.getVrFreeMoveMode(player.isFallFlying(), data.fbtMode)) {
+            switch (this.dh.vrSettings.getVrFreeMoveMode(player.isFallFlying())) {
                 case CONTROLLER -> {
                     player.setYRot(data.getController(1).getYaw());
                     player.setXRot(-data.getController(1).getPitch());
                 }
                 case WAIST -> {
-                    player.setYRot(data.waist.getYaw());
+                    player.setYRot(data.fbtMode == FBTMode.ARMS_ONLY ? data.getBodyYaw() : data.waist.getYaw());
                     player.setXRot(-data.hmd.getPitch()); // use head for up/down
                 }
                 default -> {
@@ -750,6 +752,174 @@ public class VRPlayer {
             player.setYRot(data.hmd.getYaw());
             player.setYHeadRot(player.getYRot());
             player.setXRot(-data.hmd.getPitch());
+        }
+    }
+
+    /**
+     * rotates the relative input to point in the freemove direction
+     *
+     * @param player   player that is moving
+     * @param relative relative input
+     * @param speed    speed of the player
+     * @return relative input rotated to point in the freemove direction, or Vec3.ZERO if freemove is disabled
+     */
+    public Vec3 freemoveDirection(LocalPlayer player, Vec3 relative, float speed) {
+        double strafe = relative.x;
+        double forward = relative.z;
+
+        Vec3 movement = Vec3.ZERO;
+
+        if (this.getFreeMove()) {
+            double horizontalInput = strafe * strafe + forward * forward;
+            double mX = 0.0D;
+            double mZ = 0.0D;
+            double mY = 0.0D;
+
+            if (horizontalInput >= 1.0E-4F || ClientDataHolderVR.getInstance().katVr) {
+                horizontalInput = Mth.sqrt((float) horizontalInput);
+
+                if (horizontalInput < 1.0D && !ClientDataHolderVR.getInstance().katVr) {
+                    horizontalInput = 1.0D;
+                }
+
+                horizontalInput = speed / horizontalInput;
+                strafe = strafe * horizontalInput;
+                forward = forward * horizontalInput;
+                Vec3 direction = new Vec3(strafe, 0.0D, forward);
+                boolean isFlyingOrSwimming =
+                    !player.isPassenger() && (player.getAbilities().flying || player.isSwimming());
+
+                if (ClientDataHolderVR.getInstance().katVr) {
+                    jkatvr.query();
+                    horizontalInput =
+                        jkatvr.getSpeed() * jkatvr.walkDirection() * this.dh.vrSettings.movementSpeedMultiplier;
+                    direction = new Vec3(0.0D, 0.0D, horizontalInput);
+
+                    if (isFlyingOrSwimming) {
+                        direction = direction.xRot(this.vrdata_world_pre.hmd.getPitchRad());
+                    }
+
+                    direction = direction.yRot(
+                        -jkatvr.getYaw() * Mth.DEG_TO_RAD + this.vrdata_world_pre.rotation_radians);
+                } else if (ClientDataHolderVR.getInstance().infinadeck) {
+                    jinfinadeck.query();
+                    horizontalInput = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() *
+                        this.dh.vrSettings.movementSpeedMultiplier;
+                    direction = new Vec3(0.0D, 0.0D, horizontalInput);
+
+                    if (isFlyingOrSwimming) {
+                        direction = direction.xRot(this.vrdata_world_pre.hmd.getPitchRad());
+                    }
+
+                    direction = direction.yRot(
+                        -jinfinadeck.getYaw() * Mth.DEG_TO_RAD + this.vrdata_world_pre.rotation_radians);
+                } else if (this.dh.vrSettings.seated) {
+                    int c = 0;
+                    if (this.dh.vrSettings.seatedUseHMD) {
+                        c = 1;
+                    }
+
+                    if (isFlyingOrSwimming) {
+                        direction = direction.xRot(this.vrdata_world_pre.getController(c).getPitchRad());
+                    }
+
+                    direction = direction.yRot(-this.vrdata_world_pre.getController(c).getYawRad());
+                } else {
+
+                    VRSettings.FreeMove freeMoveType = this.dh.vrSettings.getVrFreeMoveMode(
+                        !player.isPassenger() && player.getAbilities().flying);
+
+                    if (isFlyingOrSwimming) {
+                        direction = switch (freeMoveType) {
+                            case CONTROLLER -> direction.xRot(this.vrdata_world_pre.getController(1).getPitchRad());
+                            case HMD, RUN_IN_PLACE, ROOM, WAIST ->
+                                direction.xRot(this.vrdata_world_pre.hmd.getPitchRad());
+                            default -> direction;
+                        };
+                    }
+                    if (this.dh.jumpTracker.isjumping()) {
+                        direction = direction.yRot(-this.vrdata_world_pre.hmd.getYawRad());
+                    } else {
+                        direction = switch (freeMoveType) {
+                            case CONTROLLER -> direction.yRot(-this.vrdata_world_pre.getController(1).getYawRad());
+                            case HMD -> direction.yRot(-this.vrdata_world_pre.hmd.getYawRad());
+                            case RUN_IN_PLACE -> direction.yRot((float) -this.dh.runTracker.getYaw())
+                                .scale(this.dh.runTracker.getSpeed());
+                            case ROOM -> direction.yRot((180.0F + this.dh.vrSettings.worldRotation) * Mth.DEG_TO_RAD);
+                            case WAIST -> direction.yRot(this.vrdata_world_pre.fbtMode == FBTMode.ARMS_ONLY ?
+                                -this.vrdata_world_pre.getBodyYawRad() : -this.vrdata_world_pre.waist.getYawRad());
+                            default -> direction;
+                        };
+                    }
+                }
+
+                mX = direction.x;
+                mY = direction.y;
+                mZ = direction.z;
+
+                float addFactor = getActiveInertiaFactor(player);
+
+                float yAdd = player.getAbilities().flying ? 5.0F : 1.0F;
+
+                movement = new Vec3(mX * addFactor, mY * yAdd, mZ * addFactor);
+            }
+        }
+        return movement;
+    }
+
+    /**
+     * applies slowdown/speedup based one the inertia setting
+     */
+    public void applyDrag(LocalPlayer player, Vec3 movement) {
+        // don't do drag when not on ground, or inertia is set to vanilla
+        if (this.getFreeMove() && this.getActiveInertiaFactor(player) != 1.0F) {
+            double friction = 0.91;
+
+            if (player.onGround()) {
+                friction *= player.level().getBlockState(player.getBlockPosBelowThatAffectsMyMovement())
+                    .getBlock().getFriction();
+            }
+
+            // account for stock drag code we can't change in LivingEntity#travel
+            player.setDeltaMovement(
+                player.getDeltaMovement().x / friction,
+                player.getDeltaMovement().y,
+                player.getDeltaMovement().z / friction);
+
+            double addFactor = this.getActiveInertiaFactor(player);
+
+            double boundedAdditionX = getBoundedAddition(movement.x / addFactor);
+            double targetLimitX = (friction * boundedAdditionX) / (1f - friction);
+            double multiFactorX = targetLimitX / (friction * (targetLimitX + (boundedAdditionX * addFactor)));
+            double xFactor = friction * multiFactorX;
+
+            double boundedAdditionZ = getBoundedAddition(movement.z / addFactor);
+            double targetLimitZ = (friction * boundedAdditionZ) / (1f - friction);
+            double multiFactorZ = targetLimitZ / (friction * (targetLimitZ + (boundedAdditionZ * addFactor)));
+            double zFactor = friction * multiFactorZ;
+
+            player.setDeltaMovement(
+                player.getDeltaMovement().x * xFactor,
+                player.getDeltaMovement().y,
+                player.getDeltaMovement().z * zFactor);
+        }
+    }
+
+    private double getBoundedAddition(double orig) {
+        return orig >= -1.0E-6D && orig <= 1.0E-6D ? 1.0E-6D : orig;
+    }
+
+    /**
+     * returns the inertia factor, when the player is on the ground
+     *
+     * @param player player to get the inertia factor for
+     * @return active inertia factor
+     */
+    private float getActiveInertiaFactor(LocalPlayer player) {
+        if (player.onGround() && !player.getAbilities().flying && !player.isInWater()) {
+            return this.dh.vrSettings.inertiaFactor.getFactor();
+        } else {
+            return 1F;
         }
     }
 
