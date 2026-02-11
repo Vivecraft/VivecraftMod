@@ -56,7 +56,7 @@ public class VRPassHelper {
             // some shaders don't write an alpha value to the final image
             RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
             RenderSystem.colorMask(false, false, false, true);
-            RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT);
+            RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
             RenderSystem.colorMask(true, true, true, true);
         }
 

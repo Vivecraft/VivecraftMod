@@ -267,21 +267,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             this.vivecraft$roomscaleShieldHand : original;
     }
 
-    /**
-     * inject into {@link LivingEntity#getItemBlockingWith}
-     */
-    @Override
-    protected void vivecraft$roomscaleShieldActualBlockingItem(CallbackInfoReturnable<ItemStack> cir) {
-        if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldItem != null) {
-            cir.setReturnValue(this.vivecraft$roomscaleShieldItem);
-        }
-    }
-
-    @WrapMethod(method = "hurtServer")
+    @WrapMethod(method = "hurt")
     protected boolean vivecraft$roomscaleShieldBlockingItemReset(
-        ServerLevel level, DamageSource damageSource, float amount, Operation<Boolean> original)
+        DamageSource source, float amount, Operation<Boolean> original)
     {
-        boolean hurt = original.call(level, damageSource, amount);
+        boolean hurt = original.call(source, amount);
         this.vivecraft$roomscaleShieldItem = null;
         this.vivecraft$roomscaleShieldHand = null;
         return hurt;

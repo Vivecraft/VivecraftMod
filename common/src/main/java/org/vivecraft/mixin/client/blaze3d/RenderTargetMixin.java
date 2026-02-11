@@ -137,7 +137,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         }
     }
 
-    @Inject(method = "blitAndBlendToScreen", at = @At("TAIL"))
+    @Inject(method = "_blitToScreen", at = @At("TAIL"))
     private void vivecraft$resetViewport(CallbackInfo ci) {
         if (RenderPassType.isWorldOnly()) {
             // some mods do a blit mit renderpass, and mess up the viewport
