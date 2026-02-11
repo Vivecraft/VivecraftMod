@@ -254,8 +254,12 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
      * inject at end of {@link LivingEntity#hurtServer}
      */
     @Override
-    protected void vivecraft$roomscaleShieldBlockingItemReset(CallbackInfoReturnable<ItemStack> cir) {
+    protected boolean vivecraft$roomscaleShieldBlockingItemReset(
+        ServerLevel level, DamageSource damageSource, float amount, Operation<Boolean> original)
+    {
+        boolean hurt = super.vivecraft$roomscaleShieldBlockingItemReset(level, damageSource, amount, original);
         this.vivecraft$roomscaleShieldItem = null;
+        return hurt;
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
