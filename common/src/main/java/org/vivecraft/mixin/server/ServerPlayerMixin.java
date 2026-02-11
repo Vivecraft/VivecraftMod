@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.server;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
@@ -250,14 +251,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         }
     }
 
-    /**
-     * inject at end of {@link LivingEntity#hurtServer}
-     */
-    @Override
+    @WrapMethod(method = "hurtServer")
     protected boolean vivecraft$roomscaleShieldBlockingItemReset(
         ServerLevel level, DamageSource damageSource, float amount, Operation<Boolean> original)
     {
-        boolean hurt = super.vivecraft$roomscaleShieldBlockingItemReset(level, damageSource, amount, original);
+        boolean hurt = original.call(level, damageSource, amount);
         this.vivecraft$roomscaleShieldItem = null;
         return hurt;
     }
