@@ -319,6 +319,11 @@ public class VivecraftItemRendering {
                     }
                 }
                 rotation.mul(Axis.YP.rotationDegrees(side * -90.0F));
+                if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
+                    rotation.mul(Axis.ZP.rotationDegrees(side * 10.0F));
+                    translateY -= 0.0055F;
+                    translateZ -= 0.035F;
+                }
             }
             case SPEAR -> {
                 rotation.identity();

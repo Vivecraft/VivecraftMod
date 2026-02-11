@@ -10,9 +10,9 @@ dependencies {
     compileOnly project(':stubs')
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modCompileOnly "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-    modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modCompileOnly("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
     modCompileOnly "maven.modrinth:sodium:mc1.20.6-0.5.11"
@@ -24,7 +24,7 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:15.0.787") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
-    modApi("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modCompileOnly("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // other mods
     modCompileOnly "maven.modrinth:dynamic-fps:3.4.3"
@@ -57,19 +57,5 @@ jar {
                     zipTree(it)
                 }
             }
-    }
-}
-
-publishing {
-    publications {
-        mavenCommon(MavenPublication) {
-            artifactId = rootProject.archives_base_name
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
     }
 }

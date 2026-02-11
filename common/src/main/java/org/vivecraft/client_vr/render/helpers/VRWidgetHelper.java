@@ -156,6 +156,7 @@ public class VRWidgetHelper {
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         }
         MC.gameRenderer.lightTexture().turnOnLightLayer();
+        MC.gameRenderer.overlayTexture().setupOverlayColor();
 
 
         // render camera model
