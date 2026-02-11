@@ -1,14 +1,12 @@
 package org.vivecraft.mixin.world.entity;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -145,16 +143,6 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyExpressionValue(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getUseItem()Lnet/minecraft/world/item/ItemStack;"))
     protected ItemStack vivecraft$roomscaleShieldActualBlockingItemHurt(ItemStack original) {
         return original;
-    }
-
-    /**
-     * dummy to be overridden in {@link ServerPlayerMixin}
-     */
-    @WrapMethod(method = "hurtServer")
-    protected boolean vivecraft$roomscaleShieldBlockingItemReset(
-        ServerLevel level, DamageSource damageSource, float amount, Operation<Boolean> original)
-    {
-        return original.call(level, damageSource, amount);
     }
 
     /**
