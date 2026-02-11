@@ -49,8 +49,8 @@ public class VRPassHelper {
 
         if (ShadersHelper.isShaderActive()) {
             // some shaders don't write an alpha value to the final image
-            ShaderHelper.renderFullscreenQuad(() -> "alpha clear", VRShaders.SOLID_ALPHA_PIPELINE, pass -> {},
-                MC.getMainRenderTarget().getColorTextureView());
+            ShaderHelper.renderFullscreenQuad(VRShaders.SOLID_ALPHA_PIPELINE, pass -> {},
+                MC.getMainRenderTarget().getColorTexture());
         }
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {

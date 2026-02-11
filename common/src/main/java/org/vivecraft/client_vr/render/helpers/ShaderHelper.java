@@ -94,8 +94,8 @@ public class ShaderHelper {
 
                 try (MeshData meshData = builder.buildOrThrow()) {
                     SCREEN_UV_VBO = RenderSystem.getDevice()
-                        .createBuffer(() -> "fullscreen uv vr vertex buffer", GpuBuffer.USAGE_VERTEX,
-                            meshData.vertexBuffer());
+                        .createBuffer(() -> "fullscreen uv vr vertex buffer", BufferType.VERTICES,
+                            BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
                 }
             }
             return SCREEN_UV_VBO;
@@ -110,8 +110,8 @@ public class ShaderHelper {
 
                 try (MeshData meshData = builder.buildOrThrow()) {
                     SCREEN_VBO = RenderSystem.getDevice()
-                        .createBuffer(() -> "fullscreen vr vertex buffer", GpuBuffer.USAGE_VERTEX,
-                            meshData.vertexBuffer());
+                        .createBuffer(() -> "fullscreen vr vertex buffer", BufferType.VERTICES,
+                            BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
                 }
             }
             return SCREEN_VBO;
