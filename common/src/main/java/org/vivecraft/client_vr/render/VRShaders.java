@@ -90,6 +90,15 @@ public class VRShaders {
         DefaultVertexFormat.POSITION_TEX, ShaderDefines.EMPTY);
     public static final String BLIT_VR_COLOR_SAMPLER = "DiffuseSampler";
 
+    public static final RenderPipeline SOLID_ALPHA_PIPELINE = RenderPipeline.builder()
+        .withLocation("pipeline/vivecraft_solid_alpha")
+        .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/black_vr"))
+        .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/black_vr"))
+        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+        .withDepthWrite(false)
+        .withColorWrite(false, true)
+        .build();
+
     // end portal shaders
     public static final ShaderProgram RENDERTYPE_END_PORTAL_VR_SHADER = new ShaderProgram(
         ResourceLocation.fromNamespaceAndPath("vivecraft", "core/rendertype_end_portal_vr"),
