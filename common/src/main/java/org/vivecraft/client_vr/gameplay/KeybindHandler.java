@@ -48,11 +48,11 @@ public class KeybindHandler {
         if (MC.player != null && VivecraftVRMod.INSTANCE.keyQuickSwap.consumeClick()) {
             // don't swap while actively climbing
             if (!DH.climbTracker.isClimbingWith(InteractionHand.MAIN_HAND)) {
-                if (MC.player.getInventory().getSelectedSlot() != 0) {
-                    PREVIOUS_ITEM_SLOT = MC.player.getInventory().getSelectedSlot();
-                    MC.player.getInventory().setSelectedSlot(0);
+                if (MC.player.getInventory().selected != 0) {
+                    PREVIOUS_ITEM_SLOT = MC.player.getInventory().selected;
+                    MC.player.getInventory().selected = 0;
                 } else {
-                    MC.player.getInventory().setSelectedSlot(PREVIOUS_ITEM_SLOT);
+                    MC.player.getInventory().selected = PREVIOUS_ITEM_SLOT;
                     PREVIOUS_ITEM_SLOT = 0;
                 }
             }

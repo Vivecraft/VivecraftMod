@@ -245,8 +245,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             this.useItem = this.vivecraft$roomscaleShieldItem;
             original.call(damageAmount);
             this.useItem = backup;
-            this.vivecraft$roomscaleShieldItem = null;
-            this.vivecraft$roomscaleShieldHand = null;
         } else {
             original.call(damageAmount);
         }
@@ -259,6 +257,26 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
     protected InteractionHand vivecraft$roomscaleShieldHand(InteractionHand original) {
         return ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldHand != null ?
             this.vivecraft$roomscaleShieldHand : original;
+    }
+
+    /**
+     * inject into {@link LivingEntity#getItemBlockingWith}
+     */
+    @Override
+    protected void vivecraft$roomscaleShieldActualBlockingItem(CallbackInfoReturnable<ItemStack> cir) {
+        if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldItem != null) {
+            cir.setReturnValue(this.vivecraft$roomscaleShieldItem);
+        }
+    }
+
+    @WrapMethod(method = "hurtServer")
+    protected boolean vivecraft$roomscaleShieldBlockingItemReset(
+        ServerLevel level, DamageSource damageSource, float amount, Operation<Boolean> original)
+    {
+        boolean hurt = original.call(level, damageSource, amount);
+        this.vivecraft$roomscaleShieldItem = null;
+        this.vivecraft$roomscaleShieldHand = null;
+        return hurt;
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
