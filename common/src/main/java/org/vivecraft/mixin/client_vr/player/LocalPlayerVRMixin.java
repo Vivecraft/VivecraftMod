@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -33,9 +32,6 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.client_vr.utils.external.jinfinadeck;
-import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.common.network.packet.c2s.TeleportPayloadC2S;
 
 @Mixin(LocalPlayer.class)
@@ -49,12 +45,6 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
 
     @Unique
     private boolean vivecraft$teleported;
-
-    @Unique
-    private double vivecraft$additionX;
-
-    @Unique
-    private double vivecraft$additionZ;
 
     @Unique
     private boolean vivecraft$walkUpBlocksActive = false;
@@ -332,174 +322,30 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     protected Vec3 vivecraft$controllerMovement(Vec3 relative, float amount, float facing, Operation<Vec3> original) {
         if (!VRState.VR_RUNNING || !vivecraft$isLocalPlayer(this)) {
             return original.call(relative, amount, facing);
+        } else {
+            return this.vivecraft$dataholder.vrPlayer.freemoveDirection((LocalPlayer) (Object) this, relative, amount);
         }
-
-        double up = relative.y;
-        double strafe = relative.x;
-        double forward = relative.z;
-        VRPlayer vrplayer = this.vivecraft$dataholder.vrPlayer;
-
-        Vec3 movement = Vec3.ZERO;
-
-        if (vrplayer.getFreeMove()) {
-            double speed = strafe * strafe + forward * forward;
-            double mX = 0.0D;
-            double mZ = 0.0D;
-            double mY = 0.0D;
-            double addFactor = 1.0D;
-
-            if (speed >= (double) 1.0E-4F || ClientDataHolderVR.getInstance().katVr) {
-                speed = Mth.sqrt((float) speed);
-
-                if (speed < 1.0D && !ClientDataHolderVR.getInstance().katVr) {
-                    speed = 1.0D;
-                }
-
-                speed = (double) amount / speed;
-                strafe = strafe * speed;
-                forward = forward * speed;
-                Vec3 direction = new Vec3(strafe, 0.0D, forward);
-                boolean isFlyingOrSwimming = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
-
-                if (ClientDataHolderVR.getInstance().katVr) {
-                    jkatvr.query();
-                    speed = jkatvr.getSpeed() * jkatvr.walkDirection() *
-                        this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier;
-                    direction = new Vec3(0.0D, 0.0D, speed);
-
-                    if (isFlyingOrSwimming) {
-                        direction = direction.xRot(vrplayer.vrdata_world_pre.hmd.getPitchRad());
-                    }
-
-                    direction = direction.yRot(
-                        -jkatvr.getYaw() * Mth.DEG_TO_RAD + vrplayer.vrdata_world_pre.rotation_radians);
-                } else if (ClientDataHolderVR.getInstance().infinadeck) {
-                    jinfinadeck.query();
-                    speed = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() *
-                        this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier;
-                    direction = new Vec3(0.0D, 0.0D, speed);
-
-                    if (isFlyingOrSwimming) {
-                        direction = direction.xRot(vrplayer.vrdata_world_pre.hmd.getPitchRad());
-                    }
-
-                    direction = direction.yRot(
-                        -jinfinadeck.getYaw() * Mth.DEG_TO_RAD + vrplayer.vrdata_world_pre.rotation_radians);
-                } else if (this.vivecraft$dataholder.vrSettings.seated) {
-                    int c = 0;
-                    if (this.vivecraft$dataholder.vrSettings.seatedUseHMD) {
-                        c = 1;
-                    }
-
-                    if (isFlyingOrSwimming) {
-                        direction = direction.xRot(vrplayer.vrdata_world_pre.getController(c).getPitchRad());
-                    }
-
-                    direction = direction.yRot(-vrplayer.vrdata_world_pre.getController(c).getYawRad());
-                } else {
-
-                    VRSettings.FreeMove freeMoveType = this.vivecraft$dataholder.vrSettings.getVrFreeMoveMode(
-                        !this.isPassenger() && this.getAbilities().flying, vrplayer.vrdata_world_pre.fbtMode);
-
-                    if (isFlyingOrSwimming) {
-                        direction = switch (freeMoveType) {
-                            case CONTROLLER -> direction.xRot(vrplayer.vrdata_world_pre.getController(1).getPitchRad());
-                            case HMD, RUN_IN_PLACE, ROOM, WAIST ->
-                                direction.xRot(vrplayer.vrdata_world_pre.hmd.getPitchRad());
-                            default -> direction;
-                        };
-                    }
-                    if (this.vivecraft$dataholder.jumpTracker.isjumping()) {
-                        direction = direction.yRot(-vrplayer.vrdata_world_pre.hmd.getYawRad());
-                    } else {
-                        direction = switch (freeMoveType) {
-                            case CONTROLLER -> direction.yRot(-vrplayer.vrdata_world_pre.getController(1).getYawRad());
-                            case HMD -> direction.yRot(-vrplayer.vrdata_world_pre.hmd.getYawRad());
-                            case RUN_IN_PLACE -> direction.yRot((float) -this.vivecraft$dataholder.runTracker.getYaw())
-                                .scale(this.vivecraft$dataholder.runTracker.getSpeed());
-                            case ROOM -> direction.yRot(
-                                (180.0F + this.vivecraft$dataholder.vrSettings.worldRotation) * Mth.DEG_TO_RAD);
-                            case WAIST -> direction.yRot(-vrplayer.vrdata_world_pre.waist.getYawRad());
-                            default -> direction;
-                        };
-                    }
-                }
-
-                mX = direction.x;
-                mY = direction.y;
-                mZ = direction.z;
-
-                if (this.isOnGround() && !this.getAbilities().flying && !this.wasTouchingWater) {
-                    addFactor = this.vivecraft$dataholder.vrSettings.inertiaFactor.getFactor();
-                }
-
-                float yAdd = 1.0F;
-
-                if (this.getAbilities().flying) {
-                    yAdd = 5.0F;
-                }
-
-                movement = new Vec3(mX * addFactor, mY * (double) yAdd, mZ * addFactor);
-                this.vivecraft$additionX = mX;
-                this.vivecraft$additionZ = mZ;
-            }
-        }
-        return movement;
     }
 
     /**
      * inject into {@link Entity#moveRelative(float, Vec3)}
      */
     @Override
-    protected void vivecraft$afterMoveRelative(CallbackInfo ci) {
+    protected void vivecraft$afterMoveRelative(CallbackInfo ci, Vec3 movement) {
         // do drag after setting the delta movement
-        if (VRState.VR_RUNNING && vivecraft$isLocalPlayer(this) &&
-            ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() &&
-            this.isOnGround() && !this.getAbilities().flying && !this.wasTouchingWater)
-        {
-            this.vivecraft$doDrag();
+        if (VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) {
+            this.vivecraft$dataholder.vrPlayer.applyDrag((LocalPlayer) (Object) this, movement);
         }
     }
 
     /**
-     * applies slowdown/speedup based one the inertia setting
+     * modify into {@link LivingEntity#handleRelativeFrictionAndCalculateMovement}
      */
-    @Unique
-    private void vivecraft$doDrag() {
-        double friction = 0.91;
-
-        if (this.isOnGround()) {
-            friction *= this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement())
-                .getBlock().getFriction();
-        }
-
-        // account for stock drag code we can't change in LivingEntity#travel
-        this.setDeltaMovement(
-            this.getDeltaMovement().x / friction,
-            this.getDeltaMovement().y,
-            this.getDeltaMovement().z / friction);
-
-        double addFactor = this.vivecraft$dataholder.vrSettings.inertiaFactor.getFactor();
-
-        double boundedAdditionX = vivecraft$getBoundedAddition(this.vivecraft$additionX);
-        double targetLimitX = (friction * boundedAdditionX) / (1f - friction);
-        double multiFactorX = targetLimitX / (friction * (targetLimitX + (boundedAdditionX * addFactor)));
-        double xFactor = friction * multiFactorX;
-
-        double boundedAdditionZ = vivecraft$getBoundedAddition(this.vivecraft$additionZ);
-        double targetLimitZ = (friction * boundedAdditionZ) / (1f - friction);
-        double multiFactorZ = targetLimitZ / (friction * (targetLimitZ + (boundedAdditionZ * addFactor)));
-        double zFactor = friction * multiFactorZ;
-
-        this.setDeltaMovement(
-            this.getDeltaMovement().x * xFactor,
-            this.getDeltaMovement().y,
-            this.getDeltaMovement().z * zFactor);
-    }
-
-    @Unique
-    private double vivecraft$getBoundedAddition(double orig) {
-        return orig >= -1.0E-6D && orig <= 1.0E-6D ? 1.0E-6D : orig;
+    @Override
+    protected boolean vivecraft$disableVanillaClimbing(boolean original) {
+        return original && (!(VRState.VR_RUNNING && vivecraft$isLocalPlayer(this)) ||
+            this.vivecraft$dataholder.vrSettings.vanillaClimbing
+        );
     }
 
     @Unique

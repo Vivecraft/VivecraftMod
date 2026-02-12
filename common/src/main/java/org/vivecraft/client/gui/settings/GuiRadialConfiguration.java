@@ -8,8 +8,8 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.client.gui.framework.VROptionLayout;
-import org.vivecraft.client.gui.framework.screens.GuiSelectionListScreen;
 import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.screens.KeymappingSelectionScreen;
 import org.vivecraft.client.gui.framework.widgets.GuiVROptionButton;
 import org.vivecraft.client_vr.gui.GuiRadial;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -85,16 +85,12 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
 
             String label = keyMapping.map(mapping -> I18n.get(mapping.getName())).orElse("");
             this.addRenderableWidget(GuiRadial.createButton(label, (p) -> {
-                this.minecraft.setScreen(new GuiSelectionListScreen<>(
+                this.minecraft.setScreen(new KeymappingSelectionScreen(
                     Component.translatable(this.vrTitle), this,
-                    () -> Arrays.stream(this.minecraft.options.keyMappings).sorted().toList(),
-                    key -> Component.translatable(key.getName()),
-                    KeyMapping::getCategory,
                     key -> {
                         this.selectedIndex = index;
                         this.setKey(key);
-                    }, true, false, null
-                ));
+                    }));
             }, index, centerX, centerY));
         }
 

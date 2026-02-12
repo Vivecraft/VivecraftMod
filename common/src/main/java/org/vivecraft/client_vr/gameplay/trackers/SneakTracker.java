@@ -28,7 +28,7 @@ public class SneakTracker implements Tracker {
             return false;
         } else if (this.mc.gameMode == null) {
             return false;
-        } else if (player == null || !player.isAlive() || !player.isOnGround()) {
+        } else if (player == null || !player.isAlive() || !(player.isOnGround() || player.onClimbable())) {
             return false;
         } else {
             return !player.isPassenger();

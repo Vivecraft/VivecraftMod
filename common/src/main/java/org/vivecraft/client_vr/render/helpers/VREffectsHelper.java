@@ -1339,6 +1339,7 @@ public class VREffectsHelper {
         poseStack.scale(scale, scale, scale);
 
         MC.gameRenderer.lightTexture().turnOnLightLayer();
+        MC.gameRenderer.overlayTexture().setupOverlayColor();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
 
