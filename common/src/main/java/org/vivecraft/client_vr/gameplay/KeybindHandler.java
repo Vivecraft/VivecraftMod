@@ -36,9 +36,9 @@ public class KeybindHandler {
                 if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
                     String command = DH.vrSettings.vrQuickCommands[i];
                     if (command.startsWith("/")) {
-                        MC.player.connection.sendCommand(command.substring(1));
+                        MC.player.commandSigned(command.substring(1), Component.empty());
                     } else {
-                        MC.player.connection.sendChat(command);
+                        MC.player.chatSigned(command, Component.empty());
                     }
                 }
             }

@@ -35,7 +35,7 @@ public class NullVRHapticScheduler extends HapticScheduler {
                 Vec3 pos = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getController(haptic.controller)
                     .getPosition();
                 float freq = Math.min(haptic.frequency / 1000F, 1.0F);
-                SoundInstance sound = new SimpleSoundInstance(SoundEvents.NOTE_BLOCK_HAT.value(), SoundSource.AMBIENT,
+                SoundInstance sound = new SimpleSoundInstance(SoundEvents.NOTE_BLOCK_HAT, SoundSource.AMBIENT,
                     freq, haptic.amplitude, SoundInstance.createUnseededRandom(), pos.x, pos.y, pos.z);
                 Minecraft.getInstance().getSoundManager().play(sound);
                 if (Minecraft.getInstance().level != null) {

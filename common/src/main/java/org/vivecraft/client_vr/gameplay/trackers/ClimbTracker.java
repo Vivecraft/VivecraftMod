@@ -479,7 +479,7 @@ public class ClimbTracker implements Tracker {
         }
 
         if ((this.latched[0] || this.latched[1]) && !ladder && this.rand.nextInt(20) == 10) {
-            BlockPos blockPos = BlockPos.containing(this.latchStart[this.latchStartController]);
+            BlockPos blockPos = new BlockPos(this.latchStart[this.latchStartController]);
             BlockState blockState = this.mc.level.getBlockState(blockPos);
             this.dh.vrPlayer.blockDust(this.latchStart[this.latchStartController].x,
                 this.latchStart[this.latchStartController].y, this.latchStart[this.latchStartController].z, 1,
