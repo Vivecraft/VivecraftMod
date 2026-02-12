@@ -4,6 +4,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -19,7 +20,7 @@ public class KeymappingSelectionScreen extends GuiSelectionListScreen<KeyMapping
     {
         super(title, lastScreen,
             () -> Arrays.stream(Minecraft.getInstance().options.keyMappings).sorted().toList(),
-            key -> Component.translatable(key.getName()),
+            key -> new TranslatableComponent(key.getName()),
             KeyMapping::getCategory,
             consumer,
             true, false, null);

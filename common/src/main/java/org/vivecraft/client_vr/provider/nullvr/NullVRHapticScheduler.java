@@ -36,7 +36,7 @@ public class NullVRHapticScheduler extends HapticScheduler {
                     .getPosition();
                 float freq = Math.min(haptic.frequency / 1000F, 1.0F);
                 SoundInstance sound = new SimpleSoundInstance(SoundEvents.NOTE_BLOCK_HAT, SoundSource.AMBIENT,
-                    freq, haptic.amplitude, SoundInstance.createUnseededRandom(), pos.x, pos.y, pos.z);
+                    freq, haptic.amplitude, pos.x, pos.y, pos.z);
                 Minecraft.getInstance().getSoundManager().play(sound);
                 if (Minecraft.getInstance().level != null) {
                     Minecraft.getInstance().particleEngine.createParticle(ParticleTypes.NOTE, pos.x, pos.y, pos.z,

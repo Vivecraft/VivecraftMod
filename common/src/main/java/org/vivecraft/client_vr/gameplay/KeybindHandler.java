@@ -3,7 +3,7 @@ package org.vivecraft.client_vr.gameplay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -35,11 +35,7 @@ public class KeybindHandler {
             for (int i = 0; i < VivecraftVRMod.INSTANCE.keyQuickCommands.length; i++) {
                 if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
                     String command = DH.vrSettings.vrQuickCommands[i];
-                    if (command.startsWith("/")) {
-                        MC.player.commandSigned(command.substring(1), Component.empty());
-                    } else {
-                        MC.player.chatSigned(command, Component.empty());
-                    }
+                    MC.player.chat(command.substring(1));
                 }
             }
         }
@@ -97,13 +93,13 @@ public class KeybindHandler {
                 MenuWorldExporter.saveAreaToFile(clientLevel, blockpos.getX() - offset, blockpos.getZ() - offset,
                     size, size, blockpos.getY(), foundFile);
                 ClientUtils.addChatMessage(
-                    Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
+                    new TranslatableComponent("vivecraft.messages.menuworldexportclientwarning"));
             }
 
             if (error == null) {
                 ClientUtils.addChatMessage(
-                    Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
-                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2",
+                    new TranslatableComponent("vivecraft.messages.menuworldexportcomplete.1", size));
+                ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.menuworldexportcomplete.2",
                     foundFile.getAbsolutePath()));
             }
         } catch (Throwable throwable) {
@@ -112,7 +108,7 @@ public class KeybindHandler {
         } finally {
             if (error != null) {
                 ClientUtils.addChatMessage(
-                    Component.translatable("vivecraft.messages.menuworldexporterror", error.getMessage()));
+                    new TranslatableComponent("vivecraft.messages.menuworldexporterror", error.getMessage()));
             }
         }
     }

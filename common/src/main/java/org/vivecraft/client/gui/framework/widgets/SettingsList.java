@@ -260,13 +260,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 width, 20,
                 option, true);
             case KEYMAPPING -> new Button(0, 0, width, 20,
-                Component.literal(dh.vrSettings.getButtonDisplayString(option, true)), button -> {
+                new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)), button -> {
                 Minecraft.getInstance().setScreen(
-                    new KeymappingSelectionScreen(Component.translatable("vivecraft.options." + option.name()),
+                    new KeymappingSelectionScreen(new TranslatableComponent("vivecraft.options." + option.name()),
                         Minecraft.getInstance().screen, keymapping -> {
                         dh.vrSettings.setOptionValue(option, keymapping == null ? "" : keymapping.getName());
                         button.setMessage(
-                            Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
+                            new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)));
                     }));
             });
             // regular button
