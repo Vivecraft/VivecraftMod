@@ -68,10 +68,24 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           architecture: x64
+          cache: gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build with Gradle with retry
+        run: |
+          max_attempts=5
+          attempt=1
+      
+          until ./gradlew build; do
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "Build failed after $attempt attempts."
+              exit 1
+            fi
+            echo "Build failed (attempt $attempt). Retrying in 10 seconds..."
+            attempt=$((attempt + 1))
+            sleep 10
+          done
+          echo "Build succeeded."
       - name: Api with Gradle
         if: inputs.github_api_publish
         run: ./gradlew buildApi
