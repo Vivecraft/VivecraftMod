@@ -671,7 +671,7 @@ public class ClimbTracker implements Tracker {
             }
 
             AABB bb = player.getBoundingBox().move(checkX - old.x, checkY - old.y, checkZ - old.z);
-            if (player.level().noCollision(player, bb)) {
+            if (player.level.noCollision(player, bb)) {
                 if (feedback && i > 1) {
                     // ouch!
                     this.dh.vr.triggerHapticPulse(0, 100);

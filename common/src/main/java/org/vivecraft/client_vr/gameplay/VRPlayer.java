@@ -874,8 +874,8 @@ public class VRPlayer {
         if (this.getFreeMove() && this.getActiveInertiaFactor(player) != 1.0F) {
             double friction = 0.91;
 
-            if (player.onGround()) {
-                friction *= player.level().getBlockState(player.getBlockPosBelowThatAffectsMyMovement())
+            if (player.isOnGround()) {
+                friction *= player.level.getBlockState(player.getBlockPosBelowThatAffectsMyMovement())
                     .getBlock().getFriction();
             }
 
@@ -915,7 +915,7 @@ public class VRPlayer {
      * @return active inertia factor
      */
     private float getActiveInertiaFactor(LocalPlayer player) {
-        if (player.onGround() && !player.getAbilities().flying && !player.isInWater()) {
+        if (player.isOnGround() && !player.getAbilities().flying && !player.isInWater()) {
             return this.dh.vrSettings.inertiaFactor.getFactor();
         } else {
             return 1F;

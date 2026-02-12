@@ -78,7 +78,7 @@ public class KeybindHandler {
             VRSettings.LOGGER.info("Vivecraft: Saving to {}", foundFile.getAbsolutePath());
 
             if (MC.isLocalServer()) {
-                final Level serverLevel = MC.getSingleplayerServer().getLevel(player.level().dimension());
+                final Level serverLevel = MC.getSingleplayerServer().getLevel(player.level.dimension());
                 File finalFoundFile = foundFile;
                 CompletableFuture<Throwable> completablefuture = MC.getSingleplayerServer().submit(() -> {
                     try {
