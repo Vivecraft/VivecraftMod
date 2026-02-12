@@ -25,6 +25,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.Xplat;
+import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
@@ -43,15 +44,13 @@ import org.vivecraft.data.ViveItemTags;
 import org.vivecraft.mod_compat_vr.bettercombat.BetterCombatHelper;
 import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-public class SwingTracker implements DebugRenderTracker {
+public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
     private static final int[] CONTROLLER_AND_FEET = new int[]{MCVR.MAIN_CONTROLLER, MCVR.OFFHAND_CONTROLLER, MCVR.RIGHT_FOOT_TRACKER, MCVR.LEFT_FOOT_TRACKER};
     private static final VRBodyPart[] BODYPARTS = new VRBodyPart[]{VRBodyPart.MAIN_HAND, VRBodyPart.OFF_HAND, VRBodyPart.RIGHT_FOOT, VRBodyPart.LEFT_FOOT};
-    private static final float SPEED_THRESH = 3.0F;
+    // at a 0.3m offset on index controllers a speed of 2.5m/s is an intended smack, 7 m/s is about as high as your arm can go.
+    private static final float SPEED_THRESH = 2.5F;
 
     public int disableSwing = 3;
 
@@ -68,6 +67,9 @@ public class SwingTracker implements DebugRenderTracker {
     private final Vec3[] weaponTip = new Vec3[4];
     private final Vector3fHistory[] tipHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
     private final boolean[] canAct = new boolean[4];
+
+    // brushes need to be held 5 ticks, to trigger the server side
+    private final int[] useHoldTicks = new int[4];
 
     // debug render stuff
     private final AABB[] lastAttackAABB = new AABB[4];
@@ -104,8 +106,8 @@ public class SwingTracker implements DebugRenderTracker {
             return false;
         } else if (this.dh.vrSettings.seated) {
             return false;
-        } else if (this.dh.vrSettings.getVrFreeMoveMode(false, this.dh.vrPlayer.vrdata_world_pre.fbtMode) ==
-            VRSettings.FreeMove.RUN_IN_PLACE && player.zza > 0.0F)
+        } else if (this.dh.vrSettings.getVrFreeMoveMode(false) == VRSettings.FreeMove.RUN_IN_PLACE &&
+            player.zza > 0.0F)
         {
             return false; // don't hit things while RIPing.
         } else if (player.isBlocking() && !ClientNetworking.SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING) {
@@ -152,7 +154,13 @@ public class SwingTracker implements DebugRenderTracker {
             this.attackingPoint[i] = null;
             this.weaponTip[i] = null;
             this.miningPoints[i] = null;
+            this.useHoldTicks[i] = 0;
         }
+    }
+
+    @Override
+    public boolean itemInUse(LocalPlayer player) {
+        return Arrays.stream(this.useHoldTicks).anyMatch(useHoldTick -> useHoldTick > 0);
     }
 
     @Override
@@ -172,6 +180,9 @@ public class SwingTracker implements DebugRenderTracker {
         }
 
         for (int i = 0; i < trackers; i++) {
+            if (this.useHoldTicks[i] > 0) {
+                this.useHoldTicks[i]--;
+            }
             int c = CONTROLLER_AND_FEET[i];
             boolean isHand = i < 2;
             if (!isHand || !this.dh.climbTracker.isGrabbingLadder(c)) {
@@ -190,14 +201,12 @@ public class SwingTracker implements DebugRenderTracker {
                     continue;
                 }
 
-                if (!(item instanceof SwordItem || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)) &&
-                    !(item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS)))
+                if (item instanceof SwordItem || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS) ||
+                    item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS))
                 {
-                    if (isTool(itemstack)) {
-                        isTool = true;
-                    }
-                } else {
                     isSword = true;
+                    isTool = true;
+                } else if (isTool(itemstack)) {
                     isTool = true;
                 }
 
@@ -243,8 +252,8 @@ public class SwingTracker implements DebugRenderTracker {
                     .add(this.dh.vrPlayer.vrdata_room_pre.getHand(c).getCustomVector(MathUtils.BACK).mul(0.3F));
                 this.tipHistory[i].add(tip);
 
-                // at a 0.3m offset on index controllers a speed of 3m/s is an intended smack, 7 m/s is about as high as your arm can go.
                 float speed = this.tipHistory[i].averageSpeed(0.33D);
+
                 boolean inAnEntity = false;
                 this.canAct[i] = speed > speedTreshhold && !this.lastWeaponSolid[i];
 
@@ -300,7 +309,6 @@ public class SwingTracker implements DebugRenderTracker {
                     {
                         if (entityAct) {
                             // this.mc.physicalGuiManager.preClickAction();
-
                             if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
                                 ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
                                 // only attack if epic fight didn't trigger
@@ -407,6 +415,7 @@ public class SwingTracker implements DebugRenderTracker {
                         // don't break climbable blocks
                         // if this block shouldn't be breakable with roomscale mining
                         boolean protectedBlock = this.dh.vrSettings.realisticClimbEnabled &&
+                            (!player.isShiftKeyDown() || !this.dh.vrSettings.allowBreakingClimbable) &&
                             (blockstate.getBlock() instanceof LadderBlock ||
                                 blockstate.getBlock() instanceof VineBlock ||
                                 blockstate.is(ViveBlockTags.VIVECRAFT_CLIMBABLE)

@@ -81,6 +81,8 @@ public class VivecraftVRMod {
     };
     public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch", -1,
         "key.categories.gameplay");
+    public final KeyMapping keyQuickSwap = new KeyMapping("vivecraft.key.quickSwap", -1,
+        "key.categories.inventory");
     public final KeyMapping keyRadialMenu = new KeyMapping("vivecraft.key.radialMenu", -1,
         "key.categories.ui");
     public final KeyMapping keyRotateAxis = new KeyMapping("vivecraft.key.rotateAxis", -1,
@@ -131,6 +133,7 @@ public class VivecraftVRMod {
             this.userKeyBindingSet.add(this.keyTeleportFallback);
             this.userKeyBindingSet.add(this.keyToggleMovement);
             this.userKeyBindingSet.add(this.keyQuickTorch);
+            this.userKeyBindingSet.add(this.keyQuickSwap);
             this.userKeyBindingSet.add(this.keySwapMirrorView);
             this.userKeyBindingSet.add(this.keyExportWorld);
             this.userKeyBindingSet.add(this.keyMoveThirdPersonCam);

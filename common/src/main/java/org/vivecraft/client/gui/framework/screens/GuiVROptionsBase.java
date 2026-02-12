@@ -48,8 +48,18 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     protected void addDefaultButtons() {
+        int searchX, searchY;
+        if (this.width > 360) {
+            // but the search to the side
+            searchX = this.width / 2 - 180;
+            searchY = (int) Math.ceil((float) (this.height / 6) - 10.0F);
+        } else {
+            // but the search above
+            searchX = this.width / 2 - 155;
+            searchY = (int) Math.ceil((float) (this.height / 6) - 31.0F);
+        }
         Button search = new ImageButton(
-            this.width / 2 - 180, (int) Math.ceil((float) (this.height / 6) - 10.0F),
+            searchX, searchY,
             20, 20, 0, 0, 20,
             VIVE_WIDGETS_LOCATION, 64, 64,
             (p) -> this.minecraft.setScreen(new GuiAllSettings(this)),
@@ -104,7 +114,7 @@ public abstract class GuiVROptionsBase extends Screen {
         }
 
         for (final VROptionLayout layout : settings) {
-            if (layout.getOption() != null && layout.getOption().getEnumFloat()) {
+            if (layout.getOption() != null && layout.getOption().getType() == VRSettings.OptionType.LIMITED_FLOAT) {
                 // Option Slider
                 this.addRenderableWidget(
                     new GuiVROptionSlider(layout.getOrdinal(), layout.getX(this.width), layout.getY(this.height),

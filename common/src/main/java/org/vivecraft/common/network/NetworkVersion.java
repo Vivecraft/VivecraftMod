@@ -18,7 +18,11 @@ public enum NetworkVersion {
     // adds packets to send/receive damage directions
     DAMAGE_DIRECTION,
     // adds possibility to toggle settings after initial connection
-    OPTION_TOGGLE;
+    OPTION_TOGGLE,
+    // adds packet to override the aim direction/position
+    AIM_OVERRIDE,
+    // adds a packet to indicate to the server that the client did a climbey jump
+    CLIMBEY_JUMP;
 
     public static NetworkVersion fromProtocolVersion(int protocolVersion) {
         return values()[protocolVersion + 1];

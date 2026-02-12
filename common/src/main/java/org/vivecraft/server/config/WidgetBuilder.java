@@ -90,7 +90,7 @@ public class WidgetBuilder {
      * @return Button with the value as text
      */
     public static <T> Supplier<AbstractWidget> getCycleWidget(
-        ConfigBuilder.ConfigValue<T> configValue, Collection<? extends T> values, int width, int height)
+        ConfigBuilder.ConfigValue<T> configValue, Collection<T> values, int width, int height)
     {
         return () -> CycleButton
             .builder((newValue) -> new TranslatableComponent(

@@ -38,6 +38,10 @@ public class HandedKeyBinding extends KeyMapping {
         return this.pressed[hand.ordinal()];
     }
 
+    public int presses(ControllerType hand) {
+        return this.pressTime[hand.ordinal()];
+    }
+
     public void pressKey(ControllerType hand) {
         this.pressed[hand.ordinal()] = true;
         this.pressTime[hand.ordinal()]++;

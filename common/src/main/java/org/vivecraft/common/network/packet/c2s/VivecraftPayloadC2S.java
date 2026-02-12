@@ -28,12 +28,16 @@ public interface VivecraftPayloadC2S extends VivecraftPayload {
                 case DRAW -> DrawPayloadC2S.read(buffer);
                 case TELEPORT -> TeleportPayloadC2S.read(buffer);
                 case CLIMBING -> new ClimbingPayloadC2S();
+                case JUMPING -> new JumpingPayloadC2S();
                 case HEIGHT -> HeightPayloadC2S.read(buffer);
                 case ACTIVEHAND -> ActiveBodyPartPayloadC2S.read(buffer);
                 case CRAWL -> CrawlPayloadC2S.read(buffer);
                 case IS_VR_ACTIVE -> VRActivePayloadC2S.read(buffer);
                 case VR_PLAYER_STATE -> VRPlayerStatePayloadC2S.read(buffer);
                 case DAMAGE_DIRECTION -> new DamageDirectionPayloadC2S();
+                case AIM_DIRECTION_OVERRIDE -> AimDirOverridePayloadC2S.read(buffer);
+                case AIM_OVERRIDE_RESET -> AimOverrideResetPayloadC2S.read(buffer);
+                case AIM_POSITION_OVERRIDE -> AimPosOverridePayloadC2S.read(buffer);
                 default -> {
                     ServerNetworking.LOGGER.error("Vivecraft: Got unexpected payload identifier on server: {}", id);
                     yield UnknownPayloadC2S.read(buffer);

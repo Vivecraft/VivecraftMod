@@ -44,6 +44,7 @@ import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mixin.client.blaze3d.BufferBuilderAccessor;
 import org.vivecraft.mixin.client.renderer.RenderStateShardAccessor;
@@ -189,9 +190,10 @@ public class MenuWorldRenderer {
         this.rendering = true;
 
         // temporarily disable fabulous to render the menu world
-        GraphicsStatus current = this.mc.options.graphicsMode;
-        if (current == GraphicsStatus.FABULOUS) {
-            this.mc.options.graphicsMode = GraphicsStatus.FANCY;
+        GraphicsStatus currentGraphics = this.mc.options.graphicsMode().get();
+        if (currentGraphics == GraphicsStatus.FABULOUS) {
+            ((OptionInstanceExtension<GraphicsStatus>) (Object) this.mc.options.graphicsMode()).vivecraft$setWithoutUpdate(
+                GraphicsStatus.FANCY);
         }
 
         turnOnLightLayer();
@@ -254,7 +256,8 @@ public class MenuWorldRenderer {
 
         poseStack.popPose();
         turnOffLightLayer();
-        this.mc.options.graphicsMode = current;
+        ((OptionInstanceExtension<GraphicsStatus>) (Object) this.mc.options.graphicsMode()).vivecraft$setWithoutUpdate(
+            currentGraphics);
         this.rendering = false;
     }
 
@@ -1162,10 +1165,7 @@ public class MenuWorldRenderer {
             RenderSystem.disableCull();
             RenderSystem.enableBlend();
             RenderSystem.enableDepthTest();
-            int rainDistance = 5;
-            if (Minecraft.useFancyGraphics()) {
-                rainDistance = 10;
-            }
+            int rainDistance = Minecraft.useFancyGraphics() ? 10 : 5;
             RenderSystem.depthMask(true);
             int count = -1;
             float rainAnimationTime = this.ticks + ClientUtils.getCurrentPartialTick();

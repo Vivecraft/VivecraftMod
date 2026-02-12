@@ -15,6 +15,8 @@ public class GuiMixedRealitySettings extends GuiVROptionsBase {
         VRSettings.VrOptions.MIXED_REALITY_KEY_COLOR,
         VRSettings.VrOptions.MIXED_REALITY_FOV,
         VRSettings.VrOptions.MIXED_REALITY_RENDER_CAMERA_MODEL,
+        VRSettings.VrOptions.MIRROR_GUI,
+        VRSettings.VrOptions.MIXED_REALITY_GUI,
         VRSettings.VrOptions.MIXED_REALITY_UNDISTORTED,
         VRSettings.VrOptions.MIRROR_EYE,
         VRSettings.VrOptions.MONO_FOV,

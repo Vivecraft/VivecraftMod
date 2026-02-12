@@ -70,6 +70,8 @@ accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDel
 
 # for correct vr rendering
 accessible field net/minecraft/world/entity/Entity eyeHeight F
+# for cutom drag
+accessible method net/minecraft/world/entity/Entity getBlockPosBelowThatAffectsMyMovement ()Lnet/minecraft/core/BlockPos;
 
 # for matrix conversion
 accessible field com/mojang/math/Matrix4f m00 F

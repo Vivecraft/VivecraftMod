@@ -6,6 +6,7 @@
   "client": [
     "IrisBeginFrameHack",
     "IrisBlockRenderingSettingsMixin",
+    "IrisCameraPositionTrackerMixin",
     "IrisCameraUniformsMixin",
     "IrisDHCompatVRMixin",
     "IrisHandRendererVRMixin",

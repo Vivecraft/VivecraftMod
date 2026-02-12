@@ -830,8 +830,18 @@ public abstract class MCVR {
             }
 
             // single direction keys
-            ax -= Math.abs(this.getInputAction(MOD.keyRotateLeft).getAxis1DUseTracked());
-            ax += Math.abs(this.getInputAction(MOD.keyRotateRight).getAxis1DUseTracked());
+            float leftRot = Math.abs(this.getInputAction(MOD.keyRotateLeft).getAxis1DUseTracked());
+            float rightRot = Math.abs(this.getInputAction(MOD.keyRotateRight).getAxis1DUseTracked());
+
+            if (leftRot == 0 && MOD.keyRotateLeft.isDown()) {
+                leftRot = 1F;
+            }
+            if (rightRot == 0 && MOD.keyRotateRight.isDown()) {
+                rightRot = 1F;
+            }
+
+            ax -= leftRot;
+            ax += rightRot;
 
             if (ax != 0.0F) {
                 float analogRotSpeed = this.dh.vrSettings.worldRotationXSensitivity * 10.0F * ax;
@@ -971,10 +981,8 @@ public abstract class MCVR {
 
         // radial menu
         if (MOD.keyRadialMenu.consumeClick() && !gui) {
-            ControllerType controller = this.findActiveBindingControllerType(MOD.keyRadialMenu);
-            if (controller != null) {
-                RadialHandler.setOverlayShowing(!RadialHandler.isShowing(), controller);
-            }
+            RadialHandler.setOverlayShowing(!RadialHandler.isShowing(),
+                this.findActiveBindingControllerType(MOD.keyRadialMenu));
         }
 
         // close radial with ESC when not hold mode
@@ -1160,7 +1168,7 @@ public abstract class MCVR {
 
         this.getInputAction(MOD.keyVRInteract).setPriority(5).setEnabled(false);
         this.getInputAction(MOD.keyClimbeyGrab).setPriority(10).setEnabled(false);
-        this.getInputAction(MOD.keyClimbeyJump).setEnabled(false);
+        this.getInputAction(MOD.keyClimbeyJump).setPriority(20).setEnabled(false);
         this.getInputAction(GuiHandler.KEY_KEYBOARD_CLICK).setPriority(50);
         this.getInputAction(GuiHandler.KEY_KEYBOARD_SHIFT).setPriority(50);
     }

@@ -79,7 +79,7 @@ public class TelescopeTracker implements ItemInUseTracker {
      * @return if the given {@code itemStack} is a telescope
      */
     public static boolean isTelescope(ItemStack itemStack) {
-        return itemStack != null &&
+        return ClientDataHolderVR.getInstance().vrSettings.renderAllPasses || itemStack != null &&
             (itemStack.is(Items.SPYGLASS) || isLegacyTelescope(itemStack) ||
                 itemStack.is(ViveItemTags.VIVECRAFT_TELESCOPE)
             );
@@ -118,13 +118,16 @@ public class TelescopeTracker implements ItemInUseTracker {
     }
 
     public static float viewPercent(int controller) {
+        if (ClientDataHolderVR.getInstance().vrSettings.renderAllPasses) {
+            return 1F;
+        }
         // seated doesn't have a fadeout
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null && ClientDataHolderVR.getInstance().vrSettings.seated) {
             if (isTelescope(player.getUseItem())) {
-                return 1;
+                return 1F;
             } else {
-                return 0;
+                return 0F;
             }
         }
 

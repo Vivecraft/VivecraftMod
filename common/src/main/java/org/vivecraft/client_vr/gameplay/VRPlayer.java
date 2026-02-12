@@ -26,6 +26,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.network.ClientNetworking;
@@ -34,13 +36,14 @@ import org.vivecraft.client.utils.ScaleHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.VehicleTracker;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.utils.external.jinfinadeck;
+import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ViveItemTags;
@@ -66,6 +69,11 @@ public class VRPlayer {
     private float rawWorldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
     public Vec3 roomOrigin = Vec3.ZERO;
+
+    public Vec3 crossVec;
+
+    private int lookAtPosTicks;
+    private Vec3 lookAtPos = null;
 
     // based on a heuristic of which locomotion type was last used
     private boolean isFreeMoveCurrent = true;
@@ -400,6 +408,10 @@ public class VRPlayer {
             this.initDone = true;
         }
 
+        if (this.lookAtPosTicks > 0 && --this.lookAtPosTicks == 0) {
+            this.lookAtPos = null;
+        }
+
         this.doPlayerMoveInRoom(player);
         for (Tracker tracker : this.dh.getTrackers()) {
             if (tracker.processType() == Tracker.ProcessType.PER_TICK) {
@@ -468,10 +480,25 @@ public class VRPlayer {
         float playerHalfWidth = player.getBbWidth() / 2.0F;
         float playerHeight = player.getBbHeight();
 
+        Vec3 feetPos = null;
+        if (!this.dh.vrSettings.seated && this.dh.vrSettings.feetBodyPosition &&
+            this.vrdata_room_pre.fbtMode != FBTMode.ARMS_ONLY)
+        {
+            Vector3f leftFoot = this.vrdata_room_pre.getBodyPart(VRBodyPart.LEFT_FOOT).getPositionF();
+            Vector3f rightFoot = this.vrdata_room_pre.getBodyPart(VRBodyPart.RIGHT_FOOT).getPositionF();
+            if (leftFoot.y < 0.1F && rightFoot.y < 0.1F) {
+                feetPos = roomToWorldPos(leftFoot.add(rightFoot).mul(0.5F), this.vrdata_world_pre);
+            } else if (leftFoot.y < 0.1F) {
+                feetPos = roomToWorldPos(leftFoot, this.vrdata_world_pre);
+            } else if (rightFoot.y < 0.1F) {
+                feetPos = roomToWorldPos(rightFoot, this.vrdata_world_pre);
+            }
+        }
+
         // OK this is the first place I've found where we really need to update the VR data before doing this calculation.
-        double x = newHeadPivot.x;
+        double x = feetPos == null ? newHeadPivot.x : feetPos.x;
         double y = player.getY();
-        double z = newHeadPivot.z;
+        double z = feetPos == null ? newHeadPivot.z : feetPos.z;
 
         // create bounding box at dest position
         AABB bb = new AABB(
@@ -607,13 +634,19 @@ public class VRPlayer {
             this.vrdata_world_render);
     }
 
-    public Vec3 getRightClickLookOverride(Player entity, int c) {
-        Vec3 out = entity.getLookAngle();
+    /**
+     * calculates the look override for servers without Vivecraft
+     *
+     * @param entity the local player
+     * @param c      the hand that caused an action
+     * @return the direction the player should look at
+     */
+    public Vector3fc getRightClickLookOverride(Player entity, int c) {
+        Vector3fc out = MathUtils.toJomlVector3f(entity.getLookAngle());
 
-        if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
-            out = entity.getEyePosition(1.0F)
-                .subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec())
-                .normalize().reverse(); // backwards
+        if (this.lookAtPos != null || this.crossVec != null) {
+            out = MathUtils.subtractToVector3f(this.lookAtPos != null ? this.lookAtPos : this.crossVec,
+                entity.getEyePosition(1.0F)).normalize();
         }
 
         ItemStack itemStack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
@@ -635,16 +668,15 @@ public class VRPlayer {
             Vector3fc aim = this.dh.bowTracker.getAimVector();
 
             if (this.dh.bowTracker.isNotched() && aim != null && aim.lengthSquared() > 0.0F) {
-                out = new Vec3(aim.x(), aim.y(), aim.z());
+                out = aim;
             } else if (this.dh.vrSettings.aimDevice != VRSettings.AimDevice.HMD) {
-                out = MathUtils.toMcVec3(data.getController(c).getDirection());
+                out = data.getController(c).getDirection();
             }
         } else if (itemStack.getItem() == Items.BUCKET && this.dh.blockModule.bukkit[c] &&
             ClientNetworking.getActiveBodyPart().ordinal() == c && ClientNetworking.IS_LAST_BODY_PART_AIM)
         {
-            out = entity.getEyePosition(1.0F)
-                .subtract(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition())
-                .normalize().reverse(); // backwards
+            out = MathUtils.subtractToVector3f(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition(),
+                entity.getEyePosition(1.0F)).normalize();
         }
 
         return out;
@@ -684,13 +716,13 @@ public class VRPlayer {
         {
             // Server-side movement
             // when swimming/flying adjust player look according to the user setting
-            switch (this.dh.vrSettings.getVrFreeMoveMode(player.isFallFlying(), data.fbtMode)) {
+            switch (this.dh.vrSettings.getVrFreeMoveMode(player.isFallFlying())) {
                 case CONTROLLER -> {
                     player.setYRot(data.getController(1).getYaw());
                     player.setXRot(-data.getController(1).getPitch());
                 }
                 case WAIST -> {
-                    player.setYRot(data.waist.getYaw());
+                    player.setYRot(data.fbtMode == FBTMode.ARMS_ONLY ? data.getBodyYaw() : data.waist.getYaw());
                     player.setXRot(-data.hmd.getPitch()); // use head for up/down
                 }
                 default -> {
@@ -699,10 +731,10 @@ public class VRPlayer {
                 }
             }
             player.setYHeadRot(player.getYRot());
-        } else if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
+        } else if (this.lookAtPos != null || this.crossVec != null) {
             // Look AT the crosshair by default, most compatible with mods.
             Vec3 playerToCrosshair = player.getEyePosition(1)
-                .subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec()); // backwards
+                .subtract(this.lookAtPos != null ? this.lookAtPos : this.crossVec); // backwards
             double what = playerToCrosshair.y / playerToCrosshair.length();
             if (what > 1) {
                 what = 1;
@@ -720,6 +752,174 @@ public class VRPlayer {
             player.setYRot(data.hmd.getYaw());
             player.setYHeadRot(player.getYRot());
             player.setXRot(-data.hmd.getPitch());
+        }
+    }
+
+    /**
+     * rotates the relative input to point in the freemove direction
+     *
+     * @param player   player that is moving
+     * @param relative relative input
+     * @param speed    speed of the player
+     * @return relative input rotated to point in the freemove direction, or Vec3.ZERO if freemove is disabled
+     */
+    public Vec3 freemoveDirection(LocalPlayer player, Vec3 relative, float speed) {
+        double strafe = relative.x;
+        double forward = relative.z;
+
+        Vec3 movement = Vec3.ZERO;
+
+        if (this.getFreeMove()) {
+            double horizontalInput = strafe * strafe + forward * forward;
+            double mX = 0.0D;
+            double mZ = 0.0D;
+            double mY = 0.0D;
+
+            if (horizontalInput >= 1.0E-4F || ClientDataHolderVR.getInstance().katVr) {
+                horizontalInput = Mth.sqrt((float) horizontalInput);
+
+                if (horizontalInput < 1.0D && !ClientDataHolderVR.getInstance().katVr) {
+                    horizontalInput = 1.0D;
+                }
+
+                horizontalInput = speed / horizontalInput;
+                strafe = strafe * horizontalInput;
+                forward = forward * horizontalInput;
+                Vec3 direction = new Vec3(strafe, 0.0D, forward);
+                boolean isFlyingOrSwimming =
+                    !player.isPassenger() && (player.getAbilities().flying || player.isSwimming());
+
+                if (ClientDataHolderVR.getInstance().katVr) {
+                    jkatvr.query();
+                    horizontalInput =
+                        jkatvr.getSpeed() * jkatvr.walkDirection() * this.dh.vrSettings.movementSpeedMultiplier;
+                    direction = new Vec3(0.0D, 0.0D, horizontalInput);
+
+                    if (isFlyingOrSwimming) {
+                        direction = direction.xRot(this.vrdata_world_pre.hmd.getPitchRad());
+                    }
+
+                    direction = direction.yRot(
+                        -jkatvr.getYaw() * Mth.DEG_TO_RAD + this.vrdata_world_pre.rotation_radians);
+                } else if (ClientDataHolderVR.getInstance().infinadeck) {
+                    jinfinadeck.query();
+                    horizontalInput = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() *
+                        this.dh.vrSettings.movementSpeedMultiplier;
+                    direction = new Vec3(0.0D, 0.0D, horizontalInput);
+
+                    if (isFlyingOrSwimming) {
+                        direction = direction.xRot(this.vrdata_world_pre.hmd.getPitchRad());
+                    }
+
+                    direction = direction.yRot(
+                        -jinfinadeck.getYaw() * Mth.DEG_TO_RAD + this.vrdata_world_pre.rotation_radians);
+                } else if (this.dh.vrSettings.seated) {
+                    int c = 0;
+                    if (this.dh.vrSettings.seatedUseHMD) {
+                        c = 1;
+                    }
+
+                    if (isFlyingOrSwimming) {
+                        direction = direction.xRot(this.vrdata_world_pre.getController(c).getPitchRad());
+                    }
+
+                    direction = direction.yRot(-this.vrdata_world_pre.getController(c).getYawRad());
+                } else {
+
+                    VRSettings.FreeMove freeMoveType = this.dh.vrSettings.getVrFreeMoveMode(
+                        !player.isPassenger() && player.getAbilities().flying);
+
+                    if (isFlyingOrSwimming) {
+                        direction = switch (freeMoveType) {
+                            case CONTROLLER -> direction.xRot(this.vrdata_world_pre.getController(1).getPitchRad());
+                            case HMD, RUN_IN_PLACE, ROOM, WAIST ->
+                                direction.xRot(this.vrdata_world_pre.hmd.getPitchRad());
+                            default -> direction;
+                        };
+                    }
+                    if (this.dh.jumpTracker.isjumping()) {
+                        direction = direction.yRot(-this.vrdata_world_pre.hmd.getYawRad());
+                    } else {
+                        direction = switch (freeMoveType) {
+                            case CONTROLLER -> direction.yRot(-this.vrdata_world_pre.getController(1).getYawRad());
+                            case HMD -> direction.yRot(-this.vrdata_world_pre.hmd.getYawRad());
+                            case RUN_IN_PLACE -> direction.yRot((float) -this.dh.runTracker.getYaw())
+                                .scale(this.dh.runTracker.getSpeed());
+                            case ROOM -> direction.yRot((180.0F + this.dh.vrSettings.worldRotation) * Mth.DEG_TO_RAD);
+                            case WAIST -> direction.yRot(this.vrdata_world_pre.fbtMode == FBTMode.ARMS_ONLY ?
+                                -this.vrdata_world_pre.getBodyYawRad() : -this.vrdata_world_pre.waist.getYawRad());
+                            default -> direction;
+                        };
+                    }
+                }
+
+                mX = direction.x;
+                mY = direction.y;
+                mZ = direction.z;
+
+                float addFactor = getActiveInertiaFactor(player);
+
+                float yAdd = player.getAbilities().flying ? 5.0F : 1.0F;
+
+                movement = new Vec3(mX * addFactor, mY * yAdd, mZ * addFactor);
+            }
+        }
+        return movement;
+    }
+
+    /**
+     * applies slowdown/speedup based one the inertia setting
+     */
+    public void applyDrag(LocalPlayer player, Vec3 movement) {
+        // don't do drag when not on ground, or inertia is set to vanilla
+        if (this.getFreeMove() && this.getActiveInertiaFactor(player) != 1.0F) {
+            double friction = 0.91;
+
+            if (player.isOnGround()) {
+                friction *= player.level.getBlockState(player.getBlockPosBelowThatAffectsMyMovement())
+                    .getBlock().getFriction();
+            }
+
+            // account for stock drag code we can't change in LivingEntity#travel
+            player.setDeltaMovement(
+                player.getDeltaMovement().x / friction,
+                player.getDeltaMovement().y,
+                player.getDeltaMovement().z / friction);
+
+            double addFactor = this.getActiveInertiaFactor(player);
+
+            double boundedAdditionX = getBoundedAddition(movement.x / addFactor);
+            double targetLimitX = (friction * boundedAdditionX) / (1f - friction);
+            double multiFactorX = targetLimitX / (friction * (targetLimitX + (boundedAdditionX * addFactor)));
+            double xFactor = friction * multiFactorX;
+
+            double boundedAdditionZ = getBoundedAddition(movement.z / addFactor);
+            double targetLimitZ = (friction * boundedAdditionZ) / (1f - friction);
+            double multiFactorZ = targetLimitZ / (friction * (targetLimitZ + (boundedAdditionZ * addFactor)));
+            double zFactor = friction * multiFactorZ;
+
+            player.setDeltaMovement(
+                player.getDeltaMovement().x * xFactor,
+                player.getDeltaMovement().y,
+                player.getDeltaMovement().z * zFactor);
+        }
+    }
+
+    private double getBoundedAddition(double orig) {
+        return orig >= -1.0E-6D && orig <= 1.0E-6D ? 1.0E-6D : orig;
+    }
+
+    /**
+     * returns the inertia factor, when the player is on the ground
+     *
+     * @param player player to get the inertia factor for
+     * @return active inertia factor
+     */
+    private float getActiveInertiaFactor(LocalPlayer player) {
+        if (player.isOnGround() && !player.getAbilities().flying && !player.isInWater()) {
+            return this.dh.vrSettings.inertiaFactor.getFactor();
+        } else {
+            return 1F;
         }
     }
 
@@ -777,5 +977,16 @@ public class VRPlayer {
     public void updateTeleportKeys() {
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleport).setEnabled(this.isTeleportEnabled());
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
+    }
+
+    /**
+     * sets the lookAtPos, the player will look at that position for the given amount of ticks
+     *
+     * @param worldPos position to look at
+     * @param ticks    how long the player should look at it
+     */
+    public void setLookAtPos(Vec3 worldPos, int ticks) {
+        this.lookAtPos = worldPos;
+        this.lookAtPosTicks = ticks;
     }
 }

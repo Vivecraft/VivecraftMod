@@ -40,6 +40,18 @@ public class GuiAllSettings extends GuiListScreen {
         entries.add(new SettingsList.ScreenEntry(
             "vivecraft.options.screen.blocklist", GuiBlacklistEditor::new));
 
+        // keyboard layouts
+        entries.add(new SettingsList.ScreenEntry(
+            "vivecraft.options.screen.activekeyboardlayouts", GuiActiveKeyboardLayoutSelector::new));
+
+        // custom keyboard layout editor
+        entries.add(new SettingsList.ScreenEntry(
+            "vivecraft.options.screen.customkeyboardeditor", GuiKeyboardLayoutEditor::new));
+
+        // keyboard theme editor
+        entries.add(new SettingsList.ScreenEntry(
+            "vivecraft.options.screen.customkeyboardthemeeditor", GuiKeyboardThemeEditor::new));
+
         // server settings
         for (ConfigBuilder.ConfigValue<?> cv : ServerConfig.getConfigValues()) {
             entries.add(SettingsList.ConfigToEntry(cv));

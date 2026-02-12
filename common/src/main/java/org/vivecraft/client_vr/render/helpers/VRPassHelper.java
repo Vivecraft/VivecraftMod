@@ -13,11 +13,13 @@ import org.vivecraft.client_vr.extensions.MinecraftExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.List;
 
@@ -47,6 +49,14 @@ public class VRPassHelper {
         MC.gameRenderer.render(partialTick, nanoTime, renderLevel);
 
         RenderHelper.checkGLError("post game render " + eye);
+
+        if (ShadersHelper.isShaderActive()) {
+            // some shaders don't write an alpha value to the final image
+            RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+            RenderSystem.colorMask(false, false, false, true);
+            RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
+            RenderSystem.colorMask(true, true, true, true);
+        }
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
@@ -79,11 +89,7 @@ public class VRPassHelper {
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             MC.getProfiler().push("cameraCopy");
             DATA_HOLDER.vrRenderer.cameraFramebuffer.bindWrite(true);
-            RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-            RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT | GL13C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
-            DATA_HOLDER.vrRenderer.cameraRenderFramebuffer.blitToScreen(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth,
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight);
+            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, false);
             MC.getProfiler().pop();
         }
 

@@ -19,6 +19,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
+import org.vivecraft.client.gui.framework.screens.KeymappingSelectionScreen;
 import org.vivecraft.client.utils.StringSimilarity;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.helpers.GuiHelper;
@@ -251,24 +252,31 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     }
 
     private static AbstractWidget vrOptionToWidget(VRSettings.VrOptions option, int width) {
-        AbstractWidget widget;
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-        if (option.getEnumFloat()) {
+        return switch (option.getType()) {
             // slider button
-            widget = new GuiVROptionSlider(option.returnEnumOrdinal(),
+            case LIMITED_FLOAT -> new GuiVROptionSlider(option.returnEnumOrdinal(),
                 0, 0,
                 width, 20,
                 option, true);
-        } else {
+            case KEYMAPPING -> new Button(0, 0, width, 20,
+                Component.literal(dh.vrSettings.getButtonDisplayString(option, true)), button -> {
+                Minecraft.getInstance().setScreen(
+                    new KeymappingSelectionScreen(Component.translatable("vivecraft.options." + option.name()),
+                        Minecraft.getInstance().screen, keymapping -> {
+                        dh.vrSettings.setOptionValue(option, keymapping == null ? "" : keymapping.getName());
+                        button.setMessage(
+                            Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
+                    }));
+            });
             // regular button
-            widget = new Button(0, 0, width, 20,
+            default -> new Button(0, 0, width, 20,
                 new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)),
                 button -> {
                     dh.vrSettings.setOptionValue(option);
                     button.setMessage(new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)));
                 });
-        }
-        return widget;
+        };
     }
 
     /**

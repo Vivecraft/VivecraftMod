@@ -1300,7 +1300,7 @@ public class VREffectsHelper {
 
         MC.getProfiler().push("crosshair");
 
-        Vec3 crosshairRenderPos = ((GameRendererExtension) MC.gameRenderer).vivecraft$getCrossVec();
+        Vec3 crosshairRenderPos = DATA_HOLDER.vrPlayer.crossVec;
         Vec3 crossDistance = crosshairRenderPos.subtract(
             DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getPosition());
 
@@ -1350,6 +1350,7 @@ public class VREffectsHelper {
         poseStack.scale(scale, scale, scale);
 
         MC.gameRenderer.lightTexture().turnOnLightLayer();
+        MC.gameRenderer.overlayTexture().setupOverlayColor();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
 

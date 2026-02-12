@@ -7,6 +7,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.screens.TwoHandedScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 
@@ -39,12 +40,22 @@ public class GuiRadial extends TwoHandedScreen {
                 .filter(keymapping -> keymapping.getName().equalsIgnoreCase(current))
                 .findFirst()
                 .ifPresent(keymapping -> {
+                    VRInputAction vrinputaction = MCVR.get().getInputAction(this.arr[index]);
                     String label = I18n.get(keymapping.getName());
+                    if (vrinputaction != null &&
+                        (vrinputaction.keyBinding.isDown() || MethodHolder.isKeyDown(vrinputaction.keyBinding.key)))
+                    {
+                        label = "§a" + label;
+                    }
                     this.addRenderableWidget(createButton(label, (p) -> {
-                        VRInputAction vrinputaction = MCVR.get().getInputAction(this.arr[index]);
                         if (vrinputaction != null) {
-                            vrinputaction.pressBinding();
-                            vrinputaction.unpressBinding(2);
+                            if (vrinputaction.keyBinding.isDown() ||
+                                MethodHolder.isKeyDown(vrinputaction.keyBinding.key))
+                            {
+                                vrinputaction.stopHoldingBinding(2);
+                            } else {
+                                vrinputaction.holdBinding();
+                            }
                         }
                     }, index, centerX, centerY));
                 });

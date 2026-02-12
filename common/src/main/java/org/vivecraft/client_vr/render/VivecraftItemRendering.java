@@ -203,10 +203,13 @@ public class VivecraftItemRendering {
                     translateX += 0.003F * Mth.sin(j);
                 }
 
-                poseStack.translate(0.0F, 0.0F, 0.1F);
                 // un-do controller tracking
                 poseStack.last().pose().multiply(MathUtils.toMcMat4(
                     DH.vrPlayer.vrdata_world_render.getController(bowHand).getMatrix().transpose()));
+
+                // offset the bow model to be in line with the aim vector
+                org.joml.Vector3f up = aim.cross(forward, new org.joml.Vector3f()).cross(aim).normalize().mul(0.1F);
+                poseStack.translate(up.x(), up.y(), up.z());
 
                 // align with controller
                 Quaternionf lookRotation = new Quaternionf().lookAlong(aim, forward).conjugate();
@@ -308,6 +311,11 @@ public class VivecraftItemRendering {
                     }
                 }
                 rotation.mul(Vector3f.YP.rotationDegrees(side * -90.0F));
+                if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
+                    rotation.mul(Vector3f.ZP.rotationDegrees(side * 10.0F));
+                    translateY -= 0.0055F;
+                    translateZ -= 0.035F;
+                }
             }
             case SPEAR -> {
                 rotation.set(0, 0, 0, 1);
@@ -420,6 +428,9 @@ public class VivecraftItemRendering {
         CROSSBOW,
         TELESCOPE,
         COMPASS,
-        ROTATED_TOOL
+        HORN,
+        MACE,
+        ROTATED_TOOL,
+        LANCE
     }
 }

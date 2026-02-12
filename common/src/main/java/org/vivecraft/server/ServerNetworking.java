@@ -17,10 +17,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vivecraft.Xloader;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.NetworkVersion;
@@ -30,6 +30,7 @@ import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.mixin.server.TrackedEntityAccessor;
+import org.vivecraft.mod_compat_vr.ReplayHelper;
 import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.config.enums.ClimbeyBlockmode;
@@ -204,12 +205,28 @@ public class ServerNetworking {
             case TELEPORT -> {
                 if (!ServerConfig.TELEPORT_ENABLED.get()) break;
                 TeleportPayloadC2S payload = (TeleportPayloadC2S) c2sPayload;
+
+                if (ServerConfig.TELEPORT_FOOD_EXHAUSTION.get() && payload.y() > player.getY()) {
+                    // cause food exhaustion when tping up blocks, to mimic jumping up
+                    player.causeFoodExhaustion(0.05F);
+                }
+
                 player.absMoveTo(payload.x(), payload.y(), payload.z(), player.getYRot(), player.getXRot());
             }
             case CLIMBING -> {
                 if (!ServerConfig.CLIMBEY_ENABLED.get()) break;
                 player.fallDistance = 0.0F;
                 player.connection.aboveGroundTickCount = 0;
+                if (ServerConfig.CLIMBEY_FOOD_EXHAUSTION.get() &&
+                    (ClimbTracker.isClaws(player.getMainHandItem()) || ClimbTracker.isClaws(player.getOffhandItem())))
+                {
+                    player.causeFoodExhaustion(0.005F);
+                }
+            }
+            case JUMPING -> {
+                if (ServerConfig.CLIMBEY_FOOD_EXHAUSTION.get()) {
+                    player.causeFoodExhaustion(0.3F);
+                }
             }
             case ACTIVEHAND -> {
                 ActiveBodyPartPayloadC2S activeBodypart = (ActiveBodyPartPayloadC2S) c2sPayload;
@@ -242,6 +259,20 @@ public class ServerNetworking {
                 }
             }
             case DAMAGE_DIRECTION -> vivePlayer.wantsDamageDirection = true;
+            case AIM_OVERRIDE_RESET -> {
+                AimOverrideResetPayloadC2S reset = (AimOverrideResetPayloadC2S) c2sPayload;
+                if (reset.ticks() == 0) {
+                    vivePlayer.aimDirOverride = null;
+                    vivePlayer.aimPosOverride = null;
+                }
+                vivePlayer.aimReset = reset.ticks();
+            }
+            case AIM_DIRECTION_OVERRIDE ->
+                vivePlayer.aimDirOverride = ((AimDirOverridePayloadC2S) c2sPayload).direction();
+            case AIM_POSITION_OVERRIDE -> vivePlayer.aimPosOverride = player.position()
+                .add(((AimPosOverridePayloadC2S) c2sPayload).position().x(),
+                    ((AimPosOverridePayloadC2S) c2sPayload).position().y(),
+                    ((AimPosOverridePayloadC2S) c2sPayload).position().z());
             // legacy support
             case CONTROLLER0DATA, CONTROLLER1DATA, HEADDATA -> {
                 Map<PayloadIdentifier, VivecraftPayloadC2S> playerData;
@@ -503,9 +534,7 @@ public class ServerNetworking {
             }
             trackedPlayer.send(packetProvider.apply(vivePlayer.networkVersion));
         }
-        if (ServerConfig.SEND_DATA_TO_OWNER.get() || Xloader.isModLoaded("replaymod") ||
-            Xloader.isModLoaded("reforgedplaymod") || Xloader.isModLoaded("flashback"))
-        {
+        if (ServerConfig.SEND_DATA_TO_OWNER.get() || ReplayHelper.isLoaded()) {
             // force on when a replay mod is loaded
             vivePlayer.player.connection.send(packetProvider.apply(vivePlayer.networkVersion));
         }
