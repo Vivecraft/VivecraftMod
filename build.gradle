@@ -101,13 +101,15 @@ subprojects {
     }
 
     // only do these for the api
-    if (project.name in ["fabric", "neoforge"]) {
+    if (project.name in ["fabric", "forge", "neoforge"]) {
         tasks.register('apiJar', Jar) {
             archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
             dependsOn tasks.named('remapJar')
             archiveBaseName = rootProject.archives_base_name + '-api'
             if (project.name == "neoforge") {
                 archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
+            } else if (project.name == "forge") {
+                archiveBaseName = rootProject.archives_base_name + '-api-srg'
             }
 
             from(tasks.named('remapJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
@@ -131,6 +133,8 @@ subprojects {
             archiveBaseName = rootProject.archives_base_name + '-api'
             if (project.name == "neoforge") {
                 archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
+            } else if (project.name == "forge") {
+                archiveBaseName = rootProject.archives_base_name + '-api-srg'
             }
 
             from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
@@ -169,7 +173,7 @@ subprojects {
                     from components.java
                 }
 
-                if (project.name in ["fabric", "neoforge"]) {
+                if (project.name in ["fabric", "forge", "neoforge"]) {
                     Api(MavenPublication) {
                         version = rootProject.minecraft_version + "-" + rootProject.api_version
                         groupId = 'org.vivecraft'
@@ -177,6 +181,8 @@ subprojects {
                         artifactId = rootProject.archives_base_name + '-api'
                         if (project.name == "neoforge") {
                             artifactId += '-mojmap'
+                        } else if (project.name == "forge") {
+                            artifactId += '-srg'
                         }
 
                         artifact(tasks.named('apiJar'))
