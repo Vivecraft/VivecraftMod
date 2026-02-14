@@ -1,7 +1,7 @@
 package org.vivecraft.data;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -16,7 +16,7 @@ public class ViveItems {
      */
     public static ItemStack newClimbingClaws() {
         ItemStack claws = new ItemStack(Items.SHEARS);
-        claws.setHoverName(Component.translatable("vivecraft.item.climbclaws"));
+        claws.setHoverName(new TranslatableComponent("vivecraft.item.climbclaws"));
         claws.getOrCreateTag().putBoolean("Unbreakable", true);
         claws.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.UNBREAKABLE.getMask());
         return claws;
@@ -39,7 +39,7 @@ public class ViveItems {
             return false;
         } else {
             return itemStack.getHoverName().getString().equals("Climb Claws") ||
-                (itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContent &&
+                (itemStack.getHoverName() instanceof TranslatableComponent translatableContent &&
                     translatableContent.getKey().equals("vivecraft.item.climbclaws")
                 );
         }
@@ -52,7 +52,7 @@ public class ViveItems {
      */
     public static ItemStack newJumpBoots() {
         ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-        boots.setHoverName(Component.translatable("vivecraft.item.jumpboots"));
+        boots.setHoverName(new TranslatableComponent("vivecraft.item.jumpboots"));
         boots.getOrCreateTag().putBoolean("Unbreakable", true);
         boots.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.UNBREAKABLE.getMask());
         boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 0x8CE56F);
@@ -76,7 +76,7 @@ public class ViveItems {
             return false;
         } else {
             return itemStack.getHoverName().getString().equals("Jump Boots") ||
-                (itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContent &&
+                (itemStack.getHoverName() instanceof TranslatableComponent translatableContent &&
                     translatableContent.getKey().equals("vivecraft.item.jumpboots")
                 );
         }
@@ -89,7 +89,7 @@ public class ViveItems {
      */
     public static ItemStack newGrowPie() {
         ItemStack growPie = new ItemStack(Items.PUMPKIN_PIE);
-        growPie.setHoverName(Component.literal("EAT ME"));
+        growPie.setHoverName(new TextComponent("EAT ME"));
         return growPie;
     }
 
@@ -111,7 +111,7 @@ public class ViveItems {
      */
     public static ItemStack newShrinkPotion() {
         ItemStack shrinkPotion = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
-        shrinkPotion.setHoverName(Component.literal("DRINK ME"));
+        shrinkPotion.setHoverName(new TextComponent("DRINK ME"));
         shrinkPotion.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.ADDITIONAL.getMask());
         return shrinkPotion;
     }
