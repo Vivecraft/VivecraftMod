@@ -33,6 +33,7 @@ import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.network.packet.c2s.TeleportPayloadC2S;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin implements PlayerExtension {
@@ -250,7 +251,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
     protected void vivecraft$beforeEat(CallbackInfoReturnable<ItemStack> cir, @Local(argsOnly = true) ItemStack food) {
         if (VRState.VR_INITIALIZED && food.isEdible() && vivecraft$isLocalPlayer(this)) {
             ClientDataHolderVR.getInstance().hapticTracker.handleEat(food);
-            if (food.getHoverName().getString().equals("EAT ME")) {
+            if (ViveItems.isGrowPie(food)) {
                 ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
                 ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
             }

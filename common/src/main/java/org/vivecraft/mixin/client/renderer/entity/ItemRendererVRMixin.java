@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(ItemRenderer.class)
 public class ItemRendererVRMixin {
@@ -26,7 +27,7 @@ public class ItemRendererVRMixin {
         if (VRState.VR_RUNNING && itemStack.is(Items.SPYGLASS)) {
             return this.itemModelShaper.getModelManager().getModel(TelescopeTracker.SCOPE_MODEL);
         }
-        if (ClimbTracker.isClaws(itemStack)) {
+        if (ViveItems.isClimbingClaws(itemStack)) {
             return this.itemModelShaper.getModelManager().getModel(ClimbTracker.CLAWS_MODEL);
         }
         return bakedModel;
