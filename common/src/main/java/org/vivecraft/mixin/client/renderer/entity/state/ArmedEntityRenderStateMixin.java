@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(ArmedEntityRenderState.class)
 public class ArmedEntityRenderStateMixin {
@@ -34,10 +34,10 @@ public class ArmedEntityRenderStateMixin {
         ItemStack thisStack = original.call(instance, humanoidArm);
 
         if (ClientNetworking.SERVER_ALLOWS_CLIMBEY && ClientVRPlayers.getInstance().isVRPlayer(instance.getUUID()) &&
-            !ClimbTracker.isClaws(thisStack))
+            !ViveItems.isClimbingClaws(thisStack))
         {
             ItemStack otherStack = original.call(instance, humanoidArm.getOpposite());
-            if (ClimbTracker.isClaws(otherStack) &&
+            if (ViveItems.isClimbingClaws(otherStack) &&
                 !ClientVRPlayers.getInstance().isVRAndSeated(instance.getUUID()))
             {
                 return otherStack;
@@ -57,7 +57,9 @@ public class ArmedEntityRenderStateMixin {
             // don't cancel climbing claws, unless menu hand
             (ClientDataHolderVR.getInstance().vrSettings.modelArmsMode != VRSettings.ModelArmsMode.COMPLETE ||
                 ClientDataHolderVR.getInstance().isMenuHand(arm) ||
-                !(ClientDataHolderVR.getInstance().climbTracker.isClimbeyClimb() || ClimbTracker.isClaws(itemStack))
+                !(ClientDataHolderVR.getInstance().climbTracker.isClimbeyClimb() ||
+                    ViveItems.isClimbingClaws(itemStack)
+                )
             ))
         {
             return ItemStack.EMPTY;
