@@ -11,9 +11,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(value = PlayerItemInHandLayer.class, priority = 900)
 public class PlayerItemInHandLayerMixin {
@@ -27,7 +27,9 @@ public class PlayerItemInHandLayerMixin {
             // don't cancel climbing claws, unless menu hand
             (ClientDataHolderVR.getInstance().vrSettings.modelArmsMode != VRSettings.ModelArmsMode.COMPLETE ||
                 ClientDataHolderVR.getInstance().isMenuHand(arm) ||
-                !(ClientDataHolderVR.getInstance().climbTracker.isClimbeyClimb() || ClimbTracker.isClaws(itemStack))
+                !(ClientDataHolderVR.getInstance().climbTracker.isClimbeyClimb() ||
+                    ViveItems.isClimbingClaws(itemStack)
+                )
             ))
         {
             ci.cancel();

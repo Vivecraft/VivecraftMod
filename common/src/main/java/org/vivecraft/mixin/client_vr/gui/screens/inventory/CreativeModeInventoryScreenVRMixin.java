@@ -10,15 +10,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeModeInventoryScreenVRMixin extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
@@ -51,31 +49,13 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     @Unique
     private void vivecraft$addCreativeItems(CreativeModeTab tab, NonNullList<ItemStack> items) {
         if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FOOD_AND_DRINKS) || tab == null) {
-            ItemStack eatMeCake = new ItemStack(Items.PUMPKIN_PIE);
-            eatMeCake.setHoverName(Component.literal("EAT ME"));
-
-            ItemStack drinkMePotion = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
-            drinkMePotion.setHoverName(Component.literal("DRINK ME"));
-            drinkMePotion.getOrCreateTag().putInt("HideFlags", 32);
-
-            items.add(eatMeCake);
-            items.add(drinkMePotion);
+            items.add(ViveItems.newGrowPie());
+            items.add(ViveItems.newShrinkPotion());
         }
 
         if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.TOOLS_AND_UTILITIES) || tab == null) {
-            ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-            boots.setHoverName(Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
-            boots.getOrCreateTag().putBoolean("Unbreakable", true);
-            boots.getOrCreateTag().putInt("HideFlags", 4);
-            boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 0x8CE56F);
-
-            ItemStack claws = new ItemStack(Items.SHEARS);
-            claws.setHoverName(Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
-            claws.getOrCreateTag().putBoolean("Unbreakable", true);
-            claws.getOrCreateTag().putInt("HideFlags", 4);
-
-            items.add(boots);
-            items.add(claws);
+            items.add(ViveItems.newJumpBoots());
+            items.add(ViveItems.newClimbingClaws());
         }
     }
 

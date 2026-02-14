@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(PotionItem.class)
 public class PotionItemVRMixin {
@@ -19,7 +20,7 @@ public class PotionItemVRMixin {
         ItemStack itemStack, Level level, LivingEntity livingEntity, CallbackInfoReturnable<ItemStack> cir)
     {
         if (VRState.VR_INITIALIZED && livingEntity instanceof LocalPlayer &&
-            itemStack.getHoverName().getString().equals("DRINK ME"))
+            ViveItems.isShrinkPotion(itemStack))
         {
             ClientDataHolderVR.getInstance().vrPlayer.wfMode = -0.05;
             ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
