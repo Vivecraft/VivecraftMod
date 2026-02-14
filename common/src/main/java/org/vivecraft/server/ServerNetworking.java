@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.NetworkVersion;
@@ -28,6 +27,7 @@ import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
+import org.vivecraft.data.ViveItems;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.mixin.server.TrackedEntityAccessor;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
@@ -218,7 +218,9 @@ public class ServerNetworking {
                 player.fallDistance = 0.0F;
                 player.connection.aboveGroundTickCount = 0;
                 if (ServerConfig.CLIMBEY_FOOD_EXHAUSTION.get() &&
-                    (ClimbTracker.isClaws(player.getMainHandItem()) || ClimbTracker.isClaws(player.getOffhandItem())))
+                    (ViveItems.isClimbingClaws(player.getMainHandItem()) ||
+                        ViveItems.isClimbingClaws(player.getOffhandItem())
+                    ))
                 {
                     player.causeFoodExhaustion(0.005F);
                 }

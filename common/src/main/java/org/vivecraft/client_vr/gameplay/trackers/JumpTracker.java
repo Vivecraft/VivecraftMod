@@ -2,12 +2,9 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.Tracker;
@@ -18,6 +15,7 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.packet.c2s.JumpingPayloadC2S;
+import org.vivecraft.data.ViveItems;
 
 public class JumpTracker implements Tracker {
     // in room space
@@ -49,28 +47,8 @@ public class JumpTracker implements Tracker {
      * @return if the given {@code player} has jump boots equipped
      */
     public static boolean hasClimbeyJumpEquipped(Player player) {
-        return ClientNetworking.SERVER_ALLOWS_CLIMBEY && isBoots(player.getItemBySlot(EquipmentSlot.FEET));
-    }
-
-    /**
-     * @param itemStack ItemStack to check
-     * @return if the given {@code itemStack} is a jump boots item
-     */
-    public static boolean isBoots(ItemStack itemStack) {
-        if (itemStack.isEmpty()) {
-            return false;
-        } else if (!itemStack.hasCustomHoverName()) {
-            return false;
-        } else if (itemStack.getItem() != Items.LEATHER_BOOTS) {
-            return false;
-        } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
-            return false;
-        } else {
-            return itemStack.getHoverName().getString().equals("Jump Boots") ||
-                (itemStack.getHoverName() instanceof TranslatableComponent translatableContent &&
-                    translatableContent.getKey().equals("vivecraft.item.jumpboots")
-                );
-        }
+        return ClientNetworking.SERVER_ALLOWS_CLIMBEY &&
+            ViveItems.isJumpBoots(player.getItemBySlot(EquipmentSlot.FEET));
     }
 
     @Override
