@@ -23,6 +23,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(ItemInHandLayer.class)
 public abstract class ItemInHandLayerMixin extends RenderLayer {
@@ -46,14 +47,14 @@ public abstract class ItemInHandLayerMixin extends RenderLayer {
         ItemStack itemStack, @Local(argsOnly = true) LivingEntity entity, @Local(argsOnly = true) HumanoidArm arm)
     {
         if (ClientNetworking.SERVER_ALLOWS_CLIMBEY && entity instanceof Player &&
-            ClientVRPlayers.getInstance().isVRPlayer(entity.getUUID()) && !ClimbTracker.isClaws(itemStack))
+            ClientVRPlayers.getInstance().isVRPlayer(entity.getUUID()) && !ViveItems.isClimbingClaws(itemStack))
         {
             boolean mainHand = arm ==
                 (ClientVRPlayers.getInstance().isVRAndLeftHanded(entity.getUUID()) ? HumanoidArm.LEFT :
                     HumanoidArm.RIGHT
                 );
             ItemStack otherStack = mainHand ? entity.getOffhandItem() : entity.getMainHandItem();
-            if (ClimbTracker.isClaws(otherStack)) {
+            if (ViveItems.isClimbingClaws(otherStack)) {
                 if (entity instanceof LocalPlayer player && VRState.VR_RUNNING &&
                     ClientDataHolderVR.getInstance().climbTracker.isActive(player) &&
                     ClimbTracker.hasClimbeyClimbEquipped(player))

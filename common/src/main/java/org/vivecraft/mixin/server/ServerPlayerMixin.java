@@ -24,10 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -46,6 +43,7 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.common.network.packet.s2c.DamageDirectionPayloadS2C;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
+import org.vivecraft.data.ViveItems;
 import org.vivecraft.mixin.world.entity.PlayerMixin;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
@@ -77,11 +75,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         {
             ItemStack easterEggItem;
             if (this.random.nextInt(2) == 1) {
-                easterEggItem = new ItemStack(Items.PUMPKIN_PIE);
-                easterEggItem.set(DataComponents.CUSTOM_NAME, Component.literal("EAT ME"));
+                easterEggItem = ViveItems.newGrowPie();
             } else {
-                easterEggItem = PotionContents.createItemStack(Items.POTION, Potions.WATER);
-                easterEggItem.set(DataComponents.CUSTOM_NAME, Component.literal("DRINK ME"));
+                easterEggItem = ViveItems.newShrinkPotion();
             }
 
             if (this.getInventory().add(easterEggItem)) {
