@@ -15,10 +15,10 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.data.ViveItems;
 
 public class InteractiveHotbarModule implements DebugRenderModule, InteractModule {
 
@@ -71,7 +71,9 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
         // this shouldn't happen, the inventory is supposed to be final
         if (player == null || player.getInventory() == null) return false;
-        if (this.dh.climbTracker.isGrabbingLadder() && ClimbTracker.isClaws(player.getMainHandItem())) return false;
+        if (this.dh.climbTracker.isGrabbingLadder() && ViveItems.isClimbingClaws(player.getMainHandItem())) {
+            return false;
+        }
         if (!this.dh.interactTracker.isActive(player)) return false;
         if (GuiHandler.GUI_RENDER_POS_ROOM == null) return false;
 
