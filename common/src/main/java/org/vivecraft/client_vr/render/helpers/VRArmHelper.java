@@ -18,8 +18,8 @@ import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.data.ViveItems;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
@@ -161,8 +161,8 @@ public class VRArmHelper {
      */
     public static void renderVRHand_Main(PoseStack poseStack, float partialTick) {
         // don't render claws with model arms
-        if ((DATA_HOLDER.climbTracker.isClimbeyClimb() || ClimbTracker.isClaws(MC.player.getMainHandItem())) &&
-            ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
+        if ((DATA_HOLDER.climbTracker.isClimbeyClimb() || ViveItems.isClimbingClaws(MC.player.getMainHandItem())
+        ) && ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
             ClientDataHolderVR.getInstance().vrSettings.modelArmsMode == VRSettings.ModelArmsMode.COMPLETE)
         {
             return;
@@ -178,7 +178,7 @@ public class VRArmHelper {
         }
 
         // climbey override
-        if (DATA_HOLDER.climbTracker.isClimbeyClimb() && !ClimbTracker.isClaws(item) && override == null) {
+        if (DATA_HOLDER.climbTracker.isClimbeyClimb() && !ViveItems.isClimbingClaws(item) && override == null) {
             item = MC.player.getOffhandItem();
         }
 
@@ -221,7 +221,7 @@ public class VRArmHelper {
         // don't render claws with model arms
         if (!ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf ||
             ClientDataHolderVR.getInstance().vrSettings.modelArmsMode != VRSettings.ModelArmsMode.COMPLETE ||
-            !(DATA_HOLDER.climbTracker.isClimbeyClimb() || ClimbTracker.isClaws(MC.player.getOffhandItem())))
+            !(DATA_HOLDER.climbTracker.isClimbeyClimb() || ViveItems.isClimbingClaws(MC.player.getOffhandItem())))
         {
             poseStack.pushPose();
             RenderHelper.setupRenderingAtController(1, poseStack);
@@ -233,7 +233,7 @@ public class VRArmHelper {
             }
 
             // climbey override
-            if (DATA_HOLDER.climbTracker.isClimbeyClimb() && !ClimbTracker.isClaws(item) && override == null) {
+            if (DATA_HOLDER.climbTracker.isClimbeyClimb() && !ViveItems.isClimbingClaws(item) && override == null) {
                 item = MC.player.getMainHandItem();
             }
 
