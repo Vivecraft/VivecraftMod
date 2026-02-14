@@ -5,15 +5,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,6 +28,7 @@ import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.packet.c2s.ClimbingPayloadC2S;
 import org.vivecraft.common.network.packet.c2s.JumpingPayloadC2S;
 import org.vivecraft.data.ViveBlockTags;
+import org.vivecraft.data.ViveItems;
 import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 
 import java.util.*;
@@ -104,28 +101,8 @@ public class ClimbTracker implements Tracker {
      */
     public static boolean hasClimbeyClimbEquipped(Player player) {
         return ClientNetworking.SERVER_ALLOWS_CLIMBEY &&
-            (isClaws(player.getMainHandItem()) || isClaws(player.getOffhandItem()));
-    }
-
-    /**
-     * @param itemStack ItemStack to check
-     * @return if the given {@code itemStack} is a climbing claw item
-     */
-    public static boolean isClaws(ItemStack itemStack) {
-        if (itemStack == null || itemStack.isEmpty()) {
-            return false;
-        } else if (!itemStack.has(DataComponents.CUSTOM_NAME)) {
-            return false;
-        } else if (itemStack.getItem() != Items.SHEARS) {
-            return false;
-        } else if (!itemStack.has(DataComponents.UNBREAKABLE)) {
-            return false;
-        } else {
-            return itemStack.getHoverName().getString().equals("Climb Claws") ||
-                (itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContent &&
-                    translatableContent.getKey().equals("vivecraft.item.climbclaws")
-                );
-        }
+            (ViveItems.isClimbingClaws(player.getMainHandItem()) || ViveItems.isClimbingClaws(player.getOffhandItem())
+            );
     }
 
     /**
@@ -135,7 +112,7 @@ public class ClimbTracker implements Tracker {
      * @return if the player is climbing
      */
     public boolean isClimbingWith(InteractionHand hand) {
-        return this.dh.climbTracker.isGrabbingLadder() && ClimbTracker.isClaws(this.mc.player.getItemInHand(hand));
+        return this.dh.climbTracker.isGrabbingLadder() && ViveItems.isClimbingClaws(this.mc.player.getItemInHand(hand));
     }
 
     private static boolean canStand(BlockPos blockPos, LocalPlayer player) {
