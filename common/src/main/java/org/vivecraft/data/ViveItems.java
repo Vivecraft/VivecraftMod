@@ -16,7 +16,7 @@ public class ViveItems {
      */
     public static ItemStack newClimbingClaws() {
         ItemStack claws = new ItemStack(Items.SHEARS);
-        claws.setHoverName(Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
+        claws.setHoverName(Component.translatable("vivecraft.item.climbclaws"));
         claws.getOrCreateTag().putBoolean("Unbreakable", true);
         claws.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.UNBREAKABLE.getMask());
         return claws;
@@ -52,7 +52,7 @@ public class ViveItems {
      */
     public static ItemStack newJumpBoots() {
         ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-        boots.setHoverName(Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
+        boots.setHoverName(Component.translatable("vivecraft.item.jumpboots"));
         boots.getOrCreateTag().putBoolean("Unbreakable", true);
         boots.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.UNBREAKABLE.getMask());
         boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 0x8CE56F);
