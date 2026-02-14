@@ -79,8 +79,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                 easterEggItem = ViveItems.newShrinkPotion();
             }
 
-            easterEggItem.getOrCreateTag().putInt("HideFlags", 32);
-
             if (this.getInventory().add(easterEggItem)) {
                 this.inventoryMenu.broadcastChanges();
             }

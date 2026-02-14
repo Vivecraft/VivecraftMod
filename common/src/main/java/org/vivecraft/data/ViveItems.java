@@ -1,14 +1,11 @@
 package org.vivecraft.data;
 
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.component.DyedItemColor;
-import net.minecraft.world.item.component.Unbreakable;
 
 public class ViveItems {
 
@@ -19,9 +16,9 @@ public class ViveItems {
      */
     public static ItemStack newClimbingClaws() {
         ItemStack claws = new ItemStack(Items.SHEARS);
-        claws.set(DataComponents.CUSTOM_NAME,
-            Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
-        claws.set(DataComponents.UNBREAKABLE, new Unbreakable(false));
+        claws.setHoverName(Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
+        claws.getOrCreateTag().putBoolean("Unbreakable", true);
+        claws.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.UNBREAKABLE.getMask());
         return claws;
     }
 
@@ -34,11 +31,11 @@ public class ViveItems {
     public static boolean isClimbingClaws(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
             return false;
-        } else if (!itemStack.has(DataComponents.CUSTOM_NAME)) {
+        } else if (!itemStack.hasCustomHoverName()) {
             return false;
         } else if (itemStack.getItem() != Items.SHEARS) {
             return false;
-        } else if (!itemStack.has(DataComponents.UNBREAKABLE)) {
+        } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
             return itemStack.getHoverName().getString().equals("Climb Claws") ||
@@ -55,10 +52,10 @@ public class ViveItems {
      */
     public static ItemStack newJumpBoots() {
         ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-        boots.set(DataComponents.CUSTOM_NAME,
-            Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
-        boots.set(DataComponents.UNBREAKABLE, new Unbreakable(false));
-        boots.set(DataComponents.DYED_COLOR, new DyedItemColor(0x8CE56F, false));
+        boots.setHoverName(Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
+        boots.getOrCreateTag().putBoolean("Unbreakable", true);
+        boots.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.UNBREAKABLE.getMask());
+        boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 0x8CE56F);
         return boots;
     }
 
@@ -71,11 +68,11 @@ public class ViveItems {
     public static boolean isJumpBoots(ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return false;
-        } else if (!itemStack.has(DataComponents.CUSTOM_NAME)) {
+        } else if (!itemStack.hasCustomHoverName()) {
             return false;
         } else if (itemStack.getItem() != Items.LEATHER_BOOTS) {
             return false;
-        } else if (!itemStack.has(DataComponents.UNBREAKABLE)) {
+        } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
             return itemStack.getHoverName().getString().equals("Jump Boots") ||
@@ -92,7 +89,7 @@ public class ViveItems {
      */
     public static ItemStack newGrowPie() {
         ItemStack growPie = new ItemStack(Items.PUMPKIN_PIE);
-        growPie.set(DataComponents.CUSTOM_NAME, Component.literal("EAT ME"));
+        growPie.setHoverName(Component.literal("EAT ME"));
         return growPie;
     }
 
@@ -113,8 +110,9 @@ public class ViveItems {
      * @return the created Shrinking Potion item
      */
     public static ItemStack newShrinkPotion() {
-        ItemStack shrinkPotion = PotionContents.createItemStack(Items.POTION, Potions.WATER);
-        shrinkPotion.set(DataComponents.CUSTOM_NAME, Component.literal("DRINK ME"));
+        ItemStack shrinkPotion = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+        shrinkPotion.setHoverName(Component.literal("DRINK ME"));
+        shrinkPotion.getOrCreateTag().putInt("HideFlags", ItemStack.TooltipPart.ADDITIONAL.getMask());
         return shrinkPotion;
     }
 

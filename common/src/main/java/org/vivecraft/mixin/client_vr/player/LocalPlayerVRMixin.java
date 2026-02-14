@@ -33,7 +33,6 @@ import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.network.packet.c2s.TeleportPayloadC2S;
 import org.vivecraft.data.ViveItems;
-import org.vivecraft.data.ViveModifiers;
 
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin implements PlayerExtension {
