@@ -4,25 +4,19 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Unit;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.component.DyedItemColor;
-import net.minecraft.world.item.component.TooltipDisplay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeModeInventoryScreenVRMixin extends AbstractContainerScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
@@ -57,37 +51,15 @@ public abstract class CreativeModeInventoryScreenVRMixin extends AbstractContain
         if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(CreativeModeTabs.FOOD_AND_DRINKS) ||
             tab == null)
         {
-            ItemStack eatMeCake = new ItemStack(Items.PUMPKIN_PIE);
-            eatMeCake.set(DataComponents.CUSTOM_NAME, Component.literal("EAT ME"));
-
-            ItemStack drinkMePotion = PotionContents.createItemStack(Items.POTION, Potions.WATER);
-            drinkMePotion.set(DataComponents.CUSTOM_NAME, Component.literal("DRINK ME"));
-
-            items.add(eatMeCake);
-            items.add(drinkMePotion);
+            items.add(ViveItems.newGrowPie());
+            items.add(ViveItems.newShrinkPotion());
         }
 
         if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(CreativeModeTabs.TOOLS_AND_UTILITIES) ||
             tab == null)
         {
-            ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-            boots.set(DataComponents.CUSTOM_NAME,
-                Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
-            boots.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
-            boots.set(DataComponents.DYED_COLOR, new DyedItemColor(0x8CE56F));
-            boots.set(DataComponents.TOOLTIP_DISPLAY,
-                TooltipDisplay.DEFAULT.withHidden(DataComponents.UNBREAKABLE, true)
-                    .withHidden(DataComponents.DYED_COLOR, true));
-
-            ItemStack claws = new ItemStack(Items.SHEARS);
-            claws.set(DataComponents.CUSTOM_NAME,
-                Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
-            claws.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
-            claws.set(DataComponents.TOOLTIP_DISPLAY,
-                TooltipDisplay.DEFAULT.withHidden(DataComponents.UNBREAKABLE, true));
-
-            items.add(boots);
-            items.add(claws);
+            items.add(ViveItems.newJumpBoots());
+            items.add(ViveItems.newClimbingClaws());
         }
     }
 

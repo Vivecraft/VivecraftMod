@@ -31,7 +31,6 @@ import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -41,6 +40,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.osc_trackers.OSCTracker;
 import org.vivecraft.client_vr.utils.osc_trackers.OSCTrackerReceiver;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.data.ViveItems;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -490,7 +490,8 @@ public abstract class MCVR {
     protected void changeHotbar(int dir) {
         if (this.mc.player != null &&
             // never let go, jack.
-            (!this.dh.climbTracker.isGrabbingLadder() || !ClimbTracker.isClaws(this.mc.player.getMainHandItem())))
+            (!this.dh.climbTracker.isGrabbingLadder() || !ViveItems.isClimbingClaws(this.mc.player.getMainHandItem())
+            ))
         {
             if (this.mc.screen == null) {
                 InputSimulator.scrollMouse(0.0D, dir * 4);
