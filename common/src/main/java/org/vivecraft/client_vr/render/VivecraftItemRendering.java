@@ -18,11 +18,11 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ViveItemTags;
+import org.vivecraft.data.ViveItems;
 
 public class VivecraftItemRendering {
     private static final ClientDataHolderVR DH = ClientDataHolderVR.getInstance();
@@ -132,7 +132,7 @@ public class VivecraftItemRendering {
         boolean useLeftHandModelinLeftHand = false;
 
         // claws need the actual hand size
-        if (ClimbTracker.isClaws(itemStack)) {
+        if (ViveItems.isClimbingClaws(itemStack)) {
             scale = 0.4F;
         }
 
