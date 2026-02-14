@@ -68,10 +68,24 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           architecture: x64
+          cache: gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build with Gradle with retry
+        run: |
+          max_attempts=5
+          attempt=1
+      
+          until ./gradlew build; do
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "Build failed after $attempt attempts."
+              exit 1
+            fi
+            echo "Build failed (attempt $attempt). Retrying in 10 seconds..."
+            attempt=$((attempt + 1))
+            sleep 10
+          done
+          echo "Build succeeded."
       - name: Api with Gradle
         if: inputs.github_api_publish
         run: ./gradlew buildApi
@@ -101,7 +115,7 @@ jobs:
       - name: write metadata about build into a json
         run: |
           jq -n \
-            --arg release_type "${{ steps.properties.outputs.release_type }}" \
+            --arg release_type "${{ steps.info.outputs.release_type }}" \
             --arg mod_version "${{ steps.properties.outputs.mod_version }}" \
             --arg mod_name "${{ steps.properties.outputs.mod_name }}" \
             --arg fabric_loaders "${{ steps.info.outputs.fabric_loaders }}" \
@@ -257,3 +271,45 @@ jobs:
           target_commitish: ${{ matrix.branch }}
           name: ${{ steps.meta.outputs.mod_name }}
           tag_name: ${{ steps.meta.outputs.mod_version}}
+      - name: checkout repo forge-versions
+        if: steps.meta.outputs.forge_file != '' || steps.meta.outputs.neoforge_file != ''
+        uses: actions/checkout@v6
+        with:
+          ref: 'forge-versions'
+      - name: update forge versions
+        if: steps.meta.outputs.forge_file != ''
+        uses: fayer3/forge-updater@main
+        with:
+          json_file: "./forge_updates.json"
+          mc_range: "${{ steps.meta.outputs.forge_mc_versions}}"
+          new_version: "${{ steps.meta.outputs.mod_version}}"
+          type: "${{ steps.meta.outputs.release_type }}"
+      - name: update neoforge versions
+        if: steps.meta.outputs.neoforge_file != ''
+        uses: fayer3/forge-updater@main
+        with:
+          json_file: "./neoforge_updates.json"
+          mc_range: "${{ steps.meta.outputs.neoforge_mc_versions}}"
+          new_version: "${{ steps.meta.outputs.mod_version}}"
+          type: "${{ steps.meta.outputs.release_type }}"
+
+      - name: push new update json forge
+        if: steps.meta.outputs.forge_file != '' && steps.meta.outputs.neoforge_file == ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update forge ${{ steps.meta.outputs.forge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
+          push: true
+
+      - name: push new update json neoforge
+        if: steps.meta.outputs.forge_file == '' && steps.meta.outputs.neoforge_file != ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update neoforge ${{ steps.meta.outputs.neoforge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
+          push: true
+
+      - name: push new update json forge+neoforge
+        if: steps.meta.outputs.forge_file != '' && steps.meta.outputs.neoforge_file != ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update forge ${{ steps.meta.outputs.forge_mc_versions }} to ${{ steps.version.outputs.MOD_VERSION }} and update neoforge ${{ steps.meta.outputs.neoforge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
+          push: true
