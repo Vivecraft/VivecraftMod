@@ -21,6 +21,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -38,7 +39,9 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RenderHelper {
 
@@ -522,6 +525,8 @@ public class RenderHelper {
             .setColor(color.getX(), color.getY(), color.getZ(), alpha);
     }
 
+    private static final Map<String, Pair<Integer, Integer>> GL_ERRORS = new HashMap<>();
+
     /**
      * checks if there were any opengl errors since this was last called
      *
@@ -530,7 +535,13 @@ public class RenderHelper {
      */
     public static String checkGLError(String errorSection) {
         int error = GlStateManager._getError();
-        if (error != 0) {
+        int count = 0;
+        Pair<Integer, Integer> oldError = GL_ERRORS.get(errorSection);
+        if (error != 0 && oldError != null && oldError.getLeft() == error) {
+            count = oldError.getRight() + 1;
+        }
+        GL_ERRORS.put(errorSection, Pair.of(error, count));
+        if (error != 0 && count < 5) {
             String errorString = switch (error) {
                 case GL11C.GL_INVALID_ENUM -> "invalid enum";
                 case GL11C.GL_INVALID_VALUE -> "invalid value";
@@ -545,8 +556,9 @@ public class RenderHelper {
             VRSettings.LOGGER.error("Vivecraft: @ {}", errorSection);
             VRSettings.LOGGER.error("Vivecraft: {}: {}", error, errorString);
             return errorString;
-        } else {
-            return "";
+        } else if (count == 5) {
+            VRSettings.LOGGER.error("Vivecraft: repeated gl errors for {}, not logging anymore", errorSection);
         }
+        return "";
     }
 }
