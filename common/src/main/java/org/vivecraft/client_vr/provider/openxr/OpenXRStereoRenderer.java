@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.provider.openxr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.profiling.Profiler;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.openxr.*;
@@ -19,7 +20,6 @@ public class OpenXRStereoRenderer extends VRRenderer {
     private int swapIndex;
     private VRLayeredRenderTarget[] leftFramebuffers;
     private VRLayeredRenderTarget[] rightFramebuffers;
-    private boolean render;
     private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
     private boolean recalculateProjectionMatrix = true;
 
@@ -70,7 +70,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
     public void setupRenderConfiguration(boolean render) throws IOException, RenderConfigException {
         super.setupRenderConfiguration(render);
 
-        if (!render) return;
+        if(!render) return;
 
         this.projectionLayerViews = XrCompositionLayerProjectionView.calloc(2);
         try (MemoryStack stack = MemoryStack.stackPush()) {

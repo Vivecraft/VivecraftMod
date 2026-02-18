@@ -211,23 +211,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             // switch vr in the menu, or when allowed by the server
             vivecraft$switchVRState(vrActive);
         }
-        if (VRState.VR_RUNNING) {
-            ClientDataHolderVR.getInstance().frameIndex++;
-            RenderPassManager.setGUIRenderPass();
-            // reset camera position, if there is one, since it only gets set at the start of rendering, and the last renderpass can be anywhere
-            if (this.gameRenderer != null && this.gameRenderer.getMainCamera() != null && this.level != null &&
-                this.getCameraEntity() != null)
-            {
-                this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false,
-                    this.level.tickRateManager().isEntityFrozen(this.getCameraEntity()) ? 1.0f :
-                        this.deltaTracker.getGameTimeDeltaPartialTick(true));
-            }
-
-            Profiler.get().push("VR Poll/VSync");
-            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
-            Profiler.get().pop();
-            ClientDataHolderVR.getInstance().vrPlayer.postPoll();
-        }
     }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
@@ -257,6 +240,22 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Inject(method = "runTick", at = @At(value = "CONSTANT", args = "stringValue=render"))
     private void vivecraft$preRender(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
+            ClientDataHolderVR.getInstance().frameIndex++;
+            RenderPassManager.setGUIRenderPass();
+            // reset camera position, if there is one, since it only gets set at the start of rendering, and the last renderpass can be anywhere
+            if (this.gameRenderer != null && this.gameRenderer.getMainCamera() != null && this.level != null &&
+                this.getCameraEntity() != null)
+            {
+                this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false,
+                    this.level.tickRateManager().isEntityFrozen(this.getCameraEntity()) ? 1.0f :
+                        this.deltaTracker.getGameTimeDeltaPartialTick(true));
+            }
+
+            Profiler.get().push("VR Poll/VSync");
+            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
+            Profiler.get().pop();
+            ClientDataHolderVR.getInstance().vrPlayer.postPoll();
+
             Profiler.get().push("preRender");
             ClientDataHolderVR.getInstance().vrPlayer.preRender(this.deltaTracker.getGameTimeDeltaPartialTick(true));
             VRHotkeys.updateMovingThirdPersonCam();
@@ -266,6 +265,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @ModifyArg(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(Lnet/minecraft/client/DeltaTracker;Z)V"))
     private boolean vivecraft$setupRenderGUI(boolean renderLevel) {
+        Profiler.get().popPush("updatePose/Vsync");
+
         if (VRState.VR_RUNNING) {
             try {
                 Profiler.get().push("setupRenderConfiguration");
