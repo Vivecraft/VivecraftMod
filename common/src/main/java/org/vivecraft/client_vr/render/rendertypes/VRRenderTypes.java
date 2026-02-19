@@ -19,10 +19,6 @@ import java.util.function.Function;
 
 public class VRRenderTypes {
 
-    private static final String TEXTURE_SAMPLER = "Sampler0";
-    private static final String OVERLAY_SAMPLER = "Sampler1";
-    private static final String LIGHTMAP_SAMPLER = "Sampler2";
-
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT_LINEAR = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_translucent_vr",
             ((RenderSetupExtension) (Object) RenderSetup.builder(
@@ -33,8 +29,9 @@ public class VRRenderTypes {
                 .affectsCrumbling()
                 .sortOnUpload()
                 .createRenderSetup()
-            ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                VRShaders.getGuiSampler())))));
+            ).vivecraft$setGpuTextures(
+                Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
+                    VRShaders.getGuiSampler())))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_SOLID_NO_CARDINAL_LIGHT = Util.memoize(
         (gpuTexture, linear) -> RenderType.create("entity_solid_vr",
@@ -43,8 +40,9 @@ public class VRRenderTypes {
                 .useOverlay()
                 .affectsCrumbling()
                 .createRenderSetup()
-            ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                RenderSystem.getSamplerCache().getClampToEdge(linear ? FilterMode.LINEAR : FilterMode.NEAREST))))));
+            ).vivecraft$setGpuTextures(
+                Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
+                    RenderSystem.getSamplerCache().getClampToEdge(linear ? FilterMode.LINEAR : FilterMode.NEAREST))))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_CUTOUT_NO_CARDINAL_LIGHT_LINEAR = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_cutout_vr",
@@ -55,38 +53,40 @@ public class VRRenderTypes {
                 .useOverlay()
                 .affectsCrumbling()
                 .createRenderSetup()
-            ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                VRShaders.getGuiSampler())))));
+            ).vivecraft$setGpuTextures(
+                Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
+                    VRShaders.getGuiSampler())))));
 
     private static final Function<GpuTextureView, RenderType> GUI_TEXTURED_ALWAYS = Util.memoize(
         gpuTexture -> RenderType.create("gui_textured_always_vr",
             ((RenderSetupExtension) (Object) RenderSetup.builder(VRShaders.GUI_TEXTURED_ALWAYS)
                 .createRenderSetup()
-            ).vivecraft$setGpuTextures(Map.of(TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                VRShaders.getGuiSampler())))));
+            ).vivecraft$setGpuTextures(
+                Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
+                    VRShaders.getGuiSampler())))));
 
     private static final Function<Identifier, RenderType> GUI_TEXTURED = Util.memoize(
         identifier -> RenderType.create("gui_textured_vr",
             RenderSetup.builder(VRShaders.GUI_TEXTURED)
-                .withTexture(TEXTURE_SAMPLER, identifier)
+                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, identifier)
                 .createRenderSetup()));
 
     private static final RenderType END_PORTAL_VR = RenderType.create("end_portal_vr",
         RenderSetup.builder(VRShaders.END_PORTAL_VR_PIPELINE)
-            .withTexture(TEXTURE_SAMPLER, AbstractEndPortalRenderer.END_SKY_LOCATION)
-            .withTexture(OVERLAY_SAMPLER, AbstractEndPortalRenderer.END_PORTAL_LOCATION)
+            .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, AbstractEndPortalRenderer.END_SKY_LOCATION)
+            .withTexture(VRShaders.CORE_OVERLAY_SAMPLER, AbstractEndPortalRenderer.END_PORTAL_LOCATION)
             .createRenderSetup());
 
     private static final RenderType END_GATEWAY_VR = RenderType.create("end_gateway_vr",
         RenderSetup.builder(VRShaders.END_GATEWAY_VR_PIPELINE)
-            .withTexture(TEXTURE_SAMPLER, AbstractEndPortalRenderer.END_SKY_LOCATION)
-            .withTexture(OVERLAY_SAMPLER, AbstractEndPortalRenderer.END_PORTAL_LOCATION)
+            .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, AbstractEndPortalRenderer.END_SKY_LOCATION)
+            .withTexture(VRShaders.CORE_OVERLAY_SAMPLER, AbstractEndPortalRenderer.END_PORTAL_LOCATION)
             .createRenderSetup());
 
     private static final BiFunction<Identifier, Boolean, RenderType> CROSSHAIR_WORLD = Util.memoize(
         (identifier, depthAlways) -> RenderType.create("crosshair_world_vr",
             RenderSetup.builder(depthAlways ? VRShaders.CROSSHAIR_WORLD_ALWAYS : VRShaders.CROSSHAIR_WORLD)
-                .withTexture(TEXTURE_SAMPLER, identifier)
+                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, identifier)
                 .useLightmap()
                 .useOverlay()
                 .createRenderSetup()));
@@ -108,18 +108,20 @@ public class VRRenderTypes {
 
     private static final Function<Identifier, RenderType> TEXT_NO_CULL = Util.memoize(
         identifier -> RenderType.create("text_no_cull_vr",
-            RenderSetup.builder(VRShaders.TEXT_NO_CULL).withTexture("sampler0", identifier)
+            RenderSetup.builder(VRShaders.TEXT_NO_CULL)
+                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, identifier)
                 .useLightmap()
                 .createRenderSetup()));
 
     private static final Function<Identifier, RenderType> WEATHER_MENUWORLD_LIGHTMAP = Util.memoize(
         identifier -> RenderType.create("weather_menuworld",
             ((RenderSetupExtension) (Object) RenderSetup.builder(RenderPipelines.WEATHER_NO_DEPTH_WRITE)
-                .withTexture(TEXTURE_SAMPLER, identifier)
+                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, identifier)
                 .createRenderSetup()
-            ).vivecraft$setGpuTextures(Map.of(LIGHTMAP_SAMPLER, new RenderSetupExtension.GpuTextureBinding(
-                ClientDataHolderVR.getInstance().menuWorldRenderer.lightMapView,
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
+            ).vivecraft$setGpuTextures(
+                Map.of(VRShaders.CORE_LIGHTMAP_SAMPLER, new RenderSetupExtension.GpuTextureBinding(
+                    ClientDataHolderVR.getInstance().menuWorldRenderer.lightMapView,
+                    RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
 
     public static RenderType crosshairWorld(Identifier identifier, boolean depthAlways) {
         return CROSSHAIR_WORLD.apply(identifier, depthAlways);

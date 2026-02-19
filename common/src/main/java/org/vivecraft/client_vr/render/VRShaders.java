@@ -24,6 +24,11 @@ import java.util.OptionalDouble;
 import java.util.Set;
 
 public class VRShaders {
+
+    public static final String CORE_TEXTURE_SAMPLER = "Sampler0";
+    public static final String CORE_OVERLAY_SAMPLER = "Sampler1";
+    public static final String CORE_LIGHTMAP_SAMPLER = "Sampler2";
+
     // FSAA shader and its uniforms
     public static LanczosUBO LANCZOS_UBO = new LanczosUBO();
     public static final String LANCZOS_COLOR_SAMPLER = "Sampler0";
@@ -134,7 +139,7 @@ public class VRShaders {
         .withLocation("pipeline/panorama")
         .withVertexShader("core/panorama")
         .withFragmentShader("core/panorama")
-        .withSampler("Sampler0")
+        .withSampler(CORE_TEXTURE_SAMPLER)
         .withDepthWrite(false)
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).build();
 
@@ -155,7 +160,7 @@ public class VRShaders {
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     private static final RenderPipeline.Snippet ENTITY_SNIPPET = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-        .withSampler("Sampler1")
+        .withSampler(CORE_OVERLAY_SAMPLER)
         .withCull(false).buildSnippet();
 
     public static final RenderPipeline CROSSHAIR_WORLD = RenderPipeline.builder(ENTITY_SNIPPET)
@@ -245,8 +250,8 @@ public class VRShaders {
         .withLocation("pipeline/text_no_cull_vr")
         .withVertexShader("core/rendertype_text")
         .withFragmentShader("core/rendertype_text")
-        .withSampler("Sampler0")
-        .withSampler("Sampler2")
+        .withSampler(CORE_TEXTURE_SAMPLER)
+        .withSampler(CORE_LIGHTMAP_SAMPLER)
         .withCull(false).build();
 
     public static final Set<RenderPipeline> DEPTH_ALWAYS_PIPELINES = new HashSet<>(
