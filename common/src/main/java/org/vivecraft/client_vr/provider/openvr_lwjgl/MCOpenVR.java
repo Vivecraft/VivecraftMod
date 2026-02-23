@@ -710,14 +710,14 @@ public class MCOpenVR extends MCVR<VRInputAction> {
         // write defaults to disk
         String rev = this.dh.vrSettings.reverseHands ? "_reversed" : "";
         // controllers
-        FileUtils.unpackAsset("input/vive_defaults" + rev + ".json", "openvr/input/vive_defaults.json", false);
-        FileUtils.unpackAsset("input/oculus_defaults" + rev + ".json", "openvr/input/oculus_defaults.json", false);
-        FileUtils.unpackAsset("input/wmr_defaults" + rev + ".json", "openvr/input/wmr_defaults.json", false);
-        FileUtils.unpackAsset("input/knuckles_defaults" + rev + ".json", "openvr/input/knuckles_defaults.json", false);
-        FileUtils.unpackAsset("input/cosmos_defaults" + rev + ".json", "openvr/input/cosmos_defaults.json", false);
+        FileUtils.unpackAsset("input/openvr/vive_defaults" + rev + ".json", "openvr/input/vive_defaults.json", false);
+        FileUtils.unpackAsset("input/openvr/oculus_defaults" + rev + ".json", "openvr/input/oculus_defaults.json", false);
+        FileUtils.unpackAsset("input/openvr/wmr_defaults" + rev + ".json", "openvr/input/wmr_defaults.json", false);
+        FileUtils.unpackAsset("input/openvr/knuckles_defaults" + rev + ".json", "openvr/input/knuckles_defaults.json", false);
+        FileUtils.unpackAsset("input/openvr/cosmos_defaults" + rev + ".json", "openvr/input/cosmos_defaults.json", false);
 
         // camera tracker
-        FileUtils.unpackAssetToFolder("input/tracker_defaults.json", "openvr", false);
+        FileUtils.unpackAsset("input/openvr/tracker_defaults.json", "openvr/input/tracker_defaults.json", false);
     }
 
     /**

@@ -17,21 +17,21 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.utils.FileUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.provider.control.ActionType;
-import org.vivecraft.client_vr.provider.control.ControllerType;
-import org.vivecraft.client_vr.provider.control.InputAction;
-import org.vivecraft.client_vr.provider.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.control.*;
 import org.vivecraft.client_vr.provider.openxr.control.ControllerMapping;
-import org.vivecraft.client_vr.provider.openxr.control.XRBinding;
+import org.vivecraft.client_vr.provider.openxr.control.XRBindingProfile;
 import org.vivecraft.client_vr.provider.openxr.control.XRInputAction;
 import org.vivecraft.client_vr.settings.VRSettings;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -823,11 +823,7 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             logError(error, "xrCreateSession", "");
 
             this.session = new XrSession(sessionPtr.get(0), this.instance);
-
-            while (!this.isActive) {
-                VRSettings.LOGGER.info("Vivecraft: waiting for OpenXR session to start");
-                pollVREvents();
-            }
+            while (!this.isActive) {pollVREvents();}
         }
     }
 
@@ -983,8 +979,9 @@ public class MCOpenXR extends MCVR<XRInputAction> {
 
         //this.generateActionManifest();
         //this.loadActionManifest();
+        this.extractDefaultBinds();
         this.loadActionHandles();
-        this.loadDefaultBindings();
+        this.loadBindings();
         //this.installApplicationManifest(false);
         this.inputInitialized = true;
         this.initDisplayRefreshRate();
@@ -998,6 +995,16 @@ public class MCOpenXR extends MCVR<XRInputAction> {
     @Override
     public boolean hasCameraTracker() {
         return false;
+    }
+
+    public String getCurrentInteractionProfile() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrInteractionProfileState state = XrInteractionProfileState.calloc(stack);
+            state.type(XR10.XR_TYPE_INTERACTION_PROFILE_STATE);
+            int error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/left"), state);
+            logError(error, "xrGetCurrentInteractionProfile", "left");
+            return getString(state.interactionProfile());
+        }
     }
 
     public List<Long> getOrigins(XRInputAction.HandedAction handedAction, XRInputAction action) {
@@ -1100,7 +1107,7 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             long actionSet = makeActionSet(this.instance, vrinputactionset.name, vrinputactionset.localizedName, 0);
             this.actionSetHandles.put(vrinputactionset, actionSet);
 
-            for (String headset : XRBinding.supportedHeadsets()) {
+            for (String headset : XRBindingProfile.supportedHeadsets()) {
                 for (var binding : ControllerMapping.getMapping(headset).entrySet()) {
                     long action = createAction(
                         (binding.getKey() + "." + headset.replace("/interaction_profiles/", "")).replace("/", "."),
@@ -1133,121 +1140,122 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             ActionType.POSE, actionSet, BOTH_HANDS[0]);
     }
 
-    private void loadDefaultBindings() {
+    private void loadBindings() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int error;
-            for (String headset : XRBinding.supportedHeadsets()) {
-                VRSettings.LOGGER.info("loading defaults for {}", headset);
-//                if (!"/interaction_profiles/oculus/touch_controller".equals(headset)) {
-//                    continue;
-//                }
-                XRBinding[] defaultBindings = XRBinding.getBinding(headset).toArray(new XRBinding[0]);
-                XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 6,
-                    stack); //TODO different way of adding controller poses
+            XRBindingProfile bindingProfile;
+            if (ClientDataHolderVR.getInstance().vrSettings.currentBindingProfile != null) {
+                bindingProfile = XRBindingProfile.getCurrentProfile();
+                if (bindingProfile == null) {
+                    VRSettings.LOGGER.warn("Custom profile '{}' not found, loading defaults", ClientDataHolderVR.getInstance().vrSettings.currentBindingProfile);
+                }
+            } else {
+                bindingProfile = null;
+            }
 
-                for (int i = 0; i < defaultBindings.length; i++) {
-                    XRBinding binding = defaultBindings[i];
-                    XRInputAction inputAction = this.getInputActionByName(binding.key());
-                    if (binding.actionSet() != null) {
-                        //inputAction.actionSet = binding.actionSet(); //TODO?
+            List<XRBindingProfile> profilesToLoad = new ArrayList<>();
+            if (bindingProfile != null) {
+                profilesToLoad.add(bindingProfile);
+                VRSettings.LOGGER.info("Loading custom profile: {}", bindingProfile.name());
+            } else {
+                for (String headset : XRBindingProfile.supportedHeadsets()) {
+                    XRBindingProfile profile = XRBindingProfile.getDefaultBinding(headset);
+                    if (profile != null) {
+                        profilesToLoad.add(profile);
+                        VRSettings.LOGGER.info("Loading default profile for {}", headset);
                     }
-                    long handle = this.mappedBindings.get(new ActionBind(inputAction.actionSet, binding.controller()));
-                    ActionType type = ControllerMapping.getMapping(headset).get(binding.controller());
-                    inputAction.addHandle(headset, handle,
-                        binding.controller().contains("/left/") ? ControllerType.LEFT :
-                            ControllerType.RIGHT, type);
-                    inputAction.setType(binding.actionType());
-                    if (inputAction.getHandle(headset).isEmpty() || handle == 0L) {
-                        VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", binding.key(), binding.controller());
+                }
+            }
+
+            for (XRBindingProfile profile : profilesToLoad) {
+                String headsetPath = profile.interactionProfiles()[0];
+                List<Action> actions = profile.actions();
+                XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(actions.size() + 6, stack);
+
+                for (int i = 0; i < actions.size(); i++) {
+                    Action action = actions.get(i);
+                    XRInputAction inputAction = this.getInputActionByName(action.key());
+
+                    long handle = this.mappedBindings.get(new ActionBind(inputAction.actionSet, action.buttons().getFirst().path()));
+                    ActionType type = ControllerMapping.getMapping(headsetPath).get(action.buttons().getFirst().path());
+
+                    inputAction.addHandle(
+                        headsetPath,
+                        handle,
+                        action.buttons().getFirst().path().contains("/left/") ? ControllerType.LEFT : ControllerType.RIGHT,
+                        type
+                    );
+                    inputAction.setType(action.buttons().getFirst().actionType());
+
+                    if (inputAction.getHandle(headsetPath).isEmpty() || handle == 0L) {
+                        VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", action.key(), action.buttons().getFirst().path());
                         continue;
                     }
+
+                    // TODO support multiple bindings per action
                     bindings.get(i).set(
-                        new XrAction(handle,
-                            new XrActionSet(this.actionSetHandles.get(inputAction.actionSet), this.instance)),
-                        getPath(binding.controller())
+                        new XrAction(handle, new XrActionSet(this.actionSetHandles.get(inputAction.actionSet), this.instance)),
+                        getPath(action.buttons().getFirst().path())
                     );
                 }
 
-                //TODO make this also changeable?
-                XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL),
-                    this.instance);
-                bindings.get(defaultBindings.length).set(
-                    new XrAction(this.grip[RIGHT_CONTROLLER], actionSet),
-                    getPath("/user/hand/right/input/grip/pose")
-                );
-                bindings.get(defaultBindings.length + 1).set(
-                    new XrAction(this.grip[LEFT_CONTROLLER], actionSet),
-                    getPath("/user/hand/left/input/grip/pose")
-                );
-                bindings.get(defaultBindings.length + 2).set(
-                    new XrAction(this.aim[RIGHT_CONTROLLER], actionSet),
-                    getPath("/user/hand/right/input/aim/pose")
-                );
-                bindings.get(defaultBindings.length + 3).set(
-                    new XrAction(this.aim[LEFT_CONTROLLER], actionSet),
-                    getPath("/user/hand/left/input/aim/pose")
-                );
+                XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
+                String[] hands = {"/user/hand/right", "/user/hand/left"};
+                long[] poses = {this.grip[RIGHT_CONTROLLER], this.grip[LEFT_CONTROLLER], this.aim[RIGHT_CONTROLLER], this.aim[LEFT_CONTROLLER]};
+                long[] haptics = {this.haptics[RIGHT_CONTROLLER], this.haptics[LEFT_CONTROLLER]};
+                String[] posePaths = {"/input/grip/pose", "/input/grip/pose", "/input/aim/pose", "/input/aim/pose"};
+                String[] hapticPaths = {"/output/haptic", "/output/haptic"};
 
-                bindings.get(defaultBindings.length + 4).set(
-                    new XrAction(this.haptics[RIGHT_CONTROLLER], actionSet),
-                    getPath("/user/hand/right/output/haptic")
-                );
+                int offset = actions.size();
+                for (int j = 0; j < poses.length; j++) {
+                    bindings.get(offset + j).set(new XrAction(poses[j], actionSet), getPath(hands[j % 2] + posePaths[j]));
+                }
+                for (int j = 0; j < haptics.length; j++) {
+                    bindings.get(offset + poses.length + j).set(new XrAction(haptics[j], actionSet), getPath(hands[j] + hapticPaths[j]));
+                }
 
-                bindings.get(defaultBindings.length + 5).set(
-                    new XrAction(this.haptics[LEFT_CONTROLLER], actionSet),
-                    getPath("/user/hand/left/output/haptic")
-                );
-
-                XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(
-                    stack);
+                XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
                 suggested_binds.type(XR10.XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING);
                 suggested_binds.next(NULL);
-                suggested_binds.interactionProfile(getPath(headset));
+                suggested_binds.interactionProfile(getPath(headsetPath));
                 suggested_binds.suggestedBindings(bindings);
 
                 error = XR10.xrSuggestInteractionProfileBindings(this.instance, suggested_binds);
-                logError(error, "xrSuggestInteractionProfileBindings", headset);
+                logError(error, "xrSuggestInteractionProfileBindings", profile.name());
             }
-
 
             XrSessionActionSetsAttachInfo attach_info = XrSessionActionSetsAttachInfo.calloc(stack);
             attach_info.type(XR10.XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO);
             attach_info.next(NULL);
-            attach_info.actionSets(
-                stackPointers(this.actionSetHandles.values().stream().mapToLong(value -> value).toArray()));
+            attach_info.actionSets(stackPointers(this.actionSetHandles.values().stream().mapToLong(value -> value).toArray()));
 
             error = XR10.xrAttachSessionActionSets(this.session, attach_info);
             logError(error, "xrAttachSessionActionSets", "");
 
-            XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
+            XrActionSet globalActionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
             XrActionSpaceCreateInfo actionSpace = XrActionSpaceCreateInfo.calloc(stack);
             actionSpace.type(XR10.XR_TYPE_ACTION_SPACE_CREATE_INFO);
             actionSpace.next(NULL);
-            actionSpace.action(new XrAction(this.grip[RIGHT_CONTROLLER], actionSet));
-            actionSpace.subactionPath(getPath("/user/hand/right"));
-            actionSpace.poseInActionSpace(POSE_IDENTITY);
             PointerBuffer pp = stackCallocPointer(1);
-            error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
-            logError(error, "xrCreateActionSpace", "grip: /user/hand/right");
-            this.gripSpace[RIGHT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
 
-            actionSpace.action(new XrAction(this.grip[LEFT_CONTROLLER], actionSet));
-            actionSpace.subactionPath(getPath("/user/hand/left"));
-            error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
-            logError(error, "xrCreateActionSpace", "grip: /user/hand/left");
-            this.gripSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+            long[] allPoses = {this.grip[RIGHT_CONTROLLER], this.grip[LEFT_CONTROLLER], this.aim[RIGHT_CONTROLLER], this.aim[LEFT_CONTROLLER]};
+            for (int i = 0; i < allPoses.length; i++) {
+                String hand = (i % 2 == 0) ? "/user/hand/right" : "/user/hand/left";
+                actionSpace.action(new XrAction(allPoses[i], globalActionSet));
+                actionSpace.subactionPath(getPath(hand));
+                actionSpace.poseInActionSpace(POSE_IDENTITY);
 
-            actionSpace.action(new XrAction(this.aim[RIGHT_CONTROLLER], actionSet));
-            actionSpace.subactionPath(getPath("/user/hand/right"));
-            error = XR10.xrCreateActionSpace(session, actionSpace, pp);
-            logError(error, "xrCreateActionSpace", "aim: /user/hand/right");
-            this.aimSpace[RIGHT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+                error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
+                logError(error, "xrCreateActionSpace", allPoses[i] == this.grip[RIGHT_CONTROLLER] ? "grip: " + hand : "aim: " + hand);
 
-            actionSpace.action(new XrAction(this.aim[LEFT_CONTROLLER], actionSet));
-            actionSpace.subactionPath(getPath("/user/hand/left"));
-            error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
-            logError(error, "xrCreateActionSpace", "aim: /user/hand/left");
-            this.aimSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+                if (i == 0) this.gripSpace[RIGHT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+                else if (i == 1) this.gripSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+                else if (i == 2) this.aimSpace[RIGHT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+                else this.aimSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+            }
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Profile file not found", e);
         }
     }
 
@@ -1281,6 +1289,16 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                 return new String(data).trim();
             }
         });
+    }
+
+    private void extractDefaultBinds() {
+        new File("openxr/input").mkdirs();
+        FileUtils.unpackAsset("input/openxr/vive_defaults.json", "openxr/input/profiles/vive_defaults.json", false);
+        FileUtils.unpackAsset("input/openxr/oculus_defaults.json", "openxr/input/profiles/oculus_defaults.json", false);
+        FileUtils.unpackAsset("input/openxr/index_defaults.json", "openxr/input/profiles/index_defaults.json", false);
+        FileUtils.unpackAsset("input/openxr/cosmos_defaults.json", "openxr/input/profiles/cosmos_defaults.json", false);
+        FileUtils.unpackAsset("input/openxr/pico_defaults.json", "openxr/input/profiles/pico_defaults.json", false);
+        FileUtils.unpackAsset("input/openxr/simple_defaults.json", "openxr/input/profiles/simple_defaults.json", false);
     }
 
     private long createAction(

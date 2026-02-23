@@ -1,0 +1,155 @@
+{
+  "name": "Vive Controller (Default)",
+  "interactionProfiles": [
+    "/interaction_profiles/htc/vive_controller"
+  ],
+  "custom": false,
+  "actions": [
+    {
+      "key": "/actions/ingame/in/vivecraft.key.teleportFallback",
+      "buttons": [
+        { "path": "/user/hand/left/input/trigger/value", "actionType": "VEC1" }
+      ]
+    },
+    {
+      "key": "/actions/contextual/in/vivecraft.key.vrInteract",
+      "buttons": [
+        { "path": "/user/hand/left/input/trigger/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/right/input/trigger/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/right/input/squeeze/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/left/input/squeeze/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/vivecraft.key.hotbarNext",
+      "buttons": [
+        { "path": "/user/hand/right/input/squeeze/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/contextual/in/vivecraft.key.climbeyGrab",
+      "buttons": [
+        { "path": "/user/hand/right/input/squeeze/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/right/input/trigger/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/left/input/trigger/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/left/input/squeeze/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/vivecraft.key.hotbarPrev",
+      "buttons": [
+        { "path": "/user/hand/left/input/squeeze/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/key.attack",
+      "buttons": [
+        { "path": "/user/hand/right/input/trigger/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/gui/in/vivecraft.key.guiScrollAxis",
+      "buttons": [
+        { "path": "/user/hand/right/input/trackpad/y", "actionType": "VEC1" }
+      ]
+    },
+    {
+      "key": "/actions/gui/in/vivecraft.key.guiRightClick",
+      "buttons": [
+        { "path": "/user/hand/right/input/trackpad/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/keyboard/in/vivecraft.key.keyboardClick",
+      "buttons": [
+        { "path": "/user/hand/left/input/trigger/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/right/input/trigger/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/gui/in/vivecraft.key.guiMiddleClick",
+      "buttons": [
+        { "path": "/user/hand/right/input/squeeze/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/technical/in/vivecraft.key.trackpadTouch",
+      "buttons": [
+        { "path": "/user/hand/left/input/trackpad/click", "actionType": "BOOLEAN" },
+        { "path": "/user/hand/right/input/trackpad/touch", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/global/in/key.inventory",
+      "buttons": [
+        { "path": "/user/hand/right/input/trackpad/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/key.jump",
+      "buttons": [
+        { "path": "/user/hand/left/input/trackpad/x", "actionType": "VEC1" }
+      ]
+    },
+    {
+      "key": "/actions/gui/in/vivecraft.key.guiShift",
+      "buttons": [
+        { "path": "/user/hand/left/input/squeeze/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/vivecraft.key.freeMoveStrafe",
+      "buttons": [
+        { "path": "/user/hand/left/input/trackpad", "actionType": "VEC2" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/key.sneak",
+      "buttons": [
+        { "path": "/user/hand/left/input/trackpad/y", "actionType": "VEC1" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/vivecraft.key.teleport",
+      "buttons": [
+        { "path": "/user/hand/left/input/trigger/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/key.use",
+      "buttons": [
+        { "path": "/user/hand/right/input/trackpad/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/keyboard/in/vivecraft.key.keyboardShift",
+      "buttons": [
+        { "path": "/user/hand/left/input/squeeze/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/global/in/vivecraft.key.ingameMenuButton",
+      "buttons": [
+        { "path": "/user/hand/left/input/menu/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/gui/in/vivecraft.key.guiLeftClick",
+      "buttons": [
+        { "path": "/user/hand/right/input/trigger/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/vivecraft.key.radialMenu",
+      "buttons": [
+        { "path": "/user/hand/right/input/menu/click", "actionType": "BOOLEAN" }
+      ]
+    },
+    {
+      "key": "/actions/ingame/in/vivecraft.key.rotateAxis",
+      "buttons": [
+        { "path": "/user/hand/right/input/trackpad", "actionType": "VEC2" }
+      ]
+    }
+  ]
+}

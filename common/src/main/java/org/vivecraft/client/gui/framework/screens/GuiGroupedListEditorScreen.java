@@ -1,11 +1,6 @@
 package org.vivecraft.client.gui.framework.screens;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
@@ -37,7 +32,7 @@ public abstract class GuiGroupedListEditorScreen<T> extends GuiListScreen {
         this.valuesSupplier = valuesSupplier;
         this.loadDefaults = loadDefaults;
         this.save = save;
-        this.categorySupplier = categorySupplier != null ? categorySupplier : item -> "";
+        this.categorySupplier = categorySupplier != null ? categorySupplier : item -> "Empty";
     }
 
     @Override
@@ -101,26 +96,18 @@ public abstract class GuiGroupedListEditorScreen<T> extends GuiListScreen {
             String category = group.getKey();
             List<T> values = group.getValue();
 
-            SettingsList.GroupedEntry categoryEntry = null;
-
             if (!category.isEmpty()) {
-                categoryEntry = new SettingsList.GroupedEntry(
-                    Component.translatable(category));
-                entries.add(categoryEntry);
+                entries.add(new SettingsList.GroupedEntry(
+                    Component.translatable(category)
+                ));
             }
 
             for (T value : values) {
-                SettingsList.BaseEntry entry = this.toEntry(value, index++);
-
-                if (categoryEntry != null) {
-                    categoryEntry.add(entry);
-                } else {
-                    entries.add(entry);
-                }
+                entries.add(this.toEntry(value, index++));
             }
 
-            if (!this.fixedEntryCount && categoryEntry != null) {
-                categoryEntry.add(createAddButton(category));
+            if (!this.fixedEntryCount && !category.isEmpty()) {
+                entries.add(createAddButton(category));
             }
         }
 
@@ -143,69 +130,6 @@ public abstract class GuiGroupedListEditorScreen<T> extends GuiListScreen {
     }
 
     protected abstract ValueEntry<T> toEntry(T value, int index);
-
-    protected static class RemovableEntry<T> extends ValueEntry<T> {
-        protected final T value;
-
-        private final int index;
-        private final Button editButton;
-        private final Button removeButton;
-
-        public RemovableEntry(Component name, T value, int index) {
-            super(name, null);
-            this.value = value;
-            this.index = index;
-
-            this.editButton = Button.builder(Component.translatable("vivecraft.options.edit"),
-                    button -> {})
-                .bounds(0, 0, 100, 20).build();
-            this.removeButton = Button.builder(Component.literal("-"),
-                    button -> {})
-                .bounds(0, 0, 20, 20).build();
-        }
-
-        @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
-        {
-            super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
-
-            int textY = this.getY() + this.getHeight() / 2 - Minecraft.getInstance().font.lineHeight / 2 + 2;
-            guiGraphics.drawString(Minecraft.getInstance().font, this.name, this.getContentX(), textY,
-                this.textColor());
-            this.removeButton.active = this.isActive();
-            this.editButton.active = this.isActive();
-
-            this.editButton.setX(this.getContentRight() - this.editButton.getWidth() - 20);
-            this.editButton.setY(this.getY());
-            this.editButton.render(guiGraphics, mouseX, mouseY, partialTick);
-            this.removeButton.setX(this.getContentRight() - 20);
-            this.removeButton.setY(this.getY());
-            this.removeButton.render(guiGraphics, mouseX, mouseY, partialTick);
-        }
-
-        @Override
-        public List<? extends NarratableEntry> narratables() {
-            return ImmutableList.of(this.editButton, this.removeButton);
-        }
-
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return ImmutableList.of(this.editButton, this.removeButton);
-        }
-
-        @Override
-        public void setActive(boolean active) {
-            super.setActive(active);
-            this.removeButton.active = active;
-            this.editButton.active = active;
-        }
-
-        @Override
-        public T getValue() {
-            return this.value;
-        }
-    }
 
     protected static abstract class ValueEntry<T> extends SettingsList.BaseEntry {
         public ValueEntry(Component name, Supplier<String> tooltipSupplier) {
