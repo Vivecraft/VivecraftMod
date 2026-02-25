@@ -1,7 +1,8 @@
 {
-  "action_manifest_version": 0,
-  "alias_info": {},
-  "app_key": "org.jrbudda.vivecraft.steamvrinput",
+  "name": "Oculus Touch Defaults",
+  "description": "",
+  "category": "steamvr_input",
+  "controller_type": ["oculus_touch", "/interaction_profiles/oculus/touch_controller"],
   "bindings": {
     "/actions/contextual": {
       "chords": [
@@ -344,11 +345,5 @@
         }
       ]
     }
-  },
-  "category": "steamvr_input",
-  "controller_type": "oculus_touch",
-  "description": "",
-  "name": "Oculus Touch Defaults",
-  "options": {},
-  "simulated_actions": []
+  }
 }

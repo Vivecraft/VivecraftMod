@@ -1,0 +1,22 @@
+{
+  "/user/hand/left/input/trackpad": "VEC2",
+  "/user/hand/left/input/trackpad/y": "VEC1",
+  "/user/hand/left/input/squeeze/click": "BOOLEAN",
+  "/user/hand/right/input/trigger/click": "BOOLEAN",
+  "/user/hand/right/input/squeeze/click": "BOOLEAN",
+  "/user/hand/left/input/trigger/click": "BOOLEAN",
+  "/user/hand/right/input/trigger/value": "VEC1",
+  "/user/hand/left/input/trackpad/x": "VEC1",
+  "/user/hand/left/input/trackpad/click": "BOOLEAN",
+  "/user/hand/right/input/system/click": "BOOLEAN",
+  "/user/hand/left/input/trigger/value": "VEC1",
+  "/user/hand/right/input/menu/click": "BOOLEAN",
+  "/user/hand/left/input/system/click": "BOOLEAN",
+  "/user/hand/left/input/trackpad/touch": "BOOLEAN",
+  "/user/hand/right/input/trackpad/x": "VEC1",
+  "/user/hand/right/input/trackpad/click": "BOOLEAN",
+  "/user/hand/right/input/trackpad/y": "VEC1",
+  "/user/hand/right/input/trackpad": "VEC2",
+  "/user/hand/left/input/menu/click": "BOOLEAN",
+  "/user/hand/right/input/trackpad/touch": "BOOLEAN"
+}

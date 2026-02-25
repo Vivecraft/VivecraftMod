@@ -1,0 +1,6 @@
+{
+  "/user/hand/left/input/select/click": "BOOLEAN",
+  "/user/hand/right/input/menu/click": "BOOLEAN",
+  "/user/hand/right/input/select/click": "BOOLEAN",
+  "/user/hand/left/input/menu/click": "BOOLEAN"
+}

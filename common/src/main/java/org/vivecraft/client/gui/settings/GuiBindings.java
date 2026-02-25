@@ -9,60 +9,70 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.screens.GuiGroupedListEditorScreen;
+import org.vivecraft.client_vr.provider.control.ActionSet;
+import org.vivecraft.client_vr.provider.control.Source;
 import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
-import org.vivecraft.client_vr.provider.control.Action;
-import org.vivecraft.client_vr.provider.openxr.control.XRBindingProfile;
+import org.vivecraft.client_vr.provider.control.BindingProfile;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class GuiBindings extends GuiGroupedListEditorScreen<Action> {
+public class GuiBindings extends GuiGroupedListEditorScreen<Source> {
     public GuiBindings(Screen lastScreen) {
         super(Component.empty(), lastScreen, false, () ->
             {
                 if (MCOpenXR.get() == null) return List.of();
-                List<Action> actions = new ArrayList<>();
+                List<Source> sources = new ArrayList<>();
                 try {
                     if (MCOpenXR.get() == null) return List.of();
-                    XRBindingProfile profile = XRBindingProfile.getCurrentProfile();
-                    if (profile == null) profile = XRBindingProfile.getDefaultBinding(MCOpenXR.get().getCurrentInteractionProfile());
-                    if (profile == null) profile = XRBindingProfile.getDefaultBinding("");
-                    actions.addAll(profile.actions());
+                    BindingProfile profile = BindingProfile.getCurrentProfile();
+                    if (profile == null) profile = BindingProfile.getDefaultBinding(MCOpenXR.get().getCurrentInteractionProfile());
+                    if (profile == null) profile = BindingProfile.getDefaultBinding("");
+                    for (ActionSet set : profile.sets().values()) {sources.addAll(set.sources());}
                 } catch (FileNotFoundException e) {
                     // Show error to user about missing profile
                 }
 
-                return actions;
+                return sources;
             },
             () -> {},
             save -> {
-                XRBindingProfile profile = new XRBindingProfile(
-                    "Custom Profile",
-                    new String[]{MCOpenXR.get().getCurrentInteractionProfile()},
-                    true,
-                    save
+                Map<String, ActionSet> bindings = new HashMap<>();
+                bindings.put("/actions/custom",
+                    new ActionSet(save, null, null, null)
                 );
+
+                BindingProfile profile = new BindingProfile(
+                    "Custom Profile",
+                    "New custom profile",
+                    "Custom",
+                    null,
+                    bindings
+                );
+
                 if (profile.saveProfile()) {
-                    // Show success to user
+                    // TODO success message
                 } else {
-                    // Show error to user
+                    // TODO error message
                 }
             },
-            action -> XRBindingProfile.getPrettyName(action.buttons().getFirst().path())
+            action -> Component.translatable(action.path()).getString()
         );
 
         this.searchable = false;
     }
 
     @Override
-    protected Action createNewValue(String category) {
+    protected Source createNewValue(String category) {
         return null;
     }
 
     @Override
-    protected ValueEntry<Action> toEntry(Action value, int index) {
-        return new RemovableEntry<>(Component.translatable(value.key().substring(value.key().lastIndexOf('/') + 1)), value, 0);
+    protected ValueEntry<Source> toEntry(Source value, int index) {
+        return new RemovableEntry<>(Component.translatable(value.path()), value, 0);
     }
 
     protected static class RemovableEntry<T> extends ValueEntry<T> {
