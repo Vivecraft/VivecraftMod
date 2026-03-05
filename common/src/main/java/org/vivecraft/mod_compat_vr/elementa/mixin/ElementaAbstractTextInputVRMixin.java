@@ -12,9 +12,13 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 /**
  * Compatibility patch for Elementa (used by Essential, Resourcify and other mods).
  * When an Elementa text input becomes active (e.g. search field focused), opens the VR keyboard.
+ * Resourcify relocates Elementa to dev.dediamondpro.resourcify.libs.elementa.
  */
 @Pseudo
-@Mixin(targets = "gg.essential.elementa.components.input.AbstractTextInput")
+@Mixin(targets = {
+    "gg.essential.elementa.components.input.AbstractTextInput",
+    "dev.dediamondpro.resourcify.libs.elementa.components.input.AbstractTextInput"
+})
 public abstract class ElementaAbstractTextInputVRMixin {
 
     @Inject(method = "setActive", at = @At("HEAD"), remap = false)
