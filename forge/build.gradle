@@ -28,6 +28,7 @@ loom {
         mixinConfig "vivecraft.mca.mixins.json"
         mixinConfig "vivecraft.optifine.mixins.json"
         mixinConfig "vivecraft.rei.mixins.json"
+        mixinConfig "vivecraft.elementa.mixins.json"
         mixinConfig "vivecraft.resolutioncontrol.mixins.json"
         mixinConfig "vivecraft.sereneseasons.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"

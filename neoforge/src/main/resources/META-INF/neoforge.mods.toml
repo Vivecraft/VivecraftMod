@@ -64,6 +64,8 @@ config = "vivecraft.optifine.mixins.json"
 [[mixins]]
 config = "vivecraft.rei.mixins.json"
 [[mixins]]
+config = "vivecraft.elementa.mixins.json"
+[[mixins]]
 config = "vivecraft.resolutioncontrol.mixins.json"
 [[mixins]]
 config = "vivecraft.sereneseasons.mixins.json"
