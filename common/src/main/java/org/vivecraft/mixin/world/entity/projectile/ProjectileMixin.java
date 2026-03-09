@@ -31,7 +31,7 @@ public class ProjectileMixin {
                 direction.set(serverVivePlayer.getAimDir(true));
 
                 if (projectile instanceof AbstractArrow && !(projectile instanceof ThrownTrident) &&
-                    !serverVivePlayer.isSeated() && serverVivePlayer.draw > 0.0F)
+                    serverVivePlayer.isDrawing())
                 {
                     // modify velocity based on draw range
                     return velocity * serverVivePlayer.draw;

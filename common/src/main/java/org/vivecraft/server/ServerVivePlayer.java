@@ -54,6 +54,23 @@ public class ServerVivePlayer {
     }
 
     /**
+     * Gets the active bodypart to use to get the the used item, accounts for roomscale bow
+     *
+     * @return the active bodypart
+     */
+    public VRBodyPart getActiveItemBodyPart() {
+        // the bow sets the bodypart to the bodypart the arrow was drawn with, but the bow is still the active item
+        return this.isDrawing() ? VRBodyPart.MAIN_HAND : this.activeBodyPart;
+    }
+
+    /**
+     * @return if the player is using the roomscale bow
+     */
+    public boolean isDrawing() {
+        return !this.isSeated() && this.draw > 0.0F;
+    }
+
+    /**
      * transforms the local {@code direction} vector on BodyPart {@code bodyPart} into world space
      *
      * @param bodyPart  BodyPart to get the custom direction on, if not available, will use the MAIN_HAND
@@ -88,7 +105,7 @@ public class ServerVivePlayer {
     public Vec3 getAimDir(boolean ignoreUseForAim) {
         if (this.aimDirOverride != null) {
             return new Vec3(this.aimDirOverride);
-        } else if (!this.isSeated() && this.draw > 0.0F) {
+        } else if (this.isDrawing()) {
             return this.getBodyPartPos(this.activeBodyPart.opposite())
                 .subtract(this.getBodyPartPos(this.activeBodyPart)).normalize();
         } else if (ignoreUseForAim || this.useBodyPartForAim) {
