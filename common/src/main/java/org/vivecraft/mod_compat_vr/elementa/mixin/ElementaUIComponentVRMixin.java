@@ -2,12 +2,15 @@ package org.vivecraft.mod_compat_vr.elementa.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+
+import java.util.List;
 
 /**
  * Fallback compatibility for Elementa: when any component calls grabWindowFocus(),
@@ -17,24 +20,30 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
  */
 @Pseudo
 @Mixin(targets = {
+    // base elementa
     "gg.essential.elementa.UIComponent",
+    // resourcify
     "dev.dediamondpro.resourcify.libs.elementa.UIComponent"
 })
-public abstract class ElementaUIComponentVRMixin {
+public class ElementaUIComponentVRMixin {
+
+    @Unique
+    private static final List<String> vivecraft$textInputs = List.of(
+        // base elementa class names
+        "gg.essential.elementa.components.input.UITextInput",
+        "gg.essential.elementa.components.input.AbstractTextInput",
+        // resourcify repackage
+        "dev.dediamondpro.resourcify.libs.elementa.components.input.UITextInput",
+        "dev.dediamondpro.resourcify.libs.elementa.components.input.AbstractTextInput",
+        // essential repackage
+        "gg.essential.gui.common.input.UITextInput",
+        "gg.essential.gui.common.input.AbstractTextInput"
+    );
 
     @Inject(method = "grabWindowFocus", at = @At("HEAD"), remap = false)
     private void vivecraft$openKeyboardWhenTextInputGrabsFocus(CallbackInfo ci) {
-        if (VRState.VR_RUNNING && isTextInput(this)) {
+        if (VRState.VR_RUNNING && vivecraft$textInputs.contains(this.getClass().getName())) {
             KeyboardHandler.showOverlay(OpenKeyboardContext.FORCE);
         }
-    }
-
-    private static boolean isTextInput(Object component) {
-        if (component == null) return false;
-        String name = component.getClass().getName();
-        return "gg.essential.elementa.components.input.UITextInput".equals(name)
-            || "gg.essential.elementa.components.input.AbstractTextInput".equals(name)
-            || "dev.dediamondpro.resourcify.libs.elementa.components.input.UITextInput".equals(name)
-            || "dev.dediamondpro.resourcify.libs.elementa.components.input.AbstractTextInput".equals(name);
     }
 }

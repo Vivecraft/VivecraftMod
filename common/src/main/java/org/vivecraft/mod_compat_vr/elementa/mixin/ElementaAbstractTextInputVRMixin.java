@@ -16,10 +16,14 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
  */
 @Pseudo
 @Mixin(targets = {
+    // base elementa
     "gg.essential.elementa.components.input.AbstractTextInput",
-    "dev.dediamondpro.resourcify.libs.elementa.components.input.AbstractTextInput"
+    // resourcify
+    "dev.dediamondpro.resourcify.libs.elementa.components.input.AbstractTextInput",
+    // essential
+    "gg.essential.gui.common.input.AbstractTextInput"
 })
-public abstract class ElementaAbstractTextInputVRMixin {
+public class ElementaAbstractTextInputVRMixin {
 
     @Inject(method = "setActive", at = @At("HEAD"), remap = false)
     private void vivecraft$openKeyboardWhenActive(boolean isActive, CallbackInfo ci) {
