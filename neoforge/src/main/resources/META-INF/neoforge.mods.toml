@@ -52,6 +52,8 @@ config = "vivecraft.cataclysm.mixins.json"
 [[mixins]]
 config = "vivecraft.dynamicfps.mixins.json"
 [[mixins]]
+config = "vivecraft.elementa.mixins.json"
+[[mixins]]
 config = "vivecraft.emf.mixins.json"
 [[mixins]]
 config = "vivecraft.epicfight.mixins.json"
