@@ -12,6 +12,7 @@ import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -51,6 +52,11 @@ public class VRRenderingAPIImpl implements VRRenderingAPI {
     @Override
     public Vec3 getHandRenderPos(InteractionHand hand) {
         return RenderHelper.getControllerRenderPos(hand.ordinal());
+    }
+
+    @Override
+    public Vec3 getCameraEntityPos(float partialTick) {
+        return ((GameRendererExtension) Minecraft.getInstance().gameRenderer).vivecraft$getRvePos(partialTick);
     }
 
     @Override

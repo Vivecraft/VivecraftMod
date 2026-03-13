@@ -587,11 +587,15 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public Vec3 vivecraft$getRvePos(float partialTick) {
-        return new Vec3(
-            Mth.lerp(partialTick, this.vivecraft$rvelastX, this.vivecraft$rveX),
-            Mth.lerp(partialTick, this.vivecraft$rvelastY, this.vivecraft$rveY),
-            Mth.lerp(partialTick, this.vivecraft$rvelastZ, this.vivecraft$rveZ)
-        );
+        if (this.vivecraft$cached) {
+            return new Vec3(
+                Mth.lerp(partialTick, this.vivecraft$rvelastX, this.vivecraft$rveX),
+                Mth.lerp(partialTick, this.vivecraft$rvelastY, this.vivecraft$rveY),
+                Mth.lerp(partialTick, this.vivecraft$rvelastZ, this.vivecraft$rveZ)
+            );
+        } else {
+            return this.mainCamera.entity().getPosition(partialTick);
+        }
     }
 
     @Unique
