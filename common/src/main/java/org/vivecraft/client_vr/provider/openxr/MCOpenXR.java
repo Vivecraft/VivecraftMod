@@ -28,6 +28,7 @@ import org.vivecraft.client_vr.provider.control.BindingProfile;
 import org.vivecraft.client_vr.provider.openxr.control.ControllerMapping;
 import org.vivecraft.client_vr.provider.openxr.control.XRInputAction;
 import org.vivecraft.client_vr.settings.VRSettings;
+import oshi.util.tuples.Pair;
 
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
@@ -1170,12 +1171,9 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                 if (profile.controller_paths() == null) continue;
                 String headsetPath = profile.controller_paths().openxr();
                 VRSettings.LOGGER.info("Loading interaction profile: {}", profile.name());
-                int bindingIndex = 0;
                 for (Map.Entry<String, ActionSet> set : profile.sets().entrySet()) {
+                    List<Pair<XrAction, Long>> bindingList = new ArrayList<>();
                     List<Source> sources = set.getValue().sources();
-                    int totalBindings = sources.stream().mapToInt(a -> a.inputs().size()).sum();
-                    XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(totalBindings + 6, stack);
-
                     for (Source source : sources) {
                         for (Action action : source.inputs()) {
                             XRInputAction inputAction = this.getInputActionByName("/actions/" + set.getKey() + "/in/" + action.action());
@@ -1200,11 +1198,12 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                             }
 
                             // TODO support multiple bindings per action
-                            bindings.get(bindingIndex).set(
+                            bindingList.add(new Pair<>(
                                 new XrAction(handle, new XrActionSet(this.actionSetHandles.get(inputAction.actionSet), this.instance)),
                                 getPath(source.path())
-                            );
-                            bindingIndex++;
+                            ));
+
+                            VRSettings.LOGGER.info("Mapped action '{}' to set '{}'", "/actions/" + set.getKey() + "/in/" + action.action(), source.path());
                         }
                     }
 
@@ -1216,10 +1215,17 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                     String[] hapticPaths = {"/output/haptic", "/output/haptic"};
 
                     for (int j = 0; j < poses.length; j++) {
-                        bindings.get(bindingIndex + j).set(new XrAction(poses[j], actionSet), getPath(hands[j % 2] + posePaths[j]));
+                        bindingList.add(new Pair<>(new XrAction(poses[j], actionSet), getPath(hands[j % 2] + posePaths[j])));
                     }
+
                     for (int j = 0; j < haptics.length; j++) {
-                        bindings.get(bindingIndex + poses.length + j).set(new XrAction(haptics[j], actionSet), getPath(hands[j] + hapticPaths[j]));
+                        bindingList.add(new Pair<>(new XrAction(haptics[j], actionSet), getPath(hands[j] + hapticPaths[j])));
+                    }
+
+                    XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(bindingList.size(), stack);
+                    for (int i = 0; i < bindingList.size(); i++) {
+                        Pair<XrAction, Long> binding = bindingList.get(i);
+                        bindings.get(i).set(binding.getA(), binding.getB());
                     }
 
                     XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
@@ -1230,10 +1236,10 @@ public class MCOpenXR extends MCVR<XRInputAction> {
 
                     error = XR10.xrSuggestInteractionProfileBindings(this.instance, suggested_binds);
                     logError(error, "xrSuggestInteractionProfileBindings", profile.name());
-                    bindings.close();
                 }
             }
 
+            VRSettings.LOGGER.info("Using interaction profile: {}", getCurrentInteractionProfile());
             XrSessionActionSetsAttachInfo attach_info = XrSessionActionSetsAttachInfo.calloc(stack);
             attach_info.type(XR10.XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO);
             attach_info.next(NULL);
