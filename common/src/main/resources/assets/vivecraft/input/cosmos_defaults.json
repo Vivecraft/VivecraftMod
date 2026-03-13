@@ -205,13 +205,13 @@
         },
         {
           "inputs": [
-            {"action": "vivecraft.key.keyboardSlick", "type": "PRESS"}
+            {"action": "vivecraft.key.keyboardClick", "type": "PRESS"}
           ],
           "path": "/user/hand/left/input/trigger/click"
         },
         {
           "inputs": [
-            {"action": "vivecraft.key.keyboardSlick", "type": "PRESS"}
+            {"action": "vivecraft.key.keyboardClick", "type": "PRESS"}
           ],
           "path": "/user/hand/right/input/trigger/click"
         }

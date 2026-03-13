@@ -999,8 +999,8 @@ public class MCOpenXR extends MCVR<XRInputAction> {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             XrInteractionProfileState state = XrInteractionProfileState.calloc(stack);
             state.type(XR10.XR_TYPE_INTERACTION_PROFILE_STATE);
-            int error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/left"), state);
-            logError(error, "xrGetCurrentInteractionProfile", "left");
+            int error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/right"), state);
+            logError(error, "xrGetCurrentInteractionProfile", "right");
             return getString(state.interactionProfile());
         }
     }
@@ -1171,8 +1171,8 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                 if (profile.controller_paths() == null) continue;
                 String headsetPath = profile.controller_paths().openxr();
                 VRSettings.LOGGER.info("Loading interaction profile: {}", profile.name());
+                List<Pair<XrAction, Long>> bindingList = new ArrayList<>();
                 for (Map.Entry<String, ActionSet> set : profile.sets().entrySet()) {
-                    List<Pair<XrAction, Long>> bindingList = new ArrayList<>();
                     List<Source> sources = set.getValue().sources();
                     for (Source source : sources) {
                         for (Action action : source.inputs()) {
@@ -1203,7 +1203,7 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                                 getPath(source.path())
                             ));
 
-                            VRSettings.LOGGER.info("Mapped action '{}' to set '{}'", "/actions/" + set.getKey() + "/in/" + action.action(), source.path());
+                            VRSettings.LOGGER.info("Mapped action '{}' to button '{}'", this.getInputActionByName("/actions/" + set.getKey() + "/in/" + action.action()).name, source.path());
                         }
                     }
 
@@ -1221,25 +1221,24 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                     for (int j = 0; j < haptics.length; j++) {
                         bindingList.add(new Pair<>(new XrAction(haptics[j], actionSet), getPath(hands[j] + hapticPaths[j])));
                     }
-
-                    XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(bindingList.size(), stack);
-                    for (int i = 0; i < bindingList.size(); i++) {
-                        Pair<XrAction, Long> binding = bindingList.get(i);
-                        bindings.get(i).set(binding.getA(), binding.getB());
-                    }
-
-                    XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
-                    suggested_binds.type(XR10.XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING);
-                    suggested_binds.next(NULL);
-                    suggested_binds.interactionProfile(getPath(headsetPath));
-                    suggested_binds.suggestedBindings(bindings);
-
-                    error = XR10.xrSuggestInteractionProfileBindings(this.instance, suggested_binds);
-                    logError(error, "xrSuggestInteractionProfileBindings", profile.name());
                 }
+
+                XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(bindingList.size(), stack);
+                for (int i = 0; i < bindingList.size(); i++) {
+                    Pair<XrAction, Long> binding = bindingList.get(i);
+                    bindings.get(i).set(binding.getA(), binding.getB());
+                }
+
+                XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
+                suggested_binds.type(XR10.XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING);
+                suggested_binds.next(NULL);
+                suggested_binds.interactionProfile(getPath(headsetPath));
+                suggested_binds.suggestedBindings(bindings);
+
+                error = XR10.xrSuggestInteractionProfileBindings(this.instance, suggested_binds);
+                logError(error, "xrSuggestInteractionProfileBindings", profile.name());
             }
 
-            VRSettings.LOGGER.info("Using interaction profile: {}", getCurrentInteractionProfile());
             XrSessionActionSetsAttachInfo attach_info = XrSessionActionSetsAttachInfo.calloc(stack);
             attach_info.type(XR10.XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO);
             attach_info.next(NULL);
@@ -1269,7 +1268,6 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                 else if (i == 2) this.aimSpace[RIGHT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
                 else this.aimSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
             }
-
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Binding profile file not found: " + e.getMessage(), e);
         }
