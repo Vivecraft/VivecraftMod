@@ -77,6 +77,19 @@ public interface VRRenderingAPI {
     Vec3 getHandRenderPos(InteractionHand hand);
 
     /**
+     * Gets the position of the camera entity during rendering. Vivecraft sets the cameras entities position during a
+     * renderpass to the camera position for compatibility, so this can be used to get back the actual
+     * entities position.
+     * <br>
+     * Calling this outside a level, or when the camera has no entity will return garbage
+     *
+     * @param partialTick partial tick of the current frame
+     * @return The actual world position of the camera entity
+     * @since 1.3.8
+     */
+    Vec3 getCameraEntityPos(float partialTick);
+
+    /**
      * Sets the provided {@link PoseStack} to render at the position of and with the rotation of the provided
      * {@link InteractionHand}, this assumes the given {@code stack} to be set to an identity.
      *
