@@ -30,7 +30,7 @@ public class VRInputAction extends InputAction {
 
     @Override
     public boolean isButtonPressed() {
-        if (this.type == ActionType.BOOLEAN) {
+        if (this.type == ActionType.PRESS) {
             return this.digitalData().state;
         } else {
             Vector3fc axis = this.getAxis3D(false);
@@ -40,7 +40,7 @@ public class VRInputAction extends InputAction {
 
     @Override
     public boolean isButtonChanged() {
-        if (this.type == ActionType.BOOLEAN) {
+        if (this.type == ActionType.PRESS) {
             return this.digitalData().isChanged;
         } else {
             Vector3fc axis = this.getAxis3D(false);
@@ -54,7 +54,7 @@ public class VRInputAction extends InputAction {
     @Override
     public float getAxis1D(boolean delta) {
         return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalToAnalog(delta);
+            case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalToAnalog(delta);
             case VEC1, VEC2 -> delta ? this.analogData().deltaX : this.analogData().x;
             default -> 0.0F;
         };
@@ -63,7 +63,7 @@ public class VRInputAction extends InputAction {
     @Override
     public Vector2fc getAxis2D(boolean delta) {
         return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector2f(this.digitalToAnalog(delta), 0.0F);
+            case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> new Vector2f(this.digitalToAnalog(delta), 0.0F);
             case VEC1 -> delta ? new Vector2f(this.analogData().deltaX, 0.0F) : new Vector2f(this.analogData().x, 0.0F);
             case VEC2 -> delta ? new Vector2f(this.analogData().deltaX, this.analogData().deltaY) :
                 new Vector2f(this.analogData().x, this.analogData().y);
@@ -74,7 +74,7 @@ public class VRInputAction extends InputAction {
     //TODO remove
     public Vector3fc getAxis3D(boolean delta) {
         return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE ->
+            case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE ->
                 new Vector3f(this.digitalToAnalog(delta), 0.0F, 0.0F);
             case VEC1 -> delta ? new Vector3f(this.analogData().deltaX, 0.0F, 0.0F) :
                 new Vector3f(this.analogData().x, 0.0F, 0.0F);
@@ -137,7 +137,7 @@ public class VRInputAction extends InputAction {
     @Override
     public long getLastOrigin() {
         return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().activeOrigin;
+            case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().activeOrigin;
             case VEC1, VEC2 -> this.analogData().activeOrigin;
             default -> 0L;
         };
@@ -162,7 +162,7 @@ public class VRInputAction extends InputAction {
     @Override
     public boolean isActive() {
         return switch (this.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().isActive;
+            case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> this.digitalData().isActive;
             case VEC1, VEC2 -> this.analogData().isActive;
             default -> false;
         };

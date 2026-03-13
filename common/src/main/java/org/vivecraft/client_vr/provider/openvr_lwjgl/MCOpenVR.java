@@ -1543,7 +1543,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
      */
     private void readNewData(VRInputAction action) {
         switch (action.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
+            case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
                 if (action.isHanded()) {
                     for (ControllerType type : ControllerType.values()) {
                         this.readDigitalData(action, type);

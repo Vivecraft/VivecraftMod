@@ -76,7 +76,7 @@ public class XRInputAction extends InputAction {
                 continue;
             }
             switch (data.type) {
-                case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
+                case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
                     if (this.digitalData().get(i).isActive) {
                         this.activeAction = i;
                         return true;
