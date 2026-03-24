@@ -143,8 +143,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         return isSleeping && RenderPassType.isVanilla();
     }
 
-    // no remap needed to make the * work
-    @Inject(method = {"method_62202*", "addMainPass*"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 0, remap = true), remap = false)
+    @Inject(method = "addMainPass*", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 0, remap = true), remap = false)
     public void vivecraft$markVRTargetsForWrite(CallbackInfo ci, @Local FramePass framePass) {
         if (VRState.VR_RUNNING && this.targets instanceof LevelTargetBundleExtension ext) {
             if (ext.vivecraft$getOccluded() != null) {

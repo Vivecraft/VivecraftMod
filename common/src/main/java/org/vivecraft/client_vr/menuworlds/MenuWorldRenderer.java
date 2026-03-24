@@ -51,7 +51,7 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
-import org.vivecraft.Xplat;
+import org.vivecraft.Services;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -492,7 +492,7 @@ public class MenuWorldRenderer {
                     if (state != null) {
                         FluidState fluidState = state.getFluidState();
                         if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
-                            for (var sprite : Xplat.getFluidTextures(this.blockAccess, pos, fluidState)) {
+                            for (var sprite : Services.XPLAT.getFluidTextures(this.blockAccess, pos, fluidState)) {
                                 if (sprite != null && sprite.contents().getUniqueFrames().sum() > 1) {
                                     this.animatedSprites.add(sprite);
                                 }

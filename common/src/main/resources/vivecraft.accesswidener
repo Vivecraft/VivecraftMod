@@ -1,4 +1,4 @@
-accessWidener	v1	named
+accessWidener	v1	official
 
 # custom player model
 accessible class net/minecraft/client/model/geom/ModelPart$Polygon
@@ -47,6 +47,7 @@ mutable field net/minecraft/client/Options keyMappings [Lnet/minecraft/client/Ke
 # to check key inputs
 accessible field net/minecraft/client/KeyMapping clickCount I
 accessible method net/minecraft/client/KeyMapping release ()V
+accessible method net/minecraft/client/ToggleKeyMapping release ()V
 accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
 
 # to create custom GL textures

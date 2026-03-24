@@ -1,7 +1,6 @@
 package org.vivecraft;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -18,17 +17,6 @@ import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
 public interface Xplat {
-    /**
-     * This must be a <b>public static</b> method. The platform-implemented solution must be placed under a
-     * platform sub-package, with its class suffixed with {@code Impl}.
-     * <p>
-     * Example:<br>
-     * Expect: net.examplemod.ExampleExpectPlatform#getConfigDirectory()<br>
-     * Actual Fabric: net.examplemod.fabric.ExampleExpectPlatformImpl#getConfigDirectory()<br>
-     * Actual Forge: net.examplemod.forge.ExampleExpectPlatformImpl#getConfigDirectory()<br>
-     * <p>
-     * <a href="https://plugins.jetbrains.com/plugin/16210-architectury">You should also get the IntelliJ plugin to help with @ExpectPlatform.</a>
-     */
 
     /**
      * asks the mod loader to enable the stencil for the given RenderTarget
@@ -36,18 +24,12 @@ public interface Xplat {
      * @param renderTarget RenderTarget to enable the Stencil on
      * @return true if the mod loader enabled the stencil
      */
-    @ExpectPlatform
-    static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
-        return false;
-    }
+    boolean enableRenderTargetStencil(RenderTarget renderTarget);
 
     /**
      * @return runtime name of the {@link BlockBehaviour#use} method
      */
-    @ExpectPlatform
-    static String getUseMethodName() {
-        return "";
-    }
+    String getUseMethodName();
 
     /**
      * gets the TextureAtlasSprites for the given FluidState
@@ -57,28 +39,19 @@ public interface Xplat {
      * @param fluidState State of the fluid
      * @return array of the textures of a fluid block
      */
-    @ExpectPlatform
-    static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidState) {
-        return new TextureAtlasSprite[]{};
-    }
+    TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidState);
 
     /**
      * @param biome Biome to get the ClimateSettings from
      * @return ClimateSettings of the given Biome
      */
-    @ExpectPlatform
-    static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
-        throw new AssertionError();
-    }
+    Biome.ClimateSettings getBiomeClimateSettings(Biome biome);
 
     /**
      * @param biome Biome to get the BiomeSpecialEffects from
      * @return BiomeSpecialEffects of the given Biome
      */
-    @ExpectPlatform
-    static BiomeSpecialEffects getBiomeEffects(Biome biome) {
-        throw new AssertionError();
-    }
+    BiomeSpecialEffects getBiomeEffects(Biome biome);
 
     /**
      * check if packets of the given channel id are allowed to be sent
@@ -87,10 +60,7 @@ public interface Xplat {
      * @param id         channel id to check
      * @return if the connection accepts packets of the given id
      */
-    @ExpectPlatform
-    static boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
-        return true;
-    }
+    boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id);
 
     /**
      * wraps the given payload into the mod loader specific packet
@@ -98,10 +68,7 @@ public interface Xplat {
      * @param payload payload to wrap
      * @return ServerboundCustomPayloadPacket
      */
-    @ExpectPlatform
-    static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
-        throw new AssertionError();
-    }
+    Packet<?> getC2SPacket(VivecraftPayloadC2S payload);
 
     /**
      * wraps the given payload into the mod loader specific packet
@@ -109,10 +76,7 @@ public interface Xplat {
      * @param payload payload to wrap
      * @return ClientboundCustomPayloadPacket
      */
-    @ExpectPlatform
-    static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
-        throw new AssertionError();
-    }
+    Packet<?> getS2CPacket(VivecraftPayloadS2C payload);
 
     /**
      * checks if the given KeyMapping uses a key modifier to trigger
@@ -120,10 +84,7 @@ public interface Xplat {
      * @param keyMapping KeyMapping to check
      * @return true if a key modifier is used
      */
-    @ExpectPlatform
-    static boolean hasKeyModifier(KeyMapping keyMapping) {
-        return false;
-    }
+    boolean hasKeyModifier(KeyMapping keyMapping);
 
     /**
      * gets the key modifier for the given KeyMapping
@@ -131,10 +92,7 @@ public interface Xplat {
      * @param keyMapping KeyMapping to check
      * @return one of the GLFW_MOD_X modifiers, or 0 if there is none
      */
-    @ExpectPlatform
-    static int getKeyModifier(KeyMapping keyMapping) {
-        return 0;
-    }
+    int getKeyModifier(KeyMapping keyMapping);
 
     /**
      * gets the key that corresponds to the key modifier for the given KeyMapping
@@ -142,10 +100,7 @@ public interface Xplat {
      * @param keyMapping KeyMapping to check
      * @return one of the GLFW_KEY_X keys, or -1 if there is none
      */
-    @ExpectPlatform
-    static int getKeyModifierKey(KeyMapping keyMapping) {
-        return -1;
-    }
+    int getKeyModifierKey(KeyMapping keyMapping);
 
     /**
      * checks if the given player is a fake player, instead of an actual player
@@ -153,8 +108,5 @@ public interface Xplat {
      * @param player player to check
      * @return {@code true} when it is a fake player
      */
-    @ExpectPlatform
-    static boolean isFakePlayer(ServerPlayer player) {
-        return false;
-    }
+    boolean isFakePlayer(ServerPlayer player);
 }

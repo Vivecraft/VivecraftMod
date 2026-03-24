@@ -1,39 +1,41 @@
-buildscript {
-    dependencies {
-        classpath("net.fabricmc:tiny-remapper:0.12.2")
-    }
-}
-
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
-}
-
-architectury {
-    minecraft = rootProject.minecraft_version
+    id 'com.gradleup.shadow' version '9.4.0' apply false
 }
 
 subprojects {
     apply plugin: "java"
-    apply plugin: "dev.architectury.loom"
 
-    archivesBaseName = rootProject.archives_base_name
+    base.archivesName = mod_id
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
-    loom {
-        silentMojangMappingsLicense()
+    if (project.name != "common" && project.name != "stubs") {
+        apply plugin: 'com.gradleup.shadow'
+
+        configurations {
+            bundle {
+                // bundle command, to copy jar contents with the shadow plugin
+                canBeResolved = true
+                canBeConsumed = false
+            }
+        }
+
+        shadowJar {
+            from(zipTree(project.tasks.jar.archiveFile))
+            archiveClassifier.set(project.name)
+            configurations = project.configurations.named('bundle').map { [it] }
+            if (project.name != "forge") {
+                // forge does the jar in jar after so can'T use the shadow jar as output
+                destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
+            }
+        }
+
+        project.assemble.dependsOn(shadowJar)
     }
 
     dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings loom.layered() {
-            // The following line declares the mojmap mappings, you may use other mappings as well
-            officialMojangMappings()
-            // The following line declares the yarn mappings you may select this one as well.
-            // "net.fabricmc:yarn:1.18.2+build.4:v2"
-            // parchment mappings as backup
-            parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
+        if (project.name != "common" && project.name != "stubs") {
+            bundle(implementation(project(":common")) { transitive = false })
         }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
@@ -46,6 +48,9 @@ subprojects {
         // bHaptics Integration
         implementation("com.github.bhaptics:tact-java:0.1.4")
 
+        // needed dependencies
+        compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+
         // for running testing
         testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -53,40 +58,69 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = Integer.parseInt(java_version)
     }
 
     java {
+        toolchain.languageVersion = JavaLanguageVersion.of(java_version)
         withSourcesJar()
     }
 
-    processResources {
-        if (project.name != "common" && project.name != "stubs") {
-            // copy resources except the mixin jsons
-            from(project(':common').sourceSets['main'].resources) {
-                exclude "vivecraft.*"
-            }
+    tasks.named('processResources', ProcessResources) {
+        var expandProps = [
+            'version'              : version,
+            'java_version'         : java_version,
+            'mod_id'               : mod_id,
+            'mod_name'             : mod_name,
+            'mod_authors'          : mod_authors,
+            'mod_authors_array'    : mod_authors.split(",").each { s -> s.trim() }.join("\",\""),
+            'license'              : license,
+            'description'          : mod_description,
+            'discord'              : discord,
+            'kofi'                 : kofi,
+            'website'              : website,
+            'issue_tracker'        : issue_tracker,
+            'sources'              : sources,
+
+            'fabric_mc_range'      : fabric_mc_range,
+            'fabric_loader_version': fabric_loader_version,
+
+            'forge_mc_range'       : forge_mc_range,
+            'forge_loader_range'   : forge_loader_range,
+
+            'neoforge_mc_range'    : neoforge_mc_range,
+            'neoforge_loader_range': neoforge_loader_range,
+        ]
+
+        var jsonExpandProps = expandProps.collectEntries {
+            key, value -> [(key): value instanceof String ? value.replace("\n", "\\\\n") : value]
         }
+
+        filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
+            expand expandProps
+        }
+
+        filesMatching(['pack.mcmeta', 'fabric.mod.json']) {
+            expand jsonExpandProps
+        }
+
+        inputs.properties(expandProps)
     }
 
-    tasks.register('copyJarToMain', Copy) {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        if (project.name != "common" && project.name != "stubs") {
-            from remapJar
-            into "../build/libs"
+    jar {
+        archiveClassifier.set(project.name + "-slim")
+        manifest {
+            attributes(
+                'Main-Class': "org.vivecraft.LaunchPopup"
+            )
         }
-    }
-
-    remapJar {
-        // after remap, copy the final jar to the main /build/libs folder
-        finalizedBy copyJarToMain
     }
 
     javadoc {
         if (project.name != "common") {
             enabled = false
         }
-        destinationDir = file("../build/javadoc")
+        destinationDir = file(rootProject.layout.buildDirectory.file("javadoc"))
         include 'org/vivecraft/api/**'
         options.windowTitle("Vivecraft API")
         title = "Vivecraft API"
@@ -107,50 +141,44 @@ subprojects {
     }
 
     // only do these for the api
-    if (project.name in ["fabric", "neoforge"]) {
+    if (project.name == "common") {
         tasks.register('apiJar', Jar) {
             archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
-            dependsOn tasks.named('remapJar')
-            archiveBaseName = rootProject.archives_base_name + '-api'
-            if (project.name == "neoforge") {
-                archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
-            }
+            dependsOn tasks.named('jar')
+            archiveBaseName = rootProject.mod_id + '-api'
 
-            from(tasks.named('remapJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
+            from(tasks.named('jar').flatMap { it.archiveFile }.map { zipTree(it) }) {
                 include 'org/vivecraft/api/**'
             }
 
             manifest {
-                from(tasks.named('remapJar').flatMap { it.archiveFile }.map {
+                from(tasks.named('jar').flatMap { it.archiveFile }.map {
                     zipTree(it).matching {
                         include 'META-INF/MANIFEST.MF'
                     }.singleFile
                 })
             }
-            finalizedBy copyJarToMain
+            destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
         }
 
         tasks.register('apiSourcesJar', Jar) {
             archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
             archiveClassifier.set('sources')
-            dependsOn tasks.named('remapSourcesJar')
-            archiveBaseName = rootProject.archives_base_name + '-api'
-            if (project.name == "neoforge") {
-                archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
-            }
+            dependsOn tasks.named('sourcesJar')
+            archiveBaseName = rootProject.mod_id + '-api'
 
-            from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
+            from(tasks.named('sourcesJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
                 include 'org/vivecraft/api/**'
             }
 
             manifest {
-                from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map {
+                from(tasks.named('sourcesJar').flatMap { it.archiveFile }.map {
                     zipTree(it).matching {
                         include 'META-INF/MANIFEST.MF'
                     }.singleFile
                 })
             }
-            finalizedBy copyJarToMain
+            destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
         }
 
         tasks.register('buildApi', Copy) {
@@ -171,19 +199,16 @@ subprojects {
             publications {
                 Mod(MavenPublication) {
                     groupId = 'org.vivecraft'
-                    artifactId = rootProject.archives_base_name + "-" + project.name
+                    artifactId = rootProject.mod_id + "-" + project.name
                     from components.java
                 }
 
-                if (project.name in ["fabric", "neoforge"]) {
+                if (project.name == "common") {
                     Api(MavenPublication) {
                         version = rootProject.minecraft_version + "-" + rootProject.api_version
                         groupId = 'org.vivecraft'
 
-                        artifactId = rootProject.archives_base_name + '-api'
-                        if (project.name == "neoforge") {
-                            artifactId += '-mojmap'
-                        }
+                        artifactId = rootProject.mod_id + '-api'
 
                         artifact(tasks.named('apiJar'))
                         artifact(tasks.named('apiSourcesJar'))
@@ -207,8 +232,6 @@ subprojects {
 }
 
 allprojects {
-    apply plugin: "architectury-plugin"
-
     repositories {
         // Add repositories to retrieve artifacts from in here.
         // You should only use this when depending on other mods because
@@ -216,7 +239,15 @@ allprojects {
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
 
-        maven { url 'https://jitpack.io' }
+
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io"
+
+            content {
+                includeGroupAndSubgroups "com.github"
+            }
+        }
         exclusiveContent {
             forRepository {
                 maven {
@@ -246,35 +277,39 @@ allprojects {
         exclusiveContent {
             forRepository {
                 maven {
-                    name = "fabricmc"
-                    url = "https://maven.fabricmc.net/"
+                    name = "curseforge"
+                    url = "https://cursemaven.com"
                 }
             }
             filter {
-                includeGroup "net.fabricmc"
-                includeGroup "fabric-loom"
+                includeGroup 'curse.maven'
             }
         }
 
-        maven {
-            name = "neoforge"
-            url = "https://maven.neoforged.net/releases/"
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "transformers mc"
+                    url = "https://maven.terraformersmc.com"
+                }
+            }
+            filter {
+                includeGroup "com.terraformersmc"
+            }
         }
 
-        maven { url = "https://hephaestus.dev/release" }
-        maven { url = "https://cursemaven.com" }
-        maven { url = "https://maven.parchmentmc.org" }
-        maven { url = "https://maven.tterrag.com/" }
-        maven { url = "https://storage.googleapis.com/devan-maven/" }
-        maven { url = "https://maven.shedaniel.me/" }
-        maven { url = "https://aperlambda.github.io/maven" }
-        maven { url = "https://mvn.devos.one/releases/" }
-        maven { url = "https://mvn.devos.one/snapshots/" }
-        maven { url = "https://maven.terraformersmc.com/" }
-        maven { url = "https://maven.cafeteria.dev/releases/" }
-        maven { url = "https://maven.gegy.dev" }
-        maven { url = "https://modmaven.dev" }
-        maven { url = "https://maven.minecraftforge.net/" }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "shedaniel (REI)"
+                    url = "https://maven.shedaniel.me"
+                }
+            }
+            filter {
+                includeGroupAndSubgroups "me.shedaniel"
+            }
+        }
+
         exclusiveContent {
             forRepository {
                 maven {

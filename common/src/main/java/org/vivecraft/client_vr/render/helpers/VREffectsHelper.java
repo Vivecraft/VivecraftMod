@@ -35,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.opengl.GL11C;
-import org.vivecraft.Xevents;
+import org.vivecraft.Services;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
@@ -784,7 +784,8 @@ public class VREffectsHelper {
     private static void renderVRSelfEffects(float partialTick, boolean firstPass) {
         // only render the fire in first person, other views have the burning entity
         if (DATA_HOLDER.currentPass != RenderPass.THIRD && DATA_HOLDER.currentPass != RenderPass.CAMERA &&
-            !MC.player.isSpectator() && MC.player.isOnFire() && !Xevents.renderFireOverlay(MC.player, new PoseStack()))
+            !MC.player.isSpectator() && MC.player.isOnFire() &&
+            !Services.XEVENTS.renderFireOverlay(MC.player, new PoseStack()))
         {
             VREffectsHelper.renderFireInFirstPerson();
         }

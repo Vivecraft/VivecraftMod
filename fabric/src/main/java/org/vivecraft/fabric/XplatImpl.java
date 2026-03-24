@@ -21,7 +21,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.Xplat;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
@@ -29,11 +29,13 @@ import org.vivecraft.fabric.mixin.world.level.biome.BiomeAccessor;
 
 public class XplatImpl implements Xplat {
 
-    public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
+    @Override
+    public boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         return false;
     }
 
-    public static String getUseMethodName() {
+    @Override
+    public String getUseMethodName() {
         return FabricLoader.getInstance().getMappingResolver().mapMethodName(
             "intermediary",
             "net.minecraft.class_4970", "method_55766",
@@ -45,10 +47,11 @@ public class XplatImpl implements Xplat {
                 "Lnet/minecraft/class_1269;");
     }
 
-    public static TextureAtlasSprite[] getFluidTextures(
+    @Override
+    public TextureAtlasSprite[] getFluidTextures(
         BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
     {
-        if (Xloader.isModLoaded("fabric-rendering-fluids-v1")) {
+        if (Services.XLOADER.isModLoaded("fabric-rendering-fluids-v1")) {
             return FluidRenderHandlerRegistry.INSTANCE.get(fluidStateIn.getType())
                 .getFluidSprites(level, pos, fluidStateIn);
         } else {
@@ -69,39 +72,48 @@ public class XplatImpl implements Xplat {
         }
     }
 
-    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
+    @Override
+    public Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
         return ((BiomeAccessor) (Object) biome).getClimateSettings();
     }
 
-    public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
+    @Override
+    public BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getSpecialEffects();
     }
 
-    public static boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
+    @Override
+    public boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
         return true;
     }
 
-    public static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
+    @Override
+    public Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
         return ClientPlayNetworking.createC2SPacket(payload);
     }
 
-    public static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
+    @Override
+    public Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
         return ServerPlayNetworking.createS2CPacket(payload);
     }
 
-    public static boolean hasKeyModifier(KeyMapping keyMapping) {
+    @Override
+    public boolean hasKeyModifier(KeyMapping keyMapping) {
         return false;
     }
 
-    public static int getKeyModifier(KeyMapping keyMapping) {
+    @Override
+    public int getKeyModifier(KeyMapping keyMapping) {
         return 0;
     }
 
-    public static int getKeyModifierKey(KeyMapping keyMapping) {
+    @Override
+    public int getKeyModifierKey(KeyMapping keyMapping) {
         return -1;
     }
 
-    public static boolean isFakePlayer(ServerPlayer player) {
-        return Xloader.isModLoaded("fabric-events-interaction-v0") && player instanceof FakePlayer;
+    @Override
+    public boolean isFakePlayer(ServerPlayer player) {
+        return Services.XLOADER.isModLoaded("fabric-events-interaction-v0") && player instanceof FakePlayer;
     }
 }

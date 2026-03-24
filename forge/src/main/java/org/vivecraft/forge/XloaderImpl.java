@@ -16,22 +16,26 @@ import java.util.stream.Stream;
 
 public class XloaderImpl implements Xloader {
 
-    public static ModLoader getModloader() {
+    @Override
+    public ModLoader getModloader() {
         return ModLoader.FORGE;
     }
 
-    public static boolean isModLoaded(String name) {
+    @Override
+    public boolean isModLoaded(String name) {
         return FMLLoader.getLoadingModList().getModFileById(name) != null;
     }
 
-    public static String getModVersion() {
-        if (Xloader.isModLoadedSuccess()) {
+    @Override
+    public String getModVersion() {
+        if (isModLoadedSuccess()) {
             return FMLLoader.getLoadingModList().getModFileById("vivecraft").versionString();
         }
         return "no version";
     }
 
-    public static Path getConfigPath(String fileName) {
+    @Override
+    public Path getConfigPath(String fileName) {
         return FMLPaths.CONFIGDIR.get().resolve(fileName);
     }
 
@@ -39,11 +43,13 @@ public class XloaderImpl implements Xloader {
         return FMLLoader.getLoadingModList().getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
     }
 
-    public static InputStream getInJarFile(String sourcePath) throws IOException {
+    @Override
+    public InputStream getInJarFile(String sourcePath) throws IOException {
         return Files.newInputStream(getJarPath().resolve(sourcePath));
     }
 
-    public static List<Path> getInJarFolderFiles(String folder) throws IOException {
+    @Override
+    public List<Path> getInJarFolderFiles(String folder) throws IOException {
         List<Path> paths = new ArrayList<>();
         Path root = getJarPath();
         try (Stream<Path> natives = Files.list(root.resolve(folder))) {
@@ -52,8 +58,8 @@ public class XloaderImpl implements Xloader {
         return paths;
     }
 
-
-    public static boolean isDedicatedServer() {
+    @Override
+    public boolean isDedicatedServer() {
         return FMLEnvironment.dist == Dist.DEDICATED_SERVER;
     }
 }

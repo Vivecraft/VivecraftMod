@@ -2,7 +2,7 @@ package org.vivecraft.mod_compat_vr.flashback;
 
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.Packet;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.lang.reflect.Field;
@@ -18,7 +18,7 @@ public class FlashBackHelper {
     private static Method Recorder_writePacketAsync;
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("flashback");
+        return Services.XLOADER.isModLoaded("flashback");
     }
 
     public static void storePacket(Packet<?> packet) {

@@ -8,7 +8,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.EventNetworkChannel;
-import org.vivecraft.Xplat;
+import org.vivecraft.Services;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packet.WrappedPacket;
@@ -56,7 +56,7 @@ public class Vivecraft {
         // workaround to have the packets run in sync with vanilla
         new WrappedPacket(
             () -> ServerNetworking.handlePacket(VivecraftPayloadC2S.readPacket(buffer), context.getSender(),
-                p -> context.getConnection().send(Xplat.getS2CPacket(p)))).handle(
+                p -> context.getConnection().send(Services.XPLAT.getS2CPacket(p)))).handle(
             (ServerGamePacketListenerImpl) context.getConnection().getPacketListener());
         /*context.enqueueWork(
             () -> ServerNetworking.handlePacket(VivecraftPayloadC2S.readPacket(buffer), context.getSender(),

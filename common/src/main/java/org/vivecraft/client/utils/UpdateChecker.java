@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.SharedConstants;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.server.config.ServerConfig;
@@ -32,7 +32,7 @@ public class UpdateChecker {
         VRSettings.LOGGER.info("Vivecraft: Checking for Updates");
 
         char updateType;
-        if (Xloader.isDedicatedServer()) {
+        if (Services.XLOADER.isDedicatedServer()) {
             // server
             updateType = ServerConfig.CHECK_FOR_UPDATE_TYPE.get().charAt(0);
         } else {
@@ -46,8 +46,9 @@ public class UpdateChecker {
 
         try {
             String apiURL =
-                "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" + Xloader.getModloader().name +
-                    "%22]&game_versions=[%22" + SharedConstants.getCurrentVersion().name() + "%22]";
+                "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" +
+                    Services.XLOADER.getModloader().name + "%22]&game_versions=[%22" +
+                    SharedConstants.getCurrentVersion().name() + "%22]";
             HttpURLConnection conn = (HttpURLConnection) new URL(apiURL).openConnection();
             // 10 seconds read and connect timeout
             conn.setConnectTimeout(10000);
@@ -78,7 +79,7 @@ public class UpdateChecker {
             // sort the versions, modrinth doesn't guarantee them to be sorted.
             Collections.sort(versions);
 
-            String currentVersionNumber = Xloader.getModVersion() + "-" + Xloader.getModloader().name;
+            String currentVersionNumber = Services.XLOADER.getModVersion() + "-" + Services.XLOADER.getModloader().name;
             Version current = new Version(currentVersionNumber, currentVersionNumber, "");
 
             // enforce update notifications if using a non release

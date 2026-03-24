@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
@@ -84,7 +84,7 @@ public class VRState {
 
             dh.vrPlayer = new VRPlayer();
 
-            if (Xloader.isModLoaded("hapticcraft")) {
+            if (Services.XLOADER.isModLoaded("hapticcraft")) {
                 VRSettings.LOGGER.info(
                     "Vivecraft: Not activating bHaptics integration, because the official 'HapticCraft' is loaded!");
             } else {
@@ -184,7 +184,7 @@ public class VRState {
             dh.vrSettings.saveOptions();
 
             // fixes an issue with DH shaders where the depth texture gets stuck
-            if (Xloader.isModLoaded("distanthorizons")) {
+            if (Services.XLOADER.isModLoaded("distanthorizons")) {
                 ShadersHelper.maybeReloadShaders();
             }
 

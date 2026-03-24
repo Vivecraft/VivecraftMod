@@ -1,13 +1,12 @@
 package org.vivecraft.mod_compat_vr.pehkui;
 
 import net.minecraft.world.entity.Entity;
-import org.vivecraft.Xloader;
-import virtuoel.pehkui.util.ScaleUtils;
+import org.vivecraft.Services;
 
 public class PehkuiHelper {
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("pehkui");
+        return Services.XLOADER.isModLoaded("pehkui");
     }
 
     /**
@@ -18,7 +17,8 @@ public class PehkuiHelper {
      * @return scale of the entities eye height
      */
     public static float getEntityEyeHeightScale(Entity entity, float partialTick) {
-        return ScaleUtils.getEyeHeightScale(entity, partialTick);
+        // TODO 26.1 use reflection
+        return 1;//ScaleUtils.getEyeHeightScale(entity, partialTick);
     }
 
     /**
@@ -29,6 +29,7 @@ public class PehkuiHelper {
      * @return scale of the entities bounding box
      */
     public static float getEntityBbScale(Entity entity, float partialTick) {
-        return ScaleUtils.getBoundingBoxHeightScale(entity, partialTick);
+        // TODO 26.1 use reflection
+        return 1;//ScaleUtils.getBoundingBoxHeightScale(entity, partialTick);
     }
 }

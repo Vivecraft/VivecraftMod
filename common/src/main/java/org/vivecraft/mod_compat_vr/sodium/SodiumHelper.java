@@ -3,7 +3,7 @@ package org.vivecraft.mod_compat_vr.sodium;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.joml.Vector2f;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.ClassUtils;
 import org.vivecraft.mod_compat_vr.sodium.extensions.ModelCuboidExtension;
@@ -46,7 +46,8 @@ public class SodiumHelper {
     private static Field ModelCuboid$Quad_textures;
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("sodium") || Xloader.isModLoaded("rubidium") || Xloader.isModLoaded("embeddium");
+        return Services.XLOADER.isModLoaded("sodium") || Services.XLOADER.isModLoaded("rubidium") ||
+            Services.XLOADER.isModLoaded("embeddium");
     }
 
     /**

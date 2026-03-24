@@ -3,7 +3,7 @@ package org.vivecraft.server;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Pose;
-import org.vivecraft.Xplat;
+import org.vivecraft.Services;
 
 import java.util.Map;
 import java.util.UUID;
@@ -15,7 +15,7 @@ public class ServerVRPlayers {
      */
     public static ServerVivePlayer getVivePlayer(ServerPlayer player) {
         // fake players should not get the main players data
-        return Xplat.isFakePlayer(player) ? null :
+        return Services.XPLAT.isFakePlayer(player) ? null :
             getPlayersWithVivecraft(player.level().getServer()).get(player.getUUID());
     }
 

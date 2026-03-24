@@ -24,50 +24,60 @@ import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
 public class XplatImpl implements Xplat {
 
-    public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
+    @Override
+    public boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         renderTarget.enableStencil();
         return true;
     }
 
-    public static String getUseMethodName() {
+    @Override
+    public String getUseMethodName() {
         return "useWithoutItem";
     }
 
-    public static TextureAtlasSprite[] getFluidTextures(
+    @Override
+    public TextureAtlasSprite[] getFluidTextures(
         BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
     {
         return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
     }
 
-    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
+    @Override
+    public Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
         return biome.getModifiedClimateSettings();
     }
 
-    public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
+    @Override
+    public BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getModifiedSpecialEffects();
     }
 
-    public static boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
+    @Override
+    public boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
         return true;
     }
 
-    public static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
+    @Override
+    public Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         payload.write(buffer);
         return NetworkDirection.PLAY_TO_SERVER.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
     }
 
-    public static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
+    @Override
+    public Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         payload.write(buffer);
         return NetworkDirection.PLAY_TO_CLIENT.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
     }
 
-    public static boolean hasKeyModifier(KeyMapping keyMapping) {
+    @Override
+    public boolean hasKeyModifier(KeyMapping keyMapping) {
         return keyMapping.getKeyModifier() != KeyModifier.NONE;
     }
 
-    public static int getKeyModifier(KeyMapping keyMapping) {
+    @Override
+    public int getKeyModifier(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
             case SHIFT -> GLFW.GLFW_MOD_SHIFT;
             case ALT -> GLFW.GLFW_MOD_ALT;
@@ -76,7 +86,8 @@ public class XplatImpl implements Xplat {
         };
     }
 
-    public static int getKeyModifierKey(KeyMapping keyMapping) {
+    @Override
+    public int getKeyModifierKey(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
             case SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT;
             case ALT -> GLFW.GLFW_KEY_RIGHT_ALT;
@@ -85,7 +96,8 @@ public class XplatImpl implements Xplat {
         };
     }
 
-    public static boolean isFakePlayer(ServerPlayer player) {
+    @Override
+    public boolean isFakePlayer(ServerPlayer player) {
         // TODO check if forge reimplemented it, it was removed with 1.20.3
         // return player instanceof FakePlayer;
         return false;

@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -347,7 +347,7 @@ public abstract class ItemInHandRendererVRMixin {
             if (!this.vivecraft$didLogModelError) {
                 VRSettings.LOGGER.error(
                     "Vivecraft: Some mod broke player model reloading. Possible culprit 'Stfu' loaded: {}",
-                    Xloader.isModLoaded("stfu"));
+                    Services.XLOADER.isModLoaded("stfu"));
                 this.vivecraft$didLogModelError = true;
             }
             return;

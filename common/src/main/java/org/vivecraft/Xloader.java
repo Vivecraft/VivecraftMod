@@ -1,7 +1,5 @@
 package org.vivecraft;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -28,15 +26,12 @@ public interface Xloader {
     /**
      * @return mod loader enum that the game is running on
      */
-    @ExpectPlatform
-    static ModLoader getModloader() {
-        throw new AssertionError();
-    }
+    ModLoader getModloader();
 
     /**
      * @return returns true, if the mod loader loaded everything without errors
      */
-    static boolean isModLoadedSuccess() {
+    default boolean isModLoadedSuccess() {
         return isModLoaded("vivecraft");
     }
 
@@ -44,18 +39,12 @@ public interface Xloader {
      * @param name modId to check
      * @return if the mod {@code name} is loaded
      */
-    @ExpectPlatform
-    static boolean isModLoaded(String name) {
-        return false;
-    }
+    boolean isModLoaded(String name);
 
     /**
      * @return version number of the vivecraft mod
      */
-    @ExpectPlatform
-    static String getModVersion() {
-        return "";
-    }
+    String getModVersion();
 
     /**
      * asks the mod loader for the config folder, and resolves the given file there
@@ -63,32 +52,20 @@ public interface Xloader {
      * @param file file to get the path for
      * @return Path of {@code file} in the config folder
      */
-    @ExpectPlatform
-    static Path getConfigPath(String file) {
-        throw new AssertionError();
-    }
+    Path getConfigPath(String file);
 
     /**
      * @return InputStream corresponding to the given filepath inside the mod jar
      */
-    @ExpectPlatform
-    static InputStream getInJarFile(String sourcePath) throws IOException {
-        throw new AssertionError();
-    }
+    InputStream getInJarFile(String sourcePath) throws IOException;
 
     /**
      * @return List of all files in the given folder inside the mod jar
      */
-    @ExpectPlatform
-    static List<Path> getInJarFolderFiles(String folder) throws IOException {
-        throw new AssertionError();
-    }
+    List<Path> getInJarFolderFiles(String folder) throws IOException;
 
     /**
      * @return true if this is a dedicated server
      */
-    @ExpectPlatform
-    static boolean isDedicatedServer() {
-        return false;
-    }
+    boolean isDedicatedServer();
 }

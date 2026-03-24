@@ -1,13 +1,13 @@
 package org.vivecraft.mod_compat_vr.immersiveportals;
 
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import qouteall.imm_ptl.core.IPGlobal;
 import qouteall.imm_ptl.core.render.context_management.PortalRendering;
 
 public class ImmersivePortalsHelper {
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("immersive_portals");
+        return Services.XLOADER.isModLoaded("immersive_portals");
     }
 
     /**

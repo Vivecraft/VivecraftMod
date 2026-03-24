@@ -1,6 +1,6 @@
 package org.vivecraft.mod_compat_vr.create;
 
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -15,7 +15,7 @@ public class CreateHelper {
     private static Field ControlsHandler_entityRef;
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("create");
+        return Services.XLOADER.isModLoaded("create");
     }
 
     public static boolean blocksMovement() {

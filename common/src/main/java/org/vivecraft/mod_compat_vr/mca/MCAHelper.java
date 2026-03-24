@@ -2,7 +2,7 @@ package org.vivecraft.mod_compat_vr.mca;
 
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Vector3f;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.ClassUtils;
 
@@ -22,7 +22,7 @@ public class MCAHelper {
     private static Method VillagerLike_getHorizontalScaleFactor;
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("mca");
+        return Services.XLOADER.isModLoaded("mca");
     }
 
     public static void undoPlayerScale(LivingEntity player, Vector3f pos) {
@@ -61,11 +61,11 @@ public class MCAHelper {
         } else {
             try {
                 MCAClient_playerData = ClassUtils.getClassWithAlternative(
-                        Xloader.getModloader().name + ".net.mca.MCAClient", "net.conczin.mca.MCAClient")
+                        Services.XLOADER.getModloader().name + ".net.mca.MCAClient", "net.conczin.mca.MCAClient")
                     .getField("playerData");
 
                 Class<?> VillagerLike = ClassUtils.getClassWithAlternative(
-                    Xloader.getModloader().name + ".net.mca.entity.VillagerLike",
+                    Services.XLOADER.getModloader().name + ".net.mca.entity.VillagerLike",
                     "net.conczin.mca.entity.VillagerLike");
 
                 VillagerLike_getRawScaleFactor = ClassUtils.getMethodWithAlternative(VillagerLike,

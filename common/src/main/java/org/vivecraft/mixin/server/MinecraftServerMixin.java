@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.Xloader;
+import org.vivecraft.Services;
 import org.vivecraft.server.MinecraftServerExt;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerUtil;
@@ -30,7 +30,7 @@ public class MinecraftServerMixin implements MinecraftServerExt {
 
     @Inject(method = "stopServer", at = @At("HEAD"))
     private void vivecraft$stopExecutor(CallbackInfo ci) {
-        if (Xloader.isDedicatedServer()) {
+        if (Services.XLOADER.isDedicatedServer()) {
             // we need to manually shut this down, because the ShutdownHook sometimes fails to trigger
             ServerNetworking.LOGGER.info("Vivecraft: shutting down vivecraft scheduler");
             ServerUtil.SCHEDULER.shutdownNow();

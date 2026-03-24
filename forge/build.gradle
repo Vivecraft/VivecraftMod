@@ -1,129 +1,116 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'net.minecraftforge.gradle' version "${forge_gradle}"
+    id 'net.minecraftforge.jarjar' version '0.2.3'
+    id 'idea'
 }
 
-architectury {
-    platformSetupLoomIde()
-    forge()
-}
-loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
+def mixins = [
+    "vivecraft.mixins.json",
+    "vivecraft.forge.mixins.json",
 
-    forge {
-        convertAccessWideners = true
-        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+    "vivecraft.accessories.mixins.json",
+    "vivecraft.alexmobs.mixins.json",
+    "vivecraft.bedrockify.mixins.json",
+    "vivecraft.blur.mixins.json",
+    "vivecraft.cataclysm.mixins.json",
+    "vivecraft.dynamicfps.mixins.json",
+    "vivecraft.emf.mixins.json",
+    "vivecraft.epicfight.mixins.json",
+    "vivecraft.iris.mixins.json",
+    "vivecraft.mca.mixins.json",
+    "vivecraft.optifine.mixins.json",
+    "vivecraft.rei.mixins.json",
+    "vivecraft.resolutioncontrol.mixins.json",
+    "vivecraft.sereneseasons.mixins.json",
+    "vivecraft.sodium.mixins.json",
+    "vivecraft.voxy.mixins.json",
+    "vivecraft.xaerosmimimap.mixins.json",
+    "vivecraft.xaerosworldmap.mixins.json"
+]
 
-        mixinConfig "vivecraft.mixins.json"
-        mixinConfig "vivecraft.forge.mixins.json"
+minecraft {
+    mappings channel: 'official', version: minecraft_version
 
-        mixinConfig "vivecraft.accessories.mixins.json"
-        mixinConfig "vivecraft.alexmobs.mixins.json"
-        mixinConfig "vivecraft.bedrockify.mixins.json"
-        mixinConfig "vivecraft.blur.mixins.json"
-        mixinConfig "vivecraft.cataclysm.mixins.json"
-        mixinConfig "vivecraft.dynamicfps.mixins.json"
-        mixinConfig "vivecraft.emf.mixins.json"
-        mixinConfig "vivecraft.epicfight.mixins.json"
-        mixinConfig "vivecraft.iris.mixins.json"
-        mixinConfig "vivecraft.mca.mixins.json"
-        mixinConfig "vivecraft.optifine.mixins.json"
-        mixinConfig "vivecraft.rei.mixins.json"
-        mixinConfig "vivecraft.resolutioncontrol.mixins.json"
-        mixinConfig "vivecraft.sereneseasons.mixins.json"
-        mixinConfig "vivecraft.sodium.mixins.json"
-        mixinConfig "vivecraft.voxy.mixins.json"
-        mixinConfig "vivecraft.xaerosmimimap.mixins.json"
-        mixinConfig "vivecraft.xaerosworldmap.mixins.json"
+    accessTransformer = true
+
+    runs {
+        configureEach {
+            workingDir.convention layout.projectDirectory.dir('run')
+            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+            // Mixin requires either specifying the config via command line, or in the Manifest
+            args "--mixin.config=" + mixins.join(",")
+        }
+
+        register('client') {
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        register('server') {
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
     }
 }
 
-configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-    bundle {
-        // bundle command, to copy jar contents with the shadow plugin
-        canBeResolved = true
-        canBeConsumed = false
-    }
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
+repositories {
+    mavenCentral()
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
 }
 
+jarJar.register() {
+    archiveClassifier.set(project.name)
+    dependsOn(tasks.named("shadowJar"))
+
+    // Use shadowJar output instead
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(zipTree(tasks.named("shadowJar").get().archiveFile))
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
+}
 
 dependencies {
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+    implementation minecraft.dependency("net.minecraftforge:forge:$minecraft_version-$forge_version")
+    annotationProcessor("net.minecraftforge:eventbus-validator:7.0.1")
+    annotationProcessor("org.spongepowered:mixin:0.8.7:processor")
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    jarJar(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false })
+    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false })
+    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false })
+    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false })
+    // theoretically these should be possible to bundle? but there is some module resolving issue
+    /*jarJar(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }) {
+        jarJar.configure(it) {
+            module {
+                group = 'org.lwjgl'
+                name = 'lwjgl-openvr-natives-linux'
+            }
+            version = rootProject.lwjgl_version
+        }
+    }*/
 
-    // modCompileOnly("maven.modrinth:rubidium:0.6.5")
-    // modCompileOnly("maven.modrinth:oculus:1.20-1.6.4")
+    // for OSC tracker support
+    jarJar(implementation("com.illposed.osc:javaosc-core:0.9"))
 
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
-    forgeRuntimeLibrary("com.illposed.osc:javaosc-core:0.9") { transitive = false }
-    forgeRuntimeLibrary("com.github.bhaptics:tact-java:0.1.4") { transitive = false }
-    forgeRuntimeLibrary("org.java-websocket:Java-WebSocket:1.5.1") { transitive = false }
-
-    // shadow the natives
-    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
-
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
-    implementation(include("io.github.llamalad7:mixinextras-forge:${rootProject.mixin_extras_version}"))
-
-    include(implementation("com.illposed.osc:javaosc-core:0.9"))
-    include(implementation("com.github.bhaptics:tact-java:0.1.4"))
-    include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
-    }
+    // bHaptics Integration
+    jarJar(implementation("com.github.bhaptics:tact-java:0.1.4"))
+    jarJar(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
 }
 
 shadowJar {
-    exclude "fabric.mod.json"
-    exclude "architectury.common.json"
-
-    configurations = [
-        project.configurations.shadowCommon,
-        project.configurations.bundle
-    ]
-    archiveClassifier.set("dev-shadow")
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    archiveClassifier.set('forge')
+    archiveClassifier.set(project.name + "-shadow")
 }
 
 jar {
-    archiveClassifier.set("dev")
     manifest {
-        attributes(
-            'Main-Class': "org.vivecraft.LaunchPopup"
-        )
+        attributes["MixinConfigs"] = mixins.join(",")
     }
 }
 
-sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }
 
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
-}

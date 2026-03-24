@@ -46,7 +46,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.Xevents;
+import org.vivecraft.Services;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -606,7 +606,7 @@ public abstract class GameRendererVRMixin
                 vivecraft$MIN_CLIP_DISTANCE);
 
             if (triple != null &&
-                !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(),
+                !Services.XEVENTS.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(),
                     triple.getRight()))
             {
                 this.vivecraft$inBlock = triple.getLeft();
@@ -615,7 +615,7 @@ public abstract class GameRendererVRMixin
             }
 
             this.vivecraft$inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER) &&
-                !Xevents.renderWaterOverlay(this.minecraft.player, new PoseStack());
+                !Services.XEVENTS.renderWaterOverlay(this.minecraft.player, new PoseStack());
         }
     }
 
