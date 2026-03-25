@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.render;
+package org.vivecraft.mixin.client_vr;
 
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
@@ -14,7 +14,7 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 /**
  * an extension of the Camera, to correctly set up the camera position for the current pass
  */
-public class XRCamera extends Camera {
+public class CameraVRMixin extends Camera {
     /**
      * override to position the camera for the current pass
      *
