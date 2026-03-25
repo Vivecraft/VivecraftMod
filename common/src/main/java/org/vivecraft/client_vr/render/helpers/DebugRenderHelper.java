@@ -5,10 +5,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -468,7 +468,7 @@ public class DebugRenderHelper {
 
         MC.font.drawInBatch(text, MC.font.width(text) * -0.5F, -MC.font.lineHeight, -1, false,
             matrix, MC.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0,
-            LightTexture.FULL_BRIGHT);
+            LightCoordsUtil.FULL_BRIGHT);
     }
 
     /**

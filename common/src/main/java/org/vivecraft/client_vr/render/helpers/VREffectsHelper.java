@@ -180,7 +180,7 @@ public class VREffectsHelper {
         // slight offset to not cause z fighting
         poseStack.translate(0.0F, 0.0F, 0.00001F);
         // get light at the controller position
-        int light = LevelRenderer.getLightColor(MC.level, BlockPos.containing(
+        int light = LevelRenderer.getLightCoords(MC.level, BlockPos.containing(
             DATA_HOLDER.vrPlayer.vrdata_world_render.getController(c).getPosition()));
         // draw the overlay, and flip it vertically
         RenderHelper.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, poseStack.last().pose(),
@@ -1226,7 +1226,7 @@ public class VREffectsHelper {
         modelView.scale(scale, scale, scale);
 
         // white crosshair, with blending
-        int light = LevelRenderer.getLightColor(MC.level, BlockPos.containing(crosshairRenderPos));
+        int light = LevelRenderer.getLightCoords(MC.level, BlockPos.containing(crosshairRenderPos));
         float brightness = 1.0F;
 
         if (MC.hitResult == null || MC.hitResult.getType() == HitResult.Type.MISS) {

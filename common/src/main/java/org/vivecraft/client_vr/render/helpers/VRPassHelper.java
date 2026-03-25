@@ -210,7 +210,7 @@ public class VRPassHelper {
                     }
 
                     ClientUtils.takeScreenshot(rendertarget);
-                    MC.getWindow().updateDisplay(null);
+                    RenderSystem.flipFrame(null);
                     DATA_HOLDER.grabScreenShot = false;
                 }
             }

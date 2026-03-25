@@ -9,15 +9,15 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
@@ -213,15 +213,15 @@ public class RenderHelper {
     /**
      * draws the crosshair at the specified location on the screen
      *
-     * @param guiGraphics GuiGraphics to render with, is not flushed after rendering
-     * @param mouseX      x coordinate in screen pixel coordinates
-     * @param mouseY      y coordinate in screen pixel coordinates
+     * @param graphics GuiGraphicsExtractor to render with, is not flushed after rendering
+     * @param mouseX   x coordinate in screen pixel coordinates
+     * @param mouseY   y coordinate in screen pixel coordinates
      */
-    public static void drawMouseMenuQuad(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    public static void drawMouseMenuQuad(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         float size = 15.0F * Math.max(ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale,
             1.0F / (float) MC.getWindow().getGuiScale());
 
-        guiGraphics.blitSprite(VRShaders.CROSSHAIR_MENU, Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
+        graphics.blitSprite(VRShaders.CROSSHAIR_MENU, Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
             (int) (mouseY - size * 0.5F + 1), (int) size, (int) size);
     }
 
@@ -233,29 +233,30 @@ public class RenderHelper {
         RenderSystem.getDevice().createCommandEncoder()
             .clearDepthTexture(MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
-        GuiGraphics guiGraphics = GuiRenderHelper.getGuiGraphics();
+        GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
 
         int width = 200;
         List<FormattedCharSequence> formattedChars = MC.font.split(
             Component.translatable("vivecraft.messages.connectingtoruntime"), width - 10);
         int height = formattedChars.size() * 8 + Math.max(formattedChars.size() - 1, 0) * 4 + 10;
 
-        int x = guiGraphics.guiWidth() / 2 - width / 2;
-        int y = guiGraphics.guiHeight() / 2 - height / 2;
+        int x = graphics.guiWidth() / 2 - width / 2;
+        int y = graphics.guiHeight() / 2 - height / 2;
 
         // transparent background to dim the game
-        guiGraphics.fill(0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), 0x40000000);
+        graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), 0x40000000);
 
         // black background with border
-        guiGraphics.fill(x, y, x + width, y + height, 0xFF000000);
-        guiGraphics.renderOutline(x, y, width, height, 0xFFFFFFFF);
+        graphics.fill(x, y, x + width, y + height, 0xFF000000);
+        graphics.outline(x, y, width, height, 0xFFFFFFFF);
 
         for (int line = 0; line < formattedChars.size(); line++) {
-            guiGraphics.drawCenteredString(MC.font, formattedChars.get(line), guiGraphics.guiWidth() / 2,
+            graphics.centeredText(MC.font, formattedChars.get(line), graphics.guiWidth() / 2,
                 y + 5 + line * 12, 0xFFFFFFFF);
         }
 
-        guiGraphics.renderDeferredElements();
+        // TODO 26.1 why is this there
+        graphics.extractDeferredElements(0, 0, 0);
         GuiRenderHelper.finish();
     }
 
@@ -328,7 +329,7 @@ public class RenderHelper {
     public static void drawSizedQuadFullbright(
         float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix, RenderType renderType)
     {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.FULL_BRIGHT, color, matrix,
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightCoordsUtil.FULL_BRIGHT, color, matrix,
             renderType, false);
     }
 

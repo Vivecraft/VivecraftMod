@@ -1,6 +1,7 @@
 package org.vivecraft.client.extensions;
 
-import net.minecraft.client.renderer.state.BlockOutlineRenderState;
+
+import net.minecraft.client.renderer.state.level.BlockOutlineRenderState;
 
 public interface LevelRenderStateExtension {
 

@@ -21,10 +21,10 @@ loom {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${minecraft_version}_unobfuscated"
+    minecraft "com.mojang:minecraft:${minecraft_version}"
 
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}_unobfuscated"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 
     bundle(implementation(project(":common")) { transitive = false })
 

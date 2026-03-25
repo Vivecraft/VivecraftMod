@@ -58,10 +58,10 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 public abstract class ItemInHandRendererVRMixin {
 
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderTypes.entityCutoutNoCull(
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderTypes.entityCutout(
         Identifier.withDefaultNamespace("textures/map/map_background.png"), false);
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderTypes.entityCutoutNoCull(
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderTypes.entityCutout(
         Identifier.withDefaultNamespace("textures/map/map_background_checkerboard.png"), false);
 
     @Unique

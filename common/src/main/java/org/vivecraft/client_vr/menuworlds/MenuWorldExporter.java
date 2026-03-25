@@ -30,6 +30,7 @@ import net.minecraft.world.attribute.AmbientParticle;
 import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -261,7 +262,7 @@ public class MenuWorldExporter {
         float dimAmbientLight;
         Optional<Integer> cloudHeight = Optional.empty();
         DimensionType.Skybox skybox = DimensionType.Skybox.OVERWORLD;
-        DimensionType.CardinalLightType cardinalLightType = DimensionType.CardinalLightType.DEFAULT;
+        CardinalLighting.Type cardinalLightingType = CardinalLighting.Type.DEFAULT;
 
         if (header.version < 5) { // fill in missing values
             if (BuiltinDimensionTypes.NETHER.identifier().equals(dimName)) {
@@ -270,7 +271,7 @@ public class MenuWorldExporter {
                 dimMinY = 0;
                 dimAmbientLight = 0.1f;
                 skybox = DimensionType.Skybox.NONE;
-                cardinalLightType = DimensionType.CardinalLightType.NETHER;
+                cardinalLightingType = CardinalLighting.Type.NETHER;
             } else if (BuiltinDimensionTypes.END.identifier().equals(dimName)) {
                 dimFixedTime = OptionalLong.of(6000L);
                 dimHasCeiling = false;
@@ -294,7 +295,7 @@ public class MenuWorldExporter {
             if (dimHasCeiling && !dimHasSkyLight) {
                 // nether
                 skybox = DimensionType.Skybox.NONE;
-                cardinalLightType = DimensionType.CardinalLightType.NETHER;
+                cardinalLightingType = CardinalLighting.Type.NETHER;
             } else if (dimFixedTime.isPresent()) {
                 // end
                 skybox = DimensionType.Skybox.END;
@@ -333,7 +334,7 @@ public class MenuWorldExporter {
                 attributes.set(EnvironmentAttributes.FOG_COLOR, -4138753);
                 attributes.set(EnvironmentAttributes.SKY_COLOR, OverworldBiomes.calculateSkyColor(0.8f));
                 timeline = timelines != null ?
-                    HolderSet.direct(timelines.getOrThrow(Timelines.DAY), timelines.getOrThrow(Timelines.MOON)) :
+                    HolderSet.direct(timelines.getOrThrow(Timelines.OVERWORLD_DAY), timelines.getOrThrow(Timelines.MOON)) :
                     HolderSet.empty();
             }
             case END -> {
@@ -348,10 +349,10 @@ public class MenuWorldExporter {
             dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
         }
 
-        DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, 1.0,
+        DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, false, 1.0,
             dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimAmbientLight,
-            new DimensionType.MonsterSettings(ConstantInt.of(0), 0), skybox, cardinalLightType, attributes.build(),
-            timeline);
+            new DimensionType.MonsterSettings(ConstantInt.of(0), 0), skybox, cardinalLightingType, attributes.build(),
+            timeline, Optional.empty());
 
         float rotation = 0.0f;
         boolean rain = false;

@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
@@ -46,8 +46,8 @@ public class MirrorNotification {
             int backupGuiScale = GuiHandler.GUI_SCALE_FACTOR;
             GuiHandler.GUI_SCALE_FACTOR = 1;
 
-            GuiGraphics guiGraphics = GuiRenderHelper.getGuiGraphics();
-            guiGraphics.pose().scale(3, 3);
+            GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
+            graphics.pose().scale(3, 3);
 
             if (MIRROR_NOTIFY_CLEAR) {
                 RenderSystem.getDevice().createCommandEncoder()
@@ -65,7 +65,7 @@ public class MirrorNotification {
             final int COLUMN_GAP = 12;
 
             for (String line : wrapped) {
-                guiGraphics.drawString(MC.font, line, 1, column, 0xFFFFFFFF);
+                graphics.text(MC.font, line, 1, column, 0xFFFFFFFF);
                 column += COLUMN_GAP;
             }
 

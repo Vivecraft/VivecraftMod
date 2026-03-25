@@ -2,7 +2,7 @@ package org.vivecraft.mod_compat_vr.bedrockify.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.CardinalLighting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +24,7 @@ public class BedrockBlockShadingMixin {
             if (menuWorldRenderer != null && menuWorldRenderer.getLevel() != null) {
                 // change brightness based on nether or not
                 cir.setReturnValue(menuWorldRenderer.getLevel().dimensionType().cardinalLightType() ==
-                    DimensionType.CardinalLightType.NETHER ? 0.9f : 0.87f);
+                    CardinalLighting.Type.NETHER ? 0.9f : 0.87f);
             }
         }
     }

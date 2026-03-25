@@ -4,17 +4,16 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -90,7 +89,7 @@ public class VRWidgetHelper {
                 CameraTracker.CAMERA_MODEL, CameraTracker.CAMERA_DISPLAY_MODEL, () -> {
                     if (VREffectsHelper.getNearOpaqueBlock(
                         DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(),
-                        ((GameRendererExtension) MC.gameRenderer).vivecraft$getMinClipDistance()) == null)
+                        MC.gameRenderer.getMainCamera().projection.zNear()) == null)
                     {
                         return DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTextureView();
                     } else {
@@ -159,10 +158,11 @@ public class VRWidgetHelper {
 
         if (!ITEM_STACK_RENDER_STATE.isEmpty() && !ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList().isEmpty()) {
             // we use block models, so the camera texture is on the regular block atlas
-            RenderType renderType = RenderTypes.entityCutoutNoCull(TextureAtlas.LOCATION_ITEMS);
-            ItemRenderer.renderItem(ItemDisplayContext.GROUND, poseStack, MC.renderBuffers().bufferSource(),
-                combinedLight, OverlayTexture.NO_OVERLAY, new int[]{},
-                ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList(), renderType, ItemStackRenderState.FoilType.NONE);
+            RenderType renderType = RenderTypes.entityCutout(TextureAtlas.LOCATION_ITEMS);
+            // TODO 26.1 figure out how to render items
+//            ItemRenderer.renderItem(ItemDisplayContext.GROUND, poseStack, MC.renderBuffers().bufferSource(),
+//                combinedLight, OverlayTexture.NO_OVERLAY, new int[]{},
+//                ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList(), renderType, ItemStackRenderState.FoilType.NONE);
 
             MC.renderBuffers().bufferSource().endBatch(renderType);
         }
@@ -180,7 +180,7 @@ public class VRWidgetHelper {
             // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen
             for (BakedQuad bakedquad : ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList()) {
                 if (displayFaceFunc.apply(bakedquad.direction()) != DisplayFace.NONE &&
-                    bakedquad.sprite().contents().name().equals(TRANSPARENT_TEXTURE))
+                    bakedquad.materialInfo().sprite().contents().name().equals(TRANSPARENT_TEXTURE))
                 {
                     boolean mirrored = displayFaceFunc.apply(bakedquad.direction()) == DisplayFace.MIRROR;
                     consumer.addVertex(
@@ -191,7 +191,7 @@ public class VRWidgetHelper {
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 1.0F : 0.0F, 1.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)
-                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setLight(LightCoordsUtil.FULL_BRIGHT)
                         .setNormal(0.0F, 1.0F, 0.0F);
                     consumer.addVertex(
                             poseStack.last().pose(),
@@ -201,7 +201,7 @@ public class VRWidgetHelper {
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 1.0F : 0.0F, 0.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)
-                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setLight(LightCoordsUtil.FULL_BRIGHT)
                         .setNormal(0.0F, 1.0F, 0.0F);
                     consumer.addVertex(
                             poseStack.last().pose(),
@@ -211,7 +211,7 @@ public class VRWidgetHelper {
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 0.0F : 1.0F, 0.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)
-                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setLight(LightCoordsUtil.FULL_BRIGHT)
                         .setNormal(0.0F, 1.0F, 0.0F);
                     consumer.addVertex(
                             poseStack.last().pose(),
@@ -221,7 +221,7 @@ public class VRWidgetHelper {
                         .setColor(1.0F, 1.0F, 1.0F, 1.0F)
                         .setUv(mirrored ? 0.0F : 1.0F, 1.0F)
                         .setOverlay(OverlayTexture.NO_OVERLAY)
-                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setLight(LightCoordsUtil.FULL_BRIGHT)
                         .setNormal(0.0F, 1.0F, 0.0F);
                 }
             }

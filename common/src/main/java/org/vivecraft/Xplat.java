@@ -3,16 +3,12 @@ package org.vivecraft;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.FluidState;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
@@ -31,15 +27,7 @@ public interface Xplat {
      */
     String getUseMethodName();
 
-    /**
-     * gets the TextureAtlasSprites for the given FluidState
-     *
-     * @param level      level the fluid is in
-     * @param pos        BlockPos of the fluid
-     * @param fluidState State of the fluid
-     * @return array of the textures of a fluid block
-     */
-    TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidState);
+    ;
 
     /**
      * @param biome Biome to get the ClimateSettings from

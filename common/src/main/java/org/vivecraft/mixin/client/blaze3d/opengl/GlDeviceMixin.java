@@ -24,7 +24,7 @@ public class GlDeviceMixin implements GlDeviceExtension {
      */
     @Override
     public GpuTexture vivecraft$createFixedIdTexture(
-        @Nullable Supplier<String> labelSupplier, int usageFlags, TextureFormat textureFormat, int width,
+        @Nullable String label, int usageFlags, TextureFormat textureFormat, int width,
         int height, int depthLayers, int mipmapLevels, int texId)
     {
         if (mipmapLevels < 1) {
@@ -32,14 +32,13 @@ public class GlDeviceMixin implements GlDeviceExtension {
         } else if (depthLayers < 1) {
             throw new IllegalArgumentException("depthOrLayers must be at least 1");
         } else {
-            if ((usageFlags & 16) != 0) {
+            if ((usageFlags & GpuTexture.USAGE_CUBEMAP_COMPATIBLE) != 0) {
                 throw new UnsupportedOperationException("CubeMap textures are not supported");
             } else if (depthLayers > 1) {
                 throw new UnsupportedOperationException("Array or 3D textures are not supported");
             }
 
             GlStateManager.clearGlErrors();
-            String label = this.debugLabels.exists() && labelSupplier != null ? labelSupplier.get() : null;
             if (label == null) {
                 label = String.valueOf(texId);
             }

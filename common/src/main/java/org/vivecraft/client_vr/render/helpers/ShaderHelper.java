@@ -54,6 +54,8 @@ public class ShaderHelper {
     private static GpuBuffer SCREEN_UV_VBO;
     private static GpuBuffer SCREEN_VBO;
 
+    public static final Matrix4f THIRD_PASS_PROJECTION_MATRIX = new Matrix4f();
+
     /**
      * renders a fullscreen quad with the given RenderPipeline, and the given RenderTarget bound as "Sampler0"
      *
@@ -408,7 +410,7 @@ public class ShaderHelper {
         }
 
         VRShaders.MIXED_REALITY_UBO.updateBuffer(
-            ((GameRendererExtension) MC.gameRenderer).vivecraft$getThirdPassProjectionMatrix(),
+            THIRD_PASS_PROJECTION_MATRIX,
             viewMatrix,
             camPlayer, cameraLook,
             DATA_HOLDER.vrSettings.mixedRealityUnityLike,

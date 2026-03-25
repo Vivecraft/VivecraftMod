@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
@@ -59,8 +60,7 @@ public class EntityInteractionModule implements InteractModule {
 
     @Override
     public boolean onPress(LocalPlayer player, InteractionHand hand) {
-        return this.mc.gameMode.interactAt(player, this.inEntityHit[hand.ordinal()].getEntity(),
-            this.inEntityHit[hand.ordinal()], hand).consumesAction() ||
-            this.mc.gameMode.interact(player, this.inEntityHit[hand.ordinal()].getEntity(), hand).consumesAction();
+        return this.mc.gameMode.interact(player, this.inEntityHit[hand.ordinal()].getEntity(),
+            this.inEntityHit[hand.ordinal()], hand) instanceof InteractionResult.Success;
     }
 }

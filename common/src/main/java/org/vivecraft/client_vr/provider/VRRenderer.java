@@ -6,7 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
@@ -88,8 +88,7 @@ public abstract class VRRenderer {
     // last error caused by this renderer
     protected String lastError = "";
 
-    private final PerspectiveProjectionMatrixBuffer stencilProjectionMatrix = new PerspectiveProjectionMatrixBuffer(
-        "stencil");
+    private final ProjectionMatrixBuffer stencilProjectionMatrix = new ProjectionMatrixBuffer("stencil");
 
     public VRRenderer(MCVR vr) {
         this.vr = vr;
@@ -594,7 +593,8 @@ public abstract class VRRenderer {
                 }
             }
             // need to recall this, for PostChains to get the right resize
-            minecraft.resizeDisplay();
+            minecraft.getWindow().onFramebufferResize(minecraft.getWindow().handle(), minecraft.getWindow().getWidth(),
+                minecraft.getWindow().getHeight());
 
             this.resizeFrameBuffers = false;
         }

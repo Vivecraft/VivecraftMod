@@ -2,7 +2,7 @@ package org.vivecraft.client.gui.framework.widgets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -57,23 +57,23 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // draw box outline
-        guiGraphics.fill(
+        graphics.fill(
             getX(),
             getY(),
             getX() + this.width,
             getY() + this.height,
             0xFFA0A0A0);
         // draw box inside
-        guiGraphics.fill(
+        graphics.fill(
             getX() + 1,
             getY() + 1,
             getX() + this.width - 1,
             getY() + this.height - 1,
             0xFF000000);
 
-        ActiveTextCollector textRenderer = guiGraphics.textRenderer(GuiGraphics.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+        ActiveTextCollector textRenderer = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
 
         // draw text
         for (int line = 0; line + this.currentLine < this.formattedChars.size() && line < this.maxLines; line++) {
@@ -86,7 +86,7 @@ public class TextScrollWidget extends AbstractWidget {
 
         if (isFocused() || this.isHovered) {
             // draw scroll bar outline
-            guiGraphics.fill(
+            graphics.fill(
                 getX() + this.width - this.scrollBarWidth - 2,
                 (int) (getY() + 1 + scrollbarStart),
                 getX() + this.width - 1,
@@ -95,14 +95,14 @@ public class TextScrollWidget extends AbstractWidget {
         }
 
         // draw scroll bar
-        guiGraphics.fill(
+        graphics.fill(
             getX() + this.width - this.scrollBarWidth - (isFocused() || this.isHovered ? 1 : 2),
             (int) (getY() + (isFocused() || this.isHovered ? 2 : 1) + scrollbarStart),
             getX() + this.width - (isFocused() || this.isHovered ? 2 : 1),
             (int) (getY() + (isFocused() || this.isHovered ? 0 : 1) + scrollbarStart + this.scrollBarSize),
             0xFFA0A0A0);
 
-        renderMouseover(guiGraphics, mouseX, mouseY);
+        renderMouseover(graphics, mouseX, mouseY);
     }
 
     @Override
@@ -200,10 +200,11 @@ public class TextScrollWidget extends AbstractWidget {
         }
     }
 
-    public void renderMouseover(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    public void renderMouseover(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         Style style = this.getMouseoverStyle(mouseX, mouseY);
         if (style != null && style.getHoverEvent() != null) {
-            guiGraphics.renderComponentHoverEffect(Minecraft.getInstance().font, style, mouseX, mouseY);
+            // TODO 26.1 it might do that on its own now?
+            //graphics.renderComponentHoverEffect(Minecraft.getInstance().font, style, mouseX, mouseY);
         }
     }
 }

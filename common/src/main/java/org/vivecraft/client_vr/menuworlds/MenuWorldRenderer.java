@@ -14,15 +14,19 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.FluidModel;
+import net.minecraft.client.renderer.block.FluidRenderer;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.AtlasIds;
@@ -35,13 +39,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.attribute.*;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.MoonPhase;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -284,7 +288,6 @@ public class MenuWorldRenderer {
         }
 
         renderChunkLayer(ChunkSectionLayerGroup.TRANSLUCENT);
-        renderChunkLayer(ChunkSectionLayerGroup.TRIPWIRE);
 
         if (eyePosition.y + this.blockAccess.getGround() + this.blockAccess.getMinY() >= cloudHeight) {
             renderClouds(eyePosition.x,
@@ -474,12 +477,14 @@ public class MenuWorldRenderer {
         try {
             PoseStack thisPose = new PoseStack();
             int renderDistSquare = (this.renderDistance + 1) * (this.renderDistance + 1);
-            BlockRenderDispatcher blockRenderer = this.mc.getBlockRenderer();
+            ModelManager modelManager = this.mc.getModelManager();
+            FluidRenderer fluidRenderer = new FluidRenderer(modelManager.getFluidStateModelSet());
             BufferBuilder vertBuffer = this.bufferBuilders.get(pair);
             BlockPos.MutableBlockPos pos = this.currentPositions.get(pair);
             RandomSource randomSource = RandomSource.create();
 
             int count = 0;
+            /*
             while (
                 ClientUtils.milliTime() - startTime < maxTime && pos.getY() <
                     Math.min(this.segmentSize.getY() + offset.getY(),
@@ -492,12 +497,13 @@ public class MenuWorldRenderer {
                     if (state != null) {
                         FluidState fluidState = state.getFluidState();
                         if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
-                            for (var sprite : Services.XPLAT.getFluidTextures(this.blockAccess, pos, fluidState)) {
-                                if (sprite != null && sprite.contents().getUniqueFrames().sum() > 1) {
-                                    this.animatedSprites.add(sprite);
-                                }
+                            FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidState);
+                            this.addAnimatedSprite(fluidModel.flowingMaterial().sprite());
+                            this.addAnimatedSprite(fluidModel.stillMaterial().sprite());
+                            if (fluidModel.overlayMaterial() != null) {
+                                this.addAnimatedSprite(fluidModel.overlayMaterial().sprite());
                             }
-                            blockRenderer.renderLiquid(pos, this.blockAccess, vertBuffer, state,
+                            fluidRenderer.tesselate(this.blockAccess, pos, vertBuffer, state,
                                 new FluidStateWrapper(fluidState));
                             count++;
                         }
@@ -505,19 +511,18 @@ public class MenuWorldRenderer {
                         if (state.getRenderShape() != RenderShape.INVISIBLE &&
                             ItemBlockRenderTypes.getChunkRenderType(state) == layer)
                         {
-                            List<BlockModelPart> parts = this.mc.getModelManager().getBlockModelShaper()
-                                .getBlockModel(state)
-                                .collectParts(randomSource);
+                            List<BlockStateModelPart> parts = new ArrayList<>();
+                            this.mc.getModelManager().getBlockStateModelSet()
+                                .get(state)
+                                .collectParts(randomSource, parts);
                             for (var modelPart : parts) {
                                 for (var quad : modelPart.getQuads(null)) {
-                                    if (quad.sprite().contents().getUniqueFrames().sum() > 1) {
-                                        this.animatedSprites.add(quad.sprite());
-                                    }
+                                    this.addAnimatedSprite(quad.materialInfo().sprite());
                                 }
                             }
                             thisPose.pushPose();
                             thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
-                            blockRenderer.renderBatched(state, pos, this.blockAccess, thisPose, vertBuffer, true,
+                            modelManager.renderBatched(state, pos, this.blockAccess, thisPose, vertBuffer, true,
                                 parts);
                             count++;
                             thisPose.popPose();
@@ -537,7 +542,7 @@ public class MenuWorldRenderer {
                         pos.setY(pos.getY() + 1);
                     }
                 }
-            }
+            }*/
 
             // VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Built segment of {} blocks in {} layer.", count, layer.label());
             this.blockCounts.put(pair, this.blockCounts.getOrDefault(pair, 0) + count);
@@ -557,6 +562,12 @@ public class MenuWorldRenderer {
             this.builderError = e;
         } finally {
             this.builderThreads.remove(Thread.currentThread());
+        }
+    }
+
+    private void addAnimatedSprite(TextureAtlasSprite sprite) {
+        if (sprite.contents().getUniqueFrames().size() > 1) {
+            this.animatedSprites.add(sprite);
         }
     }
 
@@ -826,10 +837,12 @@ public class MenuWorldRenderer {
 
             int skyColor = this.getSkyColor();
 
+            // TODO 26.1 optiofine
+            /*
             if (OptifineHelper.isOptifineLoaded()) {
                 skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.blockAccess, position.x, position.y,
                     position.z);
-            }
+            }*/
 
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled()) {
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
@@ -1061,11 +1074,11 @@ public class MenuWorldRenderer {
         float cloudHeight = this.getValue(EnvironmentAttributes.CLOUD_HEIGHT, ClientUtils.getCurrentPartialTick());
         int cloudColor = this.getValue(EnvironmentAttributes.CLOUD_COLOR, ClientUtils.getCurrentPartialTick());
 
-        if (ARGB.alpha(cloudColor) > 0 && this.mc.options.getCloudsType() != CloudStatus.OFF) {
+        if (ARGB.alpha(cloudColor) > 0 && this.mc.options.getCloudStatus() != CloudStatus.OFF) {
             // use the LevelRenderer CloudRenderer for the clouds
             this.mc.levelRenderer.getCloudRenderer()
-                .render(cloudColor, this.mc.options.getCloudsType(), cloudHeight, new Vec3(x, y, z), this.ticks,
-                    this.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+                .render(cloudColor, this.mc.options.getCloudStatus(), cloudHeight, this.mc.options.cloudRange().get(),
+                    new Vec3(x, y, z), this.ticks, this.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         }
     }
 
@@ -1176,7 +1189,7 @@ public class MenuWorldRenderer {
         bufferSource.endBatch();
     }
 
-    public static int getLightColor(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos) {
+    public static int getLightCoords(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos) {
         int i = blockAndTintGetter.getBrightness(LightLayer.SKY, blockPos);
         int j = blockAndTintGetter.getBrightness(LightLayer.BLOCK, blockPos);
         return i << 20 | j << 4;
@@ -1715,7 +1728,8 @@ public class MenuWorldRenderer {
                 this.fogColor.y = this.fogColor.y * (1.0F - f1) + this.fogColor.y * f3 * f1;
                 this.fogColor.z = this.fogColor.z * (1.0F - f1) + this.fogColor.z * f3 * f1;
             }
-
+            // TODO 26.1 optifine
+            /*
             if (OptifineHelper.isOptifineLoaded()) {
                 // custom fog colors
                 if (fogType == FogType.WATER) {
@@ -1735,13 +1749,15 @@ public class MenuWorldRenderer {
                         this.fogColor.z = (float) colUnderlava.z;
                     }
                 }
-            }
+            }*/
         }
 
         private void updateSurfaceFog() {
             float f = 0.25F + 0.75F * (float) this.menuWorldRenderer.renderDistanceChunks / 32.0F;
             f = 1.0F - (float) Math.pow(f, 0.25);
             int skyColor = this.menuWorldRenderer.getSkyColor();
+            // TODO 26.1 optifine
+            /*
             if (OptifineHelper.isOptifineLoaded()) {
                 if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.OVERWORLD) {
                     Vec3 eyePos = this.menuWorldRenderer.getEyePos();
@@ -1752,10 +1768,13 @@ public class MenuWorldRenderer {
                         OptifineHelper.getCustomSkyColorEnd(new Vec3(ARGB.vector3fFromRGB24(skyColor))));
                 }
             }
+             */
             float skyRed = ARGB.redFloat(skyColor);
             float skyGreen = ARGB.greenFloat(skyColor);
             float skyBlue = ARGB.blueFloat(skyColor);
             int fogColor = this.menuWorldRenderer.getFogColor();
+            // TODO 26.1 optifine
+            /*
             if (OptifineHelper.isOptifineLoaded()) {
                 Vec3 color = new Vec3(ARGB.vector3fFromRGB24(skyColor));
                 if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.OVERWORLD) {
@@ -1769,6 +1788,7 @@ public class MenuWorldRenderer {
                     fogColor = ARGB.color(OptifineHelper.getCustomFogColorNether(color));
                 }
             }
+             */
             this.fogColor.x = ARGB.redFloat(fogColor);
             this.fogColor.y = ARGB.greenFloat(fogColor);
             this.fogColor.z = ARGB.blueFloat(fogColor);
@@ -1944,8 +1964,10 @@ public class MenuWorldRenderer {
         @SuppressWarnings("unchecked")
         public FluidStateWrapper(FluidState fluidState) {
             // need to do it this way, because FerriteCore changes the field type, which would error on a cast
-            super(fluidState.getType(), null, fluidState.propertiesCodec);
-            ((StateHolderExtension) (this)).vivecraft$setValues(fluidState.getValues());
+            // TODO 26.1 check if this works with ferrite core
+            super(fluidState.getType(),
+                fluidState.getProperties().toArray(new Property[]{}), (Comparable[])fluidState.getValues().toList().toArray());
+            //((StateHolderExtension) (this)).vivecraft$setValues(fluidState.getValues());
 
             this.fluidState = fluidState;
         }

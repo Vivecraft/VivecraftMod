@@ -20,6 +20,7 @@ accessible method net/minecraft/client/MouseHandler onMove (JDD)V
 accessible method net/minecraft/client/MouseHandler onScroll (JDD)V
 accessible method net/minecraft/client/KeyboardHandler charTyped (JLnet/minecraft/client/input/CharacterEvent;)V
 accessible method net/minecraft/client/KeyboardHandler keyPress (JILnet/minecraft/client/input/KeyEvent;)V
+accessible method com/mojang/blaze3d/platform/Window onFramebufferResize (JII)V
 
 # for aim fix
 accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
@@ -32,12 +33,7 @@ mutable field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3
 accessible field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
 
 # XR Camera
-accessible field net/minecraft/client/Camera initialized Z
-accessible field net/minecraft/client/Camera level Lnet/minecraft/world/level/Level;
-accessible field net/minecraft/client/Camera entity Lnet/minecraft/world/entity/Entity;
-
-# to set reset camera before tick
-accessible method net/minecraft/client/Camera setPosition (Lnet/minecraft/world/phys/Vec3;)V
+accessible field net/minecraft/client/Camera projection Lnet/minecraft/client/renderer/Projection;
 
 # for pausemenu buttons
 accessible method net/minecraft/client/Minecraft isMultiplayerServer ()Z
@@ -52,6 +48,8 @@ accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platfor
 
 # to create custom GL textures
 accessible method com/mojang/blaze3d/opengl/GlTexture <init> (ILjava/lang/String;Lcom/mojang/blaze3d/textures/TextureFormat;IIIII)V
+accessible class com/mojang/blaze3d/opengl/GlDevice
+accessible field com/mojang/blaze3d/systems/GpuDevice backend Lcom/mojang/blaze3d/systems/GpuDeviceBackend;
 
 # to render vr hands
 accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
@@ -87,7 +85,6 @@ accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData is
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 extendable class net/minecraft/world/level/material/FluidState
-accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
 
 # to init VR
 accessible class net/minecraft/client/ResourceLoadStateTracker$ReloadState

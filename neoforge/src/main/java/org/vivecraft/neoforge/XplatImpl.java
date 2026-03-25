@@ -3,19 +3,14 @@ package org.vivecraft.neoforge;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.client.settings.KeyModifier;
-import net.neoforged.neoforge.client.textures.FluidSpriteCache;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.Xplat;
@@ -35,13 +30,6 @@ public class XplatImpl implements Xplat {
     @Override
     public String getUseMethodName() {
         return "useWithoutItem";
-    }
-
-    @Override
-    public TextureAtlasSprite[] getFluidTextures(
-        BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
-    {
-        return FluidSpriteCache.getFluidSprites(level, pos, fluidStateIn);
     }
 
     @Override

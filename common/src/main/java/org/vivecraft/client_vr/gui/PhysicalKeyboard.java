@@ -3,11 +3,11 @@ package org.vivecraft.client_vr.gui;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
@@ -364,7 +364,7 @@ public class PhysicalKeyboard {
             poseStack.translate(label.getB().x, label.getB().y, label.getB().z);
             poseStack.scale(textScale, textScale, 1.0F);
             font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack,
-                this.mc.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+                this.mc.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
             poseStack.popMatrix();
         }
 

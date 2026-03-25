@@ -3,7 +3,7 @@ package org.vivecraft.client.gui.framework.widgets;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -277,10 +277,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void extractContent(
+            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(),
+            graphics.text(Minecraft.getInstance().font, this.getMessage(),
                 Minecraft.getInstance().screen.width / 2 - this.width / 2,
                 this.getContentBottom() - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFFFF);
         }
@@ -326,20 +326,20 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void extractContent(
+            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
+            super.extractContent(graphics, mouseX, mouseY, hovering, partialTick);
             this.mainWidget.setX(this.getContentX());
             this.mainWidget.setY(this.getContentY());
             this.mainWidget.setWidth(this.optionalWidget == null ? this.getContentWidth() :
                 this.getContentWidth() - 10 - this.optionalWidget.getWidth());
-            this.mainWidget.render(guiGraphics, mouseX, mouseY, partialTick);
+            this.mainWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
             if (this.optionalWidget != null) {
                 this.optionalWidget.setX(this.getContentRight() - this.optionalWidget.getWidth());
                 this.optionalWidget.setY(this.getContentY());
-                this.optionalWidget.render(guiGraphics, mouseX, mouseY, partialTick);
+                this.optionalWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
             }
         }
 
@@ -417,14 +417,14 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void extractContent(
+            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
+            super.extractContent(graphics, mouseX, mouseY, hovering, partialTick);
             this.resetButton.setX(this.getContentRight() - 20);
             this.resetButton.setY(this.getContentY());
             this.resetButton.active = this.isActive() && this.valueWidget.active && this.canReset.getAsBoolean();
-            this.resetButton.render(guiGraphics, mouseX, mouseY, partialTick);
+            this.resetButton.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
 
         @Override
@@ -487,18 +487,18 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void extractContent(
+            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
+            super.extractContent(graphics, mouseX, mouseY, hovering, partialTick);
 
             int textWidth = Minecraft.getInstance().font.width(this.getMessage());
             int textY = this.getY() + this.getHeight() / 2 - Minecraft.getInstance().font.lineHeight / 2 + 2;
             if (textWidth < this.getContentWidth() - VALUE_BUTTON_WIDTH) {
-                guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getContentX(),
+                graphics.text(Minecraft.getInstance().font, this.getMessage(), this.getContentX(),
                     textY, 0xFFFFFFFF);
             } else {
-                guiGraphics.textRenderer().acceptScrollingWithDefaultCenter(this.getMessage(),
+                graphics.textRenderer().acceptScrollingWithDefaultCenter(this.getMessage(),
                     this.getContentX(), this.getContentRight() - VALUE_BUTTON_WIDTH - 5,
                     textY, textY + Minecraft.getInstance().font.lineHeight - 1);
             }
@@ -506,7 +506,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             this.valueWidget.setX(this.getContentRight() - VALUE_BUTTON_WIDTH);
             this.valueWidget.setY(this.getContentY());
             this.valueWidget.active = this.widgetActive.getAsBoolean() && this.isActive();
-            this.valueWidget.render(guiGraphics, mouseX, mouseY, partialTick);
+            this.valueWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
 
         @Override
@@ -541,13 +541,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void extractContent(
+            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             if (this.isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard() ||
                 hovering && Minecraft.getInstance().getLastInputType().isMouse())
             {
-                guiGraphics.fill(this.getX(), this.getContentY(), this.getContentRight(),
+                graphics.fill(this.getX(), this.getContentY(), this.getContentRight(),
                     this.getContentY() + this.getHeight(), 0x80000000);
             }
         }

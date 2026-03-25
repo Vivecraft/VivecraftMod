@@ -43,9 +43,9 @@ public class VRTextureTarget extends RenderTarget {
         }
         if (texId >= 0) {
             // hardcoded opengl here
-            if (RenderSystem.getDevice() instanceof GlDevice glDevice) {
+            if (RenderSystem.getDevice().backend instanceof GlDevice glDevice) {
                 this.colorTexture = ((GlDeviceExtension) glDevice).vivecraft$createFixedIdTexture(
-                    () -> this.label + " / Color",
+                    this.label + " / Color",
                     GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC | GpuTexture.USAGE_TEXTURE_BINDING |
                         GpuTexture.USAGE_RENDER_ATTACHMENT, TextureFormat.RGBA8, width, height, 1,
                     mipmaps ? Math.max(Mth.log2(width), Mth.log2(height)) : 1, texId);

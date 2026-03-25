@@ -1,8 +1,8 @@
 package org.vivecraft.mod_compat_vr.sereneseasons.mixin;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.biome.Biome;

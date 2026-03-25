@@ -1,11 +1,11 @@
 package org.vivecraft.mixin.client_vr.renderer.item;
 
-import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.client_vr.extensions.BlockModelWrapperExtension;
 
-@Mixin(BlockModelWrapper.class)
+@Mixin(CuboidItemModelWrapper.class)
 public class BlockModelWrapperVRMixin implements BlockModelWrapperExtension {
 
     @Unique

@@ -2,8 +2,8 @@ package org.vivecraft.forge;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.loading.LoadingModList;
 import org.vivecraft.Xloader;
 
 import java.io.IOException;
@@ -23,13 +23,13 @@ public class XloaderImpl implements Xloader {
 
     @Override
     public boolean isModLoaded(String name) {
-        return FMLLoader.getLoadingModList().getModFileById(name) != null;
+        return LoadingModList.getModFileById(name) != null;
     }
 
     @Override
     public String getModVersion() {
         if (isModLoadedSuccess()) {
-            return FMLLoader.getLoadingModList().getModFileById("vivecraft").versionString();
+            return LoadingModList.getModFileById("vivecraft").versionString();
         }
         return "no version";
     }
@@ -40,7 +40,7 @@ public class XloaderImpl implements Xloader {
     }
 
     private static Path getJarPath() {
-        return FMLLoader.getLoadingModList().getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
+        return LoadingModList.getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
     }
 
     @Override

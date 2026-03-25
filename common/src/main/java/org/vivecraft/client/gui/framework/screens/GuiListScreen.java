@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.framework.screens;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -9,7 +9,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
 import org.vivecraft.client.gui.framework.widgets.SettingsList;
-import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
+import org.vivecraft.mixin.client.gui.GuiGraphicsExtractorAccessor;
 
 import java.util.List;
 
@@ -92,13 +92,13 @@ public abstract class GuiListScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             init();
             this.reinit = false;
         }
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        graphics.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 
         // render custom tooltip
         SettingsList.BaseEntry entry = null;
@@ -109,9 +109,9 @@ public abstract class GuiListScreen extends Screen {
             entry = this.list.getHovered();
         }
         if (entry != null && this.list.isEntryVisible(entry) &&
-            ((GuiGraphicsAccessor) guiGraphics).getDeferredTooltip() == null)
+            ((GuiGraphicsExtractorAccessor) graphics).getDeferredTooltip() == null)
         {
-            TooltipRenderer.renderTooltip(guiGraphics, entry.getTooltip(),
+            TooltipRenderer.renderTooltip(graphics, entry.getTooltip(),
                 this.width / 2, this.list.getRowTop(this.list.children().indexOf(entry)) + 2,
                 this.list.getItemHeight());
         }

@@ -16,9 +16,11 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.BlockOutlineRenderState;
-import net.minecraft.client.renderer.state.LevelRenderState;
+import net.minecraft.client.renderer.state.level.BlockOutlineRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -26,7 +28,6 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -83,22 +84,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     private void vivecraft$reinitVR(ResourceManager resourceManager, CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
             ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffersMaybe("Resource Reload");
-        }
-    }
-
-    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;pollLightUpdates()V"))
-    private void vivecraft$onePollLightUpdates(ClientLevel instance, Operation<Void> original) {
-        if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().isFirstPass) {
-            original.call(instance);
-        }
-    }
-
-    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"))
-    private int vivecraft$oneLightingUpdates(LevelLightEngine instance, Operation<Integer> original) {
-        if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().isFirstPass) {
-            return original.call(instance);
-        } else {
-            return 0;
         }
     }
 
@@ -230,9 +215,11 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
                     BlockPos.containing(
                         ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                 BlockState blockState = this.level.getBlockState(blockPos);
+                BlockStateModel blockStateModel = Minecraft.getInstance().getModelManager().getBlockStateModelSet()
+                    .get(blockState);
                 ((LevelRenderStateExtension) levelRenderState).vivecraft$setInteractOutlineState(c,
                     new BlockOutlineRenderState(blockPos,
-                        ItemBlockRenderTypes.getChunkRenderType(blockState).sortOnUpload(), false,
+                        blockStateModel.hasMaterialFlag(BakedQuad.FLAG_TRANSLUCENT), false,
                         blockState.getShape(this.level, blockPos, CollisionContext.of(camera.entity()))));
             } else {
                 ((LevelRenderStateExtension) levelRenderState).vivecraft$setInteractOutlineState(c, null);

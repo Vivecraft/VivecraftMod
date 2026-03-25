@@ -8,7 +8,7 @@ loom {
 
 dependencies {
     compileOnly project(":stubs")
-    minecraft "com.mojang:minecraft:${project.minecraft_version}_unobfuscated"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
     compileOnly "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
 
     // for sodium compat

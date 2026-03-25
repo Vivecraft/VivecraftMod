@@ -1,8 +1,10 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.platform.DestFactor;
 import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.shaders.UniformType;
@@ -20,6 +22,7 @@ import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
 import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Set;
 
@@ -42,8 +45,7 @@ public class VRShaders {
         .withSampler(LANCZOS_COLOR_SAMPLER)
         .withSampler(LANCZOS_DEPTH_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // mixed reality shader and its uniforms
@@ -66,8 +68,7 @@ public class VRShaders {
         .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)
         .withSampler(MIXED_REALITY_GUI_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // vr post shader and its uniforms
@@ -81,8 +82,7 @@ public class VRShaders {
         .withUniform(PostProcessUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
         .withSampler(POST_PROCESSING_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // blit shader
@@ -94,9 +94,8 @@ public class VRShaders {
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withColorWrite(true, false)
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
+        .withColorTargetState(new ColorTargetState(Optional.empty(), ColorTargetState.WRITE_COLOR))
         .build();
 
     public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
@@ -105,9 +104,8 @@ public class VRShaders {
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withBlend(BlendFunction.TRANSLUCENT)
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
+        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .build();
 
     public static final RenderPipeline SOLID_ALPHA_PIPELINE = RenderPipeline.builder()
@@ -115,8 +113,8 @@ public class VRShaders {
         .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
-        .withDepthWrite(false)
-        .withColorWrite(false, true)
+        .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
+        .withColorTargetState(new ColorTargetState(Optional.empty(), ColorTargetState.WRITE_ALPHA))
         .build();
 
     // end portal shaders
@@ -140,24 +138,24 @@ public class VRShaders {
         .withVertexShader("core/panorama")
         .withFragmentShader("core/panorama")
         .withSampler(CORE_TEXTURE_SAMPLER)
-        .withDepthWrite(false)
+        .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).build();
 
     public static final RenderPipeline GUI_TEXTURED = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/gui_textured_vr")
-        .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, true)).build();
 
     public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/gui_textured_always_vr")
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     public static final RenderPipeline CROSSHAIR_MENU = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/crosshair_menu_vr")
-        .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
-            SourceFactor.ONE, DestFactor.ONE))
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withColorTargetState(new ColorTargetState(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
+            SourceFactor.ONE, DestFactor.ONE)))
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     private static final RenderPipeline.Snippet ENTITY_SNIPPET = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
         .withSampler(CORE_OVERLAY_SAMPLER)
@@ -167,18 +165,18 @@ public class VRShaders {
         .withLocation("pipeline/crosshair_world_vr")
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-        .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
-            SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA)).build();
+        .withColorTargetState(new ColorTargetState(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
+            SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA))).build();
 
     // all those NO_DEPTH_TEST should be ALWAYS_DEPTH_TEST, to also be able to write depth
     // but 1.21.5 doesn't have that
     public static final RenderPipeline CROSSHAIR_WORLD_ALWAYS = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation("pipeline/crosshair_world_always_vr")
-        .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
-            SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA))
+        .withColorTargetState(new ColorTargetState(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
+            SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA)))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     public static final RenderPipeline ENTITY_SOLID_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation("pipeline/entity_solid_no_cardinal_light_vr")
@@ -188,15 +186,15 @@ public class VRShaders {
         .withLocation("pipeline/entity_translucent_no_cardinal_light_vr")
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-        .withBlend(BlendFunction.TRANSLUCENT).build();
+        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).build();
 
     public static final RenderPipeline ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
             ENTITY_SNIPPET)
         .withLocation("pipeline/entity_translucent_always_no_cardinal_light_vr")
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-        .withBlend(BlendFunction.TRANSLUCENT)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation("pipeline/entity_cutout_no_cull_no_cardinal_light_vr")
@@ -208,42 +206,39 @@ public class VRShaders {
         .withLocation("pipeline/entity_cutout_no_cull_always_no_cardinal_light_vr")
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     public static final RenderPipeline LINE_STRIP = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/debug_line_strip_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINE_STRIP)
         .withCull(false)
-        .withDepthWrite(true)
+        .withDepthStencilState(DepthStencilState.DEFAULT)
         .build();
 
     public static final RenderPipeline QUADS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/quads_vr")
         .withCull(false)
-        .withDepthWrite(true)
+        .withDepthStencilState(DepthStencilState.DEFAULT)
         .build();
 
     public static final RenderPipeline QUADS_ALWAYS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/quads_always_vr")
         .withCull(false)
-        .withDepthWrite(true)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     public static final RenderPipeline TRIANGLES_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/debug_triangles_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
         .withCull(false)
-        .withDepthWrite(true)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     public static final RenderPipeline TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation("pipeline/debug_triangle_fan_vr")
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_FAN)
         .withCull(false)
-        .withDepthWrite(true)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
     public static final RenderPipeline TEXT_NO_CULL = RenderPipeline.builder(
             RenderPipelines.TEXT_SNIPPET, RenderPipelines.FOG_SNIPPET)

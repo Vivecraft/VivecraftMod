@@ -244,14 +244,4 @@ public class VRPlayerModel_WithArmsLegs extends VRPlayerModel_WithArms implement
     public ModelPart getRightFoot() {
         return this.rightFoot;
     }
-
-    @Override
-    public void setAllVisible(boolean visible) {
-        super.setAllVisible(visible);
-
-        this.leftFoot.visible = visible;
-        this.rightFoot.visible = visible;
-        this.leftFootPants.visible = visible;
-        this.rightFootPants.visible = visible;
-    }
 }
