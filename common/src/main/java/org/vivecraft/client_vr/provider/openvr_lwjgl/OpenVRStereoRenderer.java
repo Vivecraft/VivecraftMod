@@ -86,9 +86,10 @@ public class OpenVRStereoRenderer extends VRRenderer {
             FloatBuffer bottom = stack.mallocFloat(1);
 
             VRSystem_GetProjectionRaw(eyeType, left, right, top, bottom);
-            // TODO 26.1 I think that is wrong
-            return new Matrix4f().perspectiveOffCenterFov(left.get(), right.get(), bottom.get(), top.get(), nearClip,
-                farClip, RenderSystem.getDevice().isZZeroToOne());
+            return new Matrix4f().frustum(
+                left.get() * nearClip, right.get() * nearClip,
+                top.get() * nearClip, bottom.get() * nearClip,
+                nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
         }
     }
 
