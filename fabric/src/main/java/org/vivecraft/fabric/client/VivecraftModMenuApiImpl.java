@@ -1,5 +1,5 @@
 package org.vivecraft.fabric.client;
-/*
+
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import org.vivecraft.client.gui.settings.VivecraftMainSettings;
@@ -10,4 +10,3 @@ public class VivecraftModMenuApiImpl implements ModMenuApi {
         return VivecraftMainSettings::new;
     }
 }
-*/

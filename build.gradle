@@ -9,7 +9,7 @@ subprojects {
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
-    if (project.name != "common" && project.name != "stubs") {
+    if (project.name == "forge" || project.name == "neoforge") {
         apply plugin: 'com.gradleup.shadow'
 
         configurations {
@@ -21,11 +21,14 @@ subprojects {
         }
 
         shadowJar {
-            from(zipTree(project.tasks.jar.archiveFile))
+            dependsOn project.tasks.named('jar')
+            from {
+                project.tasks.named('jar').get().archiveFile.map { zipTree(it) }
+            }
             archiveClassifier.set(project.name)
             configurations = project.configurations.named('bundle').map { [it] }
             if (project.name != "forge") {
-                // forge does the jar in jar after so can'T use the shadow jar as output
+                // forge does the jar in jar after so can't use the shadow jar as output
                 destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
             }
         }
@@ -35,7 +38,7 @@ subprojects {
 
     dependencies {
         if (project.name != "common" && project.name != "stubs") {
-            bundle(implementation(project(":common")) { transitive = false })
+            implementation(project(":common")) { transitive = false }
         }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
@@ -108,14 +111,25 @@ subprojects {
 
         if (project.name != "common" && project.name != "stubs") {
             // copy resources except the mixin jsons
-            from(project(':common').sourceSets['main'].resources) {
+            /*from(project(':common').sourceSets['main'].resources) {
                 exclude "vivecraft.*"
-            }
+            }*/
         }
     }
 
     jar {
-        archiveClassifier.set(project.name + "-slim")
+        archiveClassifier.set(project.name)
+        if (project.name != "common" && project.name != "stubs") {
+            if (project.name != "forge" && project.name != "neoforge") {
+                // forge does the jar in jar after so can't use the shadow jar as output
+                destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
+            }
+            dependsOn project(':common').tasks.named('jar')
+
+            from {
+                project(':common').tasks.named('jar').get().archiveFile.map { zipTree(it) }
+            }
+        }
         manifest {
             attributes(
                 'Main-Class': "org.vivecraft.LaunchPopup"

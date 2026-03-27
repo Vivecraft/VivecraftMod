@@ -73,5 +73,6 @@
       },
       "update_checker": true
     }
-  }
+  },
+  "accessWidener": "vivecraft.accesswidener"
 }
