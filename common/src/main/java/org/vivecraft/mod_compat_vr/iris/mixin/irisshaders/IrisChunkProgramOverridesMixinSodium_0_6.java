@@ -19,7 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 public class IrisChunkProgramOverridesMixinSodium_0_6 {
 
     @Group(name = "create sodium shaders", min = 1, max = 1)
-    @Redirect(method = "getProgramOverride", at = @At(value = "INVOKE", target = "Lnet/irisshaders/iris/compat/sodium/impl/shader_overrides/IrisChunkProgramOverrides;createShaders(Lnet/irisshaders/iris/pipeline/SodiumTerrainPipeline;Lnet/caffeinemc/mods/sodium/client/render/chunk/vertex/format/ChunkVertexType;)V"), remap = false, expect = 0)
+    @Redirect(method = "getProgramOverride", at = @At(value = "INVOKE", target = "Lnet/irisshaders/iris/compat/sodium/impl/shader_overrides/IrisChunkProgramOverrides;createShaders(Lnet/irisshaders/iris/pipeline/SodiumTerrainPipeline;Lnet/caffeinemc/mods/sodium/client/render/chunk/vertex/format/ChunkVertexType;)V"), expect = 0)
     private void vivecraft$createAllPipelinesShadersSodium_0_6(
         IrisChunkProgramOverrides instance, SodiumTerrainPipeline sodiumTerrainPipeline,
         ChunkVertexType chunkVertexType)

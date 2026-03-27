@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Pseudo
-@Mixin(targets = "net.optifine.shaders.config.ShaderMacros", remap = false)
+@Mixin(targets = "net.optifine.shaders.config.ShaderMacros")
 public class ShaderMacrosVRMixin {
 
     @Shadow

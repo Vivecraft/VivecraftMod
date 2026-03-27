@@ -105,6 +105,13 @@ subprojects {
         }
 
         inputs.properties(expandProps)
+
+        if (project.name != "common" && project.name != "stubs") {
+            // copy resources except the mixin jsons
+            from(project(':common').sourceSets['main'].resources) {
+                exclude "vivecraft.*"
+            }
+        }
     }
 
     jar {

@@ -334,7 +334,8 @@ public class MenuWorldExporter {
                 attributes.set(EnvironmentAttributes.FOG_COLOR, -4138753);
                 attributes.set(EnvironmentAttributes.SKY_COLOR, OverworldBiomes.calculateSkyColor(0.8f));
                 timeline = timelines != null ?
-                    HolderSet.direct(timelines.getOrThrow(Timelines.OVERWORLD_DAY), timelines.getOrThrow(Timelines.MOON)) :
+                    HolderSet.direct(timelines.getOrThrow(Timelines.OVERWORLD_DAY),
+                        timelines.getOrThrow(Timelines.MOON)) :
                     HolderSet.empty();
             }
             case END -> {
@@ -349,7 +350,8 @@ public class MenuWorldExporter {
             dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
         }
 
-        DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, false, 1.0,
+        DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, false,
+            1.0,
             dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimAmbientLight,
             new DimensionType.MonsterSettings(ConstantInt.of(0), 0), skybox, cardinalLightingType, attributes.build(),
             timeline, Optional.empty());

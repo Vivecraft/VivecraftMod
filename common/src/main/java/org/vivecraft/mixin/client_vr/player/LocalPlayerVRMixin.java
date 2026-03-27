@@ -261,6 +261,7 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
         if (VRState.VR_RUNNING) {
             VRPlayer vrPlayer = ClientDataHolderVR.getInstance().vrPlayer;
             // get the end of the reach point here, to have the correct reach distance
+            // TODO 26.1 called too late? not called when enabling vr ingame
             vrPlayer.crossVec = vrPlayer.AimedPointAtDistance(vrPlayer.vrdata_world_render.getAim(), hitDistance);
         }
         return hitDistance;

@@ -73,7 +73,8 @@ public class TextScrollWidget extends AbstractWidget {
             getY() + this.height - 1,
             0xFF000000);
 
-        ActiveTextCollector textRenderer = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+        ActiveTextCollector textRenderer = graphics.textRenderer(
+            GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
 
         // draw text
         for (int line = 0; line + this.currentLine < this.formattedChars.size() && line < this.maxLines; line++) {

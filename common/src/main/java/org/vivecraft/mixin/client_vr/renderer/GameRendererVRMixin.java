@@ -193,7 +193,7 @@ public abstract class GameRendererVRMixin
         this.vivecraft$shouldDrawGui = shouldDrawGui;
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;", ordinal = 1), cancellable = true)
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearDepthTexture(Lcom/mojang/blaze3d/textures/GpuTexture;D)V"), cancellable = true)
     private void vivecraft$mainMenu(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
@@ -221,6 +221,8 @@ public abstract class GameRendererVRMixin
 
             RenderSystem.getModelViewStack().pushMatrix().identity();
             RenderHelper.applyVRModelView(vivecraft$DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
+
+            vivecraft$resetProjectionMatrix(partialTick);
 
             VREffectsHelper.renderGuiLayer(partialTick, true);
 
@@ -250,9 +252,17 @@ public abstract class GameRendererVRMixin
         ci.cancel();
     }
 
-    @ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;", ordinal = 1), ordinal = 0, argsOnly = true)
-    private boolean vivecraft$renderGui(boolean renderLevel) {
-        return RenderPassType.isVanilla() ? renderLevel : this.vivecraft$shouldDrawGui;
+    @ModifyArg(method = "extract", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;extractGui(Lnet/minecraft/client/DeltaTracker;ZZ)V"), index = 1)
+    private boolean vivecraft$renderGui(boolean shouldRenderLevel) {
+        if (RenderPassType.isVanilla()) {
+            return shouldRenderLevel;
+        } else {
+            if (!shouldRenderLevel) {
+                // we still need the camera setup outside a level
+                this.mainCamera.extractRenderState(this.gameRenderState.levelRenderState.cameraRenderState, 0);
+            }
+            return shouldRenderLevel && this.vivecraft$shouldDrawGui;
+        }
     }
 
     @WrapWithCondition(method = "extract", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;extractGui(Lnet/minecraft/client/DeltaTracker;ZZ)V"))
@@ -283,7 +293,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotate(FLorg/joml/Vector3fc;)Lorg/joml/Matrix4f;", remap = false), index = 0, remap = true)
+    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotate(FLorg/joml/Vector3fc;)Lorg/joml/Matrix4f;"), index = 0)
     private float vivecraft$reduceNauseaSpeed(float oldVal) {
         if (!RenderPassType.isVanilla()) {
             return oldVal * 0.2F;
@@ -302,7 +312,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearDepthTexture(Lcom/mojang/blaze3d/textures/GpuTexture;D)V", remap = false), remap = true)
+    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearDepthTexture(Lcom/mojang/blaze3d/textures/GpuTexture;D)V"))
     private boolean vivecraft$noDepthClearInVR(CommandEncoder instance, GpuTexture gpuTexture, double clearDepth) {
         return RenderPassType.isVanilla();
     }
@@ -456,7 +466,9 @@ public abstract class GameRendererVRMixin
         this.vivecraft$inBlock = 0.0F;
         this.vivecraft$inwater = false;
 
-        if (!this.minecraft.player.isSpectator() && !MethodHolder.isInMenuRoom() && this.minecraft.player.isAlive()) {
+        if (this.minecraft.player != null && !this.minecraft.player.isSpectator() && !MethodHolder.isInMenuRoom() &&
+            this.minecraft.player.isAlive())
+        {
             Vec3 cameraPos = vivecraft$DATA_HOLDER.vrPlayer.getVRDataWorld().getEye(vivecraft$DATA_HOLDER.currentPass)
                 .getPosition();
             Triple<Float, BlockState, BlockPos> triple = VREffectsHelper.getNearOpaqueBlock(cameraPos,

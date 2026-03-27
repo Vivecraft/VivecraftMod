@@ -593,8 +593,7 @@ public abstract class VRRenderer {
                 }
             }
             // need to recall this, for PostChains to get the right resize
-            minecraft.getWindow().onFramebufferResize(minecraft.getWindow().handle(), minecraft.getWindow().getWidth(),
-                minecraft.getWindow().getHeight());
+            ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$resize();
 
             this.resizeFrameBuffers = false;
         }
@@ -628,11 +627,12 @@ public abstract class VRRenderer {
                         onlyIntel ? Component.empty()
                             : Component.translatable("vivecraft.messages.intelgraphics2",
                             Component.literal("https://www.vivecraft.org/faq/#gpu")
-                                .withStyle(style -> style.withUnderlined(true)
-                                    .withColor(ChatFormatting.GREEN)
-                                    .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                                    .withClickEvent(new ClickEvent.OpenUrl(
-                                        ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu")))))));
+                            .withStyle(style -> style.withUnderlined(true)
+                                                .withColor(ChatFormatting.GREEN)
+                                                .withHoverEvent(
+                                                    new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
+                                                .withClickEvent(new ClickEvent.OpenUrl(
+                                                    ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu")))))));
             }
 
             if (!this.isInitialized()) {

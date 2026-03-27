@@ -39,6 +39,9 @@ public class VRPassHelper {
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
         // THIS IS WHERE EVERYTHING IS RENDERED
+        // reextract world state for the new pass
+        MC.gameRenderer.update(deltaTracker, renderLevel);
+        MC.gameRenderer.extract(deltaTracker, renderLevel);
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
         // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
@@ -157,6 +160,9 @@ public class VRPassHelper {
 
         // done with guis
         Profiler.get().pop();
+
+        // resize happened in the gui pass, set it to false or it will mess with stuff
+        MC.getWindow().resetIsResized();
 
         // render the different vr passes
         List<RenderPass> list = DATA_HOLDER.vrRenderer.getRenderPasses(false);

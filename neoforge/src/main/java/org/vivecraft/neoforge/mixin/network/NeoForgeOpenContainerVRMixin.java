@@ -8,7 +8,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 
 @Mixin(targets = "net.neoforged.neoforge.client.network.ClientPayloadHandler")
 public class NeoForgeOpenContainerVRMixin {
-    @Inject(method = "handle(Lnet/neoforged/neoforge/network/payload/AdvancedOpenScreenPayload;Lnet/neoforged/neoforge/network/handling/IPayloadContext;)V", at = @At("HEAD"), remap = false)
+    @Inject(method = "handle(Lnet/neoforged/neoforge/network/payload/AdvancedOpenScreenPayload;Lnet/neoforged/neoforge/network/handling/IPayloadContext;)V", at = @At("HEAD"))
     private static void vivecraft$markScreenActiveNeoForge(CallbackInfo ci) {
         GuiHandler.GUI_APPEAR_OVER_BLOCK_ACTIVE = true;
     }

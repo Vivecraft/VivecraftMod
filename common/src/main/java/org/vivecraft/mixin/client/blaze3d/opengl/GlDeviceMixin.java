@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.vivecraft.client.extensions.GlDeviceExtension;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
 @Mixin(GlDevice.class)
 public class GlDeviceMixin implements GlDeviceExtension {

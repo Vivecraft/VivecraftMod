@@ -12,7 +12,7 @@ import java.util.List;
 @Mixin(targets = "me.cortex.voxy.client.iris.IrisVoxyRenderPipelineData")
 public class IrisVoxyRenderPipelineDataVRMixin {
 
-    @ModifyReturnValue(method = "createUniformSet", at = @At("RETURN"), remap = false)
+    @ModifyReturnValue(method = "createUniformSet", at = @At("RETURN"))
     private static List<?> vivecraft$sortUniforms(List<?> original) {
         original.sort((o1, o2) -> {
             try {

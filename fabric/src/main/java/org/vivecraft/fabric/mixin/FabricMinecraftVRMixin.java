@@ -26,9 +26,6 @@ public class FabricMinecraftVRMixin {
     @Final
     private ReloadableResourceManager resourceManager;
 
-    @Shadow
-    public boolean noRender;
-
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ResourceLoadStateTracker;startReload(Lnet/minecraft/client/ResourceLoadStateTracker$ReloadReason;Ljava/util/List;)V"), index = 0)
     private ResourceLoadStateTracker.ReloadReason vivecraft$registerReloadListener(
         ResourceLoadStateTracker.ReloadReason reloadReason)
@@ -37,11 +34,11 @@ public class FabricMinecraftVRMixin {
         return reloadReason;
     }
 
-    @Inject(method = "runTick", at = @At(value = "CONSTANT", args = "stringValue=blit"))
+    @Inject(method = "renderFrame", at = @At(value = "CONSTANT", args = "stringValue=present"))
     private void vivecraft$renderVRPassesFabric(
         boolean renderLevel, CallbackInfo ci)
     {
-        if (VRState.VR_RUNNING && !this.noRender) {
+        if (VRState.VR_RUNNING) {
             VRPassHelper.renderAndSubmit(renderLevel, this.deltaTracker);
         }
     }

@@ -189,7 +189,7 @@ public class MCOpenVR extends MCVR {
         OME = this;
         // make sure the lwjgl version is the right one
         // check that the right lwjgl version is loaded that we ship the OpenVR part of, or stuff breaks
-        final String[] lwjglVersions = new String[]{"3.3.3"};
+        final String[] lwjglVersions = new String[]{"3.4.1"};
         if (Arrays.stream(lwjglVersions).noneMatch(v -> Version.getVersion().startsWith(v))) {
             String suppliedJar = "";
             try {

@@ -24,9 +24,7 @@ public class HumanoidArmorLayerMixin {
         this.vivecraft$currentRenderState = renderState;
     }
 
-
-    // no remapping, because of a loom quirk and forge/neoforge override
-    @Inject(method = {"renderArmorPiece*", "method_4169"}, at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "renderArmorPiece*", at = @At("HEAD"), cancellable = true)
     private void vivecraft$noHelmetInFirstPerson(CallbackInfo ci, @Local(argsOnly = true) EquipmentSlot slot) {
         if (slot == EquipmentSlot.HEAD &&
             VREffectsHelper.isRenderingFirstPersonPlayer(this.vivecraft$currentRenderState))

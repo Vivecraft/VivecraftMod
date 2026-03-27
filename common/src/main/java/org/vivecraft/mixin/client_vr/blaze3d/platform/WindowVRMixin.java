@@ -1,7 +1,10 @@
 package org.vivecraft.mixin.client_vr.blaze3d.platform;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.platform.WindowEventHandler;
 import net.minecraft.client.Minecraft;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,6 +26,13 @@ public abstract class WindowVRMixin implements WindowExtension {
 
     @Shadow
     private int height;
+
+    @Shadow
+    private boolean isResized;
+
+    @Shadow
+    @Final
+    private WindowEventHandler eventHandler;
 
     // TODO: this doesn't disable sodium extras adaptive sync
     @ModifyVariable(method = "updateVsync", at = @At("HEAD"), ordinal = 0, argsOnly = true)
@@ -93,6 +103,11 @@ public abstract class WindowVRMixin implements WindowExtension {
         }
     }
 
+    @ModifyReturnValue(method = "isFocused", at = @At(value = "RETURN"))
+    private boolean vivecraft$windowAlwaysActive(boolean isFocused) {
+        return isFocused || VRState.VR_RUNNING;
+    }
+
     @Override
     @Unique
     public int vivecraft$getActualScreenHeight() {
@@ -103,5 +118,12 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Unique
     public int vivecraft$getActualScreenWidth() {
         return this.width;
+    }
+
+    @Override
+    @Unique
+    public void vivecraft$resize() {
+        this.isResized = true;
+        this.eventHandler.resizeGui();
     }
 }

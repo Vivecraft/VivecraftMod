@@ -13,7 +13,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 @Mixin(targets = {"me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget"})
 public abstract class reiTextFieldWidgetMixin {
 
-    @Inject(method = {"setFocused", "method_25365", "m_93692_"}, at = @At("HEAD"), remap = false)
+    @Inject(method = "setFocused", at = @At("HEAD"))
     private void vivecraft$openKeyboard(boolean focused, CallbackInfo ci) {
         if (VRState.VR_RUNNING && focused) {
             KeyboardHandler.showOverlay(OpenKeyboardContext.FORCE);

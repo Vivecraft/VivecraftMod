@@ -392,7 +392,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                     ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
                     ClientNetworking.overrideAimDir(inAnEntity ?
                         MathUtils.subtractToVector3f(averageTargetPosition.scale(1F / targetCount), handPos)
-                            .normalize() :
+                        .normalize() :
                         deviceDirection.rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians, new Vector3f()));
                     this.mc.gameMode.piercingAttack(piercingWeapon);
                     ClientNetworking.resetAim(0);

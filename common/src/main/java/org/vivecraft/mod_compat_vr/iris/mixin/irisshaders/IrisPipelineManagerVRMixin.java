@@ -31,14 +31,14 @@ import java.util.function.Function;
 @Mixin(PipelineManager.class)
 public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
-    @Shadow(remap = false)
+    @Shadow
     private void resetTextureState() {}
 
-    @Shadow(remap = false)
+    @Shadow
     private WorldRenderingPipeline pipeline;
 
     @Final
-    @Shadow(remap = false)
+    @Shadow
     private Function<Object, WorldRenderingPipeline> pipelineFactory;
 
     @Unique
@@ -68,14 +68,14 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     @Unique
     private WorldRenderPass vivecraft$currentWorldRenderPass = null;
 
-    @Inject(method = "preparePipeline", at = @At(value = "HEAD"), remap = false)
+    @Inject(method = "preparePipeline", at = @At(value = "HEAD"))
     private void vivecraft$disableDHOverrideOnChange(CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         if (VRState.VR_INITIALIZED && this.pipeline != null) {
             IrisHelper.unregisterDHIfThere(this.pipeline);
         }
     }
 
-    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;"))
     private void vivecraft$prepareForVanillaPipeline(CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         // this also runs on game startup, when the renderpassManager isn't initialized yet
         if (VRState.VR_INITIALIZED && RenderPassManager.INSTANCE != null) {
@@ -87,7 +87,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     }
 
     @Group(name = "generateVRPipelines", min = 1, max = 1)
-    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false, expect = 0)
+    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), expect = 0)
     private void vivecraft$generateVRPipelines165(
         NamespacedId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir)
     {
@@ -150,7 +150,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     }
 
     @Group(name = "returnCurrentVRPipeline", min = 1, max = 1)
-    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, cancellable = true, expect = 0)
+    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), cancellable = true, expect = 0)
     private void vivecraft$returnCurrentVRPipeline165(
         NamespacedId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir)
     {
@@ -168,7 +168,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
         return this.vivecraft$vrPipelinesPerDimension.get(key).get(ClientDataHolderVR.getInstance().currentPass);
     }
 
-    @Inject(method = "destroyPipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"), remap = false)
+    @Inject(method = "destroyPipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"))
     private void vivecraft$destroyVRPipelines(CallbackInfo ci) {
         if (this.pipeline != null) {
             IrisHelper.unregisterDHIfThere(this.pipeline);

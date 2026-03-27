@@ -4,7 +4,6 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
 public interface GlDeviceExtension {
     /**

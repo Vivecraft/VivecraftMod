@@ -17,7 +17,7 @@ public class BedrockBlockShadingMixin {
     /**
      * menuworld fix
      */
-    @Inject(method = "getBlockShade", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "getBlockShade", at = @At("HEAD"), cancellable = true)
     private void vivecraft$MenuWorldNetherBlockShade(Direction direction, CallbackInfoReturnable<Float> cir) {
         if (Minecraft.getInstance().player == null && direction == Direction.DOWN) {
             MenuWorldRenderer menuWorldRenderer = ClientDataHolderVR.getInstance().menuWorldRenderer;

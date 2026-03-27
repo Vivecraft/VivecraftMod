@@ -125,7 +125,8 @@ public class FakeBlockAccess implements LevelReader, BlockAndTintGetter {
             });
         }
 
-        this.dimensionType.timelines().forEach((timeline) -> builder.addTimelineLayer(timeline, (definition) -> renderer.time));
+        this.dimensionType.timelines()
+            .forEach((timeline) -> builder.addTimelineLayer(timeline, (definition) -> renderer.time));
 
         int flashColor = ARGB.color(204, 204, 255);
         builder.addTimeBasedLayer(EnvironmentAttributes.SKY_COLOR, (skyColor, cacheTickId) -> {

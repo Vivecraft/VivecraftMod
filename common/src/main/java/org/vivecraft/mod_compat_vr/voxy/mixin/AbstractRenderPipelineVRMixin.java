@@ -10,6 +10,6 @@ public abstract class AbstractRenderPipelineVRMixin {
 
     @Final
     @Mutable
-    @Shadow(remap = false)
+    @Shadow
     public DepthFramebuffer fb;
 }

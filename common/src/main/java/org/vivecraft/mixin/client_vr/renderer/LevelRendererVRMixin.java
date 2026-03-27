@@ -128,7 +128,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         return isSleeping && RenderPassType.isVanilla();
     }
 
-    @Inject(method = "addMainPass*", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 0, remap = true), remap = false)
+    @Inject(method = "addMainPass*", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 0))
     public void vivecraft$markVRTargetsForWrite(CallbackInfo ci, @Local FramePass framePass) {
         if (VRState.VR_RUNNING && this.targets instanceof LevelTargetBundleExtension ext) {
             if (ext.vivecraft$getOccluded() != null) {
@@ -147,11 +147,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     // no remap needed to make the * work
-    @Inject(method = {
-        "method_62214*", // fabric
-        "lambda$addMainPass$2*", // forge
-        "lambda$addMainPass$1*" // neoforge
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;endOutlineBatch()V", shift = Shift.AFTER, remap = true), remap = false)
+    @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;endOutlineBatch()V", shift = Shift.AFTER))
     private void vivecraft$interactOutlineSolid(
         CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState, @Local PoseStack poseStack)
     {
@@ -159,11 +155,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     // no remap needed to make the * work
-    @Inject(method = {
-        "method_62214*", // fabric
-        "lambda$addMainPass$2*", // forge
-        "lambda$addMainPass$1*" // neoforge
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 2, remap = true), remap = false)
+    @Inject(method = "lambda$addMainPass$0*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 2))
     private void vivecraft$interactOutlineTranslucent(
         CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState, @Local PoseStack poseStack)
     {
@@ -228,11 +220,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     // no remap needed to make the * work
-    @Inject(method = {
-        "method_62214*", // fabric
-        "lambda$addMainPass$2*", // forge
-        "lambda$addMainPass$1*" // neoforge
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = Shift.AFTER, remap = true), remap = false)
+    @Inject(method = "lambda$addMainPass$0*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = Shift.AFTER))
     private void vivecraft$renderVrStuffPart1(CallbackInfo ci) {
         if (RenderPassType.isVanilla()) return;
 
@@ -252,7 +240,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;getCloudsType()Lnet/minecraft/client/CloudStatus;"))
+    @Inject(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/OptionsRenderState;cloudStatus:Lnet/minecraft/client/CloudStatus;"))
     private void vivecraft$renderVrStuffPart2(
         CallbackInfo ci, @Local(ordinal = 0) float partialTick, @Local FrameGraphBuilder frameGraphBuilder)
     {

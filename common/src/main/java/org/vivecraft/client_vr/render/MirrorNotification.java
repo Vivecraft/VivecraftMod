@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.vivecraft.client.utils.TextUtils;
-import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
 
 import java.util.ArrayList;
@@ -43,8 +42,8 @@ public class MirrorNotification {
             int screenX = MC.mainRenderTarget.width;
 
             // override the gui scale, to be in absolute size
-            int backupGuiScale = GuiHandler.GUI_SCALE_FACTOR;
-            GuiHandler.GUI_SCALE_FACTOR = 1;
+            int backupGuiScale = MC.gameRenderer.getGameRenderState().windowRenderState.guiScale;
+            MC.gameRenderer.getGameRenderState().windowRenderState.guiScale = 1;
 
             GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
             graphics.pose().scale(3, 3);
@@ -72,7 +71,7 @@ public class MirrorNotification {
             GuiRenderHelper.finish();
 
             // reset gui scale
-            GuiHandler.GUI_SCALE_FACTOR = backupGuiScale;
+            MC.gameRenderer.getGameRenderState().windowRenderState.guiScale = backupGuiScale;
         }
     }
 }

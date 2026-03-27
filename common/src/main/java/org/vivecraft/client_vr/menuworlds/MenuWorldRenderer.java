@@ -15,15 +15,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
-import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.block.FluidRenderer;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelManager;
@@ -43,8 +40,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.MoonPhase;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.Fluid;
@@ -55,12 +50,10 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
-import org.vivecraft.Services;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
-import org.vivecraft.client_vr.extensions.StateHolderExtension;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
@@ -166,7 +159,8 @@ public class MenuWorldRenderer {
         this.mc = Minecraft.getInstance();
 
         this.lightMap = RenderSystem.getDevice().createTexture("MenuWOrld Light Texture",
-            GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT, TextureFormat.RGBA8,
+            GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT,
+            TextureFormat.RGBA8,
             16, 16, 1, 1);
         this.lightMapView = RenderSystem.getDevice().createTextureView(this.lightMap);
         RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.lightMap, 0xFFFFFFFF);
@@ -484,7 +478,6 @@ public class MenuWorldRenderer {
             RandomSource randomSource = RandomSource.create();
 
             int count = 0;
-            /*
             while (
                 ClientUtils.milliTime() - startTime < maxTime && pos.getY() <
                     Math.min(this.segmentSize.getY() + offset.getY(),
@@ -493,7 +486,7 @@ public class MenuWorldRenderer {
                 if (Mth.abs(pos.getY()) <= this.renderDistance + 1 &&
                     Mth.lengthSquared(pos.getX(), pos.getZ()) <= renderDistSquare)
                 {
-                    BlockState state = this.blockAccess.getBlockState(pos);
+                    /*BlockState state = this.blockAccess.getBlockState(pos);
                     if (state != null) {
                         FluidState fluidState = state.getFluidState();
                         if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
@@ -527,7 +520,7 @@ public class MenuWorldRenderer {
                             count++;
                             thisPose.popPose();
                         }
-                    }
+                    }*/
                 }
 
                 // iterate the position
@@ -542,7 +535,7 @@ public class MenuWorldRenderer {
                         pos.setY(pos.getY() + 1);
                     }
                 }
-            }*/
+            }
 
             // VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Built segment of {} blocks in {} layer.", count, layer.label());
             this.blockCounts.put(pair, this.blockCounts.getOrDefault(pair, 0) + count);
@@ -1966,7 +1959,8 @@ public class MenuWorldRenderer {
             // need to do it this way, because FerriteCore changes the field type, which would error on a cast
             // TODO 26.1 check if this works with ferrite core
             super(fluidState.getType(),
-                fluidState.getProperties().toArray(new Property[]{}), (Comparable[])fluidState.getValues().toList().toArray());
+                fluidState.getProperties().toArray(new Property[]{}),
+                (Comparable[]) fluidState.getValues().toList().toArray());
             //((StateHolderExtension) (this)).vivecraft$setValues(fluidState.getValues());
 
             this.fluidState = fluidState;

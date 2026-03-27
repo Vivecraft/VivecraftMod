@@ -57,7 +57,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
 
     @Shadow
     @Final
-    public MinecraftServer server;
+    private MinecraftServer server;
 
     @Shadow
     public ServerGamePacketListenerImpl connection;
@@ -254,16 +254,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         boolean hurt = original.call(level, damageSource, amount);
         this.vivecraft$roomscaleShieldItem = null;
         return hurt;
-    }
-
-    @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$noAttackWhileBlocking(Entity target, CallbackInfo ci) {
-        ServerVivePlayer vivePlayer = vivecraft$getVivePlayer();
-        if (!ServerConfig.ALLOW_ATTACKS_WHILE_BLOCKING.get() && vivePlayer != null && vivePlayer.isVR() &&
-            this.isBlocking())
-        {
-            ci.cancel();
-        }
     }
 
     @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))

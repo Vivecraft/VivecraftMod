@@ -11,6 +11,7 @@ import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -186,8 +187,10 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.isVanilla || RenderPassType.isVanilla()) {
             return this.vanilla;
         } else {
-            return this.vrTargets.get(
-                this.passOverride != null ? this.passOverride : ClientDataHolderVR.getInstance().currentPass);
+            return Objects.requireNonNull(this.vrTargets.get(
+                    this.passOverride != null ? this.passOverride : ClientDataHolderVR.getInstance().currentPass),
+                "no target for pass " +
+                    (this.passOverride != null ? this.passOverride : ClientDataHolderVR.getInstance().currentPass));
         }
     }
 

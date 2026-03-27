@@ -1,20 +1,17 @@
 package org.vivecraft.mixin.client_vr.renderer.blockentity;
 
-import net.minecraft.client.renderer.blockentity.AbstractEndPortalRenderer;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-@Mixin(AbstractEndPortalRenderer.class)
+@Mixin(TheEndPortalRenderer.class)
 public class TheEndPortalRendererVRMixin {
-    @Inject(method = "renderType", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$VRShaderOverride(CallbackInfoReturnable<RenderType> cir) {
-        if (!RenderPassType.isVanilla()) {
-            cir.setReturnValue(VRRenderTypes.endPortalVR());
-        }
+    @ModifyExpressionValue(method = "submit(Lnet/minecraft/client/renderer/blockentity/state/EndPortalRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;endPortal()Lnet/minecraft/client/renderer/rendertype/RenderType;"))
+    private RenderType vivecraft$VRShaderOverride(RenderType renderType) {
+        return RenderPassType.isVanilla() ? renderType : VRRenderTypes.endGateWayVR();
     }
 }

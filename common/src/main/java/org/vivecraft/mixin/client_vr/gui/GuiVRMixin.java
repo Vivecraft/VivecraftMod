@@ -118,7 +118,9 @@ public abstract class GuiVRMixin implements GuiExtension {
     }
 
     @Inject(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 1, shift = At.Shift.AFTER))
-    private void vivecraft$hotbarContextIndicator(CallbackInfo ci, @Local(argsOnly = true) GuiGraphicsExtractor graphics) {
+    private void vivecraft$hotbarContextIndicator(
+        CallbackInfo ci, @Local(argsOnly = true) GuiGraphicsExtractor graphics)
+    {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
             this.getCameraPlayer().getInventory().getSelectedSlot() !=

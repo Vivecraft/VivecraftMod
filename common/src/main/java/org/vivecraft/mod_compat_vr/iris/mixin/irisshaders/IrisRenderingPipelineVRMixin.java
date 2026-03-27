@@ -25,24 +25,24 @@ import java.util.function.Supplier;
 @Mixin(IrisRenderingPipeline.class)
 public class IrisRenderingPipelineVRMixin {
 
-    @Shadow(remap = false)
+    @Shadow
     private ShadowRenderTargets shadowRenderTargets;
 
     // make this mutable, or WrapOperation doesn't work
     @Final
     @Mutable
-    @Shadow(remap = false)
+    @Shadow
     private Supplier<ShadowRenderTargets> shadowTargetsSupplier;
 
     @Final
-    @Shadow(remap = false)
+    @Shadow
     private Set<GlImage> customImages;
 
-    @Shadow(remap = false)
+    @Shadow
     private ShaderStorageBufferHolder shaderStorageBufferHolder;
 
     // store shadowTargets of the first pipeline
-    @Inject(method = "<init>", at = @At("TAIL"), remap = false)
+    @Inject(method = "<init>", at = @At("TAIL"))
     private void vivecraft$storeShadowTargets(ProgramSet programSet, CallbackInfo ci) {
         ShadersHelper.SLOW_MODE = !this.customImages.isEmpty() || this.shaderStorageBufferHolder != null;
 
@@ -54,7 +54,7 @@ public class IrisRenderingPipelineVRMixin {
         }
     }
 
-    @WrapOperation(method = "<init>", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/irisshaders/iris/pipeline/IrisRenderingPipeline;shadowTargetsSupplier:Ljava/util/function/Supplier;", ordinal = 0), remap = false)
+    @WrapOperation(method = "<init>", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/irisshaders/iris/pipeline/IrisRenderingPipeline;shadowTargetsSupplier:Ljava/util/function/Supplier;", ordinal = 0))
     private void vivecraft$onlyOneShadowRenderTarget(
         IrisRenderingPipeline instance, Supplier<ShadowRenderTargets> value, Operation<Void> original)
     {
@@ -70,7 +70,7 @@ public class IrisRenderingPipelineVRMixin {
         original.call(instance, wrappedSupplier);
     }
 
-    @ModifyReturnValue(method = "shouldDisableVanillaEntityShadows()Z", at = @At("RETURN"), remap = false)
+    @ModifyReturnValue(method = "shouldDisableVanillaEntityShadows()Z", at = @At("RETURN"))
     private boolean vivecraft$shouldDisableEntityShadows(boolean noEntityShadows) {
         return noEntityShadows || (!ShadersHelper.isSlowMode() && !RenderPassType.isVanilla() &&
             ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null

@@ -61,7 +61,7 @@ public class RenderHelper {
      * @param renderPass RenderPass to get the rotation matrix for
      */
     public static Matrix4f getVRModelView(RenderPass renderPass) {
-        return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().transpose();
+        return DATA_HOLDER.vrPlayer.getVRDataWorld().getEye(renderPass).getMatrix().transpose();
     }
 
     /**

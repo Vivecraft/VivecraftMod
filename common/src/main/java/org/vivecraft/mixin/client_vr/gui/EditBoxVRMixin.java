@@ -56,7 +56,8 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
 
     @Inject(method = "extractWidgetRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
     private void vivecraft$renderKeyboardHint(
-        GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci, @Local String content)
+        GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci,
+        @Local String content)
     {
         if (VRState.VR_RUNNING && !ClientDataHolderVR.getInstance().vrSettings.seated && !KeyboardHandler.SHOWING &&
             content.isEmpty() && !(Minecraft.getInstance().screen instanceof GuiKeyboardLayoutEditor))

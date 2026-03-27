@@ -10,8 +10,10 @@ import net.minecraft.client.renderer.Projection;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,12 +50,6 @@ public abstract class CameraVRMixin {
     private Vec3 position;
 
     @Shadow
-    protected abstract void setPosition(Vec3 position);
-
-    @Shadow
-    protected abstract void setRotation(float yRot, float xRot);
-
-    @Shadow
     private float oldFovModifier;
 
     @Shadow
@@ -63,14 +59,29 @@ public abstract class CameraVRMixin {
     @Final
     private Minecraft minecraft;
 
+    @Shadow
+    private float depthFar;
+
+    @Shadow
+    private @Nullable Level level;
+
+    @Shadow
+    protected abstract void setPosition(Vec3 position);
+
+    @Shadow
+    protected abstract void setRotation(float yRot, float xRot);
+
+    @Shadow
+    protected abstract void setupPerspective(float zNear, float zFar, float fov, float width, float height);
+
     @ModifyExpressionValue(method = {"update", "createProjectionMatrixForCulling"}, at = @At(value = "CONSTANT", args = "floatValue=0.05F"))
     private float vivecraft$shorterNear(float original) {
         return RenderPassType.isVanilla() ? original : vivecraft$MIN_CLIP_DISTANCE;
     }
 
-    @WrapOperation(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setupPerspective(FFFFF)V"))
+    @WrapOperation(method = "setupPerspective", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Projection;setupPerspective(FFFFF)V"))
     private void vivecraft$vrFov(
-        Camera instance, float zNear, float zFar, float fov, float width, float height, Operation<Void> original)
+        Projection instance, float zNear, float zFar, float fov, float width, float height, Operation<Void> original)
     {
         if (!RenderPassType.isVanilla()) {
             ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
@@ -107,6 +118,17 @@ public abstract class CameraVRMixin {
             };
         }
         original.call(instance, zNear, zFar, fov, width, height);
+    }
+
+    // RETURN instead of TAIL, because TAIL goes into the if check for some reason
+    @Inject(method = "update", at = @At("RETURN"))
+    private void vivecraft$alwaysSetupProjection(CallbackInfo ci) {
+        // we aleays mneed the perspecive projection set up, even outside levels
+        if (!RenderPassType.isVanilla() && (this.entity == null || this.level == null)) {
+            this.setupPerspective(vivecraft$MIN_CLIP_DISTANCE, this.depthFar,
+                this.minecraft.options.fov().get(), this.minecraft.getWindow().getWidth(),
+                this.minecraft.getWindow().getHeight());
+        }
     }
 
     @WrapOperation(method = "createProjectionMatrixForCulling", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;perspective(FFFFZ)Lorg/joml/Matrix4f;"))

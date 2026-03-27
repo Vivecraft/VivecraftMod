@@ -15,7 +15,7 @@ public class OptifineModelBlockRendererMixin {
     /**
      * menuworld fix
      */
-    @Inject(method = "isSeparateAoLightValue()Z", at = @At(value = "HEAD"), remap = false, cancellable = true)
+    @Inject(method = "isSeparateAoLightValue()Z", at = @At(value = "HEAD"), cancellable = true)
     private static void vivecraft$optifineNoSeparateAO(CallbackInfoReturnable<Boolean> cir) {
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())
@@ -27,7 +27,7 @@ public class OptifineModelBlockRendererMixin {
     /**
      * menuworld fix
      */
-    @Inject(method = "fixAoLightValue(F)F", at = @At(value = "HEAD"), remap = false, cancellable = true)
+    @Inject(method = "fixAoLightValue(F)F", at = @At(value = "HEAD"), cancellable = true)
     private static void vivecraft$optifineNoAOOverride(float ao, CallbackInfoReturnable<Float> cir) {
         if (ao == 0.2F && ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())

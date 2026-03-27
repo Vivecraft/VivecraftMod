@@ -2,7 +2,6 @@ package org.vivecraft.client_vr.extensions;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 import org.vivecraft.client_vr.VRData;
 
 public interface GameRendererExtension {
@@ -11,6 +10,7 @@ public interface GameRendererExtension {
      * sets up the in water and in block state
      */
     void vivecraft$setupOverlayStatus();
+
     /**
      * @return if the camera is in water
      */

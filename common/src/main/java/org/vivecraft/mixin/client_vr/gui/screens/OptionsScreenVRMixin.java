@@ -44,7 +44,7 @@ public class OptionsScreenVRMixin extends Screen {
         }
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 2, shift = At.Shift.AFTER))
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;<init>()V"))
     private void vivecraft$addVivecraftSettings(CallbackInfo ci, @Local(ordinal = 0) LinearLayout header) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
             this.vivecraft$settings = new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"),

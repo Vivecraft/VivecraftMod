@@ -17,7 +17,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 })
 public class IrisProgramUniformsMixin {
 
-    @Shadow(remap = false)
+    @Shadow
     int lastFrame;
 
     @Unique
@@ -28,7 +28,7 @@ public class IrisProgramUniformsMixin {
 
 
     // modify the frame counter on RenderPasChange, so perFrame Uniforms are recalculated
-    @ModifyVariable(method = "update", at = @At(value = "STORE"), remap = false)
+    @ModifyVariable(method = "update", at = @At(value = "STORE"))
     private int vivecraft$checkNewFrame(int currentFrame) {
         if (!RenderPassType.isVanilla()) {
             this.vivecraft$actualFrame = currentFrame;
@@ -43,7 +43,7 @@ public class IrisProgramUniformsMixin {
     }
 
     // restore actual frame counter, so stuff doesn't get messed up
-    @ModifyVariable(method = "update", at = @At(value = "LOAD", ordinal = 1), remap = false)
+    @ModifyVariable(method = "update", at = @At(value = "LOAD", ordinal = 1))
     private int vivecraft$restoreFrame(int currentFrame) {
         return RenderPassType.isVanilla() ? currentFrame : this.vivecraft$actualFrame;
     }

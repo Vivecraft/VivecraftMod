@@ -18,7 +18,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 public class IrisBeginFrameHack {
     // only count frames from the first RenderPass, so that all RenderPasses have the same frame counter
     // only update the timer on the first RenderPass, so that it counts the time from all RenderPasses
-    @Inject(method = "beginFrame", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "beginFrame", at = @At("HEAD"), cancellable = true)
     private void vivecraft$onlyOneUpdate(CallbackInfo ci) {
         if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().isFirstPass) {
             ci.cancel();

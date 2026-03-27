@@ -34,7 +34,7 @@ public class EpicFightLocalPlayerVRMixin {
         }
     }
 
-    @Inject(method = "moveRelative(FLnet/minecraft/world/phys/Vec3;)V", at = @At(value = "TAIL"), remap = false)
+    @Inject(method = "moveRelative(FLnet/minecraft/world/phys/Vec3;)V", at = @At(value = "TAIL"))
     protected void vivecraft$epicFightAfterMoveRelative(CallbackInfo ci, @Local(ordinal = 1) Vec3 movement) {
         // do drag after setting the delta movement
         if (VRState.VR_RUNNING &&
