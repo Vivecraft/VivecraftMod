@@ -8,6 +8,7 @@ import net.minecraft.util.profiling.Profiler;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -40,9 +41,17 @@ public class VRPassHelper {
 
         // THIS IS WHERE EVERYTHING IS RENDERED
         // reextract world state for the new pass
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$cacheRVEPos(MC.getCameraEntity());
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$setupRVE();
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$setupOverlayStatus();
         MC.gameRenderer.update(deltaTracker, renderLevel);
         MC.gameRenderer.extract(deltaTracker, renderLevel);
+
+        // actually render
         MC.gameRenderer.render(deltaTracker, renderLevel);
+
+        // restore player
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$restoreRVEPos(MC.getCameraEntity());
 
         // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
         MC.levelRenderer.endFrame();
@@ -163,6 +172,8 @@ public class VRPassHelper {
 
         // resize happened in the gui pass, set it to false or it will mess with stuff
         MC.getWindow().resetIsResized();
+        // don't reextract the gui for the world passes
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$setShouldDrawScreen(false);
 
         // render the different vr passes
         List<RenderPass> list = DATA_HOLDER.vrRenderer.getRenderPasses(false);

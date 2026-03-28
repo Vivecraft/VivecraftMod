@@ -7,7 +7,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Projection;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -111,9 +110,9 @@ public abstract class CameraVRMixin {
             }
 
             fov = switch (dataHolder.currentPass) {
-                case THIRD -> Mth.DEG_TO_RAD * dataHolder.vrSettings.mixedRealityFov;
-                case CAMERA -> Mth.DEG_TO_RAD * dataHolder.vrSettings.handCameraFov;
-                case SCOPEL, SCOPER -> Mth.DEG_TO_RAD * (70F / 8F);
+                case THIRD -> dataHolder.vrSettings.mixedRealityFov;
+                case CAMERA -> dataHolder.vrSettings.handCameraFov;
+                case SCOPEL, SCOPER -> (70F / 8F);
                 default -> fov;
             };
         }

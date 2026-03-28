@@ -280,11 +280,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     dataHolder.teleportTracker.updateTeleportDestinations(this.player);
                 }
             }
-
-            // TODO 26.1 Maybe move that out of gamerenderer?
-            ((GameRendererExtension) this.gameRenderer).vivecraft$cacheRVEPos(this.getCameraEntity());
-            ((GameRendererExtension) this.gameRenderer).vivecraft$setupRVE();
-            ((GameRendererExtension) this.gameRenderer).vivecraft$setupOverlayStatus();
         }
     }
 
@@ -319,6 +314,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawGui(
                 renderLevel && this.entityRenderDispatcher.camera != null);
             // don't draw the level when we only want the GUI
+            ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawScreen(true);
             return false;
         } else {
             return renderLevel;
@@ -331,7 +327,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             // draw screen/gui to buffer
             // push pose so we can pop it later
             RenderSystem.getModelViewStack().pushMatrix();
-            ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawScreen(true);
             // don't draw the level when we only want the GUI
             return false;
         } else {

@@ -200,7 +200,6 @@ public abstract class GameRendererVRMixin
         }
 
         if (!renderLevel && this.vivecraft$shouldDrawScreen) {
-            this.vivecraft$shouldDrawScreen = false;
             if (this.vivecraft$shouldDrawGui) {
                 // when the gui is rendered it is expected that something got pushed to the profiler before
                 // so do that now
@@ -261,7 +260,7 @@ public abstract class GameRendererVRMixin
                 // we still need the camera setup outside a level
                 this.mainCamera.extractRenderState(this.gameRenderState.levelRenderState.cameraRenderState, 0);
             }
-            return shouldRenderLevel && this.vivecraft$shouldDrawGui;
+            return this.vivecraft$shouldDrawGui;
         }
     }
 
@@ -269,7 +268,7 @@ public abstract class GameRendererVRMixin
     private boolean vivecraft$noGUIWithViewOnly(
         GameRenderer instance, DeltaTracker deltaTracker, boolean shouldRenderLevel, boolean resourcesLoaded)
     {
-        return RenderPassType.isVanilla() || !vivecraft$DATA_HOLDER.viewOnly;
+        return RenderPassType.isVanilla() || (!vivecraft$DATA_HOLDER.viewOnly && this.vivecraft$shouldDrawScreen);
     }
 
     @Inject(method = "takeAutoScreenshot", at = @At("HEAD"), cancellable = true)
@@ -344,13 +343,6 @@ public abstract class GameRendererVRMixin
     private void vivecraft$disableStencil(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             VREffectsHelper.disableStencilTest();
-        }
-    }
-
-    @Inject(method = "renderLevel", at = @At(value = "TAIL"))
-    private void vivecraft$restoreRVE(CallbackInfo ci) {
-        if (!RenderPassType.isVanilla()) {
-            this.vivecraft$restoreRVEPos(this.minecraft.getCameraEntity());
         }
     }
 

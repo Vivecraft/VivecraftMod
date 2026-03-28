@@ -31,7 +31,8 @@ public class VRInputMixin {
         long action, int eOrigin, float fPredictedSecondsFromNow, long pActionData, int unActionDataSize,
         long ulRestrictToDevice, long __functionAddress, Operation<Integer> original)
     {
-        return JNIUtils.callI("JIFPUJ_I", __functionAddress, action, eOrigin, fPredictedSecondsFromNow, pActionData, unActionDataSize, ulRestrictToDevice);
+        return JNIUtils.callI("JIFPUJ_I", __functionAddress, action, eOrigin, fPredictedSecondsFromNow, pActionData,
+            unActionDataSize, ulRestrictToDevice);
     }
 
     @WrapOperation(method = "nVRInput_GetPoseActionDataForNextFrame", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callJPJI(JIJIJJ)I"))
@@ -39,7 +40,8 @@ public class VRInputMixin {
         long action, int eOrigin, long pActionData, int unActionDataSize, long ulRestrictToDevice,
         long __functionAddress, Operation<Integer> original)
     {
-        return JNIUtils.callI("JIPUJ_I", __functionAddress, action, eOrigin, pActionData, unActionDataSize, ulRestrictToDevice);
+        return JNIUtils.callI("JIPUJ_I", __functionAddress, action, eOrigin, pActionData, unActionDataSize,
+            ulRestrictToDevice);
     }
 
     @WrapOperation(method = "nVRInput_GetSkeletalActionData", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callJPI(JJIJ)I"))

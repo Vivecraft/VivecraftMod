@@ -22,7 +22,8 @@ public class VRChaperoneMixin {
         long pOutputColorArray, int nNumOutputColors, float flCollisionBoundsFadeDistance, long pOutputCameraColor,
         long __functionAddress, Operation<Void> original)
     {
-        JNIUtils.callV("PUFP_V", __functionAddress, pOutputColorArray, nNumOutputColors, flCollisionBoundsFadeDistance, pOutputCameraColor);
+        JNIUtils.callV("PUFP_V", __functionAddress, pOutputColorArray, nNumOutputColors, flCollisionBoundsFadeDistance,
+            pOutputCameraColor);
     }
 
     @WrapOperation(method = "VRChaperone_AreBoundsVisible", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callZ(J)Z"))

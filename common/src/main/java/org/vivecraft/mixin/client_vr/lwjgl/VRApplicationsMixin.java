@@ -49,14 +49,16 @@ public class VRApplicationsMixin {
 
     @WrapOperation(method = "nVRApplications_GetDefaultApplicationForMimeType", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPPZ(JJIJ)Z"))
     private static boolean vivecraft$nVRApplications_GetDefaultApplicationForMimeType(
-        long pchMimeType, long pchAppKeyBuffer, int unAppKeyBufferLen, long __functionAddress, Operation<Boolean> original)
+        long pchMimeType, long pchAppKeyBuffer, int unAppKeyBufferLen, long __functionAddress,
+        Operation<Boolean> original)
     {
         return JNIUtils.callZ("PPU_Z", __functionAddress, pchMimeType, pchAppKeyBuffer, unAppKeyBufferLen);
     }
 
     @WrapOperation(method = "nVRApplications_GetApplicationSupportedMimeTypes", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPPZ(JJIJ)Z"))
     private static boolean vivecraft$nVRApplications_GetApplicationSupportedMimeTypes(
-        long pchAppKey, long pchMimeTypesBuffer, int unMimeTypesBuffer, long __functionAddress, Operation<Boolean> original)
+        long pchAppKey, long pchMimeTypesBuffer, int unMimeTypesBuffer, long __functionAddress,
+        Operation<Boolean> original)
     {
         return JNIUtils.callZ("PPU_Z", __functionAddress, pchAppKey, pchMimeTypesBuffer, unMimeTypesBuffer);
     }

@@ -12,16 +12,20 @@ public class VRRenderModelsMixin {
 
     @WrapOperation(method = "nVRRenderModels_GetComponentStateForDevicePath", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPPJPPZ(JJJJJJ)Z"))
     private static boolean vivecraft$nVRRenderModels_GetComponentStateForDevicePath(
-        long pchRenderModelName, long pchComponentName, long devicePath, long pState, long pComponentState, long __functionAddress, Operation<Boolean> original)
+        long pchRenderModelName, long pchComponentName, long devicePath, long pState, long pComponentState,
+        long __functionAddress, Operation<Boolean> original)
     {
-        return JNIUtils.callZ("PPJPP_Z", __functionAddress, pchRenderModelName, pchComponentName, devicePath, pState, pComponentState);
+        return JNIUtils.callZ("PPJPP_Z", __functionAddress, pchRenderModelName, pchComponentName, devicePath, pState,
+            pComponentState);
     }
 
     @WrapOperation(method = "nVRRenderModels_GetComponentState", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPPPPPZ(JJJJJJ)Z"))
     private static boolean vivecraft$nVRRenderModels_GetComponentState(
-        long pchRenderModelName, long pchComponentName, long pControllerState, long pState, long pComponentState, long __functionAddress, Operation<Boolean> original)
+        long pchRenderModelName, long pchComponentName, long pControllerState, long pState, long pComponentState,
+        long __functionAddress, Operation<Boolean> original)
     {
-        return JNIUtils.callZ("PPPPP_Z", __functionAddress, pchRenderModelName, pchComponentName, pControllerState, pState, pComponentState);
+        return JNIUtils.callZ("PPPPP_Z", __functionAddress, pchRenderModelName, pchComponentName, pControllerState,
+            pState, pComponentState);
     }
 
     @WrapOperation(method = "nVRRenderModels_RenderModelHasComponent", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPPZ(JJJ)Z"))
@@ -30,5 +34,4 @@ public class VRRenderModelsMixin {
     {
         return JNIUtils.callZ("PP_Z", __functionAddress, pchRenderModelName, pchComponentName);
     }
-
 }

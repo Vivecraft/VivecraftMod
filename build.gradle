@@ -110,10 +110,14 @@ subprojects {
         inputs.properties(expandProps)
 
         if (project.name != "common" && project.name != "stubs") {
-            // copy resources except the mixin jsons
-            /*from(project(':common').sourceSets['main'].resources) {
-                exclude "vivecraft.*"
-            }*/
+            // copy resources to run in dev
+            from(project(':common').sourceSets['main'].resources) {
+                if (project.name == "fabric") {
+                    exclude "classtransfomer.cfg"
+                } else {
+                    exclude "vivecraft.accesswidener"
+                }
+            }
         }
     }
 
@@ -129,6 +133,7 @@ subprojects {
             from {
                 project(':common').tasks.named('jar').get().archiveFile.map { zipTree(it) }
             }
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
         manifest {
             attributes(

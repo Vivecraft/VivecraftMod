@@ -3,7 +3,9 @@ package org.vivecraft.client_vr.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.state.WindowRenderState;
 import org.vivecraft.client.utils.TextUtils;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
 
 import java.util.ArrayList;
@@ -42,8 +44,13 @@ public class MirrorNotification {
             int screenX = MC.mainRenderTarget.width;
 
             // override the gui scale, to be in absolute size
-            int backupGuiScale = MC.gameRenderer.getGameRenderState().windowRenderState.guiScale;
-            MC.gameRenderer.getGameRenderState().windowRenderState.guiScale = 1;
+            WindowRenderState windowState = MC.gameRenderer.getGameRenderState().windowRenderState;
+            int backupGuiScale = windowState.guiScale;
+            windowState.guiScale = 1;
+            int backupWidth = windowState.width;
+            windowState.width = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth();
+            int backupHeight = windowState.height;
+            windowState.height = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight();
 
             GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
             graphics.pose().scale(3, 3);
@@ -71,7 +78,9 @@ public class MirrorNotification {
             GuiRenderHelper.finish();
 
             // reset gui scale
-            MC.gameRenderer.getGameRenderState().windowRenderState.guiScale = backupGuiScale;
+            windowState.guiScale = backupGuiScale;
+            windowState.width = backupWidth;
+            windowState.height = backupHeight;
         }
     }
 }
