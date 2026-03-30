@@ -14,8 +14,8 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
-import net.minecraft.client.renderer.block.FluidRenderer;
+import net.minecraft.client.renderer.block.*;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.client.renderer.fog.FogData;
@@ -40,6 +40,8 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.MoonPhase;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.Fluid;
@@ -143,10 +145,10 @@ public class MenuWorldRenderer {
     private boolean building = false;
     private boolean reenableShaders = false;
     private long buildStartTime;
-    private Map<Pair<ChunkSectionLayer, BlockPos>, BufferBuilder> bufferBuilders;
-    private Map<Pair<ChunkSectionLayer, BlockPos>, BlockPos.MutableBlockPos> currentPositions;
-    private Map<Pair<ChunkSectionLayer, BlockPos>, Integer> blockCounts;
-    private Map<Pair<ChunkSectionLayer, BlockPos>, Long> renderTimes;
+    private Map<BlockPos, Map<ChunkSectionLayer, BufferBuilder>> bufferBuilders;
+    private Map<BlockPos, BlockPos.MutableBlockPos> currentPositions;
+    private Map<BlockPos, Integer> blockCounts;
+    private Map<BlockPos, Long> renderTimes;
     private final List<CompletableFuture<Void>> builderFutures = new ArrayList<>();
     private final Queue<Thread> builderThreads = new ConcurrentLinkedQueue<>();
     private Throwable builderError;
@@ -166,8 +168,8 @@ public class MenuWorldRenderer {
         RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.lightMap, 0xFFFFFFFF);
         this.lightMapUbo = new MappableRingBuffer(() -> "Menuworld Lightmap UBO",
             GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
-            new Std140SizeCalculator().putFloat().putFloat().putFloat().putFloat().putFloat().putFloat()
-                .putFloat().putVec3().putVec3().get());
+            new Std140SizeCalculator().putFloat().putFloat().putFloat().putFloat().putFloat().putFloat().putVec3()
+                .putVec3().putVec3().putVec3().get());
         this.globalSettingsUbo = RenderSystem.getDevice()
             .createBuffer(() -> "Menuworld Global Settings UBO", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_UNIFORM,
                 GlobalSettingsUniform.UBO_SIZE);
@@ -365,36 +367,21 @@ public class MenuWorldRenderer {
                 this.vertexBuffers = new HashMap<>();
                 this.bufferBuilders = new HashMap<>();
                 this.currentPositions = new HashMap<>();
-
                 for (ChunkSectionLayer layer : ChunkSectionLayer.values()) {
                     this.vertexBuffers.put(layer, new LinkedList<>());
+                }
 
-                    for (int x = -this.blockAccess.getXSize() / 2;
-                         x < this.blockAccess.getXSize() / 2; x += this.segmentSize.getX()) {
-                        for (int y = (int) -this.blockAccess.getGround(); y < this.blockAccess.getYSize() -
-                            (int) this.blockAccess.getGround(); y += this.segmentSize.getY()) {
-                            for (int z = -this.blockAccess.getZSize() / 2;
-                                 z < this.blockAccess.getZSize() / 2; z += this.segmentSize.getZ()) {
-                                BlockPos pos = new BlockPos(x, y, z);
-                                Pair<ChunkSectionLayer, BlockPos> pair = Pair.of(layer, pos);
+                for (int x = -this.blockAccess.getXSize() / 2;
+                     x < this.blockAccess.getXSize() / 2; x += this.segmentSize.getX()) {
+                    for (int y = (int) -this.blockAccess.getGround(); y < this.blockAccess.getYSize() -
+                        (int) this.blockAccess.getGround(); y += this.segmentSize.getY()) {
+                        for (int z = -this.blockAccess.getZSize() / 2;
+                             z < this.blockAccess.getZSize() / 2; z += this.segmentSize.getZ()) {
+                            BlockPos pos = new BlockPos(x, y, z);
+                            Map<ChunkSectionLayer, BufferBuilder> bufferMap = new EnumMap<>(ChunkSectionLayer.class);
 
-                                boolean wasSkipping = false;
-                                if (IrisHelper.isLoaded()) {
-                                    wasSkipping = IrisHelper.getSkipBufferExtension();
-                                    IrisHelper.setSkipBufferExtension(true);
-                                }
-
-                                // 32768 yields most efficient memory use for some reason
-                                BufferBuilder vertBuffer = new BufferBuilder(new ByteBufferBuilder(32768),
-                                    VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-
-                                if (!wasSkipping && IrisHelper.isLoaded()) {
-                                    IrisHelper.setSkipBufferExtension(false);
-                                }
-
-                                this.bufferBuilders.put(pair, vertBuffer);
-                                this.currentPositions.put(pair, pos.mutable());
-                            }
+                            this.bufferBuilders.put(pos, bufferMap);
+                            this.currentPositions.put(pos, pos.mutable());
                         }
                     }
                 }
@@ -414,6 +401,30 @@ public class MenuWorldRenderer {
         }
     }
 
+    private BufferBuilder getOrBeginLayer(
+        Map<ChunkSectionLayer, BufferBuilder> startedLayers, ChunkSectionLayer layer)
+    {
+        BufferBuilder builder = startedLayers.get(layer);
+        if (builder == null) {
+
+            boolean wasSkipping = false;
+            if (IrisHelper.isLoaded()) {
+                wasSkipping = IrisHelper.getSkipBufferExtension();
+                IrisHelper.setSkipBufferExtension(true);
+            }
+
+            // 32768 yields most efficient memory use for some reason
+            builder = new BufferBuilder(new ByteBufferBuilder(32768),
+                VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+
+            if (!wasSkipping && IrisHelper.isLoaded()) {
+                IrisHelper.setSkipBufferExtension(false);
+            }
+            startedLayers.put(layer, builder);
+        }
+        return builder;
+    }
+
     public boolean isBuilding() {
         return this.building;
     }
@@ -425,7 +436,7 @@ public class MenuWorldRenderer {
         this.builderFutures.clear();
 
         if (this.currentPositions.entrySet().stream().allMatch(entry -> entry.getValue().getY() >=
-            Math.min(this.segmentSize.getY() + entry.getKey().getRight().getY(),
+            Math.min(this.segmentSize.getY() + entry.getKey().getY(),
                 this.blockAccess.getYSize() - (int) this.blockAccess.getGround())))
         {
             finishBuilding();
@@ -433,21 +444,22 @@ public class MenuWorldRenderer {
         }
 
         long startTime = ClientUtils.milliTime();
-        for (var pair : this.bufferBuilders.keySet()) {
-            if (this.currentPositions.get(pair).getY() < Math.min(this.segmentSize.getY() + pair.getRight().getY(),
-                this.blockAccess.getYSize() - (int) this.blockAccess.getGround()))
+        for (var entry : this.bufferBuilders.entrySet()) {
+            if (this.currentPositions.get(entry.getKey()).getY() <
+                Math.min(this.segmentSize.getY() + entry.getKey().getY(),
+                    this.blockAccess.getYSize() - (int) this.blockAccess.getGround()))
             {
                 if (FIRST_RENDER_DONE || !SodiumHelper.isLoaded() ||
                     !SodiumHelper.hasIssuesWithParallelBlockBuilding())
                 {
                     // generate the data in parallel
                     this.builderFutures.add(
-                        CompletableFuture.runAsync(() -> buildGeometry(pair, startTime, this.renderMaxTime),
+                        CompletableFuture.runAsync(() -> buildGeometry(entry.getKey(), startTime, this.renderMaxTime),
                             Util.backgroundExecutor()));
                 } else {
                     // generate first data in series to avoid weird class loading error
-                    buildGeometry(pair, startTime, this.renderMaxTime);
-                    if (this.blockCounts.getOrDefault(pair, 0) > 0) {
+                    buildGeometry(entry.getKey(), startTime, this.renderMaxTime);
+                    if (this.blockCounts.getOrDefault(entry.getKey(), 0) > 0) {
                         FIRST_RENDER_DONE = true;
                     }
                 }
@@ -458,13 +470,11 @@ public class MenuWorldRenderer {
             .thenRunAsync(this::handleError, Util.backgroundExecutor());
     }
 
-    private void buildGeometry(Pair<ChunkSectionLayer, BlockPos> pair, long startTime, int maxTime) {
+    private void buildGeometry(BlockPos offset, long startTime, int maxTime) {
         if (ClientUtils.milliTime() - startTime >= maxTime) {
             return;
         }
 
-        ChunkSectionLayer layer = pair.getLeft();
-        BlockPos offset = pair.getRight();
         this.builderThreads.add(Thread.currentThread());
         long realStartTime = ClientUtils.milliTime();
 
@@ -473,9 +483,17 @@ public class MenuWorldRenderer {
             int renderDistSquare = (this.renderDistance + 1) * (this.renderDistance + 1);
             ModelManager modelManager = this.mc.getModelManager();
             FluidRenderer fluidRenderer = new FluidRenderer(modelManager.getFluidStateModelSet());
-            BufferBuilder vertBuffer = this.bufferBuilders.get(pair);
-            BlockPos.MutableBlockPos pos = this.currentPositions.get(pair);
+            ModelBlockRenderer blockRenderer = new ModelBlockRenderer(this.mc.options.ambientOcclusion().get(), true,
+                this.mc.getBlockColors());
+            BlockPos.MutableBlockPos pos = this.currentPositions.get(offset);
             RandomSource randomSource = RandomSource.create();
+
+            BlockQuadOutput quadOutput = (x, y, z, quad, instance) -> {
+                BufferBuilder builder = this.getOrBeginLayer(this.bufferBuilders.get(offset),
+                    quad.materialInfo().layer());
+                builder.putBlockBakedQuad(x, y, z, quad, instance);
+            };
+            FluidRenderer.Output fluidOutput = layer -> this.getOrBeginLayer(this.bufferBuilders.get(offset), layer);
 
             int count = 0;
             while (
@@ -486,24 +504,23 @@ public class MenuWorldRenderer {
                 if (Mth.abs(pos.getY()) <= this.renderDistance + 1 &&
                     Mth.lengthSquared(pos.getX(), pos.getZ()) <= renderDistSquare)
                 {
-                    /*BlockState state = this.blockAccess.getBlockState(pos);
-                    if (state != null) {
+                    BlockState state = this.blockAccess.getBlockState(pos);
+                    if (!state.isAir()) {
                         FluidState fluidState = state.getFluidState();
-                        if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
-                            FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidState);
+                        if (!fluidState.isEmpty()) {
+                            FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet()
+                                .get(fluidState);
                             this.addAnimatedSprite(fluidModel.flowingMaterial().sprite());
                             this.addAnimatedSprite(fluidModel.stillMaterial().sprite());
                             if (fluidModel.overlayMaterial() != null) {
                                 this.addAnimatedSprite(fluidModel.overlayMaterial().sprite());
                             }
-                            fluidRenderer.tesselate(this.blockAccess, pos, vertBuffer, state,
+                            fluidRenderer.tesselate(this.blockAccess, pos, fluidOutput, state,
                                 new FluidStateWrapper(fluidState));
                             count++;
                         }
 
-                        if (state.getRenderShape() != RenderShape.INVISIBLE &&
-                            ItemBlockRenderTypes.getChunkRenderType(state) == layer)
-                        {
+                        if (state.getRenderShape() == RenderShape.MODEL) {
                             List<BlockStateModelPart> parts = new ArrayList<>();
                             this.mc.getModelManager().getBlockStateModelSet()
                                 .get(state)
@@ -515,12 +532,17 @@ public class MenuWorldRenderer {
                             }
                             thisPose.pushPose();
                             thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
-                            modelManager.renderBatched(state, pos, this.blockAccess, thisPose, vertBuffer, true,
-                                parts);
+                            blockRenderer.tesselateBlock(
+                                quadOutput,
+                                pos.getX(), pos.getY(), pos.getZ(),
+                                this.blockAccess, pos, state,
+                                modelManager.getBlockStateModelSet().get(state),
+                                state.getSeed(pos)
+                            );
                             count++;
                             thisPose.popPose();
                         }
-                    }*/
+                    }
                 }
 
                 // iterate the position
@@ -538,18 +560,17 @@ public class MenuWorldRenderer {
             }
 
             // VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Built segment of {} blocks in {} layer.", count, layer.label());
-            this.blockCounts.put(pair, this.blockCounts.getOrDefault(pair, 0) + count);
-            this.renderTimes.put(pair,
-                this.renderTimes.getOrDefault(pair, 0L) + (ClientUtils.milliTime() - realStartTime));
+            this.blockCounts.put(pos, this.blockCounts.getOrDefault(pos, 0) + count);
+            this.renderTimes.put(pos,
+                this.renderTimes.getOrDefault(pos, 0L) + (ClientUtils.milliTime() - realStartTime));
 
             if (pos.getY() >= Math.min(this.segmentSize.getY() + offset.getY(),
                 this.blockAccess.getYSize() - (int) this.blockAccess.getGround()))
             {
-                VRSettings.LOGGER.debug("Vivecraft: MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
-                    this.blockCounts.get(pair),
-                    layer.label(),
+                VRSettings.LOGGER.debug("Vivecraft: MenuWorlds: Built {} blocks at {},{},{} in {} ms",
+                    this.blockCounts.get(pos),
                     offset.getX(), offset.getY(), offset.getZ(),
-                    this.renderTimes.get(pair));
+                    this.renderTimes.get(pos));
             }
         } catch (Throwable e) { // Only effective way of preventing crash on poop computers with low heap size
             this.builderError = e;
@@ -569,7 +590,7 @@ public class MenuWorldRenderer {
 
         // Sort buffers from nearest to furthest
         var entryList = new ArrayList<>(this.bufferBuilders.entrySet());
-        entryList.sort(Comparator.comparing(entry -> entry.getKey().getRight(), (posA, posB) -> {
+        entryList.sort(Comparator.comparing(Map.Entry::getKey, (posA, posB) -> {
             Vec3i center = new Vec3i(this.segmentSize.getX() / 2, this.segmentSize.getY() / 2,
                 this.segmentSize.getZ() / 2);
             double distA = posA.offset(center).distSqr(BlockPos.ZERO);
@@ -577,22 +598,26 @@ public class MenuWorldRenderer {
             return Double.compare(distA, distB);
         }));
 
-        int totalMemory = 0, count = 0;
+        long totalMemory = 0;
+        int count = 0;
+        int total = this.bufferBuilders.values().stream().mapToInt(Map::size).sum();
         try (ByteBufferBuilder builder = new ByteBufferBuilder(32768)) {
             for (var entry : entryList) {
-                ChunkSectionLayer layer = entry.getKey().getLeft();
-                BufferBuilder bufferBuilder = entry.getValue();
-                MeshData meshData = bufferBuilder.build();
-                if (meshData != null) {
-                    if (layer.pipeline() == RenderPipelines.TRANSLUCENT_TERRAIN) {
-                        meshData.sortQuads(builder,
-                            VertexSorting.byDistance(0, Mth.frac(this.blockAccess.getGround()), 0));
+                for (var layerBuffer : entry.getValue().entrySet()) {
+                    ChunkSectionLayer layer = layerBuffer.getKey();
+                    BufferBuilder bufferBuilder = layerBuffer.getValue();
+                    MeshData meshData = bufferBuilder.build();
+                    if (meshData != null) {
+                        if (layer.pipeline() == RenderPipelines.TRANSLUCENT_TERRAIN) {
+                            meshData.sortQuads(builder,
+                                VertexSorting.byDistance(0, Mth.frac(this.blockAccess.getGround()), 0));
+                        }
+                        uploadGeometry(layer, meshData);
+                        count++;
                     }
-                    uploadGeometry(layer, meshData);
-                    count++;
+                    totalMemory += ((BufferBuilderExtension) bufferBuilder).vivecraft$getBufferSize();
+                    ((BufferBuilderExtension) bufferBuilder).vivecraft$freeBuffer();
                 }
-                totalMemory += ((BufferBuilderExtension) bufferBuilder).vivecraft$getBufferSize();
-                ((BufferBuilderExtension) bufferBuilder).vivecraft$freeBuffer();
             }
         }
 
@@ -605,8 +630,8 @@ public class MenuWorldRenderer {
             this.renderTimes.values().stream().reduce(Long::sum).orElse(0L));
         VRSettings.LOGGER.info(
             "Vivecraft: MenuWorlds: Used {} temporary buffers ({} MiB), uploaded {} non-empty buffers",
-            entryList.size(),
-            totalMemory / 1048576,
+            total,
+            totalMemory / 1048576L,
             count);
         if (this.reenableShaders) {
             this.reenableShaders = false;
@@ -648,9 +673,11 @@ public class MenuWorldRenderer {
         this.builderFutures.forEach(CompletableFuture::join);
         this.builderFutures.clear();
         if (this.bufferBuilders != null) {
-            for (BufferBuilder vertBuffer : this.bufferBuilders.values()) {
-                ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
-            }
+            this.bufferBuilders.values().stream().map(Map::values).forEach(buffers -> {
+                for (BufferBuilder vertBuffer : buffers) {
+                    ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
+                }
+            });
             this.bufferBuilders = null;
         }
         this.currentPositions = null;
@@ -1466,9 +1493,7 @@ public class MenuWorldRenderer {
 
             float effectiveSkyLight = getValue(EnvironmentAttributes.SKY_LIGHT_FACTOR,
                 ClientUtils.getCurrentPartialTick());
-            Vector3f ambientColor = new Vector3f(1);
             if (this.blockAccess.dimensionType().hasEndFlashes()) {
-                ambientColor = new Vector3f(0.99f, 1.12f, 1.0f);
                 if (this.endFlashState != null && !this.mc.options.hideLightningFlash().get()) {
                     float intensity = this.endFlashState.getIntensity(1);
                     effectiveSkyLight += intensity;
@@ -1489,22 +1514,25 @@ public class MenuWorldRenderer {
 			*/
             float nightVision = 0.0f;
 
-            int skylightColor = getValue(EnvironmentAttributes.SKY_LIGHT_COLOR,
+            int blockLightTint = getValue(EnvironmentAttributes.BLOCK_LIGHT_TINT, ClientUtils.getCurrentPartialTick());
+            int skylightColor = getValue(EnvironmentAttributes.SKY_LIGHT_COLOR, ClientUtils.getCurrentPartialTick());
+            int ambientColor = getValue(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ClientUtils.getCurrentPartialTick());
+            int nightVisionColor = getValue(EnvironmentAttributes.NIGHT_VISION_COLOR,
                 ClientUtils.getCurrentPartialTick());
-
             try (GpuBuffer.MappedView buffer = RenderSystem.getDevice().createCommandEncoder()
                 .mapBuffer(this.lightMapUbo.currentBuffer(), false, true))
             {
                 Std140Builder.intoBuffer(buffer.data())
-                    .putFloat(this.blockAccess.dimensionType().ambientLight())
                     .putFloat(effectiveSkyLight)
-                    .putFloat(this.blockLightRedFlicker + 1.5f)
+                    .putFloat(this.blockLightRedFlicker + 1.4F)
                     .putFloat(nightVision)
                     .putFloat(0F) // darkness factor
-                    .putFloat(0F) // darkenworld factor
+                    .putFloat(0F) // boss darkenworld factor
                     .putFloat(Math.max(0.0F, this.mc.options.gamma().get().floatValue()))
+                    .putVec3(ARGB.vector3fFromRGB24(blockLightTint))
                     .putVec3(ARGB.vector3fFromRGB24(skylightColor))
-                    .putVec3(ambientColor);
+                    .putVec3(ARGB.vector3fFromRGB24(ambientColor))
+                    .putVec3(ARGB.vector3fFromRGB24(nightVisionColor));
             }
 
             try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
@@ -1959,8 +1987,9 @@ public class MenuWorldRenderer {
             // need to do it this way, because FerriteCore changes the field type, which would error on a cast
             // TODO 26.1 check if this works with ferrite core
             super(fluidState.getType(),
-                fluidState.getProperties().toArray(new Property[]{}),
-                (Comparable[]) fluidState.getValues().toList().toArray());
+                fluidState.getProperties().toArray(s -> new Property<?>[s]),
+                fluidState.getValues().map(Property.Value::value).toArray(s -> new Comparable<?>[s]));
+            ;
             //((StateHolderExtension) (this)).vivecraft$setValues(fluidState.getValues());
 
             this.fluidState = fluidState;

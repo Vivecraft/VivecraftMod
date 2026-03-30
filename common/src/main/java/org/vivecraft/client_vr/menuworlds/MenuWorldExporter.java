@@ -39,6 +39,7 @@ import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionDefaults;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.timeline.Timeline;
@@ -329,10 +330,12 @@ public class MenuWorldExporter {
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, Timelines.NIGHT_SKY_LIGHT_COLOR);
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_LEVEL, 4.0f);
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f);
+                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -13621215);
             }
             case OVERWORLD -> {
                 attributes.set(EnvironmentAttributes.FOG_COLOR, -4138753);
                 attributes.set(EnvironmentAttributes.SKY_COLOR, OverworldBiomes.calculateSkyColor(0.8f));
+                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -16119286);
                 timeline = timelines != null ?
                     HolderSet.direct(timelines.getOrThrow(Timelines.OVERWORLD_DAY),
                         timelines.getOrThrow(Timelines.MOON)) :
@@ -340,11 +343,15 @@ public class MenuWorldExporter {
             }
             case END -> {
                 attributes.set(EnvironmentAttributes.FOG_COLOR, -15199464);
-                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, -1736449);
+                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, -5480243);
                 attributes.set(EnvironmentAttributes.SKY_COLOR, -16777216);
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f);
+                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -12630209);
             }
         }
+
+        // TODO 26.1 should also be stored probably
+        attributes.set(EnvironmentAttributes.BLOCK_LIGHT_TINT, DimensionDefaults.BLOCK_LIGHT_TINT);
 
         if (dataVersion < 4554 && BuiltinDimensionTypes.END.identifier().equals(dimName)) {
             dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
