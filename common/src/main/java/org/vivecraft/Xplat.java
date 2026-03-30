@@ -8,7 +8,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
@@ -21,13 +20,6 @@ public interface Xplat {
      * @return true if the mod loader enabled the stencil
      */
     boolean enableRenderTargetStencil(RenderTarget renderTarget);
-
-    /**
-     * @return runtime name of the {@link BlockBehaviour#use} method
-     */
-    String getUseMethodName();
-
-    ;
 
     /**
      * @param biome Biome to get the ClimateSettings from

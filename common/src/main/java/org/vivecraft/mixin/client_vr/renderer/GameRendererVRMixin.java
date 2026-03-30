@@ -200,22 +200,11 @@ public abstract class GameRendererVRMixin
         }
 
         if (!renderLevel && this.vivecraft$shouldDrawScreen) {
-            if (this.vivecraft$shouldDrawGui) {
-                // when the gui is rendered it is expected that something got pushed to the profiler before
-                // so do that now
-                Profiler.get().push("vanillaGuiSetup");
-            }
             return;
         }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
             float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
-            if (!renderLevel || this.minecraft.level == null) {
-                // no "level" got pushed so do a manual push
-                Profiler.get().push("MainMenu");
-            } else {
-                // do a popPush
-                Profiler.get().popPush("MainMenu");
-            }
+            Profiler.get().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
             RenderSystem.getModelViewStack().pushMatrix().identity();
@@ -246,7 +235,7 @@ public abstract class GameRendererVRMixin
             }
             RenderSystem.getModelViewStack().popMatrix();
         }
-        // pop the "level" push, since that would happen after this
+        // pop the "render" push, since we cancel early
         Profiler.get().pop();
         ci.cancel();
     }

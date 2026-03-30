@@ -28,11 +28,6 @@ public class XplatImpl implements Xplat {
     }
 
     @Override
-    public String getUseMethodName() {
-        return "useWithoutItem";
-    }
-
-    @Override
     public Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
         return biome.getModifiedClimateSettings();
     }

@@ -41,11 +41,14 @@ public class VRPassHelper {
 
         // THIS IS WHERE EVERYTHING IS RENDERED
         // reextract world state for the new pass
+        Profiler.get().push("update");
         ((GameRendererExtension) MC.gameRenderer).vivecraft$cacheRVEPos(MC.getCameraEntity());
         ((GameRendererExtension) MC.gameRenderer).vivecraft$setupRVE();
         ((GameRendererExtension) MC.gameRenderer).vivecraft$setupOverlayStatus();
         MC.gameRenderer.update(deltaTracker, renderLevel);
+        Profiler.get().popPush("extract");
         MC.gameRenderer.extract(deltaTracker, renderLevel);
+        Profiler.get().pop();
 
         // actually render
         MC.gameRenderer.render(deltaTracker, renderLevel);
@@ -115,7 +118,7 @@ public class VRPassHelper {
      */
     public static void renderAndSubmit(boolean renderLevel, DeltaTracker.Timer deltaTracker) {
         // still rendering
-        Profiler.get().push("gameRenderer");
+        Profiler.get().push("render");
 
         Profiler.get().push("VR guis");
 

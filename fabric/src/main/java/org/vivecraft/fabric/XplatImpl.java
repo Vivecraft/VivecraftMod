@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.Packet;
@@ -23,19 +22,6 @@ public class XplatImpl implements Xplat {
     @Override
     public boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         return false;
-    }
-
-    @Override
-    public String getUseMethodName() {
-        return FabricLoader.getInstance().getMappingResolver().mapMethodName(
-            "intermediary",
-            "net.minecraft.class_4970", "method_55766",
-            "(Lnet/minecraft/class_2680;" +
-                "Lnet/minecraft/class_1937;" +
-                "Lnet/minecraft/class_2338;" +
-                "Lnet/minecraft/class_1657;" +
-                "Lnet/minecraft/class_3965;)" +
-                "Lnet/minecraft/class_1269;");
     }
 
     @Override
