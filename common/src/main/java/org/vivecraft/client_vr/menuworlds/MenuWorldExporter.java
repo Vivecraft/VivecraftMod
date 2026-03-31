@@ -45,7 +45,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.timeline.Timeline;
 import net.minecraft.world.timeline.Timelines;
-import org.jspecify.annotations.NonNull;
 import org.vivecraft.Services;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -195,7 +194,9 @@ public class MenuWorldExporter {
         Files.write(bytes, file);
     }
 
-    public static FakeBlockAccess loadWorld(byte[] data) throws IOException, DataFormatException, ExecutionException, InterruptedException {
+    public static FakeBlockAccess loadWorld(
+        byte[] data) throws IOException, DataFormatException, ExecutionException, InterruptedException
+    {
         Header header = new Header();
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data))) {
             header.read(dis);
@@ -459,7 +460,9 @@ public class MenuWorldExporter {
             ySize, zSize, ground, dimensionType, isFlat, rotation, rain, thunder);
     }
 
-    public static FakeBlockAccess loadWorld(InputStream is) throws IOException, DataFormatException, ExecutionException, InterruptedException {
+    public static FakeBlockAccess loadWorld(
+        InputStream is) throws IOException, DataFormatException, ExecutionException, InterruptedException
+    {
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         byte[] buffer = new byte[1048576];
         int count;
@@ -1388,7 +1391,7 @@ public class MenuWorldExporter {
 
         @Override
         public void readFully(byte[] b, int off, int len) {
-            buffer.get(b, off, len);
+            this.buffer.get(b, off, len);
         }
 
         @Override
@@ -1398,52 +1401,52 @@ public class MenuWorldExporter {
 
         @Override
         public boolean readBoolean() {
-            return buffer.get() != 0;
+            return this.buffer.get() != 0;
         }
 
         @Override
         public byte readByte() {
-            return buffer.get();
+            return this.buffer.get();
         }
 
         @Override
         public int readUnsignedByte() {
-            return buffer.get() & 0xFF;
+            return this.buffer.get() & 0xFF;
         }
 
         @Override
         public short readShort() {
-            return buffer.getShort();
+            return this.buffer.getShort();
         }
 
         @Override
         public int readUnsignedShort() {
-            return buffer.getShort() & 0xFFFF;
+            return this.buffer.getShort() & 0xFFFF;
         }
 
         @Override
         public char readChar() {
-            return buffer.getChar();
+            return this.buffer.getChar();
         }
 
         @Override
         public int readInt() {
-            return buffer.getInt();
+            return this.buffer.getInt();
         }
 
         @Override
         public long readLong() {
-            return buffer.getLong();
+            return this.buffer.getLong();
         }
 
         @Override
         public float readFloat() {
-            return buffer.getFloat();
+            return this.buffer.getFloat();
         }
 
         @Override
         public double readDouble() {
-            return buffer.getDouble();
+            return this.buffer.getDouble();
         }
 
         @Override
