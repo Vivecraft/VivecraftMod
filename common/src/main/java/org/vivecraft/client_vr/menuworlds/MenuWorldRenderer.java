@@ -1982,15 +1982,10 @@ public class MenuWorldRenderer {
     private static class FluidStateWrapper extends FluidState {
         private final FluidState fluidState;
 
-        @SuppressWarnings("unchecked")
         public FluidStateWrapper(FluidState fluidState) {
-            // need to do it this way, because FerriteCore changes the field type, which would error on a cast
-            // TODO 26.1 check if this works with ferrite core
             super(fluidState.getType(),
                 fluidState.getProperties().toArray(s -> new Property<?>[s]),
                 fluidState.getValues().map(Property.Value::value).toArray(s -> new Comparable<?>[s]));
-            ;
-            //((StateHolderExtension) (this)).vivecraft$setValues(fluidState.getValues());
 
             this.fluidState = fluidState;
         }

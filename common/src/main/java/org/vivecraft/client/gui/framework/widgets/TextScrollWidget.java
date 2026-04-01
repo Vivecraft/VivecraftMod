@@ -102,8 +102,6 @@ public class TextScrollWidget extends AbstractWidget {
             getX() + this.width - (isFocused() || this.isHovered ? 2 : 1),
             (int) (getY() + (isFocused() || this.isHovered ? 0 : 1) + scrollbarStart + this.scrollBarSize),
             0xFFA0A0A0);
-
-        renderMouseover(graphics, mouseX, mouseY);
     }
 
     @Override
@@ -198,14 +196,6 @@ public class TextScrollWidget extends AbstractWidget {
             return -1;
         } else {
             return (int) ((mouseY - this.getY() - this.padding * 0.5) / 12.0);
-        }
-    }
-
-    public void renderMouseover(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        Style style = this.getMouseoverStyle(mouseX, mouseY);
-        if (style != null && style.getHoverEvent() != null) {
-            // TODO 26.1 it might do that on its own now?
-            //graphics.renderComponentHoverEffect(Minecraft.getInstance().font, style, mouseX, mouseY);
         }
     }
 }

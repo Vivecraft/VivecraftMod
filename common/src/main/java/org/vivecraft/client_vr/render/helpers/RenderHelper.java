@@ -255,8 +255,6 @@ public class RenderHelper {
                 y + 5 + line * 12, 0xFFFFFFFF);
         }
 
-        // TODO 26.1 why is this there
-        graphics.extractDeferredElements(0, 0, 0);
         GuiRenderHelper.finish();
     }
 
