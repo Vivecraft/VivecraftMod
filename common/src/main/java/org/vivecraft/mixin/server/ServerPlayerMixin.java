@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.server;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -254,24 +252,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         boolean hurt = original.call(level, damageSource, amount);
         this.vivecraft$roomscaleShieldItem = null;
         return hurt;
-    }
-
-    @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
-    private ItemEntity vivecraft$dropVive(ItemEntity item, @Local(argsOnly = true, ordinal = 0) boolean dropAround) {
-        ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
-        if (item != null && !dropAround && serverVivePlayer != null && serverVivePlayer.isVR()) {
-            // spawn item from players hand
-            Vec3 pos = serverVivePlayer.getAimPos(false);
-            Vec3 aim = serverVivePlayer.getAimDir(false);
-
-            // item speed, taken from Player#drop
-            final float speed = 0.3F;
-            item.setDeltaMovement(aim.x * speed, aim.y * speed, aim.z * speed);
-            item.setPos(pos.x + item.getDeltaMovement().x,
-                pos.y + item.getDeltaMovement().y,
-                pos.z + item.getDeltaMovement().z);
-        }
-        return item;
     }
 
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)

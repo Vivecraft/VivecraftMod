@@ -411,7 +411,7 @@ public class VRSettings {
     @SettingField(VrOptions.BACKPACK_SWITCH_MAIN_HAND)
     public String backpackMainHandKeybind = VivecraftVRMod.INSTANCE.keyQuickSwap.getName();
     @SettingField(VrOptions.BACKPACK_SWITCH_OFFHAND)
-    public String backpackOffhandKeybind = Minecraft.getInstance().options.keySwapOffhand.getName();
+    public String backpackOffhandKeybind = "";
     @SettingField(VrOptions.PHYSICAL_GUI)
     public boolean physicalGuiEnabled = false;
     @SettingField(VrOptions.WALK_MULTIPLIER)

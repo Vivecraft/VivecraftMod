@@ -3,7 +3,7 @@ package org.vivecraft.mixin.world.entity.monster;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +18,7 @@ public class EndermanFreezeWhenLookedAtMixin {
 
     @Shadow
     @Nullable
-    private LivingEntity target;
+    private Entity target;
 
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/control/LookControl;setLookAt(DDD)V"))
     private void vivecraft$lookAtHead(LookControl instance, double x, double y, double z, Operation<Void> original) {

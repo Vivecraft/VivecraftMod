@@ -107,19 +107,19 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         if (fact < 0F) {
             ilen *= -1F;
         }
-        float pos = ilen / barSize * 9F;
+        float pos = ilen / barSize * 8F;
 
         // actual slot that is selected
         int box = (int) Math.floor(pos);
 
         if (box > 8) {
-            if (this.dh.vrSettings.reverseHands && pos >= 9.5 && pos <= 10.5) {
+            if (this.dh.vrSettings.reverseHands && pos >= 9.0 && pos <= 10.0) {
                 box = 9;
             } else {
                 return false;
             }
         } else if (box < 0) {
-            if (!this.dh.vrSettings.reverseHands && pos <= -0.5 && pos >= -1.5) {
+            if (!this.dh.vrSettings.reverseHands && pos <= -1.0 && pos >= -2.0) {
                 box = 9;
             } else {
                 return false;
@@ -138,7 +138,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
     private Vector3f getHotbarStart(float scale) {
         // offset from center to the left of the hotbar
-        Vector3f offset = GuiHandler.GUI_OFFSET_LOCAL.add(-0.32F * scale, -0.38F * scale, 0,
+        Vector3f offset = GuiHandler.GUI_OFFSET_LOCAL.add(-0.285F * scale, -0.38F * scale, 0,
             new Vector3f());
 
         // transform local offset to room offset
@@ -149,7 +149,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
     private Vector3f getHotbarEnd(Vector3fc start, float scale) {
         Vector3f endDir = GuiHandler.GUI_RENDER_ROTATION_ROOM.transformDirection(MathUtils.LEFT, new Vector3f())
-            .mul(0.64F * scale);
+            .mul(0.56F * scale);
         return endDir.add(start);
     }
 
@@ -188,7 +188,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         Vec3 barStart = VRPlayer.roomToWorldPos(barStartRoom, world);
         Vec3 barEnd = VRPlayer.roomToWorldPos(barEndRoom, world);
 
-        Vector3f line = MathUtils.subtractToVector3f(barEnd, barStart).div(9F);
+        Vector3f line = MathUtils.subtractToVector3f(barEnd, barStart).div(8F);
 
         // origin offset since the camera is room relative
         Vector3f slotPos = MathUtils.subtractToVector3f(barStart, world.getEye(this.dh.currentPass).getPosition());
@@ -196,17 +196,17 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         float size = 0.06F * world.worldScale;
 
         if (!this.dh.vrSettings.reverseHands) {
-            DebugRenderHelper.renderCylinder(slotPos.sub(line.mul(1.5F, new Vector3f()), new Vector3f()), line, size,
+            DebugRenderHelper.renderCylinder(slotPos.sub(line.mul(2F, new Vector3f()), new Vector3f()), line, size,
                 this.hotbar == 9 ? MathUtils.GREEN : MathUtils.RED);
         }
 
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 8; i++) {
             DebugRenderHelper.renderCylinder(slotPos, line, size, this.hotbar == i ? MathUtils.GREEN : MathUtils.RED);
             slotPos.add(line);
         }
 
         if (this.dh.vrSettings.reverseHands) {
-            DebugRenderHelper.renderCylinder(slotPos.add(line.mul(0.5F, new Vector3f()), new Vector3f()), line, size,
+            DebugRenderHelper.renderCylinder(slotPos.add(line.mul(1.0F, new Vector3f()), new Vector3f()), line, size,
                 this.hotbar == 9 ? MathUtils.GREEN : MathUtils.RED);
         }
     }

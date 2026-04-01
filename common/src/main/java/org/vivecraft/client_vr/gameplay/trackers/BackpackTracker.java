@@ -95,16 +95,12 @@ public class BackpackTracker implements Tracker {
             .findFirst()
             .ifPresent(keymapping -> {
                 // if the offhand keybind is set to swap item, don't swap, if we are climbing
-                if (keymapping != this.mc.options.keySwapOffhand ||
-                    !this.dh.climbTracker.isClimbingWith(InteractionHand.OFF_HAND))
-                {
-                    VRInputAction vrinputaction = MCVR.get().getInputAction(keymapping);
-                    if (vrinputaction != null) {
-                        vrinputaction.pressBinding();
-                        // hold for 2 ticks, since this tracker runs in the middle of the tick,
-                        // and unpress would happen at start of next tick
-                        vrinputaction.unpressBinding(2);
-                    }
+                VRInputAction vrinputaction = MCVR.get().getInputAction(keymapping);
+                if (vrinputaction != null) {
+                    vrinputaction.pressBinding();
+                    // hold for 2 ticks, since this tracker runs in the middle of the tick,
+                    // and unpress would happen at start of next tick
+                    vrinputaction.unpressBinding(2);
                 }
             });
     }

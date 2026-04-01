@@ -122,25 +122,16 @@ public abstract class GuiVRMixin implements GuiExtension {
         CallbackInfo ci, @Local(argsOnly = true) GuiGraphicsExtractor graphics)
     {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
-            ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
+            ClientDataHolderVR.getInstance().hotbarModule.hotbar < 8 &&
             this.getCameraPlayer().getInventory().getSelectedSlot() !=
                 ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = graphics.guiWidth() / 2;
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HOTBAR_SELECTION_SPRITE,
-                middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
+                middle - 81 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
                 graphics.guiHeight() - 22 - 1, 24, 23, 0xFF00FF00);
         }
-    }
-
-
-    @ModifyExpressionValue(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0))
-    private boolean vivecraft$offhandSlotAlwaysVisible(boolean offhandEmpty) {
-        // the result is inverted, so we need to invert ours as well
-        return offhandEmpty && !(VRState.VR_RUNNING && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar &&
-            !ClientDataHolderVR.getInstance().vrSettings.seated
-        );
     }
 
     @WrapOperation(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 2))
