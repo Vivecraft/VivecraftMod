@@ -6,9 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -159,7 +157,8 @@ public class VRWidgetHelper {
             // TODO 26.1 actually split extraction and rendering
             poseStack.pushPose();
             poseStack.translate(0.5F, 0.5F, 0.5F);
-            ITEM_STACK_RENDER_STATE.submit(poseStack, MC.gameRenderer.getSubmitNodeStorage(), combinedLight, OverlayTexture.NO_OVERLAY, 0);
+            ITEM_STACK_RENDER_STATE.submit(poseStack, MC.gameRenderer.getSubmitNodeStorage(), combinedLight,
+                OverlayTexture.NO_OVERLAY, 0);
             poseStack.popPose();
             // render the hands
             MC.gameRenderer.getFeatureRenderDispatcher().renderAllFeatures();
