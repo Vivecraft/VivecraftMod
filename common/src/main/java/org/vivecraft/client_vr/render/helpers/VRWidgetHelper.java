@@ -6,9 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -156,14 +154,16 @@ public class VRWidgetHelper {
                 null, null, 0);
 
         if (!ITEM_STACK_RENDER_STATE.isEmpty() && !ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList().isEmpty()) {
-            // we use block models, so the camera texture is on the regular block atlas
-            RenderType renderType = RenderTypes.entityCutout(TextureAtlas.LOCATION_ITEMS);
-            // TODO 26.1 figure out how to render items
-//            ItemRenderer.renderItem(ItemDisplayContext.GROUND, poseStack, MC.renderBuffers().bufferSource(),
-//                combinedLight, OverlayTexture.NO_OVERLAY, new int[]{},
-//                ITEM_STACK_RENDER_STATE.layers[0].prepareQuadList(), renderType, ItemStackRenderState.FoilType.NONE);
-
-            MC.renderBuffers().bufferSource().endBatch(renderType);
+            // TODO 26.1 actually split extraction and rendering
+            poseStack.pushPose();
+            poseStack.translate(0.5F, 0.5F, 0.5F);
+            ITEM_STACK_RENDER_STATE.submit(poseStack, MC.gameRenderer.getSubmitNodeStorage(), combinedLight,
+                OverlayTexture.NO_OVERLAY, 0);
+            poseStack.popPose();
+            // render the hands
+            MC.gameRenderer.getFeatureRenderDispatcher().renderAllFeatures();
+            // need to end the batches to have the hands/items actually render
+            MC.renderBuffers().bufferSource().endBatch();
         }
 
         // render camera display
