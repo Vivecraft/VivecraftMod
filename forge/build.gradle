@@ -71,7 +71,7 @@ jarJar.register() {
 }
 
 dependencies {
-    implementation minecraft.dependency("net.minecraftforge:forge:$minecraft_version-$forge_version")
+    implementation minecraft.dependency("net.minecraftforge:forge:$forge_version")
     annotationProcessor("net.minecraftforge:eventbus-validator:7.0.1")
 
     bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false })
