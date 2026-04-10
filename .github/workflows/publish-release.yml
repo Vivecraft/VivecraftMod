@@ -6,6 +6,14 @@ on:
       tag:
         description: Release Tag
         type: string
+      publish:
+        description: Modrinth/CurseForge publish
+        type: boolean
+        default: true
+      forge-update:
+        description: update Forge/Neoforge version jsons
+        type: boolean
+        default: true
 
 jobs:
   publish:
@@ -42,7 +50,7 @@ jobs:
         with:
           mod_version: ${{ steps.properties.outputs.mod_version }}
       - name: publish fabric
-        if: steps.info.outputs.fabric_file != ''
+        if: steps.info.outputs.fabric_file != '' && inputs.publish
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
@@ -63,7 +71,7 @@ jobs:
           fail-mode: warn
 
       - name: publish forge
-        if: steps.info.outputs.forge_file != ''
+        if: steps.info.outputs.forge_file != '' && inputs.publish
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
@@ -84,7 +92,7 @@ jobs:
           fail-mode: warn
 
       - name: publish neoforge
-        if: steps.info.outputs.neoforge_file != ''
+        if: steps.info.outputs.neoforge_file != '' && inputs.publish
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
@@ -105,7 +113,7 @@ jobs:
           fail-mode: warn
 
       - name: publish quilt
-        if: steps.info.outputs.quilt_file != ''
+        if: steps.info.outputs.quilt_file != '' && inputs.publish
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
@@ -147,21 +155,21 @@ jobs:
           type: "${{ steps.info.outputs.release_type }}"
 
       - name: push new update json forge
-        if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file == ''
+        if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file == '' && inputs.forge-update
         uses: EndBug/add-and-commit@v9
         with:
           message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
           push: true
 
       - name: push new update json neoforge
-        if: steps.info.outputs.forge_file == '' && steps.info.outputs.neoforge_file != ''
+        if: steps.info.outputs.forge_file == '' && steps.info.outputs.neoforge_file != '' && inputs.forge-update
         uses: EndBug/add-and-commit@v9
         with:
           message: 'update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
           push: true
 
       - name: push new update json forge+neoforge
-        if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file != ''
+        if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file != '' && inputs.forge-update
         uses: EndBug/add-and-commit@v9
         with:
           message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.properties.outputs.mod_version }} and update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
