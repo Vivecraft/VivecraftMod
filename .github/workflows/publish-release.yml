@@ -52,7 +52,7 @@ jobs:
           curseforge-id: 667903
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          files: ${{ steps.info.outputs.fabric_file }}
+          files: "build/libs/${{ steps.info.outputs.fabric_file }}"
           changelog-file: "changelog.md"
 
           name: "${{ steps.properties.outputs.mod_name }}-fabric"
@@ -73,7 +73,7 @@ jobs:
           curseforge-id: 667903
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          files: ${{ steps.info.outputs.forge_file }}
+          files: "build/libs/${{ steps.info.outputs.forge_file }}"
           changelog-file: "changelog.md"
 
           name: "${{ steps.properties.outputs.mod_name }}-forge"
@@ -94,7 +94,7 @@ jobs:
           curseforge-id: 667903
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          files: ${{ steps.info.outputs.neoforge_file }}
+          files: "build/libs/${{ steps.info.outputs.neoforge_file }}"
           changelog-file: "changelog.md"
 
           name: "${{ steps.properties.outputs.mod_name }}-neoforge"
@@ -115,7 +115,7 @@ jobs:
           curseforge-id: 667903
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          files: ${{ steps.info.outputs.quilt_file }}
+          files: "build/libs/${{ steps.info.outputs.quilt_file }}"
           changelog-file: "changelog.md"
 
           name: "${{ steps.properties.outputs.mod_name }}-quilt"
