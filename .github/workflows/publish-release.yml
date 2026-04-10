@@ -9,7 +9,7 @@ on:
 
 jobs:
   publish:
-    name: checkout branch, compile and publish to packages
+    name: publish release to modrinth/curseforge
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -22,12 +22,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --dir build/libs
+          gh release download "${{ inputs.tag }}" --repo "${{ github.repository  }}" --dir build/libs
       - name: download changelog
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release view "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --json body --jq ".body" > changelog.md
+          gh release view "${{ inputs.tag }}" --repo "${{ github.repository  }}" --json body --jq ".body" > changelog.md
       - name: get info from properties
         id: properties
         run: |
@@ -42,7 +42,7 @@ jobs:
         with:
           mod_version: ${{ steps.properties.outputs.mod_version }}
       - name: publish fabric
-        if: steps.info.outputs.fabric_file != '' && inputs.publish
+        if: steps.info.outputs.fabric_file != ''
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
@@ -63,7 +63,7 @@ jobs:
           fail-mode: warn
 
       - name: publish forge
-        if: steps.info.outputs.forge_file != '' && inputs.publish
+        if: steps.info.outputs.forge_file != ''
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
@@ -84,7 +84,7 @@ jobs:
           fail-mode: warn
 
       - name: publish neoforge
-        if: steps.info.outputs.neoforge_file != '' && inputs.publish
+        if: steps.info.outputs.neoforge_file != ''
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
@@ -105,7 +105,7 @@ jobs:
           fail-mode: warn
 
       - name: publish quilt
-        if: steps.info.outputs.quilt_file != '' && inputs.publish
+        if: steps.info.outputs.quilt_file != ''
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
