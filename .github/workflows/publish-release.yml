@@ -17,7 +17,7 @@ jobs:
       - name: checkout ${{ inputs.tag }}
         uses: actions/checkout@v6
         with:
-          ref: inputs.tag
+          ref: ${{ inputs.tag }}
       - name: download artifacts
         run: |
           gh release download "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --dir build/libs
