@@ -19,9 +19,13 @@ jobs:
         with:
           ref: ${{ inputs.tag }}
       - name: download artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release download "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --dir build/libs
       - name: download changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release view "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --json body --jq ".body" > changelog.md
       - name: get info from properties
