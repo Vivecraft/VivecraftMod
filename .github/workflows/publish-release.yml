@@ -19,8 +19,6 @@ jobs:
   publish:
     name: publish release to modrinth/curseforge
     runs-on: ubuntu-22.04
-    permissions:
-      contents: read
     steps:
       - name: checkout ${{ inputs.tag }}
         uses: actions/checkout@v6
