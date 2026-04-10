@@ -75,7 +75,7 @@ jobs:
         run: |
           max_attempts=5
           attempt=1
-      
+          
           until ./gradlew build; do
             if [ "$attempt" -ge "$max_attempts" ]; then
               echo "Build failed after $attempt attempts."
@@ -104,8 +104,13 @@ jobs:
       - name: get info from properties
         id: properties
         run: |
-          source <(grep -E '^(minecraft_version|mod_version|archives_base_name)=' gradle.properties)
-          echo "mod_name=${archives_base_name^} ${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
+          source <(grep -E '^(minecraft_version|mod_version|archives_base_name|mod_name)=' gradle.properties)
+          
+          # use archives_base_name if it exists, else use mod_name
+          final_name="${archives_base_name:+${archives_base_name^}}"
+          final_name="${final_name:-${$mod_name}}"
+          
+          echo "mod_name=${final_name} ${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
           echo "mod_version=${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
       - name: get info from jars/source
         id: info
