@@ -55,8 +55,8 @@ jobs:
           files: ${{ steps.info.outputs.fabric_file }}
           changelog-file: "changelog.md"
 
-          name: "${{ steps.info.outputs.mod_name }}-fabric"
-          version: "${{ steps.info.outputs.mod_version }}-fabric"
+          name: "${{ steps.properties.outputs.mod_name }}-fabric"
+          version: "${{ steps.properties.outputs.mod_version }}-fabric"
           version-type: "${{ steps.info.outputs.release_type }}"
 
           loaders: "${{ steps.info.outputs.fabric_loaders }}"
@@ -76,8 +76,8 @@ jobs:
           files: ${{ steps.info.outputs.forge_file }}
           changelog-file: "changelog.md"
 
-          name: "${{ steps.info.outputs.mod_name }}-forge"
-          version: "${{ steps.info.outputs.mod_version }}-forge"
+          name: "${{ steps.properties.outputs.mod_name }}-forge"
+          version: "${{ steps.properties.outputs.mod_version }}-forge"
           version-type: "${{ steps.info.outputs.release_type }}"
 
           loaders: "${{ steps.info.outputs.forge_loaders}}"
@@ -97,8 +97,8 @@ jobs:
           files: ${{ steps.info.outputs.neoforge_file }}
           changelog-file: "changelog.md"
 
-          name: "${{ steps.info.outputs.mod_name }}-neoforge"
-          version: "${{ steps.info.outputs.mod_version }}-neoforge"
+          name: "${{ steps.properties.outputs.mod_name }}-neoforge"
+          version: "${{ steps.properties.outputs.mod_version }}-neoforge"
           version-type: "${{ steps.info.outputs.release_type }}"
 
           loaders: "${{ steps.info.outputs.neoforge_loaders}}"
@@ -118,8 +118,8 @@ jobs:
           files: ${{ steps.info.outputs.quilt_file }}
           changelog-file: "changelog.md"
 
-          name: "${{ steps.info.outputs.mod_name }}-quilt"
-          version: "${{ steps.info.outputs.mod_version}}-quilt"
+          name: "${{ steps.properties.outputs.mod_name }}-quilt"
+          version: "${{ steps.properties.outputs.mod_version}}-quilt"
           version-type: "${{ steps.info.outputs.release_type }}"
 
           loaders: "${{ steps.info.outputs.quilt_loaders}}"
@@ -135,7 +135,7 @@ jobs:
         with:
           json_file: "./forge_updates.json"
           mc_range: "${{ steps.info.outputs.forge_mc_versions}}"
-          new_version: "${{ steps.info.outputs.mod_version}}"
+          new_version: "${{ steps.properties.outputs.mod_version}}"
           type: "${{ steps.info.outputs.release_type }}"
       - name: update neoforge versions
         if: steps.info.outputs.neoforge_file != ''
@@ -143,26 +143,26 @@ jobs:
         with:
           json_file: "./neoforge_updates.json"
           mc_range: "${{ steps.info.outputs.neoforge_mc_versions}}"
-          new_version: "${{ steps.info.outputs.mod_version}}"
+          new_version: "${{ steps.properties.outputs.mod_version}}"
           type: "${{ steps.info.outputs.release_type }}"
 
       - name: push new update json forge
         if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file == ''
         uses: EndBug/add-and-commit@v9
         with:
-          message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.info.outputs.mod_version }}'
+          message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
           push: true
 
       - name: push new update json neoforge
         if: steps.info.outputs.forge_file == '' && steps.info.outputs.neoforge_file != ''
         uses: EndBug/add-and-commit@v9
         with:
-          message: 'update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.info.outputs.mod_version }}'
+          message: 'update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
           push: true
 
       - name: push new update json forge+neoforge
         if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file != ''
         uses: EndBug/add-and-commit@v9
         with:
-          message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.version.outputs.MOD_VERSION }} and update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.info.outputs.mod_version }}'
+          message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.properties.outputs.mod_version }} and update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
           push: true

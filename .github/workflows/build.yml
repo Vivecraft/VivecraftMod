@@ -316,5 +316,5 @@ jobs:
         if: steps.meta.outputs.forge_file != '' && steps.meta.outputs.neoforge_file != ''
         uses: EndBug/add-and-commit@v9
         with:
-          message: 'update forge ${{ steps.meta.outputs.forge_mc_versions }} to ${{ steps.version.outputs.MOD_VERSION }} and update neoforge ${{ steps.meta.outputs.neoforge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
+          message: 'update forge ${{ steps.meta.outputs.forge_mc_versions }} to ${{ steps.meta.outputs.mod_version }} and update neoforge ${{ steps.meta.outputs.neoforge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
           push: true
