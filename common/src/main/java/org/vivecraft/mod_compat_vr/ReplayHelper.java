@@ -2,7 +2,7 @@ package org.vivecraft.mod_compat_vr;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.Packet;
-import org.vivecraft.Services;
+import org.vivecraft.Xplat;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -25,14 +25,14 @@ public class ReplayHelper {
                 VrPlayerState.create(vrPlayer),
                 ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_post.worldScale,
                 AutoCalibration.getPlayerHeight() / AutoCalibration.DEFAULT_HEIGHT);
-            storePacket(Services.XPLAT.getS2CPacket(payload));
+            storePacket(Xplat.INSTANCE.getS2CPacket(payload));
         }
     }
 
     public static void storeVRActive(boolean active) {
         if (!ClientVRPlayers.GOT_LOCAL_PLAYER_INFO && Minecraft.getInstance().player != null) {
             VRActivePayloadS2C payload = new VRActivePayloadS2C(active, Minecraft.getInstance().player.getUUID());
-            storePacket(Services.XPLAT.getS2CPacket(payload));
+            storePacket(Xplat.INSTANCE.getS2CPacket(payload));
         }
     }
 

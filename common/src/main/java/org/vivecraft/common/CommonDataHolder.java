@@ -1,6 +1,6 @@
 package org.vivecraft.common;
 
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 
 public class CommonDataHolder {
 
@@ -13,14 +13,14 @@ public class CommonDataHolder {
 
         String mcVersion = "";
         String modVersion = "";
-        if (Services.XLOADER.isModLoadedSuccess()) {
-            String[] version = Services.XLOADER.getModVersion().split("-", 2);
+        if (Xloader.INSTANCE.isModLoadedSuccess()) {
+            String[] version = Xloader.INSTANCE.getModVersion().split("-", 2);
             mcVersion = version[0];
             modVersion = version[1];
         }
 
         this.versionIdentifier =
-            "Vivecraft-" + mcVersion + "-" + Services.XLOADER.getModloader().name + "-" + modVersion;
+            "Vivecraft-" + mcVersion + "-" + Xloader.INSTANCE.getModloader().name + "-" + modVersion;
     }
 
     public static CommonDataHolder getInstance() {

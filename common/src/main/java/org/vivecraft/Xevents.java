@@ -7,6 +7,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public interface Xevents {
 
+    Xevents INSTANCE = Services.load(Xevents.class);
+
     /**
      * checks if someone wants to cancel the in block overlay
      *

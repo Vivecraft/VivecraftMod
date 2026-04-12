@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.*;
@@ -107,7 +107,7 @@ public class FileUtils {
 
             targetFile.getParentFile().mkdirs();
 
-            Files.copy(Services.XLOADER.getInJarFile(sourcePath), targetFile.toPath(),
+            Files.copy(Xloader.INSTANCE.getInJarFile(sourcePath), targetFile.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
             return true;
@@ -144,7 +144,7 @@ public class FileUtils {
         boolean didExtractSomething = false;
 
         try {
-            for (Path path : Services.XLOADER.getInJarFolderFiles(source)) {
+            for (Path path : Xloader.INSTANCE.getInJarFolderFiles(source)) {
                 didExtractSomething |= unpackFile(path.toString(), new File(target + "/" + path.getFileName()), false);
             }
         } catch (IOException e) {

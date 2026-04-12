@@ -11,7 +11,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 import org.vivecraft.Xplat;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
@@ -66,6 +66,6 @@ public class XplatImpl implements Xplat {
 
     @Override
     public boolean isFakePlayer(ServerPlayer player) {
-        return Services.XLOADER.isModLoaded("fabric-events-interaction-v0") && player instanceof FakePlayer;
+        return Xloader.INSTANCE.isModLoaded("fabric-events-interaction-v0") && player instanceof FakePlayer;
     }
 }

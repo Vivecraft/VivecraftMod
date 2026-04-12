@@ -13,6 +13,8 @@ import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
 public interface Xplat {
 
+    Xplat INSTANCE = Services.load(Xplat.class);
+
     /**
      * asks the mod loader to enable the stencil for the given RenderTarget
      *

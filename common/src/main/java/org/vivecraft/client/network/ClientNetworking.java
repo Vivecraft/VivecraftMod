@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3fc;
-import org.vivecraft.Services;
+import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.ClientVRPlayers;
@@ -126,7 +126,7 @@ public class ClientNetworking {
     public static void sendVersionInfo() {
         // send version string, with currently running
         if (!ClientDataHolderVR.getInstance().completelyDisabled &&
-            Services.XPLAT.serverAcceptsPacket(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL))
+            Xplat.INSTANCE.serverAcceptsPacket(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL))
         {
             Minecraft.getInstance().getConnection().send(createServerPacket(
                 new VersionPayloadC2S(
@@ -193,7 +193,7 @@ public class ClientNetworking {
     }
 
     public static Packet<?> createServerPacket(VivecraftPayloadC2S payload) {
-        return Services.XPLAT.getC2SPacket(payload);
+        return Xplat.INSTANCE.getC2SPacket(payload);
     }
 
     public static void sendLegacyPackets(VrPlayerState vrPlayerState) {

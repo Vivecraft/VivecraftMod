@@ -10,10 +10,6 @@ import java.util.ServiceLoader;
  */
 public class Services {
 
-    public static final Xevents XEVENTS = load(Xevents.class);
-    public static final Xloader XLOADER = load(Xloader.class);
-    public static final Xplat XPLAT = load(Xplat.class);
-
     /**
      * This code is used to load a service for the current environment. Your implementation of the service must be defined
      * manually by including a text file in META-INF/services named with the fully qualified class name of the service.

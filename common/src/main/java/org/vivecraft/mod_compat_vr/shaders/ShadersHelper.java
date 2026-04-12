@@ -7,7 +7,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Vector3f;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -145,9 +145,9 @@ public class ShadersHelper {
      * @param createValueMacro a consumer that defines a name with a value
      */
     public static void addMacros(Consumer<String> createMacro, BiConsumer<String, Integer> createValueMacro) {
-        if (Services.XLOADER.isModLoadedSuccess()) {
+        if (Xloader.INSTANCE.isModLoadedSuccess()) {
             createMacro.accept("VIVECRAFT");
-            String[] modVersion = Services.XLOADER.getModVersion().split("-", 3)[1].split("\\.");
+            String[] modVersion = Xloader.INSTANCE.getModVersion().split("-", 3)[1].split("\\.");
             int version = Integer.parseInt(modVersion[0]) * 10000 +
                 Integer.parseInt(modVersion[1]) * 100 +
                 Integer.parseInt(modVersion[2]);

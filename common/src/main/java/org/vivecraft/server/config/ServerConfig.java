@@ -10,7 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 import org.vivecraft.common.network.packet.s2c.AttackWhileBlockingPayloadS2C;
 import org.vivecraft.common.network.packet.s2c.CrawlPayloadS2C;
 import org.vivecraft.common.network.packet.s2c.DualWieldingPayloadS2C;
@@ -124,7 +124,7 @@ public class ServerConfig {
             CONFIG.close();
         }
         CONFIG = CommentedFileConfig
-            .builder(Services.XLOADER.getConfigPath("vivecraft-server-config.toml"))
+            .builder(Xloader.INSTANCE.getConfigPath("vivecraft-server-config.toml"))
             .autosave()
             .sync()
             .concurrent()

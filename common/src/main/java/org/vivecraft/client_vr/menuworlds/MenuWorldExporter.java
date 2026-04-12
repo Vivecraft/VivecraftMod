@@ -45,7 +45,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.timeline.Timeline;
 import net.minecraft.world.timeline.Timelines;
-import org.vivecraft.Services;
+import org.vivecraft.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.*;
@@ -630,14 +630,14 @@ public class MenuWorldExporter {
 
                 dos.writeUTF(registryAccess.lookupOrThrow(Registries.BIOME).getKey(biome).toString());
 
-                Biome.ClimateSettings climateSettings = Services.XPLAT.getBiomeClimateSettings(biome);
+                Biome.ClimateSettings climateSettings = Xplat.INSTANCE.getBiomeClimateSettings(biome);
 
                 dos.writeBoolean(climateSettings.hasPrecipitation());
                 dos.writeFloat(climateSettings.temperature());
                 dos.writeUTF(climateSettings.temperatureModifier().getSerializedName());
                 dos.writeFloat(climateSettings.downfall());
 
-                BiomeSpecialEffects specialEffects = Services.XPLAT.getBiomeEffects(biome);
+                BiomeSpecialEffects specialEffects = Xplat.INSTANCE.getBiomeEffects(biome);
 
                 dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.FOG_COLOR, dimensionType));
                 dos.writeInt(specialEffects.waterColor());

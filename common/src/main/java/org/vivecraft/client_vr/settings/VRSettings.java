@@ -22,7 +22,7 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.OpenKeyboardContext;
@@ -733,7 +733,7 @@ public class VRSettings {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public VRSettings() {
-        this.vrCfgFile = Services.XLOADER.getConfigPath("vivecraft-client-config.json").toFile();
+        this.vrCfgFile = Xloader.INSTANCE.getConfigPath("vivecraft-client-config.json").toFile();
 
         // Need to do this in the instance because array sizes aren't known until instantiation
         initializeFieldInfo();

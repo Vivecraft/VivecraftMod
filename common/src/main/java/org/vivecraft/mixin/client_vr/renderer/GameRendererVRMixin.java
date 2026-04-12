@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.Services;
+import org.vivecraft.Xevents;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -456,7 +456,7 @@ public abstract class GameRendererVRMixin
                 this.mainCamera.projection.zNear());
 
             if (triple != null &&
-                !Services.XEVENTS.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(),
+                !Xevents.INSTANCE.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(),
                     triple.getRight()))
             {
                 this.vivecraft$inBlock = triple.getLeft();
@@ -465,7 +465,7 @@ public abstract class GameRendererVRMixin
             }
 
             this.vivecraft$inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER) &&
-                !Services.XEVENTS.renderWaterOverlay(this.minecraft.player, new PoseStack());
+                !Xevents.INSTANCE.renderWaterOverlay(this.minecraft.player, new PoseStack());
         }
     }
 

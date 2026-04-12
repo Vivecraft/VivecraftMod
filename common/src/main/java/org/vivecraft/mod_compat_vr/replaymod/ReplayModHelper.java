@@ -2,7 +2,7 @@ package org.vivecraft.mod_compat_vr.replaymod;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.Packet;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +17,7 @@ public class ReplayModHelper {
     private static Method RecordingEventHandler_onPacket;
 
     public static boolean isLoaded() {
-        return Services.XLOADER.isModLoaded("replaymod") || Services.XLOADER.isModLoaded("reforgedplaymod");
+        return Xloader.INSTANCE.isModLoaded("replaymod") || Xloader.INSTANCE.isModLoaded("reforgedplaymod");
     }
 
     public static void storePacket(Packet<?> packet) {

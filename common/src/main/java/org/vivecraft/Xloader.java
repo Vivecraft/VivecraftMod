@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface Xloader {
 
+    Xloader INSTANCE = Services.load(Xloader.class);
+
     enum ModLoader {
         FABRIC("fabric"),
         FORGE("forge"),

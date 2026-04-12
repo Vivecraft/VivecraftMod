@@ -1,12 +1,12 @@
 package org.vivecraft.mod_compat_vr.pehkui;
 
 import net.minecraft.world.entity.Entity;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 
 public class PehkuiHelper {
 
     public static boolean isLoaded() {
-        return Services.XLOADER.isModLoaded("pehkui");
+        return Xloader.INSTANCE.isModLoaded("pehkui");
     }
 
     /**

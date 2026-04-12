@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.Services;
+import org.vivecraft.Xplat;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.common.network.packet.s2c.DamageDirectionPayloadS2C;
 import org.vivecraft.common.utils.MathUtils;
@@ -359,7 +359,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         if (cir.getReturnValueZ()) {
             ServerVivePlayer vivePlayer = this.vivecraft$getVivePlayer();
             if (vivePlayer != null && vivePlayer.isVR() && vivePlayer.wantsDamageDirection) {
-                this.connection.send(Services.XPLAT.getS2CPacket(
+                this.connection.send(Xplat.INSTANCE.getS2CPacket(
                     new DamageDirectionPayloadS2C(Utils.getDirFromDamageSource(damageSource, this))));
             }
         }

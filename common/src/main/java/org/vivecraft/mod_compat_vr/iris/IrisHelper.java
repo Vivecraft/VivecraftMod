@@ -5,7 +5,7 @@ import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.api.v0.IrisProgram;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
-import org.vivecraft.Services;
+import org.vivecraft.Xloader;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -60,7 +60,7 @@ public class IrisHelper {
     private static Method CapturedRenderingState_getGbufferProjection;
 
     public static boolean isLoaded() {
-        return Services.XLOADER.isModLoaded("iris") || Services.XLOADER.isModLoaded("oculus");
+        return Xloader.INSTANCE.isModLoaded("iris") || Xloader.INSTANCE.isModLoaded("oculus");
     }
 
     /**
@@ -299,7 +299,7 @@ public class IrisHelper {
             }
 
             // distant horizon compat
-            if (Services.XLOADER.isModLoaded("distanthorizons")) {
+            if (Xloader.INSTANCE.isModLoaded("distanthorizons")) {
                 try {
                     Class<?> OverrideInjector = Class.forName(
                         "com.seibel.distanthorizons.coreapi.DependencyInjection.OverrideInjector");
