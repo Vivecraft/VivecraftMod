@@ -12,10 +12,10 @@ dependencies {
     compileOnly "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
 
     // for sodium compat
-    compileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+    compileOnly "maven.modrinth:sodium:mc26.1.1-0.8.9-fabric"
 
     // for iris compat
-    compileOnly "maven.modrinth:iris:1.10.4+1.21.11-fabric"
+    compileOnly "maven.modrinth:iris:1.10.9+26.1-fabric"
 
     // for REI compat
     compileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }

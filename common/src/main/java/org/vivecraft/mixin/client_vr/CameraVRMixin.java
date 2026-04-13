@@ -141,7 +141,7 @@ public abstract class CameraVRMixin {
         {
             return original.call(instance, fovy, aspect, zNear, zFar, zZeroToOne);
         } else {
-            return dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(), zNear, zFar);
+            return instance.set(dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(), zNear, zFar));
         }
     }
 
