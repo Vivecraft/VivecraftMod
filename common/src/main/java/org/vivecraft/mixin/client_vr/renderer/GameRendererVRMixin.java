@@ -214,7 +214,7 @@ public abstract class GameRendererVRMixin
 
             VREffectsHelper.renderGuiLayer(partialTick, true);
 
-            DebugRenderHelper.renderDebug(partialTick);
+            DebugRenderHelper.extractDebug(partialTick);
 
             if (KeyboardHandler.SHOWING) {
                 if (vivecraft$DATA_HOLDER.vrSettings.physicalKeyboard) {

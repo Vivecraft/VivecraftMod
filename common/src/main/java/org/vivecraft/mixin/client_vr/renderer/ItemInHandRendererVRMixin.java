@@ -380,7 +380,7 @@ public abstract class ItemInHandRendererVRMixin {
         poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
 
-        vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY);
+        vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY, mainHand);
         Identifier skin = player.getSkin().body().texturePath();
 
         if (rightHand) {

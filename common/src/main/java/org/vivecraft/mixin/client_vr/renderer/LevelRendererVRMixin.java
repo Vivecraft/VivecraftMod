@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.BlockOutlineRenderState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
@@ -79,6 +80,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Shadow
     @Final
     private LevelTargetBundle targets;
+
+    @Shadow
+    @Final
+    private SubmitNodeStorage submitNodeStorage;
+
+    @Shadow
+    @Final
+    private FeatureRenderDispatcher featureRenderDispatcher;
 
     @Inject(method = "onResourceManagerReload", at = @At("TAIL"))
     private void vivecraft$reinitVR(ResourceManager resourceManager, CallbackInfo ci) {
@@ -229,12 +238,12 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         if (this.targets.translucent != null) {
             VREffectsHelper.renderVRFabulous(partialTick, this.targets);
         } else {
-            VREffectsHelper.renderVrFast(partialTick, false);
+            VREffectsHelper.renderVrFast(this.submitNodeStorage, partialTick, false);
             if (ShadersHelper.isShaderActive() && ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender ==
                 VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID)
             {
                 // shaders active, and render gui before translucents
-                VREffectsHelper.renderVrFast(partialTick, true);
+                VREffectsHelper.renderVrFast(this.submitNodeStorage, partialTick, true);
                 this.vivecraft$guiRendered = true;
             }
         }
@@ -253,7 +262,12 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             // no shaders, or shaders, and gui after translucents
             FramePass framePass = frameGraphBuilder.addPass("vr stuff part2");
             this.targets.main = framePass.readsAndWrites(this.targets.main);
-            framePass.executes(() -> VREffectsHelper.renderVrFast(partialTick, true));
+            framePass.executes(() -> {
+                VREffectsHelper.renderVrFast(this.submitNodeStorage, partialTick, true);
+                // actuallyrender the stuff
+                this.featureRenderDispatcher.renderAllFeatures();
+                this.renderBuffers.bufferSource().endBatch();
+            });
             this.vivecraft$guiRendered = true;
         }
     }
@@ -272,7 +286,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass,
                 RenderSystem.getModelViewStack());
 
-            VREffectsHelper.renderVrFast(partialTick, true);
+            VREffectsHelper.renderVrFast(this.submitNodeStorage, partialTick, true);
+            // actuallyrender the stuff
+            this.featureRenderDispatcher.renderAllFeatures();
+            this.renderBuffers.bufferSource().endBatch();
 
             RenderSystem.getModelViewStack().popMatrix();
         }

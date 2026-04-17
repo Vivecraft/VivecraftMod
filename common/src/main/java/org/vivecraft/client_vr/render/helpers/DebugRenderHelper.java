@@ -46,7 +46,7 @@ public class DebugRenderHelper {
      *
      * @param partialTick current partial tick
      */
-    public static void renderDebug(float partialTick) {
+    public static void extractDebug(float partialTick) {
         if (DATA_HOLDER.vrSettings.renderDeviceAxes) {
             renderDeviceAxes(DATA_HOLDER.vrPlayer.getVRDataWorld());
         }

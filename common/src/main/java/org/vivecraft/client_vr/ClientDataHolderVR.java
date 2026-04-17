@@ -37,7 +37,6 @@ public class ClientDataHolderVR {
     public final boolean kiosk;
     public final boolean viewOnly;
 
-    public boolean isMainHand;
     public boolean isFpHand;
 
     public VRPlayer vrPlayer;

@@ -707,16 +707,14 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
      * @param itemStack held item
      * @return the transparency for held items to indicate attack power or sneaking.
      */
-    public static float getItemFade(LocalPlayer player, ItemStack itemStack) {
+    public static float getItemFade(LocalPlayer player, ItemStack itemStack, boolean mainHand) {
         float fade = player.getAttackStrengthScale(0.0F) * 0.75F + 0.25F;
 
         if (player.isShiftKeyDown()) {
             fade = 0.75F;
         }
 
-        if (ClientDataHolderVR.getInstance().swingTracker.lastWeaponSolid[ClientDataHolderVR.getInstance().isMainHand ?
-            0 : 1])
-        {
+        if (ClientDataHolderVR.getInstance().swingTracker.lastWeaponSolid[mainHand ? 0 : 1]) {
             fade -= 0.25F;
         }
 

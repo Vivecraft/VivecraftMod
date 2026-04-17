@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -35,7 +36,6 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.opengl.GL11C;
-import org.vivecraft.Xevents;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
@@ -56,6 +56,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.render.renderstates.CrosshairRenderState;
+import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -608,7 +610,7 @@ public class VREffectsHelper {
 
         Profiler.get().popPush("VR");
         renderCrosshairAtDepth(!DATA_HOLDER.vrSettings.useCrosshairOcclusion);
-        DebugRenderHelper.renderDebug(partialTick);
+        DebugRenderHelper.extractDebug(partialTick);
 
         // switch to VR Occluded buffer, and copy main depth for occlusion
         LevelTargetBundleExtension extTargets = (LevelTargetBundleExtension) targets;
@@ -664,42 +666,40 @@ public class VREffectsHelper {
      * this includes hands, vr shadow, gui, camera widgets and other stuff
      *
      * @param partialTick current partial tick
-     * @param secondPass  if it's the second pass. first pass renders opaque stuff, second translucent stuff
      */
-    public static void renderVrFast(float partialTick, boolean secondPass) {
-        if (DATA_HOLDER.currentPass == RenderPass.SCOPEL || DATA_HOLDER.currentPass == RenderPass.SCOPER) {
+    public static void renderVrFast(
+        SubmitNodeCollector output, VRRenderState vrState, float partialTick)
+    {
+        if (vrState.currentPass == RenderPass.SCOPEL || vrState.currentPass == RenderPass.SCOPER) {
             // skip for spyglass
             return;
         }
 
-        Profiler.get().popPush("VR");
+        Profiler.get().popPush("render VR");
 
-        if (!secondPass) {
-            renderCrosshairAtDepth(!DATA_HOLDER.vrSettings.useCrosshairOcclusion);
-            VRWidgetHelper.renderVRThirdPersonCamWidget();
-            VRWidgetHelper.renderVRHandheldCameraWidget();
-            DebugRenderHelper.renderDebug(partialTick);
-        } else {
-            renderGuiAndShadow(partialTick, !shouldOccludeGui(), true);
+        renderCrosshairAtDepth(output, vrState.crosshairState);
+        VRWidgetHelper.renderVRThirdPersonCamWidget(output, vrState.thirdCamWidgetState);
+        VRWidgetHelper.renderVRHandheldCameraWidget(output, vrState.screenCamWidgetState);
+
+        if (vrState.handsSecond) {
+            VRArmHelper.renderVRHands(partialTick, vrState.renderHands, vrState.renderHands,
+                vrState.menuHandMain, vrState.menuHandOff);
         }
 
-        // render hands in second pass when gui is open
-        boolean renderHandsSecond =
-            RadialHandler.isShowing() || KeyboardHandler.SHOWING || Minecraft.getInstance().screen != null;
-        if (secondPass == renderHandsSecond) {
-            // should render hands in second pass if menus are open, else in the first pass
-            // only render the hands only once
-            VRArmHelper.renderVRHands(partialTick, VRArmHelper.shouldRenderHands(), VRArmHelper.shouldRenderHands(),
-                DATA_HOLDER.menuHandMain, DATA_HOLDER.menuHandOff);
-        }
+        renderVRSelfEffects(output, vrState, partialTick);
 
-        renderVRSelfEffects(partialTick, !secondPass);
+        renderGuiAndShadow(partialTick, !vrState.occludeGui, true);
+
+        if (!vrState.handsSecond) {
+            VRArmHelper.renderVRHands(partialTick, vrState.renderHands, vrState.renderHands,
+                vrState.menuHandMain, vrState.menuHandOff);
+        }
     }
 
     /**
      * @return if the gui should be occluded
      */
-    private static boolean shouldOccludeGui() {
+    public static boolean shouldOccludeGui() {
         if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
             return true;
         } else {
@@ -781,28 +781,23 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    private static void renderVRSelfEffects(float partialTick, boolean firstPass) {
+    private static void renderVRSelfEffects(SubmitNodeCollector output, VRRenderState vrState, float partialTick) {
         // only render the fire in first person, other views have the burning entity
-        if (DATA_HOLDER.currentPass != RenderPass.THIRD && DATA_HOLDER.currentPass != RenderPass.CAMERA &&
-            !MC.player.isSpectator() && MC.player.isOnFire() &&
-            !Xevents.INSTANCE.renderFireOverlay(MC.player, new PoseStack()))
-        {
-            VREffectsHelper.renderFireInFirstPerson();
+        if (vrState.firstPersonFire){
+            VREffectsHelper.renderFireInFirstPerson(output, vrState);
         }
 
-        if (firstPass) {
-            // totem of undying
-            ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
-                .renderItemActivationAnimation(new PoseStack(), partialTick, MC.gameRenderer.getSubmitNodeStorage());
-        }
+        // totem of undying
+        ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
+            .renderItemActivationAnimation(new PoseStack(), partialTick, output);
     }
 
     /**
      * renders the fire when the player is burning
      */
-    public static void renderFireInFirstPerson() {
+    public static void renderFireInFirstPerson(SubmitNodeCollector output, VRRenderState vrState) {
         PoseStack posestack = new PoseStack();
-        RenderHelper.applyStereo(DATA_HOLDER.currentPass, posestack);
+        RenderHelper.applyStereo(vrState.currentPass, posestack);
 
         TextureAtlasSprite fireSprite = MC.getAtlasManager().get(ModelBakery.FIRE_1);
 
@@ -819,13 +814,10 @@ public class VREffectsHelper {
         float vMax = fireSprite.getV1();
 
         float width = 0.3F;
-        float headHeight = (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.getHeadPivot().y -
-            ((GameRendererExtension) MC.gameRenderer).vivecraft$getRveY()
-        );
 
         RenderType renderType;
         TextureAtlasSprite textureAtlasSprite = MC.getAtlasManager().get(ModelBakery.FIRE_1);
-        if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
+        if (RenderPass.isThirdPerson(vrState.currentPass)) {
             // with depthtest
             renderType = VRRenderTypes.guiTextured(textureAtlasSprite.atlasLocation());
         } else {
@@ -833,28 +825,24 @@ public class VREffectsHelper {
             renderType = RenderTypes.fireScreenEffect(textureAtlasSprite.atlasLocation());
         }
 
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-
         for (int i = 0; i < 4; i++) {
             posestack.pushPose();
-            posestack.mulPose(Axis.YP.rotationDegrees(
-                i * 90.0F - DATA_HOLDER.vrPlayer.vrdata_world_render.getBodyYaw()));
-            posestack.translate(0.0D, -headHeight, 0.0D);
+            posestack.mulPose(Axis.YP.rotationDegrees(i * 90.0F - vrState.fireYaw));
+            posestack.translate(0.0D, -vrState.fireHeight, 0.0D);
 
-            Matrix4f matrix = posestack.last().pose();
-            consumer.addVertex(matrix, -width, 0.0F, -width)
-                .setUv(uMax, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            consumer.addVertex(matrix, width, 0.0F, -width)
-                .setUv(uMin, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            consumer.addVertex(matrix, width, headHeight, -width)
-                .setUv(uMin, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            consumer.addVertex(matrix, -width, headHeight, -width)
-                .setUv(uMax, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+            output.order(2).submitCustomGeometry(posestack, renderType, ((pose, consumer) -> {
+                consumer.addVertex(pose, -width, 0.0F, -width)
+                    .setUv(uMax, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                consumer.addVertex(pose, width, 0.0F, -width)
+                    .setUv(uMin, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                consumer.addVertex(pose, width, vrState.fireHeight, -width)
+                    .setUv(uMin, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                consumer.addVertex(pose, -width, vrState.fireHeight, -width)
+                    .setUv(uMax, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+            }));
 
             posestack.popPose();
         }
-
-        MC.renderBuffers().bufferSource().endBatch(renderType);
     }
 
     /**
@@ -1166,15 +1154,11 @@ public class VREffectsHelper {
         }
     }
 
-    /**
-     * renders the crosshair
-     *
-     * @param depthAlways if the depth test should be disabled
-     */
-    public static void renderCrosshairAtDepth(boolean depthAlways) {
-        if (!shouldRenderCrosshair()) return;
+    public static void extractCrosshairState(CrosshairRenderState crosshairRenderState) {
+        Profiler.get().push("extract crosshair");
 
-        Profiler.get().push("crosshair");
+        crosshairRenderState.shouldRender = shouldRenderCrosshair();
+        if (!crosshairRenderState.shouldRender) return;
 
         Vec3 crosshairRenderPos = DATA_HOLDER.vrPlayer.crossVec;
         Vec3 crossDistance = crosshairRenderPos.subtract(
@@ -1183,7 +1167,8 @@ public class VREffectsHelper {
         // scooch closer a bit for light calc.
         crosshairRenderPos = crosshairRenderPos.add(crossDistance.normalize().scale(-0.01D));
 
-        Matrix4f modelView = new Matrix4f();
+        PoseStack modelView = crosshairRenderState.poseStack;
+        modelView.setIdentity();
 
         Vector3f translate = MathUtils.subtractToVector3f(crosshairRenderPos,
             MC.gameRenderer.getMainCamera().position());
@@ -1195,24 +1180,24 @@ public class VREffectsHelper {
 
             switch (blockhitresult.getDirection()) {
                 case DOWN -> {
-                    modelView.rotate(
+                    modelView.mulPose(
                         Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
-                    modelView.rotate(Axis.XP.rotationDegrees(-90.0F));
+                    modelView.mulPose(Axis.XP.rotationDegrees(-90.0F));
                 }
                 case UP -> {
-                    modelView.rotate(
+                    modelView.mulPose(
                         Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
-                    modelView.rotate(Axis.XP.rotationDegrees(90.0F));
+                    modelView.mulPose(Axis.XP.rotationDegrees(90.0F));
                 }
-                case WEST -> modelView.rotate(Axis.YP.rotationDegrees(90.0F));
-                case EAST -> modelView.rotate(Axis.YP.rotationDegrees(-90.0F));
-                case SOUTH -> modelView.rotate(Axis.YP.rotationDegrees(180.0F));
+                case WEST -> modelView.mulPose(Axis.YP.rotationDegrees(90.0F));
+                case EAST -> modelView.mulPose(Axis.YP.rotationDegrees(-90.0F));
+                case SOUTH -> modelView.mulPose(Axis.YP.rotationDegrees(180.0F));
             }
         } else {
             // if there is no block hit, make it face the controller
-            modelView.rotate(
+            modelView.mulPose(
                 Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
-            modelView.rotate(
+            modelView.mulPose(
                 Axis.XP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getPitch()));
         }
 
@@ -1226,41 +1211,58 @@ public class VREffectsHelper {
         modelView.scale(scale, scale, scale);
 
         // white crosshair, with blending
-        int light = LevelRenderer.getLightCoords(MC.level, BlockPos.containing(crosshairRenderPos));
-        float brightness = 1.0F;
+        crosshairRenderState.light = LevelRenderer.getLightCoords(MC.level, BlockPos.containing(crosshairRenderPos));
 
         if (MC.hitResult == null || MC.hitResult.getType() == HitResult.Type.MISS) {
-            brightness = 0.5F;
+            crosshairRenderState.brightness = 0.5F;
+        } else {
+            crosshairRenderState.brightness = 1.0F;
         }
+
+        Profiler.get().pop();
+    }
+
+    /**
+     * renders the crosshair
+     *
+     * @param output         SubmitNodeCollector to submit the rendercall to
+     * @param crosshairState crosshair renderstate to use for rendering
+     */
+    public static void renderCrosshairAtDepth(SubmitNodeCollector output, CrosshairRenderState crosshairState) {
+        if (!crosshairState.shouldRender) return;
+
+        Profiler.get().push("submit crosshair");
 
         TextureAtlasSprite crosshairSprite = MC.getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
             .getSprite(Gui.CROSSHAIR_SPRITE);
 
-        RenderType renderType = VRRenderTypes.crosshairWorld(crosshairSprite.atlasLocation(), depthAlways);
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-
-        consumer.addVertex(modelView, -1.0F, 1.0F, 0.0F)
-            .setColor(brightness, brightness, brightness, 1.0F)
-            .setUv(crosshairSprite.getU1(), crosshairSprite.getV0())
-            .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-            .setNormal(0.0F, 0.0F, 1.0F);
-        consumer.addVertex(modelView, 1.0F, 1.0F, 0.0F)
-            .setColor(brightness, brightness, brightness, 1.0F)
-            .setUv(crosshairSprite.getU0(), crosshairSprite.getV0())
-            .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-            .setNormal(0.0F, 0.0F, 1.0F);
-        consumer.addVertex(modelView, 1.0F, -1.0F, 0.0F)
-            .setColor(brightness, brightness, brightness, 1.0F)
-            .setUv(crosshairSprite.getU0(), crosshairSprite.getV1())
-            .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-            .setNormal(0.0F, 0.0F, 1.0F);
-        consumer.addVertex(modelView, -1.0F, -1.0F, 0.0F)
-            .setColor(brightness, brightness, brightness, 1.0F)
-            .setUv(crosshairSprite.getU1(), crosshairSprite.getV1())
-            .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-            .setNormal(0.0F, 0.0F, 1.0F);
-
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        float brightness = crosshairState.brightness;
+        int light = crosshairState.light;
+        output.order(crosshairState.occlude ? 0 : 2)
+            .submitCustomGeometry(crosshairState.poseStack,
+                VRRenderTypes.crosshairWorld(crosshairSprite.atlasLocation(), !crosshairState.occlude),
+                (pose, consumer) -> {
+                    consumer.addVertex(pose, -1.0F, 1.0F, 0.0F)
+                        .setColor(brightness, brightness, brightness, 1.0F)
+                        .setUv(crosshairSprite.getU1(), crosshairSprite.getV0())
+                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                        .setNormal(0.0F, 0.0F, 1.0F);
+                    consumer.addVertex(pose, 1.0F, 1.0F, 0.0F)
+                        .setColor(brightness, brightness, brightness, 1.0F)
+                        .setUv(crosshairSprite.getU0(), crosshairSprite.getV0())
+                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                        .setNormal(0.0F, 0.0F, 1.0F);
+                    consumer.addVertex(pose, 1.0F, -1.0F, 0.0F)
+                        .setColor(brightness, brightness, brightness, 1.0F)
+                        .setUv(crosshairSprite.getU0(), crosshairSprite.getV1())
+                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                        .setNormal(0.0F, 0.0F, 1.0F);
+                    consumer.addVertex(pose, -1.0F, -1.0F, 0.0F)
+                        .setColor(brightness, brightness, brightness, 1.0F)
+                        .setUv(crosshairSprite.getU1(), crosshairSprite.getV1())
+                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                        .setNormal(0.0F, 0.0F, 1.0F);
+                });
 
         Profiler.get().pop();
     }

@@ -149,9 +149,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Shadow
     public HitResult hitResult;
 
-    @Shadow
-    public abstract void resizeGui();
-
     @WrapOperation(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/server/packs/resources/ReloadableResourceManager"))
     private ReloadableResourceManager vivecraft$initVivecraft(
         PackType packType, Operation<ReloadableResourceManager> original)

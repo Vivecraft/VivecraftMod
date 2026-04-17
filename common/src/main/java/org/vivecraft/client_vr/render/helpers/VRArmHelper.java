@@ -59,21 +59,17 @@ public class VRArmHelper {
     {
         if (!renderMain && !renderOff) return;
         Profiler.get().push("hands");
+        // TODO 26.1 this will not work, is it still needed though?
         DATA_HOLDER.isFpHand = true;
 
         VREffectsHelper.removeNausea(partialTick);
 
         if (renderMain) {
-            // set main hand active, for the attack cooldown transparency
-            DATA_HOLDER.isMainHand = true;
-
             if (menuHandMain) {
                 renderMainMenuHand(0, false);
             } else {
                 renderVRHand_Main(partialTick);
             }
-
-            DATA_HOLDER.isMainHand = false;
         }
 
         if (renderOff) {
