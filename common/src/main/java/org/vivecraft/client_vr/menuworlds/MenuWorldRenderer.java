@@ -886,7 +886,9 @@ public class MenuWorldRenderer {
             try {
                 sunriseColor = this.getValue(EnvironmentAttributes.SUNRISE_SUNSET_COLOR,
                     ClientUtils.getCurrentPartialTick()); // calcSunriseSunsetColors
-            } catch (Exception ignore) {}
+            } catch (Exception e) {
+                VRSettings.LOGGER.warn("Vivecraft: MenuWorlds: Failed to get sunrise/sunset color", e);
+            }
 
             MultiBufferSource.BufferSource bufferSource = this.mc.renderBuffers().bufferSource();
 
@@ -1828,7 +1830,9 @@ public class MenuWorldRenderer {
                     try {
                         sunriseColor = this.menuWorldRenderer.getValue(EnvironmentAttributes.SUNRISE_SUNSET_COLOR,
                             ClientUtils.getCurrentPartialTick());
-                    } catch (Exception ignore) {}
+                    } catch (Exception e) {
+                        VRSettings.LOGGER.warn("Vivecraft: MenuWorlds: Failed to get sunrise/sunset color", e);
+                    }
 
                     if (ARGB.alphaFloat(sunriseColor) > 0) {
                         f5 = f5 * ARGB.alphaFloat(sunriseColor);
