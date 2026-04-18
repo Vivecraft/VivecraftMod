@@ -122,7 +122,7 @@ public class JNIUtils {
             switch (types[i]) {
                 case 'I', 'U' -> pointers.put(stack.ints((int) args[i]));
                 case 'J' -> pointers.put(stack.longs((long) args[i]));
-                case 'F' -> pointers.put(stack.floats((int) args[i]));
+                case 'F' -> pointers.put(stack.floats((float) args[i]));
                 case 'S' -> pointers.put(stack.shorts((short) args[i]));
                 case 'Z' -> pointers.put(stack.bytes((boolean) args[i] ? (byte) 1 : (byte) 0));
                 case 'P' -> pointers.put(stack.pointers((long) args[i]).address());
