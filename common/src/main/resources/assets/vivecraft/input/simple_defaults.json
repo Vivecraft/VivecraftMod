@@ -1,0 +1,34 @@
+{
+  "name": "Simple Controller Defaults",
+  "category": "vivecraft.input.defaults",
+  "controller_paths": {"openvr": "khr_simple", "openxr": "/interaction_profiles/khr/simple_controller"},
+  "description": "Default Vivecraft bindings for Khronos Simple controllers.",
+  "sets": {
+    "global": {
+      "sources": [
+        {
+          "inputs": [
+            {"action": "vivecraft.key.ingameMenuButton", "type": "PRESS"}
+          ],
+          "path": "/user/hand/left/input/menu/click"
+        }
+      ]
+    },
+    "gui": {
+      "sources": [
+        {
+          "inputs": [
+            {"action": "vivecraft.key.guiLeftClick", "type": "PRESS"}
+          ],
+          "path": "/user/hand/left/input/select/click"
+        },
+        {
+          "inputs": [
+            {"action": "vivecraft.key.guiRightClick", "type": "PRESS"}
+          ],
+          "path": "/user/hand/right/input/select/click"
+        }
+      ]
+    }
+  }
+}

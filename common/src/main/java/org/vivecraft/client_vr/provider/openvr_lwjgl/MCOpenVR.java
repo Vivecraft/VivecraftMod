@@ -696,10 +696,10 @@ public class MCOpenVR extends MCVR<VRInputAction> {
 
         // write action manifest to disk
         try {
-            (new File("openvr/input")).mkdirs();
+            (new File("input/profiles")).mkdirs();
 
             try (OutputStreamWriter outputstreamwriter = new OutputStreamWriter(
-                new FileOutputStream("openvr/input/action_manifest.json"), StandardCharsets.UTF_8))
+                new FileOutputStream("input/action_manifest.json"), StandardCharsets.UTF_8))
             {
                 this.GSON.toJson(map, outputstreamwriter);
             }
@@ -710,14 +710,14 @@ public class MCOpenVR extends MCVR<VRInputAction> {
         // write defaults to disk
         String rev = this.dh.vrSettings.reverseHands ? "_reversed" : "";
         // controllers
-        FileUtils.unpackAsset("input/vive_defaults" + rev + ".json", "openvr/input/vive_defaults.json", false);
-        FileUtils.unpackAsset("input/oculus_defaults" + rev + ".json", "openvr/input/oculus_defaults.json", false);
-        FileUtils.unpackAsset("input/wmr_defaults" + rev + ".json", "openvr/input/wmr_defaults.json", false);
-        FileUtils.unpackAsset("input/knuckles_defaults" + rev + ".json", "openvr/input/knuckles_defaults.json", false);
-        FileUtils.unpackAsset("input/cosmos_defaults" + rev + ".json", "openvr/input/cosmos_defaults.json", false);
+        FileUtils.unpackAsset("input/vive_defaults" + rev + ".json", "input/profiles/vive_defaults.json", false);
+        FileUtils.unpackAsset("input/oculus_defaults" + rev + ".json", "input/profiles/oculus_defaults.json", false);
+        FileUtils.unpackAsset("input/wmr_defaults" + rev + ".json", "input/profiles/wmr_defaults.json", false);
+        FileUtils.unpackAsset("input/knuckles_defaults" + rev + ".json", "input/profiles/knuckles_defaults.json", false);
+        FileUtils.unpackAsset("input/cosmos_defaults" + rev + ".json", "input/profiles/cosmos_defaults.json", false);
 
         // camera tracker
-        FileUtils.unpackAssetToFolder("input/tracker_defaults.json", "openvr", false);
+        FileUtils.unpackAsset("input/tracker_defaults.json", "input/profiles/tracker_defaults.json", false);
     }
 
     /**
@@ -1070,7 +1070,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
      */
     private void installApplicationManifest(boolean force) throws RenderConfigException {
         File manifestFile = new File("openvr/vivecraft.vrmanifest");
-        FileUtils.unpackAssetToFolder("vivecraft.vrmanifest", "openvr", true);
+        FileUtils.unpackAsset("vivecraft.vrmanifest", "openvr/vivecraft.vrmanifest", true);
 
         File customFile = new File("openvr/custom.vrmanifest");
         if (customFile.exists()) {
@@ -1189,7 +1189,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
      * @throws RenderConfigException if OpenVR throws any error, or the path is invalid
      */
     private void loadActionManifest() throws RenderConfigException {
-        String actionsPath = new File("openvr/input/action_manifest.json").getAbsolutePath();
+        String actionsPath = new File("input/action_manifest.json").getAbsolutePath();
         // check if path is valid for steamvr, since it would just silently fail
         checkPathValid(actionsPath, "Failed to install action manifest", false);
         int error = VRInput_SetActionManifestPath(actionsPath);
@@ -1543,7 +1543,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
      */
     private void readNewData(VRInputAction action) {
         switch (action.type) {
-            case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
+            case PRESS, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE -> {
                 if (action.isHanded()) {
                     for (ControllerType type : ControllerType.values()) {
                         this.readDigitalData(action, type);

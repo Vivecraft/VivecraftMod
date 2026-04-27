@@ -55,4 +55,13 @@ public enum VRInputActionSet {
             default -> VivecraftVRMod.INSTANCE.isModBinding(keyBinding) ? MOD : INGAME;
         };
     }
+
+    public static VRInputActionSet getByName(String name) {
+        for (VRInputActionSet set : values()) {
+            if (set.name.equals(name)) {
+                return set;
+            }
+        }
+        return null;
+    }
 }

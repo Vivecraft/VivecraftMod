@@ -8,5 +8,5 @@ package org.vivecraft.client_vr.provider.control;
  * @param actionSetOverride action set to put it in, any of {@link VRInputActionSet}
  */
 public record ActionParams(String requirement, ActionType type, VRInputActionSet actionSetOverride) {
-    public static final ActionParams DEFAULT = new ActionParams("optional", ActionType.BOOLEAN, null);
+    public static final ActionParams DEFAULT = new ActionParams("optional", ActionType.PRESS, null);
 }

@@ -1217,15 +1217,15 @@ public abstract class MCVR<T extends InputAction> {
         this.addActionParams(map, this.mc.options.keyDown, "optional", ActionType.VEC1, null);
         this.addActionParams(map, this.mc.options.keyLeft, "optional", ActionType.VEC1, null);
         this.addActionParams(map, this.mc.options.keyRight, "optional", ActionType.VEC1, null);
-        this.addActionParams(map, this.mc.options.keyInventory, "suggested", ActionType.BOOLEAN,
+        this.addActionParams(map, this.mc.options.keyInventory, "suggested", ActionType.PRESS,
             VRInputActionSet.GLOBAL);
-        this.addActionParams(map, this.mc.options.keyAttack, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, this.mc.options.keyUse, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, this.mc.options.keyChat, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, this.mc.options.keyAttack, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, this.mc.options.keyUse, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, this.mc.options.keyChat, "optional", ActionType.PRESS, VRInputActionSet.GLOBAL);
         this.addActionParams(map, MOD.keyHotbarScroll, "optional", ActionType.VEC2, null);
         this.addActionParams(map, MOD.keyHotbarSwipeX, "optional", ActionType.VEC2, null);
         this.addActionParams(map, MOD.keyHotbarSwipeY, "optional", ActionType.VEC2, null);
-        this.addActionParams(map, MOD.keyMenuButton, "suggested", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyMenuButton, "suggested", ActionType.PRESS, VRInputActionSet.GLOBAL);
         this.addActionParams(map, MOD.keyTeleportFallback, "suggested", ActionType.VEC1, null);
         this.addActionParams(map, MOD.keyFreeMoveRotate, "optional", ActionType.VEC2, null);
         this.addActionParams(map, MOD.keyFreeMoveStrafe, "optional", ActionType.VEC2, null);
@@ -1233,22 +1233,22 @@ public abstract class MCVR<T extends InputAction> {
         this.addActionParams(map, MOD.keyRotateRight, "optional", ActionType.VEC1, null);
         this.addActionParams(map, MOD.keyRotateAxis, "optional", ActionType.VEC2, null);
         this.addActionParams(map, MOD.keyFlickStick, "optional", ActionType.VEC2, null);
-        this.addActionParams(map, MOD.keyRadialMenu, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, MOD.keySwapMirrorView, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyToggleKeyboard, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyMoveThirdPersonCam, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyToggleHandheldCam, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyQuickHandheldCam, "optional", ActionType.BOOLEAN, VRInputActionSet.GLOBAL);
-        this.addActionParams(map, MOD.keyTrackpadTouch, "optional", ActionType.BOOLEAN, VRInputActionSet.TECHNICAL);
-        this.addActionParams(map, MOD.keyVRInteract, "suggested", ActionType.BOOLEAN, VRInputActionSet.CONTEXTUAL);
-        this.addActionParams(map, MOD.keyClimbeyGrab, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, MOD.keyClimbeyJump, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, GuiHandler.KEY_LEFT_CLICK, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, MOD.keyRadialMenu, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, MOD.keySwapMirrorView, "optional", ActionType.PRESS, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyToggleKeyboard, "optional", ActionType.PRESS, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyMoveThirdPersonCam, "optional", ActionType.PRESS, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyToggleHandheldCam, "optional", ActionType.PRESS, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyQuickHandheldCam, "optional", ActionType.PRESS, VRInputActionSet.GLOBAL);
+        this.addActionParams(map, MOD.keyTrackpadTouch, "optional", ActionType.PRESS, VRInputActionSet.TECHNICAL);
+        this.addActionParams(map, MOD.keyVRInteract, "suggested", ActionType.PRESS, VRInputActionSet.CONTEXTUAL);
+        this.addActionParams(map, MOD.keyClimbeyGrab, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, MOD.keyClimbeyJump, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, GuiHandler.KEY_LEFT_CLICK, "suggested", ActionType.PRESS, null);
         this.addActionParams(map, GuiHandler.KEY_SCROLL_AXIS, "optional", ActionType.VEC2, null);
-        this.addActionParams(map, GuiHandler.KEY_RIGHT_CLICK, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, GuiHandler.KEY_SHIFT, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_CLICK, "suggested", ActionType.BOOLEAN, null);
-        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_SHIFT, "suggested", ActionType.BOOLEAN, null);
+        this.addActionParams(map, GuiHandler.KEY_RIGHT_CLICK, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, GuiHandler.KEY_SHIFT, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_CLICK, "suggested", ActionType.PRESS, null);
+        this.addActionParams(map, GuiHandler.KEY_KEYBOARD_SHIFT, "suggested", ActionType.PRESS, null);
 
         // users can provide their own action parameters if they want
         // this allows them to split mod KeyMappings into GUI, INGAME and GLOBAL categories
@@ -1284,7 +1284,7 @@ public abstract class MCVR<T extends InputAction> {
                         if (actionSet == null) {
                             VRSettings.LOGGER.warn("Vivecraft: Unknown action set: {}", tokens[1]);
                         } else {
-                            this.addActionParams(map, keyMapping, "optional", ActionType.BOOLEAN, actionSet);
+                            this.addActionParams(map, keyMapping, "optional", ActionType.PRESS, actionSet);
                         }
                     }
                 }

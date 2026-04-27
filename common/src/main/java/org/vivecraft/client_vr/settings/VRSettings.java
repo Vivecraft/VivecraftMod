@@ -260,6 +260,8 @@ public class VRSettings {
     public int[] keyboardCodes = getKeyboardCodesDefault();
 
     // Control
+    @SettingField()
+    public String currentBindingProfile = "Custom Bindings";
     @SettingField(VrOptions.REVERSE_HANDS)
     public boolean reverseHands = false;
     @SettingField(VrOptions.REVERSE_BOW)
