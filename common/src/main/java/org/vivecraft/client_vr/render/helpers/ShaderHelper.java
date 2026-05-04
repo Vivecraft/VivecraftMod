@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.extensions.LevelRenderStateExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -153,8 +154,9 @@ public class ShaderHelper {
             PUMPKIN_EFFECT = 0.0F;
             PORTAL_EFFECT = 0.0F;
 
+            // TODO 26.1 extract?
             if (MC.player != null && MC.level != null) {
-                boolean isInWater = ((GameRendererExtension) MC.gameRenderer).vivecraft$isInWater();
+                boolean isInWater = ((LevelRenderStateExtension) MC.gameRenderer.getGameRenderState().levelRenderState).vivecraft$getVRRenderState().inWater;
                 if (DATA_HOLDER.vrSettings.waterEffect && WAS_IN_WATER != isInWater) {
                     // water state changed, start effect
                     WATER_EFFECT = 2.3F;

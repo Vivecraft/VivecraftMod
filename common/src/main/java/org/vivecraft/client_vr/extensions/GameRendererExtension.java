@@ -7,21 +7,6 @@ import org.vivecraft.client_vr.VRData;
 public interface GameRendererExtension {
 
     /**
-     * sets up the in water and in block state
-     */
-    void vivecraft$setupOverlayStatus();
-
-    /**
-     * @return if the camera is in water
-     */
-    boolean vivecraft$isInWater();
-
-    /**
-     * @return if the camera in a block
-     */
-    float vivecraft$isInBlock();
-
-    /**
      * set the player position/rotation to the current VR pass location
      */
     void vivecraft$setupRVE();

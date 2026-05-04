@@ -888,8 +888,6 @@ public class MenuWorldRenderer {
                     ClientUtils.getCurrentPartialTick()); // calcSunriseSunsetColors
             } catch (Exception ignore) {}
 
-            MultiBufferSource.BufferSource bufferSource = this.mc.renderBuffers().bufferSource();
-
             float sunriseAlpha = ARGB.alphaFloat(sunriseColor);
 
             if (sunriseColor != 0 && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()) &&
@@ -981,7 +979,6 @@ public class MenuWorldRenderer {
                 }
                 poseStack.popMatrix();
             }
-            bufferSource.endBatch();
 
             float starBrightness = this.getStarBrightness() * skyVisibility;
 

@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Projection;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -122,11 +123,13 @@ public abstract class CameraVRMixin {
     // RETURN instead of TAIL, because TAIL goes into the if check for some reason
     @Inject(method = "update", at = @At("RETURN"))
     private void vivecraft$alwaysSetupProjection(CallbackInfo ci) {
-        // we aleays mneed the perspecive projection set up, even outside levels
+        // we always need the perspecive projection and position set up, even outside levels
         if (!RenderPassType.isVanilla() && (this.entity == null || this.level == null)) {
             this.setupPerspective(vivecraft$MIN_CLIP_DISTANCE, this.depthFar,
                 this.minecraft.options.fov().get(), this.minecraft.getWindow().getWidth(),
                 this.minecraft.getWindow().getHeight());
+            this.setPosition(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld()
+                .getEye(ClientDataHolderVR.getInstance().currentPass).getPosition());
         }
     }
 

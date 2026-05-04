@@ -1,13 +1,16 @@
 package org.vivecraft.client_vr.render.renderstates;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 public class CrosshairRenderState {
 
     public boolean occlude;
     public boolean shouldRender;
 
-    public final PoseStack poseStack = new PoseStack();
+    public Vec3 pos;
+    public final Matrix4f rotation = new Matrix4f();
+    public float scale;
     public float brightness;
     public int light;
 }

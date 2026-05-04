@@ -44,7 +44,6 @@ public class VRPassHelper {
         Profiler.get().push("update");
         ((GameRendererExtension) MC.gameRenderer).vivecraft$cacheRVEPos(MC.getCameraEntity());
         ((GameRendererExtension) MC.gameRenderer).vivecraft$setupRVE();
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$setupOverlayStatus();
         MC.gameRenderer.update(deltaTracker, renderLevel);
         Profiler.get().popPush("extract");
         MC.gameRenderer.extract(deltaTracker, renderLevel);

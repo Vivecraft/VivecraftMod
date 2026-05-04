@@ -3,6 +3,8 @@ package org.vivecraft.client_vr.render.helpers;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
@@ -26,6 +28,7 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 
+import javax.annotation.Nullable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -82,7 +85,9 @@ public class VRWidgetHelper {
      *
      * @param cameraState renderstate to write into
      */
-    public static void extractVRThirdPersonCamWidget(CameraWidgetRenderState cameraState) {
+    public static void extractVRThirdPersonCamWidget(
+        CameraWidgetRenderState cameraState, @Nullable LocalPlayer player)
+    {
         cameraState.visible = DATA_HOLDER.vrSettings.mixedRealityRenderCameraModel &&
             (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) &&
             (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||
@@ -99,7 +104,7 @@ public class VRWidgetHelper {
 
             extractVRCameraWidget(-0.748F, -0.438F, -0.06F, scale, RenderPass.THIRD,
                 ClientDataHolderVR.THIRD_PERSON_CAMERA_MODEL, ClientDataHolderVR.THIRD_PERSON_CAMERA_DISPLAY_MODEL,
-                cameraState);
+                cameraState, player);
         }
     }
 
@@ -108,7 +113,9 @@ public class VRWidgetHelper {
      *
      * @param cameraState renderstate to write into
      */
-    public static void extractVRHandheldCameraWidget(CameraWidgetRenderState cameraState) {
+    public static void extractVRHandheldCameraWidget(
+        CameraWidgetRenderState cameraState, @Nullable LocalPlayer player)
+    {
         cameraState.visible = DATA_HOLDER.currentPass != RenderPass.CAMERA && DATA_HOLDER.cameraTracker.isVisible();
         if (cameraState.visible) {
             float scale = 0.25F;
@@ -119,7 +126,7 @@ public class VRWidgetHelper {
             }
 
             extractVRCameraWidget(-0.5F, -0.25F, -0.22F, scale, RenderPass.CAMERA,
-                CameraTracker.CAMERA_MODEL, CameraTracker.CAMERA_DISPLAY_MODEL, cameraState);
+                CameraTracker.CAMERA_MODEL, CameraTracker.CAMERA_DISPLAY_MODEL, cameraState, player);
         }
     }
 
@@ -137,7 +144,7 @@ public class VRWidgetHelper {
      */
     private static void extractVRCameraWidget(
         float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, Identifier model,
-        Identifier displayModel, CameraWidgetRenderState cameraState)
+        Identifier displayModel, CameraWidgetRenderState cameraState, @Nullable LocalPlayer player)
     {
 
         PoseStack poseStack = cameraState.poseStack;
@@ -167,9 +174,9 @@ public class VRWidgetHelper {
         poseStack.translate(offsetX + 0.5F, offsetY + 0.5F, offsetZ + 0.5F);
 
         // lighting for the model
-        BlockPos blockpos = BlockPos.containing(
-            DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
-        cameraState.combinedLight = ClientUtils.getCombinedLightWithMin(MC.level, blockpos, 0);
+        cameraState.combinedLight = player == null ? LightCoordsUtil.FULL_BRIGHT :
+            ClientUtils.getCombinedLightWithMin((ClientLevel) player.level(),
+                BlockPos.containing(DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition()), 0);
 
         cameraState.cameraModelState.clear();
         MC.getModelManager().getItemModel(model)
@@ -179,8 +186,7 @@ public class VRWidgetHelper {
         cameraState.displayModelState.clear();
         MC.getModelManager().getItemModel(displayModel)
             .update(cameraState.displayModelState, ItemStack.EMPTY, MC.getItemModelResolver(),
-                ItemDisplayContext.GROUND,
-                null, null, 0);
+                ItemDisplayContext.GROUND, null, null, 0);
     }
 
     /**

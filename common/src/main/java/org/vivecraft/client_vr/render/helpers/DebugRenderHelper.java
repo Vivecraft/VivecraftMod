@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.Vec3i;
+import net.minecraft.gizmos.Gizmos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
@@ -487,7 +488,7 @@ public class DebugRenderHelper {
         Vec3i iColor = new Vec3i((int) (color.x() * 255), (int) (color.y() * 255), (int) (color.z() * 255));
         Vec3 start = new Vec3(position.x(), position.y(), position.z()).add(MathUtils.FORWARD_D.scale(size * 0.5F));
         Vec3 end = new Vec3(position.x(), position.y(), position.z()).add(MathUtils.BACK_D.scale(size * 0.5F));
-        RenderHelper.renderBox(consumer, start, end, size, size, iColor, (byte) 255, new Matrix4f());
+        RenderHelper.renderBox(consumer, start, end, size, size, iColor, (byte) 255, new PoseStack().last());
 
         MC.renderBuffers().bufferSource().endBatch();
     }

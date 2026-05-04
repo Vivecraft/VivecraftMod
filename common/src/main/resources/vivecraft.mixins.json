@@ -98,6 +98,7 @@
     "client_vr.renderer.item.BlockModelWrapperVRMixin",
     "client_vr.renderer.item.properties.conditional.IsUsingItemVRMixin",
     "client_vr.renderer.rendertype.RenderSetupVRMixin",
+    "client_vr.renderer.rendertype.RenderTypeVRMixin",
     "client_vr.sounds.SoundEngineVRMixin",
     "client_vr.tutorial.MovementTutorialStepInstanceVRMixin",
     "client_vr.tutorial.OpenInventoryTutorialStepVRMixin",

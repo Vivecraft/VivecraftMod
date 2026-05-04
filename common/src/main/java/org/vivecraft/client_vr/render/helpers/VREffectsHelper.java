@@ -1,22 +1,24 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.fog.FogRenderer;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -26,6 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,12 +36,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Triple;
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
+import org.vivecraft.client.extensions.LevelRenderStateExtension;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.settings.GuiOtherHUDSettings;
 import org.vivecraft.client.gui.settings.GuiRenderOpticsSettings;
@@ -48,25 +53,25 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.renderstates.CrosshairRenderState;
+import org.vivecraft.client_vr.render.renderstates.ScreenRenderState;
 import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mixin.client_vr.renderer.GameRendererAccessor;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
-import java.lang.Math;
+import javax.annotation.Nullable;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -98,10 +103,10 @@ public class VREffectsHelper {
      *
      * @param pos  position to check
      * @param dist distance where it should still count as inside the block
-     * @return null if there is no block, else a triple containing 1.0F,
+     * @return null if there is no block, else a tuple containing
      * BlockState and BlockPos of the blocking block
      */
-    public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 pos, double dist) {
+    public static Tuple<BlockState, BlockPos> getNearOpaqueBlock(Vec3 pos, double dist) {
         if (MC.level == null) {
             return null;
         } else {
@@ -109,7 +114,7 @@ public class VREffectsHelper {
             Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) ->
                 MC.level.getBlockState(bp).isSolidRender());
             Optional<BlockPos> optional = stream.findFirst();
-            return optional.map(blockPos -> Triple.of(1.0F, MC.level.getBlockState(blockPos), blockPos)).orElse(null);
+            return optional.map(blockPos -> new Tuple<>(MC.level.getBlockState(blockPos), blockPos)).orElse(null);
         }
     }
 
@@ -156,10 +161,11 @@ public class VREffectsHelper {
     /**
      * draws the spyglass view of the given controller
      *
+     * @param output    SubmitNodeCollector to submit the render calls to
      * @param poseStack PoseStack for positioning
      * @param c         controller index for the scope
      */
-    public static void drawScopeFB(PoseStack poseStack, int c) {
+    public static void drawScopeFB(SubmitNodeCollector output, PoseStack poseStack, int c) {
         poseStack.pushPose();
 
         GpuTextureView scopeView;
@@ -175,8 +181,8 @@ public class VREffectsHelper {
 
         float alpha = TelescopeTracker.viewPercent(c);
         // draw spyglass view
-        RenderHelper.drawSizedQuadFullbright(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1},
-            poseStack.last().pose(), VRRenderTypes.entitySolidNoCardinalLight(scopeView, false));
+        RenderHelper.submitSizedQuadFullbright(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1},
+            poseStack, VRRenderTypes.entitySolidNoCardinalLight(scopeView, false), output);
 
         // draw spyglass overlay
         // slight offset to not cause z fighting
@@ -185,8 +191,8 @@ public class VREffectsHelper {
         int light = LevelRenderer.getLightCoords(MC.level, BlockPos.containing(
             DATA_HOLDER.vrPlayer.vrdata_world_render.getController(c).getPosition()));
         // draw the overlay, and flip it vertically
-        RenderHelper.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, poseStack.last().pose(),
-            RenderTypes.entityTranslucent(SCOPE_TEXTURE), true);
+        RenderHelper.submitSizedQuadWithLightmap(720.0F, 720.0F, scale, light, poseStack,
+            RenderTypes.entityTranslucent(SCOPE_TEXTURE), true, output);
 
         poseStack.popPose();
     }
@@ -272,99 +278,91 @@ public class VREffectsHelper {
     /**
      * renders a 100^3 cubemap and a dirt/grass floor
      *
-     * @param poseStack Matrix4fStack to use for positioning
+     * @param poseStac Matrix4fStack to use for positioning
      */
-    public static void renderMenuPanorama(Matrix4fStack poseStack) {
+    public static void renderMenuPanorama(SubmitNodeCollector output, PoseStack poseStack) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
-        poseStack.pushMatrix();
+        poseStack.pushPose();
 
         // translate by half of the cube size
         poseStack.translate(-50F, -50F, -50.0F);
 
-        VertexConsumer consumer;
-
         // down
-        RenderType renderType = VRRenderTypes.guiTextured(CUBE_DOWN);
-        consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        consumer.addVertex(poseStack, 0, 0, 0)
-            .setUv(0, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 0, 0, 100)
-            .setUv(0, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 0, 100)
-            .setUv(1, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 0, 0)
-            .setUv(1, 0).setColor(255, 255, 255, 255);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_DOWN), (pose, consumer) -> {
+            consumer.addVertex(pose, 0, 0, 0)
+                .setUv(0, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 0, 0, 100)
+                .setUv(0, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 0, 100)
+                .setUv(1, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 0, 0)
+                .setUv(1, 0).setColor(255, 255, 255, 255);
+        });
 
         // up
-        renderType = VRRenderTypes.guiTextured(CUBE_UP);
-        consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        consumer.addVertex(poseStack, 0, 100, 100)
-            .setUv(0, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 0, 100, 0)
-            .setUv(0, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 100, 0)
-            .setUv(1, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 100, 100)
-            .setUv(1, 0).setColor(255, 255, 255, 255);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_UP), (pose, consumer) -> {
+            consumer.addVertex(pose, 0, 100, 100)
+                .setUv(0, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 0, 100, 0)
+                .setUv(0, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 100, 0)
+                .setUv(1, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 100, 100)
+                .setUv(1, 0).setColor(255, 255, 255, 255);
+        });
 
         // left
-        renderType = VRRenderTypes.guiTextured(CUBE_LEFT);
-        consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        consumer.addVertex(poseStack, 0, 0, 0)
-            .setUv(1, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 0, 100, 0)
-            .setUv(1, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 0, 100, 100)
-            .setUv(0, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 0, 0, 100)
-            .setUv(0, 1).setColor(255, 255, 255, 255);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_LEFT), (pose, consumer) -> {
+            consumer.addVertex(pose, 0, 0, 0)
+                .setUv(1, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 0, 100, 0)
+                .setUv(1, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 0, 100, 100)
+                .setUv(0, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 0, 0, 100)
+                .setUv(0, 1).setColor(255, 255, 255, 255);
+        });
 
         // right
-        renderType = VRRenderTypes.guiTextured(CUBE_RIGHT);
-        consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        consumer.addVertex(poseStack, 100, 0, 0)
-            .setUv(0, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 0, 100)
-            .setUv(1, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 100, 100)
-            .setUv(1, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 100, 0)
-            .setUv(0, 0).setColor(255, 255, 255, 255);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_RIGHT), (pose, consumer) -> {
+            consumer.addVertex(pose, 100, 0, 0)
+                .setUv(0, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 0, 100)
+                .setUv(1, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 100, 100)
+                .setUv(1, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 100, 0)
+                .setUv(0, 0).setColor(255, 255, 255, 255);
+        });
 
         // front
-        renderType = VRRenderTypes.guiTextured(CUBE_FRONT);
-        consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        consumer.addVertex(poseStack, 0, 0, 0)
-            .setUv(0, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 0, 0)
-            .setUv(1, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 100, 0)
-            .setUv(1, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 0, 100, 0)
-            .setUv(0, 0).setColor(255, 255, 255, 255);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_FRONT), (pose, consumer) -> {
+            consumer.addVertex(pose, 0, 0, 0)
+                .setUv(0, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 0, 0)
+                .setUv(1, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 100, 0)
+                .setUv(1, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 0, 100, 0)
+                .setUv(0, 0).setColor(255, 255, 255, 255);
+        });
 
         // back
-        renderType = VRRenderTypes.guiTextured(CUBE_BACK);
-        consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        consumer.addVertex(poseStack, 0, 0, 100)
-            .setUv(1, 1).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 0, 100, 100)
-            .setUv(1, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 100, 100)
-            .setUv(0, 0).setColor(255, 255, 255, 255);
-        consumer.addVertex(poseStack, 100, 0, 100)
-            .setUv(0, 1).setColor(255, 255, 255, 255);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_BACK), (pose, consumer) -> {
+            consumer.addVertex(pose, 0, 0, 100)
+                .setUv(1, 1).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 0, 100, 100)
+                .setUv(1, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 100, 100)
+                .setUv(0, 0).setColor(255, 255, 255, 255);
+            consumer.addVertex(pose, 100, 0, 100)
+                .setUv(0, 1).setColor(255, 255, 255, 255);
+        });
 
-        poseStack.popMatrix();
+        poseStack.popPose();
 
         // render floor
         Vector2fc area = DATA_HOLDER.vr.getPlayAreaSize();
@@ -376,7 +374,7 @@ public class VREffectsHelper {
             float width = area.x() + i * 2;
             float length = area.y() + i * 2;
 
-            poseStack.pushMatrix();
+            poseStack.pushPose();
 
             int r, g, b;
             if (i == 0) {
@@ -387,42 +385,41 @@ public class VREffectsHelper {
             } else {
                 r = g = b = 128;
             }
-            renderType = VRRenderTypes.guiTextured(i == 0 ? GRASS : DIRT);
-            consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
             // offset so the floor is centered
             poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
 
             final int repeat = 4; // texture wraps per meter
-
-            consumer
-                .addVertex(poseStack, 0, 0.005f * -i, 0)
-                .setUv(0, 0)
-                .setColor(r, g, b, 255);
-            consumer
-                .addVertex(poseStack, 0, 0.005f * -i, length)
-                .setUv(0, repeat * length)
-                .setColor(r, g, b, 255);
-            consumer
-                .addVertex(poseStack, width, 0.005f * -i, length)
-                .setUv(repeat * width, repeat * length)
-                .setColor(r, g, b, 255);
-            consumer
-                .addVertex(poseStack, width, 0.005f * -i, 0)
-                .setUv(repeat * width, 0)
-                .setColor(r, g, b, 255);
-
-            MC.renderBuffers().bufferSource().endBatch(renderType);
-            poseStack.popMatrix();
+            int offset = i;
+            output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(i == 0 ? GRASS : DIRT),
+                (pose, consumer) -> {
+                    consumer
+                        .addVertex(pose, 0, 0.005f * -offset, 0)
+                        .setUv(0, 0)
+                        .setColor(r, g, b, 255);
+                    consumer
+                        .addVertex(pose, 0, 0.005f * -offset, length)
+                        .setUv(0, repeat * length)
+                        .setColor(r, g, b, 255);
+                    consumer
+                        .addVertex(pose, width, 0.005f * -offset, length)
+                        .setUv(repeat * width, repeat * length)
+                        .setColor(r, g, b, 255);
+                    consumer
+                        .addVertex(pose, width, 0.005f * -offset, 0)
+                        .setUv(repeat * width, 0)
+                        .setColor(r, g, b, 255);
+                });
+            poseStack.popPose();
         }
     }
 
     /**
      * renders a dirt cube, slightly bigger than the room size
      *
-     * @param poseStack Matrix4fStack to use for positioning
+     * @param poseStac Matrix4fStack to use for positioning
      */
-    public static void renderJrbuddasAwesomeMainMenuRoomNew(Matrix4fStack poseStack) {
+    public static void renderJrbuddasAwesomeMainMenuRoomNew(SubmitNodeCollector output, PoseStack poseStack) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
@@ -443,87 +440,84 @@ public class VREffectsHelper {
         r = g = b = 0.8f;
         a = 1.0f;
 
-        poseStack.pushMatrix();
+        poseStack.pushPose();
 
         // offset so the room is centered
         poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
 
-        RenderType renderType = VRRenderTypes.guiTextured(DIRT);
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
+        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(DIRT), (pose, consumer) -> {
+            // floor
+            consumer.addVertex(pose, 0, 0, 0)
+                .setUv(0, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, 0, 0, length)
+                .setUv(0, repeat * length).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, 0, length)
+                .setUv(repeat * width, repeat * length).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, 0, 0)
+                .setUv(repeat * width, 0).setColor(r, g, b, a);
 
-        // floor
-        consumer.addVertex(poseStack, 0, 0, 0)
-            .setUv(0, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, 0, 0, length)
-            .setUv(0, repeat * length).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, 0, length)
-            .setUv(repeat * width, repeat * length).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, 0, 0)
-            .setUv(repeat * width, 0).setColor(r, g, b, a);
+            // ceiling
+            consumer.addVertex(pose, 0, height, length)
+                .setUv(0, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, 0, height, 0)
+                .setUv(0, repeat * length).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, height, 0)
+                .setUv(repeat * width, repeat * length).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, height, length)
+                .setUv(repeat * width, 0).setColor(r, g, b, a);
 
-        // ceiling
-        consumer.addVertex(poseStack, 0, height, length)
-            .setUv(0, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, 0, height, 0)
-            .setUv(0, repeat * length).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, height, 0)
-            .setUv(repeat * width, repeat * length).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, height, length)
-            .setUv(repeat * width, 0).setColor(r, g, b, a);
+            // left
+            consumer.addVertex(pose, 0, 0, 0)
+                .setUv(0, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, 0, height, 0)
+                .setUv(0, repeat * height).setColor(r, g, b, a);
+            consumer.addVertex(pose, 0, height, length)
+                .setUv(repeat * length, repeat * height).setColor(r, g, b, a);
+            consumer.addVertex(pose, 0, 0, length)
+                .setUv(repeat * length, 0).setColor(r, g, b, a);
 
-        // left
-        consumer.addVertex(poseStack, 0, 0, 0)
-            .setUv(0, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, 0, height, 0)
-            .setUv(0, repeat * height).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, 0, height, length)
-            .setUv(repeat * length, repeat * height).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, 0, 0, length)
-            .setUv(repeat * length, 0).setColor(r, g, b, a);
+            // right
+            consumer.addVertex(pose, width, 0, 0)
+                .setUv(0, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, 0, length)
+                .setUv(repeat * length, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, height, length)
+                .setUv(repeat * length, repeat * height).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, height, 0)
+                .setUv(0, repeat * height).setColor(r, g, b, a);
 
-        // right
-        consumer.addVertex(poseStack, width, 0, 0)
-            .setUv(0, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, 0, length)
-            .setUv(repeat * length, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, height, length)
-            .setUv(repeat * length, repeat * height).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, height, 0)
-            .setUv(0, repeat * height).setColor(r, g, b, a);
+            // front
+            consumer.addVertex(pose, 0, 0, 0)
+                .setUv(0, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, 0, 0)
+                .setUv(repeat * width, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, height, 0)
+                .setUv(repeat * width, repeat * height).setColor(r, g, b, a);
+            consumer.addVertex(pose, 0, height, 0)
+                .setUv(0, repeat * height).setColor(r, g, b, a);
 
-        // front
-        consumer.addVertex(poseStack, 0, 0, 0)
-            .setUv(0, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, 0, 0)
-            .setUv(repeat * width, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, height, 0)
-            .setUv(repeat * width, repeat * height).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, 0, height, 0)
-            .setUv(0, repeat * height).setColor(r, g, b, a);
+            // back
+            consumer.addVertex(pose, 0, 0, length)
+                .setUv(0, 0).setColor(r, g, b, a);
+            consumer.addVertex(pose, 0, height, length)
+                .setUv(0, repeat * height).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, height, length)
+                .setUv(repeat * width, repeat * height).setColor(r, g, b, a);
+            consumer.addVertex(pose, width, 0, length)
+                .setUv(repeat * width, 0).setColor(r, g, b, a);
+        });
 
-        // back
-        consumer.addVertex(poseStack, 0, 0, length)
-            .setUv(0, 0).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, 0, height, length)
-            .setUv(0, repeat * height).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, height, length)
-            .setUv(repeat * width, repeat * height).setColor(r, g, b, a);
-        consumer.addVertex(poseStack, width, 0, length)
-            .setUv(repeat * width, 0).setColor(r, g, b, a);
-
-        MC.renderBuffers().bufferSource().endBatch(renderType);
-        poseStack.popMatrix();
+        poseStack.popPose();
     }
 
     /**
      * renders the loaded menuworld and a room floor quad
      *
-     * @param poseStack Matrix4fStack to use for positioning
+     * @param poseStac Matrix4fStack to use for positioning
      */
-    public static void renderTechjarsAwesomeMainMenuRoom(Matrix4fStack poseStack) {
+    public static void renderTechjarsAwesomeMainMenuRoom(SubmitNodeCollector output, PoseStack poseStack) {
         // transfer the rotation
-        RenderSystem.getModelViewStack().pushMatrix().mul(poseStack);
-        poseStack = RenderSystem.getModelViewStack();
+        RenderSystem.getModelViewStack().pushMatrix().mul(poseStack.last().pose());
 
         try {
             // use irl time for sky, or fast forward
@@ -545,7 +539,7 @@ public class VREffectsHelper {
 
             DATA_HOLDER.menuWorldRenderer.updateLightmap();
             // render world
-            DATA_HOLDER.menuWorldRenderer.render(poseStack);
+            DATA_HOLDER.menuWorldRenderer.render(RenderSystem.getModelViewStack());
 
             // render room floor
             Vector2fc area = DATA_HOLDER.vr.getPlayAreaSize();
@@ -558,38 +552,110 @@ public class VREffectsHelper {
 
             float sun = DATA_HOLDER.menuWorldRenderer.getSkyDarken();
 
-            poseStack.pushMatrix();
+            poseStack.pushPose();
 
             poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
 
-            RenderType renderType = VRRenderTypes.guiTextured(DIRT);
+            output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(DIRT), (pose, consumer) -> {
+                consumer
+                    .addVertex(pose, 0, 0.005f, 0)
+                    .setUv(0, 0)
+                    .setColor(sun, sun, sun, 0.3f);
+                consumer
+                    .addVertex(pose, 0, 0.005f, length)
+                    .setUv(0, 4 * length)
+                    .setColor(sun, sun, sun, 0.3f);
+                consumer
+                    .addVertex(pose, width, 0.005f, length)
+                    .setUv(4 * width, 4 * length)
+                    .setColor(sun, sun, sun, 0.3f);
+                consumer
+                    .addVertex(pose, width, 0.005f, 0)
+                    .setUv(4 * width, 0)
+                    .setColor(sun, sun, sun, 0.3f);
+            });
 
-            VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-
-            consumer
-                .addVertex(0, 0.005f, 0)
-                .setUv(0, 0)
-                .setColor(sun, sun, sun, 0.3f);
-            consumer
-                .addVertex(0, 0.005f, length)
-                .setUv(0, 4 * length)
-                .setColor(sun, sun, sun, 0.3f);
-            consumer
-                .addVertex(width, 0.005f, length)
-                .setUv(4 * width, 4 * length)
-                .setColor(sun, sun, sun, 0.3f);
-            consumer
-                .addVertex(width, 0.005f, 0)
-                .setUv(4 * width, 0)
-                .setColor(sun, sun, sun, 0.3f);
-
-            MC.renderBuffers().bufferSource().endBatch(renderType);
-
-            poseStack.popMatrix();
+            poseStack.popPose();
         } finally {
             // reset stacks
             RenderSystem.getModelViewStack().popMatrix();
         }
+    }
+
+    public static void renderMenuRoom(
+        FeatureRenderDispatcher featureRenderer, SubmitNodeCollector output, LevelRenderState levelState)
+    {
+        // clear depth for menu environment
+        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(MC.mainRenderTarget.getDepthTexture(), 1.0);
+
+        VRRenderState vrState = ((LevelRenderStateExtension) levelState).vivecraft$getVRRenderState();
+        CameraRenderState cameraState = levelState.cameraRenderState;
+
+        RenderSystem.getModelViewStack().pushMatrix().identity();
+        RenderHelper.applyVRModelView(vrState.currentPass, RenderSystem.getModelViewStack());
+        RenderSystem.backupProjectionMatrix();
+        VRShaders.setUndistortedProj(cameraState.projectionMatrix);
+        RenderSystem.setProjectionMatrix(VRShaders.UNDISTORTED_PROJ_BUFFER, ProjectionType.PERSPECTIVE);
+        PoseStack poseStack = new PoseStack();
+
+        boolean followHead = DATA_HOLDER.vrSettings.menuAlwaysFollowFace || DATA_HOLDER.vrSettings.seated;
+
+        renderMenuEnvironment(output, cameraState, poseStack);
+        VREffectsHelper.renderGuiLayer(output, cameraState, vrState, poseStack, followHead);
+
+        if (vrState.keyboardType != VRRenderState.Keyboard.NONE) {
+            if (vrState.keyboardType == VRRenderState.Keyboard.PHYSICAL) {
+                VREffectsHelper.renderPhysicalKeyboard(output, cameraState, vrState, poseStack);
+            } else {
+                VREffectsHelper.renderScreen(output, cameraState, vrState, vrState.keyboardState,
+                    KeyboardHandler.FRAMEBUFFER, followHead,
+                    true, poseStack);
+            }
+        }
+
+        if (vrState.currentPass != RenderPass.CAMERA &&
+            (vrState.currentPass != RenderPass.THIRD || DATA_HOLDER.vrSettings.mixedRealityRenderHands))
+        {
+            VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true);
+        }
+        featureRenderer.renderAllFeatures();
+
+        ((LevelRendererExtension) MC.levelRenderer).vivecraft$renderGizmos(poseStack, cameraState,
+            RenderSystem.getModelViewStack());
+
+        RenderSystem.getModelViewStack().popMatrix();
+        RenderSystem.restoreProjectionMatrix();
+    }
+
+    public static void renderMenuEnvironment(
+        SubmitNodeCollector output, CameraRenderState cameraState, PoseStack poseStack)
+    {
+        // MAIN MENU ENVIRONMENT
+        poseStack.pushPose();
+        Vec3 eye = cameraState.pos;
+        poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
+            (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
+            (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
+
+        // remove world rotation or the room doesn't align with the screen
+        poseStack.mulPose(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+
+        if (DATA_HOLDER.menuWorldRenderer.isReady()) {
+            try {
+                renderTechjarsAwesomeMainMenuRoom(output, poseStack);
+            } catch (Exception e) {
+                VRSettings.LOGGER.error(
+                    "Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
+                DATA_HOLDER.menuWorldRenderer.destroy();
+            }
+        } else {
+            if (DATA_HOLDER.vrSettings.menuWorldFallbackPanorama) {
+                renderMenuPanorama(output, poseStack);
+            } else {
+                renderJrbuddasAwesomeMainMenuRoomNew(output, poseStack);
+            }
+        }
+        poseStack.popPose();
     }
 
     /**
@@ -599,65 +665,86 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      * @param targets     RenderTarget bundle that holds the framebuffers for rendering
      */
-    public static void renderVRFabulous(float partialTick, LevelTargetBundle targets) {
-        if (DATA_HOLDER.currentPass == RenderPass.SCOPEL || DATA_HOLDER.currentPass == RenderPass.SCOPER) {
+    public static void renderVRFabulous(
+        FeatureRenderDispatcher featureRenderDispatcher, SubmitNodeCollector output, LevelRenderState levelState,
+        PoseStack poseStack, LevelTargetBundle targets)
+    {
+        VRRenderState vrState = ((LevelRenderStateExtension) levelState).vivecraft$getVRRenderState();
+        if (vrState.currentPass == RenderPass.SCOPEL || vrState.currentPass == RenderPass.SCOPER) {
             // skip for spyglass
             return;
         }
 
-        // remember the original buffer
-        RenderTarget mainTarget = MC.mainRenderTarget;
-
-        Profiler.get().popPush("VR");
-        renderCrosshairAtDepth(!DATA_HOLDER.vrSettings.useCrosshairOcclusion);
-        DebugRenderHelper.extractDebug(partialTick);
+        Profiler.get().push("VR");
+        // TODO 26.1 this should maybe be separate
+        renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack);
+        // render stuff
+        featureRenderDispatcher.renderAllFeatures();
 
         // switch to VR Occluded buffer, and copy main depth for occlusion
         LevelTargetBundleExtension extTargets = (LevelTargetBundleExtension) targets;
 
         RenderSystem.getDevice().createCommandEncoder()
             .clearColorTexture(extTargets.vivecraft$getOccluded().get().getColorTexture(), 0x00000000);
-        extTargets.vivecraft$getOccluded().get().copyDepthFrom(mainTarget);
-        MC.mainRenderTarget = extTargets.vivecraft$getOccluded().get();
+        extTargets.vivecraft$getOccluded().get().copyDepthFrom(targets.main.get());
+
+        RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getOccluded().get().getColorTextureView();
+        RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getOccluded().get().getDepthTextureView();
 
         boolean renderHands = VRArmHelper.shouldRenderHands();
 
         if (shouldOccludeGui()) {
-            renderGuiAndShadow(partialTick, false, false);
-            VRArmHelper.renderVRHands(partialTick, renderHands && DATA_HOLDER.menuHandMain,
-                renderHands && DATA_HOLDER.menuHandOff, true, true);
+            renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, false, false);
+            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+                vrState.armsState.renderHands && vrState.armsState.menuHandMain,
+                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true);
         }
+
+        // render stuff
+        featureRenderDispatcher.renderAllFeatures();
 
         // switch to VR UnOccluded buffer, no depth copy
         RenderSystem.getDevice().createCommandEncoder()
             .clearColorAndDepthTextures(extTargets.vivecraft$getUnoccluded().get().getColorTexture(), 0x00000000,
                 extTargets.vivecraft$getUnoccluded().get().getDepthTexture(), 1.0);
-        MC.mainRenderTarget = extTargets.vivecraft$getUnoccluded().get();
+        RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getUnoccluded().get().getColorTextureView();
+        RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getUnoccluded().get().getDepthTextureView();
 
         if (!shouldOccludeGui()) {
-            renderGuiAndShadow(partialTick, false, false);
+            renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, false, false);
         }
 
-        renderVRSelfEffects(partialTick, true);
-        VRWidgetHelper.renderVRThirdPersonCamWidget();
-        VRWidgetHelper.renderVRHandheldCameraWidget();
+        renderVRSelfEffects(output, vrState);
+        VRWidgetHelper.renderVRThirdPersonCamWidget(output, vrState.thirdCamWidgetState);
+        VRWidgetHelper.renderVRHandheldCameraWidget(output, vrState.screenCamWidgetState);
 
         if (!shouldOccludeGui()) {
-            VRArmHelper.renderVRHands(partialTick, renderHands && DATA_HOLDER.menuHandMain,
-                renderHands && DATA_HOLDER.menuHandOff, true, true);
+            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+                vrState.armsState.renderHands && vrState.armsState.menuHandMain,
+                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true);
         }
+
+        // render stuff
+        featureRenderDispatcher.renderAllFeatures();
 
         // switch to VR hands buffer
         RenderSystem.getDevice().createCommandEncoder()
             .clearColorTexture(extTargets.vivecraft$getHands().get().getColorTexture(), 0x00000000);
-        extTargets.vivecraft$getHands().get().copyDepthFrom(mainTarget);
-        MC.mainRenderTarget = extTargets.vivecraft$getHands().get();
+        extTargets.vivecraft$getHands().get().copyDepthFrom(targets.main.get());
+        RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getHands().get().getColorTextureView();
+        RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getHands().get().getDepthTextureView();
 
-        VRArmHelper.renderVRHands(partialTick, renderHands && !DATA_HOLDER.menuHandMain,
-            renderHands && !DATA_HOLDER.menuHandOff, false, false);
+        VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+            vrState.armsState.renderHands && !vrState.armsState.menuHandMain,
+            vrState.armsState.renderHands && !vrState.armsState.menuHandOff, false, false);
 
-        // rebind the original buffer
-        MC.mainRenderTarget = mainTarget;
+
+        // render stuff
+        featureRenderDispatcher.renderAllFeatures();
+
+        RenderSystem.outputColorTextureOverride = null;
+        RenderSystem.outputDepthTextureOverride = null;
+        Profiler.get().pop();
     }
 
     /**
@@ -668,8 +755,9 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      */
     public static void renderVrFast(
-        SubmitNodeCollector output, VRRenderState vrState, float partialTick)
+        SubmitNodeCollector output, LevelRenderState levelState, PoseStack poseStack)
     {
+        VRRenderState vrState = ((LevelRenderStateExtension) levelState).vivecraft$getVRRenderState();
         if (vrState.currentPass == RenderPass.SCOPEL || vrState.currentPass == RenderPass.SCOPER) {
             // skip for spyglass
             return;
@@ -677,22 +765,24 @@ public class VREffectsHelper {
 
         Profiler.get().popPush("render VR");
 
-        renderCrosshairAtDepth(output, vrState.crosshairState);
+        renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack);
         VRWidgetHelper.renderVRThirdPersonCamWidget(output, vrState.thirdCamWidgetState);
         VRWidgetHelper.renderVRHandheldCameraWidget(output, vrState.screenCamWidgetState);
 
-        if (vrState.handsSecond) {
-            VRArmHelper.renderVRHands(partialTick, vrState.renderHands, vrState.renderHands,
-                vrState.menuHandMain, vrState.menuHandOff);
+        if (vrState.armsState.handsSecond) {
+            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+                vrState.armsState.renderHands, vrState.armsState.renderHands, vrState.armsState.menuHandMain,
+                vrState.armsState.menuHandOff);
         }
 
-        renderVRSelfEffects(output, vrState, partialTick);
+        renderVRSelfEffects(output, vrState);
 
-        renderGuiAndShadow(partialTick, !vrState.occludeGui, true);
+        renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, !vrState.occludeGui, true);
 
-        if (!vrState.handsSecond) {
-            VRArmHelper.renderVRHands(partialTick, vrState.renderHands, vrState.renderHands,
-                vrState.menuHandMain, vrState.menuHandOff);
+        if (!vrState.armsState.handsSecond) {
+            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+                vrState.armsState.renderHands, vrState.armsState.renderHands, vrState.armsState.menuHandMain,
+                vrState.armsState.menuHandOff);
         }
     }
 
@@ -719,29 +809,32 @@ public class VREffectsHelper {
      * @param depthAlways if the depth test should be disabled
      * @param shadowFirst if the player shadow should be rendered first
      */
-    private static void renderGuiAndShadow(float partialTick, boolean depthAlways, boolean shadowFirst) {
+    private static void renderGuiAndShadow(
+        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack,
+        boolean depthAlways, boolean shadowFirst)
+    {
         if (shadowFirst) {
-            VREffectsHelper.renderVrShadow(partialTick, depthAlways);
-        }
-        if (Minecraft.getInstance().screen != null || !KeyboardHandler.SHOWING) {
-            renderGuiLayer(partialTick, depthAlways);
-        }
-        if (!shadowFirst) {
-            VREffectsHelper.renderVrShadow(partialTick, depthAlways);
+            VREffectsHelper.renderVrShadow(output, vrState, cameraState, poseStack, depthAlways);
         }
 
-        if (KeyboardHandler.SHOWING) {
-            if (DATA_HOLDER.vrSettings.physicalKeyboard) {
-                renderPhysicalKeyboard(partialTick);
+        renderGuiLayer(output, cameraState, vrState, poseStack, depthAlways);
+
+        if (!shadowFirst) {
+            VREffectsHelper.renderVrShadow(output, vrState, cameraState, poseStack, depthAlways);
+        }
+
+        if (vrState.keyboardType != VRRenderState.Keyboard.NONE) {
+            if (vrState.keyboardType == VRRenderState.Keyboard.PHYSICAL) {
+                renderPhysicalKeyboard(output, cameraState, vrState, poseStack);
             } else {
-                render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
-                    KeyboardHandler.ROTATION_ROOM, depthAlways);
+                renderScreen(output, cameraState, vrState, vrState.keyboardState, KeyboardHandler.FRAMEBUFFER,
+                    depthAlways, true, poseStack);
             }
         }
 
-        if (RadialHandler.isShowing()) {
-            render2D(partialTick, RadialHandler.FRAMEBUFFER, RadialHandler.POS_ROOM,
-                RadialHandler.ROTATION_ROOM, depthAlways);
+        if (vrState.radialShowing) {
+            renderScreen(output, cameraState, vrState, vrState.radialState, RadialHandler.FRAMEBUFFER, depthAlways,
+                true, poseStack);
         }
     }
 
@@ -751,29 +844,21 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      */
-    public static void renderVrShadow(float partialTick, boolean depthAlways) {
-        if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
-            return;
+    public static void renderVrShadow(
+        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
+        boolean depthAlways)
+    {
+        if (RenderPass.isThirdPerson(vrState.currentPass)) return;
+
+        if (vrState.shadowPos != null) {
+            Profiler.get().push("vr shadow");
+
+            Vec3 pos = vrState.shadowPos.subtract(cameraState.pos);
+
+            RenderHelper.renderFlatQuad(pos, vrState.shadowSize.x(), vrState.shadowSize.y(),
+                0.0F, 0, 0, 0, 64, poseStack, depthAlways, output);
+            Profiler.get().pop();
         }
-        if (!MC.player.isAlive()) return;
-        if (MC.player.isPassenger() || MC.player != MC.getCameraEntity()) return;
-        // no indicator when swimming/crawling
-        if (((PlayerExtension) MC.player).vivecraft$getRoomYOffsetFromPose() < 0.0D) return;
-
-        Profiler.get().push("vr shadow");
-        AABB aabb = MC.player.getBoundingBox();
-
-        if (DATA_HOLDER.vrSettings.vrShowBlueCircleBuddy && aabb != null) {
-            Vec3 cameraPos = MC.gameRenderer.getMainCamera().position();
-
-            Vec3 interpolatedPlayerPos = ((GameRendererExtension) MC.gameRenderer).vivecraft$getRvePos(partialTick);
-
-            Vec3 pos = interpolatedPlayerPos.subtract(cameraPos).add(0.0D, 0.005D, 0.0D);
-
-            RenderHelper.renderFlatQuad(pos, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
-                0.0F, 0, 0, 0, 64, new Matrix4f(), depthAlways);
-        }
-        Profiler.get().pop();
     }
 
     /**
@@ -781,15 +866,17 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    private static void renderVRSelfEffects(SubmitNodeCollector output, VRRenderState vrState, float partialTick) {
+    private static void renderVRSelfEffects(SubmitNodeCollector output, VRRenderState vrState) {
         // only render the fire in first person, other views have the burning entity
-        if (vrState.firstPersonFire){
+        if (vrState.firstPersonFire && vrState.currentPass != RenderPass.THIRD &&
+            vrState.currentPass != RenderPass.CAMERA)
+        {
             VREffectsHelper.renderFireInFirstPerson(output, vrState);
         }
 
         // totem of undying
         ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
-            .renderItemActivationAnimation(new PoseStack(), partialTick, output);
+            .renderItemActivationAnimation(new PoseStack(), vrState.partialTick, output);
     }
 
     /**
@@ -830,16 +917,17 @@ public class VREffectsHelper {
             posestack.mulPose(Axis.YP.rotationDegrees(i * 90.0F - vrState.fireYaw));
             posestack.translate(0.0D, -vrState.fireHeight, 0.0D);
 
-            output.order(2).submitCustomGeometry(posestack, renderType, ((pose, consumer) -> {
-                consumer.addVertex(pose, -width, 0.0F, -width)
-                    .setUv(uMax, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-                consumer.addVertex(pose, width, 0.0F, -width)
-                    .setUv(uMin, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-                consumer.addVertex(pose, width, vrState.fireHeight, -width)
-                    .setUv(uMin, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-                consumer.addVertex(pose, -width, vrState.fireHeight, -width)
-                    .setUv(uMax, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
-            }));
+            output.order(RenderHelper.getPipelineRenderOrder(renderType))
+                .submitCustomGeometry(posestack, renderType, (pose, consumer) -> {
+                    consumer.addVertex(pose, -width, 0.0F, -width)
+                        .setUv(uMax, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                    consumer.addVertex(pose, width, 0.0F, -width)
+                        .setUv(uMin, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                    consumer.addVertex(pose, width, vrState.fireHeight, -width)
+                        .setUv(uMin, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                    consumer.addVertex(pose, -width, vrState.fireHeight, -width)
+                        .setUv(uMax, vMin).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+                });
 
             posestack.popPose();
         }
@@ -850,42 +938,36 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    public static void renderPhysicalKeyboard(float partialTick) {
-        if (DATA_HOLDER.bowTracker.isDrawing()) return;
-
+    public static void renderPhysicalKeyboard(
+        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack)
+    {
+        poseStack.pushPose();
         Profiler.get().push("renderPhysicalKeyboard");
 
-        removeNausea(partialTick);
+        // TODO 26.1 this likely needs to be changed
+        removeNausea(vrState.partialTick);
 
         Profiler.get().push("applyPhysicalKeyboardModelView");
-        Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
-
-        // convert previously calculated coords to world coords
-        Vec3 keyboardPos = VRPlayer.roomToWorldPos(KeyboardHandler.POS_ROOM, DATA_HOLDER.vrPlayer.vrdata_world_render);
-
-        Matrix4f keyboardRot = new Matrix4f().rotationY(DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians)
-            .mul(KeyboardHandler.ROTATION_ROOM);
-
-        Matrix4fStack poseStack = new Matrix4fStack(3);
 
         // offset from eye to keyboard pos
-        poseStack.translate((float) (keyboardPos.x - eye.x),
-            (float) (keyboardPos.y - eye.y),
-            (float) (keyboardPos.z - eye.z));
+        poseStack.translate(vrState.keyboardState.worldPos.x - cameraState.pos.x,
+            vrState.keyboardState.worldPos.y - cameraState.pos.y,
+            vrState.keyboardState.worldPos.z - cameraState.pos.z);
 
-        poseStack.mul(keyboardRot);
+        poseStack.mulPose(vrState.keyboardState.worldRotation);
 
-        float scale = DATA_HOLDER.vrPlayer.vrdata_world_render.worldScale;
-        poseStack.scale(scale, scale, scale);
+        poseStack.scale(vrState.worldScale, vrState.worldScale, vrState.worldScale);
 
         // pop apply modelview
         Profiler.get().pop();
 
-        KeyboardHandler.PHYSICAL_KEYBOARD.render(poseStack);
+        KeyboardHandler.PHYSICAL_KEYBOARD.render(output, vrState.physicalKeyboardState, poseStack);
+        // TODO 26.1 this likely needs to be changed
         reAddNausea();
 
         // pop render
         Profiler.get().pop();
+        poseStack.popPose();
     }
 
     /**
@@ -895,77 +977,75 @@ public class VREffectsHelper {
      */
     public static void removeNausea(float partialTick) {
         // remove nausea effect from projection matrix, for vanilla
-        RenderSystem.backupProjectionMatrix();
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
+        // TODO do that in the submitstorage?
+        //RenderSystem.backupProjectionMatrix();
+        //((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
     }
 
     /**
      * pops the reseted PoseStack
      */
     public static void reAddNausea() {
-        RenderSystem.restoreProjectionMatrix();
+        // TODO do that in the submitstorage?
+        //RenderSystem.restoreProjectionMatrix();
     }
 
     /**
      * Renders the given RenderTarget into the world at the given location.
      *
+     * @param output      SubmitNodeCollector to submit the rendercall to
+     * @param cameraState state of the camera
+     * @param vrState     VR state
+     * @param screenState state of the screen
      * @param framebuffer RenderTarget to render into the world
      * @param depthAlways if the depth test should be disabled
-     * @param noFog       disables for, used to render menus without for in lava
-     * @param pos         position to render the RenderTarget at
-     * @param matrix      Matrix4f to use for positioning
+     * @param noFog       disables fog, used to render menus without for in lava
+     * @param poseStack   PoseStack to use for positioning
      */
-    private static void renderScreen(
-        RenderTarget framebuffer, boolean depthAlways, boolean noFog, Vec3 pos, Matrix4f matrix)
+    public static void renderScreen(
+        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, ScreenRenderState screenState,
+        RenderTarget framebuffer, boolean depthAlways, boolean noFog, PoseStack poseStack)
     {
-        // cache fog distance
-        GpuBufferSlice oldFog = RenderSystem.getShaderFog();
-        float[] color = new float[]{1.0F, 1.0F, 1.0F, 1.0F};
-        if (!MethodHolder.isInMenuRoom()) {
-            if (MC.screen == null) {
-                color[3] = DATA_HOLDER.vrSettings.hudOpacity;
-            }
-            if (noFog || MC.screen != null) {
-                // disable fog for menus
-                RenderSystem.setShaderFog(
-                    ((GameRendererAccessor) MC.gameRenderer).getFogRenderer().getBuffer(FogRenderer.FogMode.NONE));
-            }
+        Profiler.get().push("render screen");
+        // TODO 26.1 remove nause
+        //removeNausea(partialTick);
 
-            if (MC.player != null && MC.player.isShiftKeyDown()) {
-                color[3] *= 0.75F;
-            }
-        }
+        poseStack.pushPose();
+
+        // position
+        poseStack.translate(screenState.worldPos.x - cameraState.pos.x,
+            screenState.worldPos.y - cameraState.pos.y,
+            screenState.worldPos.z - cameraState.pos.z);
+        poseStack.mulPose(screenState.worldRotation);
+        poseStack.scale(screenState.scale, screenState.scale, screenState.scale);
+
+        float[] color = new float[]{1.0F, 1.0F, 1.0F, vrState.guiOpacity};
 
         if (MC.level != null) {
-            if (isInsideOpaqueBlock(pos) || ((GameRendererExtension) MC.gameRenderer).vivecraft$isInBlock() > 0.0F) {
-                pos = DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition();
-            }
-
-            int minLight = ShadersHelper.ShaderLight();
-            int light = ClientUtils.getCombinedLightWithMin(MC.level, BlockPos.containing(pos), minLight);
-
             if (!ShadersHelper.isShaderActive() ||
                 DATA_HOLDER.vrSettings.shaderGUIRender != VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID)
             {
-                RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
-                    (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityTranslucentNoCardinalLightLinear(framebuffer.getColorTextureView(),
-                        depthAlways),
-                    false);
+                RenderHelper.submitSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
+                    (float) MC.getWindow().getGuiScaledHeight(), 1.5F, screenState.lightCoords, color, poseStack,
+                    VRRenderTypes.entityTranslucentNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways,
+                        noFog), false, output);
             } else {
-                RenderHelper.drawSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
-                    (float) MC.getWindow().getGuiScaledHeight(), 1.5F, light, color, matrix,
-                    VRRenderTypes.entityCutoutNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways),
-                    false);
+                RenderHelper.submitSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
+                    (float) MC.getWindow().getGuiScaledHeight(), 1.5F, screenState.lightCoords, color, poseStack,
+                    VRRenderTypes.entityCutoutNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways,
+                        noFog), false, output);
             }
         } else {
             RenderHelper.drawSizedQuad(
                 (float) MC.getWindow().getGuiScaledWidth(), (float) MC.getWindow().getGuiScaledHeight(),
-                1.5F, color, matrix, framebuffer);
+                1.5F, color, poseStack, framebuffer, depthAlways, output);
         }
 
-        // reset fog
-        RenderSystem.setShaderFog(oldFog);
+        // TODO 26.1 remove nause
+        reAddNausea();
+
+        Profiler.get().pop();
+        poseStack.popPose();
     }
 
     /**
@@ -974,101 +1054,23 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      */
-    public static void renderGuiLayer(float partialTick, boolean depthAlways) {
-        if (DATA_HOLDER.bowTracker.isDrawing()) return;
-        if (MC.screen == null && MC.options.hideGui) return;
-        if (RadialHandler.isShowing()) return;
+    public static void renderGuiLayer(
+        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack,
+        boolean depthAlways)
+    {
+        if (!vrState.renderGui) return;
 
         Profiler.get().push("GuiLayer");
 
-        removeNausea(partialTick);
+        // TODO 26.1
+        removeNausea(vrState.partialTick);
 
-        Matrix4fStack poseStack = new Matrix4fStack(8);
+        renderScreen(output, cameraState, vrState, vrState.guiState, GuiHandler.GUI_FRAMEBUFFER, depthAlways,
+            vrState.noHudFog, poseStack);
 
-        // MAIN MENU ENVIRONMENT
-        if (MethodHolder.isInMenuRoom()) {
-            // render the screen always on top in the menu room to prevent z fighting
-            depthAlways = true;
-
-            poseStack.pushMatrix();
-            Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
-            poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
-                (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
-                (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
-
-            // remove world rotation or the room doesn't align with the screen
-            poseStack.rotate(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
-
-            if (DATA_HOLDER.menuWorldRenderer.isReady()) {
-                try {
-                    renderTechjarsAwesomeMainMenuRoom(poseStack);
-                } catch (Exception e) {
-                    VRSettings.LOGGER.error(
-                        "Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
-                    DATA_HOLDER.menuWorldRenderer.destroy();
-                }
-            } else {
-                if (DATA_HOLDER.vrSettings.menuWorldFallbackPanorama) {
-                    renderMenuPanorama(poseStack);
-                } else {
-                    renderJrbuddasAwesomeMainMenuRoomNew(poseStack);
-                }
-            }
-            poseStack.popMatrix();
-        }
-
-        Vec3 guiPos = GuiHandler.applyGUIModelView(DATA_HOLDER.currentPass, poseStack);
-
-        renderScreen(GuiHandler.GUI_FRAMEBUFFER, depthAlways, false, guiPos, poseStack);
-
+        // TODO 26.1
         reAddNausea();
 
-        Profiler.get().pop();
-    }
-
-    /**
-     * renders the given RenderTarget into the world, ath the given location with the give rotation
-     *
-     * @param partialTick current partial tick
-     * @param framebuffer RenderTarget to render into the world
-     * @param pos         position to render the RenderTarget at, in VR room space
-     * @param rot         rotation to rotate the screen, in VR room space
-     * @param depthAlways if the depth test should be disabled
-     */
-    public static void render2D(
-        float partialTick, RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways)
-    {
-        if (DATA_HOLDER.bowTracker.isDrawing()) return;
-
-        Profiler.get().push("render2D");
-
-        removeNausea(partialTick);
-
-        Profiler.get().push("apply2DModelView");
-
-        Matrix4f modelView = new Matrix4f();
-
-        Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
-
-        Vec3 worldPos = VRPlayer.roomToWorldPos(pos, DATA_HOLDER.vrPlayer.vrdata_world_render);
-
-        Matrix4f worldRotation = new Matrix4f().rotationY(DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians)
-            .mul(rot);
-
-        modelView.translate((float) (worldPos.x - eye.x), (float) (worldPos.y - eye.y), (float) (worldPos.z - eye.z));
-        modelView.mul(worldRotation);
-
-        float scale = GuiHandler.GUI_SCALE * DATA_HOLDER.vrPlayer.vrdata_world_render.worldScale;
-        modelView.scale(scale, scale, scale);
-
-        // pop apply2DModelView
-        Profiler.get().pop();
-
-        renderScreen(framebuffer, depthAlways, true, worldPos, modelView);
-
-        reAddNausea();
-
-        // pop render2D
         Profiler.get().pop();
     }
 
@@ -1077,17 +1079,20 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    public static void renderFaceOverlay(float partialTick) {
-        if (((GameRendererExtension) MC.gameRenderer).vivecraft$isInBlock() > 0.0F) {
-            renderFaceInBlock();
+    public static void renderFaceOverlay(
+        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState)
+    {
+        if (vrState.inBlock) {
+            PoseStack poseStack = new PoseStack();
+            renderFaceInBlock(output, poseStack);
 
             // because this runs after the gameRenderer, the ModelViewStack is reset
             RenderSystem.getModelViewStack().pushMatrix().identity();
-            RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
+            RenderHelper.applyVRModelView(vrState.currentPass, RenderSystem.getModelViewStack());
 
-            renderGuiAndShadow(partialTick, true, true);
+            renderGuiAndShadow(output, cameraState, vrState, poseStack, true, true);
 
-            VRArmHelper.renderVRHands(partialTick, true, true, true, true);
+            VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true);
 
             RenderSystem.getModelViewStack().popMatrix();
         }
@@ -1096,15 +1101,16 @@ public class VREffectsHelper {
     /**
      * renders a fullscreen black quad, to block the screen
      */
-    public static void renderFaceInBlock() {
+    public static void renderFaceInBlock(SubmitNodeCollector output, PoseStack poseStack) {
         RenderType renderType = VRRenderTypes.quads(true);
-        VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
-        // render a big quad 2 meters in front
-        consumer.addVertex(-100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
-        consumer.addVertex(100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
-        consumer.addVertex(100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
-        consumer.addVertex(-100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
-        MC.renderBuffers().bufferSource().endBatch(renderType);
+        output.order(RenderHelper.getPipelineRenderOrder(renderType))
+            .submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+                // render a big quad 2 meters in front
+                consumer.addVertex(-100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
+                consumer.addVertex(100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
+                consumer.addVertex(100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
+                consumer.addVertex(-100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
+            });
     }
 
     /**
@@ -1154,10 +1160,10 @@ public class VREffectsHelper {
         }
     }
 
-    public static void extractCrosshairState(CrosshairRenderState crosshairRenderState) {
+    public static void extractCrosshairState(CrosshairRenderState crosshairRenderState, @Nullable LocalPlayer player) {
         Profiler.get().push("extract crosshair");
 
-        crosshairRenderState.shouldRender = shouldRenderCrosshair();
+        crosshairRenderState.shouldRender = player != null && shouldRenderCrosshair();
         if (!crosshairRenderState.shouldRender) return;
 
         Vec3 crosshairRenderPos = DATA_HOLDER.vrPlayer.crossVec;
@@ -1165,14 +1171,9 @@ public class VREffectsHelper {
             DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getPosition());
 
         // scooch closer a bit for light calc.
-        crosshairRenderPos = crosshairRenderPos.add(crossDistance.normalize().scale(-0.01D));
+        crosshairRenderState.pos = crosshairRenderPos.add(crossDistance.normalize().scale(-0.01D));
 
-        PoseStack modelView = crosshairRenderState.poseStack;
-        modelView.setIdentity();
-
-        Vector3f translate = MathUtils.subtractToVector3f(crosshairRenderPos,
-            MC.gameRenderer.getMainCamera().position());
-        modelView.translate(translate.x, translate.y, translate.z);
+        Matrix4f rotation = crosshairRenderState.rotation.identity();
 
         if (MC.hitResult != null && MC.hitResult.getType() == HitResult.Type.BLOCK) {
             // if there is a block hit, make the crosshair parallel to the block
@@ -1180,24 +1181,24 @@ public class VREffectsHelper {
 
             switch (blockhitresult.getDirection()) {
                 case DOWN -> {
-                    modelView.mulPose(
+                    rotation.rotate(
                         Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
-                    modelView.mulPose(Axis.XP.rotationDegrees(-90.0F));
+                    rotation.rotate(Axis.XP.rotationDegrees(-90.0F));
                 }
                 case UP -> {
-                    modelView.mulPose(
+                    rotation.rotate(
                         Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
-                    modelView.mulPose(Axis.XP.rotationDegrees(90.0F));
+                    rotation.rotate(Axis.XP.rotationDegrees(90.0F));
                 }
-                case WEST -> modelView.mulPose(Axis.YP.rotationDegrees(90.0F));
-                case EAST -> modelView.mulPose(Axis.YP.rotationDegrees(-90.0F));
-                case SOUTH -> modelView.mulPose(Axis.YP.rotationDegrees(180.0F));
+                case WEST -> rotation.rotate(Axis.YP.rotationDegrees(90.0F));
+                case EAST -> rotation.rotate(Axis.YP.rotationDegrees(-90.0F));
+                case SOUTH -> rotation.rotate(Axis.YP.rotationDegrees(180.0F));
             }
         } else {
             // if there is no block hit, make it face the controller
-            modelView.mulPose(
+            rotation.rotate(
                 Axis.YP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getYaw()));
-            modelView.mulPose(
+            rotation.rotate(
                 Axis.XP.rotationDegrees(-DATA_HOLDER.vrPlayer.vrdata_world_render.getAim().getPitch()));
         }
 
@@ -1208,11 +1209,12 @@ public class VREffectsHelper {
             float depthScale = 0.3F + 0.2F * (float) crossDistance.length();
             scale *= depthScale;
         }
-        modelView.scale(scale, scale, scale);
+        crosshairRenderState.scale = scale;
+
+        crosshairRenderState.light = LevelRenderer.getLightCoords(player.level(),
+            BlockPos.containing(crosshairRenderPos));
 
         // white crosshair, with blending
-        crosshairRenderState.light = LevelRenderer.getLightCoords(MC.level, BlockPos.containing(crosshairRenderPos));
-
         if (MC.hitResult == null || MC.hitResult.getType() == HitResult.Type.MISS) {
             crosshairRenderState.brightness = 0.5F;
         } else {
@@ -1228,10 +1230,20 @@ public class VREffectsHelper {
      * @param output         SubmitNodeCollector to submit the rendercall to
      * @param crosshairState crosshair renderstate to use for rendering
      */
-    public static void renderCrosshairAtDepth(SubmitNodeCollector output, CrosshairRenderState crosshairState) {
+    public static void renderCrosshairAtDepth(
+        SubmitNodeCollector output, CrosshairRenderState crosshairState, CameraRenderState cameraState,
+        PoseStack poseStack)
+    {
         if (!crosshairState.shouldRender) return;
 
         Profiler.get().push("submit crosshair");
+
+        poseStack.pushPose();
+        poseStack.translate(crosshairState.pos.x - cameraState.pos.x,
+            crosshairState.pos.y - cameraState.pos.y,
+            crosshairState.pos.z - cameraState.pos.z);
+        poseStack.mulPose(crosshairState.rotation);
+        poseStack.scale(crosshairState.scale, crosshairState.scale, crosshairState.scale);
 
         TextureAtlasSprite crosshairSprite = MC.getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
             .getSprite(Gui.CROSSHAIR_SPRITE);
@@ -1239,7 +1251,7 @@ public class VREffectsHelper {
         float brightness = crosshairState.brightness;
         int light = crosshairState.light;
         output.order(crosshairState.occlude ? 0 : 2)
-            .submitCustomGeometry(crosshairState.poseStack,
+            .submitCustomGeometry(poseStack,
                 VRRenderTypes.crosshairWorld(crosshairSprite.atlasLocation(), !crosshairState.occlude),
                 (pose, consumer) -> {
                     consumer.addVertex(pose, -1.0F, 1.0F, 0.0F)
@@ -1264,6 +1276,7 @@ public class VREffectsHelper {
                         .setNormal(0.0F, 0.0F, 1.0F);
                 });
 
+        poseStack.popPose();
         Profiler.get().pop();
     }
 }

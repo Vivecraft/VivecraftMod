@@ -192,6 +192,7 @@ public abstract class ItemInHandRendererVRMixin {
         AbstractClientPlayer player, float partialTick, InteractionHand hand, float swingProgress, ItemStack itemStack,
         PoseStack poseStack, SubmitNodeCollector collector, int combinedLight)
     {
+        // TODO 26.1 extract arm state
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 
         boolean mainHand = hand == InteractionHand.MAIN_HAND;
@@ -302,7 +303,7 @@ public abstract class ItemInHandRendererVRMixin {
                         OptifineHelper.endEntities();
                     }
                     // render scope view
-                    VREffectsHelper.drawScopeFB(poseStack, hand == InteractionHand.MAIN_HAND ? 0 : 1);
+                    VREffectsHelper.drawScopeFB(collector, poseStack, hand == InteractionHand.MAIN_HAND ? 0 : 1);
 
                     if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                         OptifineHelper.beginEntities();

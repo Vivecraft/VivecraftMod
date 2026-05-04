@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.render;
 
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
@@ -14,17 +15,17 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.ubos.LanczosUBO;
 import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
 import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.Set;
 
 public class VRShaders {
 
@@ -249,11 +250,10 @@ public class VRShaders {
         .withSampler(CORE_LIGHTMAP_SAMPLER)
         .withCull(false).build();
 
-    public static final Set<RenderPipeline> DEPTH_ALWAYS_PIPELINES = new HashSet<>(
-        Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT,
-            ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
-
     private static GpuSampler GUI_SAMPLER;
+
+    private static ProjectionMatrixBuffer UNDISTORTED_PROJ;
+    public static GpuBufferSlice UNDISTORTED_PROJ_BUFFER;
 
     public static GpuSampler getGuiSampler() {
         if (GUI_SAMPLER == null) {
@@ -273,12 +273,17 @@ public class VRShaders {
                     RenderSystem.getDevice().getMaxSupportedAnisotropy() : 1, OptionalDouble.empty());
     }
 
+    public static void setUndistortedProj(Matrix4f proj) {
+        UNDISTORTED_PROJ_BUFFER = UNDISTORTED_PROJ.getBuffer(proj);
+    }
+
     private VRShaders() {}
 
     public static void init() {
         MIXED_REALITY_UBO = new MixedRealityUBO();
         POST_PROCESS_UBO = new PostProcessUBO();
         LANCZOS_UBO = new LanczosUBO();
+        UNDISTORTED_PROJ = new ProjectionMatrixBuffer("undistorted");
     }
 
     public static void close() {
@@ -297,6 +302,11 @@ public class VRShaders {
         if (GUI_SAMPLER != null) {
             GUI_SAMPLER.close();
             GUI_SAMPLER = null;
+        }
+        if (UNDISTORTED_PROJ != null) {
+            UNDISTORTED_PROJ.close();
+            UNDISTORTED_PROJ = null;
+            UNDISTORTED_PROJ_BUFFER = null;
         }
     }
 }
