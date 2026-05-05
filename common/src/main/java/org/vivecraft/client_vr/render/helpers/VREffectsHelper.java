@@ -182,7 +182,7 @@ public class VREffectsHelper {
         float alpha = TelescopeTracker.viewPercent(c);
         // draw spyglass view
         RenderHelper.submitSizedQuadFullbright(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1},
-            poseStack, VRRenderTypes.entitySolidNoCardinalLight(scopeView, false), output);
+            poseStack, VRRenderTypes.entitySolidNoCardinalLight(scopeView, false), output, 1);
 
         // draw spyglass overlay
         // slight offset to not cause z fighting
@@ -192,7 +192,7 @@ public class VREffectsHelper {
             DATA_HOLDER.vrPlayer.vrdata_world_render.getController(c).getPosition()));
         // draw the overlay, and flip it vertically
         RenderHelper.submitSizedQuadWithLightmap(720.0F, 720.0F, scale, light, poseStack,
-            RenderTypes.entityTranslucent(SCOPE_TEXTURE), true, output);
+            RenderTypes.entityTranslucent(SCOPE_TEXTURE), true, output, 2);
 
         poseStack.popPose();
     }
@@ -280,7 +280,7 @@ public class VREffectsHelper {
      *
      * @param poseStac Matrix4fStack to use for positioning
      */
-    public static void renderMenuPanorama(SubmitNodeCollector output, PoseStack poseStack) {
+    public static int renderMenuPanorama(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
@@ -291,7 +291,7 @@ public class VREffectsHelper {
         poseStack.translate(-50F, -50F, -50.0F);
 
         // down
-        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_DOWN), (pose, consumer) -> {
+        output.order(order).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_DOWN), (pose, consumer) -> {
             consumer.addVertex(pose, 0, 0, 0)
                 .setUv(0, 0).setColor(255, 255, 255, 255);
             consumer.addVertex(pose, 0, 0, 100)
@@ -303,7 +303,7 @@ public class VREffectsHelper {
         });
 
         // up
-        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_UP), (pose, consumer) -> {
+        output.order(order).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_UP), (pose, consumer) -> {
             consumer.addVertex(pose, 0, 100, 100)
                 .setUv(0, 0).setColor(255, 255, 255, 255);
             consumer.addVertex(pose, 0, 100, 0)
@@ -315,7 +315,7 @@ public class VREffectsHelper {
         });
 
         // left
-        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_LEFT), (pose, consumer) -> {
+        output.order(order).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_LEFT), (pose, consumer) -> {
             consumer.addVertex(pose, 0, 0, 0)
                 .setUv(1, 1).setColor(255, 255, 255, 255);
             consumer.addVertex(pose, 0, 100, 0)
@@ -327,7 +327,7 @@ public class VREffectsHelper {
         });
 
         // right
-        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_RIGHT), (pose, consumer) -> {
+        output.order(order).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_RIGHT), (pose, consumer) -> {
             consumer.addVertex(pose, 100, 0, 0)
                 .setUv(0, 1).setColor(255, 255, 255, 255);
             consumer.addVertex(pose, 100, 0, 100)
@@ -339,7 +339,7 @@ public class VREffectsHelper {
         });
 
         // front
-        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_FRONT), (pose, consumer) -> {
+        output.order(order).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_FRONT), (pose, consumer) -> {
             consumer.addVertex(pose, 0, 0, 0)
                 .setUv(0, 1).setColor(255, 255, 255, 255);
             consumer.addVertex(pose, 100, 0, 0)
@@ -351,7 +351,7 @@ public class VREffectsHelper {
         });
 
         // back
-        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_BACK), (pose, consumer) -> {
+        output.order(order).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(CUBE_BACK), (pose, consumer) -> {
             consumer.addVertex(pose, 0, 0, 100)
                 .setUv(1, 1).setColor(255, 255, 255, 255);
             consumer.addVertex(pose, 0, 100, 100)
@@ -363,6 +363,8 @@ public class VREffectsHelper {
         });
 
         poseStack.popPose();
+
+        order++;
 
         // render floor
         Vector2fc area = DATA_HOLDER.vr.getPlayAreaSize();
@@ -391,7 +393,7 @@ public class VREffectsHelper {
 
             final int repeat = 4; // texture wraps per meter
             int offset = i;
-            output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(i == 0 ? GRASS : DIRT),
+            output.order(order).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(i == 0 ? GRASS : DIRT),
                 (pose, consumer) -> {
                     consumer
                         .addVertex(pose, 0, 0.005f * -offset, 0)
@@ -412,6 +414,7 @@ public class VREffectsHelper {
                 });
             poseStack.popPose();
         }
+        return order;
     }
 
     /**
@@ -419,7 +422,7 @@ public class VREffectsHelper {
      *
      * @param poseStac Matrix4fStack to use for positioning
      */
-    public static void renderJrbuddasAwesomeMainMenuRoomNew(SubmitNodeCollector output, PoseStack poseStack) {
+    public static int renderJrbuddasAwesomeMainMenuRoomNew(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.getMainRenderTarget().getColorTexture(), 0xFF000000,
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
@@ -445,7 +448,7 @@ public class VREffectsHelper {
         // offset so the room is centered
         poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
 
-        output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(DIRT), (pose, consumer) -> {
+        output.order(order++).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(DIRT), (pose, consumer) -> {
             // floor
             consumer.addVertex(pose, 0, 0, 0)
                 .setUv(0, 0).setColor(r, g, b, a);
@@ -508,6 +511,7 @@ public class VREffectsHelper {
         });
 
         poseStack.popPose();
+        return order;
     }
 
     /**
@@ -515,7 +519,7 @@ public class VREffectsHelper {
      *
      * @param poseStac Matrix4fStack to use for positioning
      */
-    public static void renderTechjarsAwesomeMainMenuRoom(SubmitNodeCollector output, PoseStack poseStack) {
+    public static int renderTechjarsAwesomeMainMenuRoom(SubmitNodeCollector output, PoseStack poseStack, int order) {
         // transfer the rotation
         RenderSystem.getModelViewStack().pushMatrix().mul(poseStack.last().pose());
 
@@ -556,7 +560,7 @@ public class VREffectsHelper {
 
             poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
 
-            output.submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(DIRT), (pose, consumer) -> {
+            output.order(order++).submitCustomGeometry(poseStack, VRRenderTypes.guiTextured(DIRT), (pose, consumer) -> {
                 consumer
                     .addVertex(pose, 0, 0.005f, 0)
                     .setUv(0, 0)
@@ -580,6 +584,7 @@ public class VREffectsHelper {
             // reset stacks
             RenderSystem.getModelViewStack().popMatrix();
         }
+        return order;
     }
 
     public static void renderMenuRoom(
@@ -598,25 +603,24 @@ public class VREffectsHelper {
         RenderSystem.setProjectionMatrix(VRShaders.UNDISTORTED_PROJ_BUFFER, ProjectionType.PERSPECTIVE);
         PoseStack poseStack = new PoseStack();
 
-        boolean followHead = DATA_HOLDER.vrSettings.menuAlwaysFollowFace || DATA_HOLDER.vrSettings.seated;
+        int order = 0;
 
-        renderMenuEnvironment(output, cameraState, poseStack);
-        VREffectsHelper.renderGuiLayer(output, cameraState, vrState, poseStack, followHead);
+        order = renderMenuEnvironment(output, cameraState, poseStack, order);
+        order = renderGuiLayer(output, cameraState, vrState, poseStack, true, order);
 
         if (vrState.keyboardType != VRRenderState.Keyboard.NONE) {
             if (vrState.keyboardType == VRRenderState.Keyboard.PHYSICAL) {
-                VREffectsHelper.renderPhysicalKeyboard(output, cameraState, vrState, poseStack);
+                order = renderPhysicalKeyboard(output, cameraState, vrState, poseStack, order);
             } else {
-                VREffectsHelper.renderScreen(output, cameraState, vrState, vrState.keyboardState,
-                    KeyboardHandler.FRAMEBUFFER, followHead,
-                    true, poseStack);
+                order = renderScreen(output, cameraState, vrState, vrState.keyboardState, KeyboardHandler.FRAMEBUFFER,
+                    true, true, poseStack, order);
             }
         }
 
         if (vrState.currentPass != RenderPass.CAMERA &&
             (vrState.currentPass != RenderPass.THIRD || DATA_HOLDER.vrSettings.mixedRealityRenderHands))
         {
-            VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true);
+            order = VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true, order);
         }
         featureRenderer.renderAllFeatures();
 
@@ -627,8 +631,8 @@ public class VREffectsHelper {
         RenderSystem.restoreProjectionMatrix();
     }
 
-    public static void renderMenuEnvironment(
-        SubmitNodeCollector output, CameraRenderState cameraState, PoseStack poseStack)
+    public static int renderMenuEnvironment(
+        SubmitNodeCollector output, CameraRenderState cameraState, PoseStack poseStack, int order)
     {
         // MAIN MENU ENVIRONMENT
         poseStack.pushPose();
@@ -642,7 +646,7 @@ public class VREffectsHelper {
 
         if (DATA_HOLDER.menuWorldRenderer.isReady()) {
             try {
-                renderTechjarsAwesomeMainMenuRoom(output, poseStack);
+                order = renderTechjarsAwesomeMainMenuRoom(output, poseStack, order);
             } catch (Exception e) {
                 VRSettings.LOGGER.error(
                     "Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
@@ -650,12 +654,13 @@ public class VREffectsHelper {
             }
         } else {
             if (DATA_HOLDER.vrSettings.menuWorldFallbackPanorama) {
-                renderMenuPanorama(output, poseStack);
+                order = renderMenuPanorama(output, poseStack, order);
             } else {
-                renderJrbuddasAwesomeMainMenuRoomNew(output, poseStack);
+                order = renderJrbuddasAwesomeMainMenuRoomNew(output, poseStack, order);
             }
         }
         poseStack.popPose();
+        return order;
     }
 
     /**
@@ -675,9 +680,11 @@ public class VREffectsHelper {
             return;
         }
 
+        int order = 0;
+
         Profiler.get().push("VR");
         // TODO 26.1 this should maybe be separate
-        renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack);
+        renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack, order);
         // render stuff
         featureRenderDispatcher.renderAllFeatures();
 
@@ -691,13 +698,12 @@ public class VREffectsHelper {
         RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getOccluded().get().getColorTextureView();
         RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getOccluded().get().getDepthTextureView();
 
-        boolean renderHands = VRArmHelper.shouldRenderHands();
-
+        order = 0;
         if (shouldOccludeGui()) {
-            renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, false, false);
-            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+            order = renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, false, false, order);
+            order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
                 vrState.armsState.renderHands && vrState.armsState.menuHandMain,
-                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true);
+                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true, order);
         }
 
         // render stuff
@@ -710,18 +716,19 @@ public class VREffectsHelper {
         RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getUnoccluded().get().getColorTextureView();
         RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getUnoccluded().get().getDepthTextureView();
 
+        order = 0;
         if (!shouldOccludeGui()) {
-            renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, false, false);
+            order = renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, false, false, order);
         }
 
-        renderVRSelfEffects(output, vrState);
+        order = renderVRSelfEffects(output, vrState, order);
         VRWidgetHelper.renderVRThirdPersonCamWidget(output, vrState.thirdCamWidgetState);
         VRWidgetHelper.renderVRHandheldCameraWidget(output, vrState.screenCamWidgetState);
 
         if (!shouldOccludeGui()) {
-            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+            order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
                 vrState.armsState.renderHands && vrState.armsState.menuHandMain,
-                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true);
+                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true, order);
         }
 
         // render stuff
@@ -734,10 +741,10 @@ public class VREffectsHelper {
         RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getHands().get().getColorTextureView();
         RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getHands().get().getDepthTextureView();
 
-        VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+        order = 0;
+        order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
             vrState.armsState.renderHands && !vrState.armsState.menuHandMain,
-            vrState.armsState.renderHands && !vrState.armsState.menuHandOff, false, false);
-
+            vrState.armsState.renderHands && !vrState.armsState.menuHandOff, false, false, order);
 
         // render stuff
         featureRenderDispatcher.renderAllFeatures();
@@ -764,25 +771,27 @@ public class VREffectsHelper {
         }
 
         Profiler.get().popPush("render VR");
+        int order = 0;
+        order = renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack, order);
 
-        renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack);
+        // item renderers can't be ordered, should be fine though
         VRWidgetHelper.renderVRThirdPersonCamWidget(output, vrState.thirdCamWidgetState);
         VRWidgetHelper.renderVRHandheldCameraWidget(output, vrState.screenCamWidgetState);
 
-        if (vrState.armsState.handsSecond) {
-            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+        if (!vrState.armsState.handsSecond) {
+            order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
                 vrState.armsState.renderHands, vrState.armsState.renderHands, vrState.armsState.menuHandMain,
-                vrState.armsState.menuHandOff);
+                vrState.armsState.menuHandOff, order);
         }
 
-        renderVRSelfEffects(output, vrState);
+        order = renderVRSelfEffects(output, vrState, order);
 
-        renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, !vrState.occludeGui, true);
+        order = renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, !vrState.occludeGui, true, order);
 
-        if (!vrState.armsState.handsSecond) {
-            VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
+        if (vrState.armsState.handsSecond) {
+            order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
                 vrState.armsState.renderHands, vrState.armsState.renderHands, vrState.armsState.menuHandMain,
-                vrState.armsState.menuHandOff);
+                vrState.armsState.menuHandOff, order);
         }
     }
 
@@ -809,33 +818,34 @@ public class VREffectsHelper {
      * @param depthAlways if the depth test should be disabled
      * @param shadowFirst if the player shadow should be rendered first
      */
-    private static void renderGuiAndShadow(
+    private static int renderGuiAndShadow(
         SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack,
-        boolean depthAlways, boolean shadowFirst)
+        boolean depthAlways, boolean shadowFirst, int order)
     {
         if (shadowFirst) {
-            VREffectsHelper.renderVrShadow(output, vrState, cameraState, poseStack, depthAlways);
+            order = VREffectsHelper.renderVrShadow(output, vrState, cameraState, poseStack, depthAlways, order);
         }
 
-        renderGuiLayer(output, cameraState, vrState, poseStack, depthAlways);
+        order = renderGuiLayer(output, cameraState, vrState, poseStack, depthAlways, order);
 
         if (!shadowFirst) {
-            VREffectsHelper.renderVrShadow(output, vrState, cameraState, poseStack, depthAlways);
+            order = VREffectsHelper.renderVrShadow(output, vrState, cameraState, poseStack, depthAlways, order);
         }
 
         if (vrState.keyboardType != VRRenderState.Keyboard.NONE) {
             if (vrState.keyboardType == VRRenderState.Keyboard.PHYSICAL) {
-                renderPhysicalKeyboard(output, cameraState, vrState, poseStack);
+                order = renderPhysicalKeyboard(output, cameraState, vrState, poseStack, order);
             } else {
-                renderScreen(output, cameraState, vrState, vrState.keyboardState, KeyboardHandler.FRAMEBUFFER,
-                    depthAlways, true, poseStack);
+                order = renderScreen(output, cameraState, vrState, vrState.keyboardState, KeyboardHandler.FRAMEBUFFER,
+                    depthAlways, true, poseStack, order);
             }
         }
 
         if (vrState.radialShowing) {
-            renderScreen(output, cameraState, vrState, vrState.radialState, RadialHandler.FRAMEBUFFER, depthAlways,
-                true, poseStack);
+            order = renderScreen(output, cameraState, vrState, vrState.radialState, RadialHandler.FRAMEBUFFER, depthAlways,
+                true, poseStack, order);
         }
+        return order;
     }
 
     /**
@@ -844,21 +854,22 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      */
-    public static void renderVrShadow(
+    public static int renderVrShadow(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
-        boolean depthAlways)
+        boolean depthAlways, int order)
     {
-        if (RenderPass.isThirdPerson(vrState.currentPass)) return;
+        if (RenderPass.isThirdPerson(vrState.currentPass)) return order;
 
         if (vrState.shadowPos != null) {
             Profiler.get().push("vr shadow");
 
             Vec3 pos = vrState.shadowPos.subtract(cameraState.pos);
 
-            RenderHelper.renderFlatQuad(pos, vrState.shadowSize.x(), vrState.shadowSize.y(),
-                0.0F, 0, 0, 0, 64, poseStack, depthAlways, output);
+            order = RenderHelper.renderFlatQuad(pos, vrState.shadowSize.x(), vrState.shadowSize.y(),
+                0.0F, 0, 0, 0, 64, poseStack, depthAlways, output, order);
             Profiler.get().pop();
         }
+        return order;
     }
 
     /**
@@ -866,23 +877,25 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    private static void renderVRSelfEffects(SubmitNodeCollector output, VRRenderState vrState) {
+    private static int renderVRSelfEffects(SubmitNodeCollector output, VRRenderState vrState, int order) {
         // only render the fire in first person, other views have the burning entity
         if (vrState.firstPersonFire && vrState.currentPass != RenderPass.THIRD &&
             vrState.currentPass != RenderPass.CAMERA)
         {
-            VREffectsHelper.renderFireInFirstPerson(output, vrState);
+            order = VREffectsHelper.renderFireInFirstPerson(output, vrState, order);
         }
 
         // totem of undying
+        // can't be ordered
         ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
             .renderItemActivationAnimation(new PoseStack(), vrState.partialTick, output);
+        return order;
     }
 
     /**
      * renders the fire when the player is burning
      */
-    public static void renderFireInFirstPerson(SubmitNodeCollector output, VRRenderState vrState) {
+    public static int renderFireInFirstPerson(SubmitNodeCollector output, VRRenderState vrState, int order) {
         PoseStack posestack = new PoseStack();
         RenderHelper.applyStereo(vrState.currentPass, posestack);
 
@@ -917,7 +930,7 @@ public class VREffectsHelper {
             posestack.mulPose(Axis.YP.rotationDegrees(i * 90.0F - vrState.fireYaw));
             posestack.translate(0.0D, -vrState.fireHeight, 0.0D);
 
-            output.order(RenderHelper.getPipelineRenderOrder(renderType))
+            output.order(order++)
                 .submitCustomGeometry(posestack, renderType, (pose, consumer) -> {
                     consumer.addVertex(pose, -width, 0.0F, -width)
                         .setUv(uMax, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
@@ -931,6 +944,7 @@ public class VREffectsHelper {
 
             posestack.popPose();
         }
+        return order;
     }
 
     /**
@@ -938,8 +952,9 @@ public class VREffectsHelper {
      *
      * @param partialTick current partial tick
      */
-    public static void renderPhysicalKeyboard(
-        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack)
+    public static int renderPhysicalKeyboard(
+        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack,
+        int order)
     {
         poseStack.pushPose();
         Profiler.get().push("renderPhysicalKeyboard");
@@ -961,13 +976,14 @@ public class VREffectsHelper {
         // pop apply modelview
         Profiler.get().pop();
 
-        KeyboardHandler.PHYSICAL_KEYBOARD.render(output, vrState.physicalKeyboardState, poseStack);
+        order = KeyboardHandler.PHYSICAL_KEYBOARD.render(output, vrState.physicalKeyboardState, poseStack, order);
         // TODO 26.1 this likely needs to be changed
         reAddNausea();
 
         // pop render
         Profiler.get().pop();
         poseStack.popPose();
+        return order;
     }
 
     /**
@@ -1002,9 +1018,9 @@ public class VREffectsHelper {
      * @param noFog       disables fog, used to render menus without for in lava
      * @param poseStack   PoseStack to use for positioning
      */
-    public static void renderScreen(
+    public static int renderScreen(
         SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, ScreenRenderState screenState,
-        RenderTarget framebuffer, boolean depthAlways, boolean noFog, PoseStack poseStack)
+        RenderTarget framebuffer, boolean depthAlways, boolean noFog, PoseStack poseStack, int order)
     {
         Profiler.get().push("render screen");
         // TODO 26.1 remove nause
@@ -1025,20 +1041,20 @@ public class VREffectsHelper {
             if (!ShadersHelper.isShaderActive() ||
                 DATA_HOLDER.vrSettings.shaderGUIRender != VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID)
             {
-                RenderHelper.submitSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
+                order = RenderHelper.submitSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, screenState.lightCoords, color, poseStack,
                     VRRenderTypes.entityTranslucentNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways,
-                        noFog), false, output);
+                        noFog), false, output, order);
             } else {
-                RenderHelper.submitSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
+                order = RenderHelper.submitSizedQuadWithLightmap((float) MC.getWindow().getGuiScaledWidth(),
                     (float) MC.getWindow().getGuiScaledHeight(), 1.5F, screenState.lightCoords, color, poseStack,
                     VRRenderTypes.entityCutoutNoCardinalLightLinear(framebuffer.getColorTextureView(), depthAlways,
-                        noFog), false, output);
+                        noFog), false, output, order);
             }
         } else {
-            RenderHelper.drawSizedQuad(
+            order = RenderHelper.drawSizedQuad(
                 (float) MC.getWindow().getGuiScaledWidth(), (float) MC.getWindow().getGuiScaledHeight(),
-                1.5F, color, poseStack, framebuffer, depthAlways, output);
+                1.5F, color, poseStack, framebuffer, depthAlways, output, order);
         }
 
         // TODO 26.1 remove nause
@@ -1046,6 +1062,7 @@ public class VREffectsHelper {
 
         Profiler.get().pop();
         poseStack.popPose();
+        return order;
     }
 
     /**
@@ -1054,24 +1071,19 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      */
-    public static void renderGuiLayer(
+    public static int renderGuiLayer(
         SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack,
-        boolean depthAlways)
+        boolean depthAlways, int order)
     {
-        if (!vrState.renderGui) return;
+        if (!vrState.renderGui) return order;
 
         Profiler.get().push("GuiLayer");
 
-        // TODO 26.1
-        removeNausea(vrState.partialTick);
-
-        renderScreen(output, cameraState, vrState, vrState.guiState, GuiHandler.GUI_FRAMEBUFFER, depthAlways,
-            vrState.noHudFog, poseStack);
-
-        // TODO 26.1
-        reAddNausea();
+        order = renderScreen(output, cameraState, vrState, vrState.guiState, GuiHandler.GUI_FRAMEBUFFER, depthAlways,
+            vrState.noHudFog, poseStack, order);
 
         Profiler.get().pop();
+        return order;
     }
 
     /**
@@ -1090,9 +1102,9 @@ public class VREffectsHelper {
             RenderSystem.getModelViewStack().pushMatrix().identity();
             RenderHelper.applyVRModelView(vrState.currentPass, RenderSystem.getModelViewStack());
 
-            renderGuiAndShadow(output, cameraState, vrState, poseStack, true, true);
+            int order = renderGuiAndShadow(output, cameraState, vrState, poseStack, true, true, 0);
 
-            VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true);
+            order = VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true, order);
 
             RenderSystem.getModelViewStack().popMatrix();
         }
@@ -1230,11 +1242,11 @@ public class VREffectsHelper {
      * @param output         SubmitNodeCollector to submit the rendercall to
      * @param crosshairState crosshair renderstate to use for rendering
      */
-    public static void renderCrosshairAtDepth(
+    public static int renderCrosshairAtDepth(
         SubmitNodeCollector output, CrosshairRenderState crosshairState, CameraRenderState cameraState,
-        PoseStack poseStack)
+        PoseStack poseStack, int order)
     {
-        if (!crosshairState.shouldRender) return;
+        if (!crosshairState.shouldRender) return order;
 
         Profiler.get().push("submit crosshair");
 
@@ -1250,7 +1262,9 @@ public class VREffectsHelper {
 
         float brightness = crosshairState.brightness;
         int light = crosshairState.light;
-        output.order(crosshairState.occlude ? 0 : 2)
+        // after regular geometry when unoccluded
+        order += (crosshairState.occlude ? 0 : 1);
+        output.order(order)
             .submitCustomGeometry(poseStack,
                 VRRenderTypes.crosshairWorld(crosshairSprite.atlasLocation(), !crosshairState.occlude),
                 (pose, consumer) -> {
@@ -1278,5 +1292,6 @@ public class VREffectsHelper {
 
         poseStack.popPose();
         Profiler.get().pop();
+        return order;
     }
 }

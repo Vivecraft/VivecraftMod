@@ -10,7 +10,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.LightCoordsUtil;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -334,9 +333,9 @@ public class PhysicalKeyboard {
         }
     }
 
-    public void render(SubmitNodeCollector output, KeyboardState state, PoseStack poseStack) {
+    public int render(SubmitNodeCollector output, KeyboardState state, PoseStack poseStack, int order) {
         // no keys, don't render
-        if (state.keys.isEmpty()) return;
+        if (state.keys.isEmpty()) return order;
         poseStack.pushPose();
         poseStack.translate(-state.center.x, -state.center.y, -state.center.z);
 
@@ -349,7 +348,7 @@ public class PhysicalKeyboard {
         for (KeyState key : state.keys) {
             // box first
             // Draw the key itself
-            output.order(0).submitCustomGeometry(poseStack, renderType,
+            output.order(order).submitCustomGeometry(poseStack, renderType,
                 (pose, consumer) -> this.drawBox(consumer, key.box, key.color, pose));
 
             // Calculate text position
@@ -362,9 +361,9 @@ public class PhysicalKeyboard {
             poseStack.scale(textScale, textScale, 1.0F);
 
             // label second
-            output.order(1).submitText(poseStack,
-                this.mc.font.width(key.label) / 2F,
-                this.mc.font.lineHeight / 2F,
+            output.order(order + 1).submitText(poseStack,
+                -this.mc.font.width(key.label) / 2F,
+                -this.mc.font.lineHeight / 2F,
                 key.label.getVisualOrderText(),
                 false,
                 Font.DisplayMode.POLYGON_OFFSET,
@@ -376,6 +375,7 @@ public class PhysicalKeyboard {
         }
 
         poseStack.popPose();
+        return order + 2;
     }
 
     public void show() {

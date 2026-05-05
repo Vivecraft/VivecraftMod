@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -23,18 +21,15 @@ import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.data.ViveItems;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
-
-import javax.annotation.Nullable;
 
 public class VRArmHelper {
 
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
     private static final Minecraft MC = Minecraft.getInstance();
 
-    private static final Vec3i TP_UNLIMITED_COLOR = new Vec3i(173, 216, 230);
-    private static final Vec3i TP_LIMITED_COLOR = new Vec3i(205, 169, 205);
-    private static final Vec3i TP_INVALID_COLOR = new Vec3i(83, 83, 83);
+    public static final Vec3i TP_UNLIMITED_COLOR = new Vec3i(173, 216, 230);
+    public static final Vec3i TP_LIMITED_COLOR = new Vec3i(205, 169, 205);
+    public static final Vec3i TP_INVALID_COLOR = new Vec3i(83, 83, 83);
 
     /**
      * @return if first person hands should be rendered in the current RenderPass
@@ -58,11 +53,11 @@ public class VRArmHelper {
      * @param menuHandMain if the right hand should render as the menu hand
      * @param menuHandOff  if the left hand should render as the menu hand
      */
-    public static void renderVRHands(
+    public static int renderVRHands(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
-        boolean renderMain, boolean renderOff, boolean menuHandMain, boolean menuHandOff)
+        boolean renderMain, boolean renderOff, boolean menuHandMain, boolean menuHandOff, int order)
     {
-        if (!renderMain && !renderOff) return;
+        if (!renderMain && !renderOff) return order;
         Profiler.get().push("hands");
         // TODO 26.1 this will not work, is it still needed though?
         DATA_HOLDER.isFpHand = true;
@@ -72,17 +67,18 @@ public class VRArmHelper {
 
         if (renderMain) {
             if (menuHandMain) {
-                renderMenuHand(output, vrState, cameraState, poseStack, 0, false);
+                order = renderMenuHand(output, vrState, cameraState, poseStack, 0, order);
             } else {
+                // hand submits can't be ordered
                 renderVRHand_Main(output, vrState, cameraState, poseStack);
             }
         }
 
         if (renderOff) {
             if (menuHandOff) {
-                renderMenuHand(output, vrState, cameraState, poseStack, 1, false);
+                order = renderMenuHand(output, vrState, cameraState, poseStack, 1, order);
             } else {
-                renderVRHand_Offhand(output, vrState, cameraState, poseStack, true);
+                order = renderVRHand_Offhand(output, vrState, cameraState, poseStack, true, order);
             }
         }
 
@@ -91,6 +87,7 @@ public class VRArmHelper {
 
         DATA_HOLDER.isFpHand = false;
         Profiler.get().pop();
+        return order;
     }
 
     /**
@@ -100,10 +97,10 @@ public class VRArmHelper {
      * @param c           controller to render the hand for
      * @param depthAlways if depth testing should be disabled for rendering
      */
-    public static void renderMenuHand(
-        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack, int c, boolean depthAlways)
+    public static int renderMenuHand(
+        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack, int c,
+        int order)
     {
-
         float lightPercent = vrState.armsState.headLight / 15F;
         Vec3i color = new Vec3i(
             (int) (64 * lightPercent),
@@ -121,14 +118,15 @@ public class VRArmHelper {
             (c == 0 ? vrState.armsState.mainHandWorldPos.z : vrState.armsState.offHandWorldPos.z) - cameraState.pos.z);
         poseStack.mulPose(c == 0 ? vrState.armsState.mainHandWorldRot : vrState.armsState.offHandWorldRot);
 
-        RenderType renderType = VRRenderTypes.quads(depthAlways && c == 0);
+        RenderType renderType = VRRenderTypes.quads(false);
 
-        output.order(RenderHelper.getPipelineRenderOrder(renderType))
+        output.order(order++)
             .submitCustomGeometry(poseStack, renderType,
                 (pose, consumer) -> RenderHelper.renderBox(consumer, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F,
                     color, alpha, pose));
 
         poseStack.popPose();
+        return order;
     }
 
     public static ItemStack extractHandRenderItem(LocalPlayer player, InteractionHand hand) {
@@ -162,9 +160,9 @@ public class VRArmHelper {
 
         poseStack.pushPose();
         poseStack.translate(
-            cameraState.pos.x - vrState.armsState.mainHandWorldPos.x,
-            cameraState.pos.y - vrState.armsState.mainHandWorldPos.y,
-            cameraState.pos.z - vrState.armsState.mainHandWorldPos.z);
+            vrState.armsState.mainHandWorldPos.x - cameraState.pos.x,
+            vrState.armsState.mainHandWorldPos.y - cameraState.pos.y,
+            vrState.armsState.mainHandWorldPos.z - cameraState.pos.z);
         poseStack.mulPose(vrState.armsState.mainHandWorldRot);
 
         // TODO 26.1 this doesn't work like that, do we still need that?
@@ -190,18 +188,19 @@ public class VRArmHelper {
      * @param partialTick    current partial tick
      * @param renderTeleport if the teleport arc should be rendered
      */
-    public static void renderVRHand_Offhand(
+    public static int renderVRHand_Offhand(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
-        boolean renderTeleport)
+        boolean renderTeleport, int order)
     {
+        poseStack.pushPose();
+        poseStack.translate(
+            vrState.armsState.offHandWorldPos.x - cameraState.pos.x,
+            vrState.armsState.offHandWorldPos.y - cameraState.pos.y,
+            vrState.armsState.offHandWorldPos.z - cameraState.pos.z);
+        poseStack.mulPose(vrState.armsState.offHandWorldRot);
         // don't render claws with model arms
-        if (!vrState.armsState.skipOffHandItemRendering){
+        if (!vrState.armsState.skipOffHandItemRendering) {
             poseStack.pushPose();
-            poseStack.translate(
-                cameraState.pos.x - vrState.armsState.offHandWorldPos.x,
-                cameraState.pos.y - vrState.armsState.offHandWorldPos.y,
-                cameraState.pos.z - vrState.armsState.offHandWorldPos.z);
-            poseStack.mulPose(vrState.armsState.offHandWorldRot);
 
             // TODO 26.1 this doesn't work like that, do we still need that?
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
@@ -227,11 +226,6 @@ public class VRArmHelper {
             // TP energy
             if (vrState.teleportState.tpEnergy) {
                 poseStack.pushPose();
-                poseStack.translate(
-                    cameraState.pos.x - vrState.armsState.offHandWorldPos.x,
-                    cameraState.pos.y - vrState.armsState.offHandWorldPos.y,
-                    cameraState.pos.z - vrState.armsState.offHandWorldPos.z);
-                poseStack.mulPose(vrState.armsState.offHandWorldRot);
 
                 Vec3 start = new Vec3(0.0D, 0.005D, 0.03D);
                 float max = 0.03F;
@@ -240,14 +234,15 @@ public class VRArmHelper {
 
                 if (vrState.teleportState.tpEnergySize > 0.0F) {
                     // tp energy quad, slightly above the max energy quad
-                    RenderHelper.renderFlatQuad(start.add(0.0D, 0.05001D, 0.0D),
+                    order = RenderHelper.renderFlatQuad(start.add(0.0D, 0.05001D, 0.0D),
                         vrState.teleportState.tpEnergySize * max, vrState.teleportState.tpEnergySize * max, 0.0F,
-                        TP_LIMITED_COLOR.getX(), TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 128,
-                        poseStack, false, output);
+                        TP_LIMITED_COLOR.getX(), TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 128, poseStack,
+                        false, output, order);
                 }
                 // max energy quad
-                RenderHelper.renderFlatQuad(start.add(0.0D, 0.05D, 0.0D), max, max, 0.0F, TP_LIMITED_COLOR.getX(),
-                    TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 50, poseStack, false, output);
+                order = RenderHelper.renderFlatQuad(start.add(0.0D, 0.05D, 0.0D), max, max, 0.0F,
+                    TP_LIMITED_COLOR.getX(), TP_LIMITED_COLOR.getY(), TP_LIMITED_COLOR.getZ(), 50, poseStack, false,
+                    output, order);
 
                 poseStack.popPose();
             }
@@ -255,89 +250,14 @@ public class VRArmHelper {
             if (vrState.teleportState.aiming) {
                 // renders from the head
                 if (vrState.teleportState.arcAiming) {
-                    renderTeleportArc(output, cameraState, vrState.teleportState, poseStack);
+                    order = renderTeleportArc(output, cameraState, vrState.teleportState, poseStack, order);
                 } /* else {
                     renderTeleportLine(poseStack);
                 }*/
             }
         }
-    }
-
-    public static void extractTeleport(TeleportRenderState teleportState, @Nullable LocalPlayer player) {
-        if (player == null) {
-            teleportState.tpEnergy = false;
-            teleportState.aiming = false;
-            return;
-        }
-        teleportState.tpEnergy = ClientNetworking.isLimitedSurvivalTeleport() &&
-            !DATA_HOLDER.vrPlayer.getFreeMove() &&
-            MC.gameMode != null && MC.gameMode.hasMissTime() &&
-            DATA_HOLDER.teleportTracker.vrMovementStyle.arcAiming &&
-            !DATA_HOLDER.bowTracker.isActive(player);
-
-        teleportState.aiming = DATA_HOLDER.teleportTracker.isAiming();
-
-        if (teleportState.aiming) {
-            teleportState.tpEnergySize = 2.0F * (DATA_HOLDER.teleportTracker.getTeleportEnergy() -
-                4.0F * (float) DATA_HOLDER.teleportTracker.movementTeleportDistance
-            ) / 100.0F;
-        } else {
-            teleportState.tpEnergySize = 2.0F * DATA_HOLDER.teleportTracker.getTeleportEnergy() / 100.0F;
-        }
-
-        teleportState.arcAiming = DATA_HOLDER.teleportTracker.vrMovementStyle.arcAiming;
-
-        teleportState.showBeam = teleportState.aiming &&
-            DATA_HOLDER.teleportTracker.vrMovementStyle.showBeam &&
-            DATA_HOLDER.teleportTracker.isAiming() &&
-            DATA_HOLDER.teleportTracker.movementTeleportArcSteps > 1;
-
-        // don't need any of the arc stuff if we are not aiming
-        if (!teleportState.showBeam) return;
-
-        teleportState.dest = DATA_HOLDER.teleportTracker.getDestination();
-        teleportState.validLocation =
-            teleportState.dest.x != 0.0D || teleportState.dest.y != 0.0D || teleportState.dest.z != 0.0D;
-        teleportState.showHitIndicator = DATA_HOLDER.teleportTracker.movementTeleportProgress >= 1.0D;
-
-        double vOffset;
-        if (!teleportState.validLocation) {
-            // invalid location
-            teleportState.color = TP_INVALID_COLOR;
-            teleportState.alpha = (byte) 128;
-            vOffset = DATA_HOLDER.teleportTracker.lastTeleportArcDisplayOffset;
-        } else {
-            teleportState.alpha = (byte) 255;
-            if (ClientNetworking.isLimitedSurvivalTeleport() && !player.getAbilities().mayfly) {
-                teleportState.color = TP_LIMITED_COLOR;
-            } else {
-                teleportState.color = TP_UNLIMITED_COLOR;
-            }
-
-            vOffset = Util.getMillis() * 0.001D
-                * (double) DATA_HOLDER.teleportTracker.vrMovementStyle.textureScrollSpeed * 0.6D;
-            DATA_HOLDER.teleportTracker.lastTeleportArcDisplayOffset = vOffset;
-        }
-
-        teleportState.segmentHalfWidth = DATA_HOLDER.teleportTracker.vrMovementStyle.beamHalfWidth * 0.15F;
-        int segments = DATA_HOLDER.teleportTracker.movementTeleportArcSteps - 1;
-
-        if (DATA_HOLDER.teleportTracker.vrMovementStyle.beamGrow) {
-            segments = (int) (segments * DATA_HOLDER.teleportTracker.movementTeleportProgress);
-        }
-        teleportState.segments.clear();
-        if (segments > 0) {
-            float segmentProgress = 1.0F / (float) segments;
-            for (int i = 0; i < segments; i++) {
-                float progress = Mth.frac((float) i / (float) segments + (float) (vOffset * segmentProgress));
-
-                Vec3 start = DATA_HOLDER.teleportTracker.getInterpolatedArcPosition(progress - segmentProgress * 0.4F);
-
-                Vec3 end = DATA_HOLDER.teleportTracker.getInterpolatedArcPosition(progress);
-
-                teleportState.segments.add(new TeleportRenderState.Segment(start, end, progress * 2.0F));
-            }
-        }
+        poseStack.popPose();
+        return order;
     }
 
     /**
@@ -387,31 +307,33 @@ public class VRArmHelper {
      *
      * @param matrix Matrix4f for positioning
      */
-    public static void renderTeleportArc(
+    public static int renderTeleportArc(
         SubmitNodeCollector output, CameraRenderState cameraState, TeleportRenderState teleportState,
-        PoseStack poseStack)
+        PoseStack poseStack, int order)
     {
         if (teleportState.showBeam) {
             Profiler.get().push("teleportArc");
 
             poseStack.pushPose();
+            poseStack.setIdentity();
             // TODO SHADERS use a shader with lightmaps
 
             // to make shaders work
             RenderType renderType = VRRenderTypes.quads(false);
 
             // arc
-            output.order(RenderHelper.getPipelineRenderOrder(renderType)).submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
-                for (TeleportRenderState.Segment segment : teleportState.segments) {
-                    RenderHelper.renderBox(consumer,
-                        segment.start().subtract(cameraState.pos.x, cameraState.pos.y, cameraState.pos.z),
-                        segment.end().subtract(cameraState.pos.x, cameraState.pos.y, cameraState.pos.z),
-                        -teleportState.segmentHalfWidth, teleportState.segmentHalfWidth,
-                        (-1.0F + segment.vOffset()) * teleportState.segmentHalfWidth,
-                        (1.0F + segment.vOffset()) * teleportState.segmentHalfWidth, teleportState.color,
-                        teleportState.alpha, pose);
-                }
-            });
+            output.order(order++)
+                .submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+                    for (TeleportRenderState.Segment segment : teleportState.segments) {
+                        RenderHelper.renderBox(consumer,
+                            segment.start().subtract(cameraState.pos.x, cameraState.pos.y, cameraState.pos.z),
+                            segment.end().subtract(cameraState.pos.x, cameraState.pos.y, cameraState.pos.z),
+                            -teleportState.segmentHalfWidth, teleportState.segmentHalfWidth,
+                            (-1.0F + segment.vOffset()) * teleportState.segmentHalfWidth,
+                            (1.0F + segment.vOffset()) * teleportState.segmentHalfWidth, teleportState.color,
+                            teleportState.alpha, pose);
+                    }
+                });
 
             // hit indicator
             if (teleportState.validLocation && teleportState.showHitIndicator) {
@@ -423,28 +345,29 @@ public class VRArmHelper {
 
                 y += offset;
 
-                RenderHelper.renderFlatQuad(teleportState.dest.add(x, y, z), 0.6F, 0.6F, 0.0F,
+                order = RenderHelper.renderFlatQuad(teleportState.dest.add(x, y, z), 0.6F, 0.6F, 0.0F,
                     (int) (teleportState.color.getX() * 1.03D),
                     (int) (teleportState.color.getY() * 1.03D),
-                    (int) (teleportState.color.getZ() * 1.03D), 64, poseStack, false, output);
+                    (int) (teleportState.color.getZ() * 1.03D), 64, poseStack, false, output, order);
 
                 y += offset;
 
-                RenderHelper.renderFlatQuad(teleportState.dest.add(x, y, z), 0.4F, 0.4F, 0.0F,
+                order = RenderHelper.renderFlatQuad(teleportState.dest.add(x, y, z), 0.4F, 0.4F, 0.0F,
                     (int) (teleportState.color.getX() * 1.04D),
                     (int) (teleportState.color.getY() * 1.04D),
-                    (int) (teleportState.color.getZ() * 1.04D), 64, poseStack, false, output);
+                    (int) (teleportState.color.getZ() * 1.04D), 64, poseStack, false, output, order);
 
                 y += offset;
 
-                RenderHelper.renderFlatQuad(teleportState.dest.add(x, y, z), 0.2F, 0.2F, 0.0F,
+                order = RenderHelper.renderFlatQuad(teleportState.dest.add(x, y, z), 0.2F, 0.2F, 0.0F,
                     (int) (teleportState.color.getX() * 1.05D),
                     (int) (teleportState.color.getY() * 1.05D),
-                    (int) (teleportState.color.getZ() * 1.05D), 64, poseStack, false, output);
+                    (int) (teleportState.color.getZ() * 1.05D), 64, poseStack, false, output, order);
             }
             poseStack.popPose();
 
             Profiler.get().pop();
         }
+        return order;
     }
 }

@@ -284,16 +284,16 @@ public class RenderHelper {
      * @param source        TenderTarget to render
      * @param collector     SubmitNodeCollector to submit drawcalls to
      */
-    public static void drawSizedQuad(
+    public static int drawSizedQuad(
         float displayWidth, float displayHeight, float size, float[] color, PoseStack poseStack, RenderTarget source,
-        boolean depthAlways, SubmitNodeCollector output)
+        boolean depthAlways, SubmitNodeCollector output, int order)
     {
         float sizeX = size * 0.5F;
         float sizeY = sizeX * displayHeight / displayWidth;
 
         RenderType renderType = VRRenderTypes.guiTextured(source.getColorTextureView(), depthAlways);
 
-        output.order(getPipelineRenderOrder(renderType))
+        output.order(order++)
             .submitCustomGeometry(poseStack, renderType,
                 (pose, consumer) -> {
                     consumer
@@ -313,6 +313,7 @@ public class RenderHelper {
                         .setUv(0.0F, 1.0F)
                         .setColor(color[0], color[1], color[2], color[3]);
                 });
+        return order;
     }
 
     /**
@@ -327,12 +328,12 @@ public class RenderHelper {
      * @param flipY         if the texture should be flipped vertically
      * @param collector     SubmitNodeCollector to submit drawcalls to
      */
-    public static void submitSizedQuadWithLightmap(
+    public static int submitSizedQuadWithLightmap(
         float displayWidth, float displayHeight, float size, int packedLight, PoseStack poseStack,
-        RenderType renderType, boolean flipY, SubmitNodeCollector collector)
+        RenderType renderType, boolean flipY, SubmitNodeCollector collector, int order)
     {
-        submitSizedQuadWithLightmap(displayWidth, displayHeight, size, packedLight, new float[]{1, 1, 1, 1}, poseStack,
-            renderType, flipY, collector);
+        return submitSizedQuadWithLightmap(displayWidth, displayHeight, size, packedLight, new float[]{1, 1, 1, 1},
+            poseStack, renderType, flipY, collector, order);
     }
 
     /**
@@ -346,12 +347,12 @@ public class RenderHelper {
      * @param renderType    entity RenderType to use
      * @param collector     SubmitNodeCollector to submit drawcalls to
      */
-    public static void submitSizedQuadFullbright(
+    public static int submitSizedQuadFullbright(
         float displayWidth, float displayHeight, float size, float[] color, PoseStack poseStack, RenderType renderType,
-        SubmitNodeCollector collector)
+        SubmitNodeCollector collector, int order)
     {
-        submitSizedQuadWithLightmap(displayWidth, displayHeight, size, LightCoordsUtil.FULL_BRIGHT, color, poseStack,
-            renderType, false, collector);
+        return submitSizedQuadWithLightmap(displayWidth, displayHeight, size, LightCoordsUtil.FULL_BRIGHT, color,
+            poseStack, renderType, false, collector, order);
     }
 
     /**
@@ -367,16 +368,16 @@ public class RenderHelper {
      * @param flipY         if the texture should be flipped vertically
      * @param collector     SubmitNodeCollector to submit drawcalls to
      */
-    public static void submitSizedQuadWithLightmap(
+    public static int submitSizedQuadWithLightmap(
         float displayWidth, float displayHeight, float size, int packedLight, float[] color, PoseStack poseStack,
-        RenderType renderType, boolean flipY, SubmitNodeCollector collector)
+        RenderType renderType, boolean flipY, SubmitNodeCollector collector, int order)
     {
         float sizeX = size * 0.5F;
         float sizeY = sizeX * displayHeight / displayWidth;
 
         Vector3f normal = poseStack.last().transformNormal(0, 0, 1, new Vector3f());
 
-        collector.order(getPipelineRenderOrder(renderType))
+        collector.order(order++)
             .submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
                 consumer.addVertex(pose, -sizeX, -sizeY, 0)
                     .setColor(color[0], color[1], color[2], color[3])
@@ -399,6 +400,7 @@ public class RenderHelper {
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
                     .setNormal(normal.x, normal.y, normal.z);
             });
+        return order;
     }
 
     /**
@@ -416,14 +418,14 @@ public class RenderHelper {
      * @param depthAlways ignores depth and always draws
      * @param output      SubmitNodeCollector to submit drawcalls to
      */
-    public static void renderFlatQuad(
+    public static int renderFlatQuad(
         Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, PoseStack poseStack,
-        boolean depthAlways, SubmitNodeCollector output)
+        boolean depthAlways, SubmitNodeCollector output, int order)
     {
         Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))
             .yRot(Mth.DEG_TO_RAD * -yaw);
 
-        output.order(depthAlways ? ALWAYS_RENDER_ORDER : 0)
+        output.order(order++)
             .submitCustomGeometry(poseStack, VRRenderTypes.quads(depthAlways), (pose, consumer) -> {
                 consumer.addVertex(pose, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
                     .setColor(r, g, b, a);
@@ -434,6 +436,7 @@ public class RenderHelper {
                 consumer.addVertex(pose, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
                     .setColor(r, g, b, a);
             });
+        return order;
     }
 
     /**

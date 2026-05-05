@@ -158,6 +158,7 @@ public class VRRenderState {
 
         // hands
         this.armsState.extract(player, headPos);
+        this.teleportState.extract(player);
 
         // HUDs
         this.occludeGui = VREffectsHelper.shouldOccludeGui();
@@ -183,6 +184,9 @@ public class VRRenderState {
 
             if (dataHolder.vrSettings.physicalKeyboard) {
                 KeyboardHandler.PHYSICAL_KEYBOARD.extract(this.physicalKeyboardState);
+                this.keyboardType = Keyboard.PHYSICAL;
+            } else {
+                this.keyboardType = Keyboard.POINTER;
             }
         } else {
             this.keyboardType = Keyboard.NONE;
@@ -200,7 +204,7 @@ public class VRRenderState {
         // if the gui should even render
         this.renderGui = (mc.screen != null || this.keyboardType == Keyboard.NONE) &&
             !dataHolder.bowTracker.isDrawing() &&
-            (mc.screen != null && !mc.options.hideGui) &&
+            (mc.screen != null || !mc.options.hideGui) &&
             !this.radialShowing;
 
         // ui lights in world
