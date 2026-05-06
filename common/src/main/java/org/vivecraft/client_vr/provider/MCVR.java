@@ -1536,4 +1536,10 @@ public abstract class MCVR {
      * @return the name of the VR runtime
      */
     public abstract String getRuntimeName();
+
+    /**
+     * @param inputValueHandle the origin handle from the VR runtime
+     * @return which controller the origin belongs to, or {@code null} if unknown
+     */
+    public abstract ControllerType getOriginControllerType(long inputValueHandle);
 }

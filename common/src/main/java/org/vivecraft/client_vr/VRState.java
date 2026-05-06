@@ -13,6 +13,7 @@ import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
+import org.vivecraft.client_vr.provider.openxr_lwjgl.MCOpenXR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRShaders;
@@ -64,9 +65,20 @@ public class VRState {
             }
 
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+            VRSettings.LOGGER.info("Vivecraft: VR Provider setting = {}", dh.vrSettings.stereoProviderPluginID);
+
+            // Force OpenXR for all VR modes - OpenVR/SteamVR is no longer used
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
-                dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
+                VRSettings.LOGGER.info("Vivecraft: OpenVR setting detected, overriding to OpenXR (SteamVR bypass)");
+                dh.vrSettings.stereoProviderPluginID = VRSettings.VRProvider.OPENXR;
+                dh.vrSettings.saveOptions();
+            }
+
+            if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENXR) {
+                VRSettings.LOGGER.info("Vivecraft: Using OpenXR provider (bypassing SteamVR)");
+                dh.vr = new MCOpenXR(Minecraft.getInstance(), dh);
             } else {
+                VRSettings.LOGGER.info("Vivecraft: Using NullVR provider");
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
             }
             if (!dh.vr.init()) {

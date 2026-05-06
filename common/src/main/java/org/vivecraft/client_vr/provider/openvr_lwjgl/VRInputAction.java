@@ -217,15 +217,15 @@ public class VRInputAction {
      */
     public boolean isEnabled() {
         if (!this.isEnabledRaw(this.currentHand)) return false;
-        if (MCOpenVR.get() == null) return false;
+        if (MCVR.get() == null) return false;
 
         long lastOrigin = this.getLastOrigin();
-        ControllerType hand = MCOpenVR.get().getOriginControllerType(lastOrigin);
+        ControllerType hand = MCVR.get().getOriginControllerType(lastOrigin);
 
         if (hand == null && this.isHanded()) return false;
 
         // iterate over all actions, and check if another action has a higher priority
-        for (VRInputAction action : MCOpenVR.get().getInputActions()) {
+        for (VRInputAction action : MCVR.get().getInputActions()) {
             if (action != this && action.isEnabledRaw(hand) && action.isActive() &&
                 action.getPriority() > this.getPriority() && MCVR.get().getOrigins(action).contains(lastOrigin))
             {

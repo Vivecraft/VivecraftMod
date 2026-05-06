@@ -290,6 +290,11 @@ public class NullVR extends MCVR {
     }
 
     @Override
+    public ControllerType getOriginControllerType(long inputValueHandle) {
+        return null;
+    }
+
+    @Override
     public boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
         boolean triggered = false;
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && action == GLFW.GLFW_PRESS &&

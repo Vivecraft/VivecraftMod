@@ -34,6 +34,9 @@ dependencies {
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
     forgeRuntimeLibrary("com.illposed.osc:javaosc-core:0.9") { transitive = false }
     forgeRuntimeLibrary("com.github.bhaptics:tact-java:0.1.4") { transitive = false }
     forgeRuntimeLibrary("org.java-websocket:Java-WebSocket:1.5.1") { transitive = false }
@@ -43,6 +46,9 @@ dependencies {
     bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
     implementation(include("io.github.llamalad7:mixinextras-neoforge:${rootProject.mixin_extras_version}"))

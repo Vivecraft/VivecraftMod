@@ -204,6 +204,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (!VRState.VR_INITIALIZED) {
             return;
         }
+        // OpenXR requires event polling to transition the session state machine
+        // (IDLE → READY → SYNCHRONIZED → VISIBLE → FOCUSED). We must poll events
+        // even when VR_RUNNING is false, otherwise the session never reaches READY
+        // and isActive() never returns true — creating a deadlock.
+        if (!VRState.VR_RUNNING) {
+            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
+        }
+
         boolean vrActive = !ClientDataHolderVR.getInstance().vrSettings.vrHotswitchingEnabled ||
             ClientDataHolderVR.getInstance().vr.isActive();
         if (VRState.VR_RUNNING != vrActive && (ClientNetworking.SERVER_ALLOWS_VR_SWITCHING || this.player == null)) {

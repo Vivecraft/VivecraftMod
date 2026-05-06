@@ -69,6 +69,10 @@ dependencies {
     include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos")) { transitive = false }
     include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows")) { transitive = false }
 
+    include(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}:natives-linux")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_version}:natives-windows")) { transitive = false }
+
     include(implementation("com.illposed.osc:javaosc-core:0.9"))
     include(implementation("com.github.bhaptics:tact-java:0.1.4"))
     include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))

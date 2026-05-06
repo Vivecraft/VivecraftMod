@@ -56,6 +56,7 @@ public class DeviceSource {
     public enum Source {
         NULL,
         OPENVR,
+        OPENXR,
         OSC
     }
 }
