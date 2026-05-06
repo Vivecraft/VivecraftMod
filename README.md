@@ -22,7 +22,7 @@ Mod compatibility is important to us. If you find any issues, don't be afraid to
 - [X] Iris support
 - [X] In game VR switching
 - [X] API, details [here](https://github.com/Vivecraft/VivecraftMod/wiki/Mod-API)
-- [ ] OpenXR support
+- [X] OpenXR support
 
 [Vivecraft Discord server](https://discord.gg/2x3QCk8qa9)\
 [Development Discord server](https://discord.gg/jYyyv7zhSW)
