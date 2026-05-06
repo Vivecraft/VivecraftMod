@@ -22,6 +22,7 @@ import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.utils.RGBAColor;
 
@@ -348,7 +349,7 @@ public class PhysicalKeyboard {
         for (KeyState key : state.keys) {
             // box first
             // Draw the key itself
-            output.order(order).submitCustomGeometry(poseStack, renderType,
+            RenderHelper.submitLateCustomGeometry(output.order(order), poseStack, renderType,
                 (pose, consumer) -> this.drawBox(consumer, key.box, key.color, pose));
 
             // Calculate text position

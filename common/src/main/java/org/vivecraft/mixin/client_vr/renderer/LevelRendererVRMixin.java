@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.client.extensions.FeatureRenderDispatcherExtension;
 import org.vivecraft.client.extensions.LevelRenderStateExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MultiPassTextureTarget;
@@ -50,10 +51,8 @@ import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
 import org.vivecraft.client_vr.gameplay.interact_modules.BlockInteractionModule;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
-import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.Set;
 
@@ -172,7 +171,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    // no remap needed to make the * work
     @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;endOutlineBatch()V", shift = Shift.AFTER))
     private void vivecraft$interactOutlineSolid(
         CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState, @Local PoseStack poseStack)
@@ -180,7 +178,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         vivecraft$interactOutline(levelRenderState, poseStack, false);
     }
 
-    // no remap needed to make the * work
     @Inject(method = "lambda$addMainPass$0*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 2))
     private void vivecraft$interactOutlineTranslucent(
         CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState, @Local PoseStack poseStack)
@@ -245,7 +242,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    // no remap needed to make the * work
     @Inject(method = "lambda$addMainPass$0*", at = @At("TAIL"))
     private void vivecraft$renderVrFabulous(
         CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState, @Local PoseStack poseStack)
@@ -256,7 +252,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             poseStack, this.targets);
     }
 
-    // no remap needed to make the * work
     @Inject(method = "lambda$addMainPass$0*", at = @At(value = "CONSTANT", args = "stringValue=renderSolidFeatures"))
     private void vivecraft$renderVrStuffPart1(
         CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState, @Local PoseStack poseStack)
@@ -266,6 +261,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         VREffectsHelper.renderVrFast(this.submitNodeStorage, levelRenderState, poseStack);
         // TODO 26.1 figure out a way to render gui after the level
         this.vivecraft$guiRendered = true;
+    }
+
+    @Inject(method = "lambda$addMainPass$0*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;renderTranslucentParticles()V"))
+    private void vivecraft$renderLateCustomGeometry(CallbackInfo ci) {
+        if (!RenderPassType.isVanilla()) {
+            ((FeatureRenderDispatcherExtension) this.featureRenderDispatcher).vivecraft$renderLate();
+            this.renderBuffers.bufferSource().endBatch();
+        }
     }
 
     // if the gui didn't render yet, render it now.

@@ -2,7 +2,6 @@ package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -12,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -29,6 +29,7 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.extensions.SubmitNodeCollectionExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -50,8 +51,6 @@ public class RenderHelper {
 
     public static final Identifier WHITE_TEXTURE = Identifier.parse("vivecraft:textures/white.png");
     public static final Identifier BLACK_TEXTURE = Identifier.parse("vivecraft:textures/black.png");
-
-    public static final int ALWAYS_RENDER_ORDER = 99;
 
     public static GpuTextureView getGpuTexture(Identifier identifier) {
         return MC.getTextureManager().getTexture(identifier).getTextureView();
@@ -293,26 +292,25 @@ public class RenderHelper {
 
         RenderType renderType = VRRenderTypes.guiTextured(source.getColorTextureView(), depthAlways);
 
-        output.order(order++)
-            .submitCustomGeometry(poseStack, renderType,
-                (pose, consumer) -> {
-                    consumer
-                        .addVertex(pose, -sizeX, -sizeY, 0)
-                        .setUv(0.0F, 0.0F)
-                        .setColor(color[0], color[1], color[2], color[3]);
-                    consumer
-                        .addVertex(pose, sizeX, -sizeY, 0)
-                        .setUv(1.0F, 0.0F)
-                        .setColor(color[0], color[1], color[2], color[3]);
-                    consumer
-                        .addVertex(pose, sizeX, sizeY, 0)
-                        .setUv(1.0F, 1.0F)
-                        .setColor(color[0], color[1], color[2], color[3]);
-                    consumer
-                        .addVertex(pose, -sizeX, sizeY, 0)
-                        .setUv(0.0F, 1.0F)
-                        .setColor(color[0], color[1], color[2], color[3]);
-                });
+        RenderHelper.submitLateCustomGeometry(output.order(order++), poseStack, renderType,
+            (pose, consumer) -> {
+                consumer
+                    .addVertex(pose, -sizeX, -sizeY, 0)
+                    .setUv(0.0F, 0.0F)
+                    .setColor(color[0], color[1], color[2], color[3]);
+                consumer
+                    .addVertex(pose, sizeX, -sizeY, 0)
+                    .setUv(1.0F, 0.0F)
+                    .setColor(color[0], color[1], color[2], color[3]);
+                consumer
+                    .addVertex(pose, sizeX, sizeY, 0)
+                    .setUv(1.0F, 1.0F)
+                    .setColor(color[0], color[1], color[2], color[3]);
+                consumer
+                    .addVertex(pose, -sizeX, sizeY, 0)
+                    .setUv(0.0F, 1.0F)
+                    .setColor(color[0], color[1], color[2], color[3]);
+            });
         return order;
     }
 
@@ -370,15 +368,15 @@ public class RenderHelper {
      */
     public static int submitSizedQuadWithLightmap(
         float displayWidth, float displayHeight, float size, int packedLight, float[] color, PoseStack poseStack,
-        RenderType renderType, boolean flipY, SubmitNodeCollector collector, int order)
+        RenderType renderType, boolean flipY, SubmitNodeCollector output, int order)
     {
         float sizeX = size * 0.5F;
         float sizeY = sizeX * displayHeight / displayWidth;
 
         Vector3f normal = poseStack.last().transformNormal(0, 0, 1, new Vector3f());
 
-        collector.order(order++)
-            .submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+        RenderHelper.submitLateCustomGeometry(output.order(order++), poseStack, renderType,
+            (pose, consumer) -> {
                 consumer.addVertex(pose, -sizeX, -sizeY, 0)
                     .setColor(color[0], color[1], color[2], color[3])
                     .setUv(0.0F, flipY ? 1.0F : 0.0F)
@@ -425,8 +423,8 @@ public class RenderHelper {
         Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))
             .yRot(Mth.DEG_TO_RAD * -yaw);
 
-        output.order(order++)
-            .submitCustomGeometry(poseStack, VRRenderTypes.quads(depthAlways), (pose, consumer) -> {
+        RenderHelper.submitLateCustomGeometry(output.order(order++), poseStack, VRRenderTypes.quads(depthAlways),
+            (pose, consumer) -> {
                 consumer.addVertex(pose, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
                     .setColor(r, g, b, a);
                 consumer.addVertex(pose, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
@@ -548,9 +546,12 @@ public class RenderHelper {
             .setColor(color.getX(), color.getY(), color.getZ(), alpha);
     }
 
-    public static int getPipelineRenderOrder(RenderType renderType) {
-        return renderType.pipeline().getDepthStencilState() != null &&
-            renderType.pipeline().getDepthStencilState().depthTest() == CompareOp.ALWAYS_PASS ? ALWAYS_RENDER_ORDER : 0;
+    public static void submitLateCustomGeometry(
+        OrderedSubmitNodeCollector output, PoseStack poseStack, RenderType renderType,
+        SubmitNodeCollector.CustomGeometryRenderer customGeometryRenderer)
+    {
+        ((SubmitNodeCollectionExtension) output).vivecraft$submitLateCustomGeometry(poseStack, renderType,
+            customGeometryRenderer);
     }
 
     private static final Map<String, Pair<Integer, Integer>> GL_ERRORS = new HashMap<>();

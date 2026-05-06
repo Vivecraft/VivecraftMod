@@ -67,7 +67,8 @@ public class VRArmHelper {
 
         if (renderMain) {
             if (menuHandMain) {
-                order = renderMenuHand(output, vrState, cameraState, poseStack, 0, order);
+                /*order = */
+                renderMenuHand(output, vrState, cameraState, poseStack, 0, order);
             } else {
                 // hand submits can't be ordered
                 renderVRHand_Main(output, vrState, cameraState, poseStack);
@@ -76,7 +77,8 @@ public class VRArmHelper {
 
         if (renderOff) {
             if (menuHandOff) {
-                order = renderMenuHand(output, vrState, cameraState, poseStack, 1, order);
+                /*order = */
+                renderMenuHand(output, vrState, cameraState, poseStack, 1, order);
             } else {
                 order = renderVRHand_Offhand(output, vrState, cameraState, poseStack, true, order);
             }
@@ -120,10 +122,9 @@ public class VRArmHelper {
 
         RenderType renderType = VRRenderTypes.quads(false);
 
-        output.order(order++)
-            .submitCustomGeometry(poseStack, renderType,
-                (pose, consumer) -> RenderHelper.renderBox(consumer, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F,
-                    color, alpha, pose));
+        RenderHelper.submitLateCustomGeometry(output.order(order++), poseStack, renderType,
+            (pose, consumer) -> RenderHelper.renderBox(consumer, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F,
+                color, alpha, pose));
 
         poseStack.popPose();
         return order;
@@ -322,8 +323,8 @@ public class VRArmHelper {
             RenderType renderType = VRRenderTypes.quads(false);
 
             // arc
-            output.order(order++)
-                .submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+            RenderHelper.submitLateCustomGeometry(output.order(order++), poseStack, renderType,
+                (pose, consumer) -> {
                     for (TeleportRenderState.Segment segment : teleportState.segments) {
                         RenderHelper.renderBox(consumer,
                             segment.start().subtract(cameraState.pos.x, cameraState.pos.y, cameraState.pos.z),

@@ -37,6 +37,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.lwjgl.opengl.GL11C;
@@ -52,7 +53,6 @@ import org.vivecraft.client.utils.StencilHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -687,6 +687,7 @@ public class VREffectsHelper {
         renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack, order);
         // render stuff
         featureRenderDispatcher.renderAllFeatures();
+        MC.renderBuffers().bufferSource().endBatch();
 
         // switch to VR Occluded buffer, and copy main depth for occlusion
         LevelTargetBundleExtension extTargets = (LevelTargetBundleExtension) targets;
@@ -708,6 +709,7 @@ public class VREffectsHelper {
 
         // render stuff
         featureRenderDispatcher.renderAllFeatures();
+        MC.renderBuffers().bufferSource().endBatch();
 
         // switch to VR UnOccluded buffer, no depth copy
         RenderSystem.getDevice().createCommandEncoder()
@@ -733,6 +735,7 @@ public class VREffectsHelper {
 
         // render stuff
         featureRenderDispatcher.renderAllFeatures();
+        MC.renderBuffers().bufferSource().endBatch();
 
         // switch to VR hands buffer
         RenderSystem.getDevice().createCommandEncoder()
@@ -748,6 +751,7 @@ public class VREffectsHelper {
 
         // render stuff
         featureRenderDispatcher.renderAllFeatures();
+        MC.renderBuffers().bufferSource().endBatch();
 
         RenderSystem.outputColorTextureOverride = null;
         RenderSystem.outputDepthTextureOverride = null;
@@ -786,7 +790,8 @@ public class VREffectsHelper {
 
         order = renderVRSelfEffects(output, vrState, order);
 
-        order = renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, !vrState.occludeGui, true, order);
+        order = renderGuiAndShadow(output, levelState.cameraRenderState, vrState, poseStack, !vrState.occludeGui, true,
+            order);
 
         if (vrState.armsState.handsSecond) {
             order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
@@ -842,7 +847,8 @@ public class VREffectsHelper {
         }
 
         if (vrState.radialShowing) {
-            order = renderScreen(output, cameraState, vrState, vrState.radialState, RadialHandler.FRAMEBUFFER, depthAlways,
+            order = renderScreen(output, cameraState, vrState, vrState.radialState, RadialHandler.FRAMEBUFFER,
+                depthAlways,
                 true, poseStack, order);
         }
         return order;
@@ -930,8 +936,8 @@ public class VREffectsHelper {
             posestack.mulPose(Axis.YP.rotationDegrees(i * 90.0F - vrState.fireYaw));
             posestack.translate(0.0D, -vrState.fireHeight, 0.0D);
 
-            output.order(order++)
-                .submitCustomGeometry(posestack, renderType, (pose, consumer) -> {
+            RenderHelper.submitLateCustomGeometry(output.order(order++), posestack, renderType,
+                (pose, consumer) -> {
                     consumer.addVertex(pose, -width, 0.0F, -width)
                         .setUv(uMax, vMax).setColor(1.0F, 1.0F, 1.0F, 0.9F);
                     consumer.addVertex(pose, width, 0.0F, -width)
@@ -1078,7 +1084,7 @@ public class VREffectsHelper {
         if (!vrState.renderGui) return order;
 
         Profiler.get().push("GuiLayer");
-
+        Matrix4fStack mat = RenderSystem.getModelViewStack();
         order = renderScreen(output, cameraState, vrState, vrState.guiState, GuiHandler.GUI_FRAMEBUFFER, depthAlways,
             vrState.noHudFog, poseStack, order);
 
@@ -1092,37 +1098,41 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      */
     public static void renderFaceOverlay(
-        SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState)
+        SubmitNodeCollector output, FeatureRenderDispatcher featureRenderDispatcher, CameraRenderState cameraState,
+        VRRenderState vrState)
     {
         if (vrState.inBlock) {
             PoseStack poseStack = new PoseStack();
-            renderFaceInBlock(output, poseStack);
+            RenderSystem.backupProjectionMatrix();
+            RenderSystem.setProjectionMatrix(VRShaders.UNDISTORTED_PROJ_BUFFER, ProjectionType.PERSPECTIVE);
+            int order = renderFaceInBlock(output, poseStack, 0);
 
-            // because this runs after the gameRenderer, the ModelViewStack is reset
-            RenderSystem.getModelViewStack().pushMatrix().identity();
-            RenderHelper.applyVRModelView(vrState.currentPass, RenderSystem.getModelViewStack());
+            // because this runs after the gameRenderer, the ModelViewStack is reset, so use the posestack instead
+            RenderHelper.applyVRModelView(vrState.currentPass, poseStack.last().pose());
 
-            int order = renderGuiAndShadow(output, cameraState, vrState, poseStack, true, true, 0);
+            order = renderGuiAndShadow(output, cameraState, vrState, poseStack, true, true, order);
 
             order = VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true, order);
-
-            RenderSystem.getModelViewStack().popMatrix();
+            featureRenderDispatcher.renderAllFeatures();
+            MC.renderBuffers().bufferSource().endBatch();
+            RenderSystem.restoreProjectionMatrix();
         }
     }
 
     /**
      * renders a fullscreen black quad, to block the screen
      */
-    public static void renderFaceInBlock(SubmitNodeCollector output, PoseStack poseStack) {
+    public static int renderFaceInBlock(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderType renderType = VRRenderTypes.quads(true);
-        output.order(RenderHelper.getPipelineRenderOrder(renderType))
-            .submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+        RenderHelper.submitLateCustomGeometry(output.order(order++), poseStack, renderType,
+            (pose, consumer) -> {
                 // render a big quad 2 meters in front
                 consumer.addVertex(-100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
                 consumer.addVertex(100.F, -100.F, -2.0F).setColor(0, 0, 0, 255);
                 consumer.addVertex(100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
                 consumer.addVertex(-100.F, 100.F, -2.0F).setColor(0, 0, 0, 255);
             });
+        return order;
     }
 
     /**
@@ -1224,7 +1234,7 @@ public class VREffectsHelper {
         crosshairRenderState.scale = scale;
 
         crosshairRenderState.light = LevelRenderer.getLightCoords(player.level(),
-            BlockPos.containing(crosshairRenderPos));
+            BlockPos.containing(crosshairRenderState.pos));
 
         // white crosshair, with blending
         if (MC.hitResult == null || MC.hitResult.getType() == HitResult.Type.MISS) {
@@ -1264,31 +1274,32 @@ public class VREffectsHelper {
         int light = crosshairState.light;
         // after regular geometry when unoccluded
         order += (crosshairState.occlude ? 0 : 1);
-        output.order(order)
-            .submitCustomGeometry(poseStack,
-                VRRenderTypes.crosshairWorld(crosshairSprite.atlasLocation(), !crosshairState.occlude),
-                (pose, consumer) -> {
-                    consumer.addVertex(pose, -1.0F, 1.0F, 0.0F)
-                        .setColor(brightness, brightness, brightness, 1.0F)
-                        .setUv(crosshairSprite.getU1(), crosshairSprite.getV0())
-                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                        .setNormal(0.0F, 0.0F, 1.0F);
-                    consumer.addVertex(pose, 1.0F, 1.0F, 0.0F)
-                        .setColor(brightness, brightness, brightness, 1.0F)
-                        .setUv(crosshairSprite.getU0(), crosshairSprite.getV0())
-                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                        .setNormal(0.0F, 0.0F, 1.0F);
-                    consumer.addVertex(pose, 1.0F, -1.0F, 0.0F)
-                        .setColor(brightness, brightness, brightness, 1.0F)
-                        .setUv(crosshairSprite.getU0(), crosshairSprite.getV1())
-                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                        .setNormal(0.0F, 0.0F, 1.0F);
-                    consumer.addVertex(pose, -1.0F, -1.0F, 0.0F)
-                        .setColor(brightness, brightness, brightness, 1.0F)
-                        .setUv(crosshairSprite.getU1(), crosshairSprite.getV1())
-                        .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                        .setNormal(0.0F, 0.0F, 1.0F);
-                });
+
+        // not late, this should render before translucents
+        output.order(order).submitCustomGeometry(poseStack,
+            VRRenderTypes.crosshairWorld(crosshairSprite.atlasLocation(), !crosshairState.occlude),
+            (pose, consumer) -> {
+                consumer.addVertex(pose, -1.0F, 1.0F, 0.0F)
+                    .setColor(brightness, brightness, brightness, 1.0F)
+                    .setUv(crosshairSprite.getU1(), crosshairSprite.getV0())
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                    .setNormal(0.0F, 0.0F, 1.0F);
+                consumer.addVertex(pose, 1.0F, 1.0F, 0.0F)
+                    .setColor(brightness, brightness, brightness, 1.0F)
+                    .setUv(crosshairSprite.getU0(), crosshairSprite.getV0())
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                    .setNormal(0.0F, 0.0F, 1.0F);
+                consumer.addVertex(pose, 1.0F, -1.0F, 0.0F)
+                    .setColor(brightness, brightness, brightness, 1.0F)
+                    .setUv(crosshairSprite.getU0(), crosshairSprite.getV1())
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                    .setNormal(0.0F, 0.0F, 1.0F);
+                consumer.addVertex(pose, -1.0F, -1.0F, 0.0F)
+                    .setColor(brightness, brightness, brightness, 1.0F)
+                    .setUv(crosshairSprite.getU1(), crosshairSprite.getV1())
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                    .setNormal(0.0F, 0.0F, 1.0F);
+            });
 
         poseStack.popPose();
         Profiler.get().pop();

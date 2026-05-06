@@ -159,7 +159,7 @@ public abstract class GameRendererVRMixin
         if (!RenderPassType.isVanilla() && vrState.currentPass != RenderPass.THIRD &&
             vrState.currentPass != RenderPass.CAMERA)
         {
-            VREffectsHelper.renderFaceOverlay(this.submitNodeStorage,
+            VREffectsHelper.renderFaceOverlay(this.submitNodeStorage, this.featureRenderDispatcher,
                 this.gameRenderState.levelRenderState.cameraRenderState, vrState);
         }
     }

@@ -54,6 +54,9 @@ accessible field com/mojang/blaze3d/systems/GpuDevice backend Lcom/mojang/blaze3
 # to render vr hands
 accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
 
+# to render vr stuff after translucent terrain
+accessible field net/minecraft/client/renderer/feature/CustomFeatureRenderer$Storage translucentCustomGeometrySubmits Ljava/util/Map;
+
 # to render item activation outside of gamerenderer
 accessible method net/minecraft/client/renderer/ScreenEffectRenderer renderItemActivationAnimation (Lcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/client/renderer/SubmitNodeCollector;)V
 # to disable destroy delay, on roomscale hitting
