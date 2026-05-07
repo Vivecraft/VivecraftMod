@@ -62,9 +62,6 @@ public class VRArmHelper {
         // TODO 26.1 this will not work, is it still needed though?
         DATA_HOLDER.isFpHand = true;
 
-        // TODO 26.1
-        //VREffectsHelper.removeNausea(partialTick);
-
         if (renderMain) {
             if (menuHandMain) {
                 /*order = */
@@ -83,9 +80,6 @@ public class VRArmHelper {
                 order = renderVRHand_Offhand(output, vrState, cameraState, poseStack, true, order);
             }
         }
-
-        // TODO 26.1
-        //VREffectsHelper.reAddNausea();
 
         DATA_HOLDER.isFpHand = false;
         Profiler.get().pop();

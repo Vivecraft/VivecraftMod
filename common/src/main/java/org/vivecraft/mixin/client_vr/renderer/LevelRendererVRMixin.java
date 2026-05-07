@@ -51,6 +51,7 @@ import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
 import org.vivecraft.client_vr.gameplay.interact_modules.BlockInteractionModule;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
@@ -258,9 +259,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     {
         if (RenderPassType.isVanilla() || this.targets.translucent != null) return;
 
-        VREffectsHelper.renderVrFast(this.submitNodeStorage, levelRenderState, poseStack);
-        // TODO 26.1 figure out a way to render gui after the level
-        this.vivecraft$guiRendered = true;
+        VREffectsHelper.renderVrFast(this.submitNodeStorage, levelRenderState, poseStack, false);
     }
 
     @Inject(method = "lambda$addMainPass$0*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;renderTranslucentParticles()V"))
@@ -276,16 +275,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Inject(method = "renderLevel", at = @At("RETURN"))
     private void vivecraft$renderVrStuffFinal(CallbackInfo ci) {
         if (RenderPassType.isVanilla()) return;
+        VRRenderState vrState = ((LevelRenderStateExtension) this.levelRenderState).vivecraft$getVRRenderState();
 
-        if (!this.vivecraft$guiRendered && !Minecraft.useShaderTransparency()) {
+        if (vrState.uiAfterWorld) {
             // re set up modelView, since this is after everything got cleared
             RenderSystem.getModelViewStack().pushMatrix().identity();
-            RenderHelper.applyVRModelView(
-                ((LevelRenderStateExtension) this.levelRenderState).vivecraft$getVRRenderState().currentPass,
-                RenderSystem.getModelViewStack());
+            RenderHelper.applyVRModelView(vrState.currentPass, RenderSystem.getModelViewStack());
 
-            // TODO 26.1 UI only
-            VREffectsHelper.renderVrFast(this.submitNodeStorage, this.levelRenderState, new PoseStack());
+            VREffectsHelper.renderVrFast(this.submitNodeStorage, this.levelRenderState, new PoseStack(), true);
             // actuallyrender the stuff
             this.featureRenderDispatcher.renderAllFeatures();
             this.renderBuffers.bufferSource().endBatch();

@@ -23,20 +23,7 @@ public class VRRenderTypes {
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT_LINEAR = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_translucent_vr",
-            setGpuTextures(
-                RenderSetup.builder(depthAlways ? VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT :
-                        VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT)
-                    .useLightmap()
-                    .useOverlay()
-                    .affectsCrumbling()
-                    .sortOnUpload()
-                    .createRenderSetup(),
-                Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    VRShaders.getGuiSampler())))));
-
-    private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT_NO_FOG_LINEAR = Util.memoize(
-        (gpuTexture, depthAlways) -> RenderType.create("entity_translucent_no_fog_vr",
-            setFogOverride(
+            setUndistorted(
                 setGpuTextures(
                     RenderSetup.builder(depthAlways ? VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT :
                             VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT)
@@ -46,8 +33,23 @@ public class VRRenderTypes {
                         .sortOnUpload()
                         .createRenderSetup(),
                     Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                        VRShaders.getGuiSampler()))),
-                FogRenderer.FogMode.NONE)));
+                        VRShaders.getGuiSampler()))))));
+
+    private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT_NO_FOG_LINEAR = Util.memoize(
+        (gpuTexture, depthAlways) -> RenderType.create("entity_translucent_no_fog_vr",
+            setUndistorted(
+                setFogOverride(
+                    setGpuTextures(
+                        RenderSetup.builder(depthAlways ? VRShaders.ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT :
+                                VRShaders.ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT)
+                            .useLightmap()
+                            .useOverlay()
+                            .affectsCrumbling()
+                            .sortOnUpload()
+                            .createRenderSetup(),
+                        Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
+                            VRShaders.getGuiSampler()))),
+                    FogRenderer.FogMode.NONE))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_SOLID_NO_CARDINAL_LIGHT = Util.memoize(
         (gpuTexture, linear) -> RenderType.create("entity_solid_vr",
@@ -88,15 +90,16 @@ public class VRRenderTypes {
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> GUI_TEXTURED_VIEW = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("gui_textured_always_vr",
-            setGpuTextures(
-                RenderSetup.builder(depthAlways ? VRShaders.GUI_TEXTURED_ALWAYS : VRShaders.GUI_TEXTURED)
-                    .createRenderSetup(),
-                Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    VRShaders.getGuiSampler())))));
+            setUndistorted(
+                setGpuTextures(
+                    RenderSetup.builder(depthAlways ? VRShaders.GUI_TEXTURED_ALWAYS : VRShaders.GUI_TEXTURED)
+                        .createRenderSetup(),
+                    Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
+                        VRShaders.getGuiSampler()))))));
 
-    private static final Function<Identifier, RenderType> GUI_TEXTURED = Util.memoize(
-        identifier -> RenderType.create("gui_textured_vr",
-            RenderSetup.builder(VRShaders.GUI_TEXTURED)
+    private static final BiFunction<Identifier, Boolean, RenderType> GUI_TEXTURED = Util.memoize(
+        (identifier, depthAlways) -> RenderType.create("gui_textured_vr",
+            RenderSetup.builder(depthAlways ? VRShaders.GUI_TEXTURED_ALWAYS : VRShaders.GUI_TEXTURED)
                 .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, identifier)
                 .createRenderSetup()));
 
@@ -121,14 +124,16 @@ public class VRRenderTypes {
                 .createRenderSetup()));
 
     private static final RenderType QUADS = RenderType.create("quads_vr",
-        RenderSetup.builder(VRShaders.QUADS)
-            .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
-            .createRenderSetup());
+        setUndistorted(
+            RenderSetup.builder(VRShaders.QUADS)
+                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
+                .createRenderSetup()));
 
     private static final RenderType QUADS_ALWAYS = RenderType.create("quads_always_vr",
-        RenderSetup.builder(VRShaders.QUADS_ALWAYS)
-            .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
-            .createRenderSetup());
+        setUndistorted(
+            RenderSetup.builder(VRShaders.QUADS_ALWAYS)
+                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
+                .createRenderSetup()));
 
     private static final RenderType TRIANGLES_ALWAYS = RenderType.create("triangles_always_vr",
         RenderSetup.builder(VRShaders.TRIANGLES_ALWAYS)
@@ -225,7 +230,11 @@ public class VRRenderTypes {
     }
 
     public static RenderType guiTextured(Identifier identifier) {
-        return GUI_TEXTURED.apply(identifier);
+        return guiTextured(identifier, false);
+    }
+
+    public static RenderType guiTextured(Identifier identifier, boolean depthAlways) {
+        return GUI_TEXTURED.apply(identifier, depthAlways);
     }
 
     public static RenderType guiTextured(GpuTextureView texture, boolean depthAlways) {

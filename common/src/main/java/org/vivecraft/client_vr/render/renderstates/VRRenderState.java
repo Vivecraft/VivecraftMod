@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.LightCoordsUtil;
@@ -14,6 +16,8 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2f;
 import org.vivecraft.Xevents;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.ClientVRPlayers;
+import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -45,6 +49,8 @@ public class VRRenderState {
     public boolean inWater;
     public boolean inBlock;
 
+    public Vec3 headPos;
+
     // first person fire
     public boolean firstPersonFire;
     public float fireHeight;
@@ -65,7 +71,11 @@ public class VRRenderState {
 
     // uis
     public boolean occludeGui;
-    public float guiOpacity;
+    public float uiOpacity;
+    public UiMode uiRenderMode = UiMode.MENU;
+    public boolean uiAfterWorld;
+    public float uiWidth;
+    public float uiHeight;
     public boolean noHudFog;
 
     public Keyboard keyboardType = Keyboard.NONE;
@@ -85,15 +95,10 @@ public class VRRenderState {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
         VRData worldData = dataHolder.vrPlayer.getVRDataWorld();
-        Vec3 headPos = worldData.hmd.getPosition();
 
         this.currentPass = dataHolder.currentPass;
 
-        this.worldScale = worldData.worldScale;
-
         this.inMenuRoom = MethodHolder.isInMenuRoom();
-
-        this.partialTick = partialTick;
 
         // overlay status
         this.inBlock = false;
@@ -113,6 +118,10 @@ public class VRRenderState {
 
         // everything after tzhis just needs to be done once per frame
         if (!dataHolder.isFirstPass) return;
+
+        this.partialTick = partialTick;
+        this.worldScale = worldData.worldScale;
+        this.headPos = worldData.hmd.getPosition();
 
         // first person effects
         this.firstPersonFire = player != null && !player.isSpectator() && player.isOnFire() &&
@@ -157,21 +166,54 @@ public class VRRenderState {
         }
 
         // hands
-        this.armsState.extract(player, headPos);
+        this.armsState.extract(player, this.headPos);
         this.teleportState.extract(player);
 
         // HUDs
         this.occludeGui = VREffectsHelper.shouldOccludeGui();
-        this.guiOpacity = 1F;
+        this.uiOpacity = 1F;
+        this.uiAfterWorld = ShadersHelper.isShaderActive() &&
+            dataHolder.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_SHADER;
+        if (mc.level == null) {
+            this.uiRenderMode = UiMode.MENU;
+        } else if (!ShadersHelper.isShaderActive() ||
+            dataHolder.vrSettings.shaderGUIRender != VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID)
+        {
+            this.uiRenderMode = UiMode.TRANSLUCENT;
+        } else {
+            this.uiRenderMode = UiMode.CUTOUT;
+        }
+
+        this.uiWidth = mc.getWindow().getGuiScaledWidth();
+        this.uiHeight = mc.getWindow().getGuiScaledHeight();
+
         if (!this.inMenuRoom) {
             if (mc.screen == null) {
-                this.guiOpacity = dataHolder.vrSettings.hudOpacity;
+                this.uiOpacity = dataHolder.vrSettings.hudOpacity;
             }
             if (player != null && player.isShiftKeyDown()) {
-                this.guiOpacity *= 0.75F;
+                this.uiOpacity *= 0.75F;
             }
         }
         this.noHudFog = !this.inMenuRoom && mc.screen != null;
+
+        // check if the main player renders, we need the arm position for the gui if it exists
+        // this is a stupid workaround to get the position before the player actually renders
+        for(EntityRenderState entityState : mc.gameRenderer.getGameRenderState().levelRenderState.entityRenderStates) {
+            if (entityState instanceof AvatarRenderState avatarState) {
+                ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) entityState).vivecraft$getRotInfo();
+                if (rotInfo != null && ((EntityRenderStateExtension) entityState).vivecraft$isFirstPersonPlayer()) {
+                    // this is the main player
+                    mc.getEntityRenderDispatcher().submit(avatarState,
+                        mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState,
+                        avatarState.x - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.x,
+                        avatarState.y - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.y,
+                        avatarState.z - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.z,
+                        new PoseStack(), mc.gameRenderer.getSubmitNodeStorage());
+                    mc.gameRenderer.getSubmitNodeStorage().clear();
+                }
+            }
+        }
 
         // gui render position first, that also sets up the scale
         GuiHandler.extractGui(this.guiState);
@@ -211,7 +253,7 @@ public class VRRenderState {
         if (player != null && !this.inMenuRoom) {
             int minLight = ShadersHelper.ShaderLight();
             int headLightCoords = ClientUtils.getCombinedLightWithMin((ClientLevel) player.level(),
-                BlockPos.containing(headPos), minLight);
+                BlockPos.containing(this.headPos), minLight);
 
             // assign the head brighness if either the head or the ui is in a block
             this.guiState.lightCoords =
@@ -240,5 +282,11 @@ public class VRRenderState {
         NONE,
         PHYSICAL,
         POINTER
+    }
+
+    public enum UiMode {
+        MENU,
+        CUTOUT,
+        TRANSLUCENT
     }
 }
