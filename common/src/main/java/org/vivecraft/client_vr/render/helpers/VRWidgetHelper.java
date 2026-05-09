@@ -38,8 +38,9 @@ public class VRWidgetHelper {
     /**
      * renders the third person camcorder
      *
-     * @param output     SubmitNodeCollector to submit the rendercall to
-     * @param widgeetStat camera widget renderstate to use for rendering
+     * @param output      SubmitNodeCollector to submit the rendercall to
+     * @param cameraState camera view renderstate to get the camera position
+     * @param widgetState camera widget renderstate to use for rendering
      */
     public static void renderVRThirdPersonCamWidget(
         SubmitNodeCollector output, CameraRenderState cameraState, CameraWidgetRenderState widgetState,
@@ -60,7 +61,8 @@ public class VRWidgetHelper {
     /**
      * renders the screenshot camera
      *
-     * @param output     SubmitNodeCollector to submit the rendercall to
+     * @param output      SubmitNodeCollector to submit the rendercall to
+     * @param cameraState camera view renderstate to get the camera position
      * @param widgetState camera widget renderstate to use for rendering
      */
     public static void renderVRHandheldCameraWidget(
@@ -86,6 +88,7 @@ public class VRWidgetHelper {
      * extracts the third person camcorder
      *
      * @param cameraState renderstate to write into
+     * @param player      to get the current level for lighting
      */
     public static void extractVRThirdPersonCamWidget(
         CameraWidgetRenderState cameraState, @Nullable LocalPlayer player)
@@ -114,6 +117,7 @@ public class VRWidgetHelper {
      * extracts the screenshot camera
      *
      * @param cameraState renderstate to write into
+     * @param player      to get the current level for lighting
      */
     public static void extractVRHandheldCameraWidget(
         CameraWidgetRenderState cameraState, @Nullable LocalPlayer player)
@@ -143,6 +147,7 @@ public class VRWidgetHelper {
      * @param model        camera model to render
      * @param displayModel model of the display that shows the camera view
      * @param widgetState  widget render state to store data in
+     * @param player       to get the current level for lighting
      */
     private static void extractVRCameraWidget(
         float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, Identifier model,

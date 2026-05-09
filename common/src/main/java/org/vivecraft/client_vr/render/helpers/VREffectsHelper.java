@@ -277,7 +277,10 @@ public class VREffectsHelper {
     /**
      * renders a 100^3 cubemap and a dirt/grass floor
      *
-     * @param poseStac Matrix4fStack to use for positioning
+     * @param output    SubmitNodeCollector to output to
+     * @param poseStack PoseStack to use for positioning
+     * @param order     order to render at
+     * @return order to render the next thing at
      */
     public static int renderMenuPanorama(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
@@ -419,7 +422,10 @@ public class VREffectsHelper {
     /**
      * renders a dirt cube, slightly bigger than the room size
      *
-     * @param poseStac Matrix4fStack to use for positioning
+     * @param output    SubmitNodeCollector to output to
+     * @param poseStack PoseStack to use for positioning
+     * @param order     order to render at
+     * @return order to render the next thing at
      */
     public static int renderJrbuddasAwesomeMainMenuRoomNew(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
@@ -516,7 +522,10 @@ public class VREffectsHelper {
     /**
      * renders the loaded menuworld and a room floor quad
      *
-     * @param poseStac Matrix4fStack to use for positioning
+     * @param output    SubmitNodeCollector to output to
+     * @param poseStack PoseStack to use for positioning
+     * @param order     order to render at
+     * @return order to render the next thing at
      */
     public static int renderTechjarsAwesomeMainMenuRoom(SubmitNodeCollector output, PoseStack poseStack, int order) {
         // transfer the rotation
@@ -586,6 +595,13 @@ public class VREffectsHelper {
         return order;
     }
 
+    /**
+     * renders the menu environment, aswell as hands, screen and keyboard
+     *
+     * @param featureRenderer FeatureRenderDispatcher to render with
+     * @param output          SubmitNodeCollector to out put to
+     * @param levelState      level state to get the camera state from
+     */
     public static void renderMenuRoom(
         FeatureRenderDispatcher featureRenderer, SubmitNodeCollector output, LevelRenderState levelState)
     {
@@ -630,6 +646,16 @@ public class VREffectsHelper {
         RenderSystem.restoreProjectionMatrix();
     }
 
+    /**
+     * renders the current menu environment
+     *
+     * @param output      SubmitNodeCollector to output to
+     * @param cameraState sate of the camera for the position
+     * @param poseStack   PoseStack to use for positioning
+     * @param order       order to render at
+     * @return order to render the next thing at
+     */
+
     public static int renderMenuEnvironment(
         SubmitNodeCollector output, CameraRenderState cameraState, PoseStack poseStack, int order)
     {
@@ -666,11 +692,14 @@ public class VREffectsHelper {
      * renders the vivecraft stuff into separate buffers for the fabulous settings
      * this includes hands, vr shadow, gui, camera widgets and other stuff
      *
-     * @param partialTick current partial tick
-     * @param targets     RenderTarget bundle that holds the framebuffers for rendering
+     * @param featureRender FeatureRenderDispatcher to render with
+     * @param output        SubmitNodeCollector to output to
+     * @param levelState    LevelRenderState to getthe vr renderstate and camera state from
+     * @param poseStack     PoseStack to use for positioning
+     * @param targets       RenderTarget bundle that holds the framebuffers for rendering
      */
     public static void renderVRFabulous(
-        FeatureRenderDispatcher featureRenderDispatcher, SubmitNodeCollector output, LevelRenderState levelState,
+        FeatureRenderDispatcher featureRender, SubmitNodeCollector output, LevelRenderState levelState,
         PoseStack poseStack, LevelTargetBundle targets)
     {
         VRRenderState vrState = ((LevelRenderStateExtension) levelState).vivecraft$getVRRenderState();
@@ -684,7 +713,7 @@ public class VREffectsHelper {
         Profiler.get().push("VR");
         renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack, order);
         // render stuff
-        featureRenderDispatcher.renderAllFeatures();
+        featureRender.renderAllFeatures();
         MC.renderBuffers().bufferSource().endBatch();
 
         // switch to VR Occluded buffer, and copy main depth for occlusion
@@ -706,7 +735,7 @@ public class VREffectsHelper {
         }
 
         // render stuff
-        featureRenderDispatcher.renderAllFeatures();
+        featureRender.renderAllFeatures();
         MC.renderBuffers().bufferSource().endBatch();
 
         // switch to VR UnOccluded buffer, no depth copy
@@ -734,7 +763,7 @@ public class VREffectsHelper {
         }
 
         // render stuff
-        featureRenderDispatcher.renderAllFeatures();
+        featureRender.renderAllFeatures();
         MC.renderBuffers().bufferSource().endBatch();
 
         // switch to VR hands buffer
@@ -750,7 +779,7 @@ public class VREffectsHelper {
             vrState.armsState.renderHands && !vrState.armsState.menuHandOff, false, false, order);
 
         // render stuff
-        featureRenderDispatcher.renderAllFeatures();
+        featureRender.renderAllFeatures();
         MC.renderBuffers().bufferSource().endBatch();
 
         RenderSystem.outputColorTextureOverride = null;
@@ -763,7 +792,10 @@ public class VREffectsHelper {
      * one before and one after translucents.
      * this includes hands, vr shadow, gui, camera widgets and other stuff
      *
-     * @param partialTick current partial tick
+     * @param output         SubmitNodeCollector to output to
+     * @param levelState     LevelRenderState to getthe vr renderstate and camera state from
+     * @param poseStack      PoseStack to use for positioning
+     * @param secondPassOnly if true, only renders the screen and hands
      */
     public static void renderVrFast(
         SubmitNodeCollector output, LevelRenderState levelState, PoseStack poseStack, boolean secondPassOnly)
@@ -828,9 +860,14 @@ public class VREffectsHelper {
     /**
      * renders the guis (current screen/hud, radial and keyboard) and player shadow in the correct order
      *
-     * @param partialTick current partial tick
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR render state
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
      * @param depthAlways if the depth test should be disabled
      * @param shadowFirst if the player shadow should be rendered first
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     private static int renderGuiAndShadow(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
@@ -866,8 +903,13 @@ public class VREffectsHelper {
     /**
      * renders the player position indicator
      *
-     * @param partialTick current partial tick
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR render state
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
      * @param depthAlways if the depth test should be disabled
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     public static int renderVrShadow(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
@@ -890,7 +932,12 @@ public class VREffectsHelper {
     /**
      * renders effects around the player, includes burning animation and totem of undying
      *
-     * @param partialTick current partial tick
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR render state
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     private static int renderVRSelfEffects(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
@@ -912,6 +959,13 @@ public class VREffectsHelper {
 
     /**
      * renders the fire when the player is burning
+     *
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR render state
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     public static int renderFireInFirstPerson(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
@@ -971,7 +1025,12 @@ public class VREffectsHelper {
     /**
      * renders the physical touch keyboard
      *
-     * @param partialTick current partial tick
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR render state
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     public static int renderPhysicalKeyboard(
         SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack,
@@ -1053,8 +1112,13 @@ public class VREffectsHelper {
     /**
      * renders the GUI/HUD buffer into the world
      *
-     * @param partialTick current partial tick
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR render state
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
      * @param depthAlways if the depth test should be disabled
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     public static int renderGuiLayer(
         SubmitNodeCollector output, CameraRenderState cameraState, VRRenderState vrState, PoseStack poseStack,
@@ -1073,7 +1137,9 @@ public class VREffectsHelper {
     /**
      * if the face is inside a block, this renders a black square, and rerenders the gui and hands
      *
-     * @param partialTick current partial tick
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR render state
+     * @param cameraState camera render state for the position
      */
     public static void renderFaceOverlay(
         SubmitNodeCollector output, FeatureRenderDispatcher featureRenderDispatcher, CameraRenderState cameraState,
@@ -1099,6 +1165,11 @@ public class VREffectsHelper {
 
     /**
      * renders a fullscreen black quad, to block the screen
+     *
+     * @param output    SubmitNodeCollector to output to
+     * @param poseStack PoseStack to use for positioning
+     * @param order     order to render at
+     * @return order to render the next thing at
      */
     public static int renderFaceInBlock(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderType renderType = VRRenderTypes.quads(true);
@@ -1227,8 +1298,12 @@ public class VREffectsHelper {
     /**
      * renders the crosshair
      *
-     * @param output         SubmitNodeCollector to submit the rendercall to
+     * @param output         SubmitNodeCollector to output to
+     * @param cameraState    camera render state for the position
+     * @param poseStack      PoseStack to use for positioning
      * @param crosshairState crosshair renderstate to use for rendering
+     * @param order          order to render at
+     * @return order to render the next thing at
      */
     public static int renderCrosshairAtDepth(
         SubmitNodeCollector output, CrosshairRenderState crosshairState, CameraRenderState cameraState,

@@ -47,11 +47,15 @@ public class VRArmHelper {
     /**
      * renders the VR hands
      *
+     * @param output       SubmitNodeCollector to output to
      * @param vrState      VR renderstate
+     * @param cameraState  camera render state for the position
      * @param renderMain   if the main hand should be rendered
      * @param renderOff    if the offhand should be rendered
      * @param menuHandMain if the right hand should render as the menu hand
      * @param menuHandOff  if the left hand should render as the menu hand
+     * @param order        order to render at
+     * @return order to render the next thing at
      */
     public static int renderVRHands(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
@@ -86,9 +90,13 @@ public class VRArmHelper {
     /**
      * renders a menu hand for the specified controller, which is a gray box
      *
+     * @param output      SubmitNodeCollector to output to
      * @param vrState     VR renderstate
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
      * @param c           controller to render the hand for
-     * @param depthAlways if depth testing should be disabled for rendering
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     public static int renderMenuHand(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack, int c,
@@ -143,7 +151,10 @@ public class VRArmHelper {
     /**
      * renders the main minecraft hand
      *
-     * @param partialTick current partial tick
+     * @param output      SubmitNodeCollector to output to
+     * @param vrState     VR renderstate
+     * @param cameraState camera render state for the position
+     * @param poseStack   PoseStack to use for positioning
      */
     public static void renderVRHand_Main(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack)
@@ -177,8 +188,13 @@ public class VRArmHelper {
     /**
      * renders the offhand minecraft hand
      *
-     * @param partialTick    current partial tick
+     * @param output         SubmitNodeCollector to output to
+     * @param vrState        VR renderstate
+     * @param cameraState    camera render state for the position
+     * @param poseStack      PoseStack to use for positioning
      * @param renderTeleport if the teleport arc should be rendered
+     * @param order          order to render at
+     * @return order to render the next thing at
      */
     public static int renderVRHand_Offhand(
         SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
@@ -297,7 +313,12 @@ public class VRArmHelper {
     /**
      * renders the teleport arc
      *
-     * @param matrix Matrix4f for positioning
+     * @param output        SubmitNodeCollector to output to
+     * @param cameraState   camera render state for the position
+     * @param teleportState teleport render state
+     * @param poseStack     PoseStack to use for positioning
+     * @param order         order to render at
+     * @return order to render the next thing at
      */
     public static int renderTeleportArc(
         SubmitNodeCollector output, CameraRenderState cameraState, TeleportRenderState teleportState,

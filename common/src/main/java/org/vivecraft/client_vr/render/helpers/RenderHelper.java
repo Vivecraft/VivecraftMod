@@ -281,7 +281,10 @@ public class RenderHelper {
      * @param color         color of the quad, expects an array of length 4 for: r, g, b, a
      * @param poseStack     PoseStack to position the screen with
      * @param source        TenderTarget to render
-     * @param collector     SubmitNodeCollector to submit drawcalls to
+     * @param depthAlways   if the quad should use depth testing or not
+     * @param output        SubmitNodeCollector to output to
+     * @param order         order to render at
+     * @return order to render the next thing at
      */
     public static int drawSizedQuad(
         float displayWidth, float displayHeight, float size, float[] color, PoseStack poseStack, RenderTarget source,
@@ -324,14 +327,16 @@ public class RenderHelper {
      * @param poseStack     PoseStack to use to
      * @param renderType    entity RenderType to use
      * @param flipY         if the texture should be flipped vertically
-     * @param collector     SubmitNodeCollector to submit drawcalls to
+     * @param output        SubmitNodeCollector to output to
+     * @param order         order to render at
+     * @return order to render the next thing at
      */
     public static int submitSizedQuadWithLightmap(
         float displayWidth, float displayHeight, float size, int packedLight, PoseStack poseStack,
-        RenderType renderType, boolean flipY, SubmitNodeCollector collector, int order)
+        RenderType renderType, boolean flipY, SubmitNodeCollector output, int order)
     {
         return submitSizedQuadWithLightmap(displayWidth, displayHeight, size, packedLight, new float[]{1, 1, 1, 1},
-            poseStack, renderType, flipY, collector, order);
+            poseStack, renderType, flipY, output, order);
     }
 
     /**
@@ -343,14 +348,16 @@ public class RenderHelper {
      * @param color         color of the quad, expects an array of length 4 for: r, g, b, a
      * @param poseStack     PoseStack to use to
      * @param renderType    entity RenderType to use
-     * @param collector     SubmitNodeCollector to submit drawcalls to
+     * @param output        SubmitNodeCollector to output to
+     * @param order         order to render at
+     * @return order to render the next thing at
      */
     public static int submitSizedQuadFullbright(
         float displayWidth, float displayHeight, float size, float[] color, PoseStack poseStack, RenderType renderType,
-        SubmitNodeCollector collector, int order)
+        SubmitNodeCollector output, int order)
     {
         return submitSizedQuadWithLightmap(displayWidth, displayHeight, size, LightCoordsUtil.FULL_BRIGHT, color,
-            poseStack, renderType, false, collector, order);
+            poseStack, renderType, false, output, order);
     }
 
     /**
@@ -364,7 +371,9 @@ public class RenderHelper {
      * @param poseStack     PoseStack to use to for positioning
      * @param renderType    RenderType to render as, needs to be one of the entity types
      * @param flipY         if the texture should be flipped vertically
-     * @param collector     SubmitNodeCollector to submit drawcalls to
+     * @param output        SubmitNodeCollector to output to
+     * @param order         order to render at
+     * @return order to render the next thing at
      */
     public static int submitSizedQuadWithLightmap(
         float displayWidth, float displayHeight, float size, int packedLight, float[] color, PoseStack poseStack,
@@ -414,7 +423,9 @@ public class RenderHelper {
      * @param a           alpha 0-255
      * @param poseStack   PoseStack to use for positioning
      * @param depthAlways ignores depth and always draws
-     * @param output      SubmitNodeCollector to submit drawcalls to
+     * @param output      SubmitNodeCollector to output to
+     * @param order       order to render at
+     * @return order to render the next thing at
      */
     public static int renderFlatQuad(
         Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, PoseStack poseStack,
@@ -447,7 +458,7 @@ public class RenderHelper {
      * @param ySize    Y size of the box
      * @param color    color of the box 0-255 per component
      * @param alpha    transparency of the box 0-255
-     * @param matrix   Matrix4f to use for positioning
+     * @param pose     Pose to use for positioning
      */
     public static void renderBox(
         VertexConsumer consumer, Vec3 start, Vec3 end, float xSize, float ySize, Vec3i color, byte alpha,
@@ -546,6 +557,14 @@ public class RenderHelper {
             .setColor(color.getX(), color.getY(), color.getZ(), alpha);
     }
 
+    /**
+     * adds the given CustomGeometryRenderer to render after Translucnets
+     *
+     * @param output                 order to render at
+     * @param poseStack              PoseStack to use for the submit
+     * @param renderType             rendertype to submit as
+     * @param customGeometryRenderer renderer to add
+     */
     public static void submitLateCustomGeometry(
         OrderedSubmitNodeCollector output, PoseStack poseStack, RenderType renderType,
         SubmitNodeCollector.CustomGeometryRenderer customGeometryRenderer)
