@@ -857,7 +857,7 @@ public class MenuWorldRenderer {
 
             int skyColor = this.getSkyColor();
 
-            // TODO 26.1 optiofine
+            // TODO 26.1 optifine
             /*
             if (OptifineHelper.isOptifineLoaded()) {
                 skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.blockAccess, position.x, position.y,

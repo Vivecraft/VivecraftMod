@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
@@ -14,10 +15,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -26,7 +23,6 @@ import org.vivecraft.client_vr.render.renderstates.CameraWidgetRenderState;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.utils.MathUtils;
 
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -42,12 +38,15 @@ public class VRWidgetHelper {
     /**
      * renders the third person camcorder
      *
-     * @param output      SubmitNodeCollector to submit the rendercall to
-     * @param cameraState camera widget renderstate to use for rendering
+     * @param output     SubmitNodeCollector to submit the rendercall to
+     * @param widgeetStat camera widget renderstate to use for rendering
      */
-    public static void renderVRThirdPersonCamWidget(SubmitNodeCollector output, CameraWidgetRenderState cameraState) {
-        if (cameraState.visible) {
-            renderVRCameraWidget(output, cameraState,
+    public static void renderVRThirdPersonCamWidget(
+        SubmitNodeCollector output, CameraRenderState cameraState, CameraWidgetRenderState widgetState,
+        PoseStack poseStack)
+    {
+        if (widgetState.visible) {
+            renderVRCameraWidget(output, cameraState, widgetState, poseStack,
                 () -> DATA_HOLDER.vrRenderer.framebufferMR.getColorTextureView(), (face) -> {
                     if (face == Direction.NORTH) {
                         return DisplayFace.MIRROR;
@@ -61,12 +60,15 @@ public class VRWidgetHelper {
     /**
      * renders the screenshot camera
      *
-     * @param output      SubmitNodeCollector to submit the rendercall to
-     * @param cameraState camera widget renderstate to use for rendering
+     * @param output     SubmitNodeCollector to submit the rendercall to
+     * @param widgetState camera widget renderstate to use for rendering
      */
-    public static void renderVRHandheldCameraWidget(SubmitNodeCollector output, CameraWidgetRenderState cameraState) {
-        if (cameraState.visible) {
-            renderVRCameraWidget(output, cameraState,
+    public static void renderVRHandheldCameraWidget(
+        SubmitNodeCollector output, CameraRenderState cameraState, CameraWidgetRenderState widgetState,
+        PoseStack poseStack)
+    {
+        if (widgetState.visible) {
+            renderVRCameraWidget(output, cameraState, widgetState, poseStack,
                 () -> {
                     if (VREffectsHelper.getNearOpaqueBlock(
                         DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(),
@@ -140,52 +142,43 @@ public class VRWidgetHelper {
      * @param renderPass   RenderPass this camera shows, the camera will be placed there
      * @param model        camera model to render
      * @param displayModel model of the display that shows the camera view
-     * @param cameraState  widget render state to store data in
+     * @param widgetState  widget render state to store data in
      */
     private static void extractVRCameraWidget(
         float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, Identifier model,
-        Identifier displayModel, CameraWidgetRenderState cameraState, @Nullable LocalPlayer player)
+        Identifier displayModel, CameraWidgetRenderState widgetState, @Nullable LocalPlayer player)
     {
 
-        PoseStack poseStack = cameraState.poseStack;
-        poseStack.setIdentity();
-
         // model position relative to the view position
-        Vec3 widgetPosition = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
-        Vec3 eye = MC.gameRenderer.getMainCamera().position();
-        Vector3f widgetOffset = MathUtils.subtractToVector3f(widgetPosition, eye);
+        widgetState.pos = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
 
         // orient and scale model
-        poseStack.translate(widgetOffset.x, widgetOffset.y, widgetOffset.z);
-
-        Matrix4f rotation = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix();
-        poseStack.last().pose().mul(rotation);
-        poseStack.last().normal().mul(new Matrix3f(rotation));
+        widgetState.modelMatrix.set(DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix());
 
         scale = scale * DATA_HOLDER.vrPlayer.vrdata_world_render.worldScale;
-        poseStack.scale(scale, scale, scale);
+        widgetState.modelMatrix.scale(scale, scale, scale);
 
         // show orientation
         if (DEBUG) {
-            DebugRenderHelper.renderLocalAxes(poseStack.last().pose());
+            DebugRenderHelper.renderLocalAxes(widgetState.pos, widgetState.modelMatrix);
         }
 
         // apply model offset
-        poseStack.translate(offsetX + 0.5F, offsetY + 0.5F, offsetZ + 0.5F);
+        widgetState.modelMatrix.translate(offsetX + 0.5F, offsetY + 0.5F, offsetZ + 0.5F);
 
         // lighting for the model
-        cameraState.combinedLight = player == null ? LightCoordsUtil.FULL_BRIGHT :
+        widgetState.combinedLight = player == null ? LightCoordsUtil.FULL_BRIGHT :
             ClientUtils.getCombinedLightWithMin((ClientLevel) player.level(),
                 BlockPos.containing(DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition()), 0);
 
-        cameraState.cameraModelState.clear();
+        widgetState.cameraModelState.clear();
         MC.getModelManager().getItemModel(model)
-            .update(cameraState.cameraModelState, ItemStack.EMPTY, MC.getItemModelResolver(), ItemDisplayContext.GROUND,
+            .update(widgetState.cameraModelState, ItemStack.EMPTY, MC.getItemModelResolver(), ItemDisplayContext.GROUND,
                 null, null, 0);
 
-        cameraState.displayModelState.clear();
+        widgetState.displayModelState.clear();
         MC.getModelManager().getItemModel(displayModel)
-            .update(cameraState.displayModelState, ItemStack.EMPTY, MC.getItemModelResolver(),
+            .update(widgetState.displayModelState, ItemStack.EMPTY, MC.getItemModelResolver(),
                 ItemDisplayContext.GROUND, null, null, 0);
     }
 
@@ -193,30 +186,37 @@ public class VRWidgetHelper {
      * redners a camera model with screen
      *
      * @param output          SubmitNodeCollector to submit the rendercall to
-     * @param cameraState     camera widget renderstate to use for rendering
+     * @param widgetState     camera widget renderstate to use for rendering
      * @param displaySupFunc  function that supplies the camera buffer, or something else
      * @param displayFaceFunc function that specifies if the view should be mirrored, normal or not shown at all
      */
     private static void renderVRCameraWidget(
-        SubmitNodeCollector output, CameraWidgetRenderState cameraState,
-        Supplier<GpuTextureView> displaySupFunc, Function<Direction, DisplayFace> displayFaceFunc)
+        SubmitNodeCollector output, CameraRenderState cameraState, CameraWidgetRenderState widgetState,
+        PoseStack poseStack, Supplier<GpuTextureView> displaySupFunc, Function<Direction, DisplayFace> displayFaceFunc)
     {
+        poseStack.pushPose();
+        poseStack.translate(
+            widgetState.pos.x - cameraState.pos.x,
+            widgetState.pos.y - cameraState.pos.y,
+            widgetState.pos.z - cameraState.pos.z
+        );
+        poseStack.mulPose(widgetState.modelMatrix);
 
         // render camera model
-        if (!cameraState.cameraModelState.isEmpty()) {
-            cameraState.cameraModelState.submit(cameraState.poseStack, output, cameraState.combinedLight,
+        if (!widgetState.cameraModelState.isEmpty()) {
+            widgetState.cameraModelState.submit(poseStack, output, widgetState.combinedLight,
                 OverlayTexture.NO_OVERLAY, 0);
         }
 
         // render camera display
-        if (!cameraState.displayModelState.isEmpty() &&
-            !cameraState.displayModelState.layers[0].prepareQuadList().isEmpty())
+        if (!widgetState.displayModelState.isEmpty() &&
+            !widgetState.displayModelState.layers[0].prepareQuadList().isEmpty())
         {
-            output.submitCustomGeometry(cameraState.poseStack,
+            output.submitCustomGeometry(poseStack,
                 VRRenderTypes.entitySolidNoCardinalLight(displaySupFunc.get(), true),
                 (pose, consumer) -> {
                     // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen
-                    for (BakedQuad bakedquad : cameraState.displayModelState.layers[0].prepareQuadList()) {
+                    for (BakedQuad bakedquad : widgetState.displayModelState.layers[0].prepareQuadList()) {
                         if (displayFaceFunc.apply(bakedquad.direction()) != DisplayFace.NONE &&
                             bakedquad.materialInfo().sprite().contents().name().equals(TRANSPARENT_TEXTURE))
                         {
@@ -265,6 +265,7 @@ public class VRWidgetHelper {
                     }
                 });
         }
+        poseStack.popPose();
     }
 
     public enum DisplayFace {

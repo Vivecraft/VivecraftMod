@@ -79,9 +79,8 @@ public class ScreenshotCameraModule implements DebugRenderModule, HeldInteractMo
         if (this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode() && this.camPos != null) {
             VRData world = this.dh.vrPlayer.getVRDataWorld();
             // no origin offset, since the camera is world relative
-            DebugRenderHelper.renderSphere(
-                MathUtils.subtractToVector3f(this.camPos, world.getEye(this.dh.currentPass).getPosition()),
-                INTERACT_DIST * world.worldScale, isActive ? MathUtils.GREEN : MathUtils.RED);
+            DebugRenderHelper.renderSphere(this.camPos, INTERACT_DIST * world.worldScale,
+                isActive ? MathUtils.GREEN_INT : MathUtils.RED_INT);
         }
     }
 }

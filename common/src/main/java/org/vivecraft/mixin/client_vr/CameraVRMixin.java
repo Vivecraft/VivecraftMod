@@ -4,10 +4,11 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Projection;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -74,6 +75,9 @@ public abstract class CameraVRMixin {
     @Shadow
     protected abstract void setupPerspective(float zNear, float zFar, float fov, float width, float height);
 
+    @Shadow
+    protected abstract void alignWithEntity(float partialTicks);
+
     @ModifyExpressionValue(method = {"update", "createProjectionMatrixForCulling"}, at = @At(value = "CONSTANT", args = "floatValue=0.05F"))
     private float vivecraft$shorterNear(float original) {
         return RenderPassType.isVanilla() ? original : vivecraft$MIN_CLIP_DISTANCE;
@@ -122,14 +126,13 @@ public abstract class CameraVRMixin {
 
     // RETURN instead of TAIL, because TAIL goes into the if check for some reason
     @Inject(method = "update", at = @At("RETURN"))
-    private void vivecraft$alwaysSetupProjection(CallbackInfo ci) {
+    private void vivecraft$alwaysSetupProjection(CallbackInfo ci, @Local(argsOnly = true) DeltaTracker deltaTracker) {
         // we always need the perspecive projection and position set up, even outside levels
         if (!RenderPassType.isVanilla() && (this.entity == null || this.level == null)) {
             this.setupPerspective(vivecraft$MIN_CLIP_DISTANCE, this.depthFar,
                 this.minecraft.options.fov().get(), this.minecraft.getWindow().getWidth(),
                 this.minecraft.getWindow().getHeight());
-            this.setPosition(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld()
-                .getEye(ClientDataHolderVR.getInstance().currentPass).getPosition());
+            this.alignWithEntity(deltaTracker.getGameTimeDeltaPartialTick(true));
         }
     }
 
@@ -144,7 +147,8 @@ public abstract class CameraVRMixin {
         {
             return original.call(instance, fovy, aspect, zNear, zFar, zZeroToOne);
         } else {
-            return instance.set(dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(), zNear, zFar));
+            return instance.set(
+                dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(), zNear, zFar));
         }
     }
 

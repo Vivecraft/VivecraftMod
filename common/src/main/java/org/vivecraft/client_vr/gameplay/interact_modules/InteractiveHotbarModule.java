@@ -191,23 +191,23 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         Vector3f line = MathUtils.subtractToVector3f(barEnd, barStart).div(9F);
 
         // origin offset since the camera is room relative
-        Vector3f slotPos = MathUtils.subtractToVector3f(barStart, world.getEye(this.dh.currentPass).getPosition());
+        Vec3 slotPos = barStart;
 
         float size = 0.06F * world.worldScale;
 
         if (!this.dh.vrSettings.reverseHands) {
-            DebugRenderHelper.renderCylinder(slotPos.sub(line.mul(1.5F, new Vector3f()), new Vector3f()), line, size,
-                this.hotbar == 9 ? MathUtils.GREEN : MathUtils.RED);
+            DebugRenderHelper.renderCylinder(slotPos.subtract(line.x * 1.5F, line.y * 1.5F,line.z * 1.5F), line, size,
+                this.hotbar == 9 ? MathUtils.GREEN_INT : MathUtils.RED_INT);
         }
 
         for (int i = 0; i < 9; i++) {
-            DebugRenderHelper.renderCylinder(slotPos, line, size, this.hotbar == i ? MathUtils.GREEN : MathUtils.RED);
-            slotPos.add(line);
+            DebugRenderHelper.renderCylinder(slotPos, line, size, this.hotbar == i ? MathUtils.GREEN_INT : MathUtils.RED_INT);
+            slotPos = slotPos.add(line.x, line.y, line.z);
         }
 
         if (this.dh.vrSettings.reverseHands) {
-            DebugRenderHelper.renderCylinder(slotPos.add(line.mul(0.5F, new Vector3f()), new Vector3f()), line, size,
-                this.hotbar == 9 ? MathUtils.GREEN : MathUtils.RED);
+            DebugRenderHelper.renderCylinder(slotPos.add(line.x * 0.5F, line.y * 0.5F,line.z * 0.5F), line, size,
+                this.hotbar == 9 ? MathUtils.GREEN_INT : MathUtils.RED_INT);
         }
     }
 }

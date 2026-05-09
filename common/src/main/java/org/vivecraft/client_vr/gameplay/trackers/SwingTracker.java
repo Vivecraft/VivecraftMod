@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
@@ -82,7 +83,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
     private final AABB[] lastAttackAABB = new AABB[4];
     private final Vec3[] lastBlockHit = new Vec3[4];
     private final int[] lastMiningPointHit = new int[4];
-    private final List<Pair<Vec3, Vector3fc>>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
+    private final List<Pair<Vec3, Integer>>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -754,9 +755,9 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
         Vec3 cam = camWorld.add(this.dh.vrPlayer.vrdata_world_pre.origin).subtract(world.origin);
 
         for (int i = 0; i < trackers; i++) {
-            Vector3fc failColor =
+            int failColor =
                 this.tipHistory[i].averageSpeed(0.33D) > SPEED_THRESH * (this.mc.player.isCreative() ? 1.5F : 1F) ?
-                    MathUtils.ORANGE : MathUtils.RED;
+                    MathUtils.ORANGE_INT : MathUtils.RED_INT;
             if (this.miningPoints[i] != null || this.miningPoint[i] != null) {
                 if (this.previousMiningPoints[i].isEmpty() ||
                     !this.previousMiningPoints[i].getLast().getLeft().equals(this.miningPoint[i]))
@@ -765,55 +766,52 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                     if (this.miningPoints[i] != null && this.canAct[i]) {
                         // skip first, since that is the last tick point
                         for (int p = 1; p < this.miningPoints[i].size(); p++) {
-                            Vector3fc color = p <= this.lastMiningPointHit[i] ? MathUtils.GREEN : MathUtils.LIGHT_GRAY;
+                            int color = p <= this.lastMiningPointHit[i] ? MathUtils.GREEN_INT : MathUtils.LIGHT_GRAY_INT;
                             if (p < this.miningPoints[i].size() - 1) {
-                                color = color.mul(0.5F, new Vector3f());
+                                color = ARGB.scaleRGB(color, 0.5F);
                             }
                             this.previousMiningPoints[i].addLast(
                                 Pair.of(this.miningPoints[i].get(p), color));
                         }
                     } else {
                         this.previousMiningPoints[i].addLast(
-                            Pair.of(this.miningPoint[i], this.canAct[i] ? MathUtils.GREEN : failColor));
+                            Pair.of(this.miningPoint[i], this.canAct[i] ? MathUtils.GREEN_INT : failColor));
                     }
                     while (this.previousMiningPoints[i].size() > 20) {
                         this.previousMiningPoints[i].removeFirst();
                     }
                 }
 
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.miningPoint[i], cam), 0.025F,
-                    this.canAct[i] ? MathUtils.GREEN : failColor);
+                DebugRenderHelper.renderCube(this.miningPoint[i], 0.025F,
+                    this.canAct[i] ? MathUtils.GREEN_INT : failColor);
                 if (!this.previousMiningPoints[i].isEmpty()) {
-                    Pair<Vec3, Vector3fc> prev = null;
-                    for (Pair<Vec3, Vector3fc> p : this.previousMiningPoints[i]) {
-                        DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(p.getLeft(), cam), 0.0125F,
+                    Pair<Vec3, Integer> prev = null;
+                    for (Pair<Vec3, Integer> p : this.previousMiningPoints[i]) {
+                        DebugRenderHelper.renderCube(p.getLeft(), 0.0125F,
                             p.getRight());
                         if (prev != null) {
-                            DebugRenderHelper.renderLine(p.getRight(),
-                                MathUtils.subtractToVector3f(prev.getLeft(), cam),
-                                MathUtils.subtractToVector3f(p.getLeft(), cam));
+                            DebugRenderHelper.renderLine(p.getRight(), prev.getLeft(), p.getLeft());
                         }
                         prev = p;
                     }
                 }
             }
             if (this.lastBlockHit[i] != null) {
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.lastBlockHit[i], camWorld), 0.025F,
-                    MathUtils.GREEN);
+                DebugRenderHelper.renderCube(this.lastBlockHit[i], 0.025F, MathUtils.GREEN_INT);
             }
 
             if (this.lastAttackAABB[i] != null) {
-                DebugRenderHelper.renderAABB(this.lastAttackAABB[i].move(-cam.x, -cam.y, -cam.z),
-                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
+                DebugRenderHelper.renderAABB(this.lastAttackAABB[i],
+                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN_INT);
             }
             if (this.weaponTip[i] != null) {
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.weaponTip[i], cam), 0.025F,
-                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
+                DebugRenderHelper.renderCube(this.weaponTip[i], 0.025F,
+                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN_INT);
             }
             for (Entity entity : this.lastHitEntities[i]) {
                 DebugRenderHelper.renderCube(
-                    MathUtils.subtractToVector3f(entity.getBoundingBox().getCenter(), camWorld),
-                    (float) entity.getBoundingBox().getSize() / 2F, MathUtils.GREEN);
+                    entity.getBoundingBox().getCenter(),
+                    (float) entity.getBoundingBox().getSize() / 2F, MathUtils.GREEN_INT);
             }
         }
     }

@@ -93,9 +93,8 @@ public class ThirdPersonCameraModule implements DebugRenderModule, HeldInteractM
             VRData world = this.dh.vrPlayer.getVRDataWorld();
             // origin offset since the camera is room relative
             Vec3 cam = this.camPos.subtract(this.dh.vrPlayer.vrdata_world_pre.origin).add(world.origin);
-            DebugRenderHelper.renderSphere(
-                MathUtils.subtractToVector3f(cam, world.getEye(this.dh.currentPass).getPosition()),
-                INTERACT_DIST * world.worldScale, isActive ? MathUtils.GREEN : MathUtils.RED);
+            DebugRenderHelper.renderSphere(cam, INTERACT_DIST * world.worldScale,
+                isActive ? MathUtils.GREEN_INT : MathUtils.RED_INT);
         }
     }
 }

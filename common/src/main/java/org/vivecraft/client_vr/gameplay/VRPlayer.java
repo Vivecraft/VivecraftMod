@@ -324,7 +324,8 @@ public class VRPlayer {
             }
         }
 
-        this.dh.menuHandOff = MethodHolder.isInMenuRoom() || this.mc.screen != null || KeyboardHandler.SHOWING;
+        this.dh.menuHandOff = MethodHolder.isInMenuRoom() || this.mc.screen != null || KeyboardHandler.SHOWING ||
+            RadialHandler.isShowing();
         this.dh.menuHandMain = this.dh.menuHandOff ||
             (this.dh.hotbarModule.hotbar >= 0 && this.dh.vrSettings.vrTouchHotbar);
     }

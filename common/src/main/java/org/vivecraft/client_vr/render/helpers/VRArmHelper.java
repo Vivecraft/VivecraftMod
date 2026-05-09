@@ -59,13 +59,11 @@ public class VRArmHelper {
     {
         if (!renderMain && !renderOff) return order;
         Profiler.get().push("hands");
-        // TODO 26.1 this will not work, is it still needed though?
-        DATA_HOLDER.isFpHand = true;
+        ClientDataHolderVR.isFpHand.set(true);
 
         if (renderMain) {
             if (menuHandMain) {
-                /*order = */
-                renderMenuHand(output, vrState, cameraState, poseStack, 0, order);
+                order = renderMenuHand(output, vrState, cameraState, poseStack, 0, order);
             } else {
                 // hand submits can't be ordered
                 renderVRHand_Main(output, vrState, cameraState, poseStack);
@@ -74,14 +72,13 @@ public class VRArmHelper {
 
         if (renderOff) {
             if (menuHandOff) {
-                /*order = */
-                renderMenuHand(output, vrState, cameraState, poseStack, 1, order);
+                order = renderMenuHand(output, vrState, cameraState, poseStack, 1, order);
             } else {
                 order = renderVRHand_Offhand(output, vrState, cameraState, poseStack, true, order);
             }
         }
 
-        DATA_HOLDER.isFpHand = false;
+        ClientDataHolderVR.isFpHand.set(false);
         Profiler.get().pop();
         return order;
     }
@@ -160,7 +157,7 @@ public class VRArmHelper {
             vrState.armsState.mainHandWorldPos.z - cameraState.pos.z);
         poseStack.mulPose(vrState.armsState.mainHandWorldRot);
 
-        // TODO 26.1 this doesn't work like that, do we still need that?
+        // TODO 26.1 optifine this doesn't work like that, do we still need that?
         if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
             // if we don't do this shaders render the hands wrong
             OptifineHelper.beginEntities();
@@ -197,7 +194,7 @@ public class VRArmHelper {
         if (!vrState.armsState.skipOffHandItemRendering) {
             poseStack.pushPose();
 
-            // TODO 26.1 this doesn't work like that, do we still need that?
+            // TODO 26.1 optifine this doesn't work like that, do we still need that?
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                 // if we don't do this shaders render the hands wrong
                 OptifineHelper.beginEntities();

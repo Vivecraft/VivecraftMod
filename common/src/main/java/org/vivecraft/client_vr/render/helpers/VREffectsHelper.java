@@ -722,8 +722,10 @@ public class VREffectsHelper {
         }
 
         order = renderVRSelfEffects(output, vrState, levelState.cameraRenderState, poseStack, order);
-        VRWidgetHelper.renderVRThirdPersonCamWidget(output, vrState.thirdCamWidgetState);
-        VRWidgetHelper.renderVRHandheldCameraWidget(output, vrState.screenCamWidgetState);
+        VRWidgetHelper.renderVRThirdPersonCamWidget(output, levelState.cameraRenderState, vrState.thirdCamWidgetState,
+            poseStack);
+        VRWidgetHelper.renderVRHandheldCameraWidget(output, levelState.cameraRenderState, vrState.screenCamWidgetState,
+            poseStack);
 
         if (!vrState.occludeGui) {
             order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
@@ -779,8 +781,10 @@ public class VREffectsHelper {
                 order);
 
             // item renderers can't be ordered, should be fine though
-            VRWidgetHelper.renderVRThirdPersonCamWidget(output, vrState.thirdCamWidgetState);
-            VRWidgetHelper.renderVRHandheldCameraWidget(output, vrState.screenCamWidgetState);
+            VRWidgetHelper.renderVRThirdPersonCamWidget(output, levelState.cameraRenderState,
+                vrState.thirdCamWidgetState, poseStack);
+            VRWidgetHelper.renderVRHandheldCameraWidget(output, levelState.cameraRenderState,
+                vrState.screenCamWidgetState, poseStack);
 
             if (!vrState.armsState.handsSecond) {
                 order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,

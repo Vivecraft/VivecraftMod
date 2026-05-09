@@ -37,7 +37,8 @@ public class ClientDataHolderVR {
     public final boolean kiosk;
     public final boolean viewOnly;
 
-    public boolean isFpHand;
+    // thread local, since this is once used during extraction, and once during rendering
+    public static ThreadLocal<Boolean> isFpHand = ThreadLocal.withInitial(() -> false);
 
     public VRPlayer vrPlayer;
     public MCVR vr;
