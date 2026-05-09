@@ -91,6 +91,8 @@ public class VRRenderState {
     public final CameraWidgetRenderState thirdCamWidgetState = new CameraWidgetRenderState();
     public final CameraWidgetRenderState screenCamWidgetState = new CameraWidgetRenderState();
 
+    public final PostProcessRenderState postProcessState = new PostProcessRenderState();
+
     public void extract(@Nullable LocalPlayer player, float partialTick) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
@@ -122,6 +124,8 @@ public class VRRenderState {
         this.partialTick = partialTick;
         this.worldScale = worldData.worldScale;
         this.headPos = worldData.hmd.getPosition();
+
+        this.postProcessState.extract(this.partialTick, this.inWater);
 
         // first person effects
         this.firstPersonFire = player != null && !player.isSpectator() && player.isOnFire() &&

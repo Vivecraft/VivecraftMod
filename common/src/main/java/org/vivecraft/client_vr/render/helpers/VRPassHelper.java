@@ -6,6 +6,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.Profiler;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.extensions.LevelRenderStateExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -86,7 +87,8 @@ public class VRPassHelper {
             // do post-processing
             ShaderHelper.doVrPostProcess(eye, rendertarget,
                 eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.framebufferEye0 :
-                    DATA_HOLDER.vrRenderer.framebufferEye1, deltaTracker.getGameTimeDeltaPartialTick(false));
+                    DATA_HOLDER.vrRenderer.framebufferEye1,
+                ((LevelRenderStateExtension) MC.gameRenderer.getGameRenderState().levelRenderState).vivecraft$getVRRenderState().postProcessState);
 
             RenderHelper.checkGLError("post overlay" + eye);
             Profiler.get().pop();
