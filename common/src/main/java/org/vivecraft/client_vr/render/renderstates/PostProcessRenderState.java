@@ -103,7 +103,7 @@ public class PostProcessRenderState {
                 this.red = 0;
             }
 
-            if (mc.player.isSleeping()) {
+            if (dataHolder.vrSettings.sleepEffect && mc.player.isSleeping()) {
                 this.black = 0.5F + 0.3F * mc.player.getSleepTimer() * 0.01F;
             }
 
