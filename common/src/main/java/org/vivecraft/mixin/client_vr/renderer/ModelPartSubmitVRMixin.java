@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.ModelPartSubmitExtension;
 
 @Mixin(SubmitNodeStorage.ModelPartSubmit.class)
@@ -17,7 +18,7 @@ public class ModelPartSubmitVRMixin implements ModelPartSubmitExtension {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vivecraft$storeFirstPerson(CallbackInfo ci) {
-        this.vivecraft$isFpHand = ClientDataHolderVR.isFpHand.get();
+        this.vivecraft$isFpHand = VRState.VR_RUNNING && ClientDataHolderVR.isFpHand.get();
     }
 
     @Override

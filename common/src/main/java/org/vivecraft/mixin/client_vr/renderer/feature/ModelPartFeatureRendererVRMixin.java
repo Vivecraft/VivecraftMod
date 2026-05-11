@@ -8,14 +8,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.ModelPartSubmitExtension;
 
 @Mixin(ModelPartFeatureRenderer.class)
 public class ModelPartFeatureRendererVRMixin {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeStorage$ModelPartSubmit;sprite()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;"))
     private void vivecraft$setFirstPerson(CallbackInfo ci, @Local SubmitNodeStorage.ModelPartSubmit modelPartSubmit) {
-        ClientDataHolderVR.isFpHand.set(
-            ((ModelPartSubmitExtension) (Object) modelPartSubmit).vivecraft$isFirstPerson());
+        if (VRState.VR_RUNNING) {
+            ClientDataHolderVR.isFpHand.set(
+                ((ModelPartSubmitExtension) (Object) modelPartSubmit).vivecraft$isFirstPerson());
+        }
     }
 
     @Inject(method = "render", at = @At("TAIL"))
