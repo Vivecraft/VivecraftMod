@@ -102,6 +102,9 @@ public class VRRenderState {
 
         this.inMenuRoom = MethodHolder.isInMenuRoom();
 
+        // depends on render pass
+        this.occludeGui = VREffectsHelper.shouldOccludeGui();
+
         // overlay status
         this.inBlock = false;
         this.inWater = false;
@@ -174,7 +177,6 @@ public class VRRenderState {
         this.teleportState.extract(player);
 
         // HUDs
-        this.occludeGui = VREffectsHelper.shouldOccludeGui();
         this.uiOpacity = 1F;
         this.uiAfterWorld = ShadersHelper.isShaderActive() &&
             dataHolder.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_SHADER;
@@ -203,7 +205,7 @@ public class VRRenderState {
 
         // check if the main player renders, we need the arm position for the gui if it exists
         // this is a stupid workaround to get the position before the player actually renders
-        for(EntityRenderState entityState : mc.gameRenderer.getGameRenderState().levelRenderState.entityRenderStates) {
+        for (EntityRenderState entityState : mc.gameRenderer.getGameRenderState().levelRenderState.entityRenderStates) {
             if (entityState instanceof AvatarRenderState avatarState) {
                 ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) entityState).vivecraft$getRotInfo();
                 if (rotInfo != null && ((EntityRenderStateExtension) entityState).vivecraft$isFirstPersonPlayer()) {
