@@ -78,6 +78,9 @@ public abstract class CameraVRMixin {
     @Shadow
     protected abstract void alignWithEntity(float partialTicks);
 
+    @Shadow
+    private boolean detached;
+
     @ModifyExpressionValue(method = {"update", "createProjectionMatrixForCulling"}, at = @At(value = "CONSTANT", args = "floatValue=0.05F"))
     private float vivecraft$shorterNear(float original) {
         return RenderPassType.isVanilla() ? original : vivecraft$MIN_CLIP_DISTANCE;
@@ -186,6 +189,9 @@ public abstract class CameraVRMixin {
             if (ClientDataHolderVR.getInstance().isFirstPass || ShadersHelper.isSlowMode()) {
                 ShadersHelper.SHADOW_CAMERA_POSITION = this.position;
             }
+
+            // no detaching in VR please
+            this.detached = false;
             ci.cancel();
         }
     }
@@ -225,6 +231,7 @@ public abstract class CameraVRMixin {
         renderSelf &= !(RenderPass.isFirstPerson(ClientDataHolderVR.getInstance().currentPass) &&
             this.entity instanceof LivingEntity && ((LivingEntity) this.entity).isSleeping()
         );
-        return renderSelf;
+        // isDetached is only true if some other mod has changed it since update
+        return renderSelf || isDetached;
     }
 }
