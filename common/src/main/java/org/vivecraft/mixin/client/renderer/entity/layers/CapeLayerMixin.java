@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client.renderer.entity.layers;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.player.PlayerModel;
@@ -8,7 +9,9 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.PlayerSkin;
 import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -18,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
 import org.vivecraft.client.utils.ModelUtils;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.utils.MathUtils;
 
 @Mixin(CapeLayer.class)
@@ -34,16 +38,15 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
     }
 
     // DEBUG CAPE
-    /*
-    @WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/state/PlayerRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/PlayerSkin;capeTexture()Lnet/minecraft/resources/Identifier;"))
-    private Identifier vivecraft$whiteCape(PlayerSkin skin, Operation<Identifier> original) {
-        Identifier capeTexture = original.call(skin);
+    //@WrapOperation(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/PlayerSkin;cape()Lnet/minecraft/core/ClientAsset$Texture;"))
+    @Unique
+    private ClientAsset.Texture vivecraft$debugCape(PlayerSkin instance, Operation<ClientAsset.Texture> original) {
+        ClientAsset.Texture capeTexture = original.call(instance);
         if (capeTexture == null) {
-            capeTexture = RenderHelper.WHITE_TEXTURE;
+            capeTexture = new ClientAsset.ResourceTexture(RenderHelper.DEBUG_CAPE, RenderHelper.DEBUG_CAPE);
         }
         return capeTexture;
     }
-    */
 
     @ModifyExpressionValue(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/CapeLayer;hasLayer(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;)Z", ordinal = 1))
     private boolean vivecraft$modifyTransform(
@@ -68,7 +71,7 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
             float yRot = (float) -Math.atan2(this.vivecraft$tempV.x, this.vivecraft$tempV.y) + Mth.HALF_PI;
 
             // transform offset to be body relative
-            this.vivecraft$tempV.set(0F, 0F, 5.5F - 0.5F * (getParentModel().body.xRot / Mth.HALF_PI));
+            this.vivecraft$tempV.set(0F, 0F, 2 - 0.5F * (getParentModel().body.xRot / Mth.HALF_PI));
             if (hasArmor) {
                 // vanilla cape offset with armor
                 this.vivecraft$tempV.add(0F, -0.85F, 1.1F);
@@ -91,16 +94,18 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
             // limit the up rotation when walking forward, depending on body rotation
             float lean = xRot / Mth.HALF_PI;
             if (lean >= 0) {
-                lean = renderState.capeLean * (1F - Mth.clamp(lean, 0F, 1F));
+                lean = (renderState.isCrouching ? renderState.capeLean - Mth.HALF_PI * 0.5F : renderState.capeLean) *
+                    (1F - Mth.clamp(lean, 0F, 1F));
             } else {
                 lean = 0F;
             }
 
             // manual rotation
             poseStack.mulPose(new Quaternionf()
+                //.rotateY(Mth.PI)
                 .rotateX((6.0f + lean / 2.0f + flap) * Mth.DEG_TO_RAD)
                 .rotateZ(renderState.capeLean2 / 2.0f * Mth.DEG_TO_RAD)
-                .rotateY((180.0f - renderState.capeLean2 / 2.0f) * Mth.DEG_TO_RAD + yRot));
+                .rotateY(-(-renderState.capeLean2 / 2.0f) * Mth.DEG_TO_RAD + yRot));
 
             return false;
         } else {
