@@ -15,6 +15,7 @@ def mixins = [
     "vivecraft.cataclysm.mixins.json",
     "vivecraft.colorwheel.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
+    "vivecraft.elementa.mixins.json",
     "vivecraft.emf.mixins.json",
     "vivecraft.epicfight.mixins.json",
     "vivecraft.iris.mixins.json",
