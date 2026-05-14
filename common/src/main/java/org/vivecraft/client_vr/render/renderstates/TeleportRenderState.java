@@ -29,7 +29,7 @@ public class TeleportRenderState {
     public boolean validLocation;
     public float segmentHalfWidth;
 
-    public List<Segment> segments= new ArrayList<>();
+    public List<Segment> segments = new ArrayList<>();
 
     public record Segment(Vec3 start, Vec3 end, float vOffset) {}
 
@@ -42,7 +42,7 @@ public class TeleportRenderState {
         }
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
-        
+
         this.tpEnergy = ClientNetworking.isLimitedSurvivalTeleport() &&
             !dataHolder.vrPlayer.getFreeMove() &&
             mc.gameMode != null && mc.gameMode.hasMissTime() &&

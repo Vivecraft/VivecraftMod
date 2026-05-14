@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.render.renderstates;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;

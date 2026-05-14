@@ -50,7 +50,9 @@ public class ArmsRenderState {
         this.headLight = player == null ? 15 :
             Math.max(ShadersHelper.ShaderLight(),
                 player.level().getMaxLocalRawBrightness(BlockPos.containing(headPos)));
-        this.rawHeadLightCoords = player != null ? LevelRenderer.getLightCoords(player.level(), BlockPos.containing(headPos)) : LightCoordsUtil.FULL_BRIGHT;
+        this.rawHeadLightCoords =
+            player != null ? LevelRenderer.getLightCoords(player.level(), BlockPos.containing(headPos)) :
+                LightCoordsUtil.FULL_BRIGHT;
         this.mainHandRenderItem = VRArmHelper.extractHandRenderItem(player, InteractionHand.MAIN_HAND);
         this.offHandRenderItem = VRArmHelper.extractHandRenderItem(player, InteractionHand.OFF_HAND);
 

@@ -387,9 +387,8 @@ public class DebugRenderHelper {
      * @param color    cube color
      */
     public static void renderCube(Vec3 position, float size, int color) {
-        addSafeGizmo(
-            new CuboidGizmo(new AABB(position.subtract(size * 0.5F), position.add(size * 0.5F)), GizmoStyle.strokeAndFill(color, 2.5F, color),
-                false));
+        addSafeGizmo(new CuboidGizmo(new AABB(position.subtract(size * 0.5F), position.add(size * 0.5F)),
+            GizmoStyle.strokeAndFill(color, 2.5F, color), false));
     }
 
     /**

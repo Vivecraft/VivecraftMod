@@ -21,7 +21,7 @@ public class PostProcessRenderState {
     public float black;
     public float blue;
     public float time;
-    
+
     public void extract(float partialTick, boolean isInWater) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();

@@ -225,7 +225,7 @@ public class IrisHelper {
                         case ENTITIES_SOLID -> ShaderKey_ENTITIES_SOLID;
                         case ENTITIES_TRANSLUCENT -> ShaderKey_ENTITIES_TRANSLUCENT;
                         case BASIC_COLOR -> ShaderKey_BASIC_COLOR;
-                        case TEXTURED_COLOR ->  ShaderKey_TEXTURED_COLOR;
+                        case TEXTURED_COLOR -> ShaderKey_TEXTURED_COLOR;
                     });
                 return;
             } catch (IllegalAccessException | InvocationTargetException ignore) {

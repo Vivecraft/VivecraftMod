@@ -35,6 +35,7 @@ public interface RenderSetupExtension {
 
     /**
      * applies the uniform overrides, if any is set
+     *
      * @param renderPass RenderPass to apply the unoiform overrides to
      */
     void vivecraft$applyUniformOverrides(RenderPass renderPass);

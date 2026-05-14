@@ -766,7 +766,8 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                     if (this.miningPoints[i] != null && this.canAct[i]) {
                         // skip first, since that is the last tick point
                         for (int p = 1; p < this.miningPoints[i].size(); p++) {
-                            int color = p <= this.lastMiningPointHit[i] ? MathUtils.GREEN_INT : MathUtils.LIGHT_GRAY_INT;
+                            int color =
+                                p <= this.lastMiningPointHit[i] ? MathUtils.GREEN_INT : MathUtils.LIGHT_GRAY_INT;
                             if (p < this.miningPoints[i].size() - 1) {
                                 color = ARGB.scaleRGB(color, 0.5F);
                             }

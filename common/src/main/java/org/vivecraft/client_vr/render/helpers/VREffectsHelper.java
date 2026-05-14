@@ -994,8 +994,7 @@ public class VREffectsHelper {
 
         float width = 0.3F;
 
-        RenderType renderType;
-        renderType = VRRenderTypes.guiTextured(fireSprite.atlasLocation(),
+        RenderType renderType = VRRenderTypes.guiTextured(fireSprite.atlasLocation(),
             // with depthtest in third
             !RenderPass.isThirdPerson(vrState.currentPass));
 
