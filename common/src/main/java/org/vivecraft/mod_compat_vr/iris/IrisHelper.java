@@ -121,6 +121,17 @@ public class IrisHelper {
         return Optional.empty();
     }
 
+    public static Object getPipelineManager() {
+        if (init()) {
+            try {
+                return Iris_getPipelineManager.invoke(null);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't get iris pipeline manager:", e);
+            }
+        }
+        return null;
+    }
+
     /**
      * @return if the active shader has the vanilla water overlay enabled or disabled
      */
