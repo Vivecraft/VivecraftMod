@@ -55,6 +55,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mixin.client.renderer.RenderStateShardAccessor;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
+import org.vivecraft.mod_compat_vr.sable.SableHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 import java.io.InputStream;
@@ -279,7 +280,11 @@ public class MenuWorldRenderer {
         }
         layer.setupRenderState();
         ShaderInstance shaderInstance = RenderSystem.getShader();
+
+        SableHelper.setSkylightFactor(shaderInstance);
+
         shaderInstance.apply();
+
         // use our lightmap
         turnOnLightLayer();
         for (VertexBuffer vertexBuffer : buffers) {
