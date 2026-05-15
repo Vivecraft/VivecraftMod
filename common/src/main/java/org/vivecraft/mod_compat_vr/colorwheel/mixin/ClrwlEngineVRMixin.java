@@ -1,8 +1,8 @@
 package org.vivecraft.mod_compat_vr.colorwheel.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.djefrey.colorwheel.accessors.IrisRenderingPipelineAccessor;
 import dev.djefrey.colorwheel.compile.ClrwlPrograms;
+import dev.djefrey.colorwheel.engine.BeginTranslucentRenderFunction;
 import dev.djefrey.colorwheel.engine.ClrwlEngine;
 import dev.djefrey.colorwheel.instancing.ClrwlInstancedDrawManager;
 import dev.engine_room.flywheel.backend.compile.FlwPrograms;
@@ -18,10 +18,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.colorwheel.extensions.ClrwlInstancedDrawManagerExtension;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -55,8 +58,14 @@ public class ClrwlEngineVRMixin {
                 for (RenderPass renderPass : RenderPass.values()) {
                     Object pipeline = ((PipelineManagerExtension) pipelineManager).vivecraft$getVRPipeline(renderPass);
                     if (pipeline != null) {
-                        ((IrisRenderingPipelineAccessor) pipeline).colorwheel$setBeginTranslucentsCallback(
-                            this.drawManager::renderTranslucent);
+                        try {
+                            Method callback = pipeline.getClass().getMethod("colorwheel$setBeginTranslucentsCallback",
+                                BeginTranslucentRenderFunction.class);
+                            callback.invoke(pipeline,
+                                (BeginTranslucentRenderFunction) this.drawManager::renderTranslucent);
+                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                            VRSettings.LOGGER.error("failed to set colorwheel translucent callback");
+                        }
                         this.vivecraft$pipelines.put(renderPass, (IrisRenderingPipeline) pipeline);
 
                         ENGINES.put((IrisRenderingPipeline) pipeline, (ClrwlEngine) (Object) this);
@@ -74,7 +83,13 @@ public class ClrwlEngineVRMixin {
     private void vivecraft$delete(CallbackInfo ci) {
         for (RenderPass renderPass : this.vivecraft$pipelines.keySet()) {
             IrisRenderingPipeline pipeline = this.vivecraft$pipelines.get(renderPass);
-            ((IrisRenderingPipelineAccessor) pipeline).colorwheel$setBeginTranslucentsCallback(null);
+            try {
+                Method callback = pipeline.getClass().getMethod("colorwheel$setBeginTranslucentsCallback",
+                    BeginTranslucentRenderFunction.class);
+                callback.invoke(pipeline, (BeginTranslucentRenderFunction) null);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                VRSettings.LOGGER.error("failed to reset colorwheel translucent callback");
+            }
 
             this.vivecraft$pipelines.remove(renderPass);
             ENGINES.remove(pipeline);
