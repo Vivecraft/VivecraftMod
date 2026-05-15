@@ -77,7 +77,7 @@ subprojects {
             'mod_id'               : mod_id,
             'mod_name'             : mod_name,
             'mod_authors'          : mod_authors,
-            'mod_authors_array'    : mod_authors.split(",").each { s -> s.trim() }.join("\",\""),
+            'mod_authors_array'    : mod_authors.split(",").collect { it.trim() }.join("\",\""),
             'license'              : license,
             'description'          : mod_description,
             'discord'              : discord,
