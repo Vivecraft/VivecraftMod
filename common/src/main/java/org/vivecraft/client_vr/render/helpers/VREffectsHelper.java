@@ -1231,10 +1231,10 @@ public class VREffectsHelper {
     }
 
     public static void extractCrosshairState(CrosshairRenderState crosshairRenderState, @Nullable LocalPlayer player) {
-        Profiler.get().push("extract crosshair");
-
         crosshairRenderState.shouldRender = player != null && shouldRenderCrosshair();
         if (!crosshairRenderState.shouldRender) return;
+
+        Profiler.get().push("extract crosshair");
 
         Vec3 crosshairRenderPos = DATA_HOLDER.vrPlayer.crossVec;
         Vec3 crossDistance = crosshairRenderPos.subtract(

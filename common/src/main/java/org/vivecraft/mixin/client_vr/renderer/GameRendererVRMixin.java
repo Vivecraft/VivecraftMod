@@ -195,6 +195,7 @@ public abstract class GameRendererVRMixin
             GL11.glDisable(GL11.GL_STENCIL_TEST);
             VREffectsHelper.renderMenuRoom(this.featureRenderDispatcher, this.submitNodeStorage,
                 this.gameRenderState.levelRenderState);
+            Profiler.get().pop();
         }
         // pop the "render" push, since we cancel early
         Profiler.get().pop();
