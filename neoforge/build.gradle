@@ -52,14 +52,6 @@ dependencies {
     include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
 }
 
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("META-INF/neoforge.mods.toml") {
-        expand "version": project.version
-    }
-}
-
 shadowJar {
     exclude "fabric.mod.json"
     exclude "architectury.common.json"

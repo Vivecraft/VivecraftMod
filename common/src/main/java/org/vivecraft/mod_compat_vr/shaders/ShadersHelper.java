@@ -247,6 +247,10 @@ public class ShadersHelper {
             consumer.accept(VRShaders.ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_CUTOUT);
             consumer.accept(VRShaders.ENTITY_SOLID_NO_CARDINAL_LIGHT, ShaderType.ENTITIES_SOLID);
 
+            consumer.accept(VRShaders.GUI_TEXTURED, ShaderType.TEXTURED_COLOR);
+            consumer.accept(VRShaders.GUI_TEXTURED_ALWAYS, ShaderType.TEXTURED_COLOR);
+
+            consumer.accept(VRShaders.LINE_STRIP, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.QUADS, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.QUADS_ALWAYS, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.TRIANGLES_ALWAYS, ShaderType.BASIC_COLOR);

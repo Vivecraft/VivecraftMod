@@ -157,6 +157,10 @@ public class VRRenderTypes {
         return GUI_TEXTURED.apply(resourceLocation);
     }
 
+    public static RenderType guiTextured(Identifier identifier, boolean depthAlways) {
+        return GUI_TEXTURED.apply(identifier, depthAlways);
+    }
+
     public static RenderType guiTextureAlways(GpuTextureView texture) {
         return GUI_TEXTURED_ALWAYS.apply(texture);
     }

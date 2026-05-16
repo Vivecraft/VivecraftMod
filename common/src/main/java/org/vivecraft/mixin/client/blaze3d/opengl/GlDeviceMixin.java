@@ -32,7 +32,7 @@ public class GlDeviceMixin implements GlDeviceExtension {
         } else if (depthLayers < 1) {
             throw new IllegalArgumentException("depthOrLayers must be at least 1");
         } else {
-            if ((usageFlags & 16) != 0) {
+            if ((usageFlags & GpuTexture.USAGE_CUBEMAP_COMPATIBLE) != 0) {
                 throw new UnsupportedOperationException("CubeMap textures are not supported");
             } else if (depthLayers > 1) {
                 throw new UnsupportedOperationException("Array or 3D textures are not supported");
