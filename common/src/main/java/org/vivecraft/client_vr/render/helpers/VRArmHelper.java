@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.render.helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -180,7 +181,8 @@ public class VRArmHelper {
         MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
             0.0F, InteractionHand.MAIN_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
             poseStack, MC.gameRenderer.getSubmitNodeStorage(),
-            MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
+            LevelRenderer.getLightColor(MC.player.level(),
+                BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
         if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
             // undo the thing we did before
@@ -226,7 +228,8 @@ public class VRArmHelper {
             MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
                 0.0F, InteractionHand.OFF_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
                 poseStack, MC.gameRenderer.getSubmitNodeStorage(),
-                MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
+                LevelRenderer.getLightColor(MC.player.level(),
+                    BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                 // undo the thing we did before
