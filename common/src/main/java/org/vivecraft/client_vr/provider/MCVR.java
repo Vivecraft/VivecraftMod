@@ -1431,6 +1431,23 @@ public abstract class MCVR {
     }
 
     /**
+     * @return the x/y angular velocity of the main controller
+     */
+    public Vector2d getControllerVelocity() {
+        int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
+        Vector3f up = this.controllerUpHistory[mainController].averagePosition(0.1).normalize();
+        Vector3f cur = this.controllerForwardHistory[mainController].averagePosition(0.1).normalize();
+        Vector3f prev = this.controllerForwardHistory[mainController].averagePosition(0.3).normalize();
+
+        return new Vector2d(
+            // yaw
+            (Math.atan2(-prev.x, prev.z) - Math.atan2(-cur.x, cur.z)) * Mth.RAD_TO_DEG,
+            // pitch
+            (Math.asin(prev.y) - Math.asin(cur.y)) * (up.y < 0 ? -1 : 1) * Mth.RAD_TO_DEG
+        );
+    }
+
+    /**
      * @return the name of this MCVR implementation
      */
     public abstract String getName();

@@ -1,13 +1,9 @@
 package org.vivecraft.mixin.client_vr;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.util.Mth;
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,12 +12,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.MCVR;
 
 @Mixin(MouseHandler.class)
 public class MouseHandlerVRMixin {
@@ -31,37 +25,6 @@ public class MouseHandlerVRMixin {
     @Final
     @Shadow
     private Minecraft minecraft;
-
-    @Inject(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getTutorial()Lnet/minecraft/client/tutorial/Tutorial;"))
-    private void vivecraft$modifyMouseTravel(
-        CallbackInfo ci,
-        // this is stupid, but the locals have differnt ordinals on different modloaders
-        @Local(ordinal = 1) LocalDoubleRef fabricX, @Local(ordinal = 2) LocalDoubleRef fabricY,
-        @Local(ordinal = 4) LocalDoubleRef forgeX, @Local(ordinal = 5) LocalDoubleRef forgeY)
-    {
-        if (VRState.VR_RUNNING) {
-            int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
-            Vector3f up = MCVR.get().controllerUpHistory[mainController].averagePosition(0.1).normalize();
-            Vector3f cur = MCVR.get().controllerForwardHistory[mainController].averagePosition(0.1).normalize();
-            Vector3f prev = MCVR.get().controllerForwardHistory[mainController].averagePosition(0.3).normalize();
-
-            // yaw
-            double velX = (Math.atan2(-prev.x, prev.z) - Math.atan2(-cur.x, cur.z)) * Mth.RAD_TO_DEG;
-
-            // pitch
-            double velY = (Math.asin(prev.y) - Math.asin(cur.y)) * (up.y < 0 ? -1 : 1) * Mth.RAD_TO_DEG;
-
-            if (Xloader.INSTANCE.getModloader() == Xloader.ModLoader.FABRIC ||
-                Xloader.INSTANCE.getModloader() == Xloader.ModLoader.QUILT)
-            {
-                fabricX.set(velX);
-                fabricY.set(velY);
-            } else {
-                forgeX.set(velX);
-                forgeY.set(velY);
-            }
-        }
-    }
 
     @WrapWithCondition(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
     private boolean vivecraft$noTurning(LocalPlayer instance, double x, double y) {
