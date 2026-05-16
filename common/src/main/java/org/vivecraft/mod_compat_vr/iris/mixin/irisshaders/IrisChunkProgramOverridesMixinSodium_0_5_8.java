@@ -111,7 +111,7 @@ public class IrisChunkProgramOverridesMixinSodium_0_5_8 implements IrisChunkProg
         // return shader of the current RenderPass
         return !RenderPassType.isVanilla() ?
             this.vivecraft$pipelinePrograms.get(ClientDataHolderVR.getInstance().currentPass)
-            .get((IrisTerrainPass) key) : instance.get((IrisTerrainPass) key);
+                .get((IrisTerrainPass) key) : instance.get((IrisTerrainPass) key);
     }
 
     @Inject(method = "deleteShaders", at = @At("HEAD"))

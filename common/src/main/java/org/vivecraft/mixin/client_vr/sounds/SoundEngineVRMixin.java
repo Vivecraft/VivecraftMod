@@ -15,6 +15,6 @@ public class SoundEngineVRMixin {
     @ModifyExpressionValue(method = "updateSource", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;upVector()Lorg/joml/Vector3fc;"))
     private Vector3fc vivecraft$useHeadUp(Vector3fc original) {
         return VRState.VR_RUNNING ? ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER)
-                                    .getCustomVector(MathUtils.UP) : original;
+            .getCustomVector(MathUtils.UP) : original;
     }
 }
