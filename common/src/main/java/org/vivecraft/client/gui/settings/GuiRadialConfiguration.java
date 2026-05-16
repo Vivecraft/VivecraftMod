@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -122,17 +122,17 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
-        graphics.centeredText(this.minecraft.font,
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawCenteredString(this.minecraft.font,
             Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50,
             0xFF55FF55);
 
         if (this.isShift) {
-            graphics.centeredText(this.minecraft.font,
+            guiGraphics.drawCenteredString(this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36,
                 0xFFD23877);
-            graphics.centeredText(this.minecraft.font,
+            guiGraphics.drawCenteredString(this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.3"), this.width / 2, this.height - 22,
                 0xFFD23877);
         }

@@ -6,7 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ProjectionMatrixBuffer;
+import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
@@ -88,7 +88,8 @@ public abstract class VRRenderer {
     // last error caused by this renderer
     protected String lastError = "";
 
-    private final ProjectionMatrixBuffer stencilProjectionMatrix = new ProjectionMatrixBuffer("stencil");
+    private final PerspectiveProjectionMatrixBuffer stencilProjectionMatrix = new PerspectiveProjectionMatrixBuffer(
+        "stencil");
 
     public VRRenderer(MCVR vr) {
         this.vr = vr;
@@ -539,7 +540,7 @@ public abstract class VRRenderer {
             // main render target
             if (dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported()) {
                 ((RenderTargetExtension) WorldRenderPass.STEREO_XR.target)
-                    .vivecraft$setStencil(!Xplat.INSTANCE.enableRenderTargetStencil(WorldRenderPass.STEREO_XR.target));
+                    .vivecraft$setStencil(!Xplat.enableRenderTargetStencil(WorldRenderPass.STEREO_XR.target));
             } else {
                 ((RenderTargetExtension) WorldRenderPass.STEREO_XR.target).vivecraft$setStencil(false);
             }
@@ -593,7 +594,7 @@ public abstract class VRRenderer {
                 }
             }
             // need to recall this, for PostChains to get the right resize
-            ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$resize();
+            minecraft.resizeDisplay();
 
             this.resizeFrameBuffers = false;
         }

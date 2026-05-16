@@ -16,13 +16,13 @@ import org.vivecraft.client_vr.extensions.FieldDependentMixin;
 public class CustomRenderTypesVRMixin {
     @Final
     @Mutable
-    @Shadow
+    @Shadow(remap = false)
     protected static BlendFunction DEST_TRANSPARENCY;
 
     @WrapOperation(method = "<clinit>*", at = {
         @At(value = "FIELD", target = "Lxaero/map/graphics/CustomRenderTypes;DEST_TRANSPARENCY:Lcom/mojang/blaze3d/pipeline/BlendFunction;", opcode = Opcodes.PUTSTATIC),
         @At(value = "FIELD", target = "Lxaero/lib/client/graphics/XaeroRenderType;DEST_TRANSPARENCY:Lcom/mojang/blaze3d/pipeline/BlendFunction;", opcode = Opcodes.PUTSTATIC)
-    })
+    }, remap = false)
     private static void vivecraft$fixMapBlend(BlendFunction value, Operation<Void> original) {
         // refetch main target when not an improved buffer, to get the new gui buffer
         original.call(

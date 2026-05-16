@@ -70,7 +70,7 @@ public class InputSimulator {
 
     public static void typeChar(char character, int modifiers) {
         Minecraft.getInstance().keyboardHandler.charTyped(Minecraft.getInstance().getWindow().handle(),
-            new CharacterEvent(character));
+            new CharacterEvent(character, modifiers));
     }
 
     public static void typeChar(char character) {

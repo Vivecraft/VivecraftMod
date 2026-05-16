@@ -18,7 +18,7 @@ public class IrisShadowRendererMixin {
 
     // only render shadows on the first RenderPass
     // cancel them here, or we would also cancel prepare shaders
-    @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true, remap = false)
     private void vivecraft$onlyOneShadow(CallbackInfo ci) {
         if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().isFirstPass &&
             !ShadersHelper.isSlowMode())

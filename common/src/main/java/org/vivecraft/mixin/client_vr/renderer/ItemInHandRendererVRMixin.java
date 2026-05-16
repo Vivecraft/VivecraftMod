@@ -58,10 +58,10 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 public abstract class ItemInHandRendererVRMixin {
 
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderTypes.entityCutout(
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderTypes.entityCutoutNoCull(
         Identifier.withDefaultNamespace("textures/map/map_background.png"), false);
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderTypes.entityCutout(
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderTypes.entityCutoutNoCull(
         Identifier.withDefaultNamespace("textures/map/map_background_checkerboard.png"), false);
 
     @Unique
@@ -192,7 +192,6 @@ public abstract class ItemInHandRendererVRMixin {
         AbstractClientPlayer player, float partialTick, InteractionHand hand, float swingProgress, ItemStack itemStack,
         PoseStack poseStack, SubmitNodeCollector collector, int combinedLight)
     {
-        // TODO 26.1 extract arm state
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 
         boolean mainHand = hand == InteractionHand.MAIN_HAND;
@@ -303,7 +302,7 @@ public abstract class ItemInHandRendererVRMixin {
                         OptifineHelper.endEntities();
                     }
                     // render scope view
-                    VREffectsHelper.drawScopeFB(collector, poseStack, hand == InteractionHand.MAIN_HAND ? 0 : 1);
+                    VREffectsHelper.drawScopeFB(poseStack, hand == InteractionHand.MAIN_HAND ? 0 : 1);
 
                     if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                         OptifineHelper.beginEntities();
@@ -348,7 +347,7 @@ public abstract class ItemInHandRendererVRMixin {
             if (!this.vivecraft$didLogModelError) {
                 VRSettings.LOGGER.error(
                     "Vivecraft: Some mod broke player model reloading. Possible culprit 'Stfu' loaded: {}",
-                    Xloader.INSTANCE.isModLoaded("stfu"));
+                    Xloader.isModLoaded("stfu"));
                 this.vivecraft$didLogModelError = true;
             }
             return;
@@ -381,7 +380,7 @@ public abstract class ItemInHandRendererVRMixin {
         poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
 
-        vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY, mainHand);
+        vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY);
         Identifier skin = player.getSkin().body().texturePath();
 
         if (rightHand) {

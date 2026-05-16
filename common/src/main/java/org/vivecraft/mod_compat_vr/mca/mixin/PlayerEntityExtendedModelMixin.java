@@ -25,14 +25,14 @@ import org.vivecraft.client.extensions.EntityRenderStateExtension;
 public abstract class PlayerEntityExtendedModelMixin {
 
     @Final
-    @Shadow
+    @Shadow(remap = false)
     public ModelPart breasts;
 
     @Final
-    @Shadow
+    @Shadow(remap = false)
     public ModelPart breastsWear;
 
-    @Shadow
+    @Shadow(remap = false)
     float breastSize;
 
     @Unique
@@ -42,7 +42,7 @@ public abstract class PlayerEntityExtendedModelMixin {
     @Unique
     private final Matrix3f vivecraft$rotMatrix = new Matrix3f();
 
-    @Inject(method = "setupAnim", at = @At("TAIL"))
+    @Inject(method = {"setupAnim", "method_62110"}, at = @At("TAIL"), remap = false)
     private void vivecraft$moveBreasts(CallbackInfo ci, @Local(argsOnly = true) AvatarRenderState villager) {
         if (((EntityRenderStateExtension) villager).vivecraft$getRotInfo() != null) {
 

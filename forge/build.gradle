@@ -1,7 +1,5 @@
 plugins {
-    id 'net.minecraftforge.gradle' version "${forge_gradle}"
-    id 'net.minecraftforge.jarjar' version '0.2.3'
-    id 'idea'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 def mixins = [
@@ -30,89 +28,103 @@ def mixins = [
     "vivecraft.xaerosworldmap.mixins.json"
 ]
 
-minecraft {
-    mappings channel: 'official', version: minecraft_version
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
 
-    accessTransformer = true
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
 
-    runs {
-        configureEach {
-            workingDir.convention layout.projectDirectory.dir('run')
-            systemProperty 'forge.logging.console.level', 'debug'
-            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
-            // Mixin requires either specifying the config via command line, or in the Manifest
-            args "--mixin.config=" + mixins.join(",")
-        }
+    forge {
+        convertAccessWideners = true
+        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        register('client') {
-            systemProperty 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        register('server') {
-            systemProperty 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
+        for(String mixin : mixins) {
+            mixinConfig(mixin)
         }
     }
 }
 
-repositories {
-    mavenCentral()
-    minecraft.mavenizer(it)
-    maven fg.forgeMaven
-    maven fg.minecraftLibsMaven
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    bundle {
+        // bundle command, to copy jar contents with the shadow plugin
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
 }
 
-jarJar.register() {
-    archiveClassifier.set(project.name)
-    dependsOn(tasks.named("shadowJar"))
-
-    // Use shadowJar output instead
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(zipTree(tasks.named("shadowJar").get().archiveFile))
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
-}
 
 dependencies {
-    implementation minecraft.dependency("net.minecraftforge:forge:$forge_version")
-    annotationProcessor("net.minecraftforge:eventbus-validator:7.0.1")
+    forge "net.minecraftforge:forge:${rootProject.forge_version}"
 
-    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false })
-    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false })
-    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux-arm64") { transitive = false })
-    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false })
-    bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false })
-    // theoretically these should be possible to bundle? but there is some module resolving issue
-    /*jarJar(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }) {
-        jarJar.configure(it) {
-            module {
-                group = 'org.lwjgl'
-                name = 'lwjgl-openvr-natives-linux'
-            }
-            version = rootProject.lwjgl_version
-        }
-    }*/
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    // for OSC tracker support
-    jarJar(implementation("com.illposed.osc:javaosc-core:0.9"))
+    // modCompileOnly("maven.modrinth:rubidium:0.6.5")
+    // modCompileOnly("maven.modrinth:oculus:1.20-1.6.4")
 
-    // bHaptics Integration
-    jarJar(implementation("com.github.bhaptics:tact-java:0.1.4"))
-    jarJar(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+    forgeRuntimeLibrary("com.illposed.osc:javaosc-core:0.9") { transitive = false }
+    forgeRuntimeLibrary("com.github.bhaptics:tact-java:0.1.4") { transitive = false }
+    forgeRuntimeLibrary("org.java-websocket:Java-WebSocket:1.5.1") { transitive = false }
+
+    // shadow the natives
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
+    implementation(include("io.github.llamalad7:mixinextras-forge:${rootProject.mixin_extras_version}"))
+
+    include(implementation("com.illposed.osc:javaosc-core:0.9"))
+    include(implementation("com.github.bhaptics:tact-java:0.1.4"))
+    include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
 }
 
 shadowJar {
-    archiveClassifier.set(project.name + "-shadow")
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+
+    configurations = [
+        project.configurations.shadowCommon,
+        project.configurations.bundle
+    ]
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier.set('forge')
 }
 
 jar {
+    archiveClassifier.set("dev")
     manifest {
-        attributes["MixinConfigs"] = mixins.join(",")
+        attributes(
+            'Main-Class': "org.vivecraft.LaunchPopup"
+        )
     }
 }
 
-sourceSets.each {
-    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-    it.output.resourcesDir = dir
-    it.java.destinationDirectory = dir
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
 }
 
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}

@@ -1,57 +1,92 @@
 plugins {
-    id 'net.neoforged.moddev' version "${neoforge_moddev}"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
-neoForge {
-    version = neoforge_version
+architectury {
+    platformSetupLoomIde()
+    neoForge()
+}
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+}
 
-    accessTransformers.from(project(':common').getTasksByName("convertAW", false).outputs.files.first)
-
-    // access transformer is not truly valid, because it doesn't make some constructors public
-    // validateAccessTransformers = true
-
-    runs {
-        configureEach {
-            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
-            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
-        }
-        client {
-            client()
-        }
-        server {
-            server()
-        }
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    bundle {
+        // bundle command, to copy jar contents with the shadow plugin
+        canBeResolved = true
+        canBeConsumed = false
     }
-    mods {
-        "${mod_id}" {
-            sourceSet sourceSets.main
-        }
-    }
-    dependencies {
-        bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false })
-        bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false })
-        bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux-arm64") { transitive = false })
-        bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false })
-        bundle(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false })
-        // theoretically these should be possible to bundle? but there is some module resolving issue
-        /*jarJar(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }) {
-            jarJar.configure(it) {
-                module {
-                    group = 'org.lwjgl'
-                    name = 'lwjgl-openvr-natives-linux'
-                }
-                version = rootProject.lwjgl_version
-            }
-        }*/
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentNeoForge.extendsFrom common
+}
 
-        // for OSC tracker support
-        jarJar(implementation("com.illposed.osc:javaosc-core:0.9"))
 
-        // bHaptics Integration
-        jarJar(implementation("com.github.bhaptics:tact-java:0.1.4"))
-        jarJar(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
+dependencies {
+    neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
+
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+    forgeRuntimeLibrary("com.illposed.osc:javaosc-core:0.9") { transitive = false }
+    forgeRuntimeLibrary("com.github.bhaptics:tact-java:0.1.4") { transitive = false }
+    forgeRuntimeLibrary("org.java-websocket:Java-WebSocket:1.5.1") { transitive = false }
+
+    // shadow the natives
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
+    implementation(include("io.github.llamalad7:mixinextras-neoforge:${rootProject.mixin_extras_version}"))
+
+    include(implementation("com.illposed.osc:javaosc-core:0.9"))
+    include(implementation("com.github.bhaptics:tact-java:0.1.4"))
+    include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+
+    configurations = [
+        project.configurations.shadowCommon,
+        project.configurations.bundle
+    ]
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier.set('neoforge')
+    atAccessWideners.add("vivecraft.accesswidener")
+}
+
+jar {
+    archiveClassifier.set("dev")
+    manifest {
+        attributes(
+            'Main-Class': "org.vivecraft.LaunchPopup"
+        )
     }
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
 
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}

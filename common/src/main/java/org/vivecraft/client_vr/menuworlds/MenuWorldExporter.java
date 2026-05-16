@@ -31,7 +31,6 @@ import net.minecraft.world.attribute.AmbientParticle;
 import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.attribute.EnvironmentAttributes;
-import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -40,7 +39,6 @@ import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
-import net.minecraft.world.level.dimension.DimensionDefaults;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.timeline.Timeline;
@@ -206,10 +204,11 @@ public class MenuWorldExporter {
         }
 
         ByteBuffer buf = ByteBuffer.allocate(header.uncompressedSize).order(ByteOrder.BIG_ENDIAN);
-        try (Inflater inflater = new Inflater()) {
-            inflater.setInput(data, Header.SIZE, data.length - Header.SIZE);
-            inflater.inflate(buf);
-        }
+        Inflater inflater = new Inflater();
+        inflater.setInput(data, Header.SIZE, data.length - Header.SIZE);
+        inflater.inflate(buf);
+        inflater.end();
+
         buf.rewind();
         DataInput di = new DataInputBuffer(buf);
 
@@ -268,7 +267,7 @@ public class MenuWorldExporter {
         float dimAmbientLight;
         Optional<Integer> cloudHeight = Optional.empty();
         DimensionType.Skybox skybox = DimensionType.Skybox.OVERWORLD;
-        CardinalLighting.Type cardinalLightingType = CardinalLighting.Type.DEFAULT;
+        DimensionType.CardinalLightType cardinalLightType = DimensionType.CardinalLightType.DEFAULT;
 
         if (header.version < 5) { // fill in missing values
             if (BuiltinDimensionTypes.NETHER.identifier().equals(dimName)) {
@@ -277,7 +276,7 @@ public class MenuWorldExporter {
                 dimMinY = 0;
                 dimAmbientLight = 0.1f;
                 skybox = DimensionType.Skybox.NONE;
-                cardinalLightingType = CardinalLighting.Type.NETHER;
+                cardinalLightType = DimensionType.CardinalLightType.NETHER;
             } else if (BuiltinDimensionTypes.END.identifier().equals(dimName)) {
                 dimFixedTime = OptionalLong.of(6000L);
                 dimHasCeiling = false;
@@ -301,7 +300,7 @@ public class MenuWorldExporter {
             if (dimHasCeiling && !dimHasSkyLight) {
                 // nether
                 skybox = DimensionType.Skybox.NONE;
-                cardinalLightingType = CardinalLighting.Type.NETHER;
+                cardinalLightType = DimensionType.CardinalLightType.NETHER;
             } else if (dimFixedTime.isPresent()) {
                 // end
                 skybox = DimensionType.Skybox.END;
@@ -335,38 +334,30 @@ public class MenuWorldExporter {
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, Timelines.NIGHT_SKY_LIGHT_COLOR);
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_LEVEL, 4.0f);
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f);
-                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -13621215);
             }
             case OVERWORLD -> {
                 attributes.set(EnvironmentAttributes.FOG_COLOR, -4138753);
                 attributes.set(EnvironmentAttributes.SKY_COLOR, OverworldBiomes.calculateSkyColor(0.8f));
-                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -16119286);
                 timeline = timelines != null ?
-                    HolderSet.direct(timelines.getOrThrow(Timelines.OVERWORLD_DAY),
-                        timelines.getOrThrow(Timelines.MOON)) :
+                    HolderSet.direct(timelines.getOrThrow(Timelines.DAY), timelines.getOrThrow(Timelines.MOON)) :
                     HolderSet.empty();
             }
             case END -> {
                 attributes.set(EnvironmentAttributes.FOG_COLOR, -15199464);
-                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, -5480243);
+                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, -1736449);
                 attributes.set(EnvironmentAttributes.SKY_COLOR, -16777216);
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f);
-                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -12630209);
             }
         }
-
-        // TODO 26.1 should also be stored probably
-        attributes.set(EnvironmentAttributes.BLOCK_LIGHT_TINT, DimensionDefaults.BLOCK_LIGHT_TINT);
 
         if (dataVersion < 4554 && BuiltinDimensionTypes.END.identifier().equals(dimName)) {
             dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
         }
 
-        DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, false,
-            1.0,
+        DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, 1.0,
             dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimAmbientLight,
-            new DimensionType.MonsterSettings(ConstantInt.of(0), 0), skybox, cardinalLightingType, attributes.build(),
-            timeline, Optional.empty());
+            new DimensionType.MonsterSettings(ConstantInt.of(0), 0), skybox, cardinalLightType, attributes.build(),
+            timeline);
 
         float rotation = 0.0f;
         boolean rain = false;
@@ -630,14 +621,14 @@ public class MenuWorldExporter {
 
                 dos.writeUTF(registryAccess.lookupOrThrow(Registries.BIOME).getKey(biome).toString());
 
-                Biome.ClimateSettings climateSettings = Xplat.INSTANCE.getBiomeClimateSettings(biome);
+                Biome.ClimateSettings climateSettings = Xplat.getBiomeClimateSettings(biome);
 
                 dos.writeBoolean(climateSettings.hasPrecipitation());
                 dos.writeFloat(climateSettings.temperature());
                 dos.writeUTF(climateSettings.temperatureModifier().getSerializedName());
                 dos.writeFloat(climateSettings.downfall());
 
-                BiomeSpecialEffects specialEffects = Xplat.INSTANCE.getBiomeEffects(biome);
+                BiomeSpecialEffects specialEffects = Xplat.getBiomeEffects(biome);
 
                 dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.FOG_COLOR, dimensionType));
                 dos.writeInt(specialEffects.waterColor());

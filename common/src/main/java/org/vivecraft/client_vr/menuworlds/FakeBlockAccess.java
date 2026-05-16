@@ -1,14 +1,12 @@
 package org.vivecraft.client_vr.menuworlds;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.*;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.attribute.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
-import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
@@ -32,7 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class FakeBlockAccess implements LevelReader, BlockAndTintGetter {
+public class FakeBlockAccess implements LevelReader {
     private final int version;
     private final long seed;
     private final DimensionType dimensionType;
@@ -125,8 +123,7 @@ public class FakeBlockAccess implements LevelReader, BlockAndTintGetter {
             });
         }
 
-        this.dimensionType.timelines()
-            .forEach((timeline) -> builder.addTimelineLayer(timeline, (definition) -> renderer.time));
+        this.dimensionType.timelines().forEach((timeline) -> builder.addTimelineLayer(timeline, () -> renderer.time));
 
         int flashColor = ARGB.color(204, 204, 255);
         builder.addTimeBasedLayer(EnvironmentAttributes.SKY_COLOR, (skyColor, cacheTickId) -> {
@@ -256,7 +253,7 @@ public class FakeBlockAccess implements LevelReader, BlockAndTintGetter {
                 b += color & 0x000000FF;
             }
 
-            return 255 << 24 | (r / count & 255) << 16 | (g / count & 255) << 8 | b / count & 255;
+            return (r / count & 255) << 16 | (g / count & 255) << 8 | b / count & 255;
         }
     }
 
@@ -298,10 +295,21 @@ public class FakeBlockAccess implements LevelReader, BlockAndTintGetter {
         }
     }
 
-
     @Override
-    public CardinalLighting cardinalLighting() {
-        return this.dimensionType().cardinalLightType().get();
+    public float getShade(Direction face, boolean shade) {
+        // isNether?? yeah mate nice hard-coding
+        DimensionType.CardinalLightType type = this.dimensionType().cardinalLightType();
+
+        if (!shade) {
+            return type == DimensionType.CardinalLightType.NETHER ? 0.9F : 1.0F;
+        } else {
+            return switch (face) {
+                case DOWN -> type == DimensionType.CardinalLightType.NETHER ? 0.9F : 0.5F;
+                case UP -> type == DimensionType.CardinalLightType.NETHER ? 0.9F : 1.0F;
+                case NORTH, SOUTH -> 0.8F;
+                case WEST, EAST -> 0.6F;
+            };
+        }
     }
 
     @Override

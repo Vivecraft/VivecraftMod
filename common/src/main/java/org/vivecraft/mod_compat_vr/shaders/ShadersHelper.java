@@ -145,9 +145,9 @@ public class ShadersHelper {
      * @param createValueMacro a consumer that defines a name with a value
      */
     public static void addMacros(Consumer<String> createMacro, BiConsumer<String, Integer> createValueMacro) {
-        if (Xloader.INSTANCE.isModLoadedSuccess()) {
+        if (Xloader.isModLoadedSuccess()) {
             createMacro.accept("VIVECRAFT");
-            String[] modVersion = Xloader.INSTANCE.getModVersion().split("-", 3)[1].split("\\.");
+            String[] modVersion = Xloader.getModVersion().split("-", 3)[1].split("\\.");
             int version = Integer.parseInt(modVersion[0]) * 10000 +
                 Integer.parseInt(modVersion[1]) * 100 +
                 Integer.parseInt(modVersion[2]);

@@ -16,7 +16,7 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 import java.util.function.Supplier;
 
 @Pseudo
-@Mixin(targets = "net.irisshaders.iris.uniforms.CommonUniforms")
+@Mixin(targets = "net.irisshaders.iris.uniforms.CommonUniforms", remap = false)
 public class IrisCommonUniformsMixin {
     @Inject(method = "generalCommonUniforms", at = @At("TAIL"))
     private static void vivecraft$addVivecraftUniforms(

@@ -1,19 +1,34 @@
 package org.vivecraft;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.FluidState;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
 public interface Xplat {
-
-    Xplat INSTANCE = Services.load(Xplat.class);
+    /**
+     * This must be a <b>public static</b> method. The platform-implemented solution must be placed under a
+     * platform sub-package, with its class suffixed with {@code Impl}.
+     * <p>
+     * Example:<br>
+     * Expect: net.examplemod.ExampleExpectPlatform#getConfigDirectory()<br>
+     * Actual Fabric: net.examplemod.fabric.ExampleExpectPlatformImpl#getConfigDirectory()<br>
+     * Actual Forge: net.examplemod.forge.ExampleExpectPlatformImpl#getConfigDirectory()<br>
+     * <p>
+     * <a href="https://plugins.jetbrains.com/plugin/16210-architectury">You should also get the IntelliJ plugin to help with @ExpectPlatform.</a>
+     */
 
     /**
      * asks the mod loader to enable the stencil for the given RenderTarget
@@ -21,19 +36,49 @@ public interface Xplat {
      * @param renderTarget RenderTarget to enable the Stencil on
      * @return true if the mod loader enabled the stencil
      */
-    boolean enableRenderTargetStencil(RenderTarget renderTarget);
+    @ExpectPlatform
+    static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
+        return false;
+    }
+
+    /**
+     * @return runtime name of the {@link BlockBehaviour#use} method
+     */
+    @ExpectPlatform
+    static String getUseMethodName() {
+        return "";
+    }
+
+    /**
+     * gets the TextureAtlasSprites for the given FluidState
+     *
+     * @param level      level the fluid is in
+     * @param pos        BlockPos of the fluid
+     * @param fluidState State of the fluid
+     * @return array of the textures of a fluid block
+     */
+    @ExpectPlatform
+    static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidState) {
+        return new TextureAtlasSprite[]{};
+    }
 
     /**
      * @param biome Biome to get the ClimateSettings from
      * @return ClimateSettings of the given Biome
      */
-    Biome.ClimateSettings getBiomeClimateSettings(Biome biome);
+    @ExpectPlatform
+    static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
+        throw new AssertionError();
+    }
 
     /**
      * @param biome Biome to get the BiomeSpecialEffects from
      * @return BiomeSpecialEffects of the given Biome
      */
-    BiomeSpecialEffects getBiomeEffects(Biome biome);
+    @ExpectPlatform
+    static BiomeSpecialEffects getBiomeEffects(Biome biome) {
+        throw new AssertionError();
+    }
 
     /**
      * check if packets of the given channel id are allowed to be sent
@@ -42,7 +87,10 @@ public interface Xplat {
      * @param id         channel id to check
      * @return if the connection accepts packets of the given id
      */
-    boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id);
+    @ExpectPlatform
+    static boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
+        return true;
+    }
 
     /**
      * wraps the given payload into the mod loader specific packet
@@ -50,7 +98,10 @@ public interface Xplat {
      * @param payload payload to wrap
      * @return ServerboundCustomPayloadPacket
      */
-    Packet<?> getC2SPacket(VivecraftPayloadC2S payload);
+    @ExpectPlatform
+    static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
+        throw new AssertionError();
+    }
 
     /**
      * wraps the given payload into the mod loader specific packet
@@ -58,7 +109,10 @@ public interface Xplat {
      * @param payload payload to wrap
      * @return ClientboundCustomPayloadPacket
      */
-    Packet<?> getS2CPacket(VivecraftPayloadS2C payload);
+    @ExpectPlatform
+    static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
+        throw new AssertionError();
+    }
 
     /**
      * checks if the given KeyMapping uses a key modifier to trigger
@@ -66,7 +120,10 @@ public interface Xplat {
      * @param keyMapping KeyMapping to check
      * @return true if a key modifier is used
      */
-    boolean hasKeyModifier(KeyMapping keyMapping);
+    @ExpectPlatform
+    static boolean hasKeyModifier(KeyMapping keyMapping) {
+        return false;
+    }
 
     /**
      * gets the key modifier for the given KeyMapping
@@ -74,7 +131,10 @@ public interface Xplat {
      * @param keyMapping KeyMapping to check
      * @return one of the GLFW_MOD_X modifiers, or 0 if there is none
      */
-    int getKeyModifier(KeyMapping keyMapping);
+    @ExpectPlatform
+    static int getKeyModifier(KeyMapping keyMapping) {
+        return 0;
+    }
 
     /**
      * gets the key that corresponds to the key modifier for the given KeyMapping
@@ -82,7 +142,10 @@ public interface Xplat {
      * @param keyMapping KeyMapping to check
      * @return one of the GLFW_KEY_X keys, or -1 if there is none
      */
-    int getKeyModifierKey(KeyMapping keyMapping);
+    @ExpectPlatform
+    static int getKeyModifierKey(KeyMapping keyMapping) {
+        return -1;
+    }
 
     /**
      * checks if the given player is a fake player, instead of an actual player
@@ -90,5 +153,8 @@ public interface Xplat {
      * @param player player to check
      * @return {@code true} when it is a fake player
      */
-    boolean isFakePlayer(ServerPlayer player);
+    @ExpectPlatform
+    static boolean isFakePlayer(ServerPlayer player) {
+        return false;
+    }
 }

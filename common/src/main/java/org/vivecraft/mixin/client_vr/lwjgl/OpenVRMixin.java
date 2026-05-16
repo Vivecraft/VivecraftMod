@@ -10,7 +10,7 @@ import java.util.function.LongFunction;
 
 import static org.lwjgl.openvr.VR.*;
 
-@Mixin(value = OpenVR.class)
+@Mixin(value = OpenVR.class, remap = false)
 public abstract class OpenVRMixin {
 
     @Shadow

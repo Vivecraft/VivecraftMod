@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.screens;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
@@ -39,11 +39,11 @@ public class BlockedServerScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        graphics.centeredText(this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFFFF);
         this.message.visitLines(TextAlignment.CENTER, this.width / 2, 120,
-            this.minecraft.font.lineHeight, graphics.textRenderer());
+            this.minecraft.font.lineHeight, guiGraphics.textRenderer());
     }
 }

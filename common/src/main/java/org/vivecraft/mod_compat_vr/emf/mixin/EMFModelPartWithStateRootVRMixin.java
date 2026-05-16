@@ -14,11 +14,11 @@ import traben.entity_model_features.models.parts.EMFModelPartRoot;
 @Mixin(targets = {
     "traben.entity_model_features.models.parts.EMFModelPartWithState",
     "traben.entity_model_features.models.EMFModelPartWithState"
-})
+}, remap = false)
 public class EMFModelPartWithStateRootVRMixin {
 
-    @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Ltraben/entity_model_features/models/parts/EMFModelPartRoot;animate()V"))
+    @WrapWithCondition(method = {"render", "method_22699", "m_104306_"}, at = @At(value = "INVOKE", target = "Ltraben/entity_model_features/models/parts/EMFModelPartRoot;animate()V"))
     private boolean vivecraft$noAnimationForFirstPerson(EMFModelPartRoot instance) {
-        return !VRState.VR_RUNNING || !ClientDataHolderVR.isFpHand.get();
+        return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().isFpHand;
     }
 }

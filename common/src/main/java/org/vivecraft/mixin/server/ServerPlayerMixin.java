@@ -57,7 +57,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
 
     @Shadow
     @Final
-    private MinecraftServer server;
+    public MinecraftServer server;
 
     @Shadow
     public ServerGamePacketListenerImpl connection;
@@ -256,6 +256,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         return hurt;
     }
 
+    @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$noAttackWhileBlocking(Entity target, CallbackInfo ci) {
+        ServerVivePlayer vivePlayer = vivecraft$getVivePlayer();
+        if (!ServerConfig.ALLOW_ATTACKS_WHILE_BLOCKING.get() && vivePlayer != null && vivePlayer.isVR() &&
+            this.isBlocking())
+        {
+            ci.cancel();
+        }
+    }
+
     @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
     private ItemEntity vivecraft$dropVive(ItemEntity item, @Local(argsOnly = true, ordinal = 0) boolean dropAround) {
         ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
@@ -359,7 +369,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         if (cir.getReturnValueZ()) {
             ServerVivePlayer vivePlayer = this.vivecraft$getVivePlayer();
             if (vivePlayer != null && vivePlayer.isVR() && vivePlayer.wantsDamageDirection) {
-                this.connection.send(Xplat.INSTANCE.getS2CPacket(
+                this.connection.send(Xplat.getS2CPacket(
                     new DamageDirectionPayloadS2C(Utils.getDirFromDamageSource(damageSource, this))));
             }
         }

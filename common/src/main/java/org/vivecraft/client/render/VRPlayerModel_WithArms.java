@@ -384,6 +384,16 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
     }
 
     @Override
+    public void setAllVisible(boolean visible) {
+        super.setAllVisible(visible);
+
+        this.leftHand.visible = visible;
+        this.rightHand.visible = visible;
+        this.leftHandSleeve.visible = visible;
+        this.rightHandSleeve.visible = visible;
+    }
+
+    @Override
     public ModelPart getLeftHand() {
         return this.leftHand;
     }

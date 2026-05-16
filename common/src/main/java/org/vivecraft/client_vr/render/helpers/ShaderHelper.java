@@ -9,20 +9,27 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.VRShaders;
-import org.vivecraft.client_vr.render.renderstates.PostProcessRenderState;
 import org.vivecraft.client_vr.render.ubos.LanczosUBO;
 import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
 import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 
 import javax.annotation.Nullable;
 import java.util.OptionalInt;
@@ -34,10 +41,18 @@ public class ShaderHelper {
     private static final Minecraft MC = Minecraft.getInstance();
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
 
+    private static float FOV_REDUCTION = 1.0F;
+    private static float WATER_EFFECT;
+    private static boolean WAS_IN_WATER;
+    private static float PUMPKIN_EFFECT;
+    private static float PORTAL_EFFECT;
+    private static float RED;
+    private static float BLACK;
+    private static float BLUE;
+    private static float TIME;
+
     private static GpuBuffer SCREEN_UV_VBO;
     private static GpuBuffer SCREEN_VBO;
-
-    public static final Matrix4f THIRD_PASS_PROJECTION_MATRIX = new Matrix4f();
 
     /**
      * renders a fullscreen quad with the given RenderPipeline, and the given RenderTarget bound as "Sampler0"
@@ -117,25 +132,131 @@ public class ShaderHelper {
      * fov reduction when walking
      * water and portal wobbles
      *
-     * @param eye              RenderPass that is being post processed, LEFT or RIGHT
-     * @param source           RenderTarget that holds the rendered image
-     * @param target           RenderTarget to write to
-     * @param postProcessState post processing render state
+     * @param eye         RenderPass that is being post processed, LEFT or RIGHT
+     * @param source      RenderTarget that holds the rendered image
+     * @param target      RenderTarget to write to
+     * @param partialTick current partial tick
      */
-    public static void doVrPostProcess(
-        RenderPass eye, RenderTarget source, RenderTarget target, PostProcessRenderState postProcessState)
-    {
+    public static void doVrPostProcess(RenderPass eye, RenderTarget source, RenderTarget target, float partialTick) {
+        if (eye == RenderPass.LEFT) {
+            // only update these once per frame, or the effects are twice as fast
+            // and could be out of sync between the eyes
+
+            // status effects
+            RED = 0.0F;
+            BLACK = 0.0F;
+            BLUE = 0.0F;
+            TIME = (float) Util.getMillis() / 1000.0F;
+
+            PUMPKIN_EFFECT = 0.0F;
+            PORTAL_EFFECT = 0.0F;
+
+            if (MC.player != null && MC.level != null) {
+                boolean isInWater = ((GameRendererExtension) MC.gameRenderer).vivecraft$isInWater();
+                if (DATA_HOLDER.vrSettings.waterEffect && WAS_IN_WATER != isInWater) {
+                    // water state changed, start effect
+                    WATER_EFFECT = 2.3F;
+                } else {
+                    if (isInWater) {
+                        // slow falloff in water
+                        WATER_EFFECT -= 1F / 120F;
+                    } else {
+                        // fast falloff outside water
+                        WATER_EFFECT -= 1F / 60F;
+                    }
+
+                    if (WATER_EFFECT < 0.0F) {
+                        WATER_EFFECT = 0.0F;
+                    }
+                }
+
+                WAS_IN_WATER = isInWater;
+
+                if (IrisHelper.isLoaded() && !IrisHelper.hasWaterEffect()) {
+                    WATER_EFFECT = 0.0F;
+                }
+
+                float portalTime = Mth.lerp(partialTick, MC.player.oPortalEffectIntensity,
+                    MC.player.portalEffectIntensity);
+                if (DATA_HOLDER.vrSettings.portalEffect &&
+                    // vanilla check for portal overlay
+                    portalTime > 0.0F)
+                {
+                    PORTAL_EFFECT = portalTime;
+                } else {
+                    PORTAL_EFFECT = 0.0F;
+                }
+
+                ItemStack itemstack = MC.player.getItemBySlot(EquipmentSlot.HEAD);
+
+                if (DATA_HOLDER.vrSettings.pumpkinEffect && itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem() &&
+                    (!itemstack.has(DataComponents.CUSTOM_MODEL_DATA)))
+                {
+                    PUMPKIN_EFFECT = 1.0F;
+                } else {
+                    PUMPKIN_EFFECT = 0.0F;
+                }
+
+                float hurtTimer = (float) MC.player.hurtTime - partialTick;
+                float healthPercent = 1.0F - MC.player.getHealth() / MC.player.getMaxHealth();
+                healthPercent = (healthPercent - 0.5F) * 0.75F;
+
+                if (DATA_HOLDER.vrSettings.hitIndicator && hurtTimer > 0.0F) { // hurt flash
+                    hurtTimer = hurtTimer / (float) MC.player.hurtDuration;
+                    hurtTimer = healthPercent +
+                        Mth.sin(hurtTimer * hurtTimer * hurtTimer * hurtTimer * Mth.PI) * 0.5F;
+                    RED = hurtTimer;
+                } else if (DATA_HOLDER.vrSettings.lowHealthIndicator) { // red due to low health
+                    RED = healthPercent * Mth.abs(Mth.sin((2.5F * TIME) / (1.0F - healthPercent + 0.1F)));
+
+                    if (MC.player.isCreative()) {
+                        RED = 0.0F;
+                    }
+                }
+
+                float freeze = MC.player.getPercentFrozen();
+                if (DATA_HOLDER.vrSettings.freezeEffect && freeze > 0) {
+                    BLUE = RED;
+                    BLUE = Math.max(freeze / 2, BLUE);
+                    RED = 0;
+                }
+
+                if (DATA_HOLDER.vrSettings.sleepEffect && MC.player.isSleeping()) {
+                    BLACK = 0.5F + 0.3F * MC.player.getSleepTimer() * 0.01F;
+                }
+
+                if (DATA_HOLDER.vr.isWalkingAbout && BLACK < 0.8F) {
+                    BLACK = 0.5F;
+                }
+
+                // fov reduction when moving
+                if (DATA_HOLDER.vrSettings.useFOVReduction && DATA_HOLDER.vrPlayer.getFreeMove()) {
+                    if (Math.abs(MC.player.zza) > 0.0F || Math.abs(MC.player.xxa) > 0.0F) {
+                        FOV_REDUCTION = FOV_REDUCTION - 0.05F;
+                    } else {
+                        FOV_REDUCTION = FOV_REDUCTION + 0.01F;
+                    }
+                    FOV_REDUCTION = Mth.clamp(FOV_REDUCTION, DATA_HOLDER.vrSettings.fovReductionMin, 0.8F);
+                } else {
+                    FOV_REDUCTION = 1.0F;
+                }
+            } else {
+                WATER_EFFECT = 0.0F;
+                FOV_REDUCTION = 1.0F;
+            }
+        }
+
         VRShaders.POST_PROCESS_UBO.updateBuffer(
-            postProcessState.pumpkinEffect > 0.0F ? 0.3F : postProcessState.fovReduction,
+            PUMPKIN_EFFECT > 0.0F ? 0.3F : FOV_REDUCTION,
             DATA_HOLDER.vrSettings.fovRedutioncOffset,
-            postProcessState.pumpkinEffect > 0.0F ? 0.0F : 0.06F,
-            postProcessState.waterEffect,
-            postProcessState.portalEffect,
-            postProcessState.time,
-            postProcessState.pumpkinEffect,
-            postProcessState.red,
-            postProcessState.blue,
-            postProcessState.black,
+            PUMPKIN_EFFECT > 0.0F ? 0.0F : 0.06F,
+            WATER_EFFECT,
+            PORTAL_EFFECT,
+            TIME,
+            PUMPKIN_EFFECT,
+            RED,
+            BLUE,
+            BLACK,
             eye == RenderPass.LEFT ? 1 : -1
         );
 
@@ -287,7 +408,7 @@ public class ShaderHelper {
         }
 
         VRShaders.MIXED_REALITY_UBO.updateBuffer(
-            THIRD_PASS_PROJECTION_MATRIX,
+            ((GameRendererExtension) MC.gameRenderer).vivecraft$getThirdPassProjectionMatrix(),
             viewMatrix,
             camPlayer, cameraLook,
             DATA_HOLDER.vrSettings.mixedRealityUnityLike,

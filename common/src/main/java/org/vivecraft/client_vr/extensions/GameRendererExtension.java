@@ -2,19 +2,24 @@ package org.vivecraft.client_vr.extensions;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.VRData;
+import org.joml.Matrix4f;
 
 public interface GameRendererExtension {
+
+    /**
+     * @return if the camera is in water
+     */
+    boolean vivecraft$isInWater();
+
+    /**
+     * @return if the camera in a block
+     */
+    float vivecraft$isInBlock();
 
     /**
      * set the player position/rotation to the current VR pass location
      */
     void vivecraft$setupRVE();
-
-    /**
-     * set the player position/rotation to the current VR device pose
-     */
-    void vivecraft$setupRVEAtDevice(VRData.VRDevicePose eyePose);
 
     /**
      * cache the player position/rotation to be able to restore it later
@@ -32,11 +37,6 @@ public interface GameRendererExtension {
     double vivecraft$getRveY();
 
     /**
-     * @return the cached original player position
-     */
-    Vec3 vivecraft$getRvePos();
-
-    /**
      * @param partialTick partial Tick to interpolate the position
      * @return the cached original player position
      */
@@ -48,6 +48,16 @@ public interface GameRendererExtension {
      * @param partialTick partial ticks to interpolate fov changes
      */
     void vivecraft$resetProjectionMatrix(float partialTick);
+
+    /**
+     * @return the projection matrix of the third person pass, only valid if that pass was rendered before
+     */
+    Matrix4f vivecraft$getThirdPassProjectionMatrix();
+
+    /**
+     * @return min clipping plane
+     */
+    float vivecraft$getMinClipDistance();
 
     /**
      * sets if the GamerRenderer should run through the screen rendering part of {@code GameRenderer.render()}

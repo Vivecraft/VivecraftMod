@@ -16,21 +16,21 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 })
 public class IrisHandRendererVRMixin {
 
-    @Inject(method = "setupGlState", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setupGlState", at = @At("HEAD"), cancellable = true, remap = false)
     private void vivecraft$noViewBobbingInVR(CallbackInfoReturnable<PoseStack> cir) {
         if (!RenderPassType.isVanilla()) {
             cir.setReturnValue(new PoseStack());
         }
     }
 
-    @Inject(method = "renderSolid", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderSolid", at = @At("HEAD"), cancellable = true, remap = false)
     private void vivecraft$NoHandSolid(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "renderTranslucent", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderTranslucent", at = @At("HEAD"), cancellable = true, remap = false)
     private void vivecraft$NoHandTranslucent(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             ci.cancel();

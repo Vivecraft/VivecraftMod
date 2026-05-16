@@ -1,6 +1,6 @@
 package org.vivecraft.client.gui.framework.screens;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -29,7 +29,7 @@ public abstract class TwoHandedScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             this.init();
             this.reinit = false;
@@ -50,9 +50,9 @@ public abstract class TwoHandedScreen extends Screen {
             boolean hover2 = widget.isMouseOver(x2, y2);
 
             if (hover1) {
-                widget.extractRenderState(graphics, (int) x1, (int) y1, partialTick);
+                widget.render(guiGraphics, (int) x1, (int) y1, partialTick);
             } else {
-                widget.extractRenderState(graphics, (int) x2, (int) y2, partialTick);
+                widget.render(guiGraphics, (int) x2, (int) y2, partialTick);
             }
 
             if (hover1) {
@@ -78,8 +78,8 @@ public abstract class TwoHandedScreen extends Screen {
             this.lastHoveredButtonId2 = widget2;
         }
 
-        RenderHelper.drawMouseMenuQuad(graphics, (int) x1, (int) y1);
-        RenderHelper.drawMouseMenuQuad(graphics, (int) x2, (int) y2);
+        RenderHelper.drawMouseMenuQuad(guiGraphics, (int) x1, (int) y1);
+        RenderHelper.drawMouseMenuQuad(guiGraphics, (int) x2, (int) y2);
     }
 
     public boolean processCursor(Vector3f Pos_room, Matrix4f Rotation_room, boolean mainCursor) {

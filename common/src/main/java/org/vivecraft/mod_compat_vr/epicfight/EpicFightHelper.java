@@ -25,7 +25,7 @@ public class EpicFightHelper {
     private static KeyMapping EpicFight_ATTACK;
 
     public static boolean isLoaded() {
-        return Xloader.INSTANCE.isModLoaded("epicfight");
+        return Xloader.isModLoaded("epicfight");
     }
 
     /**

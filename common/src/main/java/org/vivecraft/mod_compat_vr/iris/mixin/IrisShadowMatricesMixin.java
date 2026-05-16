@@ -21,7 +21,7 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 public class IrisShadowMatricesMixin {
 
     // offset camera pos, to be in the equal grid as the first pass, but with correct offset
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 1)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 1, remap = false)
     private static float vivecraft$modifyOffsetX(
         float xOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
@@ -35,7 +35,7 @@ public class IrisShadowMatricesMixin {
         }
     }
 
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 2)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 2, remap = false)
     private static float vivecraft$modifyOffsetY(
         float yOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
@@ -48,7 +48,7 @@ public class IrisShadowMatricesMixin {
         }
     }
 
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 3, remap = false)
     private static float vivecraft$modifyOffsetZ(
         float zOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {

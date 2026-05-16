@@ -1,12 +1,12 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.openvr.HiddenAreaMesh;
+import org.lwjgl.openvr.HmdMatrix44;
 import org.lwjgl.openvr.VR;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -15,8 +15,6 @@ import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
-
-import java.nio.FloatBuffer;
 
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_PostPresentHandoff;
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_Submit;
@@ -80,16 +78,15 @@ public class OpenVRStereoRenderer extends VRRenderer {
     @Override
     protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer left = stack.mallocFloat(1);
-            FloatBuffer right = stack.mallocFloat(1);
-            FloatBuffer top = stack.mallocFloat(1);
-            FloatBuffer bottom = stack.mallocFloat(1);
-
-            VRSystem_GetProjectionRaw(eyeType, left, right, top, bottom);
-            return new Matrix4f().frustum(
-                left.get() * nearClip, right.get() * nearClip,
-                top.get() * nearClip, bottom.get() * nearClip,
-                nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
+            if (eyeType == VR.EVREye_Eye_Left) {
+                return OpenVRUtil.Matrix4fFromOpenVR(
+                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Left, nearClip, Math.min(farClip, Float.MAX_VALUE),
+                        HmdMatrix44.calloc(stack)));
+            } else {
+                return OpenVRUtil.Matrix4fFromOpenVR(
+                    VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Right, nearClip, Math.min(farClip, Float.MAX_VALUE),
+                        HmdMatrix44.calloc(stack)));
+            }
         }
     }
 

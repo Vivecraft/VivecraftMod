@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.EnumMap;
 import java.util.Map;
 
-@Mixin(targets = "dev.djefrey.colorwheel.engine.ClrwlEngine")
+@Mixin(targets = "dev.djefrey.colorwheel.engine.ClrwlEngine", remap = false)
 public class ClrwlEngineVRMixin {
 
     @Shadow

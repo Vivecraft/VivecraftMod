@@ -17,7 +17,7 @@ public class ReplayModHelper {
     private static Method RecordingEventHandler_onPacket;
 
     public static boolean isLoaded() {
-        return Xloader.INSTANCE.isModLoaded("replaymod") || Xloader.INSTANCE.isModLoaded("reforgedplaymod");
+        return Xloader.isModLoaded("replaymod") || Xloader.isModLoaded("reforgedplaymod");
     }
 
     public static void storePacket(Packet<?> packet) {

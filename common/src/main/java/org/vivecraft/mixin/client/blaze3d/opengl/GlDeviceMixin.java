@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.vivecraft.client.extensions.GlDeviceExtension;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 @Mixin(GlDevice.class)
 public class GlDeviceMixin implements GlDeviceExtension {
@@ -23,7 +24,7 @@ public class GlDeviceMixin implements GlDeviceExtension {
      */
     @Override
     public GpuTexture vivecraft$createFixedIdTexture(
-        @Nullable String label, int usageFlags, TextureFormat textureFormat, int width,
+        @Nullable Supplier<String> labelSupplier, int usageFlags, TextureFormat textureFormat, int width,
         int height, int depthLayers, int mipmapLevels, int texId)
     {
         if (mipmapLevels < 1) {
@@ -38,6 +39,7 @@ public class GlDeviceMixin implements GlDeviceExtension {
             }
 
             GlStateManager.clearGlErrors();
+            String label = this.debugLabels.exists() && labelSupplier != null ? labelSupplier.get() : null;
             if (label == null) {
                 label = String.valueOf(texId);
             }

@@ -4,12 +4,17 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.network.NetworkDirection;
 import org.lwjgl.glfw.GLFW;
@@ -19,48 +24,50 @@ import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
 public class XplatImpl implements Xplat {
 
-    @Override
-    public boolean enableRenderTargetStencil(RenderTarget renderTarget) {
+    public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         renderTarget.enableStencil();
         return true;
     }
 
-    @Override
-    public Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
+    public static String getUseMethodName() {
+        return "useWithoutItem";
+    }
+
+    public static TextureAtlasSprite[] getFluidTextures(
+        BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
+    {
+        return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
+    }
+
+    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
         return biome.getModifiedClimateSettings();
     }
 
-    @Override
-    public BiomeSpecialEffects getBiomeEffects(Biome biome) {
+    public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getModifiedSpecialEffects();
     }
 
-    @Override
-    public boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
+    public static boolean serverAcceptsPacket(ClientPacketListener connection, Identifier id) {
         return true;
     }
 
-    @Override
-    public Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
+    public static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         payload.write(buffer);
         return NetworkDirection.PLAY_TO_SERVER.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
     }
 
-    @Override
-    public Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
+    public static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         payload.write(buffer);
         return NetworkDirection.PLAY_TO_CLIENT.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
     }
 
-    @Override
-    public boolean hasKeyModifier(KeyMapping keyMapping) {
+    public static boolean hasKeyModifier(KeyMapping keyMapping) {
         return keyMapping.getKeyModifier() != KeyModifier.NONE;
     }
 
-    @Override
-    public int getKeyModifier(KeyMapping keyMapping) {
+    public static int getKeyModifier(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
             case SHIFT -> GLFW.GLFW_MOD_SHIFT;
             case ALT -> GLFW.GLFW_MOD_ALT;
@@ -69,8 +76,7 @@ public class XplatImpl implements Xplat {
         };
     }
 
-    @Override
-    public int getKeyModifierKey(KeyMapping keyMapping) {
+    public static int getKeyModifierKey(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
             case SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT;
             case ALT -> GLFW.GLFW_KEY_RIGHT_ALT;
@@ -79,8 +85,7 @@ public class XplatImpl implements Xplat {
         };
     }
 
-    @Override
-    public boolean isFakePlayer(ServerPlayer player) {
+    public static boolean isFakePlayer(ServerPlayer player) {
         // TODO check if forge reimplemented it, it was removed with 1.20.3
         // return player instanceof FakePlayer;
         return false;

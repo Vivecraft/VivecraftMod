@@ -11,10 +11,10 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(targets = {
     "traben.entity_model_features.models.parts.EMFModelPartWithState",
     "traben.entity_model_features.models.EMFModelPartWithState"
-})
+}, remap = false)
 public class EMFModelPartWithStateVRMixin {
-    @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Runnable;run()V"))
+    @WrapWithCondition(method = {"render", "method_22699", "m_104306_"}, at = @At(value = "INVOKE", target = "Ljava/lang/Runnable;run()V"))
     private boolean vivecraft$noRenderEventForFirstPerson(Runnable instance) {
-        return !VRState.VR_RUNNING || !ClientDataHolderVR.isFpHand.get();
+        return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().isFpHand;
     }
 }

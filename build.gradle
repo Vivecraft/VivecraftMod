@@ -1,48 +1,42 @@
+buildscript {
+    dependencies {
+        classpath("net.fabricmc:tiny-remapper:0.12.2")
+    }
+}
+
 plugins {
-    id 'com.gradleup.shadow' version '9.4.0' apply false
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
+}
+
+architectury {
+    minecraft = rootProject.minecraft_version
 }
 
 subprojects {
     apply plugin: "java"
+    apply plugin: "dev.architectury.loom"
 
-    base.archivesName = mod_id
+    archivesBaseName = rootProject.mod_id
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
-    if (project.name == "forge" || project.name == "neoforge") {
-        apply plugin: 'com.gradleup.shadow'
-
-        configurations {
-            bundle {
-                // bundle command, to copy jar contents with the shadow plugin
-                canBeResolved = true
-                canBeConsumed = false
-            }
-        }
-
-        shadowJar {
-            dependsOn project.tasks.named('jar')
-            from {
-                project.tasks.named('jar').get().archiveFile.map { zipTree(it) }
-            }
-            archiveClassifier.set(project.name)
-            configurations = project.configurations.named('bundle').map { [it] }
-            if (project.name != "forge") {
-                // forge does the jar in jar after so can't use the shadow jar as output
-                destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
-            }
-        }
-
-        project.assemble.dependsOn(shadowJar)
+    loom {
+        silentMojangMappingsLicense()
     }
 
     dependencies {
-        if (project.name != "common" && project.name != "stubs") {
-            implementation(project(":common")) { transitive = false }
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings loom.layered() {
+            // The following line declares the mojmap mappings, you may use other mappings as well
+            officialMojangMappings()
+            // The following line declares the yarn mappings you may select this one as well.
+            // "net.fabricmc:yarn:1.18.2+build.4:v2"
+            // parchment mappings as backup
+            parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
         }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
-        implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux-arm64") { transitive = false }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
 
@@ -52,9 +46,6 @@ subprojects {
         // bHaptics Integration
         implementation("com.github.bhaptics:tact-java:0.1.4")
 
-        // needed dependencies
-        compileOnly("com.google.code.findbugs:jsr305:3.0.2")
-
         // for running testing
         testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -62,15 +53,14 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = Integer.parseInt(java_version)
+        options.release = Integer.parseInt(rootProject.java_version)
     }
 
     java {
-        toolchain.languageVersion = JavaLanguageVersion.of(java_version)
         withSourcesJar()
     }
 
-    tasks.named('processResources', ProcessResources) {
+    processResources {
         var expandProps = [
             'version'              : version,
             'java_version'         : java_version,
@@ -111,36 +101,24 @@ subprojects {
         inputs.properties(expandProps)
 
         if (project.name != "common" && project.name != "stubs") {
-            // copy resources to run in dev
+            // copy resources except the mixin jsons
             from(project(':common').sourceSets['main'].resources) {
-                if (project.name == "fabric") {
-                    exclude "classtransfomer.cfg"
-                } else {
-                    exclude "vivecraft.accesswidener"
-                }
+                exclude "vivecraft.*"
             }
         }
     }
 
-    jar {
-        archiveClassifier.set(project.name)
+    tasks.register('copyJarToMain', Copy) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         if (project.name != "common" && project.name != "stubs") {
-            if (project.name != "forge" && project.name != "neoforge") {
-                // forge does the jar in jar after so can't use the shadow jar as output
-                destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
-            }
-            dependsOn project(':common').tasks.named('jar')
+            from remapJar
+            into rootProject.layout.buildDirectory.dir("libs")
+        }
+    }
 
-            from {
-                project(':common').tasks.named('jar').get().archiveFile.map { zipTree(it) }
-            }
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-        manifest {
-            attributes(
-                'Main-Class': "org.vivecraft.LaunchPopup"
-            )
-        }
+    remapJar {
+        // after remap, copy the final jar to the main /build/libs folder
+        finalizedBy copyJarToMain
     }
 
     javadoc {
@@ -168,44 +146,50 @@ subprojects {
     }
 
     // only do these for the api
-    if (project.name == "common") {
+    if (project.name in ["fabric", "neoforge"]) {
         tasks.register('apiJar', Jar) {
             archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
-            dependsOn tasks.named('jar')
+            dependsOn tasks.named('remapJar')
             archiveBaseName = rootProject.mod_id + '-api'
+            if (project.name == "neoforge") {
+                archiveBaseName = rootProject.mod_id + '-api-mojmap'
+            }
 
-            from(tasks.named('jar').flatMap { it.archiveFile }.map { zipTree(it) }) {
+            from(tasks.named('remapJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
                 include 'org/vivecraft/api/**'
             }
 
             manifest {
-                from(tasks.named('jar').flatMap { it.archiveFile }.map {
+                from(tasks.named('remapJar').flatMap { it.archiveFile }.map {
                     zipTree(it).matching {
                         include 'META-INF/MANIFEST.MF'
                     }.singleFile
                 })
             }
-            destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
+            finalizedBy copyJarToMain
         }
 
         tasks.register('apiSourcesJar', Jar) {
             archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
             archiveClassifier.set('sources')
-            dependsOn tasks.named('sourcesJar')
+            dependsOn tasks.named('remapSourcesJar')
             archiveBaseName = rootProject.mod_id + '-api'
+            if (project.name == "neoforge") {
+                archiveBaseName = rootProject.mod_id + '-api-mojmap'
+            }
 
-            from(tasks.named('sourcesJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
+            from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
                 include 'org/vivecraft/api/**'
             }
 
             manifest {
-                from(tasks.named('sourcesJar').flatMap { it.archiveFile }.map {
+                from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map {
                     zipTree(it).matching {
                         include 'META-INF/MANIFEST.MF'
                     }.singleFile
                 })
             }
-            destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
+            finalizedBy copyJarToMain
         }
 
         tasks.register('buildApi', Copy) {
@@ -230,12 +214,15 @@ subprojects {
                     from components.java
                 }
 
-                if (project.name == "common") {
+                if (project.name in ["fabric", "neoforge"]) {
                     Api(MavenPublication) {
                         version = rootProject.minecraft_version + "-" + rootProject.api_version
                         groupId = 'org.vivecraft'
 
                         artifactId = rootProject.mod_id + '-api'
+                        if (project.name == "neoforge") {
+                            artifactId += '-mojmap'
+                        }
 
                         artifact(tasks.named('apiJar'))
                         artifact(tasks.named('apiSourcesJar'))
@@ -259,6 +246,8 @@ subprojects {
 }
 
 allprojects {
+    apply plugin: "architectury-plugin"
+
     repositories {
         // Add repositories to retrieve artifacts from in here.
         // You should only use this when depending on other mods because
@@ -266,15 +255,7 @@ allprojects {
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
 
-
-        maven {
-            name = "jitpack"
-            url = "https://jitpack.io"
-
-            content {
-                includeGroupAndSubgroups "com.github"
-            }
-        }
+        maven { url 'https://jitpack.io' }
         exclusiveContent {
             forRepository {
                 maven {
@@ -304,39 +285,35 @@ allprojects {
         exclusiveContent {
             forRepository {
                 maven {
-                    name = "curseforge"
-                    url = "https://cursemaven.com"
+                    name = "fabricmc"
+                    url = "https://maven.fabricmc.net/"
                 }
             }
             filter {
-                includeGroup 'curse.maven'
+                includeGroup "net.fabricmc"
+                includeGroup "fabric-loom"
             }
         }
 
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "transformers mc"
-                    url = "https://maven.terraformersmc.com"
-                }
-            }
-            filter {
-                includeGroup "com.terraformersmc"
-            }
+        maven {
+            name = "neoforge"
+            url = "https://maven.neoforged.net/releases/"
         }
 
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "shedaniel (REI)"
-                    url = "https://maven.shedaniel.me"
-                }
-            }
-            filter {
-                includeGroupAndSubgroups "me.shedaniel"
-            }
-        }
-
+        maven { url = "https://hephaestus.dev/release" }
+        maven { url = "https://cursemaven.com" }
+        maven { url = "https://maven.parchmentmc.org" }
+        maven { url = "https://maven.tterrag.com/" }
+        maven { url = "https://storage.googleapis.com/devan-maven/" }
+        maven { url = "https://maven.shedaniel.me/" }
+        maven { url = "https://aperlambda.github.io/maven" }
+        maven { url = "https://mvn.devos.one/releases/" }
+        maven { url = "https://mvn.devos.one/snapshots/" }
+        maven { url = "https://maven.terraformersmc.com/" }
+        maven { url = "https://maven.cafeteria.dev/releases/" }
+        maven { url = "https://maven.gegy.dev" }
+        maven { url = "https://modmaven.dev" }
+        maven { url = "https://maven.minecraftforge.net/" }
         exclusiveContent {
             forRepository {
                 maven {

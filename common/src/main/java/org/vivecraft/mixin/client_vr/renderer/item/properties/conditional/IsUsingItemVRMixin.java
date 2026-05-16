@@ -18,7 +18,8 @@ import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 @Mixin(IsUsingItem.class)
 public class IsUsingItemVRMixin {
 
-    @Inject(method = "get", at = @At("HEAD"), cancellable = true)
+    // loom doesn't want to remap this for some reason
+    @Inject(method = {"get", "method_65638"}, at = @At("HEAD"), cancellable = true, remap = false)
     private void vivecraft$noHornUseAnim(
         CallbackInfoReturnable<Boolean> cir, @Local(argsOnly = true) ItemStack itemStack,
         @Local(argsOnly = true) LivingEntity entity)
@@ -28,7 +29,7 @@ public class IsUsingItemVRMixin {
         }
     }
 
-    @ModifyReturnValue(method = "get", at = @At(value = "RETURN"))
+    @ModifyReturnValue(method = {"get", "method_65638"}, at = @At(value = "RETURN"), remap = false)
     private boolean vivecraft$roomscaleBowNotch(
         boolean usingItem, @Local(argsOnly = true) ItemStack itemStack,
         @Local(argsOnly = true) LivingEntity livingEntity)

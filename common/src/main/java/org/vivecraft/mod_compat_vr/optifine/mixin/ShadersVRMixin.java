@@ -26,19 +26,19 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 @Mixin(targets = "net.optifine.shaders.Shaders")
 public class ShadersVRMixin {
 
-    @Shadow
+    @Shadow(remap = false)
     static double cameraPositionX;
-    @Shadow
+    @Shadow(remap = false)
     static double cameraPositionY;
-    @Shadow
+    @Shadow(remap = false)
     static double cameraPositionZ;
 
-    @ModifyExpressionValue(method = "setProgramUniforms", at = @At(value = "CONSTANT", args = "floatValue=0.05F"))
+    @ModifyExpressionValue(method = "setProgramUniforms", at = @At(value = "CONSTANT", args = "floatValue=0.05F"), remap = false)
     private static float vivecraft$nearPlane(float original) {
         return RenderPassType.isVanilla() ? original : 0.02F;
     }
 
-    @WrapOperation(method = "setCameraShadow", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;position()Lnet/minecraft/world/phys/Vec3;"))
+    @WrapOperation(method = "setCameraShadow", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;position()Lnet/minecraft/world/phys/Vec3;", remap = true), remap = false)
     private static Vec3 vivecraft$positionCameraForShadows(Camera camera, Operation<Vec3> original) {
         if (!VRState.VR_RUNNING || ShadersHelper.isSlowMode() || ClientDataHolderVR.getInstance().isFirstPass) {
             ShadersHelper.SHADOW_CAMERA_POSITION = Minecraft.getInstance().gameRenderer.getMainCamera().position();
@@ -50,7 +50,7 @@ public class ShadersVRMixin {
         }
     }
 
-    @ModifyVariable(method = "setCameraShadow", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lorg/joml/Matrix4f;", shift = At.Shift.AFTER))
+    @ModifyVariable(method = "setCameraShadow", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = true), remap = false)
     private static PoseStack vivecraft$offsetShadow(PoseStack shadowModelViewMat) {
         // always set the position, since all passes use the same targets
         ShadersHelper.setShadowCameraPosition(true, (float) cameraPositionX, (float) cameraPositionY,
@@ -66,7 +66,7 @@ public class ShadersVRMixin {
         return shadowModelViewMat;
     }
 
-    @WrapOperation(method = "setCameraOffset", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getX()D"))
+    @WrapOperation(method = "setCameraOffset", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getX()D", remap = true), remap = false)
     private static double vivecraft$sameX(Entity entity, Operation<Double> original) {
         if (RenderPassType.isVanilla() || ShadersHelper.isSlowMode()) {
             return original.call(entity);
@@ -75,7 +75,7 @@ public class ShadersVRMixin {
         }
     }
 
-    @WrapOperation(method = "setCameraOffset", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getZ()D"))
+    @WrapOperation(method = "setCameraOffset", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getZ()D", remap = true), remap = false)
     private static double vivecraft$sameZ(Entity entity, Operation<Double> original) {
         if (RenderPassType.isVanilla() || ShadersHelper.isSlowMode()) {
             return original.call(entity);
@@ -84,7 +84,7 @@ public class ShadersVRMixin {
         }
     }
 
-    @Inject(method = {"beginClouds", "endClouds"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = {"beginClouds", "endClouds"}, at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$noCloudsInMenu(CallbackInfo ci) {
         // don't render the clouds with shaders in the menu world
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
@@ -94,25 +94,25 @@ public class ShadersVRMixin {
         }
     }
 
-    @WrapOperation(method = "beginRender", at = @At(value = "FIELD", target = "Lnet/optifine/shaders/Shaders;frameCounter:I", opcode = Opcodes.PUTSTATIC, ordinal = 0))
+    @WrapOperation(method = "beginRender", at = @At(value = "FIELD", target = "Lnet/optifine/shaders/Shaders;frameCounter:I", opcode = Opcodes.PUTSTATIC, ordinal = 0), remap = false)
     private static void vivecraft$onlyOneFrameIncrement(int frameCounter, Operation<Void> original) {
         if (!VRState.VR_RUNNING || ShadersHelper.isSlowMode() || ClientDataHolderVR.getInstance().isFirstPass) {
             original.call(frameCounter);
         }
     }
 
-    @Inject(method = "beginRender", at = @At(value = "CONSTANT", args = "stringValue=beginRender"))
+    @Inject(method = "beginRender", at = @At(value = "CONSTANT", args = "stringValue=beginRender"), remap = false)
     private static void vivecraft$invalidateVivecraftUniforms(CallbackInfo ci) {
         OptifineHelper.UNIFORMS_UPDATED = false;
     }
 
-    @Inject(method = "beginRender", at = @At("TAIL"))
+    @Inject(method = "beginRender", at = @At("TAIL"), remap = false)
     private static void vivecraft$updateVivecraftUniforms(CallbackInfo ci) {
         // calling it a second time, if it wasn't called in the shadow pass
         OptifineHelper.updateUniforms();
     }
 
-    @Inject(method = "setProgramUniforms", at = @At("TAIL"))
+    @Inject(method = "setProgramUniforms", at = @At("TAIL"), remap = false)
     private static void vivecraft$setVivecraftUniforms(CallbackInfo ci) {
         OptifineHelper.setUniforms();
     }

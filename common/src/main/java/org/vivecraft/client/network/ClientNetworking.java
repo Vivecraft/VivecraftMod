@@ -126,7 +126,7 @@ public class ClientNetworking {
     public static void sendVersionInfo() {
         // send version string, with currently running
         if (!ClientDataHolderVR.getInstance().completelyDisabled &&
-            Xplat.INSTANCE.serverAcceptsPacket(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL))
+            Xplat.serverAcceptsPacket(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL))
         {
             Minecraft.getInstance().getConnection().send(createServerPacket(
                 new VersionPayloadC2S(
@@ -193,7 +193,7 @@ public class ClientNetworking {
     }
 
     public static Packet<?> createServerPacket(VivecraftPayloadC2S payload) {
-        return Xplat.INSTANCE.getC2SPacket(payload);
+        return Xplat.getC2SPacket(payload);
     }
 
     public static void sendLegacyPackets(VrPlayerState vrPlayerState) {

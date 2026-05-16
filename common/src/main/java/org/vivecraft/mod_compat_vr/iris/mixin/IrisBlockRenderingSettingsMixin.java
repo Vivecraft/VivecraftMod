@@ -16,7 +16,7 @@ public class IrisBlockRenderingSettingsMixin {
     /**
      * menuworld fix
      */
-    @Inject(method = "getAmbientOcclusionLevel", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getAmbientOcclusionLevel", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$defaultAOForMenuWorld(CallbackInfoReturnable<Float> cir) {
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())
@@ -28,7 +28,7 @@ public class IrisBlockRenderingSettingsMixin {
     /**
      * menuworld fix
      */
-    @Inject(method = "shouldUseSeparateAo", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "shouldUseSeparateAo", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$noSeparationForMenuWorld(CallbackInfoReturnable<Boolean> cir) {
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())
@@ -40,7 +40,7 @@ public class IrisBlockRenderingSettingsMixin {
     /**
      * menuworld fix
      */
-    @Inject(method = "shouldDisableDirectionalShading", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "shouldDisableDirectionalShading", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$forceShadingForMenuWorld(CallbackInfoReturnable<Boolean> cir) {
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())

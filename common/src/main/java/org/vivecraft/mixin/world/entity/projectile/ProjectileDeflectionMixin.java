@@ -14,7 +14,7 @@ import org.vivecraft.server.ServerVivePlayer;
 @Mixin(ProjectileDeflection.class)
 public interface ProjectileDeflectionMixin {
 
-    @WrapOperation(method = "lambda$static$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getLookAngle()Lnet/minecraft/world/phys/Vec3;"))
+    @WrapOperation(method = "method_59862", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getLookAngle()Lnet/minecraft/world/phys/Vec3;"))
     private static Vec3 vivecraft$deflectLook(Entity instance, Operation<Vec3> original) {
         if (instance instanceof ServerPlayer player) {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);

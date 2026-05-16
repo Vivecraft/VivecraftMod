@@ -25,14 +25,14 @@ public class ReplayHelper {
                 VrPlayerState.create(vrPlayer),
                 ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_post.worldScale,
                 AutoCalibration.getPlayerHeight() / AutoCalibration.DEFAULT_HEIGHT);
-            storePacket(Xplat.INSTANCE.getS2CPacket(payload));
+            storePacket(Xplat.getS2CPacket(payload));
         }
     }
 
     public static void storeVRActive(boolean active) {
         if (!ClientVRPlayers.GOT_LOCAL_PLAYER_INFO && Minecraft.getInstance().player != null) {
             VRActivePayloadS2C payload = new VRActivePayloadS2C(active, Minecraft.getInstance().player.getUUID());
-            storePacket(Xplat.INSTANCE.getS2CPacket(payload));
+            storePacket(Xplat.getS2CPacket(payload));
         }
     }
 

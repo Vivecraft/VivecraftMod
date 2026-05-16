@@ -2,7 +2,7 @@ package org.vivecraft.client.gui.framework.screens;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -63,16 +63,16 @@ public class GuiStringListEditorScreen extends GuiListEditorScreen<String> {
         }
 
         @Override
-        public void extractContent(
-            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void renderContent(
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             this.editBox.setX(this.getContentX());
             this.editBox.setY(this.getY());
             this.editBox.setWidth(this.getContentWidth() - 20);
-            this.editBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
+            this.editBox.render(guiGraphics, mouseX, mouseY, partialTick);
             this.deleteButton.setX(this.getContentRight() - 20);
             this.deleteButton.setY(this.getY());
-            this.deleteButton.extractRenderState(graphics, mouseX, mouseY, partialTick);
+            this.deleteButton.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override

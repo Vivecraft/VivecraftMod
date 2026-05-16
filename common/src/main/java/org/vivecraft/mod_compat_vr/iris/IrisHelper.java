@@ -61,7 +61,7 @@ public class IrisHelper {
     private static Method CapturedRenderingState_getGbufferProjection;
 
     public static boolean isLoaded() {
-        return Xloader.INSTANCE.isModLoaded("iris") || Xloader.INSTANCE.isModLoaded("oculus");
+        return Xloader.isModLoaded("iris") || Xloader.isModLoaded("oculus");
     }
 
     /**
@@ -312,7 +312,7 @@ public class IrisHelper {
             }
 
             // distant horizon compat
-            if (Xloader.INSTANCE.isModLoaded("distanthorizons")) {
+            if (Xloader.isModLoaded("distanthorizons")) {
                 try {
                     Class<?> OverrideInjector = Class.forName(
                         "com.seibel.distanthorizons.coreapi.DependencyInjection.OverrideInjector");

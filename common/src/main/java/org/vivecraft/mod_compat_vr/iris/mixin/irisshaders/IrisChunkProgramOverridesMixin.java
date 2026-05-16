@@ -33,7 +33,7 @@ import java.util.EnumMap;
 public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverridesExtension {
 
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> programs;
 
     @Unique
@@ -84,7 +84,7 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
         }
     }
 
-    @Redirect(method = "getProgramOverride", at = @At(value = "INVOKE", target = "Ljava/util/EnumMap;get(Ljava/lang/Object;)Ljava/lang/Object;"))
+    @Redirect(method = "getProgramOverride", at = @At(value = "INVOKE", target = "Ljava/util/EnumMap;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
     private Object vivecraft$getVRPipelineShaders(
         EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> instance, Object key)
     {
@@ -94,7 +94,7 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
                 .get((IrisTerrainPass) key) : instance.get((IrisTerrainPass) key);
     }
 
-    @Inject(method = "deleteShaders", at = @At("HEAD"))
+    @Inject(method = "deleteShaders", at = @At("HEAD"), remap = false)
     private void vivecraft$deleteVRPipelineShaders(CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
             for (EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> map : this.vivecraft$pipelinePrograms.values()) {

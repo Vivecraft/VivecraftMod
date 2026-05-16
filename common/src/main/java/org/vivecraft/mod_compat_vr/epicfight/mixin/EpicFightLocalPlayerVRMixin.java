@@ -20,7 +20,7 @@ import yesman.epicfight.api.client.camera.EpicFightCameraAPI;
 @Mixin(value = LocalPlayer.class, priority = 1100)
 public class EpicFightLocalPlayerVRMixin {
 
-    @WrapOperation(method = "moveRelative", at = @At(value = "INVOKE", target = "Lyesman/epicfight/api/client/camera/EpicFightCameraAPI;getRelativeMove(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;"))
+    @WrapOperation(method = {"moveRelative", "method_5724", "m_19920_"}, at = @At(value = "INVOKE", target = "Lyesman/epicfight/api/client/camera/EpicFightCameraAPI;getRelativeMove(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;", remap = true), remap = false)
     private Vec3 vivecraft$epicFightFreeMove(
         EpicFightCameraAPI api, Vec3 relative, float amount, Operation<Vec3> original)
     {
@@ -34,7 +34,7 @@ public class EpicFightLocalPlayerVRMixin {
         }
     }
 
-    @Inject(method = "moveRelative", at = @At(value = "TAIL"))
+    @Inject(method = {"moveRelative", "method_5724", "m_19920_"}, at = @At(value = "TAIL"), remap = false)
     protected void vivecraft$epicFightAfterMoveRelative(CallbackInfo ci, @Local(ordinal = 1) Vec3 movement) {
         // do drag after setting the delta movement
         if (VRState.VR_RUNNING &&

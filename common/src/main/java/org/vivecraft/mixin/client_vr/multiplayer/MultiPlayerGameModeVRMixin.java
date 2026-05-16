@@ -63,7 +63,7 @@ public class MultiPlayerGameModeVRMixin {
         return result;
     }
 
-    @WrapOperation(method = "lambda$useItem$0", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ServerboundUseItemPacket"))
+    @WrapOperation(method = "method_41929", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ServerboundUseItemPacket"))
     private ServerboundUseItemPacket vivecraft$lookOverridePacket(
         InteractionHand hand, int sequence, float yRot, float xRot, Operation<ServerboundUseItemPacket> original)
     {

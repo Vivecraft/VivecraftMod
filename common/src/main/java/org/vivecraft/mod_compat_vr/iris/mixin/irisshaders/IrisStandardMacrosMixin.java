@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Pseudo
-@Mixin(targets = "net.irisshaders.iris.gl.shader.StandardMacros")
+@Mixin(targets = "net.irisshaders.iris.gl.shader.StandardMacros", remap = false)
 public class IrisStandardMacrosMixin {
     @Shadow
     private static void define(List<StringPair> defines, String key) {}

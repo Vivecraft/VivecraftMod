@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client_vr;
+package org.vivecraft.client_vr.render;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
@@ -36,7 +36,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Mixin(Camera.class)
-public abstract class CameraVRMixin {
+public abstract class XRCamera {
     @Unique
     private static final float vivecraft$MIN_CLIP_DISTANCE = 0.02F;
 

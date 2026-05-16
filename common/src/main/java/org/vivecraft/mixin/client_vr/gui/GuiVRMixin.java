@@ -7,7 +7,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -46,68 +46,68 @@ public abstract class GuiVRMixin implements GuiExtension {
     @Shadow
     protected abstract Player getCameraPlayer();
 
-    @Inject(method = "extractVignette", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
     private void vivecraft$cancelVignette(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "extractTextureOverlay", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderTextureOverlay", at = @At("HEAD"), cancellable = true)
     private void vivecraft$cancelTextureOverlay(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "extractPortalOverlay", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
     private void vivecraft$cancelPortalOverlay(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "extractSpyglassOverlay", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderSpyglassOverlay", at = @At("HEAD"), cancellable = true)
     private void vivecraft$cancelSpyglassOverlay(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "extractCrosshair", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
     private void vivecraft$cancelCrosshair(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "extractSleepOverlay", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderSleepOverlay", at = @At("HEAD"), cancellable = true)
     private void vivecraft$noSleepOverlay(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "extractConfusionOverlay", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderConfusionOverlay", at = @At("HEAD"), cancellable = true)
     private void vivecraft$noConfusionOverlay(CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
-    @ModifyExpressionValue(method = "extractTabList", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
+    @ModifyExpressionValue(method = "renderTabList", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
     private boolean vivecraft$toggleableTabList(boolean keyDown) {
         return keyDown || this.vivecraft$showPlayerList;
     }
 
-    @Inject(method = "extractItemHotbar", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderItemHotbar", at = @At("HEAD"), cancellable = true)
     private void vivecraft$noHotbarOnScreens(CallbackInfo ci) {
         if (VRState.VR_RUNNING && this.minecraft.screen != null) {
             ci.cancel();
         }
     }
 
-    @WrapOperation(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/HumanoidArm;getOpposite()Lnet/minecraft/world/entity/HumanoidArm;"))
+    @WrapOperation(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/HumanoidArm;getOpposite()Lnet/minecraft/world/entity/HumanoidArm;"))
     private HumanoidArm vivecraft$offhandSlotSide(HumanoidArm instance, Operation<HumanoidArm> original) {
         if (!VRState.VR_RUNNING) {
             return original.call(instance);
@@ -117,25 +117,23 @@ public abstract class GuiVRMixin implements GuiExtension {
         }
     }
 
-    @Inject(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 1, shift = At.Shift.AFTER))
-    private void vivecraft$hotbarContextIndicator(
-        CallbackInfo ci, @Local(argsOnly = true) GuiGraphicsExtractor graphics)
-    {
+    @Inject(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 1, shift = At.Shift.AFTER))
+    private void vivecraft$hotbarContextIndicator(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
             this.getCameraPlayer().getInventory().getSelectedSlot() !=
                 ClientDataHolderVR.getInstance().hotbarModule.hotbar &&
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
-            int middle = graphics.guiWidth() / 2;
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HOTBAR_SELECTION_SPRITE,
+            int middle = guiGraphics.guiWidth() / 2;
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, HOTBAR_SELECTION_SPRITE,
                 middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
-                graphics.guiHeight() - 22 - 1, 24, 23, 0xFF00FF00);
+                guiGraphics.guiHeight() - 22 - 1, 24, 23, 0xFF00FF00);
         }
     }
 
 
-    @ModifyExpressionValue(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0))
+    @ModifyExpressionValue(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0))
     private boolean vivecraft$offhandSlotAlwaysVisible(boolean offhandEmpty) {
         // the result is inverted, so we need to invert ours as well
         return offhandEmpty && !(VRState.VR_RUNNING && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar &&
@@ -143,17 +141,17 @@ public abstract class GuiVRMixin implements GuiExtension {
         );
     }
 
-    @WrapOperation(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 2))
+    @WrapOperation(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 2))
     private void vivecraft$renderVRHotbarLeftIndicator(
-        GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier sprite, int x,
+        GuiGraphics instance, RenderPipeline renderPipeline, Identifier sprite, int x,
         int y, int width, int height, Operation<Void> original)
     {
         vivecraft$renderColoredIcon(instance, renderPipeline, sprite, x, y, width, height, original);
     }
 
-    @WrapOperation(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 3))
+    @WrapOperation(method = "renderItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V", ordinal = 3))
     private void vivecraft$renderVRHotbarRightIndicator(
-        GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier sprite, int x,
+        GuiGraphics instance, RenderPipeline renderPipeline, Identifier sprite, int x,
         int y, int width, int height, Operation<Void> original)
     {
         vivecraft$renderColoredIcon(instance, renderPipeline, sprite, x, y, width, height, original);
@@ -161,7 +159,7 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Unique
     private void vivecraft$renderColoredIcon(
-        GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier sprite, int x,
+        GuiGraphics instance, RenderPipeline renderPipeline, Identifier sprite, int x,
         int y, int width, int height, Operation<Void> original)
     {
         boolean changeColor =
@@ -175,20 +173,20 @@ public abstract class GuiVRMixin implements GuiExtension {
         }
     }
 
-    @Inject(method = "extractItemHotbar", at = @At("TAIL"))
-    private void vivecraft$renderViveIcons(CallbackInfo ci, @Local(argsOnly = true) GuiGraphicsExtractor graphics) {
+    @Inject(method = "renderItemHotbar", at = @At("TAIL"))
+    private void vivecraft$renderViveIcons(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
         if (VRState.VR_RUNNING) {
-            this.vivecraft$renderViveHudIcons(graphics);
+            this.vivecraft$renderViveHudIcons(guiGraphics);
         }
     }
 
     /**
      * renders the vivecraft status icons above the hotbar
      *
-     * @param graphics GuiGraphicsExtractor to render with
+     * @param guiGraphics GuiGraphics to render with
      */
     @Unique
-    private void vivecraft$renderViveHudIcons(GuiGraphicsExtractor graphics) {
+    private void vivecraft$renderViveHudIcons(GuiGraphics guiGraphics) {
         if (this.minecraft.getCameraEntity() instanceof Player player) {
             int icon = 0;
             Holder<MobEffect> mobeffect = null;
@@ -216,7 +214,7 @@ public abstract class GuiVRMixin implements GuiExtension {
             int y = this.minecraft.getWindow().getGuiScaledHeight() - 39;
 
             if (icon == -1) {
-                graphics.fakeItem(new ItemStack(Items.ELYTRA), x, y);
+                guiGraphics.renderFakeItem(new ItemStack(Items.ELYTRA), x, y);
                 mobeffect = null;
             } else if (icon == -2) {
                 int x2 = x;
@@ -225,10 +223,10 @@ public abstract class GuiVRMixin implements GuiExtension {
                 } else {
                     mobeffect = null;
                 }
-                graphics.fakeItem(new ItemStack(Items.RABBIT_FOOT), x2, y);
+                guiGraphics.renderFakeItem(new ItemStack(Items.RABBIT_FOOT), x2, y);
             }
             if (mobeffect != null) {
-                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Gui.getMobEffectSprite(mobeffect), x, y, 18, 18);
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, Gui.getMobEffectSprite(mobeffect), x, y, 18, 18);
             }
         }
     }

@@ -107,8 +107,7 @@ public class FileUtils {
 
             targetFile.getParentFile().mkdirs();
 
-            Files.copy(Xloader.INSTANCE.getInJarFile(sourcePath), targetFile.toPath(),
-                StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Xloader.getInJarFile(sourcePath), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             return true;
         } catch (Exception exception) {
@@ -144,7 +143,7 @@ public class FileUtils {
         boolean didExtractSomething = false;
 
         try {
-            for (Path path : Xloader.INSTANCE.getInJarFolderFiles(source)) {
+            for (Path path : Xloader.getInJarFolderFiles(source)) {
                 didExtractSomething |= unpackFile(path.toString(), new File(target + "/" + path.getFileName()), false);
             }
         } catch (IOException e) {

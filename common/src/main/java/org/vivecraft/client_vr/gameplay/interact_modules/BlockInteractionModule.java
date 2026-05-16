@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.Xplat;
 import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -61,7 +62,7 @@ public class BlockInteractionModule implements InteractModule {
             // compile a list of blocks that explicitly declare OnBlockActivated (right click)
             this.rightClickable = new HashSet<>();
 
-            String name = "useWithoutItem";
+            String name = Xplat.getUseMethodName();
             for (Object object : BuiltInRegistries.BLOCK) {
                 Class<?> oclass = object.getClass();
 

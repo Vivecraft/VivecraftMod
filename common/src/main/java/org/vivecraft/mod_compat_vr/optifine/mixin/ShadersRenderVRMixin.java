@@ -20,24 +20,24 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 @Mixin(targets = "net.optifine.shaders.ShadersRender")
 public class ShadersRenderVRMixin {
 
-    @Shadow
+    @Shadow(remap = false)
     public static void updateActiveRenderInfo(Camera activeRenderInfo, Minecraft mc, float partialTick) {}
 
-    @Inject(method = {"renderHandTranslucent", "renderHand0"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = {"renderHandTranslucent", "renderHand0"}, at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$noTranslucentHandsInVR(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = {"renderHandSolid", "renderHand1"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = {"renderHandSolid", "renderHand1"}, at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$noSolidHandsInVR(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "renderShadowMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;"), cancellable = true)
+    @Inject(method = "renderShadowMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;", remap = true), remap = false, cancellable = true)
     private static void vivecraft$shadowsOnlyOnce(
         CallbackInfo ci, @Local(argsOnly = true) Camera activeRenderInfo, @Local(argsOnly = true) float partialTick)
     {

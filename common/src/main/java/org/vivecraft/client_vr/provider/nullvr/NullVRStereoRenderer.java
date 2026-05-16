@@ -1,7 +1,6 @@
 package org.vivecraft.client_vr.provider.nullvr;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
@@ -51,7 +50,7 @@ public class NullVRStereoRenderer extends VRRenderer {
         return new Matrix4f().setPerspectiveOffCenter(
             Mth.DEG_TO_RAD * ClientDataHolderVR.getInstance().vrSettings.nullvrFOV,
             Mth.DEG_TO_RAD * ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle * (eyeType == 0 ? -1F : 1F), 0F,
-            1.0F, nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
+            1.0F, nearClip, farClip);
     }
 
     @Override

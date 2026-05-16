@@ -27,8 +27,8 @@ public class VivecraftMod implements ModInitializer {
 
         // register packets
 
-        PayloadTypeRegistry.clientboundPlay().register(VivecraftPayloadS2C.TYPE, VivecraftPayloadS2C.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(VivecraftPayloadC2S.TYPE, VivecraftPayloadC2S.CODEC);
+        PayloadTypeRegistry.playS2C().register(VivecraftPayloadS2C.TYPE, VivecraftPayloadS2C.CODEC);
+        PayloadTypeRegistry.playC2S().register(VivecraftPayloadC2S.TYPE, VivecraftPayloadC2S.CODEC);
 
         // use channel registers to be compatible with other mod loaders
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {

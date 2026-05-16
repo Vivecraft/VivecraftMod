@@ -18,7 +18,7 @@ public class FlashBackHelper {
     private static Method Recorder_writePacketAsync;
 
     public static boolean isLoaded() {
-        return Xloader.INSTANCE.isModLoaded("flashback");
+        return Xloader.isModLoaded("flashback");
     }
 
     public static void storePacket(Packet<?> packet) {

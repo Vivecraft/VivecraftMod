@@ -1,80 +1,119 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${fabric_loom}"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
 }
 
 loom {
-    accessWidenerPath.set(project(':common').file("src/main/resources/${mod_id}.accesswidener"))
-    runs {
-        client {
-            client()
-            setConfigName('Fabric Client')
-            ideConfigGenerated(true)
-            runDir('runs/client')
-        }
-        server {
-            server()
-            setConfigName('Fabric Server')
-            ideConfigGenerated(true)
-            runDir('runs/server')
-        }
-    }
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${minecraft_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+
+    modCompileOnly("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    compileOnly "maven.modrinth:sodium:mc26.1.1-0.8.9-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
 
     // for iris compat
-    compileOnly "maven.modrinth:iris:1.10.9+26.1-fabric"
-    compileOnly 'org.anarres:jcpp:1.4.14' //temp iris
-    compileOnly 'io.github.douira:glsl-transformer:3.0.0-pre3' //temp iris
+    modCompileOnly "maven.modrinth:iris:1.10.4+1.21.11-fabric"
+    modCompileOnly 'org.anarres:jcpp:1.4.14' //temp iris
+    modCompileOnly 'io.github.douira:glsl-transformer:3.0.0-pre3' //temp iris
 
     // for REI compat
-    compileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:18.0.796") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
-    compileOnly("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modCompileOnly("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // other mods
-    // runtimeOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    // compileOnly "maven.modrinth:lithium:mc1.20.4-0.12.1"
-    // compileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
+    // modRuntimeOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
+    // modCompileOnly "maven.modrinth:lithium:mc1.20.4-0.12.1"
+    // modCompileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
 
     //mod menu
-    //compileOnly("com.terraformersmc:modmenu:18.0.0-alpha.8") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
-    compileOnly "maven.modrinth:modmenu:18.0.0-alpha.8"
+    modCompileOnly("com.terraformersmc:modmenu:17.0.0-beta.1") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for immersive portals compat
-    compileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // needed for resource loading
-    include(implementation(fabricApi.module("fabric-resource-loader-v0", fabric_api_version)))
-    include(implementation(fabricApi.module("fabric-resource-loader-v1", fabric_api_version)))
+    include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
+    include(modImplementation(fabricApi.module("fabric-resource-loader-v1", rootProject.fabric_api_version)))
     // commands also needs base
-    include(implementation(fabricApi.module("fabric-api-base", fabric_api_version)))
-    include(implementation(fabricApi.module("fabric-command-api-v2", fabric_api_version)))
-    include(implementation(fabricApi.module("fabric-networking-api-v1", fabric_api_version)))
+    include(modImplementation(fabricApi.module("fabric-api-base", rootProject.fabric_api_version)))
+    include(modImplementation(fabricApi.module("fabric-command-api-v2", rootProject.fabric_api_version)))
+    include(modImplementation(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version)))
 
     include(implementation('com.electronwill.night-config:toml:3.6.6'))
     include(implementation('com.electronwill.night-config:core:3.6.6'))
 
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false })
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false })
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux-arm64") { transitive = false })
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false })
-    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false })
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos")) { transitive = false }
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows")) { transitive = false }
 
-    // for OSC tracker support
     include(implementation("com.illposed.osc:javaosc-core:0.9"))
-
-    // bHaptics Integration
     include(implementation("com.github.bhaptics:tact-java:0.1.4"))
     include(implementation("org.java-websocket:Java-WebSocket:1.5.1"))
 
 }
 
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+shadowJar {
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier.set('fabric')
+}
+
+jar {
+    archiveClassifier.set("dev")
+    manifest {
+        attributes(
+            'Main-Class': "org.vivecraft.LaunchPopup"
+        )
+    }
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}

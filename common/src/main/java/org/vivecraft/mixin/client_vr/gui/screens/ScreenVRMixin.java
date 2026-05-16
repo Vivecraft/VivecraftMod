@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(Screen.class)
 public abstract class ScreenVRMixin {
 
-    @Inject(method = {"extractBackground", "extractPanorama", "extractTransparentBackground"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = {"renderBackground", "renderPanorama", "renderTransparentBackground"}, at = @At("HEAD"), cancellable = true)
     private void vivecraft$vrNoBackground(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             if (!ClientDataHolderVR.getInstance().vrSettings.menuBackground &&
@@ -26,14 +26,14 @@ public abstract class ScreenVRMixin {
         }
     }
 
-    @Inject(method = "extractBlurredBackground", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderBlurredBackground", at = @At("HEAD"), cancellable = true)
     public void vivecraft$noGuiBlur(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "extractPanorama", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderPanorama", at = @At("HEAD"), cancellable = true)
     private void vivecraft$maybeNoPanorama(CallbackInfo ci) {
         if (VRState.VR_RUNNING && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() ||
             ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama

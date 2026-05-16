@@ -13,7 +13,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 })
 public class IrisCameraUniformsMixin {
     // we change the near plane to be a bit shorter
-    @ModifyExpressionValue(method = "lambda$addCameraUniforms$0", at = @At(value = "CONSTANT", args = "doubleValue=0.05"))
+    @ModifyExpressionValue(method = "lambda$addCameraUniforms$0", at = @At(value = "CONSTANT", args = "doubleValue=0.05"), remap = false)
     private static double vivecraft$nearPlane(double original) {
         // see GameRendererVRMixin#vivecraft$MIN_CLIP_DISTANCE
         return RenderPassType.isVanilla() ? original : 0.02;

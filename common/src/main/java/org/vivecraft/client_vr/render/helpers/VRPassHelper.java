@@ -6,10 +6,8 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.Profiler;
 import org.vivecraft.api.client.data.RenderPass;
-import org.vivecraft.client.extensions.LevelRenderStateExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -41,20 +39,7 @@ public class VRPassHelper {
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
         // THIS IS WHERE EVERYTHING IS RENDERED
-        // reextract world state for the new pass
-        Profiler.get().push("update");
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$cacheRVEPos(MC.getCameraEntity());
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$setupRVE();
-        MC.gameRenderer.update(deltaTracker, renderLevel);
-        Profiler.get().popPush("extract");
-        MC.gameRenderer.extract(deltaTracker, renderLevel);
-        Profiler.get().pop();
-
-        // actually render
         MC.gameRenderer.render(deltaTracker, renderLevel);
-
-        // restore player
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$restoreRVEPos(MC.getCameraEntity());
 
         // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
         MC.levelRenderer.endFrame();
@@ -87,8 +72,7 @@ public class VRPassHelper {
             // do post-processing
             ShaderHelper.doVrPostProcess(eye, rendertarget,
                 eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.framebufferEye0 :
-                    DATA_HOLDER.vrRenderer.framebufferEye1,
-                ((LevelRenderStateExtension) MC.gameRenderer.getGameRenderState().levelRenderState).vivecraft$getVRRenderState().postProcessState);
+                    DATA_HOLDER.vrRenderer.framebufferEye1, deltaTracker.getGameTimeDeltaPartialTick(false));
 
             RenderHelper.checkGLError("post overlay" + eye);
             Profiler.get().pop();
@@ -119,7 +103,7 @@ public class VRPassHelper {
      */
     public static void renderAndSubmit(boolean renderLevel, DeltaTracker.Timer deltaTracker) {
         // still rendering
-        Profiler.get().push("render");
+        Profiler.get().push("gameRenderer");
 
         Profiler.get().push("VR guis");
 
@@ -174,11 +158,6 @@ public class VRPassHelper {
         // done with guis
         Profiler.get().pop();
 
-        // resize happened in the gui pass, set it to false or it will mess with stuff
-        MC.getWindow().resetIsResized();
-        // don't reextract the gui for the world passes
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$setShouldDrawScreen(false);
-
         // render the different vr passes
         List<RenderPass> list = DATA_HOLDER.vrRenderer.getRenderPasses(false);
         DATA_HOLDER.isFirstPass = true;
@@ -231,7 +210,7 @@ public class VRPassHelper {
                     }
 
                     ClientUtils.takeScreenshot(rendertarget);
-                    RenderSystem.flipFrame(null);
+                    MC.getWindow().updateDisplay(null);
                     DATA_HOLDER.grabScreenShot = false;
                 }
             }

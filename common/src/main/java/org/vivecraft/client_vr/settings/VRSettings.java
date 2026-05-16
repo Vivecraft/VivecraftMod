@@ -735,7 +735,7 @@ public class VRSettings {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public VRSettings() {
-        this.vrCfgFile = Xloader.INSTANCE.getConfigPath("vivecraft-client-config.json").toFile();
+        this.vrCfgFile = Xloader.getConfigPath("vivecraft-client-config.json").toFile();
 
         // Need to do this in the instance because array sizes aren't known until instantiation
         initializeFieldInfo();

@@ -1,8 +1,6 @@
 package org.vivecraft.client.extensions;
 
-
-import net.minecraft.client.renderer.state.level.BlockOutlineRenderState;
-import org.vivecraft.client_vr.render.renderstates.VRRenderState;
+import net.minecraft.client.renderer.state.BlockOutlineRenderState;
 
 public interface LevelRenderStateExtension {
 
@@ -15,9 +13,4 @@ public interface LevelRenderStateExtension {
      * gets the states of the interact outline
      */
     BlockOutlineRenderState[] vivecraft$getInteractOutlineStates();
-
-    /**
-     * gets the VR render state object
-     */
-    VRRenderState vivecraft$getVRRenderState();
 }

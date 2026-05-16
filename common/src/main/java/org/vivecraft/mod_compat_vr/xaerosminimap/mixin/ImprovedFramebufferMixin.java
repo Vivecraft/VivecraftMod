@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Pseudo
 @Mixin(targets = "xaero.common.graphics.ImprovedFramebuffer")
 public class ImprovedFramebufferMixin {
-    @ModifyExpressionValue(method = "forceAsMainRenderTarget", at = @At(value = "FIELD", target = "Lxaero/common/graphics/ImprovedFramebuffer;mainRenderTargetBackup:Lcom/mojang/blaze3d/pipeline/RenderTarget;", ordinal = 0))
+    @ModifyExpressionValue(method = "forceAsMainRenderTarget", at = @At(value = "FIELD", target = "Lxaero/common/graphics/ImprovedFramebuffer;mainRenderTargetBackup:Lcom/mojang/blaze3d/pipeline/RenderTarget;", ordinal = 0, remap = true), remap = false)
     private RenderTarget vivecraft$fixConstantReference(RenderTarget mainRenderTarget) {
         // refetch main target when not an improved buffer, to get the new gui buffer
         return this.getClass().isInstance(Minecraft.getInstance().mainRenderTarget) ? mainRenderTarget : null;

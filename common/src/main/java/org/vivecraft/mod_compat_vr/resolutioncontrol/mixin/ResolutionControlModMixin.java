@@ -17,7 +17,7 @@ import org.vivecraft.client_xr.render_pass.WorldRenderPass;
     "io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod"})
 public class ResolutionControlModMixin {
 
-    @Inject(method = "setShouldScale", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setShouldScale", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$dontResizeGUI(CallbackInfo ci) {
         // we handle the resize ourselves
         if (!RenderPassType.isVanilla()) {
@@ -25,21 +25,21 @@ public class ResolutionControlModMixin {
         }
     }
 
-    @Inject(method = "updateFramebufferSize", at = @At("HEAD"))
+    @Inject(method = "updateFramebufferSize", at = @At("HEAD"), remap = false)
     private void vivecraft$resizeVRBuffers(CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
             ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("");
         }
     }
 
-    @Inject(method = "getCurrentWidth", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getCurrentWidth", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$getVRWidth(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
             cir.setReturnValue(WorldRenderPass.STEREO_XR.target.width);
         }
     }
 
-    @Inject(method = "getCurrentHeight", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getCurrentHeight", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$getVRHeight(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
             cir.setReturnValue(WorldRenderPass.STEREO_XR.target.height);

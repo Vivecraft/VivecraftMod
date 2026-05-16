@@ -17,10 +17,10 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
     "net.irisshaders.iris.uniforms.CameraUniforms$CameraPositionTracker"})
 public class IrisCameraPositionTrackerMixin {
 
-    @Shadow
+    @Shadow(remap = false)
     private Vector3d currentCameraPosition = new Vector3d();
 
-    @Inject(method = "update", at = @At("TAIL"))
+    @Inject(method = "update", at = @At("TAIL"), remap = false)
     private void vivecraft$capturePosition(CallbackInfo ci) {
         if (!VRState.VR_RUNNING || ClientDataHolderVR.getInstance().isFirstPass || ShadersHelper.isSlowMode()) {
             ShadersHelper.setShadowCameraPosition(false, (float) this.currentCameraPosition.x,

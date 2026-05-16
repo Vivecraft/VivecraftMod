@@ -1,8 +1,8 @@
 package org.vivecraft.mixin.client_vr;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -24,9 +24,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.packs.PackType;
@@ -38,10 +37,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -70,7 +66,6 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
-import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.KeybindHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
@@ -84,10 +79,8 @@ import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
-import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 // inject late, to let other mods disable the hud rendering
@@ -137,6 +130,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public abstract Entity getCameraEntity();
 
     @Shadow
+    public abstract boolean isLocalServer();
+
+    @Shadow
+    public abstract IntegratedServer getSingleplayerServer();
+
+    @Shadow
+    public abstract void resizeDisplay();
+
+    @Shadow
     public abstract void setScreen(Screen guiScreen);
 
     @Shadow
@@ -179,7 +181,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;hasDelayedCrash()Z"))
+    @Inject(method = "destroy", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;"))
     private void vivecraft$destroyVR(CallbackInfo ci) {
         try {
             // the game crashed probably not because of us, so keep the vr choice
@@ -187,7 +189,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         } catch (Exception ignored) {}
     }
 
-    @Inject(method = "renderFrame", at = @At("HEAD"))
+    @Inject(method = "runTick", at = @At("HEAD"))
     private void vivecraft$toggleVRState(CallbackInfo callback) {
         if (ClientDataHolderVR.getInstance().completelyDisabled) {
             VRState.VR_ENABLED = false;
@@ -215,7 +217,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             if (this.gameRenderer != null && this.gameRenderer.getMainCamera() != null && this.level != null &&
                 this.getCameraEntity() != null)
             {
-                this.gameRenderer.getMainCamera().update(this.deltaTracker);
+                this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false,
+                    this.level.tickRateManager().isEntityFrozen(this.getCameraEntity()) ? 1.0f :
+                        this.deltaTracker.getGameTimeDeltaPartialTick(true));
             }
 
             Profiler.get().push("VR Poll/VSync");
@@ -249,7 +253,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;update(Lnet/minecraft/client/DeltaTracker;Z)V"))
+    @Inject(method = "runTick", at = @At(value = "CONSTANT", args = "stringValue=render"))
     private void vivecraft$preRender(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             Profiler.get().push("preRender");
@@ -259,28 +263,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-
-    @WrapOperation(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;pick(F)V"))
-    private void vivecraft$onlyOnePick(Minecraft instance, float partialTick, Operation<Void> original) {
-        if (RenderPassType.isVanilla()) {
-            original.call(instance, partialTick);
-        } else {
-            ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
-            if (!(ImmersivePortalsHelper.isLoaded() && ImmersivePortalsHelper.isRenderingPortal())) {
-                original.call(instance, partialTick);
-
-                if (this.hitResult != null && this.hitResult.getType() != HitResult.Type.MISS) {
-                    dataHolder.vrPlayer.crossVec = this.hitResult.getLocation();
-                }
-
-                if (this.screen == null) {
-                    dataHolder.teleportTracker.updateTeleportDestinations(this.player);
-                }
-            }
-        }
-    }
-
-    @ModifyArg(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;extract(Lnet/minecraft/client/DeltaTracker;Z)V"))
+    @ModifyArg(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(Lnet/minecraft/client/DeltaTracker;Z)V"))
     private boolean vivecraft$setupRenderGUI(boolean renderLevel) {
         if (VRState.VR_RUNNING) {
             try {
@@ -307,31 +290,21 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             // set gui pass before setup, to always be in that pass and not a random one from last frame
             RenderPassManager.setGUIRenderPass();
 
+            // draw screen/gui to buffer
+            // push pose so we can pop it later
+            RenderSystem.getModelViewStack().pushMatrix();
+            ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawScreen(true);
             // only draw the gui when the level was rendered once, since some mods expect that
             ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawGui(
                 renderLevel && this.entityRenderDispatcher.camera != null);
             // don't draw the level when we only want the GUI
-            ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawScreen(true);
             return false;
         } else {
             return renderLevel;
         }
     }
 
-    @ModifyArg(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(Lnet/minecraft/client/DeltaTracker;Z)V"))
-    private boolean vivecraft$renderGUI(boolean renderLevel) {
-        if (VRState.VR_RUNNING) {
-            // draw screen/gui to buffer
-            // push pose so we can pop it later
-            RenderSystem.getModelViewStack().pushMatrix();
-            // don't draw the level when we only want the GUI
-            return false;
-        } else {
-            return renderLevel;
-        }
-    }
-
-    @WrapOperation(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
+    @WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
     private void vivecraft$blitMirror(RenderTarget instance, Operation<Void> original) {
         if (VRState.VR_RUNNING) {
             Profiler.get().popPush("vrMirror");
@@ -346,50 +319,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 RenderHelper.drawVRConnectingMessage();
             }
             original.call(instance);
-        }
-    }
-
-    @WrapMethod(method = "pick(F)V")
-    private void vivecraft$vrPick(float partialTick, Operation<Void> original) {
-        if (VRState.VR_RUNNING) {
-            ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
-            // don't update the hitresult when chat is open
-            if (this.screen != null && this.hitResult != null) {
-                return;
-            }
-            // skip when data not available yet
-            else if (dataHolder.vrPlayer.vrdata_world_render == null ||
-                this.getCameraEntity() == null)
-            {
-                // some mods don't like it when the hitresult is null, so set it to a miss
-                if (this.player != null) {
-                    this.hitResult = BlockHitResult.miss(this.player.position(),
-                        this.player.getDirection(), this.player.blockPosition());
-                } else {
-                    this.hitResult = BlockHitResult.miss(Vec3.ZERO, Direction.UP, BlockPos.ZERO);
-                }
-                return;
-            }
-
-            AABB originalBB = this.getCameraEntity().getBoundingBox();
-            // set the entity position and view to the controller
-            ((GameRendererExtension) this.gameRenderer).vivecraft$cacheRVEPos(this.getCameraEntity());
-            ((GameRendererExtension) this.gameRenderer).vivecraft$setupRVEAtDevice(
-                dataHolder.vrPlayer.vrdata_world_render.getAim());
-            // move the bounding box as well, this is used for entity hits
-            this.getCameraEntity().setBoundingBox(originalBB.move(
-                this.getCameraEntity().position()
-                    .subtract(((GameRendererExtension) this.gameRenderer).vivecraft$getRvePos())));
-
-            // call the vanilla method
-            original.call(partialTick);
-
-            // restore entity
-            ((GameRendererExtension) this.gameRenderer).vivecraft$restoreRVEPos(this.getCameraEntity());
-            this.getCameraEntity().setBoundingBox(originalBB);
-        } else {
-            // call the vanilla method
-            original.call(partialTick);
         }
     }
 
@@ -413,6 +342,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @ModifyExpressionValue(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/TimeUnit;toNanos(J)J"))
     private long vivecraft$noWaitOnLevelLoad(long original) {
         return VRState.VR_RUNNING ? 0L : original;
+    }
+
+    @Inject(method = "resizeDisplay", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"))
+    private void vivecraft$restoreVanillaState(CallbackInfo ci) {
+        if (VRState.VR_INITIALIZED) {
+            if (VRState.VR_RUNNING) {
+                RenderPassManager.setGUIRenderPass();
+            } else {
+                RenderPassManager.setVanillaRenderPass();
+            }
+        }
     }
 
     @WrapOperation(method = {"continueAttack", "startAttack"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))
@@ -652,8 +592,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         Profiler.get().pop();
     }
 
-    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;pick(F)V"))
-    private boolean vivecraft$removePick(Minecraft instance, float partialTicks) {
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"))
+    private boolean vivecraft$removePick(GameRenderer instance, float partialTicks) {
         // not exactly why we remove that, probably to safe some performance
         // don't cancel it though if the hitresult is null
         return !VRState.VR_RUNNING || this.hitResult == null;
@@ -669,11 +609,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         } else {
             original.call(instance, pointOfView);
         }
-    }
-
-    @Inject(method = "handleKeybinds", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER))
-    private void vivecraft$saveHideGuiOption(CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().vrSettings.saveOptions();
     }
 
     @WrapWithCondition(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;checkEntityPostEffect(Lnet/minecraft/world/entity/Entity;)V"))
@@ -792,6 +727,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
+    @ModifyReturnValue(method = "isWindowActive", at = @At(value = "RETURN"))
+    private boolean vivecraft$windowAlwaysActive(boolean windowActive) {
+        return windowActive || VRState.VR_RUNNING;
+    }
+
     /**
      * switches the VR state
      *
@@ -885,7 +825,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
         }
         // always resize, since that also rebuild the screen
-        ((WindowExtension) (Object) this.window).vivecraft$resize();
+        resizeDisplay();
         this.window.updateVsync(this.options.enableVsync().get());
     }
 

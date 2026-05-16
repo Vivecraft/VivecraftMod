@@ -25,12 +25,12 @@ public class IrisVoxyRenderPipelineVRMixin extends AbstractRenderPipelineVRMixin
 
     @Final
     @Mutable
-    @Shadow
+    @Shadow(remap = false)
     public DepthFramebuffer fbTranslucent;
 
     @Final
     @Mutable
-    @Shadow
+    @Shadow(remap = false)
     private IrisVoxyRenderPipelineData data;
 
     @Unique
@@ -40,13 +40,13 @@ public class IrisVoxyRenderPipelineVRMixin extends AbstractRenderPipelineVRMixin
     private final EnumMap<RenderPass, DepthFramebuffer> vivecraft$framebuffersTranslucent = new EnumMap<>(
         RenderPass.class);
 
-    @Inject(method = "<init>", at = @At("TAIL"))
+    @Inject(method = "<init>", at = @At("TAIL"), remap = false)
     private void vivecraft$storeFramebuffers(CallbackInfo ci) {
         this.vivecraft$framebuffersOpaque.put(ClientDataHolderVR.getInstance().currentPass, this.fb);
         this.vivecraft$framebuffersTranslucent.put(ClientDataHolderVR.getInstance().currentPass, this.fbTranslucent);
     }
 
-    @Inject(method = "preSetup", at = @At("HEAD"))
+    @Inject(method = "preSetup", at = @At("HEAD"), remap = false)
     private void vivecraft$switchPipeline(CallbackInfo ci) {
         // make sure iris is actually loaded
         if (IrisHelper.isLoaded()) {
@@ -99,7 +99,7 @@ public class IrisVoxyRenderPipelineVRMixin extends AbstractRenderPipelineVRMixin
         }
     }
 
-    @Inject(method = "free", at = @At("HEAD"))
+    @Inject(method = "free", at = @At("HEAD"), remap = false)
     private void vivecraft$free(CallbackInfo ci) {
         for (DepthFramebuffer buffer : this.vivecraft$framebuffersOpaque.values()) {
             if (buffer != null && buffer != this.fb) {

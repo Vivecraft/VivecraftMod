@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.gui.screens;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -75,9 +75,9 @@ public abstract class TitleScreenMixin extends Screen {
         this.addRenderableWidget(this.vivecraft$updateButton);
     }
 
-    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    @Inject(method = "render", at = @At("TAIL"))
     private void vivecraft$renderToolTip(
-        GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
+        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
     {
         // some mods cancel the title screen init
         if (this.vivecraft$updateButton != null) {
@@ -86,7 +86,7 @@ public abstract class TitleScreenMixin extends Screen {
 
         if (VRState.VR_INITIALIZED && !VRState.VR_RUNNING) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
-            graphics.tooltip(this.font,
+            guiGraphics.renderTooltip(this.font,
                 this.font.split(hotswitchMessage, 280).stream().map(ClientTooltipComponent::create).toList(),
                 this.width / 2 - 140 - 12, 17, DefaultTooltipPositioner.INSTANCE, null);
         }

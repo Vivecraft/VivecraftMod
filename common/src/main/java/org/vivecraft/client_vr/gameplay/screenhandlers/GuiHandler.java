@@ -24,6 +24,7 @@ import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -36,7 +37,6 @@ import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.renderstates.ScreenRenderState;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -502,12 +502,14 @@ public class GuiHandler {
     }
 
     /**
-     * sets up the {@code screenState} to orient the gui
+     * sets up the {@code poseMatrix} to render the gui, and returns the world position of the gui
      *
-     * @param screenState ScreenState to update
+     * @param currentPass renderpass to position the gui for
+     * @param poseMatrix  matrix to alter
+     * @return gui position in world space
      */
-    public static void extractGui(ScreenRenderState screenState) {
-        Profiler.get().push("extrract GUIModelView");
+    public static Vec3 applyGUIModelView(RenderPass currentPass, Matrix4f poseMatrix) {
+        Profiler.get().push("applyGUIModelView");
 
         if (MC.screen != null && GUI_POS_ROOM == null) {
             // naughty mods!
@@ -676,18 +678,26 @@ public class GuiHandler {
             GUI_SCALE = 1.0F;
         }
 
+        Vec3 eye = DH.vrPlayer.vrdata_world_render.getEye(DH.currentPass).getPosition();
+
+        Vec3 translation = guipos.subtract(eye);
+        poseMatrix.translate((float) translation.x, (float) translation.y, (float) translation.z);
+
+        // offset from eye to gui pos
+        poseMatrix.mul(guirot);
+        poseMatrix.translate(guilocal.x, guilocal.y, guilocal.z);
+
         GUI_SCALE_APPLIED = scale;
         GUI_OFFSET_LOCAL.set(guilocal).div(DH.vrPlayer.vrdata_world_render.worldScale);
+
+        float thescale = scale * DH.vrPlayer.vrdata_world_render.worldScale;
+        poseMatrix.scale(thescale, thescale, thescale);
 
         GUI_RENDER_POS_ROOM = VRPlayer.worldToRoomPos(guipos, DH.vrPlayer.vrdata_world_render);
         GUI_RENDER_ROTATION_ROOM.rotationY(-DH.vrPlayer.vrdata_world_render.rotation_radians).mul(guirot);
 
-        // set up gui rotation
-        screenState.worldRotation.set(guirot);
-        screenState.worldRotation.translate(guilocal.x, guilocal.y, guilocal.z);
-        screenState.scale = scale * DH.vrPlayer.vrdata_world_render.worldScale;
-        screenState.worldPos = guipos;
-
         Profiler.get().pop();
+
+        return guipos;
     }
 }

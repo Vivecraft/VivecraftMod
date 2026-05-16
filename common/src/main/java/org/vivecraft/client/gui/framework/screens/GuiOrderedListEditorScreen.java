@@ -2,7 +2,7 @@ package org.vivecraft.client.gui.framework.screens;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -59,13 +59,13 @@ public abstract class GuiOrderedListEditorScreen<T> extends GuiListEditorScreen<
         }
 
         @Override
-        public void extractContent(
-            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void renderContent(
+            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            super.extractContent(graphics, mouseX, mouseY, hovering, partialTick);
+            super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
 
             int textY = this.getY() + this.getHeight() / 2 - Minecraft.getInstance().font.lineHeight / 2 + 2;
-            graphics.text(Minecraft.getInstance().font, this.getMessage(), this.getContentX(), textY,
+            guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getContentX(), textY,
                 0xFFFFFFFF);
 
             this.upButton.active = this.isActive() && this.index != 0;
@@ -78,7 +78,7 @@ public abstract class GuiOrderedListEditorScreen<T> extends GuiListEditorScreen<
                 Button b = (Button) child;
                 b.setX(this.getContentRight() - (2 - i) * 22 - 20);
                 b.setY(this.getContentY());
-                b.extractRenderState(graphics, mouseX, mouseY, partialTick);
+                b.render(guiGraphics, mouseX, mouseY, partialTick);
                 i++;
             }
         }

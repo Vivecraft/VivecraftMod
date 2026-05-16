@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 @Mixin(Options.class)
 public abstract class OptionsVRMixin {
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;toArray(Ljava/util/function/IntFunction;)[Ljava/lang/Object;"))
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;toArray(Ljava/util/function/IntFunction;)[Ljava/lang/Object;", remap = false), remap = true)
     private Object[] vivecraft$processKeyMappings(
         Stream instance, IntFunction<Object[]> intFunction, Operation<Object[]> original)
     {

@@ -44,27 +44,27 @@ public class GuiFBTPlayerRenderer extends PictureInPictureRenderer<GuiFBTPlayerS
 
         // legs
         RenderHelper.renderBox(consumer, new Vec3(2, 0, 0), new Vec3(2, 12, 0),
-            4, 4, color, ALPHA, poseStack.last());
+            4, 4, color, ALPHA, poseStack.last().pose());
         RenderHelper.renderBox(consumer, new Vec3(-2, 0, 0), new Vec3(-2, 12, 0),
-            4, 4, color, ALPHA, poseStack.last());
+            4, 4, color, ALPHA, poseStack.last().pose());
         // body
         RenderHelper.renderBox(consumer, new Vec3(0, 12, 0), new Vec3(0, 24, 0),
-            8, 4, color, ALPHA, poseStack.last());
+            8, 4, color, ALPHA, poseStack.last().pose());
 
         // head
         RenderHelper.renderBox(consumer, new Vec3(0, 24, 0), new Vec3(0, 32, 0),
-            8, 8, color, ALPHA, poseStack.last());
+            8, 8, color, ALPHA, poseStack.last().pose());
 
         // arms
         RenderHelper.renderBox(consumer,
             new Vec3(6, 22, 0).subtract(fbtState.left().x() * 2F, fbtState.left().y() * 2F, fbtState.left().z() * 2F),
             new Vec3(6, 22, 0).add(fbtState.left().x() * 10F, fbtState.left().y() * 10F, fbtState.left().z() * 10F),
-            4, 4, fbtState.leftReady() ? COLOR_ACTIVE : COLOR_INACTIVE, ALPHA, poseStack.last());
+            4, 4, fbtState.leftReady() ? COLOR_ACTIVE : COLOR_INACTIVE, ALPHA, poseStack.last().pose());
         RenderHelper.renderBox(consumer,
             new Vec3(-6, 22, 0).subtract(fbtState.right().x() * 2F, fbtState.right().y() * 2F,
                 fbtState.right().z() * 2F),
             new Vec3(-6, 22, 0).add(fbtState.right().x() * 10F, fbtState.right().y() * 10F, fbtState.right().z() * 10F),
-            4, 4, fbtState.rightReady() ? COLOR_ACTIVE : COLOR_INACTIVE, ALPHA, poseStack.last());
+            4, 4, fbtState.rightReady() ? COLOR_ACTIVE : COLOR_INACTIVE, ALPHA, poseStack.last().pose());
 
         this.bufferSource.endBatch(renderType);
         poseStack.popPose();

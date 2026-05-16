@@ -124,7 +124,7 @@ public class ServerConfig {
             CONFIG.close();
         }
         CONFIG = CommentedFileConfig
-            .builder(Xloader.INSTANCE.getConfigPath("vivecraft-server-config.toml"))
+            .builder(Xloader.getConfigPath("vivecraft-server-config.toml"))
             .autosave()
             .sync()
             .concurrent()
