@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.util.Util;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.valueproviders.ConstantInt;
@@ -207,7 +207,7 @@ public class MenuWorldExporter {
                 default -> BuiltinDimensionTypes.OVERWORLD_EFFECTS;
             };
         } else {
-            dimName = Identifier.parse(di.readUTF());
+            dimName = ResourceLocation.parse(di.readUTF());
         }
 
         boolean isFlat;

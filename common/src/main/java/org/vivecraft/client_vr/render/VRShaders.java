@@ -250,6 +250,7 @@ public class VRShaders {
 
     private static PerspectiveProjectionMatrixBuffer UNDISTORTED_PROJ;
     public static GpuBufferSlice UNDISTORTED_PROJ_BUFFER;
+
     public static void setUndistortedProj(Matrix4f proj) {
         UNDISTORTED_PROJ_BUFFER = UNDISTORTED_PROJ.getBuffer(proj);
     }

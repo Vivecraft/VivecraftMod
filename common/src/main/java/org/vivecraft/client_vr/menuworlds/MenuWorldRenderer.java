@@ -565,7 +565,7 @@ public class MenuWorldRenderer {
                     BufferBuilder bufferBuilder = layerBuffer.getValue();
                     MeshData meshData = bufferBuilder.build();
                     if (meshData != null) {
-                        if (layer.pipeline() == RenderPipelines.TRANSLUCENT_TERRAIN) {
+                        if (layer.pipeline() == RenderPipelines.TRANSLUCENT) {
                             meshData.sortQuads(builder,
                                 VertexSorting.byDistance(0, Mth.frac(this.blockAccess.getGround()), 0));
                         }

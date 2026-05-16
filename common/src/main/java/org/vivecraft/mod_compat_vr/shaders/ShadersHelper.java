@@ -250,7 +250,6 @@ public class ShadersHelper {
             consumer.accept(VRShaders.GUI_TEXTURED, ShaderType.TEXTURED_COLOR);
             consumer.accept(VRShaders.GUI_TEXTURED_ALWAYS, ShaderType.TEXTURED_COLOR);
 
-            consumer.accept(VRShaders.LINE_STRIP, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.QUADS, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.QUADS_ALWAYS, ShaderType.BASIC_COLOR);
             consumer.accept(VRShaders.TRIANGLES_ALWAYS, ShaderType.BASIC_COLOR);
