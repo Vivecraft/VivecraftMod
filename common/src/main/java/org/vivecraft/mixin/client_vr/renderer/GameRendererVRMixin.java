@@ -53,6 +53,7 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
@@ -60,6 +61,7 @@ import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 // higher priority to apply before iris modelview alteration
@@ -132,6 +134,12 @@ public abstract class GameRendererVRMixin
     @Shadow
     @Final
     private PerspectiveProjectionMatrixBuffer levelProjectionMatrixBuffer;
+
+    @Shadow
+    private float spinningEffectTime;
+
+    @Shadow
+    private float spinningEffectSpeed;
 
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     private Camera vivecraft$replaceCamera() {
@@ -401,9 +409,46 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 0, remap = true)
+    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), index = 0, remap = true)
     public Quaternionfc vivecraft$nullifyCameraRotation(Quaternionfc rotation) {
         return RenderPassType.isVanilla() ? rotation : new Quaternionf();
+    }
+
+    @Unique
+    private float vivecraft$storedSpinningEffectTime;
+
+    @Unique
+    private float vivecraft$storedSpinningEffectSpeed;
+
+    @Unique
+    private double vivecraft$storedScreenEffectScale;
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), remap = true)
+    public void vivecraft$irisNauseReduction1(CallbackInfo ci) {
+        if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
+            // backup
+            this.vivecraft$storedSpinningEffectTime = this.spinningEffectTime;
+            this.vivecraft$storedSpinningEffectSpeed = this.spinningEffectSpeed;
+            this.vivecraft$storedScreenEffectScale = this.minecraft.options.screenEffectScale().get();
+            // spin spead
+            this.spinningEffectTime *= 0.2F;
+            this.spinningEffectSpeed *= 0.2F;
+            // stretch amount
+            // square root of 0.4, since this gets squared before applying
+            ((OptionInstanceExtension<Double>) (Object) this.minecraft.options.screenEffectScale()).vivecraft$setWithoutUpdate(
+                this.vivecraft$storedScreenEffectScale * 0.6324555320336759);
+        }
+    }
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = false), remap = true)
+    public void vivecraft$irisNauseReduction2(CallbackInfo ci) {
+        if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
+            // restore
+            this.spinningEffectTime = this.vivecraft$storedSpinningEffectTime;
+            this.spinningEffectSpeed = this.vivecraft$storedSpinningEffectSpeed;
+            ((OptionInstanceExtension<Double>) (Object) this.minecraft.options.screenEffectScale()).vivecraft$setWithoutUpdate(
+                this.vivecraft$storedScreenEffectScale);
+        }
     }
 
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderLevel(Lcom/mojang/blaze3d/resource/GraphicsResourceAllocator;Lnet/minecraft/client/DeltaTracker;ZLnet/minecraft/client/Camera;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Vector4f;Z)V"), index = 4)
