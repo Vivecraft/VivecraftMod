@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client_vr;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.MCVR;
 
 @Mixin(MouseHandler.class)
 public class MouseHandlerVRMixin {
@@ -32,34 +32,9 @@ public class MouseHandlerVRMixin {
     private boolean vivecraft$checkNull(LocalPlayer instance, Operation<Boolean> original) {
         return instance != null && original.call(instance);
     }
-
-
-    @Inject(method = "turnPlayer", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$noTurnStanding(CallbackInfo ci) {
-        if (!VRState.VR_RUNNING) {
-            return;
-        }
-
-        if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
-            // call the tutorial before canceling
-            // controller movement
-            int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
-            float deltaMovement = MCVR.get().controllerForwardHistory[mainController].averagePosition(0.2)
-                .normalize().dot(MCVR.get().controllerForwardHistory[mainController].averagePosition(1.0).normalize());
-
-            this.minecraft.getTutorial().onMouse(1F - deltaMovement, 0);
-            ci.cancel();
-        }
-    }
-
-    // cancel after tutorial call
-    @Inject(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onMouse(DD)V", shift = At.Shift.AFTER), cancellable = true)
-    private void vivecraft$noTurnSeated(CallbackInfo ci) {
-        if (!VRState.VR_RUNNING) {
-            return;
-        }
-
-        ci.cancel();
+    @WrapWithCondition(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
+    private boolean vivecraft$noTurning(LocalPlayer instance, double x, double y) {
+        return !VRState.VR_RUNNING;
     }
 
     @Inject(method = "grabMouse", at = @At("HEAD"), cancellable = true)

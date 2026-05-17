@@ -40,6 +40,7 @@ public class IrisHelper {
     private static Object ShaderKey_ENTITIES_SOLID;
     private static Object ShaderKey_ENTITIES_CUTOUT;
     private static Object ShaderKey_ENTITIES_TRANSLUCENT;
+    private static Object ShaderKey_TEXTURED_COLOR;
     private static Object ShaderKey_BASIC_COLOR;
 
     // for iris/dh compat
@@ -118,6 +119,17 @@ public class IrisHelper {
             }
         }
         return Optional.empty();
+    }
+
+    public static Object getPipelineManager() {
+        if (init()) {
+            try {
+                return Iris_getPipelineManager.invoke(null);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't get iris pipeline manager:", e);
+            }
+        }
+        return null;
     }
 
     /**
@@ -213,6 +225,7 @@ public class IrisHelper {
                         case ENTITIES_SOLID -> ShaderKey_ENTITIES_SOLID;
                         case ENTITIES_TRANSLUCENT -> ShaderKey_ENTITIES_TRANSLUCENT;
                         case BASIC_COLOR -> ShaderKey_BASIC_COLOR;
+                        case TEXTURED_COLOR -> ShaderKey_TEXTURED_COLOR;
                     });
                 return;
             } catch (IllegalAccessException | InvocationTargetException ignore) {
@@ -345,6 +358,7 @@ public class IrisHelper {
                 ShaderKey_ENTITIES_CUTOUT = ShaderKey.getField("ENTITIES_CUTOUT").get(null);
                 ShaderKey_ENTITIES_TRANSLUCENT = ShaderKey.getField("ENTITIES_TRANSLUCENT").get(null);
                 ShaderKey_BASIC_COLOR = ShaderKey.getField("BASIC_COLOR").get(null);
+                ShaderKey_TEXTURED_COLOR = ShaderKey.getField("TEXTURED_COLOR").get(null);
             } catch (NoSuchMethodException | NoSuchFieldException | NullPointerException e) {
                 VRSettings.LOGGER.error("Vivecraft: Failed to init iris pipeline compat, falling back to official API.",
                     e);

@@ -1,36 +1,36 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
-issueTrackerURL = "https://github.com/Vivecraft/VivecraftMod/issues"
-license = "LGPLv3"
+issueTrackerURL = "${issue_tracker}"
+license = "${license}"
 
 [[mods]]
-modId = "vivecraft"
+modId = "${mod_id}"
 version = "${version}"
-displayName = "Vivecraft"
-displayURL = "https://modrinth.com/mod/vivecraft"
+displayName = "${mod_name}"
+displayURL = "${website}"
 logoFile = "vivecraft_icon.png"
-authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player, Techjar"
+authors = "${mod_authors}"
 displayTest = "IGNORE_SERVER_VERSION"
 description = '''
-The VR mod for any loader!
+${description}
 
-Support us on Ko-Fi: https://ko-fi.com/vivecraft
+Support us on Ko-Fi: ${kofi}
 
-Discord: https://discord.gg/jYyyv7zhSW
+Discord: ${discord}
 '''
 updateJSONURL = "https://raw.githubusercontent.com/Vivecraft/VivecraftMod/forge-versions/neoforge_updates.json"
 
-[[dependencies.vivecraft]]
+[[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.5.0-beta,)"
+versionRange = "${neoforge_loader_range}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.vivecraft]]
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.5]"
+versionRange = "${neoforge_mc_range}"
 ordering = "NONE"
 side = "BOTH"
 
@@ -50,7 +50,11 @@ config = "vivecraft.blur.mixins.json"
 [[mixins]]
 config = "vivecraft.cataclysm.mixins.json"
 [[mixins]]
+config = "vivecraft.colorwheel.mixins.json"
+[[mixins]]
 config = "vivecraft.dynamicfps.mixins.json"
+[[mixins]]
+config = "vivecraft.elementa.mixins.json"
 [[mixins]]
 config = "vivecraft.emf.mixins.json"
 [[mixins]]

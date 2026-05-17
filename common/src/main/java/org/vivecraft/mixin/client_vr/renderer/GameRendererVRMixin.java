@@ -50,18 +50,18 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.XRCamera;
-import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.helpers.VRArmHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.function.Predicate;
@@ -132,6 +132,12 @@ public abstract class GameRendererVRMixin
     @Shadow
     @Final
     private Camera mainCamera;
+
+    @Shadow
+    private float spinningEffectTime;
+
+    @Shadow
+    private float spinningEffectSpeed;
 
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     private Camera vivecraft$replaceCamera() {
@@ -342,47 +348,17 @@ public abstract class GameRendererVRMixin
             }
             return;
         }
+        if (renderLevel && this.minecraft.level != null) {
+            // pop the "world" push, since that would happen after this
+            Profiler.get().pop();
+        }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
-            float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
-            if (!renderLevel || this.minecraft.level == null) {
-                // no "level" got pushed so do a manual push
-                Profiler.get().push("MainMenu");
-            } else {
-                // do a popPush
-                Profiler.get().popPush("MainMenu");
-            }
+            Profiler.get().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
-            RenderSystem.getModelViewStack().pushMatrix().identity();
-            RenderHelper.applyVRModelView(vivecraft$DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
-
-            vivecraft$resetProjectionMatrix(partialTick);
-
-            VREffectsHelper.renderGuiLayer(partialTick, true);
-
-            DebugRenderHelper.renderDebug(partialTick);
-
-            if (KeyboardHandler.SHOWING) {
-                if (vivecraft$DATA_HOLDER.vrSettings.physicalKeyboard) {
-                    VREffectsHelper.renderPhysicalKeyboard(partialTick);
-                } else {
-                    VREffectsHelper.render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
-                        KeyboardHandler.ROTATION_ROOM,
-                        vivecraft$DATA_HOLDER.vrSettings.menuAlwaysFollowFace && MethodHolder.isInMenuRoom());
-                }
-            }
-
-            if (vivecraft$DATA_HOLDER.currentPass != RenderPass.CAMERA &&
-                (vivecraft$DATA_HOLDER.currentPass != RenderPass.THIRD ||
-                    vivecraft$DATA_HOLDER.vrSettings.mixedRealityRenderHands
-                ))
-            {
-                VRArmHelper.renderVRHands(partialTick, true, true, true, true);
-            }
-            RenderSystem.getModelViewStack().popMatrix();
+            VREffectsHelper.renderMenuRoom(deltaTracker.getGameTimeDeltaPartialTick(false));
+            Profiler.get().pop();
         }
-        // pop the "level" push, since that would happen after this
-        Profiler.get().pop();
         ci.cancel();
     }
 
@@ -486,6 +462,14 @@ public abstract class GameRendererVRMixin
         this.vivecraft$setupOverlayStatus();
     }
 
+    @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getProjectionMatrix(F)Lorg/joml/Matrix4f;"))
+    private Matrix4f vivecraft$captureUndistortedProjection(Matrix4f original) {
+        if (VRState.VR_RUNNING) {
+            VRShaders.setUndistortedProj(original);
+        }
+        return original;
+    }
+
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotate(FLorg/joml/Vector3fc;)Lorg/joml/Matrix4f;", remap = false), index = 0, remap = true)
     private float vivecraft$reduceNauseaSpeed(float oldVal) {
         if (!RenderPassType.isVanilla()) {
@@ -495,19 +479,56 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
-    private float vivecraft$reduceNauseaAffect(float delta, float start, float end, Operation<Float> original) {
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F"))
+    private float vivecraft$reduceNauseaAffect(float a, float b, Operation<Float> original) {
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
-            return original.call(delta, start, end) * 0.4F;
+            return original.call(a, b) * 0.4F;
         } else {
-            return original.call(delta, start, end);
+            return original.call(a, b);
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 0, remap = true)
+    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), index = 0, remap = true)
     public Quaternionfc vivecraft$nullifyCameraRotation(Quaternionfc rotation) {
         return RenderPassType.isVanilla() ? rotation : new Quaternionf();
+    }
+
+    @Unique
+    private float vivecraft$storedSpinningEffectTime;
+
+    @Unique
+    private float vivecraft$storedSpinningEffectSpeed;
+
+    @Unique
+    private double vivecraft$storedScreenEffectScale;
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), remap = true)
+    public void vivecraft$irisNauseReduction1(CallbackInfo ci) {
+        if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
+            // backup
+            this.vivecraft$storedSpinningEffectTime = this.spinningEffectTime;
+            this.vivecraft$storedSpinningEffectSpeed = this.spinningEffectSpeed;
+            this.vivecraft$storedScreenEffectScale = this.minecraft.options.screenEffectScale().get();
+            // spin spead
+            this.spinningEffectTime *= 0.2F;
+            this.spinningEffectSpeed *= 0.2F;
+            // stretch amount
+            // square root of 0.4, since this gets squared before applying
+            ((OptionInstanceExtension<Double>) (Object) this.minecraft.options.screenEffectScale()).vivecraft$setWithoutUpdate(
+                this.vivecraft$storedScreenEffectScale * 0.6324555320336759);
+        }
+    }
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = false), remap = true)
+    public void vivecraft$irisNauseReduction2(CallbackInfo ci) {
+        if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
+            // restore
+            this.spinningEffectTime = this.vivecraft$storedSpinningEffectTime;
+            this.spinningEffectSpeed = this.vivecraft$storedSpinningEffectSpeed;
+            ((OptionInstanceExtension<Double>) (Object) this.minecraft.options.screenEffectScale()).vivecraft$setWithoutUpdate(
+                this.vivecraft$storedScreenEffectScale);
+        }
     }
 
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), index = 1)

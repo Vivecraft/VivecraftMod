@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.render;
 
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
@@ -8,13 +9,20 @@ import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class VRShaders {
+
+    public static final String CORE_TEXTURE_SAMPLER = "Sampler0";
+    public static final String CORE_OVERLAY_SAMPLER = "Sampler1";
+    public static final String CORE_LIGHTMAP_SAMPLER = "Sampler2";
+
     // FSAA shader and its uniforms
     public static final String LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM = "texelWidthOffset";
     public static final String LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM = "texelHeightOffset";
@@ -161,10 +169,19 @@ public class VRShaders {
         .withLocation("pipeline/panorama")
         .withVertexShader("core/position_tex")
         .withFragmentShader("core/position_tex")
-        .withSampler("Sampler0")
+        .withSampler(CORE_TEXTURE_SAMPLER)
         .withDepthWrite(false)
         .withBlend(BlendFunction.PANORAMA)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS).build();
+
+    public static final RenderPipeline GUI_TEXTURED = RenderPipeline.builder(
+            RenderPipelines.GUI_TEXTURED_SNIPPET)
+        .withLocation("pipeline/gui_textured_vr").build();
+
+    public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
+            RenderPipelines.GUI_TEXTURED_SNIPPET)
+        .withLocation("pipeline/gui_textured_always_vr")
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline CROSSHAIR_MENU = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/crosshair_menu_vr")
@@ -173,7 +190,7 @@ public class VRShaders {
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     private static final RenderPipeline.Snippet ENTITY_SNIPPET = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-        .withSampler("Sampler1")
+        .withSampler(CORE_OVERLAY_SAMPLER)
         .withCull(false).buildSnippet();
 
     public static final RenderPipeline CROSSHAIR_WORLD = RenderPipeline.builder(ENTITY_SNIPPET)
@@ -256,13 +273,20 @@ public class VRShaders {
         .withLocation("pipeline/text_no_cull_vr")
         .withVertexShader("core/rendertype_text")
         .withFragmentShader("core/rendertype_text")
-        .withSampler("Sampler0")
-        .withSampler("Sampler2")
+        .withSampler(CORE_TEXTURE_SAMPLER)
+        .withSampler(CORE_LIGHTMAP_SAMPLER)
         .withCull(false).build();
 
     public static final Set<RenderPipeline> DEPTH_ALWAYS_PIPELINES = new HashSet<>(
         Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT,
             ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
+
+    private static PerspectiveProjectionMatrixBuffer UNDISTORTED_PROJ;
+    public static GpuBufferSlice UNDISTORTED_PROJ_BUFFER;
+
+    public static void setUndistortedProj(Matrix4f proj) {
+        UNDISTORTED_PROJ_BUFFER = UNDISTORTED_PROJ.getBuffer(proj);
+    }
 
     private VRShaders() {}
 }

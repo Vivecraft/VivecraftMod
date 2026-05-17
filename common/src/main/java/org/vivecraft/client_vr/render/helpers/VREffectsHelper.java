@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.render.helpers;
 
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -55,6 +56,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -595,6 +597,75 @@ public class VREffectsHelper {
     }
 
     /**
+     * renders the menu environment, aswell as hands, screen and keyboard
+     */
+    public static void renderMenuRoom(float partialTick) {
+        // clear depth for menu environment
+        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(MC.mainRenderTarget.getDepthTexture(), 1.0);
+
+        RenderSystem.getModelViewStack().pushMatrix().identity();
+        RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
+
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
+
+        renderMenuEnvironment();
+        // render the screen always on top in the menu room to prevent z fighting
+        renderGuiLayer(true);
+
+        DebugRenderHelper.renderDebug(partialTick);
+
+        if (KeyboardHandler.SHOWING) {
+            if (DATA_HOLDER.vrSettings.physicalKeyboard) {
+                renderPhysicalKeyboard();
+            } else {
+                render2D(KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
+                    KeyboardHandler.ROTATION_ROOM, DATA_HOLDER.vrSettings.menuAlwaysFollowFace);
+            }
+        }
+
+        if (DATA_HOLDER.currentPass != RenderPass.CAMERA &&
+            (DATA_HOLDER.currentPass != RenderPass.THIRD || DATA_HOLDER.vrSettings.mixedRealityRenderHands))
+        {
+            VRArmHelper.renderVRHands(partialTick, true, true, true, true);
+        }
+
+        RenderSystem.getModelViewStack().popMatrix();
+    }
+
+    /**
+     * renders the current menu environment
+     */
+    public static void renderMenuEnvironment() {
+        // MAIN MENU ENVIRONMENT
+
+        Matrix4fStack poseStack = new Matrix4fStack(8);
+
+        Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
+        poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
+            (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
+            (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
+
+        // remove world rotation or the room doesn't align with the screen
+        poseStack.rotate(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+
+        if (DATA_HOLDER.menuWorldRenderer.isReady()) {
+            try {
+                renderTechjarsAwesomeMainMenuRoom(poseStack);
+            } catch (Exception e) {
+                VRSettings.LOGGER.error(
+                    "Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
+                DATA_HOLDER.menuWorldRenderer.destroy();
+            }
+        } else {
+            if (DATA_HOLDER.vrSettings.menuWorldFallbackPanorama) {
+                renderMenuPanorama(poseStack);
+            } else {
+                renderJrbuddasAwesomeMainMenuRoomNew(poseStack);
+            }
+        }
+    }
+
+    /**
      * renders the vivecraft stuff into separate buffers for the fabulous settings
      * this includes hands, vr shadow, gui, camera widgets and other stuff
      *
@@ -751,7 +822,7 @@ public class VREffectsHelper {
             VREffectsHelper.renderVrShadow(partialTick, depthAlways);
         }
         if (Minecraft.getInstance().screen != null || !KeyboardHandler.SHOWING) {
-            renderGuiLayer(partialTick, depthAlways);
+            renderGuiLayer(depthAlways);
         }
         if (!shadowFirst) {
             VREffectsHelper.renderVrShadow(partialTick, depthAlways);
@@ -759,15 +830,15 @@ public class VREffectsHelper {
 
         if (KeyboardHandler.SHOWING) {
             if (DATA_HOLDER.vrSettings.physicalKeyboard) {
-                renderPhysicalKeyboard(partialTick);
+                renderPhysicalKeyboard();
             } else {
-                render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
+                render2D(KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
                     KeyboardHandler.ROTATION_ROOM, depthAlways);
             }
         }
 
         if (RadialHandler.isShowing()) {
-            render2D(partialTick, RadialHandler.FRAMEBUFFER, RadialHandler.POS_ROOM,
+            render2D(RadialHandler.FRAMEBUFFER, RadialHandler.POS_ROOM,
                 RadialHandler.ROTATION_ROOM, depthAlways);
         }
     }
@@ -861,15 +932,9 @@ public class VREffectsHelper {
             ((GameRendererExtension) MC.gameRenderer).vivecraft$getRveY()
         );
 
-        RenderType renderType;
-        TextureAtlasSprite textureAtlasSprite = ModelBakery.FIRE_1.sprite();
-        if (RenderPass.isThirdPerson(DATA_HOLDER.currentPass)) {
-            // with depthtest
-            renderType = RenderType.guiTextured(textureAtlasSprite.atlasLocation());
-        } else {
-            // without depthtest
-            renderType = RenderType.fireScreenEffect(textureAtlasSprite.atlasLocation());
-        }
+        RenderType renderType = VRRenderTypes.guiTextured(fireSprite.atlasLocation(),
+            // with depthtest in third
+            !RenderPass.isThirdPerson(DATA_HOLDER.currentPass));
 
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 
@@ -897,15 +962,13 @@ public class VREffectsHelper {
 
     /**
      * renders the physical touch keyboard
-     *
-     * @param partialTick current partial tick
      */
-    public static void renderPhysicalKeyboard(float partialTick) {
+    public static void renderPhysicalKeyboard() {
         if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         Profiler.get().push("renderPhysicalKeyboard");
 
-        removeNausea(partialTick);
+        removeNausea();
 
         Profiler.get().push("applyPhysicalKeyboardModelView");
         Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
@@ -940,13 +1003,11 @@ public class VREffectsHelper {
 
     /**
      * removes the nausea effect from the projection matrix
-     *
-     * @param partialTick current partial tick
      */
-    public static void removeNausea(float partialTick) {
+    public static void removeNausea() {
         // remove nausea effect from projection matrix, for vanilla
         RenderSystem.backupProjectionMatrix();
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
+        RenderSystem.setProjectionMatrix(VRShaders.UNDISTORTED_PROJ_BUFFER, ProjectionType.PERSPECTIVE);
     }
 
     /**
@@ -1017,51 +1078,18 @@ public class VREffectsHelper {
     /**
      * renders the GUI/HUD buffer into the world
      *
-     * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      */
-    public static void renderGuiLayer(float partialTick, boolean depthAlways) {
+    public static void renderGuiLayer(boolean depthAlways) {
         if (DATA_HOLDER.bowTracker.isDrawing()) return;
         if (MC.screen == null && MC.options.hideGui) return;
         if (RadialHandler.isShowing()) return;
 
         Profiler.get().push("GuiLayer");
 
-        removeNausea(partialTick);
+        removeNausea();
 
-        Matrix4fStack poseStack = new Matrix4fStack(8);
-
-        // MAIN MENU ENVIRONMENT
-        if (MethodHolder.isInMenuRoom()) {
-            // render the screen always on top in the menu room to prevent z fighting
-            depthAlways = true;
-
-            poseStack.pushMatrix();
-            Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
-            poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
-                (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
-                (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
-
-            // remove world rotation or the room doesn't align with the screen
-            poseStack.rotate(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
-
-            if (DATA_HOLDER.menuWorldRenderer.isReady()) {
-                try {
-                    renderTechjarsAwesomeMainMenuRoom(poseStack);
-                } catch (Exception e) {
-                    VRSettings.LOGGER.error(
-                        "Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
-                    DATA_HOLDER.menuWorldRenderer.destroy();
-                }
-            } else {
-                if (DATA_HOLDER.vrSettings.menuWorldFallbackPanorama) {
-                    renderMenuPanorama(poseStack);
-                } else {
-                    renderJrbuddasAwesomeMainMenuRoomNew(poseStack);
-                }
-            }
-            poseStack.popMatrix();
-        }
+        Matrix4f poseStack = new Matrix4f();
 
         Vec3 guiPos = GuiHandler.applyGUIModelView(DATA_HOLDER.currentPass, poseStack);
 
@@ -1075,20 +1103,19 @@ public class VREffectsHelper {
     /**
      * renders the given RenderTarget into the world, ath the given location with the give rotation
      *
-     * @param partialTick current partial tick
      * @param framebuffer RenderTarget to render into the world
      * @param pos         position to render the RenderTarget at, in VR room space
      * @param rot         rotation to rotate the screen, in VR room space
      * @param depthAlways if the depth test should be disabled
      */
     public static void render2D(
-        float partialTick, RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways)
+        RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways)
     {
         if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         Profiler.get().push("render2D");
 
-        removeNausea(partialTick);
+        removeNausea();
 
         Profiler.get().push("apply2DModelView");
 
