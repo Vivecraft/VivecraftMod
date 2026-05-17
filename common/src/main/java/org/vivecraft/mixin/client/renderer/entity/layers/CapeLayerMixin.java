@@ -9,9 +9,9 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.core.ClientAsset;
+import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.PlayerSkin;
 import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -38,12 +38,12 @@ public abstract class CapeLayerMixin extends RenderLayer<PlayerRenderState, Play
     }
 
     // DEBUG CAPE
-    //@WrapOperation(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/PlayerSkin;cape()Lnet/minecraft/core/ClientAsset$Texture;"))
+    //@WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/state/PlayerRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/PlayerSkin;capeTexture()Lnet/minecraft/resources/ResourceLocation;"))
     @Unique
-    private ClientAsset.Texture vivecraft$debugCape(PlayerSkin instance, Operation<ClientAsset.Texture> original) {
-        ClientAsset.Texture capeTexture = original.call(instance);
+    private ResourceLocation vivecraft$debugCape(PlayerSkin instance, Operation<ResourceLocation> original) {
+        ResourceLocation capeTexture = original.call(instance);
         if (capeTexture == null) {
-            capeTexture = new ClientAsset.ResourceTexture(RenderHelper.DEBUG_CAPE, RenderHelper.DEBUG_CAPE);
+            capeTexture = RenderHelper.DEBUG_CAPE;
         }
         return capeTexture;
     }

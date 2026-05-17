@@ -345,7 +345,16 @@ public abstract class GameRendererVRMixin
 
         if (!renderLevel && this.vivecraft$shouldDrawScreen) {
             this.vivecraft$shouldDrawScreen = false;
+            if (this.vivecraft$shouldDrawGui) {
+                // when the gui is rendered it is expected that something got pushed to the profiler before
+                // so do that now
+                Profiler.get().push("vanillaGuiSetup");
+            }
             return;
+        }
+        if (renderLevel && this.minecraft.level != null) {
+            // pop the "world" push, since that would happen after this
+            Profiler.get().pop();
         }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
             Profiler.get().push("MainMenu");

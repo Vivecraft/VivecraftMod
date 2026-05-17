@@ -795,6 +795,8 @@ public class MenuWorldRenderer {
                     this.getTimeOfDay()); // calcSunriseSunsetColors
             } catch (Exception ignore) {}
 
+            MultiBufferSource.BufferSource bufferSource = this.mc.renderBuffers().bufferSource();
+
             if (sunriseColor != 0 && this.dimensionInfo.isSunriseOrSunset(this.getTimeOfDay()) &&
                 (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()))
             {
@@ -856,6 +858,8 @@ public class MenuWorldRenderer {
                 vertexConsumer.addVertex(size, -100.0f, -size).setUv(u1, v0).setColor(color);
                 vertexConsumer.addVertex(-size, -100.0f, -size).setUv(u0, v0).setColor(color);
             }
+
+            bufferSource.endBatch();
 
             float starBrightness = this.getStarBrightness() * skyVisibility;
 

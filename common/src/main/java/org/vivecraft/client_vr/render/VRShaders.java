@@ -140,6 +140,10 @@ public class VRShaders {
         .withDepthWrite(false)
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).build();
 
+    public static final RenderPipeline GUI_TEXTURED = RenderPipeline.builder(
+            RenderPipelines.GUI_TEXTURED_SNIPPET)
+        .withLocation("pipeline/gui_textured_vr").build();
+
     public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation("pipeline/gui_textured_always_vr")
