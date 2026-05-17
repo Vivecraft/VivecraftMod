@@ -49,9 +49,10 @@ public class VRRenderTypes {
                 .setTextureState(getTextureState(gpuTexture))
                 .createCompositeState(false)));
 
-    private static final Function<ResourceLocation, RenderType> GUI_TEXTURED = Util.memoize(
-        resourceLocation -> RenderType.create("gui_textured_vr", 1536, false, false,
-            RenderPipelines.GUI_TEXTURED, RenderType.CompositeState.builder()
+    private static final BiFunction<ResourceLocation, Boolean, RenderType> GUI_TEXTURED = Util.memoize(
+        (resourceLocation, depthAlways) -> RenderType.create("gui_textured_vr", 1536, false, false,
+            depthAlways ? VRShaders.GUI_TEXTURED_ALWAYS : VRShaders.GUI_TEXTURED,
+            RenderType.CompositeState.builder()
                 .setTextureState(getTextureState(resourceLocation))
                 .createCompositeState(false)));
 
@@ -154,7 +155,11 @@ public class VRRenderTypes {
     }
 
     public static RenderType guiTextured(ResourceLocation resourceLocation) {
-        return GUI_TEXTURED.apply(resourceLocation);
+        return guiTextured(resourceLocation, false);
+    }
+
+    public static RenderType guiTextured(ResourceLocation resourceLocation, boolean depthAlways) {
+        return GUI_TEXTURED.apply(resourceLocation, depthAlways);
     }
 
     public static RenderType guiTextureAlways(GpuTextureView texture) {

@@ -1,21 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "vivecraft",
+  "id": "${mod_id}",
   "version": "${version}",
 
-  "name": "Vivecraft",
-  "description": "The VR mod for any loader!",
+  "name": "${mod_name}",
+  "description": "${description}",
   "icon": "vivecraft_icon.png",
   "authors": [
-    "fayer3",
-    "Ferri_Arnus",
-    "IMS",
-    "jrbudda",
-    "minecraft player",
-    "Techjar"
+    "${mod_authors_array}"
   ],
 
-  "license": "LGPLv3",
+  "license": "${license}",
 
   "environment": "*",
   "entrypoints": {
@@ -37,7 +32,9 @@
     "vivecraft.bedrockify.mixins.json",
     "vivecraft.blur.mixins.json",
     "vivecraft.cataclysm.mixins.json",
+    "vivecraft.colorwheel.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
+    "vivecraft.elementa.mixins.json",
     "vivecraft.emf.mixins.json",
     "vivecraft.epicfight.mixins.json",
     "vivecraft.iris.mixins.json",
@@ -54,19 +51,16 @@
   ],
   "depends": {
     "fabricloader": ">=0.16.1",
-    "minecraft": ["1.21.6","1.21.7","1.21.8"],
-    "java": ">=21"
+    "minecraft": ${fabric_mc_range},
+    "java": ">=${java_version}"
   },
   "breaks": {
     "sodium": ["0.4.11+build.25", "0.4.11+build.26"]
   },
-  "suggests": {
-    "another-mod": "*"
-  },
   "contact": {
-    "homepage": "https://modrinth.com/mod/vivecraft",
-    "issues": "https://github.com/Vivecraft/VivecraftMod/issues",
-    "sources": "https://github.com/Vivecraft/VivecraftMod"
+    "homepage": "${website}",
+    "issues": "${issue_tracker}",
+    "sources": "${sources}"
   },
   "custom": {
     "mc-publish": {
@@ -76,8 +70,8 @@
     },
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://discord.gg/jYyyv7zhSW",
-        "vivecraft.message.kofi": "https://ko-fi.com/vivecraft"
+        "modmenu.discord": "${discord}",
+        "vivecraft.message.kofi": "${kofi}"
       },
       "update_checker": true
     }

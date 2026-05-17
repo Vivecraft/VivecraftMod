@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "org.vivecraft.mod_compat_vr.elementa.mixin",
+  "plugin": "org.vivecraft.MixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ElementaAbstractTextInputVRMixin",
+    "ElementaUIComponentVRMixin"
+  ],
+  "minVersion": "0.8.4"
+}
