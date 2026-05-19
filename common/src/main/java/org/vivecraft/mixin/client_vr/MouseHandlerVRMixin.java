@@ -32,6 +32,7 @@ public class MouseHandlerVRMixin {
     private boolean vivecraft$checkNull(LocalPlayer instance, Operation<Boolean> original) {
         return instance != null && original.call(instance);
     }
+
     @WrapWithCondition(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
     private boolean vivecraft$noTurning(LocalPlayer instance, double x, double y) {
         return !VRState.VR_RUNNING;
