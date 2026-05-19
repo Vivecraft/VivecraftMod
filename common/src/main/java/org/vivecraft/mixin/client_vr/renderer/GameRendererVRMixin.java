@@ -438,7 +438,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F"))
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
     private float vivecraft$reduceNauseaAffect(float a, float b, Operation<Float> original) {
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
