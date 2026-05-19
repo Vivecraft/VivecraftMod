@@ -50,8 +50,6 @@ config = "vivecraft.blur.mixins.json"
 [[mixins]]
 config = "vivecraft.cataclysm.mixins.json"
 [[mixins]]
-config = "vivecraft.colorwheel.mixins.json"
-[[mixins]]
 config = "vivecraft.dynamicfps.mixins.json"
 [[mixins]]
 config = "vivecraft.elementa.mixins.json"
