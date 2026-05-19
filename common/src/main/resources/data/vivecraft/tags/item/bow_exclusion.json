@@ -7,6 +7,7 @@
     },
 
     "#vivecraft:moditems/irons_spellbooks",
-    "#vivecraft:moditems/balkons_weaponsmod/nonbows"
+    "#vivecraft:moditems/balkons_weaponsmod/nonbows",
+    "#vivecraft:moditems/dewdrop_wateringcans"
   ]
 }

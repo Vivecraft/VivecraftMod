@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -35,7 +36,11 @@ import org.vivecraft.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -164,7 +169,9 @@ public class MenuWorldExporter {
         Files.write(bytes, file);
     }
 
-    public static FakeBlockAccess loadWorld(byte[] data) throws IOException, DataFormatException {
+    public static FakeBlockAccess loadWorld(
+        byte[] data) throws IOException, DataFormatException, ExecutionException, InterruptedException
+    {
         Header header = new Header();
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data))) {
             header.read(dis);
@@ -173,47 +180,46 @@ public class MenuWorldExporter {
             throw new DataFormatException("Unsupported menu world version: " + header.version);
         }
 
+        ByteBuffer buf = ByteBuffer.allocate(header.uncompressedSize).order(ByteOrder.BIG_ENDIAN);
         Inflater inflater = new Inflater();
         inflater.setInput(data, Header.SIZE, data.length - Header.SIZE);
-        ByteArrayOutputStream output = new ByteArrayOutputStream(header.uncompressedSize);
-        byte[] buffer = new byte[1048576];
-        while (!inflater.finished()) {
-            int len = inflater.inflate(buffer);
-            output.write(buffer, 0, len);
-        }
+        inflater.inflate(buf);
+        inflater.end();
 
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(output.toByteArray()));
-        int xSize = dis.readInt();
-        int ySize = dis.readInt();
-        int zSize = dis.readInt();
-        int ground = dis.readInt();
+        buf.rewind();
+        DataInput di = new DataInputBuffer(buf);
+
+        int xSize = buf.getInt();
+        int ySize = buf.getInt();
+        int zSize = buf.getInt();
+        int ground = buf.getInt();
 
         ResourceLocation dimName;
         if (header.version < 4) { // old format
-            int dimId = dis.readInt();
+            int dimId = buf.getInt();
             dimName = switch (dimId) {
                 case -1 -> BuiltinDimensionTypes.NETHER_EFFECTS;
                 case 1 -> BuiltinDimensionTypes.END_EFFECTS;
                 default -> BuiltinDimensionTypes.OVERWORLD_EFFECTS;
             };
         } else {
-            dimName = ResourceLocation.parse(dis.readUTF());
+            dimName = ResourceLocation.parse(di.readUTF());
         }
 
         boolean isFlat;
 
         if (header.version < 4) // old format
         {
-            isFlat = dis.readUTF().equals("flat");
+            isFlat = di.readUTF().equals("flat");
         } else {
-            isFlat = dis.readBoolean();
+            isFlat = buf.get() != 0;
         }
 
-        boolean dimHasSkyLight = dis.readBoolean();
+        boolean dimHasSkyLight = buf.get() != 0;
 
         long seed = 0;
         if (header.version >= 3) {
-            seed = dis.readLong();
+            seed = buf.getLong();
         }
 
         int dataVersion;
@@ -224,7 +230,7 @@ public class MenuWorldExporter {
         } else if (header.version == 4) {
             dataVersion = 2586; // assume 1.16.5
         } else {
-            dataVersion = dis.readInt(); // v5+ stores the real data version
+            dataVersion = buf.getInt(); // v5+ stores the real data version
         }
 
         if (dataVersion > SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
@@ -254,12 +260,12 @@ public class MenuWorldExporter {
                 dimAmbientLight = 0.0f;
             }
         } else {
-            if (dis.readBoolean()) {
-                dimFixedTime = OptionalLong.of(dis.readLong());
+            if (buf.get() != 0) {
+                dimFixedTime = OptionalLong.of(buf.getLong());
             }
-            dimHasCeiling = dis.readBoolean();
-            dimMinY = dis.readInt();
-            dimAmbientLight = dis.readFloat();
+            dimHasCeiling = buf.get() != 0;
+            dimMinY = buf.getInt();
+            dimAmbientLight = buf.getFloat();
         }
 
         DimensionType dimensionType = new DimensionType(dimFixedTime, dimHasSkyLight, dimHasCeiling, false, false, 1.0,
@@ -271,44 +277,64 @@ public class MenuWorldExporter {
         boolean thunder = false;
 
         if (header.version >= 5) {
-            rotation = dis.readFloat();
-            rain = dis.readBoolean();
-            thunder = dis.readBoolean();
+            rotation = buf.getFloat();
+            rain = buf.get() != 0;
+            thunder = buf.get() != 0;
         }
 
         BlockStateMapper blockStateMapper = new BlockStateMapper();
-        blockStateMapper.readPalette(dis, dataVersion);
+        blockStateMapper.readPalette(di, dataVersion);
 
         BiomeMapper biomeMapper;
         if (header.version >= 5) {
             biomeMapper = new PaletteBiomeMapper();
-            ((PaletteBiomeMapper) biomeMapper).readPalette(dis);
+            ((PaletteBiomeMapper) biomeMapper).readPalette(di);
         } else {
             biomeMapper = new LegacyBiomeMapper();
         }
 
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        int segmentSize = 16;
+
         BlockState[] blocks = new BlockState[xSize * ySize * zSize];
-        for (int i = 0; i < blocks.length; i++) {
-            blocks[i] = blockStateMapper.getState(dis.readInt());
+        for (int s = 0; s < ySize / segmentSize; s++) {
+            int segment = s;
+            int size = xSize * zSize * segmentSize;
+            ByteBuffer bufSlice = buf.slice();
+            futures.add(CompletableFuture.runAsync(() -> {
+                for (int i = size * segment; i < size * segment + size; i++) {
+                    blocks[i] = blockStateMapper.getState(bufSlice.getInt());
+                }
+            }, Util.backgroundExecutor()));
+            buf.position(buf.position() + size * 4);
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
+        futures.clear();
 
         short[][] heightmap = new short[xSize][zSize];
-        for (int x = 0; x < xSize; x++) {
-            for (int z = 0; z < zSize; z++) {
-                for (int y = ySize - 1; y >= 0; y--) {
-                    int index = (y * zSize + z) * xSize + x;
-                    if (blocks[index].blocksMotion() || !blocks[index].getFluidState().isEmpty()) {
-                        heightmap[x][z] = (short) (y + 1);
-                        break;
+        for (int s = 0; s < xSize; s += segmentSize) {
+            int x = s;
+            futures.add(CompletableFuture.runAsync(() -> {
+                for (int z = 0; z < zSize; z++) {
+                    for (int y = ySize - 1; y >= 0; y--) {
+                        int index = (y * zSize + z) * xSize + x;
+                        if (blocks[index].blocksMotion() || !blocks[index].getFluidState().isEmpty()) {
+                            heightmap[x][z] = (short) (y + 1);
+                            break;
+                        }
                     }
                 }
-            }
+            }, Util.backgroundExecutor()));
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
+        futures.clear();
 
+        byte[] lightdata = new byte[xSize * ySize * zSize];
+        buf.get(lightdata);
         byte[] skylightmap = new byte[xSize * ySize * zSize];
         byte[] blocklightmap = new byte[xSize * ySize * zSize];
-        for (int i = 0; i < skylightmap.length; i++) {
-            int b = dis.readByte() & 0xFF;
+        for (int i = 0; i < lightdata.length; i++) {
+            int b = lightdata[i] & 0xFF;
             skylightmap[i] = (byte) (b & 15);
             blocklightmap[i] = (byte) (b >> 4);
         }
@@ -317,7 +343,7 @@ public class MenuWorldExporter {
         if (header.version == 2) {
             Biome[] tempBiomemap = new Biome[xSize * zSize];
             for (int i = 0; i < tempBiomemap.length; i++) {
-                tempBiomemap[i] = biomeMapper.getBiome(dis.readInt());
+                tempBiomemap[i] = biomeMapper.getBiome(buf.getInt());
             }
             for (int x = 0; x < xSize / 4; x++) {
                 for (int z = 0; z < zSize / 4; z++) {
@@ -330,7 +356,7 @@ public class MenuWorldExporter {
             }
         } else {
             for (int i = 0; i < biomemap.length; i++) {
-                biomemap[i] = biomeMapper.getBiome(dis.readInt());
+                biomemap[i] = biomeMapper.getBiome(buf.getInt());
             }
         }
 
@@ -338,7 +364,9 @@ public class MenuWorldExporter {
             ySize, zSize, ground, dimensionType, isFlat, rotation, rain, thunder);
     }
 
-    public static FakeBlockAccess loadWorld(InputStream is) throws IOException, DataFormatException {
+    public static FakeBlockAccess loadWorld(
+        InputStream is) throws IOException, DataFormatException, ExecutionException, InterruptedException
+    {
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         byte[] buffer = new byte[1048576];
         int count;
@@ -392,7 +420,7 @@ public class MenuWorldExporter {
             return this.paletteMap.byId(id);
         }
 
-        void readPalette(DataInputStream dis, int dataVersion) throws IOException {
+        void readPalette(DataInput dis, int dataVersion) throws IOException {
             this.paletteMap.clear();
             int size = dis.readInt();
 
@@ -441,7 +469,7 @@ public class MenuWorldExporter {
             return this.paletteMap.byId(id);
         }
 
-        void readPalette(DataInputStream dis) throws IOException {
+        void readPalette(DataInput dis) throws IOException {
             this.paletteMap.clear();
             int size = dis.readInt();
 
@@ -1053,6 +1081,89 @@ public class MenuWorldExporter {
         public Biome getBiome(int id) {
             Biome biome = MAP.get(id);
             return biome != null ? biome : MAP.get(1);
+        }
+    }
+
+    private static class DataInputBuffer implements DataInput {
+        final ByteBuffer buffer;
+
+        private DataInputBuffer(ByteBuffer buffer) {
+            this.buffer = buffer;
+        }
+
+        @Override
+        public void readFully(byte[] b) {
+            readFully(b, 0, b.length);
+        }
+
+        @Override
+        public void readFully(byte[] b, int off, int len) {
+            this.buffer.get(b, off, len);
+        }
+
+        @Override
+        public int skipBytes(int n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean readBoolean() {
+            return this.buffer.get() != 0;
+        }
+
+        @Override
+        public byte readByte() {
+            return this.buffer.get();
+        }
+
+        @Override
+        public int readUnsignedByte() {
+            return this.buffer.get() & 0xFF;
+        }
+
+        @Override
+        public short readShort() {
+            return this.buffer.getShort();
+        }
+
+        @Override
+        public int readUnsignedShort() {
+            return this.buffer.getShort() & 0xFFFF;
+        }
+
+        @Override
+        public char readChar() {
+            return this.buffer.getChar();
+        }
+
+        @Override
+        public int readInt() {
+            return this.buffer.getInt();
+        }
+
+        @Override
+        public long readLong() {
+            return this.buffer.getLong();
+        }
+
+        @Override
+        public float readFloat() {
+            return this.buffer.getFloat();
+        }
+
+        @Override
+        public double readDouble() {
+            return this.buffer.getDouble();
+        }
+
+        @Override
+        public String readLine() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String readUTF() throws IOException {
+            return DataInputStream.readUTF(this);
         }
     }
 }

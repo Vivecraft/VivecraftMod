@@ -17,6 +17,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class VRShaders {
+
+    public static final String CORE_TEXTURE_SAMPLER = "Sampler0";
+    public static final String CORE_OVERLAY_SAMPLER = "Sampler1";
+    public static final String CORE_LIGHTMAP_SAMPLER = "Sampler2";
+
     // FSAA shader and its uniforms
     public static final ShaderProgram LANCZOS_SHADER = new ShaderProgram(
         ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"),

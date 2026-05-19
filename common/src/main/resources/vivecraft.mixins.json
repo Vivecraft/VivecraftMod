@@ -31,6 +31,7 @@
     "client.renderer.entity.layers.RenderLayerMixin",
     "client.renderer.entity.layers.WingsLayerMixin",
     "client.renderer.entity.state.EntityRenderStateMixin",
+    "client_vr.DeltaTrackerTimerVRMixin",
     "client_vr.ClientBrandRetrieverVRMixin",
     "client_vr.KeyboardHandlerVRMixin",
     "client_vr.KeyboardInputVRMixin",

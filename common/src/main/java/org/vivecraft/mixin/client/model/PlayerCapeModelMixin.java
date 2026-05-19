@@ -29,6 +29,7 @@ public class PlayerCapeModelMixin<T extends PlayerRenderState> extends HumanoidM
         ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) renderState).vivecraft$getRotInfo();
         if (rotInfo != null) {
             this.cape.resetPose();
+            this.cape.z = 0;
             this.body.resetPose();
         }
     }
