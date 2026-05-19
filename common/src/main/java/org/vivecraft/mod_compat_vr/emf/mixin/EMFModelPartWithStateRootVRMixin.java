@@ -6,15 +6,19 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.extensions.ClassDependentMixin;
+import traben.entity_model_features.models.parts.EMFModelPartRoot;
 
 @Pseudo
+@ClassDependentMixin("traben.entity_model_features.models.parts.EMFModelPartRoot")
 @Mixin(targets = {
     "traben.entity_model_features.models.parts.EMFModelPartWithState",
     "traben.entity_model_features.models.EMFModelPartWithState"
 }, remap = false)
-public class EMFModelPartWithStateVRMixin {
-    @WrapWithCondition(method = {"render", "method_22699", "m_104306_"}, at = @At(value = "INVOKE", target = "Ljava/lang/Runnable;run()V"))
-    private boolean vivecraft$noRenderEventForFirstPerson(Runnable instance) {
+public class EMFModelPartWithStateRootVRMixin {
+
+    @WrapWithCondition(method = {"render", "method_22699", "m_104306_"}, at = @At(value = "INVOKE", target = "Ltraben/entity_model_features/models/parts/EMFModelPartRoot;animate()V"))
+    private boolean vivecraft$noAnimationForFirstPerson(EMFModelPartRoot instance) {
         return !VRState.VR_RUNNING || !ClientDataHolderVR.getInstance().isFpHand;
     }
 }

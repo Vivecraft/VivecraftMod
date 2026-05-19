@@ -46,7 +46,7 @@ public class ServerPlayerGameModeMixin {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         if (vivePlayer != null && vivePlayer.isVR()) {
             // store the BodyPart to continue destroying with it
-            vivePlayer.delayedDestroyBodyPart = vivePlayer.activeBodyPart;
+            vivePlayer.delayedDestroyBodyPart = vivePlayer.getActiveItemBodyPart();
         }
     }
 

@@ -1,6 +1,7 @@
 build/
 *.ipr
 run/
+runs/
 *.iws
 out/
 *.iml
@@ -8,6 +9,7 @@ out/
 output/
 bin/
 libs/
+local.properties
 
 .classpath
 .project

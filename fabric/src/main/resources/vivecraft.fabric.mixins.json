@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "FabricMinecraftVRMixin",
+    "FabricMouseHandlerVRMixin",
     "screenhandler.client.FabricClientNetworkingVRMixin",
     "world.level.biome.BiomeAccessor"
   ],
