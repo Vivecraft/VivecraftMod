@@ -34,6 +34,7 @@
     "client.renderer.entity.state.ArmedEntityRenderStateMixin",
     "client.renderer.entity.state.EntityRenderStateMixin",
     "client.renderer.item.ItemModelResolverMixin",
+    "client_vr.DeltaTrackerTimerVRMixin",
     "client_vr.ClientBrandRetrieverVRMixin",
     "client_vr.KeyboardHandlerVRMixin",
     "client_vr.KeyboardInputVRMixin",

@@ -612,7 +612,7 @@ public class VREffectsHelper {
      */
     public static void renderMenuRoom(float partialTick) {
         // clear depth for menu environment
-        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(MC.mainRenderTarget.getDepthTexture(), 1.0);
+        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT);
 
         RenderSystem.getModelViewStack().pushMatrix().identity();
         RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());

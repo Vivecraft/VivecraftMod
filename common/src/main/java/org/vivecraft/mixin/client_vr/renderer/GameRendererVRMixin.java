@@ -50,7 +50,6 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
-import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.render.XRCamera;
@@ -133,10 +132,7 @@ public abstract class GameRendererVRMixin
     private Camera mainCamera;
 
     @Shadow
-    private float spinningEffectTime;
-
-    @Shadow
-    private float spinningEffectSpeed;
+    private int confusionAnimationTick;
 
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     private Camera vivecraft$replaceCamera() {
@@ -470,13 +466,13 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
-    private float vivecraft$reduceNauseaAffect(float a, float b, Operation<Float> original) {
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
+    private float vivecraft$reduceNauseaAffect(float delta, float start, float end, Operation<Float> original) {
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
-            return original.call(a, b) * 0.4F;
+            return original.call(delta, start, end) * 0.4F;
         } else {
-            return original.call(a, b);
+            return original.call(delta, start, end);
         }
     }
 
@@ -486,28 +482,28 @@ public abstract class GameRendererVRMixin
     }
 
     @Unique
-    private float vivecraft$storedSpinningEffectTime;
+    private int vivecraft$storedConfusionAnimationTick;
 
     @Unique
-    private float vivecraft$storedSpinningEffectSpeed;
+    private float vivecraft$storedOSpinningEffectIntensity;
 
     @Unique
-    private double vivecraft$storedScreenEffectScale;
+    private float vivecraft$storedSpinningEffectIntensity;
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), remap = true)
-    public void vivecraft$irisNauseReduction1(CallbackInfo ci) {
+    public void vivecraft$irisNauseReduction1(CallbackInfo ci, @Local(ordinal = 0) float partialTick) {
         if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
             // backup
-            this.vivecraft$storedSpinningEffectTime = this.spinningEffectTime;
-            this.vivecraft$storedSpinningEffectSpeed = this.spinningEffectSpeed;
-            this.vivecraft$storedScreenEffectScale = this.minecraft.options.screenEffectScale().get();
+            this.vivecraft$storedConfusionAnimationTick = this.confusionAnimationTick;
+            this.vivecraft$storedSpinningEffectIntensity = this.minecraft.player.spinningEffectIntensity;
+            this.vivecraft$storedOSpinningEffectIntensity = this.minecraft.player.oSpinningEffectIntensity;
             // spin spead
-            this.spinningEffectTime *= 0.2F;
-            this.spinningEffectSpeed *= 0.2F;
+            vivecraft$DATA_HOLDER.partialTickOverride = (this.confusionAnimationTick + partialTick) * 0.2F;
+            this.confusionAnimationTick = 0;
             // stretch amount
-            // square root of 0.4, since this gets squared before applying
-            ((OptionInstanceExtension<Double>) (Object) this.minecraft.options.screenEffectScale()).vivecraft$setWithoutUpdate(
-                this.vivecraft$storedScreenEffectScale * 0.6324555320336759);
+            this.minecraft.player.spinningEffectIntensity = this.minecraft.player.oSpinningEffectIntensity =
+                Mth.lerp(partialTick, this.minecraft.player.oSpinningEffectIntensity,
+                    this.minecraft.player.spinningEffectIntensity) * 0.4F;
         }
     }
 
@@ -515,10 +511,10 @@ public abstract class GameRendererVRMixin
     public void vivecraft$irisNauseReduction2(CallbackInfo ci) {
         if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
             // restore
-            this.spinningEffectTime = this.vivecraft$storedSpinningEffectTime;
-            this.spinningEffectSpeed = this.vivecraft$storedSpinningEffectSpeed;
-            ((OptionInstanceExtension<Double>) (Object) this.minecraft.options.screenEffectScale()).vivecraft$setWithoutUpdate(
-                this.vivecraft$storedScreenEffectScale);
+            vivecraft$DATA_HOLDER.partialTickOverride = null;
+            this.confusionAnimationTick = this.vivecraft$storedConfusionAnimationTick;
+            this.minecraft.player.spinningEffectIntensity = this.vivecraft$storedSpinningEffectIntensity;
+            this.minecraft.player.oSpinningEffectIntensity = this.vivecraft$storedOSpinningEffectIntensity;
         }
     }
 

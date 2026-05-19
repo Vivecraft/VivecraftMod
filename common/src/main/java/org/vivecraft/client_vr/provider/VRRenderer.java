@@ -653,9 +653,10 @@ public abstract class VRRenderer {
                                 Component.literal("https://www.vivecraft.org/faq/#gpu")
                                     .withStyle(style -> style.withUnderlined(true)
                                         .withColor(ChatFormatting.GREEN)
-                                        .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                                        .withClickEvent(new ClickEvent.OpenUrl(
-                                            ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu")))))));
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                            CommonComponents.GUI_OPEN_IN_BROWSER))
+                                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
+                                            "https://www.vivecraft.org/faq/#gpu"))))));
             }
 
             if (!this.isInitialized()) {

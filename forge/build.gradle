@@ -23,8 +23,7 @@ def mixins = [
     "vivecraft.sereneseasons.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.voxy.mixins.json",
-    "vivecraft.xaerosmimimap.mixins.json",
-    "vivecraft.xaerosworldmap.mixins.json"
+    "vivecraft.xaerosmimimap.mixins.json"
 ]
 
 architectury {

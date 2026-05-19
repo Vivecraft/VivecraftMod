@@ -39,7 +39,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
@@ -347,20 +346,10 @@ public class MenuWorldRenderer {
     {
         BufferBuilder builder = startedLayers.get(layer);
         if (builder == null) {
-
-            boolean wasSkipping = false;
-            if (IrisHelper.isLoaded()) {
-                wasSkipping = IrisHelper.getSkipBufferExtension();
-                IrisHelper.setSkipBufferExtension(true);
-            }
-
             // 32768 yields most efficient memory use for some reason
             builder = new BufferBuilder(new ByteBufferBuilder(32768),
                 VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-            if (!wasSkipping && IrisHelper.isLoaded()) {
-                IrisHelper.setSkipBufferExtension(false);
-            }
             startedLayers.put(layer, builder);
         }
         return builder;
@@ -463,7 +452,7 @@ public class MenuWorldRenderer {
                             thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
                             blockRenderer.renderBatched(state, pos, this.blockAccess, thisPose,
                                 this.getOrBeginLayer(this.bufferBuilders.get(offset),
-                                    ItemBlockRenderTypes.getChunkRenderType(state)), true, parts);
+                                    ItemBlockRenderTypes.getChunkRenderType(state)), true, randomSource);
                             count++;
                             thisPose.popPose();
                         }
