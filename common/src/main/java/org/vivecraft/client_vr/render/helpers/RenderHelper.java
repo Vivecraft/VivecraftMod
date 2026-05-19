@@ -47,7 +47,7 @@ public class RenderHelper {
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
     private static final Minecraft MC = Minecraft.getInstance();
 
-    public static final ResourceLocation DEBUG_CAPE = ResourceLocation.parse("vivecraft:textures/cape.png");
+    public static final ResourceLocation DEBUG_CAPE = new ResourceLocation("vivecraft:textures/cape.png");
     public static final ResourceLocation WHITE_TEXTURE = new ResourceLocation("vivecraft:textures/white.png");
     public static final ResourceLocation BLACK_TEXTURE = new ResourceLocation("vivecraft:textures/black.png");
 

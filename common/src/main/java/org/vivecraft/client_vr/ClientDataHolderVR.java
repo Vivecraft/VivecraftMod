@@ -40,8 +40,6 @@ public class ClientDataHolderVR {
     public boolean isMainHand;
     public boolean isFpHand;
 
-    public Float partialTickOverride = null;
-
     public VRPlayer vrPlayer;
     public MCVR vr;
     public VRRenderer vrRenderer;

@@ -353,8 +353,8 @@ public class MenuWorldRenderer {
         BufferBuilder builder = startedLayers.get(layer);
         if (builder == null) {
             // 32768 yields most efficient memory use for some reason
-            builder = new BufferBuilder(new ByteBufferBuilder(32768),
-                VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+            builder = new BufferBuilder(32768);
+            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
             startedLayers.put(layer, builder);
         }
@@ -515,31 +515,22 @@ public class MenuWorldRenderer {
         long totalMemory = 0;
         int count = 0;
         int total = this.bufferBuilders.values().stream().mapToInt(Map::size).sum();
-        try (ByteBufferBuilder builder = new ByteBufferBuilder(32768)) {
-            for (var entry : entryList) {
-                for (var layerBuffer : entry.getValue().entrySet()) {
-                    RenderType layer = layerBuffer.getKey();
-                    BufferBuilder bufferBuilder = layerBuffer.getValue();
-                    MeshData meshData = bufferBuilder.build();
-                    if (meshData != null) {
-                        if (layer == RenderType.translucent()) {
-                            meshData.sortQuads(builder,
-                                VertexSorting.byDistance(0, Mth.frac(this.blockAccess.getGround()), 0));
-                        }
-                        uploadGeometry(layer, meshData);
-                        count++;
-                    }
-                    totalMemory += ((BufferBuilderExtension) bufferBuilder).vivecraft$getBufferSize();
-                    ((BufferBuilderExtension) bufferBuilder).vivecraft$freeBuffer();
+        for (var entry : entryList) {
+            for (var layerBuffer : entry.getValue().entrySet()) {
+                RenderType layer = layerBuffer.getKey();
+                BufferBuilder bufferBuilder = layerBuffer.getValue();
+                if (layer == RenderType.translucent()) {
+                    bufferBuilder.setQuadSorting(
+                        VertexSorting.byDistance(0, Mth.frac(this.blockAccess.getGround()), 0));
                 }
+                BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();
+                if (!renderedBuffer.isEmpty()) {
+                    uploadGeometry(layer, renderedBuffer);
+                    count++;
+                }
+                totalMemory += ((BufferBuilderExtension) bufferBuilder).vivecraft$getBufferSize();
+                ((BufferBuilderExtension) bufferBuilder).vivecraft$freeBuffer();
             }
-            BufferBuilder.RenderedBuffer renderedBuffer = vertBuffer.end();
-            if (!renderedBuffer.isEmpty()) {
-                uploadGeometry(layer, renderedBuffer);
-                count++;
-            }
-            totalMemory += ((BufferBuilderExtension) vertBuffer).vivecraft$getBufferSize();
-            ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
         }
 
         this.bufferBuilders = null;

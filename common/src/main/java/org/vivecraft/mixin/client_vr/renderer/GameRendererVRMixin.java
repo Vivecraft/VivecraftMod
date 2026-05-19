@@ -356,7 +356,7 @@ public abstract class GameRendererVRMixin
             this.minecraft.getProfiler().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
-            VREffectsHelper.renderMenuRoom(deltaTracker.getGameTimeDeltaPartialTick(false));
+            VREffectsHelper.renderMenuRoom(partialTick);
             this.minecraft.getProfiler().pop();
         }
         ci.cancel();
@@ -507,37 +507,43 @@ public abstract class GameRendererVRMixin
     private int vivecraft$storedConfusionAnimationTick;
 
     @Unique
+    private float vivecraft$storedPartialTick;
+
+    @Unique
     private float vivecraft$storedOSpinningEffectIntensity;
 
     @Unique
     private float vivecraft$storedSpinningEffectIntensity;
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), remap = true)
-    public void vivecraft$irisNauseReduction1(CallbackInfo ci, @Local(ordinal = 0) float partialTick) {
+    @ModifyVariable(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;", remap = false), remap = true, argsOnly = true)
+    public float vivecraft$irisNauseReduction1(float partialTick) {
         if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
             // backup
             this.vivecraft$storedConfusionAnimationTick = this.confusionAnimationTick;
+            this.vivecraft$storedPartialTick = partialTick;
             this.vivecraft$storedSpinningEffectIntensity = this.minecraft.player.spinningEffectIntensity;
             this.vivecraft$storedOSpinningEffectIntensity = this.minecraft.player.oSpinningEffectIntensity;
             // spin spead
-            vivecraft$DATA_HOLDER.partialTickOverride = (this.confusionAnimationTick + partialTick) * 0.2F;
+            partialTick = (this.confusionAnimationTick + partialTick) * 0.2F;
             this.confusionAnimationTick = 0;
             // stretch amount
             this.minecraft.player.spinningEffectIntensity = this.minecraft.player.oSpinningEffectIntensity =
-                Mth.lerp(partialTick, this.minecraft.player.oSpinningEffectIntensity,
+                Mth.lerp(this.vivecraft$storedPartialTick, this.minecraft.player.oSpinningEffectIntensity,
                     this.minecraft.player.spinningEffectIntensity) * 0.4F;
         }
+        return partialTick;
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = false), remap = true)
-    public void vivecraft$irisNauseReduction2(CallbackInfo ci) {
+    @ModifyVariable(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = false), remap = true, argsOnly = true)
+    public float vivecraft$irisNauseReduction2(float partialTick) {
         if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
             // restore
-            vivecraft$DATA_HOLDER.partialTickOverride = null;
+            partialTick = this.vivecraft$storedPartialTick;
             this.confusionAnimationTick = this.vivecraft$storedConfusionAnimationTick;
             this.minecraft.player.spinningEffectIntensity = this.vivecraft$storedSpinningEffectIntensity;
             this.minecraft.player.oSpinningEffectIntensity = this.vivecraft$storedOSpinningEffectIntensity;
         }
+        return partialTick;
     }
 
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), index = 1)

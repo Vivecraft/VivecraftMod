@@ -202,7 +202,7 @@ public class MenuWorldExporter {
                 default -> BuiltinDimensionTypes.OVERWORLD_EFFECTS;
             };
         } else {
-            dimName = ResourceLocation.parse(di.readUTF());
+            dimName = new ResourceLocation(di.readUTF());
         }
 
         boolean isFlat;
