@@ -585,12 +585,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
         }
 
-        if (VRState.VR_RUNNING) {
-            // process keybinds before ticking input actions, to make sure they are processed before they are unpressed
-            this.profiler.push("Vivecraft Keybindings");
-            KeybindHandler.processKeybindings();
-            this.profiler.pop();
-        }
+        // process keybinds before ticking input actions, to make sure they are processed before they are unpressed
+        Profiler.get().push("Vivecraft Keybindings");
+        KeybindHandler.processKeybindings();
+        Profiler.get().pop();
 
         if (VRState.VR_RUNNING) {
             if (dataHolder.menuWorldRenderer.isReady() && MethodHolder.isInMenuRoom()) {

@@ -10,6 +10,11 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import java.io.IOException;
 
 public class VRShaders {
+
+    public static final String CORE_TEXTURE_SAMPLER = "Sampler0";
+    public static final String CORE_OVERLAY_SAMPLER = "Sampler1";
+    public static final String CORE_LIGHTMAP_SAMPLER = "Sampler2";
+
     // FSAA shader and its uniforms
     public static ShaderInstance LANCZOS_SHADER;
     public static AbstractUniform LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM;

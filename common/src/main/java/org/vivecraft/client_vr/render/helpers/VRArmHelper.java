@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -190,7 +191,8 @@ public class VRArmHelper {
         MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
             0.0F, InteractionHand.MAIN_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
             poseStack, bufferSource,
-            MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
+            LevelRenderer.getLightColor(MC.player.level(),
+                BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
         bufferSource.endBatch();
 
@@ -243,7 +245,8 @@ public class VRArmHelper {
             MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, partialTick,
                 0.0F, InteractionHand.OFF_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
                 poseStack, bufferSource,
-                MC.getEntityRenderDispatcher().getPackedLightCoords(MC.player, partialTick));
+                LevelRenderer.getLightColor(MC.player.level(),
+                    BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
             bufferSource.endBatch();
 

@@ -50,17 +50,15 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.XRCamera;
-import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.helpers.VRArmHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.function.Predicate;
@@ -134,6 +132,9 @@ public abstract class GameRendererVRMixin
     @Shadow
     @Final
     private Camera mainCamera;
+
+    @Shadow
+    private int confusionAnimationTick;
 
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     private Camera vivecraft$replaceCamera() {
@@ -351,49 +352,18 @@ public abstract class GameRendererVRMixin
             }
             return;
         }
+        if (renderLevel && this.minecraft.level != null) {
+            // pop the "world" push, since that would happen after this
+            Profiler.get().pop();
+        }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
-            float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
-            if (!renderLevel || this.minecraft.level == null) {
-                // no "level" got pushed so do a manual push
-                this.minecraft.getProfiler().push("MainMenu");
-            } else {
-                // do a popPush
-                this.minecraft.getProfiler().popPush("MainMenu");
-            }
+            Profiler.get().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
-            RenderSystem.getModelViewStack().pushMatrix().identity();
-            RenderHelper.applyVRModelView(vivecraft$DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
-            RenderSystem.applyModelViewMatrix();
-
-            vivecraft$resetProjectionMatrix(partialTick);
-
-            VREffectsHelper.renderGuiLayer(partialTick, true);
-
-            DebugRenderHelper.renderDebug(partialTick);
-
-            if (KeyboardHandler.SHOWING) {
-                if (vivecraft$DATA_HOLDER.vrSettings.physicalKeyboard) {
-                    VREffectsHelper.renderPhysicalKeyboard(partialTick);
-                } else {
-                    VREffectsHelper.render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
-                        KeyboardHandler.ROTATION_ROOM,
-                        vivecraft$DATA_HOLDER.vrSettings.menuAlwaysFollowFace && MethodHolder.isInMenuRoom());
-                }
-            }
-
-            if (vivecraft$DATA_HOLDER.currentPass != RenderPass.CAMERA &&
-                (vivecraft$DATA_HOLDER.currentPass != RenderPass.THIRD ||
-                    vivecraft$DATA_HOLDER.vrSettings.mixedRealityRenderHands
-                ))
-            {
-                VRArmHelper.renderVRHands(partialTick, true, true, true, true);
-            }
-            RenderSystem.getModelViewStack().popMatrix();
+            VREffectsHelper.renderMenuRoom(deltaTracker.getGameTimeDeltaPartialTick(false));
+            Profiler.get().pop();
             RenderSystem.applyModelViewMatrix();
         }
-        // pop the "level" push, since that would happen after this
-        this.minecraft.getProfiler().pop();
         ci.cancel();
     }
 
@@ -523,9 +493,46 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 0, remap = true)
+    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), index = 0, remap = true)
     public Quaternionfc vivecraft$nullifyCameraRotation(Quaternionfc rotation) {
         return RenderPassType.isVanilla() ? rotation : new Quaternionf();
+    }
+
+    @Unique
+    private int vivecraft$storedConfusionAnimationTick;
+
+    @Unique
+    private float vivecraft$storedOSpinningEffectIntensity;
+
+    @Unique
+    private float vivecraft$storedSpinningEffectIntensity;
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), remap = true)
+    public void vivecraft$irisNauseReduction1(CallbackInfo ci, @Local(ordinal = 0) float partialTick) {
+        if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
+            // backup
+            this.vivecraft$storedConfusionAnimationTick = this.confusionAnimationTick;
+            this.vivecraft$storedSpinningEffectIntensity = this.minecraft.player.spinningEffectIntensity;
+            this.vivecraft$storedOSpinningEffectIntensity = this.minecraft.player.oSpinningEffectIntensity;
+            // spin spead
+            vivecraft$DATA_HOLDER.partialTickOverride = (this.confusionAnimationTick + partialTick) * 0.2F;
+            this.confusionAnimationTick = 0;
+            // stretch amount
+            this.minecraft.player.spinningEffectIntensity = this.minecraft.player.oSpinningEffectIntensity =
+                Mth.lerp(partialTick, this.minecraft.player.oSpinningEffectIntensity,
+                    this.minecraft.player.spinningEffectIntensity) * 0.4F;
+        }
+    }
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = false), remap = true)
+    public void vivecraft$irisNauseReduction2(CallbackInfo ci) {
+        if (!RenderPassType.isVanilla() && IrisHelper.isLoaded()) {
+            // restore
+            vivecraft$DATA_HOLDER.partialTickOverride = null;
+            this.confusionAnimationTick = this.vivecraft$storedConfusionAnimationTick;
+            this.minecraft.player.spinningEffectIntensity = this.vivecraft$storedSpinningEffectIntensity;
+            this.minecraft.player.oSpinningEffectIntensity = this.vivecraft$storedOSpinningEffectIntensity;
+        }
     }
 
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), index = 1)
