@@ -1,6 +1,7 @@
 package org.vivecraft.common.utils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class ClassUtils {
 
@@ -36,6 +37,25 @@ public class ClassUtils {
             return clazz.getDeclaredField(field1);
         } catch (NoSuchFieldException e) {
             return clazz.getDeclaredField(field2);
+        }
+    }
+
+    /**
+     * does a method Lookup with an alternative
+     *
+     * @param clazz   Class to get the method from
+     * @param method1 first option
+     * @param method2 alternative option
+     * @return found method
+     * @throws NoSuchMethodException if neither method exists
+     */
+    public static Method getMethodWithAlternative(
+        Class<?> clazz, String method1, String method2) throws NoSuchMethodException
+    {
+        try {
+            return clazz.getDeclaredMethod(method1);
+        } catch (NoSuchMethodException e) {
+            return clazz.getDeclaredMethod(method2);
         }
     }
 }

@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "dew_drop_watering_cans:copper_watering_can",
+      "required": false
+    },
+    {
+      "id": "dew_drop_watering_cans:iron_watering_can",
+      "required": false
+    },
+    {
+      "id": "dew_drop_watering_cans:gold_watering_can",
+      "required": false
+    },
+    {
+      "id": "dew_drop_watering_cans:diamond_watering_can",
+      "required": false
+    },
+    {
+      "id": "dew_drop_watering_cans:netherite_watering_can",
+      "required": false
+    }
+  ]
+}
