@@ -8,6 +8,7 @@ def mixins = [
 
     "vivecraft.accessories.mixins.json",
     "vivecraft.alexmobs.mixins.json",
+    "vivecraft.armourers_workshop.mixins.json",
     "vivecraft.bedrockify.mixins.json",
     "vivecraft.blur.mixins.json",
     "vivecraft.cataclysm.mixins.json",
@@ -22,6 +23,7 @@ def mixins = [
     "vivecraft.resolutioncontrol.mixins.json",
     "vivecraft.sereneseasons.mixins.json",
     "vivecraft.sodium.mixins.json",
+    "vivecraft.trinkets.mixins.json",
     "vivecraft.voxy.mixins.json",
     "vivecraft.xaerosmimimap.mixins.json"
 ]

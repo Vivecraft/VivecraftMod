@@ -599,10 +599,11 @@ public class VREffectsHelper {
      */
     public static void renderMenuRoom(float partialTick) {
         // clear depth for menu environment
-        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT);
+        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
 
         RenderSystem.getModelViewStack().pushMatrix().identity();
         RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
+        RenderSystem.applyModelViewMatrix();
 
         ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
 
@@ -628,6 +629,7 @@ public class VREffectsHelper {
         }
 
         RenderSystem.getModelViewStack().popMatrix();
+        RenderSystem.applyModelViewMatrix();
     }
 
     /**

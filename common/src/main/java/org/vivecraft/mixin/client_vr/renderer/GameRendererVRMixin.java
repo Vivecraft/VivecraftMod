@@ -7,7 +7,6 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -354,15 +353,14 @@ public abstract class GameRendererVRMixin
         }
         if (renderLevel && this.minecraft.level != null) {
             // pop the "world" push, since that would happen after this
-            Profiler.get().pop();
+            this.minecraft.getProfiler().pop();
         }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
-            Profiler.get().push("MainMenu");
+            this.minecraft.getProfiler().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
             VREffectsHelper.renderMenuRoom(deltaTracker.getGameTimeDeltaPartialTick(false));
-            Profiler.get().pop();
-            RenderSystem.applyModelViewMatrix();
+            this.minecraft.getProfiler().pop();
         }
         ci.cancel();
     }

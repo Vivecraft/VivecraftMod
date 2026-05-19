@@ -8,6 +8,7 @@ public class SableHelper {
 
     /**
      * Sable adds a skylight scale to the vanilla shader, without setting this the menuworlöd would be black
+     *
      * @param shaderInstance shader instace to set the uniform on
      */
     public static void setSkylightFactor(ShaderInstance shaderInstance) {
