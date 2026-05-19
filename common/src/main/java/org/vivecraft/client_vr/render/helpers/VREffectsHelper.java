@@ -610,15 +610,15 @@ public class VREffectsHelper {
 
         renderMenuEnvironment();
         // render the screen always on top in the menu room to prevent z fighting
-        renderGuiLayer(true);
+        renderGuiLayer(partialTick, true);
 
         DebugRenderHelper.renderDebug(partialTick);
 
         if (KeyboardHandler.SHOWING) {
             if (DATA_HOLDER.vrSettings.physicalKeyboard) {
-                renderPhysicalKeyboard();
+                renderPhysicalKeyboard(partialTick);
             } else {
-                render2D(KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
+                render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
                     KeyboardHandler.ROTATION_ROOM, DATA_HOLDER.vrSettings.menuAlwaysFollowFace);
             }
         }
@@ -822,7 +822,7 @@ public class VREffectsHelper {
             VREffectsHelper.renderVrShadow(partialTick, depthAlways);
         }
         if (Minecraft.getInstance().screen != null || !KeyboardHandler.SHOWING) {
-            renderGuiLayer(depthAlways);
+            renderGuiLayer(partialTick, depthAlways);
         }
         if (!shadowFirst) {
             VREffectsHelper.renderVrShadow(partialTick, depthAlways);
@@ -830,15 +830,15 @@ public class VREffectsHelper {
 
         if (KeyboardHandler.SHOWING) {
             if (DATA_HOLDER.vrSettings.physicalKeyboard) {
-                renderPhysicalKeyboard();
+                renderPhysicalKeyboard(partialTick);
             } else {
-                render2D(KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
+                render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
                     KeyboardHandler.ROTATION_ROOM, depthAlways);
             }
         }
 
         if (RadialHandler.isShowing()) {
-            render2D(RadialHandler.FRAMEBUFFER, RadialHandler.POS_ROOM,
+            render2D(partialTick, RadialHandler.FRAMEBUFFER, RadialHandler.POS_ROOM,
                 RadialHandler.ROTATION_ROOM, depthAlways);
         }
     }
@@ -962,13 +962,15 @@ public class VREffectsHelper {
 
     /**
      * renders the physical touch keyboard
+     *
+     * @param partialTick current partial tick
      */
-    public static void renderPhysicalKeyboard() {
+    public static void renderPhysicalKeyboard(float partialTick) {
         if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         Profiler.get().push("renderPhysicalKeyboard");
 
-        removeNausea();
+        removeNausea(partialTick);
 
         Profiler.get().push("applyPhysicalKeyboardModelView");
         Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
@@ -1003,11 +1005,13 @@ public class VREffectsHelper {
 
     /**
      * removes the nausea effect from the projection matrix
+     *
+     * @param partialTick current partial tick
      */
-    public static void removeNausea() {
+    public static void removeNausea(float partialTick) {
         // remove nausea effect from projection matrix, for vanilla
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(VRShaders.UNDISTORTED_PROJ_BUFFER, ProjectionType.PERSPECTIVE);
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
     }
 
     /**
@@ -1078,16 +1082,17 @@ public class VREffectsHelper {
     /**
      * renders the GUI/HUD buffer into the world
      *
+     * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      */
-    public static void renderGuiLayer(boolean depthAlways) {
+    public static void renderGuiLayer(float partialTick, boolean depthAlways) {
         if (DATA_HOLDER.bowTracker.isDrawing()) return;
         if (MC.screen == null && MC.options.hideGui) return;
         if (RadialHandler.isShowing()) return;
 
         Profiler.get().push("GuiLayer");
 
-        removeNausea();
+        removeNausea(partialTick);
 
         Matrix4f poseStack = new Matrix4f();
 
@@ -1103,19 +1108,20 @@ public class VREffectsHelper {
     /**
      * renders the given RenderTarget into the world, ath the given location with the give rotation
      *
+     * @param partialTick current partial tick
      * @param framebuffer RenderTarget to render into the world
      * @param pos         position to render the RenderTarget at, in VR room space
      * @param rot         rotation to rotate the screen, in VR room space
      * @param depthAlways if the depth test should be disabled
      */
     public static void render2D(
-        RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways)
+        float partialTick, RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways)
     {
         if (DATA_HOLDER.bowTracker.isDrawing()) return;
 
         Profiler.get().push("render2D");
 
-        removeNausea();
+        removeNausea(partialTick);
 
         Profiler.get().push("apply2DModelView");
 

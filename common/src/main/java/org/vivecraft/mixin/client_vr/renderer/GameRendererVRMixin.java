@@ -53,7 +53,6 @@ import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
@@ -460,14 +459,6 @@ public abstract class GameRendererVRMixin
         this.vivecraft$cacheRVEPos(this.minecraft.getCameraEntity());
         this.vivecraft$setupRVE();
         this.vivecraft$setupOverlayStatus();
-    }
-
-    @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getProjectionMatrix(F)Lorg/joml/Matrix4f;"))
-    private Matrix4f vivecraft$captureUndistortedProjection(Matrix4f original) {
-        if (VRState.VR_RUNNING) {
-            VRShaders.setUndistortedProj(original);
-        }
-        return original;
     }
 
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotate(FLorg/joml/Vector3fc;)Lorg/joml/Matrix4f;", remap = false), index = 0, remap = true)

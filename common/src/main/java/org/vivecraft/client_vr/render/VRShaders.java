@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
@@ -9,10 +8,8 @@ import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -280,13 +277,6 @@ public class VRShaders {
     public static final Set<RenderPipeline> DEPTH_ALWAYS_PIPELINES = new HashSet<>(
         Set.of(CROSSHAIR_WORLD_ALWAYS, ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT,
             ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
-
-    private static PerspectiveProjectionMatrixBuffer UNDISTORTED_PROJ;
-    public static GpuBufferSlice UNDISTORTED_PROJ_BUFFER;
-
-    public static void setUndistortedProj(Matrix4f proj) {
-        UNDISTORTED_PROJ_BUFFER = UNDISTORTED_PROJ.getBuffer(proj);
-    }
 
     private VRShaders() {}
 }

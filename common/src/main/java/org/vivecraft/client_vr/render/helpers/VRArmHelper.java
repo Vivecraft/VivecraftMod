@@ -63,7 +63,7 @@ public class VRArmHelper {
         Profiler.get().push("hands");
         DATA_HOLDER.isFpHand = true;
 
-        VREffectsHelper.removeNausea();
+        VREffectsHelper.removeNausea(partialTick);
 
         if (renderMain) {
             // set main hand active, for the attack cooldown transparency

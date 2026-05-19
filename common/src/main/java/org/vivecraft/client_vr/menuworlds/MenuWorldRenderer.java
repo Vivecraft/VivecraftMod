@@ -124,7 +124,7 @@ public class MenuWorldRenderer {
     private boolean building = false;
     private boolean reenableShaders = false;
     private long buildStartTime;
-    private Map<BlockPos, Map<ChunkSectionLayer, BufferBuilder>> bufferBuilders;
+    private Map<BlockPos, Map<RenderType, BufferBuilder>> bufferBuilders;
     private Map<BlockPos, BlockPos.MutableBlockPos> currentPositions;
     private Map<BlockPos, Integer> blockCounts;
     private Map<BlockPos, Long> renderTimes;
@@ -329,7 +329,7 @@ public class MenuWorldRenderer {
                         for (int z = -this.blockAccess.getZSize() / 2;
                              z < this.blockAccess.getZSize() / 2; z += this.segmentSize.getZ()) {
                             BlockPos pos = new BlockPos(x, y, z);
-                            Map<ChunkSectionLayer, BufferBuilder> bufferMap = new EnumMap<>(ChunkSectionLayer.class);
+                            Map<RenderType, BufferBuilder> bufferMap = new HashMap<>();
 
                             this.bufferBuilders.put(pos, bufferMap);
                             this.currentPositions.put(pos, pos.mutable());
@@ -353,7 +353,7 @@ public class MenuWorldRenderer {
     }
 
     private BufferBuilder getOrBeginLayer(
-        Map<ChunkSectionLayer, BufferBuilder> startedLayers, ChunkSectionLayer layer)
+        Map<RenderType, BufferBuilder> startedLayers, RenderType layer)
     {
         BufferBuilder builder = startedLayers.get(layer);
         if (builder == null) {
@@ -537,11 +537,11 @@ public class MenuWorldRenderer {
         try (ByteBufferBuilder builder = new ByteBufferBuilder(32768)) {
             for (var entry : entryList) {
                 for (var layerBuffer : entry.getValue().entrySet()) {
-                    ChunkSectionLayer layer = layerBuffer.getKey();
+                    RenderType layer = layerBuffer.getKey();
                     BufferBuilder bufferBuilder = layerBuffer.getValue();
                     MeshData meshData = bufferBuilder.build();
                     if (meshData != null) {
-                        if (layer.pipeline() == RenderPipelines.TRANSLUCENT) {
+                        if (layer == RenderType.translucent()) {
                             meshData.sortQuads(builder,
                                 VertexSorting.byDistance(0, Mth.frac(this.blockAccess.getGround()), 0));
                         }
