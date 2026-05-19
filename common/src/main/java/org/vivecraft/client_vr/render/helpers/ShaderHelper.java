@@ -190,7 +190,7 @@ public class ShaderHelper {
                     RED = 0;
                 }
 
-                if (MC.player.isSleeping()) {
+                if (DATA_HOLDER.vrSettings.sleepEffect && MC.player.isSleeping()) {
                     BLACK = 0.5F + 0.3F * MC.player.getSleepTimer() * 0.01F;
                 }
 

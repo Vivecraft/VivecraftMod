@@ -594,6 +594,77 @@ public class VREffectsHelper {
     }
 
     /**
+     * renders the menu environment, aswell as hands, screen and keyboard
+     */
+    public static void renderMenuRoom(float partialTick) {
+        // clear depth for menu environment
+        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+
+        RenderSystem.getModelViewStack().pushMatrix().identity();
+        RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
+        RenderSystem.applyModelViewMatrix();
+
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
+
+        renderMenuEnvironment();
+        // render the screen always on top in the menu room to prevent z fighting
+        renderGuiLayer(partialTick, true);
+
+        DebugRenderHelper.renderDebug(partialTick);
+
+        if (KeyboardHandler.SHOWING) {
+            if (DATA_HOLDER.vrSettings.physicalKeyboard) {
+                renderPhysicalKeyboard(partialTick);
+            } else {
+                render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
+                    KeyboardHandler.ROTATION_ROOM, DATA_HOLDER.vrSettings.menuAlwaysFollowFace);
+            }
+        }
+
+        if (DATA_HOLDER.currentPass != RenderPass.CAMERA &&
+            (DATA_HOLDER.currentPass != RenderPass.THIRD || DATA_HOLDER.vrSettings.mixedRealityRenderHands))
+        {
+            VRArmHelper.renderVRHands(partialTick, true, true, true, true);
+        }
+
+        RenderSystem.getModelViewStack().popMatrix();
+        RenderSystem.applyModelViewMatrix();
+    }
+
+    /**
+     * renders the current menu environment
+     */
+    public static void renderMenuEnvironment() {
+        // MAIN MENU ENVIRONMENT
+
+        Matrix4fStack poseStack = new Matrix4fStack(8);
+
+        Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
+        poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
+            (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
+            (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
+
+        // remove world rotation or the room doesn't align with the screen
+        poseStack.rotate(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+
+        if (DATA_HOLDER.menuWorldRenderer.isReady()) {
+            try {
+                renderTechjarsAwesomeMainMenuRoom(poseStack);
+            } catch (Exception e) {
+                VRSettings.LOGGER.error(
+                    "Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
+                DATA_HOLDER.menuWorldRenderer.destroy();
+            }
+        } else {
+            if (DATA_HOLDER.vrSettings.menuWorldFallbackPanorama) {
+                renderMenuPanorama(poseStack);
+            } else {
+                renderJrbuddasAwesomeMainMenuRoomNew(poseStack);
+            }
+        }
+    }
+
+    /**
      * renders the vivecraft stuff into separate buffers for the fabulous settings
      * this includes hands, vr shadow, gui, camera widgets and other stuff
      *
@@ -1090,38 +1161,6 @@ public class VREffectsHelper {
 
         poseStack.pushPose();
         removeNausea(partialTick, poseStack);
-
-        // MAIN MENU ENVIRONMENT
-        if (MethodHolder.isInMenuRoom()) {
-            // render the screen always on top in the menu room to prevent z fighting
-            depthAlways = true;
-
-            poseStack.pushPose();
-            Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
-            poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
-                (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
-                (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
-
-            // remove world rotation or the room doesn't align with the screen
-            poseStack.mulPose(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
-
-            if (DATA_HOLDER.menuWorldRenderer.isReady()) {
-                try {
-                    renderTechjarsAwesomeMainMenuRoom(poseStack);
-                } catch (Exception e) {
-                    VRSettings.LOGGER.error(
-                        "Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
-                    DATA_HOLDER.menuWorldRenderer.destroy();
-                }
-            } else {
-                if (DATA_HOLDER.vrSettings.menuWorldFallbackPanorama) {
-                    renderMenuPanorama(poseStack);
-                } else {
-                    renderJrbuddasAwesomeMainMenuRoomNew(poseStack);
-                }
-            }
-            poseStack.popPose();
-        }
 
         Vec3 guiPos = GuiHandler.applyGUIModelView(DATA_HOLDER.currentPass, poseStack);
 

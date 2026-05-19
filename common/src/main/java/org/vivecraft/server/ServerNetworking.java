@@ -235,8 +235,8 @@ public class ServerNetworking {
                     newBodyPart = VRBodyPart.MAIN_HAND;
                 }
                 vivePlayer.useBodyPartForAim = activeBodypart.useForAim();
-                if (vivePlayer.activeBodyPart != newBodyPart && ServerConfig.DUAL_WIELDING.get() &&
-                    NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion))
+                if (vivePlayer.activeBodyPart != newBodyPart && !vivePlayer.isDrawing() &&
+                    ServerConfig.DUAL_WIELDING.get() && NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion))
                 {
                     // handle equipment changes
                     ItemStack oldItem = player.getItemBySlot(EquipmentSlot.MAINHAND);
@@ -249,6 +249,9 @@ public class ServerNetworking {
                     applyEquipmentChange(player, oldItem, newItem);
                     // store in case it breaks
                     vivePlayer.activeItemOverride = newItem.copy();
+                } else {
+                    // still update it, since it ued for the bow
+                    vivePlayer.activeBodyPart = newBodyPart;
                 }
             }
             case CRAWL -> {
