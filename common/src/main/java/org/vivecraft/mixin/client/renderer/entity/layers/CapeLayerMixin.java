@@ -11,7 +11,6 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -41,9 +40,9 @@ public abstract class CapeLayerMixin extends RenderLayer<AbstractClientPlayer, P
     }
 
     // DEBUG CAPE
-    //@WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/PlayerSkin;capeTexture()Lnet/minecraft/resources/ResourceLocation;"))
+    //@WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;getCloakTextureLocation()Lnet/minecraft/resources/ResourceLocation;"))
     @Unique
-    private ResourceLocation vivecraft$debugCape(PlayerSkin instance, Operation<ResourceLocation> original) {
+    private ResourceLocation vivecraft$debugCape(AbstractClientPlayer instance, Operation<ResourceLocation> original) {
         ResourceLocation capeTexture = original.call(instance);
         if (capeTexture == null) {
             capeTexture = RenderHelper.DEBUG_CAPE;

@@ -74,10 +74,7 @@ subprojects {
             'fabric_loader_version': fabric_loader_version,
 
             'forge_mc_range'       : forge_mc_range,
-            'forge_loader_range'   : forge_loader_range,
-
-            'neoforge_mc_range'    : neoforge_mc_range,
-            'neoforge_loader_range': neoforge_loader_range,
+            'forge_loader_range'   : forge_loader_range
         ]
 
         var jsonExpandProps = expandProps.collectEntries {
