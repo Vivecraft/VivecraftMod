@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Pseudo
 @Mixin(targets = {
@@ -18,9 +18,11 @@ public class IrisShadowRendererMixin {
 
     // only render shadows on the first RenderPass
     // cancel them here, or we would also cancel prepare shaders
-    @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true)
     private void vivecraft$onlyOneShadow(CallbackInfo ci) {
-        if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().isFirstPass && !IrisHelper.SLOW_MODE) {
+        if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().isFirstPass &&
+            !ShadersHelper.isSlowMode())
+        {
             ci.cancel();
         }
     }

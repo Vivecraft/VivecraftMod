@@ -7,14 +7,15 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MapRenderer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.PatchedDataComponentMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -42,7 +43,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.VRArmRenderer;
@@ -50,6 +50,7 @@ import org.vivecraft.client_vr.render.VivecraftItemRendering;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.data.ViveItems;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
@@ -57,18 +58,18 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 public abstract class ItemInHandRendererVRMixin {
 
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderType.entityCutoutNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background.png"), false);
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderTypes.entityCutout(
+        Identifier.withDefaultNamespace("textures/map/map_background.png"), false);
     @Unique
-    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderType.entityCutoutNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background_checkerboard.png"), false);
+    private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL = RenderTypes.entityCutout(
+        Identifier.withDefaultNamespace("textures/map/map_background_checkerboard.png"), false);
 
     @Unique
     private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL_TEXT = VRRenderTypes.textNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background.png"));
+        Identifier.withDefaultNamespace("textures/map/map_background.png"));
     @Unique
     private static final RenderType VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL_TEXT = VRRenderTypes.textNoCull(
-        ResourceLocation.withDefaultNamespace("textures/map/map_background_checkerboard.png"));
+        Identifier.withDefaultNamespace("textures/map/map_background_checkerboard.png"));
 
     @Final
     @Shadow
@@ -176,7 +177,7 @@ public abstract class ItemInHandRendererVRMixin {
         }
     }
 
-    @ModifyArg(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V"))
+    @ModifyArg(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V"))
     private RenderType vivecraft$overrideMapVanilla(RenderType renderType) {
         if (VRState.VR_RUNNING) {
             return renderType == MAP_BACKGROUND ? VIVECRAFT$MAP_BACKGROUND_NO_CULL_TEXT :
@@ -191,6 +192,7 @@ public abstract class ItemInHandRendererVRMixin {
         AbstractClientPlayer player, float partialTick, InteractionHand hand, float swingProgress, ItemStack itemStack,
         PoseStack poseStack, SubmitNodeCollector collector, int combinedLight)
     {
+        // TODO 26.1 extract arm state
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 
         boolean mainHand = hand == InteractionHand.MAIN_HAND;
@@ -258,7 +260,7 @@ public abstract class ItemInHandRendererVRMixin {
 
             boolean isBow = BowTracker.isBow(itemStack) && dh.bowTracker.isActive((LocalPlayer) player);
 
-            if (ClimbTracker.isClaws(itemStack) || (!isBow &&
+            if (ViveItems.isClimbingClaws(itemStack) || (!isBow &&
                 (ClientNetworking.isThirdPersonItems() || (hasCMD && ClientNetworking.isThirdPersonItemsCustom()))
             ))
             {
@@ -301,7 +303,7 @@ public abstract class ItemInHandRendererVRMixin {
                         OptifineHelper.endEntities();
                     }
                     // render scope view
-                    VREffectsHelper.drawScopeFB(poseStack, hand == InteractionHand.MAIN_HAND ? 0 : 1);
+                    VREffectsHelper.drawScopeFB(collector, poseStack, hand == InteractionHand.MAIN_HAND ? 0 : 1);
 
                     if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                         OptifineHelper.beginEntities();
@@ -346,7 +348,7 @@ public abstract class ItemInHandRendererVRMixin {
             if (!this.vivecraft$didLogModelError) {
                 VRSettings.LOGGER.error(
                     "Vivecraft: Some mod broke player model reloading. Possible culprit 'Stfu' loaded: {}",
-                    Xloader.isModLoaded("stfu"));
+                    Xloader.INSTANCE.isModLoaded("stfu"));
                 this.vivecraft$didLogModelError = true;
             }
             return;
@@ -379,8 +381,8 @@ public abstract class ItemInHandRendererVRMixin {
         poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
 
-        vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY);
-        ResourceLocation skin = player.getSkin().body().texturePath();
+        vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY, mainHand);
+        Identifier skin = player.getSkin().body().texturePath();
 
         if (rightHand) {
             vrArmRenderer.renderRightHand(poseStack, collector, combinedLight, skin, true);

@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -20,7 +20,7 @@ import org.vivecraft.common.utils.MathUtils;
 @Mixin(NameTagFeatureRenderer.Storage.class)
 public class NameTagFeatureRendererVRMixin {
 
-    @WrapOperation(method = "add", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/CameraRenderState;orientation:Lorg/joml/Quaternionf;"))
+    @WrapOperation(method = "add", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraRenderState;orientation:Lorg/joml/Quaternionf;"))
     private Quaternionf vivecraft$cameraOffset(
         CameraRenderState camera, Operation<Quaternionf> original, @Local(argsOnly = true) PoseStack poseStack)
     {

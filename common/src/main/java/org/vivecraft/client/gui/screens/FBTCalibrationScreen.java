@@ -1,6 +1,6 @@
 package org.vivecraft.client.gui.screens;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -18,7 +18,7 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
+import org.vivecraft.mixin.client.gui.GuiGraphicsExtractorAccessor;
 
 public class FBTCalibrationScreen extends Screen {
 
@@ -150,24 +150,24 @@ public class FBTCalibrationScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         this.calibrationText.visible = !this.calibrated;
         this.unlabeledTrackersWarningText.visible = !this.calibrated && this.usingUnlabeledTrackers;
         this.unlabeledTrackersConfirmationText.visible = this.calibrated && this.usingUnlabeledTrackers;
 
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         if (!this.calibrated || !this.usingUnlabeledTrackers) {
             // arm overlay
-            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
+            graphics.outline(graphics.guiWidth() / 2 - 64, graphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
-            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
+            graphics.outline(graphics.guiWidth() / 2 + 16, graphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
 
             // render target rectangles
-            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 - 64, guiGraphics.guiHeight() - 32 - 96,
+            graphics.outline(graphics.guiWidth() / 2 - 64, graphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
-            guiGraphics.submitOutline(guiGraphics.guiWidth() / 2 + 16, guiGraphics.guiHeight() - 32 - 96,
+            graphics.outline(graphics.guiWidth() / 2 + 16, graphics.guiHeight() - 32 - 96,
                 48, 16, 0xFFFFFFFF);
 
             // submit player pip
@@ -176,9 +176,9 @@ public class FBTCalibrationScreen extends Screen {
                 yRot = this.yaw - ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getYawRad();
             }
 
-            ((GuiGraphicsAccessor) guiGraphics).getGuiRenderState().submitPicturesInPictureState(
+            ((GuiGraphicsExtractorAccessor) graphics).getGuiRenderState().addPicturesInPictureState(
                 new GuiFBTPlayerState(this.rightHandAtPosition, this.leftHandAtPosition, new Vector3f(this.rightHand),
-                    new Vector3f(this.leftHand), yRot, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
+                    new Vector3f(this.leftHand), yRot, 0, 0, graphics.guiWidth(), graphics.guiHeight()));
         }
     }
 

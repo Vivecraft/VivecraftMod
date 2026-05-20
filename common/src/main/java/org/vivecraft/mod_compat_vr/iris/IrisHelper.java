@@ -10,6 +10,7 @@ import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.ClassUtils;
+import org.vivecraft.mod_compat_vr.shaders.ShaderType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -35,6 +36,13 @@ public class IrisHelper {
     private static Method ShaderStorageBufferHolder_setupBuffers;
     private static RenderPass lastSSBOPass;
 
+    private static Method IrisPipelines_assignPipeline;
+    private static Object ShaderKey_ENTITIES_SOLID;
+    private static Object ShaderKey_ENTITIES_CUTOUT;
+    private static Object ShaderKey_ENTITIES_TRANSLUCENT;
+    private static Object ShaderKey_TEXTURED_COLOR;
+    private static Object ShaderKey_BASIC_COLOR;
+
     // for iris/dh compat
     private static boolean DH_PRESENT = false;
     private static Object dhOverrideInjector;
@@ -52,10 +60,8 @@ public class IrisHelper {
 
     private static Method CapturedRenderingState_getGbufferProjection;
 
-    public static boolean SLOW_MODE = false;
-
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("iris") || Xloader.isModLoaded("oculus");
+        return Xloader.INSTANCE.isModLoaded("iris") || Xloader.INSTANCE.isModLoaded("oculus");
     }
 
     /**
@@ -104,26 +110,42 @@ public class IrisHelper {
         }
     }
 
+    public static Optional<?> getPipeline() {
+        if (init()) {
+            try {
+                return (Optional<?>) PipelineManager_getPipeline.invoke(Iris_getPipelineManager.invoke(null));
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't get iris pipeline:", e);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static Object getPipelineManager() {
+        if (init()) {
+            try {
+                return Iris_getPipelineManager.invoke(null);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't get iris pipeline manager:", e);
+            }
+        }
+        return null;
+    }
+
     /**
      * @return if the active shader has the vanilla water overlay enabled or disabled
      */
     public static boolean hasWaterEffect() {
         if (init()) {
-            try {
-                // Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderUnderwaterOverlay).orElse(true);
-                return (boolean) ((Optional<?>) PipelineManager_getPipeline.invoke(
-                    Iris_getPipelineManager.invoke(null))
-                ).map(o -> {
-                    try {
-                        return WorldRenderingPipeline_shouldRenderUnderwaterOverlay.invoke(o);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        VRSettings.LOGGER.error("Vivecraft: Iris water effect check failed:", e);
-                        return true;
-                    }
-                }).orElse(true);
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                VRSettings.LOGGER.error("Vivecraft: Iris water effect check failed:", e);
-            }
+            // Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderUnderwaterOverlay).orElse(true);
+            return (boolean) getPipeline().map(o -> {
+                try {
+                    return WorldRenderingPipeline_shouldRenderUnderwaterOverlay.invoke(o);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    VRSettings.LOGGER.error("Vivecraft: Iris water effect check failed:", e);
+                    return true;
+                }
+            }).orElse(true);
         }
         return true;
     }
@@ -194,8 +216,25 @@ public class IrisHelper {
         }
     }
 
-    public static void registerPipeline(RenderPipeline pipeline, String shader) {
-        IrisProgram program = IrisProgram.valueOf(shader);
+    public static void registerPipeline(RenderPipeline pipeline, ShaderType type) {
+        if (init() && IrisPipelines_assignPipeline != null) {
+            try {
+                IrisPipelines_assignPipeline.invoke(null, pipeline,
+                    switch (type) {
+                        case ENTITIES_CUTOUT -> ShaderKey_ENTITIES_CUTOUT;
+                        case ENTITIES_SOLID -> ShaderKey_ENTITIES_SOLID;
+                        case ENTITIES_TRANSLUCENT -> ShaderKey_ENTITIES_TRANSLUCENT;
+                        case BASIC_COLOR -> ShaderKey_BASIC_COLOR;
+                        case TEXTURED_COLOR -> ShaderKey_TEXTURED_COLOR;
+                    });
+                return;
+            } catch (IllegalAccessException | InvocationTargetException ignore) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't assign pipeline {} to type '{}'", pipeline, type);
+            }
+        }
+
+        // fallback to regular api if something failed
+        IrisProgram program = IrisProgram.valueOf(type.name());
         IrisApi.getInstance().assignPipeline(pipeline, program);
     }
 
@@ -273,7 +312,7 @@ public class IrisHelper {
             }
 
             // distant horizon compat
-            if (Xloader.isModLoaded("distanthorizons")) {
+            if (Xloader.INSTANCE.isModLoaded("distanthorizons")) {
                 try {
                     Class<?> OverrideInjector = Class.forName(
                         "com.seibel.distanthorizons.coreapi.DependencyInjection.OverrideInjector");
@@ -310,6 +349,20 @@ public class IrisHelper {
                     VRSettings.LOGGER.error("Vivecraft: DH present but compat init failed:", e);
                     DH_PRESENT = false;
                 }
+            }
+            try {
+                Class<?> ShaderKey = Class.forName("net.irisshaders.iris.pipeline.programs.ShaderKey");
+                IrisPipelines_assignPipeline = Class.forName("net.irisshaders.iris.pipeline.IrisPipelines")
+                    .getMethod("assignPipeline", RenderPipeline.class, ShaderKey);
+                ShaderKey_ENTITIES_SOLID = ShaderKey.getField("ENTITIES_SOLID").get(null);
+                ShaderKey_ENTITIES_CUTOUT = ShaderKey.getField("ENTITIES_CUTOUT").get(null);
+                ShaderKey_ENTITIES_TRANSLUCENT = ShaderKey.getField("ENTITIES_TRANSLUCENT").get(null);
+                ShaderKey_BASIC_COLOR = ShaderKey.getField("BASIC_COLOR").get(null);
+                ShaderKey_TEXTURED_COLOR = ShaderKey.getField("TEXTURED_COLOR").get(null);
+            } catch (NoSuchMethodException | NoSuchFieldException | NullPointerException e) {
+                VRSettings.LOGGER.error("Vivecraft: Failed to init iris pipeline compat, falling back to official API.",
+                    e);
+                IrisPipelines_assignPipeline = null;
             }
         } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e) {
             INIT_FAILED = true;

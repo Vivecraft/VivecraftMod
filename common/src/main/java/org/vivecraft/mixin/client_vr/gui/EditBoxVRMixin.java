@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client_vr.gui;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -54,9 +54,10 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
         super(x, y, width, height, message);
     }
 
-    @Inject(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
+    @Inject(method = "extractWidgetRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
     private void vivecraft$renderKeyboardHint(
-        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci, @Local String content)
+        GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci,
+        @Local String content)
     {
         if (VRState.VR_RUNNING && !ClientDataHolderVR.getInstance().vrSettings.seated && !KeyboardHandler.SHOWING &&
             content.isEmpty() && !(Minecraft.getInstance().screen instanceof GuiKeyboardLayoutEditor))
@@ -65,7 +66,7 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
                 // limit text to field size
                 String fullString = I18n.get("vivecraft.message.openKeyboard");
                 String cutString = this.font.plainSubstrByWidth(fullString, this.getInnerWidth());
-                guiGraphics.drawString(this.font, fullString.equals(cutString) ? cutString : cutString + "...",
+                graphics.text(this.font, fullString.equals(cutString) ? cutString : cutString + "...",
                     this.textX, this.textY, this.textColorUneditable);
             }
         }

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.jna.NativeLibrary;
-import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
@@ -12,6 +11,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.util.profiling.Profiler;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
@@ -184,7 +184,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
         OME = this;
         // make sure the lwjgl version is the right one
         // check that the right lwjgl version is loaded that we ship the OpenVR part of, or stuff breaks
-        final String[] lwjglVersions = new String[]{"3.3.3"};
+        final String[] lwjglVersions = new String[]{"3.4.1"};
         if (Arrays.stream(lwjglVersions).noneMatch(v -> Version.getVersion().startsWith(v))) {
             String suppliedJar = "";
             try {

@@ -2,7 +2,6 @@ package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
@@ -12,6 +11,7 @@ import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -104,15 +104,6 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
-    public void setFilterMode(FilterMode filterMode) {
-        if (this.vrTargets == null) {
-            super.setFilterMode(filterMode);
-            return;
-        }
-        callOnTarget(r -> r.setFilterMode(filterMode));
-    }
-
-    @Override
     public void blitToScreen() {
         if (this.vrTargets == null) {
             super.blitToScreen();
@@ -196,8 +187,10 @@ public class MultiPassTextureTarget extends TextureTarget {
         if (this.isVanilla || RenderPassType.isVanilla()) {
             return this.vanilla;
         } else {
-            return this.vrTargets.get(
-                this.passOverride != null ? this.passOverride : ClientDataHolderVR.getInstance().currentPass);
+            return Objects.requireNonNull(this.vrTargets.get(
+                    this.passOverride != null ? this.passOverride : ClientDataHolderVR.getInstance().currentPass),
+                "no target for pass " +
+                    (this.passOverride != null ? this.passOverride : ClientDataHolderVR.getInstance().currentPass));
         }
     }
 
@@ -210,6 +203,5 @@ public class MultiPassTextureTarget extends TextureTarget {
         this.last = current;
         this.width = current.width;
         this.height = current.height;
-        this.filterMode = current.filterMode;
     }
 }

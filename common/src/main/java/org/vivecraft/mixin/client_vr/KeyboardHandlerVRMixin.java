@@ -67,9 +67,4 @@ public class KeyboardHandlerVRMixin {
             ClientDataHolderVR.getInstance().grabScreenShot = true;
         }
     }
-
-    @Inject(method = "keyPress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER))
-    private void vivecraft$saveHideGuiOption(CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-    }
 }

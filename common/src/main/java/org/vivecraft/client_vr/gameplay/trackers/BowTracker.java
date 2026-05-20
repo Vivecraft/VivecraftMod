@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -268,29 +268,30 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
         VRData world = this.dh.vrPlayer.getVRDataWorld();
         Vec3 cam = world.getEye(this.dh.currentPass).getPosition();
         int bowHand = this.dh.vrSettings.reverseShootingEye && ClientNetworking.supportsReversedBow() ? 0 : 1;
-        Vector3f bowPos = MathUtils.subtractToVector3f(world.getController(bowHand).getPosition(), cam);
         if (this.isDrawing() || this.dh.vrSettings.seated) {
             // aim dir
-            DebugRenderHelper.renderLine(MathUtils.RED, bowPos, this.aim.mul(-1F, new Vector3f()).add(bowPos));
+            Vec3 arrowPos = world.getController(1 - bowHand).getPosition();
+            DebugRenderHelper.renderLine(MathUtils.RED_INT, arrowPos, arrowPos.add(this.aim.x, this.aim.y, this.aim.z));
         } else {
+            Vec3 bowPos = world.getController(bowHand).getPosition();
             float dist = 0.15F * world.worldScale;
-            VRData.VRDevicePose bowHandPose = world.getHand(bowHand);
-            VRData.VRDevicePose arrowPose = world.getController(1 - bowHand);
+            VRData.VRDevicePose bowHandPos = world.getHand(bowHand);
+            VRData.VRDevicePose arrowPos = world.getController(1 - bowHand);
 
             // bow distance threshold and angle cone
-            Vector3f stringPos = bowHandPose.getCustomVector(MathUtils.UP)
-                .mul(world.worldScale * this.maxDraw * 0.5F).add(bowPos);
+            Vector3f stringOffset = bowHandPos.getCustomVector(MathUtils.UP)
+                .mul(world.worldScale * this.maxDraw * 0.5F);
+            Vec3 stringPos = bowPos.add(stringOffset.x, stringOffset.y, stringOffset.z);
             DebugRenderHelper.renderSphere(stringPos, dist,
-                isNotched() ? MathUtils.GREEN : MathUtils.RED);
-            Vector3f bowDir = bowHandPose.getCustomVector(MathUtils.DOWN);
-            DebugRenderHelper.renderCone(bowDir.mul(-dist, new Vector3f()).add(stringPos), bowDir, 20.F,
-                0.25F * world.worldScale, isNotched() ? MathUtils.GREEN : MathUtils.RED);
+                isNotched() ? MathUtils.GREEN_INT : MathUtils.RED_INT);
+            Vector3f bowDir = bowHandPos.getCustomVector(MathUtils.DOWN);
+            DebugRenderHelper.renderCone(stringPos.add(bowDir.x * -dist, bowDir.y * -dist, bowDir.z * -dist), bowDir,
+                20.F, 0.25F * world.worldScale, isNotched() ? MathUtils.GREEN_INT : MathUtils.RED_INT);
 
             // arrow point dir
-            DebugRenderHelper.renderLine(isNotched() ? MathUtils.GREEN : MathUtils.RED,
-                MathUtils.subtractToVector3f(arrowPose.getPosition(), cam),
-                MathUtils.subtractToVector3f(arrowPose.getPosition(), cam)
-                    .add(arrowPose.getDirection().mul(world.worldScale)));
+            DebugRenderHelper.renderLine(isNotched() ? MathUtils.GREEN_INT : MathUtils.RED_INT,
+                arrowPos.getPosition(),
+                arrowPos.getPosition().add(new Vec3(arrowPos.getDirection().mul(world.worldScale))));
         }
     }
 }

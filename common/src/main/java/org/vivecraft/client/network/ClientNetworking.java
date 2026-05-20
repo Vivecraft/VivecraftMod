@@ -6,12 +6,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3fc;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
@@ -29,7 +30,10 @@ import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
+import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mod_compat_vr.ReplayHelper;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -65,9 +69,11 @@ public class ClientNetworking {
     public static NetworkVersion USED_NETWORK_VERSION = NetworkVersion.LEGACY;
     private static float WORLDSCALE_LAST = 0.0F;
     private static float HEIGHT_LAST = 0.0F;
-    public static float OVERRIDDEN_YAW;
-    public static float OVERRIDDEN_PITCH;
-    public static boolean OVERRIDE_ACTIVE;
+
+    // these overrides are for vanilla servers
+    public static Vector3fc AIM_DIR_OVERRIDE = null;
+    public static Vec3 AIM_POS_OVERRIDE = null;
+
     private static VRBodyPart LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
     public static VRBodyPart BODY_PART_CLIENT_OVERRIDE = null;
     public static boolean IS_LAST_BODY_PART_AIM = false;
@@ -120,7 +126,7 @@ public class ClientNetworking {
     public static void sendVersionInfo() {
         // send version string, with currently running
         if (!ClientDataHolderVR.getInstance().completelyDisabled &&
-            Xplat.serverAcceptsPacket(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL))
+            Xplat.INSTANCE.serverAcceptsPacket(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL))
         {
             Minecraft.getInstance().getConnection().send(createServerPacket(
                 new VersionPayloadC2S(
@@ -132,9 +138,16 @@ public class ClientNetworking {
     }
 
     public static void sendVRPlayerPositions(VRPlayer vrPlayer) {
-        if (!SERVER_WANTS_DATA || Minecraft.getInstance().getConnection() == null ||
+        if (Minecraft.getInstance().getConnection() == null ||
             Minecraft.getInstance().getCameraEntity() != Minecraft.getInstance().player)
         {
+            return;
+        }
+        if (ReplayHelper.isLoaded()) {
+            // replay mod / flashback compat, on servers without the plugin
+            ReplayHelper.storePlayerData(vrPlayer);
+        }
+        if (!SERVER_WANTS_DATA) {
             return;
         }
 
@@ -180,7 +193,7 @@ public class ClientNetworking {
     }
 
     public static Packet<?> createServerPacket(VivecraftPayloadC2S payload) {
-        return Xplat.getC2SPacket(payload);
+        return Xplat.INSTANCE.getC2SPacket(payload);
     }
 
     public static void sendLegacyPackets(VrPlayerState vrPlayerState) {
@@ -232,6 +245,81 @@ public class ClientNetworking {
     public static int getTeleportHorizLimit() {
         return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(
             VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT).getInt();
+    }
+
+    /**
+     * resets the aim override
+     */
+    public static void resetAim(int ticks) {
+        if (!SERVER_WANTS_DATA) {
+            restoreLook();
+        } else if (NetworkVersion.AIM_OVERRIDE.accepts(USED_NETWORK_VERSION)) {
+            sendServerPacket(new AimOverrideResetPayloadC2S(ticks));
+            if (ticks == 0) {
+                AIM_DIR_OVERRIDE = null;
+                AIM_POS_OVERRIDE = null;
+            }
+        }
+    }
+
+    /**
+     * overrides the aim of the player to the given direction. Position is still based on active bodypart
+     *
+     * @param dirOverride direction to override the aim to
+     */
+    public static void overrideAimDir(Vector3fc dirOverride) {
+        if (!SERVER_WANTS_DATA) {
+            overrideLook(Minecraft.getInstance().player, () -> dirOverride);
+        } else if (NetworkVersion.AIM_OVERRIDE.accepts(USED_NETWORK_VERSION)) {
+            sendServerPacket(new AimDirOverridePayloadC2S(dirOverride));
+            AIM_DIR_OVERRIDE = dirOverride;
+        }
+    }
+
+    /**
+     * @return the current aim direction
+     */
+    public static Vector3fc getActiveAimDir() {
+        if (AIM_DIR_OVERRIDE != null) {
+            return AIM_DIR_OVERRIDE;
+        } else {
+            VRBodyPart bp = IS_LAST_BODY_PART_AIM ? getActiveBodyPart() :
+                ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ? VRBodyPart.HEAD :
+                VRBodyPart.MAIN_HAND;
+            return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(bp).getDirection();
+        }
+    }
+
+    /**
+     * overrides the aim position of the player to the given position.
+     *
+     * @param posOverride position to override the aim to
+     */
+    public static void overrideAimPos(Vec3 posOverride) {
+        // this is only for modded servers, can't handle this on vanilla ones
+        if (SERVER_WANTS_DATA && NetworkVersion.AIM_OVERRIDE.accepts(USED_NETWORK_VERSION)) {
+            sendServerPacket(new AimPosOverridePayloadC2S(
+                MathUtils.subtractToVector3f(posOverride, Minecraft.getInstance().player.position())));
+            AIM_POS_OVERRIDE = posOverride;
+        }
+    }
+
+    /**
+     * @return the current aim position, {@code null} when not on a server with vivecraft
+     */
+    @Nullable
+    public static Vec3 getActiveAimPos() {
+        if (!SERVER_WANTS_DATA) {
+            // no overrides on servers without the plugin
+            return null;
+        } else if (AIM_POS_OVERRIDE != null) {
+            return AIM_POS_OVERRIDE;
+        } else {
+            VRBodyPart bp = IS_LAST_BODY_PART_AIM ? getActiveBodyPart() :
+                ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ? VRBodyPart.HEAD :
+                VRBodyPart.MAIN_HAND;
+            return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(bp).getPosition();
+        }
     }
 
     /**
@@ -293,20 +381,21 @@ public class ClientNetworking {
         }
     }
 
-    public static void overrideLook(Player player, Supplier<Vec3> viewSupplier) {
+    public static void overrideLook(Player player, Supplier<Vector3fc> viewSupplier) {
         if (SERVER_WANTS_DATA) return; // shouldn't be needed, don't tease the anti-cheat.
 
-        Vec3 view = viewSupplier.get();
-        OVERRIDDEN_PITCH = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
-        OVERRIDDEN_YAW = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
+        Vector3fc view = viewSupplier.get();
+        float pitch = (float) Math.toDegrees(Math.asin(-view.y() / view.length()));
+        float yaw = (float) Math.toDegrees(Math.atan2(-view.x(), view.z()));
         ((LocalPlayer) player).connection.send(
-            new ServerboundMovePlayerPacket.Rot(OVERRIDDEN_YAW, OVERRIDDEN_PITCH, player.onGround(),
+            new ServerboundMovePlayerPacket.Rot(yaw, pitch, player.onGround(),
                 player.horizontalCollision));
-        OVERRIDE_ACTIVE = true;
+        AIM_DIR_OVERRIDE = view;
     }
 
     public static void restoreLook() {
-        OVERRIDE_ACTIVE = false;
+        AIM_DIR_OVERRIDE = null;
+        AIM_POS_OVERRIDE = null;
     }
 
     public static void handlePacket(VivecraftPayloadS2C s2cPayload) {
@@ -346,7 +435,7 @@ public class ClientNetworking {
 
                 if (packet.blocks() != null) {
                     for (String blockId : packet.blocks()) {
-                        BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockId)).ifPresent(block -> {
+                        BuiltInRegistries.BLOCK.get(Identifier.parse(blockId)).ifPresent(block -> {
                             if (block.value() != Blocks.AIR) {
                                 dataholder.climbTracker.blocklist.add(block.value());
                             }
@@ -416,7 +505,7 @@ public class ClientNetworking {
                 }
                 if (Minecraft.getInstance().screen != null) {
                     // reinit screen, since overrides affect some option availability
-                    Minecraft.getInstance().screen.init(Minecraft.getInstance(),
+                    Minecraft.getInstance().screen.init(
                         Minecraft.getInstance().getWindow().getGuiScaledWidth(),
                         Minecraft.getInstance().getWindow().getGuiScaledHeight());
                 }

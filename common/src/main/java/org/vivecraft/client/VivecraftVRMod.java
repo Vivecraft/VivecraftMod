@@ -2,7 +2,7 @@ package org.vivecraft.client;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.control.HandedKeyBinding;
@@ -29,13 +29,13 @@ public class VivecraftVRMod {
     private Set<KeyMapping> vanillaBindingSet;
 
     public final KeyMapping.Category categoryClimbey = KeyMapping.Category.register(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "key.category.climbey"));
+        Identifier.fromNamespaceAndPath("vivecraft", "key.category.climbey"));
 
     public final KeyMapping.Category categoryGui = KeyMapping.Category.register(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "key.category.gui"));
+        Identifier.fromNamespaceAndPath("vivecraft", "key.category.gui"));
 
     public final KeyMapping.Category categoryKeyboard = KeyMapping.Category.register(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "key.category.keyboard"));
+        Identifier.fromNamespaceAndPath("vivecraft", "key.category.keyboard"));
 
     public final HandedKeyBinding keyClimbeyGrab = new HandedKeyBinding("vivecraft.key.climbeyGrab", -1,
         this.categoryClimbey);
@@ -94,6 +94,8 @@ public class VivecraftVRMod {
     };
     public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch", -1,
         KeyMapping.Category.GAMEPLAY);
+    public final KeyMapping keyQuickSwap = new KeyMapping("vivecraft.key.quickSwap", -1,
+        KeyMapping.Category.INVENTORY);
     public final KeyMapping keyRadialMenu = new KeyMapping("vivecraft.key.radialMenu", -1,
         KeyMapping.Category.MISC);
     public final KeyMapping keyRotateAxis = new KeyMapping("vivecraft.key.rotateAxis", -1,
@@ -144,6 +146,7 @@ public class VivecraftVRMod {
             this.userKeyBindingSet.add(this.keyTeleportFallback);
             this.userKeyBindingSet.add(this.keyToggleMovement);
             this.userKeyBindingSet.add(this.keyQuickTorch);
+            this.userKeyBindingSet.add(this.keyQuickSwap);
             this.userKeyBindingSet.add(this.keySwapMirrorView);
             this.userKeyBindingSet.add(this.keyExportWorld);
             this.userKeyBindingSet.add(this.keyMoveThirdPersonCam);

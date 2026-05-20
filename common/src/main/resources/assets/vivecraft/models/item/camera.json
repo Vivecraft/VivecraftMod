@@ -3,7 +3,7 @@
   "ambientocclusion": false,
   "texture_size": [64, 64],
   "textures": {
-    "0": "vivecraft:blocks/camera",
+    "0": "vivecraft:item/camera",
     "particle": "vivecraft:transparent"
   },
   "elements": [

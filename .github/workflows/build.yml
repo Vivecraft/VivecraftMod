@@ -1,0 +1,320 @@
+name: build and publish
+run-name: building
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Modrinth/CurseForge publish
+        type: boolean
+        default: true
+      github_publish:
+        description: Github release
+        type: boolean
+        default: true
+      github_api_publish:
+        description: Github Api
+        type: boolean
+        default: true
+      maven_publish:
+        description: Maven
+        type: boolean
+        default: true
+      maven_api_publish:
+        description: Maven Api
+        type: boolean
+        default: true
+
+jobs:
+  prepare:
+    name: Read branches to compile and publish
+    runs-on: ubuntu-22.04
+    outputs:
+      branches: ${{ steps.read.outputs.branches }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: build-branch
+      - name: read branches to compile
+        id: read
+        run: |
+          # read file and convert to JSON array
+          BRANCHES=$(jq -c . branches.json)
+          echo "branches=$BRANCHES" >> "$GITHUB_OUTPUT"
+      - name: store changelog
+        uses: actions/upload-artifact@v6
+        with:
+          name: changelog
+          path: ./changelog.md
+          retention-days: 1
+  process:
+    name: checkout branch, compile and publish to packages
+    runs-on: ubuntu-22.04
+    needs: prepare
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      # no max-parallel, since this is allowed to run in parallel
+      matrix:
+        branch: ${{ fromJSON(needs.prepare.outputs.branches) }}
+    steps:
+      - name: checkout ${{ matrix.branch }}
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.branch }}
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+          cache: gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+      - name: Build with Gradle with retry
+        run: |
+          max_attempts=5
+          attempt=1
+          
+          until ./gradlew build; do
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "Build failed after $attempt attempts."
+              exit 1
+            fi
+            echo "Build failed (attempt $attempt). Retrying in 10 seconds..."
+            attempt=$((attempt + 1))
+            sleep 10
+          done
+          echo "Build succeeded."
+      - name: Api with Gradle
+        if: inputs.github_api_publish
+        run: ./gradlew buildApi
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.branch }}
+          path: build/libs
+          retention-days: 1
+          if-no-files-found: error
+      #      - name: publish api and mod
+      #        if: maven_api_publish
+      #        env:
+      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #        run: ./gradlew publish
+      - name: get info from properties
+        id: properties
+        run: |
+          source <(grep -E '^(minecraft_version|mod_version|archives_base_name|mod_name)=' gradle.properties)
+          
+          # use archives_base_name if it exists, else use mod_name
+          final_name="${archives_base_name:+${archives_base_name^}}"
+          final_name="${final_name:-${mod_name}}"
+          
+          echo "mod_name=${final_name} ${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
+          echo "mod_version=${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
+      - name: get info from jars/source
+        id: info
+        uses: fayer3/build-parse-action@main
+        with:
+          mod_version: ${{ steps.properties.outputs.mod_version }}
+      - name: write metadata about build into a json
+        run: |
+          jq -n \
+            --arg release_type "${{ steps.info.outputs.release_type }}" \
+            --arg mod_version "${{ steps.properties.outputs.mod_version }}" \
+            --arg mod_name "${{ steps.properties.outputs.mod_name }}" \
+            --arg fabric_loaders "${{ steps.info.outputs.fabric_loaders }}" \
+            --arg fabric_file "${{ steps.info.outputs.fabric_file }}" \
+            --arg quilt_loaders "${{ steps.info.outputs.quilt_loaders }}" \
+            --arg quilt_file "${{ steps.info.outputs.quilt_file }}" \
+            --arg forge_loaders "${{ steps.info.outputs.forge_loaders }}" \
+            --arg forge_file "${{ steps.info.outputs.forge_file }}" \
+            --arg forge_mc_versions "${{ steps.info.outputs.forge_mc_versions }}" \
+            --arg neoforge_loaders "${{ steps.info.outputs.neoforge_loaders }}" \
+            --arg neoforge_file "${{ steps.info.outputs.neoforge_file }}" \
+            --arg neoforge_mc_versions "${{ steps.info.outputs.neoforge_mc_versions }}" \
+            '{
+              release_type: $release_type,
+              mod_version: $mod_version,
+              mod_name: $mod_name,
+              fabric_loaders: $fabric_loaders,
+              fabric_file: $fabric_file,
+              quilt_loaders: $quilt_loaders,
+              quilt_file: $quilt_file,
+              forge_loaders: $forge_loaders,
+              forge_file: $forge_file,
+              forge_mc_versions: $forge_mc_versions,
+              neoforge_loaders: $neoforge_loaders,
+              neoforge_file: $neoforge_file,
+              neoforge_mc_versions: $neoforge_mc_versions
+            }' > ${{ matrix.branch }}-metadata.json
+      - name: Upload metadata artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.branch }}-metadata
+          path: ${{ matrix.branch }}-metadata.json
+          retention-days: 1
+          if-no-files-found: error
+  publish:
+    name: collect compile output, and publish to github/curseforge/modrinth
+    runs-on: ubuntu-22.04
+    needs: [ prepare, process ]
+    strategy:
+      max-parallel: 1 # max 1 to be in series
+      matrix:
+        branch: ${{ fromJSON(needs.prepare.outputs.branches) }}
+    steps:
+      - name: load changelog
+        uses: actions/download-artifact@v7
+        with:
+          name: changelog
+      - name: load builds
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ matrix.branch }}
+      - name: load metadata
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ matrix.branch }}-metadata
+      - name: read metadata.json
+        id: meta
+        run: |
+          jq -r 'to_entries[] | "\(.key)=\(.value)"' ${{ matrix.branch }}-metadata.json | while read row; do
+            echo "$row"
+            echo "$row" >> "$GITHUB_OUTPUT"
+          done
+      - name: publish fabric
+        if: steps.meta.outputs.fabric_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: ${{ steps.meta.outputs.fabric_file }}
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.meta.outputs.mod_name }}-fabric"
+          version: "${{ steps.meta.outputs.mod_version }}-fabric"
+          version-type: "${{ steps.meta.outputs.release_type }}"
+
+          loaders: "${{ steps.meta.outputs.fabric_loaders }}"
+          fail-mode: warn
+
+      - name: publish forge
+        if: steps.meta.outputs.forge_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: ${{ steps.meta.outputs.forge_file }}
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.meta.outputs.mod_name }}-forge"
+          version: "${{ steps.meta.outputs.mod_version }}-forge"
+          version-type: "${{ steps.meta.outputs.release_type }}"
+
+          loaders: "${{ steps.meta.outputs.forge_loaders}}"
+          fail-mode: warn
+
+      - name: publish neoforge
+        if: steps.meta.outputs.neoforge_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: ${{ steps.meta.outputs.neoforge_file }}
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.meta.outputs.mod_name }}-neoforge"
+          version: "${{ steps.meta.outputs.mod_version }}-neoforge"
+          version-type: "${{ steps.meta.outputs.release_type }}"
+
+          loaders: "${{ steps.meta.outputs.neoforge_loaders}}"
+          fail-mode: warn
+
+      - name: publish quilt
+        if: steps.meta.outputs.quilt_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: ${{ steps.meta.outputs.quilt_file }}
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.meta.outputs.mod_name }}-quilt"
+          version: "${{ steps.meta.outputs.mod_version}}-quilt"
+          version-type: "${{ steps.meta.outputs.release_type }}"
+
+          loaders: "${{ steps.meta.outputs.quilt_loaders}}"
+          fail-mode: warn
+      - name: github release
+        if: inputs.github_publish
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./*.jar
+          body_path: "changelog.md"
+          target_commitish: ${{ matrix.branch }}
+          name: ${{ steps.meta.outputs.mod_name }}
+          tag_name: ${{ steps.meta.outputs.mod_version}}
+      - name: checkout repo forge-versions
+        if: steps.meta.outputs.forge_file != '' || steps.meta.outputs.neoforge_file != ''
+        uses: actions/checkout@v6
+        with:
+          ref: 'forge-versions'
+      - name: update forge versions
+        if: steps.meta.outputs.forge_file != ''
+        uses: fayer3/forge-updater@main
+        with:
+          json_file: "./forge_updates.json"
+          mc_range: "${{ steps.meta.outputs.forge_mc_versions}}"
+          new_version: "${{ steps.meta.outputs.mod_version}}"
+          type: "${{ steps.meta.outputs.release_type }}"
+      - name: update neoforge versions
+        if: steps.meta.outputs.neoforge_file != ''
+        uses: fayer3/forge-updater@main
+        with:
+          json_file: "./neoforge_updates.json"
+          mc_range: "${{ steps.meta.outputs.neoforge_mc_versions}}"
+          new_version: "${{ steps.meta.outputs.mod_version}}"
+          type: "${{ steps.meta.outputs.release_type }}"
+
+      - name: push new update json forge
+        if: steps.meta.outputs.forge_file != '' && steps.meta.outputs.neoforge_file == ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update forge ${{ steps.meta.outputs.forge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
+          push: true
+
+      - name: push new update json neoforge
+        if: steps.meta.outputs.forge_file == '' && steps.meta.outputs.neoforge_file != ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update neoforge ${{ steps.meta.outputs.neoforge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
+          push: true
+
+      - name: push new update json forge+neoforge
+        if: steps.meta.outputs.forge_file != '' && steps.meta.outputs.neoforge_file != ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update forge ${{ steps.meta.outputs.forge_mc_versions }} to ${{ steps.meta.outputs.mod_version }} and update neoforge ${{ steps.meta.outputs.neoforge_mc_versions }} to ${{ steps.meta.outputs.mod_version }}'
+          push: true

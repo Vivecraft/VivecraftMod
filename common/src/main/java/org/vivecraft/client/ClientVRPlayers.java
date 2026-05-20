@@ -50,6 +50,8 @@ public class ClientVRPlayers {
     private static long LOCAL_PLAYER_ROT_INFO_FRAME_INDEX = -1;
     private static RotInfo LOCAL_PLAYER_ROT_INFO;
 
+    public static boolean GOT_LOCAL_PLAYER_INFO = false;
+
     private final Random rand = new Random();
 
     public static ClientVRPlayers getInstance() {
@@ -68,6 +70,7 @@ public class ClientVRPlayers {
         }
         LOCAL_PLAYER_ROT_INFO = null;
         LOCAL_PLAYER_ROT_INFO_FRAME_INDEX = -1;
+        GOT_LOCAL_PLAYER_INFO = false;
     }
 
     private ClientVRPlayers() {
@@ -131,10 +134,11 @@ public class ClientVRPlayers {
     public void update(
         UUID uuid, VrPlayerState vrPlayerState, float worldScale, float heightScale, boolean localPlayer)
     {
-        if (!localPlayer && this.mc.player.getUUID().equals(uuid) &&
-            ClientDataHolderVR.getInstance().vrSettings.mainPlayerDataSource != VRSettings.DataSource.SERVER)
-        {
-            return; // Don't update local player from server packet
+        if (!localPlayer && this.mc.player.getUUID().equals(uuid)) {
+            GOT_LOCAL_PLAYER_INFO = true;
+            if (ClientDataHolderVR.getInstance().vrSettings.mainPlayerDataSource != VRSettings.DataSource.SERVER) {
+                return; // Don't update local player from server packet
+            }
         }
 
         Vector3fc hmdDir = vrPlayerState.hmd().orientation().transform(MathUtils.BACK, new Vector3f());

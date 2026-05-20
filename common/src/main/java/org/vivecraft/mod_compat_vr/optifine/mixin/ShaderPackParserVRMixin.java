@@ -12,7 +12,7 @@ import org.vivecraft.mod_compat_vr.shaders.ShaderPatcher;
 @Pseudo
 @Mixin(targets = "net.optifine.shaders.config.ShaderPackParser")
 public class ShaderPackParserVRMixin {
-    @WrapOperation(method = "loadShader", at = @At(value = "INVOKE", target = "Lnet/optifine/shaders/config/ShaderPackParser;addMacros(Lnet/optifine/util/LineBuffer;I)Lnet/optifine/util/LineBuffer;"), remap = false)
+    @WrapOperation(method = "loadShader", at = @At(value = "INVOKE", target = "Lnet/optifine/shaders/config/ShaderPackParser;addMacros(Lnet/optifine/util/LineBuffer;I)Lnet/optifine/util/LineBuffer;"))
     private static LineBuffer vivecraft$patchShader(LineBuffer reader, int index, Operation<LineBuffer> original) {
         if (VRState.VR_INITIALIZED) {
             String patched = ShaderPatcher.patchShader(reader.toString());

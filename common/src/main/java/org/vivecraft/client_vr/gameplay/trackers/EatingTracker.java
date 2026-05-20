@@ -1,14 +1,13 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -146,16 +145,15 @@ public class EatingTracker implements ItemInUseTracker, DebugRenderTracker {
     @Override
     public void renderDebug() {
         VRData world = this.dh.vrPlayer.getVRDataWorld();
-        Vec3 cam = world.getEye(this.dh.currentPass).getPosition();
         for (int c = 0; c < 2; c++) {
             if (this.foodPos[c] != null) {
-                Vector3fc food = MathUtils.subtractToVector3f(VRPlayer.roomToWorldPos(this.foodPos[c], world), cam);
+                Vec3 food = VRPlayer.roomToWorldPos(this.foodPos[c], world);
                 // food pos
                 DebugRenderHelper.renderCube(food, 0.05F * world.worldScale,
-                    this.eating[c] ? MathUtils.GREEN : MathUtils.RED);
+                    this.eating[c] ? MathUtils.GREEN_INT : MathUtils.RED_INT);
                 // food distance threshold
                 DebugRenderHelper.renderSphere(food, THRESHOLD * world.worldScale,
-                    this.eating[c] ? MathUtils.GREEN : MathUtils.RED);
+                    this.eating[c] ? MathUtils.GREEN_INT : MathUtils.RED_INT);
             }
         }
     }

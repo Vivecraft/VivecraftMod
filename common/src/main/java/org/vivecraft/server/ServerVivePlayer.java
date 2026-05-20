@@ -26,6 +26,11 @@ public class ServerVivePlayer {
     public float worldScale = 1.0F;
     public float heightScale = 1.0F;
     public VRBodyPart activeBodyPart = VRBodyPart.MAIN_HAND;
+    // custom aim override, instead of using the active bodypart
+    public Vector3fc aimDirOverride = null;
+    public Vec3 aimPosOverride = null;
+    // ticks when to reset the aim override
+    public int aimReset;
     // we need to keep a copy of this, in case the item breaks during dualwielding
     public ItemStack activeItemOverride = ItemStack.EMPTY;
     // when a player mines a block too fast, the destroy is delayed, need to keep track of the bodypart that actually destroyed it
@@ -46,6 +51,23 @@ public class ServerVivePlayer {
 
     public ServerVivePlayer(ServerPlayer player) {
         this.player = player;
+    }
+
+    /**
+     * Gets the active bodypart to use to get the the used item, accounts for roomscale bow
+     *
+     * @return the active bodypart
+     */
+    public VRBodyPart getActiveItemBodyPart() {
+        // the bow sets the bodypart to the bodypart the arrow was drawn with, but the bow is still the active item
+        return this.isDrawing() ? VRBodyPart.MAIN_HAND : this.activeBodyPart;
+    }
+
+    /**
+     * @return if the player is using the roomscale bow
+     */
+    public boolean isDrawing() {
+        return !this.isSeated() && this.draw > 0.0F;
     }
 
     /**
@@ -81,7 +103,9 @@ public class ServerVivePlayer {
      * @return the direction the player is aiming, accounts for the roomscale bow
      */
     public Vec3 getAimDir(boolean ignoreUseForAim) {
-        if (!this.isSeated() && this.draw > 0.0F) {
+        if (this.aimDirOverride != null) {
+            return new Vec3(this.aimDirOverride);
+        } else if (this.isDrawing()) {
             return this.getBodyPartPos(this.activeBodyPart.opposite())
                 .subtract(this.getBodyPartPos(this.activeBodyPart)).normalize();
         } else if (ignoreUseForAim || this.useBodyPartForAim) {
@@ -96,7 +120,9 @@ public class ServerVivePlayer {
      * @return the position from which the player is aiming
      */
     public Vec3 getAimPos(boolean ignoreUseForAim) {
-        if (ignoreUseForAim || this.useBodyPartForAim) {
+        if (this.aimPosOverride != null) {
+            return this.aimPosOverride;
+        } else if (ignoreUseForAim || this.useBodyPartForAim) {
             return this.getBodyPartPos(this.activeBodyPart);
         } else {
             return this.getBodyPartPos(VRBodyPart.MAIN_HAND);
@@ -220,5 +246,12 @@ public class ServerVivePlayer {
             this.vrPlayerStateAsPose = this.vrPlayerState.asVRPose(this.player.position());
         }
         return this.vrPlayerStateAsPose;
+    }
+
+    public void tick() {
+        if (this.aimReset > 0 && --this.aimReset == 0) {
+            this.aimDirOverride = null;
+            this.aimPosOverride = null;
+        }
     }
 }

@@ -67,7 +67,7 @@ public class KeyboardHandler {
             if (DH.vrSettings.physicalKeyboard) {
                 PHYSICAL_KEYBOARD.show();
             } else {
-                UI.init(Minecraft.getInstance(), GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
+                UI.init(GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
             }
 
             SHOWING = true;
@@ -137,7 +137,7 @@ public class KeyboardHandler {
             // put the keyboard below the current screen
             Matrix4fc guiRot = GuiHandler.GUI_ROTATION_ROOM;
             Vector3f guiUp = guiRot.transformDirection(MathUtils.UP, new Vector3f())
-                .mul(0.8F);
+                .mul(0.8F * GuiHandler.GUI_SCALE);
             Vector3f guiFwd = guiRot.transformDirection(MathUtils.FORWARD, new Vector3f())
                 .mul(0.25F * GuiHandler.GUI_SCALE);
 

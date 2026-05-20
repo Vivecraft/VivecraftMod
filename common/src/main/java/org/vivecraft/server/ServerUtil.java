@@ -15,6 +15,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionfc;
@@ -169,7 +170,7 @@ public class ServerUtil {
     {
         // reload command
         dispatcher.register(Commands.literal("vivecraft-server-config")
-            .requires(source -> source.hasPermission(4))
+            .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_OWNER))
             .then(Commands.literal("reload")
                 .executes(context -> {
                     ServerConfig.init((action, path, incorrectValue, correctedValue) -> {
@@ -360,7 +361,7 @@ public class ServerUtil {
             );
 
             dispatcher.register(Commands.literal("vivecraft-server-config")
-                .requires(source -> source.hasPermission(4))
+                .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_OWNER))
                 .then(baseCommand)
             );
         }

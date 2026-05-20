@@ -11,7 +11,8 @@ import org.vivecraft.Xevents;
 
 public class XeventsImpl implements Xevents {
 
-    public static boolean renderBlockOverlay(
+    @Override
+    public boolean renderBlockOverlay(
         Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos)
     {
         return ClientHooks.renderBlockOverlay(player, poseStack, RenderBlockScreenEffectEvent.OverlayType.BLOCK,
@@ -19,12 +20,14 @@ public class XeventsImpl implements Xevents {
             Minecraft.getInstance().renderBuffers().bufferSource());
     }
 
-    public static boolean renderWaterOverlay(Player player, PoseStack poseStack) {
+    @Override
+    public boolean renderWaterOverlay(Player player, PoseStack poseStack) {
         return ClientHooks.renderWaterOverlay(player, poseStack, Minecraft.getInstance().getAtlasManager(),
             Minecraft.getInstance().renderBuffers().bufferSource());
     }
 
-    public static boolean renderFireOverlay(Player player, PoseStack poseStack) {
+    @Override
+    public boolean renderFireOverlay(Player player, PoseStack poseStack) {
         return ClientHooks.renderFireOverlay(player, poseStack, Minecraft.getInstance().getAtlasManager(),
             Minecraft.getInstance().renderBuffers().bufferSource());
     }

@@ -4,10 +4,10 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.vivecraft.Xloader;
@@ -83,6 +83,7 @@ public class ServerConfig {
 
     // climbey
     public static ConfigBuilder.BooleanValue CLIMBEY_ENABLED;
+    public static ConfigBuilder.BooleanValue CLIMBEY_FOOD_EXHAUSTION;
     public static ConfigBuilder.EnumValue<ClimbeyBlockmode> CLIMBEY_BLOCKMODE;
     public static ConfigBuilder.ListValue<String> CLIMBEY_BLOCKLIST;
 
@@ -91,6 +92,7 @@ public class ServerConfig {
 
     // teleport
     public static ConfigBuilder.BooleanValue TELEPORT_ENABLED;
+    public static ConfigBuilder.BooleanValue TELEPORT_FOOD_EXHAUSTION;
     public static ConfigBuilder.BooleanValue TELEPORT_LIMITED_SURVIVAL;
     public static ConfigBuilder.IntValue TELEPORT_UP_LIMIT;
     public static ConfigBuilder.IntValue TELEPORT_DOWN_LIMIT;
@@ -122,7 +124,7 @@ public class ServerConfig {
             CONFIG.close();
         }
         CONFIG = CommentedFileConfig
-            .builder(Xloader.getConfigPath("vivecraft-server-config.toml"))
+            .builder(Xloader.INSTANCE.getConfigPath("vivecraft-server-config.toml"))
             .autosave()
             .sync()
             .concurrent()
@@ -329,6 +331,9 @@ public class ServerConfig {
             .push("enabled")
             .define(true)
             .setPacketFunction(v -> ServerNetworking.getClimbeyServerPayload());
+        CLIMBEY_FOOD_EXHAUSTION = BUILDER
+            .push("foodExhaustion")
+            .define(true);
         CLIMBEY_BLOCKMODE = BUILDER
             .push("blockmode")
             .defineEnum(ClimbeyBlockmode.DISABLED, ClimbeyBlockmode.class)
@@ -339,12 +344,12 @@ public class ServerConfig {
                 boolean valid = true;
                 try {
                     // check if valid block
-                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse((String) s))
+                    Holder.Reference<Block> b = BuiltInRegistries.BLOCK.get(Identifier.parse((String) s))
                         .orElseGet(() -> null);
                     if (b == null || b.value() == Blocks.AIR) {
                         valid = false;
                     }
-                } catch (ResourceLocationException e) {
+                } catch (IdentifierException e) {
                     valid = false;
                 }
                 if (!valid) {
@@ -374,6 +379,9 @@ public class ServerConfig {
             .push("enabled")
             .define(true)
             .setPacketFunction(v -> new TeleportPayloadS2C(ServerConfig.TELEPORT_ENABLED.get(), v.networkVersion));
+        TELEPORT_FOOD_EXHAUSTION = BUILDER
+            .push("foodExhaustion")
+            .define(false);
         TELEPORT_LIMITED_SURVIVAL = BUILDER
             .push("limitedSurvival")
             .define(false)

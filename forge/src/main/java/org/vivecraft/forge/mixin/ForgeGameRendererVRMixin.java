@@ -13,7 +13,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Mixin(GameRenderer.class)
 public class ForgeGameRendererVRMixin {
 
-    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FFF)V", remap = false), remap = true)
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FFF)V"))
     private void vivecraft$removeAnglesInternal(
         Camera instance, float yaw, float pitch, float roll, Operation<Void> original)
     {

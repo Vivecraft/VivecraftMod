@@ -13,13 +13,14 @@ public class CommonDataHolder {
 
         String mcVersion = "";
         String modVersion = "";
-        if (Xloader.isModLoadedSuccess()) {
-            String[] version = Xloader.getModVersion().split("-", 2);
+        if (Xloader.INSTANCE.isModLoadedSuccess()) {
+            String[] version = Xloader.INSTANCE.getModVersion().split("-", 2);
             mcVersion = version[0];
             modVersion = version[1];
         }
 
-        this.versionIdentifier = "Vivecraft-" + mcVersion + "-" + Xloader.getModloader().name + "-" + modVersion;
+        this.versionIdentifier =
+            "Vivecraft-" + mcVersion + "-" + Xloader.INSTANCE.getModloader().name + "-" + modVersion;
     }
 
     public static CommonDataHolder getInstance() {

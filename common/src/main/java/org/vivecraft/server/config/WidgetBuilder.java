@@ -93,14 +93,12 @@ public class WidgetBuilder {
      * @return Button with the value as text
      */
     public static <T> Supplier<AbstractWidget> getCycleWidget(
-        ConfigBuilder.ConfigValue<T> configValue, Collection<? extends T> values, int width, int height)
+        ConfigBuilder.ConfigValue<T> configValue, Collection<T> values, int width, int height)
     {
         return () -> CycleButton
             .builder((newValue) -> Component.translatable(
-                "vivecraft.serverSettings." + configValue.getPath() + "." + newValue))
-            // toArray is needed here, because the button uses Objects, and the collection is of other types
-            .withValues(values.toArray())
-            .withInitialValue(configValue.get())
+                "vivecraft.serverSettings." + configValue.getPath() + "." + newValue), configValue.get())
+            .withValues(values)
             .displayOnlyValue()
             .create(0, 0, width, height, Component.empty(), (button, newValue) -> {
                 configValue.set((T) newValue);

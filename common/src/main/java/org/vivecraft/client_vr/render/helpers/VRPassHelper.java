@@ -6,16 +6,20 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.Profiler;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.extensions.LevelRenderStateExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.util.List;
 
@@ -37,7 +41,20 @@ public class VRPassHelper {
             MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
         // THIS IS WHERE EVERYTHING IS RENDERED
+        // reextract world state for the new pass
+        Profiler.get().push("update");
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$cacheRVEPos(MC.getCameraEntity());
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$setupRVE();
+        MC.gameRenderer.update(deltaTracker, renderLevel);
+        Profiler.get().popPush("extract");
+        MC.gameRenderer.extract(deltaTracker, renderLevel);
+        Profiler.get().pop();
+
+        // actually render
         MC.gameRenderer.render(deltaTracker, renderLevel);
+
+        // restore player
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$restoreRVEPos(MC.getCameraEntity());
 
         // flip buffers for the next pass, in vanilla this is only done when flipping the backbuffer
         MC.levelRenderer.endFrame();
@@ -45,6 +62,12 @@ public class VRPassHelper {
         MC.gameRenderer.getFeatureRenderDispatcher().endFrame();
 
         RenderHelper.checkGLError("post game render " + eye);
+
+        if (ShadersHelper.isShaderActive()) {
+            // some shaders don't write an alpha value to the final image
+            ShaderHelper.renderFullscreenQuad(() -> "alpha clear", VRShaders.SOLID_ALPHA_PIPELINE, pass -> {},
+                MC.getMainRenderTarget().getColorTextureView());
+        }
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
@@ -63,8 +86,9 @@ public class VRPassHelper {
 
             // do post-processing
             ShaderHelper.doVrPostProcess(eye, rendertarget,
-                eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.getLeftEyeTarget() :
-                    DATA_HOLDER.vrRenderer.getRightEyeTarget(), deltaTracker.getGameTimeDeltaPartialTick(false));
+                eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.framebufferEye0 :
+                    DATA_HOLDER.vrRenderer.framebufferEye1,
+                ((LevelRenderStateExtension) MC.gameRenderer.getGameRenderState().levelRenderState).vivecraft$getVRRenderState().postProcessState);
 
             RenderHelper.checkGLError("post overlay" + eye);
             Profiler.get().pop();
@@ -72,11 +96,8 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
-            // set alpha, because the blit does not copy it anymore
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTexture(), 0xFF000000);
-            DATA_HOLDER.vrRenderer.cameraRenderFramebuffer.blitAndBlendToTexture(
-                DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTextureView());
+            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, DATA_HOLDER.vrRenderer.cameraFramebuffer,
+                false);
             Profiler.get().pop();
         }
 
@@ -98,7 +119,7 @@ public class VRPassHelper {
      */
     public static void renderAndSubmit(boolean renderLevel, DeltaTracker.Timer deltaTracker) {
         // still rendering
-        Profiler.get().push("gameRenderer");
+        Profiler.get().push("render");
 
         Profiler.get().push("VR guis");
 
@@ -153,6 +174,11 @@ public class VRPassHelper {
         // done with guis
         Profiler.get().pop();
 
+        // resize happened in the gui pass, set it to false or it will mess with stuff
+        MC.getWindow().resetIsResized();
+        // don't reextract the gui for the world passes
+        ((GameRendererExtension) MC.gameRenderer).vivecraft$setShouldDrawScreen(false);
+
         // render the different vr passes
         List<RenderPass> list = DATA_HOLDER.vrRenderer.getRenderPasses(false);
         DATA_HOLDER.isFirstPass = true;
@@ -205,7 +231,7 @@ public class VRPassHelper {
                     }
 
                     ClientUtils.takeScreenshot(rendertarget);
-                    MC.getWindow().updateDisplay(null);
+                    RenderSystem.flipFrame(null);
                     DATA_HOLDER.grabScreenShot = false;
                 }
             }

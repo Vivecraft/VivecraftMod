@@ -1219,6 +1219,9 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             error = XR10.xrAttachSessionActionSets(this.session, attach_info);
             logError(error, "xrAttachSessionActionSets", "");
 
+
+            VRSettings.LOGGER.info("Using interaction profile: {}", getCurrentInteractionProfile());
+
             XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
             XrActionSpaceCreateInfo actionSpace = XrActionSpaceCreateInfo.calloc(stack);
             actionSpace.type(XR10.XR_TYPE_ACTION_SPACE_CREATE_INFO);
@@ -1248,6 +1251,16 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
             logError(error, "xrCreateActionSpace", "aim: /user/hand/left");
             this.aimSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+        }
+    }
+
+    public String getCurrentInteractionProfile() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrInteractionProfileState state = XrInteractionProfileState.calloc(stack);
+            state.type(XR10.XR_TYPE_INTERACTION_PROFILE_STATE);
+            int error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/left"), state);
+            logError(error, "xrGetCurrentInteractionProfile", "left");
+            return getString(state.interactionProfile());
         }
     }
 

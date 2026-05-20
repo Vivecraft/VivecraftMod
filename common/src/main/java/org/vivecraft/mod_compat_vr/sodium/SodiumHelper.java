@@ -46,7 +46,8 @@ public class SodiumHelper {
     private static Field ModelCuboid$Quad_textures;
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("sodium") || Xloader.isModLoaded("rubidium") || Xloader.isModLoaded("embeddium");
+        return Xloader.INSTANCE.isModLoaded("sodium") || Xloader.INSTANCE.isModLoaded("rubidium") ||
+            Xloader.INSTANCE.isModLoaded("embeddium");
     }
 
     /**

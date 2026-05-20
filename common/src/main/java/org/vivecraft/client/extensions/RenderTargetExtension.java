@@ -15,13 +15,6 @@ public interface RenderTargetExtension {
     boolean vivecraft$hasStencil();
 
     /**
-     * sets if linear filtering should be used, if false or unset will use nearest filtering.
-     *
-     * @param linearFilter if linear filtering should be used
-     */
-    void vivecraft$setLinearFilter(boolean linearFilter);
-
-    /**
      * sets if mipmaps should be used for sampling
      *
      * @param mipmaps if mipmaps should be used

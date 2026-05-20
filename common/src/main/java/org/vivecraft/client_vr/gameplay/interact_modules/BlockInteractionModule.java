@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.Xplat;
 import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -21,7 +20,7 @@ import java.util.HashSet;
 
 public class BlockInteractionModule implements InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "block_interact");
+    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft", "block_interact");
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -40,7 +39,7 @@ public class BlockInteractionModule implements InteractModule {
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 
@@ -62,7 +61,7 @@ public class BlockInteractionModule implements InteractModule {
             // compile a list of blocks that explicitly declare OnBlockActivated (right click)
             this.rightClickable = new HashSet<>();
 
-            String name = Xplat.getUseMethodName();
+            String name = "useWithoutItem";
             for (Object object : BuiltInRegistries.BLOCK) {
                 Class<?> oclass = object.getClass();
 

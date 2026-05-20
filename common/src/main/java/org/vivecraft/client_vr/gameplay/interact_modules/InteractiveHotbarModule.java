@@ -5,7 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -15,14 +15,14 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.data.ViveItems;
 
 public class InteractiveHotbarModule implements DebugRenderModule, InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "interactive_hotbar");
+    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft", "interactive_hotbar");
 
     private final ClientDataHolderVR dh;
     private final Minecraft mc;
@@ -37,7 +37,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 
@@ -71,7 +71,9 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
         // this shouldn't happen, the inventory is supposed to be final
         if (player == null || player.getInventory() == null) return false;
-        if (this.dh.climbTracker.isGrabbingLadder() && ClimbTracker.isClaws(player.getMainHandItem())) return false;
+        if (this.dh.climbTracker.isGrabbingLadder() && ViveItems.isClimbingClaws(player.getMainHandItem())) {
+            return false;
+        }
         if (!this.dh.interactTracker.isActive(player)) return false;
         if (GuiHandler.GUI_RENDER_POS_ROOM == null) return false;
 
@@ -189,23 +191,24 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         Vector3f line = MathUtils.subtractToVector3f(barEnd, barStart).div(9F);
 
         // origin offset since the camera is room relative
-        Vector3f slotPos = MathUtils.subtractToVector3f(barStart, world.getEye(this.dh.currentPass).getPosition());
+        Vec3 slotPos = barStart;
 
         float size = 0.06F * world.worldScale;
 
         if (!this.dh.vrSettings.reverseHands) {
-            DebugRenderHelper.renderCylinder(slotPos.sub(line.mul(1.5F, new Vector3f()), new Vector3f()), line, size,
-                this.hotbar == 9 ? MathUtils.GREEN : MathUtils.RED);
+            DebugRenderHelper.renderCylinder(slotPos.subtract(line.x * 1.5F, line.y * 1.5F, line.z * 1.5F), line, size,
+                this.hotbar == 9 ? MathUtils.GREEN_INT : MathUtils.RED_INT);
         }
 
         for (int i = 0; i < 9; i++) {
-            DebugRenderHelper.renderCylinder(slotPos, line, size, this.hotbar == i ? MathUtils.GREEN : MathUtils.RED);
-            slotPos.add(line);
+            DebugRenderHelper.renderCylinder(slotPos, line, size,
+                this.hotbar == i ? MathUtils.GREEN_INT : MathUtils.RED_INT);
+            slotPos = slotPos.add(line.x, line.y, line.z);
         }
 
         if (this.dh.vrSettings.reverseHands) {
-            DebugRenderHelper.renderCylinder(slotPos.add(line.mul(0.5F, new Vector3f()), new Vector3f()), line, size,
-                this.hotbar == 9 ? MathUtils.GREEN : MathUtils.RED);
+            DebugRenderHelper.renderCylinder(slotPos.add(line.x * 0.5F, line.y * 0.5F, line.z * 0.5F), line, size,
+                this.hotbar == 9 ? MathUtils.GREEN_INT : MathUtils.RED_INT);
         }
     }
 }

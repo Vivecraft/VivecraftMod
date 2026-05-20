@@ -4,12 +4,13 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.vehicle.AbstractBoat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 
@@ -47,10 +48,11 @@ public abstract class AbstractBoatMixin extends Entity {
             // only custom boat controls in standing mode
             if (this.inputUp) {
                 // controller-based
-                float yaw = switch (dataHolder.vrSettings.getVrFreeMoveMode(false,
-                    dataHolder.vrPlayer.vrdata_world_pre.fbtMode)) {
+                float yaw = switch (dataHolder.vrSettings.getVrFreeMoveMode(false)) {
                     case HMD -> dataHolder.vrPlayer.vrdata_world_pre.hmd.getYaw();
-                    case WAIST -> dataHolder.vrPlayer.vrdata_world_pre.waist.getYaw();
+                    case WAIST -> dataHolder.vrPlayer.vrdata_world_pre.fbtMode == FBTMode.ARMS_ONLY ?
+                        dataHolder.vrPlayer.vrdata_world_pre.getBodyYawRad() :
+                        dataHolder.vrPlayer.vrdata_world_pre.waist.getYaw();
                     default -> dataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
                 };
 

@@ -1,15 +1,15 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.client.gui.framework.VROptionLayout;
-import org.vivecraft.client.gui.framework.screens.GuiSelectionListScreen;
 import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.screens.KeymappingSelectionScreen;
 import org.vivecraft.client.gui.framework.widgets.GuiVROptionButton;
 import org.vivecraft.client_vr.gui.GuiRadial;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -88,16 +88,12 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
 
             String label = keyMapping.map(mapping -> I18n.get(mapping.getName())).orElse("");
             this.addRenderableWidget(GuiRadial.createButton(label, (p) -> {
-                this.minecraft.setScreen(new GuiSelectionListScreen<>(
+                this.minecraft.setScreen(new KeymappingSelectionScreen(
                     Component.translatable(this.vrTitle), this,
-                    () -> Arrays.stream(this.minecraft.options.keyMappings).sorted().toList(),
-                    key -> Component.translatable(key.getName()),
-                    key -> key.getCategory().id().toLanguageKey("key.category"),
                     key -> {
                         this.selectedIndex = index;
                         this.setKey(key);
-                    }, true, false, null
-                ));
+                    }));
             }, index, centerX, centerY));
         }
 
@@ -126,17 +122,17 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.minecraft.font,
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        graphics.centeredText(this.minecraft.font,
             Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50,
             0xFF55FF55);
 
         if (this.isShift) {
-            guiGraphics.drawCenteredString(this.minecraft.font,
+            graphics.centeredText(this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36,
                 0xFFD23877);
-            guiGraphics.drawCenteredString(this.minecraft.font,
+            graphics.centeredText(this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.3"), this.width / 2, this.height - 22,
                 0xFFD23877);
         }

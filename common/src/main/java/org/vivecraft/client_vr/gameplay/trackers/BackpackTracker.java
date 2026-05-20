@@ -2,19 +2,21 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.common.utils.MathUtils;
+
+import java.util.Arrays;
 
 public class BackpackTracker implements Tracker {
     public boolean[] wasIn = new boolean[2];
-    public int previousSlot = 0;
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
 
@@ -36,6 +38,9 @@ public class BackpackTracker implements Tracker {
         } else if (!player.isAlive()) {
             return false;
         } else if (player.isSleeping()) {
+            return false;
+        } else if (this.mc.options.keyAttack.isDown() || VivecraftVRMod.INSTANCE.keyVRInteract.isDown()) {
+            // don't swap while doing an action
             return false;
         } else {
             return !this.dh.bowTracker.isDrawing();
@@ -71,33 +76,7 @@ public class BackpackTracker implements Tracker {
 
             if (zone) {
                 if (!this.wasIn[c]) {
-                    if (c == 0) {
-                        // main hand
-                        if (!this.dh.climbTracker.isGrabbingLadder() ||
-                            !ClimbTracker.isClaws(this.mc.player.getMainHandItem()))
-                        {
-                            if (player.getInventory().getSelectedSlot() != 0) {
-                                this.previousSlot = player.getInventory().getSelectedSlot();
-                                player.getInventory().setSelectedSlot(0);
-                            } else {
-                                player.getInventory().setSelectedSlot(this.previousSlot);
-                                this.previousSlot = 0;
-                            }
-                        }
-                    } else {
-                        // offhand
-                        if (!this.dh.climbTracker.isGrabbingLadder() ||
-                            !ClimbTracker.isClaws(this.mc.player.getOffhandItem()))
-                        {
-                            if (this.dh.vrSettings.physicalGuiEnabled) {
-                                // minecraft.physicalGuiManager.toggleInventoryBag();
-                            } else {
-                                player.connection.send(new ServerboundPlayerActionPacket(
-                                    ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ZERO,
-                                    Direction.DOWN));
-                            }
-                        }
-                    }
+                    pressKeybind(c);
 
                     this.dh.vr.triggerHapticPulse(c, 1500);
                     this.wasIn[c] = true;
@@ -106,5 +85,27 @@ public class BackpackTracker implements Tracker {
                 this.wasIn[c] = false;
             }
         }
+    }
+
+    private void pressKeybind(int c) {
+        String keybind =
+            c == 0 ? this.dh.vrSettings.backpackMainHandKeybind : this.dh.vrSettings.backpackOffhandKeybind;
+        Arrays.stream(this.mc.options.keyMappings)
+            .filter(keymapping -> keymapping.getName().equalsIgnoreCase(keybind))
+            .findFirst()
+            .ifPresent(keymapping -> {
+                // if the offhand keybind is set to swap item, don't swap, if we are climbing
+                if (keymapping != this.mc.options.keySwapOffhand ||
+                    !this.dh.climbTracker.isClimbingWith(InteractionHand.OFF_HAND))
+                {
+                    VRInputAction vrinputaction = MCVR.get().getInputAction(keymapping);
+                    if (vrinputaction != null) {
+                        vrinputaction.pressBinding();
+                        // hold for 2 ticks, since this tracker runs in the middle of the tick,
+                        // and unpress would happen at start of next tick
+                        vrinputaction.unpressBinding(2);
+                    }
+                }
+            });
     }
 }

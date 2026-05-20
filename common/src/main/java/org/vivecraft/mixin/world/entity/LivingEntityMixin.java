@@ -20,16 +20,16 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.mixin.server.ServerPlayerMixin;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-
-    @Shadow
-    protected ItemStack useItem;
 
     @Shadow
     public abstract ItemStack getItemBySlot(EquipmentSlot slot);
@@ -140,8 +140,14 @@ public abstract class LivingEntityMixin extends Entity {
     /**
      * dummy to be overridden in {@link ServerPlayerMixin}
      */
-    @ModifyExpressionValue(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getUseItem()Lnet/minecraft/world/item/ItemStack;"))
-    protected ItemStack vivecraft$roomscaleShieldActualBlockingItem(ItemStack original) {
+    @ModifyVariable(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F", shift = At.Shift.AFTER))
+    protected ItemStack vivecraft$roomscaleShieldActualBlockingItemHurt(ItemStack original) {
         return original;
     }
+
+    /**
+     * dummy to be overridden in {@link ServerPlayerMixin}
+     */
+    @Inject(method = "getItemBlockingWith", at = @At(value = "HEAD"), cancellable = true)
+    protected void vivecraft$roomscaleShieldActualBlockingItem(CallbackInfoReturnable<ItemStack> cir) {}
 }

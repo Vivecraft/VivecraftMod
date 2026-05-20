@@ -1,7 +1,7 @@
 package org.vivecraft.api.client;
 
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,7 +40,7 @@ public interface InteractModule {
      * @return The ID of this module.
      * @since 1.3.0
      */
-    ResourceLocation getId();
+    Identifier getId();
 
     /**
      * Used to reset the module state for the given hand, this is called when the Interact Tracker is not active anymore,

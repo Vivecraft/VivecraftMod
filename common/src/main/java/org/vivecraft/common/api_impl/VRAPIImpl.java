@@ -63,8 +63,11 @@ public final class VRAPIImpl implements VRAPI {
             return null;
         } else if (player instanceof ServerPlayer serverPlayer) {
             return ServerVRPlayers.getVivePlayer(serverPlayer).asVRPose();
+        } else if (player.isLocalPlayer()) {
+            return VRClientAPIImpl.INSTANCE.getPreTickWorldPose();
         } else {
-            return ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID()).asVRPose(player.position());
+            return ClientVRPlayers.getInstance().getLatestRotationsForPlayer(player.getUUID())
+                .asVRPose(player.position());
         }
     }
 
@@ -82,5 +85,13 @@ public final class VRAPIImpl implements VRAPI {
 
     private Map<UUID, VRPoseHistoryImpl> getMap(boolean isClientSide) {
         return isClientSide ? this.clientPoseHistories : this.serverPoseHistories;
+    }
+
+    @SuppressWarnings("removal")
+    public static class LegacyApi implements org.vivecraft.api_beta.VivecraftAPI {
+        public boolean isVRPlayer(Player player) {
+            return
+                VRAPI.instance().isVRPlayer(player);
+        }
     }
 }

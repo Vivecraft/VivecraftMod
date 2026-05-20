@@ -1,17 +1,17 @@
 package org.vivecraft.client_vr.gui;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Tuple;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -25,7 +25,6 @@ import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.utils.RGBAColor;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -199,8 +198,8 @@ public class PhysicalKeyboard {
         }
     }
 
-    private Vector3f getCenterPos() {
-        return new Vector3f(
+    private Vector3f getCenterPos(Vector3f target) {
+        return target.set(
             ((this.keyWidth + this.spacing) * (this.columns + this.columns % 2.0F / 2.0F) +
                 (this.keyWidthSpecial + this.spacing) * 2.0F
             ) / 2.0F,
@@ -211,7 +210,7 @@ public class PhysicalKeyboard {
     private KeyButton findTouchedKey(ControllerType controller) {
         // Transform the controller into keyboard space
         Matrix4f matrix = new Matrix4f();
-        matrix.translate(this.getCenterPos());
+        matrix.translate(this.getCenterPos(new Vector3f()));
         matrix.mul(new Matrix4f(KeyboardHandler.ROTATION_ROOM).invert());
         matrix.translate(-KeyboardHandler.POS_ROOM.x, -KeyboardHandler.POS_ROOM.y, -KeyboardHandler.POS_ROOM.z);
 
@@ -243,135 +242,141 @@ public class PhysicalKeyboard {
         }
     }
 
-    private void drawBox(VertexConsumer buf, AABB box, RGBAColor color, Matrix4f matrix) {
+    private void drawBox(VertexConsumer buf, AABB box, RGBAColor color, PoseStack.Pose pose) {
         // Alright let's draw a box
         float minX = (float) box.minX, minY = (float) box.minY, minZ = (float) box.minZ;
         float maxX = (float) box.maxX, maxY = (float) box.maxY, maxZ = (float) box.maxZ;
 
         // front
-        buf.addVertex(matrix, minX, minY, minZ).setUv(0, 0)
+        buf.addVertex(pose, minX, minY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, maxY, minZ).setUv(0, 0)
+        buf.addVertex(pose, minX, maxY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, maxY, minZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, maxY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, minY, minZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, minY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
 
         // top
-        buf.addVertex(matrix, minX, minY, minZ).setUv(0, 0)
+        buf.addVertex(pose, minX, minY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, minY, minZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, minY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, minY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, minY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, minY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, minX, minY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
 
         // left
-        buf.addVertex(matrix, minX, minY, minZ).setUv(0, 0)
+        buf.addVertex(pose, minX, minY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, minY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, minX, minY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, maxY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, minX, maxY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, maxY, minZ).setUv(0, 0)
+        buf.addVertex(pose, minX, maxY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
 
         // back
-        buf.addVertex(matrix, maxX, maxY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, maxY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, maxY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, minX, maxY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, minY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, minX, minY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, minY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, minY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
 
         // bottom
-        buf.addVertex(matrix, maxX, maxY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, maxY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, maxY, minZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, maxY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, maxY, minZ).setUv(0, 0)
+        buf.addVertex(pose, minX, maxY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, minX, maxY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, minX, maxY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
 
         // right
-        buf.addVertex(matrix, maxX, maxY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, maxY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, minY, maxZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, minY, maxZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, minY, minZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, minY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
-        buf.addVertex(matrix, maxX, maxY, minZ).setUv(0, 0)
+        buf.addVertex(pose, maxX, maxY, minZ).setUv(0, 0)
             .setColor(color.r, color.g, color.b, color.a);
         // Woo that was fun
     }
 
-    public void render(Matrix4fStack poseStack) {
-        // no keys, don't render
-        if (this.keys.isEmpty()) return;
-        poseStack.pushMatrix();
-        Vector3f center = this.getCenterPos();
-        poseStack.translate(-center.x, -center.y, -center.z);
+    public static class KeyboardState {
+        public float scale = 1.0F;
+        public final Vector3f center = new Vector3f();
+        public List<KeyState> keys = new ArrayList<>();
+    }
 
+    public record KeyState(AABB box, RGBAColor color, Component label) {}
+
+    public void extract(KeyboardState state) {
+        state.scale = this.scale;
+        this.getCenterPos(state.center);
+
+        state.keys.clear();
 
         KeyboardTheme.Theme theme =
             this.easterEggActive ? EasterEggTheme.INSTANCE : this.dh.vrSettings.physicalKeyboardTheme.theme;
         for (KeyButton button : this.keys) {
             theme.updateColor(button.color, button.key.id(), button.key.x(), button.key.y());
+            state.keys.add(new KeyState(
+                button.getRenderBoundingBox(),
+                button.getRenderColor(),
+                button.key.label()));
         }
+    }
 
-        // We need to ignore depth so we can see the back faces and text
+    public int render(SubmitNodeCollector output, KeyboardState state, PoseStack poseStack, int order) {
+        // no keys, don't render
+        if (state.keys.isEmpty()) return order;
+        poseStack.pushPose();
+        poseStack.translate(-state.center.x, -state.center.y, -state.center.z);
 
         // Stuff for drawing labels
-        Font font = this.mc.font;
-        ArrayList<Tuple<Component, Vector3f>> labels = new ArrayList<>();
-        float textScale = 0.002F * this.scale;
+        float textScale = 0.002F * state.scale;
 
         // Start building vertices for key boxes
         RenderType renderType = VRRenderTypes.quads(true);
-        VertexConsumer buf = this.mc.renderBuffers().bufferSource().getBuffer(renderType);
 
-        for (KeyButton key : this.keys) {
-            AABB box = key.getRenderBoundingBox();
-            RGBAColor color = key.getRenderColor();
-
+        for (KeyState key : state.keys) {
+            // box first
             // Draw the key itself
-            this.drawBox(buf, box, color, poseStack);
+            RenderHelper.submitLateCustomGeometry(output.order(order), poseStack, renderType,
+                (pose, consumer) -> this.drawBox(consumer, key.box, key.color, pose));
 
             // Calculate text position
-            float stringWidth = (float) font.width(key.key.label()) * textScale;
-            float stringHeight = font.lineHeight * textScale;
-            float textX = (float) box.minX + ((float) box.maxX - (float) box.minX) / 2.0F - stringWidth / 2.0F;
-            float textY = (float) box.minY + ((float) box.maxY - (float) box.minY) / 2.0F - stringHeight / 2.0F;
-            float textZ = (float) box.minZ + ((float) box.maxZ - (float) box.minZ) / 2.0F;
+            poseStack.pushPose();
+            float textX = (float) key.box.minX + ((float) key.box.maxX - (float) key.box.minX) / 2.0F;
+            float textY = (float) key.box.minY + ((float) key.box.maxY - (float) key.box.minY) / 2.0F;
+            float textZ = (float) key.box.minZ + ((float) key.box.maxZ - (float) key.box.minZ) / 2.0F;
 
-            // Put label in the list
-            labels.add(new Tuple<>(key.key.label(), new Vector3f(textX, textY, textZ)));
-        }
-
-        // Draw all the key boxes
-        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
-        this.mc.renderBuffers().bufferSource().endBatch(renderType);
-
-        // Build all the text
-        // TODO 1.21.5 no cull text
-        for (Tuple<Component, Vector3f> label : labels) {
-            poseStack.pushMatrix();
-            poseStack.translate(label.getB().x, label.getB().y, label.getB().z);
+            poseStack.translate(textX, textY, textZ);
             poseStack.scale(textScale, textScale, 1.0F);
-            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack,
-                this.mc.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
-            poseStack.popMatrix();
+
+            // label second
+            output.order(order + 1).submitText(poseStack,
+                -this.mc.font.width(key.label) / 2F,
+                -this.mc.font.lineHeight / 2F,
+                key.label.getVisualOrderText(),
+                false,
+                Font.DisplayMode.POLYGON_OFFSET,
+                LightCoordsUtil.FULL_BRIGHT,
+                0xFFFFFFFF,
+                0x00000000,
+                0);
+            poseStack.popPose();
         }
 
-        // Draw all the labels
-        this.mc.renderBuffers().bufferSource().endBatch();
-
-        poseStack.popMatrix();
+        poseStack.popPose();
+        return order + 2;
     }
 
     public void show() {

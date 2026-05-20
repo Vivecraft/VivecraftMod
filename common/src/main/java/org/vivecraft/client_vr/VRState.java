@@ -87,7 +87,7 @@ public class VRState {
 
             dh.vrPlayer = new VRPlayer();
 
-            if (Xloader.isModLoaded("hapticcraft")) {
+            if (Xloader.INSTANCE.isModLoaded("hapticcraft")) {
                 VRSettings.LOGGER.info(
                     "Vivecraft: Not activating bHaptics integration, because the official 'HapticCraft' is loaded!");
             } else {
@@ -187,7 +187,7 @@ public class VRState {
             dh.vrSettings.saveOptions();
 
             // fixes an issue with DH shaders where the depth texture gets stuck
-            if (Xloader.isModLoaded("distanthorizons")) {
+            if (Xloader.INSTANCE.isModLoaded("distanthorizons")) {
                 ShadersHelper.maybeReloadShaders();
             }
 

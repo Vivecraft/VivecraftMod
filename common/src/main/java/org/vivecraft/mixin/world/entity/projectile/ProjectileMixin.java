@@ -4,9 +4,9 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,7 +31,7 @@ public class ProjectileMixin {
                 direction.set(serverVivePlayer.getAimDir(true));
 
                 if (projectile instanceof AbstractArrow && !(projectile instanceof ThrownTrident) &&
-                    !serverVivePlayer.isSeated() && serverVivePlayer.draw > 0.0F)
+                    serverVivePlayer.isDrawing())
                 {
                     // modify velocity based on draw range
                     return velocity * serverVivePlayer.draw;

@@ -18,13 +18,13 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 public class SodiumWorldRendererVRMixin {
 
     @Group(name = "forceChunkUpdate", min = 1, max = 1)
-    @ModifyVariable(method = "updateChunks", at = @At("STORE"), ordinal = 1, remap = false, expect = 0)
+    @ModifyVariable(method = "updateChunks", at = @At("STORE"), ordinal = 1, expect = 0)
     private boolean vivecraft$RenderUpdate(boolean dirty) {
         return !RenderPassType.isVanilla() || dirty;
     }
 
     @Group(name = "forceChunkUpdate", min = 1, max = 1)
-    @ModifyVariable(method = "setupTerrain", at = @At("STORE"), ordinal = 2, remap = false, expect = 0)
+    @ModifyVariable(method = "setupTerrain", at = @At("STORE"), ordinal = 2, expect = 0)
     private boolean vivecraft$RenderUpdateSodium5(boolean dirty) {
         return !RenderPassType.isVanilla() || dirty;
     }

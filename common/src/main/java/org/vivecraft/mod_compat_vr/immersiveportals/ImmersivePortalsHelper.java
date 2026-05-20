@@ -7,7 +7,7 @@ import qouteall.imm_ptl.core.render.context_management.PortalRendering;
 public class ImmersivePortalsHelper {
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("immersive_portals");
+        return Xloader.INSTANCE.isModLoaded("immersive_portals");
     }
 
     /**

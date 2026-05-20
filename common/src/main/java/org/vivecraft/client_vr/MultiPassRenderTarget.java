@@ -1,7 +1,6 @@
 package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
@@ -26,7 +25,6 @@ public class MultiPassRenderTarget extends RenderTarget {
         // use the default vanilla target for those
         this.width = mainTarget.width;
         this.height = mainTarget.height;
-        this.filterMode = mainTarget.filterMode;
     }
 
     @Override
@@ -48,11 +46,6 @@ public class MultiPassRenderTarget extends RenderTarget {
     @Override
     public void createBuffers(int width, int height) {
         callOnTarget(r -> r.createBuffers(width, height));
-    }
-
-    @Override
-    public void setFilterMode(FilterMode filterMode) {
-        callOnTarget(r -> r.setFilterMode(filterMode));
     }
 
     @Override

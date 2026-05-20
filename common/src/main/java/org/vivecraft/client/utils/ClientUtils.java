@@ -4,15 +4,15 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -97,7 +97,7 @@ public class ClientUtils {
      * @return combined sky/block light
      */
     public static int getCombinedLightWithMin(BlockAndTintGetter lightReader, BlockPos pos, int minLight) {
-        int light = LevelRenderer.getLightColor(lightReader, pos);
+        int light = LevelRenderer.getLightCoords(lightReader, pos);
         int blockLight = (light >> 4) & 0xF;
 
         if (blockLight < minLight) {
@@ -148,7 +148,7 @@ public class ClientUtils {
         }
     }
 
-    public static Component getNameFromSoundEvent(ResourceLocation soundLocation) {
+    public static Component getNameFromSoundEvent(Identifier soundLocation) {
         String key = soundLocation.getPath();
         if (I18n.exists(key)) {
             return Component.translatable(key);
@@ -171,7 +171,7 @@ public class ClientUtils {
     public static void addChatMessage(Component message) {
         // can be null, when called very early
         if (MC.gui != null) {
-            MC.gui.getChat().addMessage(message);
+            MC.gui.getChat().addClientSystemMessage(message);
         }
         if (VRState.VR_RUNNING) {
             triggerChatHapticSound();
@@ -194,7 +194,7 @@ public class ClientUtils {
                 DH.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
             {
                 Vec3 controllerPos = DH.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse(DH.vrSettings.chatNotificationSound))
+                BuiltInRegistries.SOUND_EVENT.get(Identifier.parse(DH.vrSettings.chatNotificationSound))
                     .ifPresent(soundEvent -> {
                         if (MC.level != null) {
                             MC.level.playLocalSound(controllerPos.x(), controllerPos.y(), controllerPos.z(),

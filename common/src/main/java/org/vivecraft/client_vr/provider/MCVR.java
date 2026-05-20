@@ -32,7 +32,6 @@ import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.provider.control.*;
 import org.vivecraft.client_vr.provider.openxr.DeviceCompat;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -42,6 +41,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.osc_trackers.OSCTracker;
 import org.vivecraft.client_vr.utils.osc_trackers.OSCTrackerReceiver;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.data.ViveItems;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -506,7 +506,8 @@ public abstract class MCVR<T extends InputAction> {
     protected void changeHotbar(int dir) {
         if (this.mc.player != null &&
             // never let go, jack.
-            (!this.dh.climbTracker.isGrabbingLadder() || !ClimbTracker.isClaws(this.mc.player.getMainHandItem())))
+            (!this.dh.climbTracker.isGrabbingLadder() || !ViveItems.isClimbingClaws(this.mc.player.getMainHandItem())
+            ))
         {
             if (this.mc.screen == null) {
                 InputSimulator.scrollMouse(0.0D, dir * 4);
@@ -1004,10 +1005,8 @@ public abstract class MCVR<T extends InputAction> {
 
         // radial menu
         if (MOD.keyRadialMenu.consumeClick() && !gui) {
-            ControllerType controller = this.findActiveBindingControllerType(MOD.keyRadialMenu);
-            if (controller != null) {
-                RadialHandler.setOverlayShowing(!RadialHandler.isShowing(), controller);
-            }
+            RadialHandler.setOverlayShowing(!RadialHandler.isShowing(),
+                this.findActiveBindingControllerType(MOD.keyRadialMenu));
         }
 
         // close radial with ESC when not hold mode
@@ -1198,7 +1197,7 @@ public abstract class MCVR<T extends InputAction> {
         this.getInputAction(MOD.keyVRInteract).setEnabled(false);
         this.getInputAction(MOD.keyClimbeyGrab).setPriority(10);
         this.getInputAction(MOD.keyClimbeyGrab).setEnabled(false);
-        this.getInputAction(MOD.keyClimbeyJump).setEnabled(false);
+        this.getInputAction(MOD.keyClimbeyJump).setPriority(20).setEnabled(false);
         this.getInputAction(GuiHandler.KEY_KEYBOARD_CLICK).setPriority(50);
         this.getInputAction(GuiHandler.KEY_KEYBOARD_SHIFT).setPriority(50);
     }
@@ -1454,6 +1453,23 @@ public abstract class MCVR<T extends InputAction> {
         }
 
         return poses;
+    }
+
+    /**
+     * @return the x/y angular velocity of the main controller
+     */
+    public Vector2d getControllerVelocity() {
+        int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
+        Vector3f up = this.controllerUpHistory[mainController].averagePosition(0.1).normalize();
+        Vector3f cur = this.controllerForwardHistory[mainController].averagePosition(0.1).normalize();
+        Vector3f prev = this.controllerForwardHistory[mainController].averagePosition(0.3).normalize();
+
+        return new Vector2d(
+            // yaw
+            (Math.atan2(-prev.x, prev.z) - Math.atan2(-cur.x, cur.z)) * Mth.RAD_TO_DEG,
+            // pitch
+            (Math.asin(prev.y) - Math.asin(cur.y)) * (up.y < 0 ? -1 : 1) * Mth.RAD_TO_DEG
+        );
     }
 
     /**

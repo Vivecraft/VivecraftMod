@@ -15,7 +15,7 @@ public class CreateHelper {
     private static Field ControlsHandler_entityRef;
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("create");
+        return Xloader.INSTANCE.isModLoaded("create");
     }
 
     public static boolean blocksMovement() {

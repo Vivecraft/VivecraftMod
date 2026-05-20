@@ -7,12 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Pseudo
 @Mixin(targets = {
@@ -22,47 +20,41 @@ import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 })
 public class IrisShadowMatricesMixin {
 
-    @Unique
-    private static Vec3 vivecraft$FIRST_PASS_POS;
-
     // offset camera pos, to be in the equal grid as the first pass, but with correct offset
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 1, remap = false)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 1)
     private static float vivecraft$modifyOffsetX(
         float xOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
-        if (!RenderPassType.isVanilla() && !IrisHelper.SLOW_MODE) {
-            curPos.set(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
-            if (ClientDataHolderVR.getInstance().isFirstPass) {
-                vivecraft$FIRST_PASS_POS = curPos.get();
-            }
-            return (float) (vivecraft$FIRST_PASS_POS.x % shadowIntervalSize -
-                (vivecraft$FIRST_PASS_POS.x - curPos.get().x)
+        if (!RenderPassType.isVanilla() && !ShadersHelper.isSlowMode()) {
+            curPos.set(Minecraft.getInstance().gameRenderer.getMainCamera().position());
+            return (float) (ShadersHelper.SHADOW_CAMERA_POSITION.x % shadowIntervalSize -
+                (ShadersHelper.SHADOW_CAMERA_POSITION.x - curPos.get().x)
             );
         } else {
             return xOffset;
         }
     }
 
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 2, remap = false)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 2)
     private static float vivecraft$modifyOffsetY(
         float yOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
-        if (!RenderPassType.isVanilla() && !IrisHelper.SLOW_MODE) {
-            return (float) (vivecraft$FIRST_PASS_POS.y % shadowIntervalSize -
-                (vivecraft$FIRST_PASS_POS.y - curPos.get().y)
+        if (!RenderPassType.isVanilla() && !ShadersHelper.isSlowMode()) {
+            return (float) (ShadersHelper.SHADOW_CAMERA_POSITION.y % shadowIntervalSize -
+                (ShadersHelper.SHADOW_CAMERA_POSITION.y - curPos.get().y)
             );
         } else {
             return yOffset;
         }
     }
 
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 3, remap = false)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
     private static float vivecraft$modifyOffsetZ(
         float zOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
-        if (!RenderPassType.isVanilla() && !IrisHelper.SLOW_MODE) {
-            return (float) (vivecraft$FIRST_PASS_POS.z % shadowIntervalSize -
-                (vivecraft$FIRST_PASS_POS.z - curPos.get().z)
+        if (!RenderPassType.isVanilla() && !ShadersHelper.isSlowMode()) {
+            return (float) (ShadersHelper.SHADOW_CAMERA_POSITION.z % shadowIntervalSize -
+                (ShadersHelper.SHADOW_CAMERA_POSITION.z - curPos.get().z)
             );
         } else {
             return zOffset;

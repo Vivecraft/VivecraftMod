@@ -70,7 +70,7 @@ public class InputSimulator {
 
     public static void typeChar(char character, int modifiers) {
         Minecraft.getInstance().keyboardHandler.charTyped(Minecraft.getInstance().getWindow().handle(),
-            new CharacterEvent(character, modifiers));
+            new CharacterEvent(character));
     }
 
     public static void typeChar(char character) {
@@ -146,8 +146,8 @@ public class InputSimulator {
     }
 
     private static boolean controlDown() {
-        return MethodHolder.isKeyDown(InputQuirks.EDIT_SHORTCUT_KEY_LEFT) ||
-            MethodHolder.isKeyDown(InputQuirks.EDIT_SHORTCUT_KEY_RIGHT);
+        return MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT_CONTROL) ||
+            MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL);
     }
 
     private static boolean altDown() {

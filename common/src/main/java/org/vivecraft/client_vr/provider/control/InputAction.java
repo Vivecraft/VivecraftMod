@@ -197,13 +197,13 @@ public class InputAction {
 
         // need to simulate the modifier or the binding wouldn't be pressed
         if (key.getValue() != -1 &&
-            (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.hasKeyModifier(this.keyBinding)))
+            (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.INSTANCE.hasKeyModifier(this.keyBinding)))
         {
             if (key.getType() == InputConstants.Type.KEYSYM) {
-                if (Xplat.hasKeyModifier(this.keyBinding)) {
-                    InputSimulator.pressModifier(Xplat.getKeyModifierKey(this.keyBinding));
+                if (Xplat.INSTANCE.hasKeyModifier(this.keyBinding)) {
+                    InputSimulator.pressModifier(Xplat.INSTANCE.getKeyModifierKey(this.keyBinding));
                 }
-                InputSimulator.pressKey(key.getValue(), Xplat.getKeyModifier(this.keyBinding));
+                InputSimulator.pressKey(key.getValue(), Xplat.INSTANCE.getKeyModifier(this.keyBinding));
                 return;
             }
 
@@ -224,12 +224,12 @@ public class InputAction {
         InputConstants.Key key = this.keyBinding.key;
 
         if (key.getValue() != -1 &&
-            (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.hasKeyModifier(this.keyBinding)))
+            (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.INSTANCE.hasKeyModifier(this.keyBinding)))
         {
             if (key.getType() == InputConstants.Type.KEYSYM) {
                 InputSimulator.releaseKey(key.getValue());
-                if (Xplat.hasKeyModifier(this.keyBinding)) {
-                    InputSimulator.releaseModifier(Xplat.getKeyModifierKey(this.keyBinding));
+                if (Xplat.INSTANCE.hasKeyModifier(this.keyBinding)) {
+                    InputSimulator.releaseModifier(Xplat.INSTANCE.getKeyModifierKey(this.keyBinding));
                 }
                 return;
             }

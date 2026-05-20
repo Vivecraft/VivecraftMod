@@ -11,8 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +19,6 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.function.Supplier;
 
@@ -54,7 +52,7 @@ public class MultiPlayerGameModeVRMixin {
     }
 
     @Unique
-    private <T> T vivecraft$wrapWithLookOverride(Supplier<T> useCall, Player player, Supplier<Vec3> viewSupplier) {
+    private <T> T vivecraft$wrapWithLookOverride(Supplier<T> useCall, Player player, Supplier<Vector3fc> viewSupplier) {
         if (VRState.VR_RUNNING) {
             ClientNetworking.overrideLook(player, viewSupplier);
         }
@@ -65,23 +63,14 @@ public class MultiPlayerGameModeVRMixin {
         return result;
     }
 
-    @WrapOperation(method = "method_41929", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ServerboundUseItemPacket"))
+    @WrapOperation(method = "lambda$useItem$0", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ServerboundUseItemPacket"))
     private ServerboundUseItemPacket vivecraft$lookOverridePacket(
         InteractionHand hand, int sequence, float yRot, float xRot, Operation<ServerboundUseItemPacket> original)
     {
         if (VRState.VR_RUNNING) {
-            if (ClientNetworking.OVERRIDE_ACTIVE) {
-                yRot = ClientNetworking.OVERRIDDEN_YAW;
-                xRot = ClientNetworking.OVERRIDDEN_PITCH;
-            } else {
-                VRBodyPart bp = ClientNetworking.IS_LAST_BODY_PART_AIM ? ClientNetworking.getActiveBodyPart() :
-                    ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ?
-                        VRBodyPart.HEAD : VRBodyPart.MAIN_HAND;
-                Vector3f dir = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(bp)
-                    .getDirection();
-                yRot = (float) Math.toDegrees(Math.atan2(-dir.x, dir.z));
-                xRot = (float) Math.toDegrees(Math.asin(-dir.y / dir.length()));
-            }
+            Vector3fc dir = ClientNetworking.getActiveAimDir();
+            yRot = (float) Math.toDegrees(Math.atan2(-dir.x(), dir.z()));
+            xRot = (float) Math.toDegrees(Math.asin(-dir.y() / dir.length()));
         }
         return original.call(hand, sequence, yRot, xRot);
     }

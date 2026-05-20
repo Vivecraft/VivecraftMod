@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.framework;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
@@ -18,14 +18,14 @@ public class TooltipRenderer {
     /**
      * renders a big centered tooltip below a widget, or above if there isn't enough space
      *
-     * @param guiGraphics   GuiGraphics used to render stuff
+     * @param graphics      GuiGraphicsExtractor used to render stuff
      * @param tooltip       text to render
      * @param tooltipCenter center of where the tooltip should be
      * @param widgetY       upper edge of the widget
      * @param widgetHeight  height of the widget to get the lower edge
      */
     public static void renderTooltip(
-        GuiGraphics guiGraphics, String tooltip, int tooltipCenter, int widgetY, int widgetHeight)
+        GuiGraphicsExtractor graphics, String tooltip, int tooltipCenter, int widgetY, int widgetHeight)
     {
         if (!tooltip.isEmpty()) {
             // add format reset at line ends
@@ -41,11 +41,11 @@ public class TooltipRenderer {
 
             // if tooltip is not too low, draw below button, else above
             if (widgetY + widgetHeight + formattedText.size() * (mc.font.lineHeight + 1) + 14 < mc.screen.height) {
-                guiGraphics.renderTooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
+                graphics.tooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
                         .map(ClientTooltipComponent::create).toList(), tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
                     widgetY + widgetHeight + 14, DefaultTooltipPositioner.INSTANCE, null);
             } else {
-                guiGraphics.renderTooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
+                graphics.tooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
                         .map(ClientTooltipComponent::create).toList(), tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
                     widgetY - formattedText.size() * (mc.font.lineHeight + 1) + 9, DefaultTooltipPositioner.INSTANCE,
                     null);

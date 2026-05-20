@@ -1,14 +1,14 @@
 package org.vivecraft.client_vr.gameplay;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import org.vivecraft.client.utils.ClientUtils;
 
 public class VRMovementStyle {
 
-    private static final ResourceLocation BEAM_PNG = ResourceLocation.withDefaultNamespace(
+    private static final Identifier BEAM_PNG = Identifier.withDefaultNamespace(
         "textures/entity/endercrystal/endercrystal_beam.png");
 
     public String name;
@@ -26,7 +26,7 @@ public class VRMovementStyle {
     public float beamSpiralRadius;
     public int beamVStrips;
     public float textureScrollSpeed;
-    public ResourceLocation texture;
+    public Identifier texture;
     public SoundEvent startTeleportingSound;
     public float startTeleportingSoundVolume;
     public SoundEvent endTeleportingSound;

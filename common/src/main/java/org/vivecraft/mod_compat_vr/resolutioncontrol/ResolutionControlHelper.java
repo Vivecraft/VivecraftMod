@@ -6,7 +6,7 @@ import org.vivecraft.Xloader;
 public class ResolutionControlHelper {
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("resolutioncontrol");
+        return Xloader.INSTANCE.isModLoaded("resolutioncontrol");
     }
 
     /**

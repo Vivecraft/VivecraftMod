@@ -13,7 +13,7 @@ public class ClientEventsMixin {
     /**
      * menuworld fix
      */
-    @Inject(method = "onGetFluidRenderType", at = @At("HEAD"), remap = false, cancellable = true)
+    @Inject(method = "onGetFluidRenderType", at = @At("HEAD"), cancellable = true)
     private void vivecraft$fixNoPlayer(CallbackInfo ci) {
         if (Minecraft.getInstance().player == null) {
             ci.cancel();

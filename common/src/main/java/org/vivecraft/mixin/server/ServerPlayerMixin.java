@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.server;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
@@ -21,12 +22,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -45,6 +43,7 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.common.network.packet.s2c.DamageDirectionPayloadS2C;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
+import org.vivecraft.data.ViveItems;
 import org.vivecraft.mixin.world.entity.PlayerMixin;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
@@ -58,7 +57,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
 
     @Shadow
     @Final
-    public MinecraftServer server;
+    private MinecraftServer server;
 
     @Shadow
     public ServerGamePacketListenerImpl connection;
@@ -76,11 +75,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         {
             ItemStack easterEggItem;
             if (this.random.nextInt(2) == 1) {
-                easterEggItem = new ItemStack(Items.PUMPKIN_PIE);
-                easterEggItem.set(DataComponents.CUSTOM_NAME, Component.literal("EAT ME"));
+                easterEggItem = ViveItems.newGrowPie();
             } else {
-                easterEggItem = PotionContents.createItemStack(Items.POTION, Potions.WATER);
-                easterEggItem.set(DataComponents.CUSTOM_NAME, Component.literal("DRINK ME"));
+                easterEggItem = ViveItems.newShrinkPotion();
             }
 
             if (this.getInventory().add(easterEggItem)) {
@@ -92,10 +89,14 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
     @Inject(method = "doTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER))
     private void vivecraft$overridePose(CallbackInfo ci) {
         ServerVRPlayers.overridePose((ServerPlayer) (Object) this);
+        ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
+        if (serverVivePlayer != null) {
+            serverVivePlayer.tick();
+        }
     }
 
     /**
-     * inject into {@link Player#sweepAttack}
+     * inject into {@link Player#doSweepAttack}
      */
     @Override
     protected int vivecraft$modifySweepParticleSpawnPos(
@@ -129,7 +130,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         // feet make more damage with boots
         if (ServerConfig.DUAL_WIELDING.get() && ServerConfig.BOOTS_ARMOR_DAMAGE.get() > 0) {
             ServerVivePlayer vivePlayer = vivecraft$getVivePlayer();
-            if (vivePlayer.isVR() && vivePlayer.activeBodyPart.isFoot() &&
+            if (vivePlayer != null && vivePlayer.isVR() && vivePlayer.getActiveItemBodyPart().isFoot() &&
                 !this.getItemBySlot(EquipmentSlot.FEET).isEmpty())
             {
                 float addedDamage = 0F;
@@ -172,7 +173,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             // if the hit is from an entity, move it back in the movement direction, to get a better source direction
             if (damageSource.getDirectEntity() instanceof Entity entity && dmgPos == entity.position()) {
                 isProjectile = entity instanceof Projectile;
-                dmgPos = entity.getBoundingBox().getCenter().subtract(entity.getDeltaMovement().normalize());
+                Vec3 travelDir = entity.getDeltaMovement().normalize();
+                dmgPos = entity.getBoundingBox().getCenter();
+                if (isProjectile) {
+                    // move the projectile check position half the bounding box size + 1.5m away from the player center
+                    float scale = this.getBbWidth() * 0.5F + 1.5F;
+                    float dist = (float) dmgPos.subtract(this.getBoundingBox().getCenter()).dot(travelDir);
+                    dmgPos = dmgPos.add(travelDir.scale(-dist - scale));
+                } else {
+                    dmgPos = dmgPos.subtract(travelDir);
+                }
             }
             // check if any hand is holding a shield
             for (int i = 0; i < 2; i++) {
@@ -219,7 +229,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
      * inject into {@link LivingEntity#hurtServer}
      */
     @Override
-    protected ItemStack vivecraft$roomscaleShieldActualBlockingItem(ItemStack original) {
+    protected ItemStack vivecraft$roomscaleShieldActualBlockingItemHurt(ItemStack original) {
         if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldItem != null) {
             return this.vivecraft$roomscaleShieldItem;
         } else {
@@ -227,14 +237,23 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         }
     }
 
-    @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$noAttackWhileBlocking(Entity target, CallbackInfo ci) {
-        ServerVivePlayer vivePlayer = vivecraft$getVivePlayer();
-        if (!ServerConfig.ALLOW_ATTACKS_WHILE_BLOCKING.get() && vivePlayer != null && vivePlayer.isVR() &&
-            this.isBlocking())
-        {
-            ci.cancel();
+    /**
+     * inject into {@link LivingEntity#getItemBlockingWith}
+     */
+    @Override
+    protected void vivecraft$roomscaleShieldActualBlockingItem(CallbackInfoReturnable<ItemStack> cir) {
+        if (ServerConfig.ALLOW_ROOMSCALE_SHIELD_BLOCKING.get() && this.vivecraft$roomscaleShieldItem != null) {
+            cir.setReturnValue(this.vivecraft$roomscaleShieldItem);
         }
+    }
+
+    @WrapMethod(method = "hurtServer")
+    protected boolean vivecraft$roomscaleShieldBlockingItemReset(
+        ServerLevel level, DamageSource damageSource, float amount, Operation<Boolean> original)
+    {
+        boolean hurt = original.call(level, damageSource, amount);
+        this.vivecraft$roomscaleShieldItem = null;
+        return hurt;
     }
 
     @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
@@ -340,7 +359,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         if (cir.getReturnValueZ()) {
             ServerVivePlayer vivePlayer = this.vivecraft$getVivePlayer();
             if (vivePlayer != null && vivePlayer.isVR() && vivePlayer.wantsDamageDirection) {
-                this.connection.send(Xplat.getS2CPacket(
+                this.connection.send(Xplat.INSTANCE.getS2CPacket(
                     new DamageDirectionPayloadS2C(Utils.getDirFromDamageSource(damageSource, this))));
             }
         }

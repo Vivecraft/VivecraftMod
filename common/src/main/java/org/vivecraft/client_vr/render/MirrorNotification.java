@@ -2,9 +2,10 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.state.WindowRenderState;
 import org.vivecraft.client.utils.TextUtils;
-import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
 
 import java.util.ArrayList;
@@ -43,11 +44,16 @@ public class MirrorNotification {
             int screenX = MC.mainRenderTarget.width;
 
             // override the gui scale, to be in absolute size
-            int backupGuiScale = GuiHandler.GUI_SCALE_FACTOR;
-            GuiHandler.GUI_SCALE_FACTOR = 1;
+            WindowRenderState windowState = MC.gameRenderer.getGameRenderState().windowRenderState;
+            int backupGuiScale = windowState.guiScale;
+            windowState.guiScale = 1;
+            int backupWidth = windowState.width;
+            windowState.width = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth();
+            int backupHeight = windowState.height;
+            windowState.height = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight();
 
-            GuiGraphics guiGraphics = GuiRenderHelper.getGuiGraphics();
-            guiGraphics.pose().scale(3, 3);
+            GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
+            graphics.pose().scale(3, 3);
 
             if (MIRROR_NOTIFY_CLEAR) {
                 RenderSystem.getDevice().createCommandEncoder()
@@ -65,14 +71,16 @@ public class MirrorNotification {
             final int COLUMN_GAP = 12;
 
             for (String line : wrapped) {
-                guiGraphics.drawString(MC.font, line, 1, column, 0xFFFFFFFF);
+                graphics.text(MC.font, line, 1, column, 0xFFFFFFFF);
                 column += COLUMN_GAP;
             }
 
             GuiRenderHelper.finish();
 
             // reset gui scale
-            GuiHandler.GUI_SCALE_FACTOR = backupGuiScale;
+            windowState.guiScale = backupGuiScale;
+            windowState.width = backupWidth;
+            windowState.height = backupHeight;
         }
     }
 }

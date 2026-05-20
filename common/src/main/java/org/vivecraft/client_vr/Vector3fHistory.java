@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -124,14 +124,13 @@ public class Vector3fHistory {
                 break;
             }
 
-            if (last == null) {
-                last = current;
-            } else {
+            if (last != null) {
                 count++;
                 float timeDelta = 0.001F * (last.ts - current.ts);
                 float positionDelta = last.vec.distance(current.vec);
                 speedTotal += positionDelta / timeDelta;
             }
+            last = current;
         }
 
         return count == 0 ? speedTotal : speedTotal / (float) count;

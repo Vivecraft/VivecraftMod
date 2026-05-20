@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.vivecraft.client.gui.framework.screens.TwoHandedScreen;
 import org.vivecraft.client.gui.framework.widgets.ColoredKeyButton;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
@@ -56,9 +56,9 @@ public class GuiKeyboard extends TwoHandedScreen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, "Keyboard", this.width / 2, 2, 0xFFFFFFFF);
-        super.render(guiGraphics, 0, 0, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        this.extractBackground(graphics, mouseX, mouseY, partialTick);
+        graphics.centeredText(this.font, "Keyboard", this.width / 2, 2, 0xFFFFFFFF);
+        super.extractRenderState(graphics, 0, 0, partialTick);
     }
 }

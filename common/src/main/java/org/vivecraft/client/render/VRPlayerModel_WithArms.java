@@ -384,16 +384,6 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
     }
 
     @Override
-    public void setAllVisible(boolean visible) {
-        super.setAllVisible(visible);
-
-        this.leftHand.visible = visible;
-        this.rightHand.visible = visible;
-        this.leftHandSleeve.visible = visible;
-        this.rightHandSleeve.visible = visible;
-    }
-
-    @Override
     public ModelPart getLeftHand() {
         return this.leftHand;
     }
@@ -424,7 +414,7 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
     }
 
     @Override
-    protected ModelPart getArm(HumanoidArm side) {
+    public ModelPart getArm(HumanoidArm side) {
         return side == HumanoidArm.RIGHT ? this.rightHand : this.leftHand;
     }
 

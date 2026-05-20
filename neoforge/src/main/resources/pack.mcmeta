@@ -1,7 +1,7 @@
 {
   "pack": {
     "description": "The VR mod for any loader!",
-    "min_format": [88, 0],
-    "max_format": [88, 0]
+    "min_format": [94, 1],
+    "max_format": [94, 1]
   }
 }

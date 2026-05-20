@@ -21,7 +21,7 @@ public abstract class AccessoriesRenderLayerVRMixin<T extends LivingEntity, S ex
         super(renderer);
     }
 
-    @ModifyExpressionValue(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;FF)V", at = @At(value = "INVOKE", target = "Lio/wispforest/accessories/api/client/AccessoryRenderer;shouldRender(Z)Z", remap = false), remap = true)
+    @ModifyExpressionValue(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;FF)V", at = @At(value = "INVOKE", target = "Lio/wispforest/accessories/api/client/AccessoryRenderer;shouldRender(Z)Z"))
     private boolean vivecraft$noHeadInFirstPerson(
         boolean original, @Local(argsOnly = true) LivingEntityRenderState livingEntityRenderState,
         @Local AccessoriesContainer container)

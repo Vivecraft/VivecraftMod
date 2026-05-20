@@ -1,11 +1,12 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(ItemRenderer.class)
+@Mixin(ItemFeatureRenderer.class)
 public class ItemRendererVRMixin {
 
+    // TODO 26.1 might be possible now?
 // hand item fade
 // needs custom item renderer, since the regular one doesn't accept a non 1.0 alpha
 /*

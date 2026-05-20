@@ -22,7 +22,7 @@ public class MCAHelper {
     private static Method VillagerLike_getHorizontalScaleFactor;
 
     public static boolean isLoaded() {
-        return Xloader.isModLoaded("mca");
+        return Xloader.INSTANCE.isModLoaded("mca");
     }
 
     public static void undoPlayerScale(LivingEntity player, Vector3f pos) {
@@ -61,14 +61,15 @@ public class MCAHelper {
         } else {
             try {
                 MCAClient_playerData = ClassUtils.getClassWithAlternative(
-                        Xloader.getModloader().name + ".net.mca.MCAClient", "net.conczin.mca.MCAClient")
+                        Xloader.INSTANCE.getModloader().name + ".net.mca.MCAClient", "net.conczin.mca.MCAClient")
                     .getField("playerData");
 
                 Class<?> VillagerLike = ClassUtils.getClassWithAlternative(
-                    Xloader.getModloader().name + ".net.mca.entity.VillagerLike",
+                    Xloader.INSTANCE.getModloader().name + ".net.mca.entity.VillagerLike",
                     "net.conczin.mca.entity.VillagerLike");
 
-                VillagerLike_getRawScaleFactor = VillagerLike.getMethod("getRawScaleFactor");
+                VillagerLike_getRawScaleFactor = ClassUtils.getMethodWithAlternative(VillagerLike,
+                    "getRawScaleFactor", "getRawVerticalScaleFactor");
                 VillagerLike_getHorizontalScaleFactor = VillagerLike.getMethod("getHorizontalScaleFactor");
             } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException e) {
                 INIT_FAILED = true;

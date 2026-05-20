@@ -2,8 +2,9 @@ package org.vivecraft.client_vr.gameplay.interact_modules;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
@@ -15,7 +16,7 @@ import org.vivecraft.common.utils.MathUtils;
 
 public class EntityInteractionModule implements InteractModule {
 
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("vivecraft", "entity_interact");
+    private static final Identifier ID = Identifier.fromNamespaceAndPath("vivecraft", "entity_interact");
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -28,7 +29,7 @@ public class EntityInteractionModule implements InteractModule {
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 
@@ -59,8 +60,7 @@ public class EntityInteractionModule implements InteractModule {
 
     @Override
     public boolean onPress(LocalPlayer player, InteractionHand hand) {
-        return this.mc.gameMode.interactAt(player, this.inEntityHit[hand.ordinal()].getEntity(),
-            this.inEntityHit[hand.ordinal()], hand).consumesAction() ||
-            this.mc.gameMode.interact(player, this.inEntityHit[hand.ordinal()].getEntity(), hand).consumesAction();
+        return this.mc.gameMode.interact(player, this.inEntityHit[hand.ordinal()].getEntity(),
+            this.inEntityHit[hand.ordinal()], hand) instanceof InteractionResult.Success;
     }
 }

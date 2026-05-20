@@ -8,17 +8,20 @@ import org.vivecraft.Xevents;
 
 public class XeventsImpl implements Xevents {
 
-    public static boolean renderBlockOverlay(
+    @Override
+    public boolean renderBlockOverlay(
         Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos)
     {
         return false;
     }
 
-    public static boolean renderWaterOverlay(Player player, PoseStack poseStack) {
+    @Override
+    public boolean renderWaterOverlay(Player player, PoseStack poseStack) {
         return false;
     }
 
-    public static boolean renderFireOverlay(Player player, PoseStack poseStack) {
+    @Override
+    public boolean renderFireOverlay(Player player, PoseStack poseStack) {
         return false;
     }
 }

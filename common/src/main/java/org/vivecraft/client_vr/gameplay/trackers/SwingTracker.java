@@ -3,9 +3,11 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
@@ -13,7 +15,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.AttackRange;
+import net.minecraft.world.item.component.PiercingWeapon;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
@@ -43,15 +50,13 @@ import org.vivecraft.data.ViveBlockTags;
 import org.vivecraft.data.ViveItemTags;
 import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-public class SwingTracker implements DebugRenderTracker {
+public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
     private static final int[] CONTROLLER_AND_FEET = new int[]{MCVR.MAIN_CONTROLLER, MCVR.OFFHAND_CONTROLLER, MCVR.RIGHT_FOOT_TRACKER, MCVR.LEFT_FOOT_TRACKER};
     private static final VRBodyPart[] BODYPARTS = new VRBodyPart[]{VRBodyPart.MAIN_HAND, VRBodyPart.OFF_HAND, VRBodyPart.RIGHT_FOOT, VRBodyPart.LEFT_FOOT};
-    private static final float SPEED_THRESH = 3.0F;
+    // at a 0.3m offset on index controllers a speed of 2.5m/s is an intended smack, 7 m/s is about as high as your arm can go.
+    private static final float SPEED_THRESH = 2.5F;
 
     public int disableSwing = 3;
 
@@ -67,13 +72,18 @@ public class SwingTracker implements DebugRenderTracker {
     private final Vec3[] attackingPoint = new Vec3[4];
     private final Vec3[] weaponTip = new Vec3[4];
     private final Vector3fHistory[] tipHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
+    private final Vector3fHistory[] tipDirHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
+    private final Vector3fHistory[] baseHistory = new Vector3fHistory[]{new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory(), new Vector3fHistory()};
     private final boolean[] canAct = new boolean[4];
+
+    // brushes need to be held 5 ticks, to trigger the server side
+    private final int[] useHoldTicks = new int[4];
 
     // debug render stuff
     private final AABB[] lastAttackAABB = new AABB[4];
     private final Vec3[] lastBlockHit = new Vec3[4];
     private final int[] lastMiningPointHit = new int[4];
-    private final List<Pair<Vec3, Vector3fc>>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
+    private final List<Pair<Vec3, Integer>>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -104,8 +114,8 @@ public class SwingTracker implements DebugRenderTracker {
             return false;
         } else if (this.dh.vrSettings.seated) {
             return false;
-        } else if (this.dh.vrSettings.getVrFreeMoveMode(false, this.dh.vrPlayer.vrdata_world_pre.fbtMode) ==
-            VRSettings.FreeMove.RUN_IN_PLACE && player.zza > 0.0F)
+        } else if (this.dh.vrSettings.getVrFreeMoveMode(false) == VRSettings.FreeMove.RUN_IN_PLACE &&
+            player.zza > 0.0F)
         {
             return false; // don't hit things while RIPing.
         } else if (player.isBlocking() && !ClientNetworking.SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING) {
@@ -160,7 +170,13 @@ public class SwingTracker implements DebugRenderTracker {
             this.attackingPoint[i] = null;
             this.weaponTip[i] = null;
             this.miningPoints[i] = null;
+            this.useHoldTicks[i] = 0;
         }
+    }
+
+    @Override
+    public boolean itemInUse(LocalPlayer player) {
+        return Arrays.stream(this.useHoldTicks).anyMatch(useHoldTick -> useHoldTick > 0);
     }
 
     @Override
@@ -180,6 +196,9 @@ public class SwingTracker implements DebugRenderTracker {
         }
 
         for (int i = 0; i < trackers; i++) {
+            if (this.useHoldTicks[i] > 0) {
+                this.useHoldTicks[i]--;
+            }
             int c = CONTROLLER_AND_FEET[i];
             boolean isHand = i < 2;
             if (!isHand || !this.dh.climbTracker.isGrabbingLadder(c)) {
@@ -190,6 +209,7 @@ public class SwingTracker implements DebugRenderTracker {
                 Item item = itemstack.getItem();
                 boolean isTool = false;
                 boolean isSword = false;
+                boolean isLance = false;
 
                 if (this.dh.vrSettings.onlySwordCollision &&
                     !(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)))
@@ -198,27 +218,31 @@ public class SwingTracker implements DebugRenderTracker {
                     continue;
                 }
 
-                if (!(itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS)) &&
-                    !(item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS)))
+                if (itemstack.is(ItemTags.SWORDS) || itemstack.is(ViveItemTags.VIVECRAFT_SWORDS) ||
+                    item instanceof TridentItem || itemstack.is(ViveItemTags.VIVECRAFT_SPEARS))
                 {
-                    if (isTool(itemstack)) {
-                        isTool = true;
-                    }
-                } else {
                     isSword = true;
+                    isTool = true;
+                } else if (itemstack.is(ItemTags.SPEARS) || itemstack.is(ViveItemTags.VIVECRAFT_LANCES)) {
+                    isLance = true;
+                    isTool = true;
+                } else if (isTool(itemstack)) {
                     isTool = true;
                 }
 
                 float weaponLength = 0.0F;
                 float entityReachAdd = 0.3F;
 
+                AttackRange range = itemstack.get(DataComponents.ATTACK_RANGE);
+
                 if (isHand) {
-                    double playerEntityReach = player.entityInteractionRange();
+                    double playerEntityReach =
+                        range != null ? range.effectiveMaxRange(player) : player.entityInteractionRange();
 
                     // subtract arm length and clamp it to 6 meters
                     playerEntityReach = Math.min(playerEntityReach, 6.0) - 0.5;
 
-                    if (isSword) {
+                    if (isSword || isLance) {
                         weaponLength = 0.6F;
                         // in default situations a total reach of 2.5
                         entityReachAdd = (float) playerEntityReach - weaponLength;
@@ -231,6 +255,7 @@ public class SwingTracker implements DebugRenderTracker {
                         // in default situations a total reach of 0.4
                         entityReachAdd = (float) playerEntityReach * 0.16F - weaponLength;
                     }
+                    entityReachAdd += range != null ? range.hitboxMargin() : 0.0F;
                 }
 
                 weaponLength *= this.dh.vrPlayer.vrdata_world_pre.worldScale;
@@ -242,14 +267,36 @@ public class SwingTracker implements DebugRenderTracker {
                 this.miningPoint[i] = handPos.add(weaponEnd.x, weaponEnd.y, weaponEnd.z);
 
                 // do speed calc in actual room coords
-                Vector3f tip = this.dh.vrPlayer.vrdata_room_pre.getDevice(c).getPositionF()
-                    .add(this.dh.vrPlayer.vrdata_room_pre.getHand(c).getCustomVector(MathUtils.BACK).mul(0.3F));
+                Vector3f base = this.dh.vrPlayer.vrdata_room_pre.getDevice(c).getPositionF();
+                Vector3f tip = this.dh.vrPlayer.vrdata_room_pre.getHand(c).getCustomVector(MathUtils.BACK).mul(0.3F)
+                    .add(base);
+                this.baseHistory[i].add(base);
                 this.tipHistory[i].add(tip);
+                this.tipDirHistory[i].add(isTool ? this.dh.vrPlayer.vrdata_room_pre.getHand(c).getDirection() :
+                    this.dh.vrPlayer.vrdata_room_pre.getDevice(c).getDirection());
 
-                // at a 0.3m offset on index controllers a speed of 3m/s is an intended smack, 7 m/s is about as high as your arm can go.
                 float speed = this.tipHistory[i].averageSpeed(0.33D);
+
                 boolean inAnEntity = false;
-                this.canAct[i] = speed > speedTreshhold && !this.lastWeaponSolid[i];
+                this.canAct[i] =
+                    speed > speedTreshhold && !this.lastWeaponSolid[i] && !player.cannotAttackWithItem(itemstack, 0);
+
+                boolean canLunge = false;
+                Vector3f deviceDirection = this.tipDirHistory[i].averagePosition(0.33D).normalize();
+                // roomscale spear lunge
+                if (this.canAct[i] && isLance && this.dh.vrSettings.roomscaleSpearLunge) {
+                    // this is on purpose not checking averageSpeed, to get the linear speed
+                    Vector3f baseTravelDirection = this.baseHistory[i].netMovement(0.33D);
+                    // divide by time to make it m/s
+                    baseTravelDirection.div(0.33F);
+                    // speed in the pointing direction
+                    float dotSpeed = Math.max(baseTravelDirection.dot(deviceDirection), 0F);
+                    // check if the item has a lunge that could be triggered
+                    canLunge = dotSpeed > speedTreshhold && isLance && player.hasEnoughFoodToDoExhaustiveManoeuvres() &&
+                        EnchantmentHelper.getItemEnchantmentLevel(
+                            player.level().registryAccess().getOrThrow(Enchantments.LUNGE), itemstack) > 0 &&
+                        !player.isPassenger() && !player.isFallFlying() && !player.isInWater();
+                }
 
                 // Check EntityCollisions first
                 boolean entityAct = this.canAct[i];
@@ -274,8 +321,16 @@ public class SwingTracker implements DebugRenderTracker {
                 // no hitting through blocks
                 this.weaponTip[i] = this.constrain(handPos, this.weaponTip[i]);
 
-                AABB weaponBB = new AABB(handPos, this.attackingPoint[i]);
-                AABB weaponTipBB = new AABB(handPos, this.weaponTip[i]);
+                // -0.5 to subtract arm length
+                float weaponStartOffset = range != null ?
+                    Math.max(0.0F, range.effectiveMinRange(player) - range.hitboxMargin() - 0.5F) :
+                    0.0F;
+                Vector3fc weaponEntityStart = handDirection.mul(weaponStartOffset, new Vector3f());
+                Vec3 entityStartPos = this.constrain(handPos,
+                    handPos.add(weaponEntityStart.x(), weaponEntityStart.y(), weaponEntityStart.z()));
+
+                AABB weaponBB = new AABB(entityStartPos, this.attackingPoint[i]);
+                AABB weaponTipBB = new AABB(entityStartPos, this.weaponTip[i]);
 
                 // make sure the last attack point is also in, for better collision on fast swings
                 if (lastAttackPoint != null) {
@@ -296,6 +351,11 @@ public class SwingTracker implements DebugRenderTracker {
                     mobs.addAll(players);
                 }
 
+                // piercing attacks
+                PiercingWeapon piercingWeapon = itemstack.get(DataComponents.PIERCING_WEAPON);
+                Vec3 averageTargetPosition = Vec3.ZERO;
+                int targetCount = 0;
+
                 for (Entity entity : mobs) {
                     if (entity.isPickable() &&
                         entity != this.mc.getCameraEntity().getVehicle() && // don't hit ridden entity
@@ -303,8 +363,10 @@ public class SwingTracker implements DebugRenderTracker {
                     {
                         if (entityAct) {
                             // this.mc.physicalGuiManager.preClickAction();
-
-                            if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
+                            if (piercingWeapon != null) {
+                                averageTargetPosition = averageTargetPosition.add(entity.getBoundingBox().getCenter());
+                                targetCount++;
+                            } else if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
                                 ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
                                 // only attack if epic fight didn't trigger
                                 this.mc.gameMode.attack(player, entity);
@@ -324,6 +386,18 @@ public class SwingTracker implements DebugRenderTracker {
                 } else {
                     // since we couldn't act, we also didn't hit anything
                     this.lastHitEntities[i] = Collections.emptyList();
+                }
+
+                if (piercingWeapon != null && this.canAct[i] && (inAnEntity || canLunge)) {
+                    // piercing attacks have their own logic
+                    ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
+                    ClientNetworking.overrideAimDir(inAnEntity ?
+                        MathUtils.subtractToVector3f(averageTargetPosition.scale(1F / targetCount), handPos)
+                            .normalize() :
+                        deviceDirection.rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians, new Vector3f()));
+                    this.mc.gameMode.piercingAttack(piercingWeapon);
+                    ClientNetworking.resetAim(0);
+                    continue;
                 }
 
                 // can't hit anything else if we hit an entity
@@ -410,6 +484,7 @@ public class SwingTracker implements DebugRenderTracker {
                         // don't break climbable blocks
                         // if this block shouldn't be breakable with roomscale mining
                         boolean protectedBlock = this.dh.vrSettings.realisticClimbEnabled &&
+                            (!player.isShiftKeyDown() || !this.dh.vrSettings.allowBreakingClimbable) &&
                             (blockstate.getBlock() instanceof LadderBlock ||
                                 blockstate.getBlock() instanceof VineBlock ||
                                 blockstate.is(ViveBlockTags.VIVECRAFT_CLIMBABLE)
@@ -475,16 +550,35 @@ public class SwingTracker implements DebugRenderTracker {
                         }
                     }
                     // roomscale brushes
-                    else if (isHand && (item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/)) {
-                        ((BrushItem) item).spawnDustParticles(player.level(), blockHit, blockstate,
-                            player.getViewVector(0.0F),
-                            c == 0 ? player.getMainArm() : player.getMainArm().getOpposite());
+                    else if (isHand && (item instanceof BrushItem || itemstack.is(ViveItemTags.VIVECRAFT_BRUSHES))) {
+                        // local visuals/sound
+                        if (item instanceof BrushItem brush) {
+                            brush.spawnDustParticles(player.level(), blockHit, blockstate,
+                                player.getViewVector(0.0F),
+                                c == 0 ? player.getMainArm() : player.getMainArm().getOpposite());
+                        }
                         player.level().playSound(player, blockHit.getBlockPos(),
                             blockstate.getBlock() instanceof BrushableBlock ?
                                 ((BrushableBlock) blockstate.getBlock()).getBrushSound() :
                                 SoundEvents.BRUSH_GENERIC, SoundSource.BLOCKS);
+
+                        // server logic
+                        // need to look at it for longer, this will modify the player look direction
+                        // needed for vanilla and spigot
+                        ClientDataHolderVR.getInstance().vrPlayer.setLookAtPos(blockHit.getLocation(), 5);
+
+                        ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
+                        ClientNetworking.overrideAimDir(MathUtils.subtractToVector3f(blockHit.getLocation(),
+                            ClientNetworking.SERVER_WANTS_DATA ? handPos :
+                                Minecraft.getInstance().player.getEyePosition()));
+                        // for modded servers, make sure the aim stays consistent until it triggers
+                        ClientNetworking.overrideAimPos(handPos);
+
                         this.mc.gameMode.useItemOn(player,
                             c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit);
+
+                        ClientNetworking.resetAim(5);
+                        this.useHoldTicks[i] = 5;
                     }
                     // roomscale noteblocks
                     else if (blockstate.getBlock() instanceof NoteBlock ||
@@ -614,16 +708,14 @@ public class SwingTracker implements DebugRenderTracker {
      * @param itemStack held item
      * @return the transparency for held items to indicate attack power or sneaking.
      */
-    public static float getItemFade(LocalPlayer player, ItemStack itemStack) {
+    public static float getItemFade(LocalPlayer player, ItemStack itemStack, boolean mainHand) {
         float fade = player.getAttackStrengthScale(0.0F) * 0.75F + 0.25F;
 
         if (player.isShiftKeyDown()) {
             fade = 0.75F;
         }
 
-        if (ClientDataHolderVR.getInstance().swingTracker.lastWeaponSolid[ClientDataHolderVR.getInstance().isMainHand ?
-            0 : 1])
-        {
+        if (ClientDataHolderVR.getInstance().swingTracker.lastWeaponSolid[mainHand ? 0 : 1]) {
             fade -= 0.25F;
         }
 
@@ -663,9 +755,9 @@ public class SwingTracker implements DebugRenderTracker {
         Vec3 cam = camWorld.add(this.dh.vrPlayer.vrdata_world_pre.origin).subtract(world.origin);
 
         for (int i = 0; i < trackers; i++) {
-            Vector3fc failColor =
+            int failColor =
                 this.tipHistory[i].averageSpeed(0.33D) > SPEED_THRESH * (this.mc.player.isCreative() ? 1.5F : 1F) ?
-                    MathUtils.ORANGE : MathUtils.RED;
+                    MathUtils.ORANGE_INT : MathUtils.RED_INT;
             if (this.miningPoints[i] != null || this.miningPoint[i] != null) {
                 if (this.previousMiningPoints[i].isEmpty() ||
                     !this.previousMiningPoints[i].getLast().getLeft().equals(this.miningPoint[i]))
@@ -674,55 +766,53 @@ public class SwingTracker implements DebugRenderTracker {
                     if (this.miningPoints[i] != null && this.canAct[i]) {
                         // skip first, since that is the last tick point
                         for (int p = 1; p < this.miningPoints[i].size(); p++) {
-                            Vector3fc color = p <= this.lastMiningPointHit[i] ? MathUtils.GREEN : MathUtils.LIGHT_GRAY;
+                            int color =
+                                p <= this.lastMiningPointHit[i] ? MathUtils.GREEN_INT : MathUtils.LIGHT_GRAY_INT;
                             if (p < this.miningPoints[i].size() - 1) {
-                                color = color.mul(0.5F, new Vector3f());
+                                color = ARGB.scaleRGB(color, 0.5F);
                             }
                             this.previousMiningPoints[i].addLast(
                                 Pair.of(this.miningPoints[i].get(p), color));
                         }
                     } else {
                         this.previousMiningPoints[i].addLast(
-                            Pair.of(this.miningPoint[i], this.canAct[i] ? MathUtils.GREEN : failColor));
+                            Pair.of(this.miningPoint[i], this.canAct[i] ? MathUtils.GREEN_INT : failColor));
                     }
                     while (this.previousMiningPoints[i].size() > 20) {
                         this.previousMiningPoints[i].removeFirst();
                     }
                 }
 
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.miningPoint[i], cam), 0.025F,
-                    this.canAct[i] ? MathUtils.GREEN : failColor);
+                DebugRenderHelper.renderCube(this.miningPoint[i], 0.025F,
+                    this.canAct[i] ? MathUtils.GREEN_INT : failColor);
                 if (!this.previousMiningPoints[i].isEmpty()) {
-                    Pair<Vec3, Vector3fc> prev = null;
-                    for (Pair<Vec3, Vector3fc> p : this.previousMiningPoints[i]) {
-                        DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(p.getLeft(), cam), 0.0125F,
+                    Pair<Vec3, Integer> prev = null;
+                    for (Pair<Vec3, Integer> p : this.previousMiningPoints[i]) {
+                        DebugRenderHelper.renderCube(p.getLeft(), 0.0125F,
                             p.getRight());
                         if (prev != null) {
-                            DebugRenderHelper.renderLine(p.getRight(),
-                                MathUtils.subtractToVector3f(prev.getLeft(), cam),
-                                MathUtils.subtractToVector3f(p.getLeft(), cam));
+                            DebugRenderHelper.renderLine(p.getRight(), prev.getLeft(), p.getLeft());
                         }
                         prev = p;
                     }
                 }
             }
             if (this.lastBlockHit[i] != null) {
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.lastBlockHit[i], camWorld), 0.025F,
-                    MathUtils.GREEN);
+                DebugRenderHelper.renderCube(this.lastBlockHit[i], 0.025F, MathUtils.GREEN_INT);
             }
 
             if (this.lastAttackAABB[i] != null) {
-                DebugRenderHelper.renderAABB(this.lastAttackAABB[i].move(-cam.x, -cam.y, -cam.z),
-                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
+                DebugRenderHelper.renderAABB(this.lastAttackAABB[i],
+                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN_INT);
             }
             if (this.weaponTip[i] != null) {
-                DebugRenderHelper.renderCube(MathUtils.subtractToVector3f(this.weaponTip[i], cam), 0.025F,
-                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN);
+                DebugRenderHelper.renderCube(this.weaponTip[i], 0.025F,
+                    this.lastHitEntities[i].isEmpty() ? failColor : MathUtils.GREEN_INT);
             }
             for (Entity entity : this.lastHitEntities[i]) {
                 DebugRenderHelper.renderCube(
-                    MathUtils.subtractToVector3f(entity.getBoundingBox().getCenter(), camWorld),
-                    (float) entity.getBoundingBox().getSize() / 2F, MathUtils.GREEN);
+                    entity.getBoundingBox().getCenter(),
+                    (float) entity.getBoundingBox().getSize() / 2F, MathUtils.GREEN_INT);
             }
         }
     }

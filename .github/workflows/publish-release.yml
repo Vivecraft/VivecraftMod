@@ -1,0 +1,174 @@
+name: publish release
+run-name: publishing
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release Tag
+        type: string
+      publish:
+        description: Modrinth/CurseForge publish
+        type: boolean
+        default: true
+      forge-update:
+        description: update Forge/Neoforge version jsons
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    name: publish release to modrinth/curseforge
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout ${{ inputs.tag }}
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag }}
+      - name: download artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${{ inputs.tag }}" --repo "${{ github.repository  }}" --dir build/libs
+      - name: download changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "${{ inputs.tag }}" --repo "${{ github.repository  }}" --json body --jq ".body" > changelog.md
+      - name: get info from properties
+        id: properties
+        run: |
+          source <(grep -E '^(minecraft_version|mod_version|archives_base_name|mod_name)=' gradle.properties)
+          final_name="${archives_base_name:+${archives_base_name^}}"
+          final_name="${final_name:-${mod_name}}"
+          echo "mod_name=${final_name} ${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
+          echo "mod_version=${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
+      - name: get info from jars/source
+        id: info
+        uses: fayer3/build-parse-action@main
+        with:
+          mod_version: ${{ steps.properties.outputs.mod_version }}
+      - name: publish fabric
+        if: steps.info.outputs.fabric_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: "build/libs/${{ steps.info.outputs.fabric_file }}"
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.properties.outputs.mod_name }}-fabric"
+          version: "${{ steps.properties.outputs.mod_version }}-fabric"
+          version-type: "${{ steps.info.outputs.release_type }}"
+
+          loaders: "${{ steps.info.outputs.fabric_loaders }}"
+          fail-mode: warn
+
+      - name: publish forge
+        if: steps.info.outputs.forge_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: "build/libs/${{ steps.info.outputs.forge_file }}"
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.properties.outputs.mod_name }}-forge"
+          version: "${{ steps.properties.outputs.mod_version }}-forge"
+          version-type: "${{ steps.info.outputs.release_type }}"
+
+          loaders: "${{ steps.info.outputs.forge_loaders}}"
+          fail-mode: warn
+
+      - name: publish neoforge
+        if: steps.info.outputs.neoforge_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: "build/libs/${{ steps.info.outputs.neoforge_file }}"
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.properties.outputs.mod_name }}-neoforge"
+          version: "${{ steps.properties.outputs.mod_version }}-neoforge"
+          version-type: "${{ steps.info.outputs.release_type }}"
+
+          loaders: "${{ steps.info.outputs.neoforge_loaders}}"
+          fail-mode: warn
+
+      - name: publish quilt
+        if: steps.info.outputs.quilt_file != '' && inputs.publish
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: "build/libs/${{ steps.info.outputs.quilt_file }}"
+          changelog-file: "changelog.md"
+
+          name: "${{ steps.properties.outputs.mod_name }}-quilt"
+          version: "${{ steps.properties.outputs.mod_version}}-quilt"
+          version-type: "${{ steps.info.outputs.release_type }}"
+
+          loaders: "${{ steps.info.outputs.quilt_loaders}}"
+          fail-mode: warn
+      - name: checkout repo forge-versions
+        if: steps.info.outputs.forge_file != '' || steps.info.outputs.neoforge_file != ''
+        uses: actions/checkout@v6
+        with:
+          ref: 'forge-versions'
+      - name: update forge versions
+        if: steps.info.outputs.forge_file != ''
+        uses: fayer3/forge-updater@main
+        with:
+          json_file: "./forge_updates.json"
+          mc_range: "${{ steps.info.outputs.forge_mc_versions}}"
+          new_version: "${{ steps.properties.outputs.mod_version}}"
+          type: "${{ steps.info.outputs.release_type }}"
+      - name: update neoforge versions
+        if: steps.info.outputs.neoforge_file != ''
+        uses: fayer3/forge-updater@main
+        with:
+          json_file: "./neoforge_updates.json"
+          mc_range: "${{ steps.info.outputs.neoforge_mc_versions}}"
+          new_version: "${{ steps.properties.outputs.mod_version}}"
+          type: "${{ steps.info.outputs.release_type }}"
+
+      - name: push new update json forge
+        if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file == '' && inputs.forge-update
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
+          push: true
+
+      - name: push new update json neoforge
+        if: steps.info.outputs.forge_file == '' && steps.info.outputs.neoforge_file != '' && inputs.forge-update
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
+          push: true
+
+      - name: push new update json forge+neoforge
+        if: steps.info.outputs.forge_file != '' && steps.info.outputs.neoforge_file != '' && inputs.forge-update
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update forge ${{ steps.info.outputs.forge_mc_versions }} to ${{ steps.properties.outputs.mod_version }} and update neoforge ${{ steps.info.outputs.neoforge_mc_versions }} to ${{ steps.properties.outputs.mod_version }}'
+          push: true

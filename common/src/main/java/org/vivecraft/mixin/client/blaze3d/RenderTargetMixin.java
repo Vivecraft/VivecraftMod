@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client.blaze3d;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,8 +20,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     @Shadow
     public int height;
     @Unique
-    private boolean vivecraft$linearFilter;
-    @Unique
     private boolean vivecraft$mipmaps;
     @Unique
     private boolean vivecraft$stencil = false;
@@ -41,12 +38,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @Override
     @Unique
-    public void vivecraft$setLinearFilter(boolean linearFilter) {
-        this.vivecraft$linearFilter = linearFilter;
-    }
-
-    @Override
-    @Unique
     public void vivecraft$setMipmaps(boolean mipmaps) {
         this.vivecraft$mipmaps = mipmaps;
     }
@@ -57,22 +48,12 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         return this.vivecraft$mipmaps;
     }
 
-    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createTexture(Ljava/util/function/Supplier;ILcom/mojang/blaze3d/textures/TextureFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;", remap = false), index = 6, remap = true)
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createTexture(Ljava/util/function/Supplier;ILcom/mojang/blaze3d/textures/TextureFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;"), index = 6)
     private int vivecraft$mipLevels(
         Supplier<String> labelSupplier, int usageFlags, TextureFormat textureFormat, int width, int height,
         int depthLayers, int mipLevels)
     {
         return this.vivecraft$mipmaps && !textureFormat.hasDepthAspect() ?
             Math.max(Mth.log2(this.width), Mth.log2(this.height)) : mipLevels;
-    }
-
-    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;setFilterMode(Lcom/mojang/blaze3d/textures/FilterMode;Z)V"))
-    private FilterMode vivecraft$linearFilter(FilterMode filterMode) {
-        return this.vivecraft$linearFilter ? FilterMode.LINEAR : filterMode;
-    }
-
-    @ModifyArg(method = "setFilterMode(Lcom/mojang/blaze3d/textures/FilterMode;Z)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;setTextureFilter(Lcom/mojang/blaze3d/textures/FilterMode;Z)V", remap = false), index = 1, remap = true)
-    private boolean vivecraft$useMipMaps(boolean mipmaps) {
-        return mipmaps || this.vivecraft$mipmaps;
     }
 }

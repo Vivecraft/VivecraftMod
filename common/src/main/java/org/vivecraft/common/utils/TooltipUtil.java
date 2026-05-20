@@ -74,7 +74,7 @@ public class TooltipUtil {
                 }
             }
         }
-        if (!Xloader.isDedicatedServer()) {
+        if (!Xloader.INSTANCE.isDedicatedServer()) {
             tooltip += getClientOnlyTooltip();
         }
 

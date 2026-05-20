@@ -1,7 +1,7 @@
 package org.vivecraft.client.utils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
 import org.vivecraft.Xloader;
@@ -34,7 +34,7 @@ public class FileUtils {
     public static void unpackAsset(String sourcePath, String targetFile, boolean required) {
         try {
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
-                .getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", sourcePath));
+                .getResource(Identifier.fromNamespaceAndPath("vivecraft", sourcePath));
 
             if (resource.isPresent()) {
                 try (InputStream is = resource.get().open(); OutputStream os = new FileOutputStream(targetFile)) {
@@ -59,7 +59,7 @@ public class FileUtils {
     public static String loadAssetToString(String sourcePath, boolean required) {
         try {
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
-                .getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", sourcePath));
+                .getResource(Identifier.fromNamespaceAndPath("vivecraft", sourcePath));
 
             if (resource.isPresent()) {
                 try (InputStream is = resource.get().open()) {
@@ -107,7 +107,8 @@ public class FileUtils {
 
             targetFile.getParentFile().mkdirs();
 
-            Files.copy(Xloader.getInJarFile(sourcePath), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Xloader.INSTANCE.getInJarFile(sourcePath), targetFile.toPath(),
+                StandardCopyOption.REPLACE_EXISTING);
 
             return true;
         } catch (Exception exception) {
@@ -143,7 +144,7 @@ public class FileUtils {
         boolean didExtractSomething = false;
 
         try {
-            for (Path path : Xloader.getInJarFolderFiles(source)) {
+            for (Path path : Xloader.INSTANCE.getInJarFolderFiles(source)) {
                 didExtractSomething |= unpackFile(path.toString(), new File(target + "/" + path.getFileName()), false);
             }
         } catch (IOException e) {

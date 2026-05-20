@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.extensions.ClassDependentMixin;
 @ClassDependentMixin("net.optifine.Config")
 @Mixin(DefaultVertexFormat.class)
 public class OptifineDefaultVertexFormatMixin {
-    @Inject(method = "updateVertexFormats", at = @At("TAIL"), remap = false)
+    @Inject(method = "updateVertexFormats", at = @At("TAIL"))
     private static void vivecraft$rebuildMenuWorld(CallbackInfo ci) {
         if (VRState.VR_INITIALIZED && ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
             ClientDataHolderVR.getInstance().menuWorldRenderer.getLevel() != null)

@@ -1,6 +1,6 @@
 package org.vivecraft.client.gui.framework.screens;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -8,7 +8,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec2;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
@@ -21,13 +21,13 @@ import org.vivecraft.client.gui.settings.GuiAllSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.TooltipUtil;
-import org.vivecraft.mixin.client.gui.GuiGraphicsAccessor;
+import org.vivecraft.mixin.client.gui.GuiGraphicsExtractorAccessor;
 
 import java.util.ArrayList;
 
 public abstract class GuiVROptionsBase extends Screen {
-    private static final ResourceLocation SEARCH_ICON =
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "icon/search");
+    private static final Identifier SEARCH_ICON =
+        Identifier.fromNamespaceAndPath("vivecraft", "icon/search");
 
     protected ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
     protected final Screen lastScreen;
@@ -113,7 +113,7 @@ public abstract class GuiVROptionsBase extends Screen {
         }
 
         for (final VROptionLayout layout : settings) {
-            if (layout.getOption() != null && layout.getOption().getEnumFloat()) {
+            if (layout.getOption() != null && layout.getOption().getType() == VRSettings.OptionType.LIMITED_FLOAT) {
                 // Option Slider
                 this.addRenderableWidget(
                     new GuiVROptionSlider(layout.getOrdinal(), layout.getX(this.width), layout.getY(this.height),
@@ -238,7 +238,7 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             this.reinit = false;
             // remember selected option
@@ -253,13 +253,13 @@ public abstract class GuiVROptionsBase extends Screen {
             }
         }
 
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         if (this.visibleList != null) {
-            this.visibleList.render(guiGraphics, mouseX, mouseY, partialTick);
+            this.visibleList.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
 
-        guiGraphics.drawCenteredString(this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 0xFFFFFFFF);
+        graphics.centeredText(this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 0xFFFFFFFF);
 
         if (this.btnDefaults != null) {
             this.btnDefaults.visible = this.drawDefaultButtons;
@@ -269,7 +269,7 @@ public abstract class GuiVROptionsBase extends Screen {
             this.btnDone.visible = this.drawDefaultButtons;
         }
 
-        renderTooltip(guiGraphics, mouseX, mouseY);
+        renderTooltip(graphics, mouseX, mouseY);
     }
 
     protected void actionPerformed(AbstractWidget widget) {}
@@ -341,7 +341,7 @@ public abstract class GuiVROptionsBase extends Screen {
             super.charTyped(characterEvent);
     }
 
-    private void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    private void renderTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         GuiEventListener hover = null;
 
         if (this.minecraft.getLastInputType().isKeyboard()) {
@@ -357,9 +357,9 @@ public abstract class GuiVROptionsBase extends Screen {
             }
         }
         if (hover instanceof GuiVROption guiHover && guiHover.getOption() != null &&
-            ((GuiGraphicsAccessor) guiGraphics).getDeferredTooltip() == null)
+            ((GuiGraphicsExtractorAccessor) graphics).getDeferredTooltip() == null)
         {
-            TooltipRenderer.renderTooltip(guiGraphics, TooltipUtil.getClientConfigTooltip(guiHover.getOption()),
+            TooltipRenderer.renderTooltip(graphics, TooltipUtil.getClientConfigTooltip(guiHover.getOption()),
                 this.width / 2, guiHover.getY(), guiHover.getHeight());
         }
     }

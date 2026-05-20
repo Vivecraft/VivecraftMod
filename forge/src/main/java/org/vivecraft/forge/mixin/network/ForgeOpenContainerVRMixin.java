@@ -9,7 +9,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 
 @Mixin(OpenContainer.class)
 public class ForgeOpenContainerVRMixin {
-    @Inject(method = "handle", at = @At("HEAD"), remap = false)
+    @Inject(method = "handle", at = @At("HEAD"))
     private static void vivecraft$markScreenActiveForge(CallbackInfo ci) {
         GuiHandler.GUI_APPEAR_OVER_BLOCK_ACTIVE = true;
     }

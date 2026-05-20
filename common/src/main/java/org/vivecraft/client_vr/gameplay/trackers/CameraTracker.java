@@ -2,20 +2,21 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.utils.MathUtils;
 
 public class CameraTracker implements Tracker {
-    public static final ResourceLocation CAMERA_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft", "camera");
-    public static final ResourceLocation CAMERA_DISPLAY_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
+    public static final Identifier CAMERA_MODEL = Identifier.fromNamespaceAndPath("vivecraft", "camera");
+    public static final Identifier CAMERA_DISPLAY_MODEL = Identifier.fromNamespaceAndPath("vivecraft",
         "camera_display");
 
     private boolean visible = false;
@@ -112,7 +113,9 @@ public class CameraTracker implements Tracker {
      * @return position relative to the room origin
      */
     public Vector3f getRoomPosition(Vec3 roomOrigin) {
-        if (roomOrigin == Vec3.ZERO && this.dh.vrPlayer != null) {
+        if (!isVisible()) {
+            return this.dh.vr.getEyePosition(RenderPass.CENTER).add(0, 1, 0);
+        } else if (roomOrigin == Vec3.ZERO && this.dh.vrPlayer != null) {
             return MathUtils.subtractToVector3f(this.position, this.dh.vrPlayer.roomOrigin);
         } else {
             return MathUtils.subtractToVector3f(this.position, roomOrigin);

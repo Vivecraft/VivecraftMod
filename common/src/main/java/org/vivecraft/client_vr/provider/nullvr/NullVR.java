@@ -32,7 +32,6 @@ import java.util.List;
  * MCVR implementation that does not interact with any runtime.
  */
 public class NullVR extends MCVR<InputAction> {
-    private static final float IPD = 0.1F;
 
     protected static NullVR OME;
 
@@ -121,12 +120,12 @@ public class NullVR extends MCVR<InputAction> {
             this.hmdPose.identity();
             this.hmdPose.m31(1.62F);
 
-            // eye offset, 10cm total distance
+            // eye offset, half in each direction
             this.hmdPoseLeftEye.set(this.hmdPose);
-            this.hmdPoseLeftEye.m30(-IPD * 0.5F);
+            this.hmdPoseLeftEye.m30(-this.dh.vrSettings.nullvrIPD * 0.5F);
 
             this.hmdPoseRightEye.set(this.hmdPose);
-            this.hmdPoseRightEye.m30(IPD * 0.5F);
+            this.hmdPoseRightEye.m30(this.dh.vrSettings.nullvrIPD * 0.5F);
 
             this.populateInputActions();
 
@@ -171,6 +170,10 @@ public class NullVR extends MCVR<InputAction> {
             this.hmdPose.rotation(this.deviceRotations[HEAD_TRACKER]);
             this.hmdPose.setTranslation(this.deviceOffsets[HEAD_TRACKER]);
 
+            // update each frame to make the setting work
+            this.hmdPoseLeftEye.m30(-this.dh.vrSettings.nullvrIPD * 0.5F);
+            this.hmdPoseRightEye.m30(this.dh.vrSettings.nullvrIPD * 0.5F);
+
             // fbt trackers index 3-9
             for (int i = 3; i < TRACKABLE_DEVICE_COUNT; i++) {
                 if (this.deviceSource[i].source != DeviceSource.Source.OSC ||
@@ -206,6 +209,8 @@ public class NullVR extends MCVR<InputAction> {
 
             Profiler.get().pop();
         }
+
+        ((NullVRHapticScheduler) this.hapticScheduler).tick();
     }
 
     @Override
@@ -300,7 +305,7 @@ public class NullVR extends MCVR<InputAction> {
 
     @Override
     public float getIPD() {
-        return IPD;
+        return this.dh.vrSettings.nullvrIPD;
     }
 
     @Override
@@ -311,15 +316,21 @@ public class NullVR extends MCVR<InputAction> {
     @Override
     public boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
         boolean triggered = false;
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && action == GLFW.GLFW_PRESS &&
+            key == GLFW.GLFW_KEY_KP_ADD)
+        {
+            MOD.keyVRInteract.pressKey(ControllerType.LEFT);
+            MOD.keyVRInteract.pressKey(ControllerType.RIGHT);
+        } else if (!MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) ||
+            !MethodHolder.isKeyDown(GLFW.GLFW_KEY_KP_ADD))
+        {
+            MOD.keyVRInteract.unpressKey(ControllerType.LEFT);
+            MOD.keyVRInteract.unpressKey(ControllerType.RIGHT);
+        }
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
             if (action == GLFW.GLFW_PRESS) {
                 if (key == GLFW.GLFW_KEY_F6) {
                     this.vrActive = !this.vrActive;
-                    return true;
-                }
-                if (key == GLFW.GLFW_KEY_KP_ADD) {
-                    MOD.keyVRInteract.pressKey(ControllerType.LEFT);
-                    MOD.keyVRInteract.pressKey(ControllerType.RIGHT);
                     return true;
                 }
 

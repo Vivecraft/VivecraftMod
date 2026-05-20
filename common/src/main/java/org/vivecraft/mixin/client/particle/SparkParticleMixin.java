@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client.particle;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.state.QuadParticleRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,7 +25,7 @@ public class SparkParticleMixin implements SparkParticleExtension {
         QuadParticleRenderState quadParticleRenderState, Camera camera, float f, CallbackInfo ci)
     {
         if (!ClientDataHolderVR.getInstance().vrSettings.selfButtSparklesInFirstPerson &&
-            camera.getEntity().getUUID().equals(this.vivecraft$playerUUID) &&
+            camera.entity().getUUID().equals(this.vivecraft$playerUUID) &&
             ((!VRState.VR_RUNNING && !camera.isDetached()) || (VRState.VR_RUNNING &&
                 Stream.of(RenderPass.LEFT, RenderPass.RIGHT, RenderPass.CENTER)
                     .anyMatch(pass -> ClientDataHolderVR.getInstance().currentPass == pass)

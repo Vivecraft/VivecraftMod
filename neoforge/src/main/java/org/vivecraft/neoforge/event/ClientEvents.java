@@ -2,7 +2,7 @@ package org.vivecraft.neoforge.event;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
@@ -30,7 +30,7 @@ public class ClientEvents {
     @SubscribeEvent
     public static void registerReloadEvent(AddClientReloadListenersEvent addClientReloadListenersEvent) {
         addClientReloadListenersEvent.addListener(
-            ResourceLocation.fromNamespaceAndPath("vivecraft", "reloadlistener"),
+            Identifier.fromNamespaceAndPath("vivecraft", "reloadlistener"),
             new ReloadListener());
     }
 

@@ -10,17 +10,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.data.ViveItems;
 
 @Mixin(ItemModelResolver.class)
 public class ItemModelResolverMixin {
     @ModifyExpressionValue(method = "appendItemLayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"))
-    private Object vivecraft$modelOverride(Object resourceLocation, @Local(argsOnly = true) ItemStack itemStack) {
+    private Object vivecraft$modelOverride(Object identifier, @Local(argsOnly = true) ItemStack itemStack) {
         if (VRState.VR_RUNNING && itemStack.is(Items.SPYGLASS)) {
             return TelescopeTracker.SCOPE_MODEL;
         }
-        if (ClimbTracker.isClaws(itemStack)) {
+        if (ViveItems.isClimbingClaws(itemStack)) {
             return ClimbTracker.CLAWS_MODEL;
         }
-        return resourceLocation;
+        return identifier;
     }
 }
