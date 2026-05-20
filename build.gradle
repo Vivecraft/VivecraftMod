@@ -11,7 +11,7 @@ subprojects {
     apply plugin: "java"
     apply plugin: "dev.architectury.loom"
 
-    archivesBaseName = rootProject.archives_base_name
+    archivesBaseName = rootProject.mod_id
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
@@ -47,7 +47,7 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 17
+        options.release = Integer.parseInt(rootProject.java_version)
     }
 
     java {
@@ -55,6 +55,45 @@ subprojects {
     }
 
     processResources {
+        var expandProps = [
+            'version'              : version,
+            'java_version'         : java_version,
+            'mod_id'               : mod_id,
+            'mod_name'             : mod_name,
+            'mod_authors'          : mod_authors,
+            'mod_authors_array'    : mod_authors.split(",").collect { it.trim() }.join("\",\""),
+            'license'              : license,
+            'description'          : mod_description,
+            'discord'              : discord,
+            'kofi'                 : kofi,
+            'website'              : website,
+            'issue_tracker'        : issue_tracker,
+            'sources'              : sources,
+
+            'fabric_mc_range'      : fabric_mc_range,
+            'fabric_loader_version': fabric_loader_version,
+
+            'forge_mc_range'       : forge_mc_range,
+            'forge_loader_range'   : forge_loader_range,
+
+            'neoforge_mc_range'    : neoforge_mc_range,
+            'neoforge_loader_range': neoforge_loader_range,
+        ]
+
+        var jsonExpandProps = expandProps.collectEntries {
+            key, value -> [(key): value instanceof String ? value.replace("\n", "\\\\n") : value]
+        }
+
+        filesMatching(['META-INF/mods.toml']) {
+            expand expandProps
+        }
+
+        filesMatching(['pack.mcmeta', 'fabric.mod.json']) {
+            expand jsonExpandProps
+        }
+
+        inputs.properties(expandProps)
+
         if (project.name != "common" && project.name != "stubs") {
             // copy resources except the mixin jsons
             from(project(':common').sourceSets['main'].resources) {
@@ -67,7 +106,7 @@ subprojects {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
         if (project.name != "common" && project.name != "stubs") {
             from remapJar
-            into "../build/libs"
+            into rootProject.layout.buildDirectory.dir("libs")
         }
     }
 
@@ -80,7 +119,7 @@ subprojects {
         if (project.name != "common") {
             enabled = false
         }
-        destinationDir = file("../build/javadoc")
+        destinationDir = file(rootProject.layout.buildDirectory.file("javadoc"))
         include 'org/vivecraft/api/**'
         options.windowTitle("Vivecraft API")
         title = "Vivecraft API"
@@ -105,11 +144,11 @@ subprojects {
         tasks.register('apiJar', Jar) {
             archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
             dependsOn tasks.named('remapJar')
-            archiveBaseName = rootProject.archives_base_name + '-api'
+            archiveBaseName = rootProject.mod_id + '-api'
             if (project.name == "neoforge") {
-                archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
+                archiveBaseName = rootProject.mod_id + '-api-mojmap'
             } else if (project.name == "forge") {
-                archiveBaseName = rootProject.archives_base_name + '-api-srg'
+                archiveBaseName = rootProject.mod_id + '-api-srg'
             }
 
             from(tasks.named('remapJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
@@ -130,11 +169,11 @@ subprojects {
             archiveVersion.set(rootProject.minecraft_version + "-" + rootProject.api_version)
             archiveClassifier.set('sources')
             dependsOn tasks.named('remapSourcesJar')
-            archiveBaseName = rootProject.archives_base_name + '-api'
+            archiveBaseName = rootProject.mod_id + '-api'
             if (project.name == "neoforge") {
-                archiveBaseName = rootProject.archives_base_name + '-api-mojmap'
+                archiveBaseName = rootProject.mod_id + '-api-mojmap'
             } else if (project.name == "forge") {
-                archiveBaseName = rootProject.archives_base_name + '-api-srg'
+                archiveBaseName = rootProject.mod_id + '-api-srg'
             }
 
             from(tasks.named('remapSourcesJar').flatMap { it.archiveFile }.map { zipTree(it) }) {
@@ -169,7 +208,7 @@ subprojects {
             publications {
                 Mod(MavenPublication) {
                     groupId = 'org.vivecraft'
-                    artifactId = rootProject.archives_base_name + "-" + project.name
+                    artifactId = rootProject.mod_id + "-" + project.name
                     from components.java
                 }
 
@@ -178,7 +217,7 @@ subprojects {
                         version = rootProject.minecraft_version + "-" + rootProject.api_version
                         groupId = 'org.vivecraft'
 
-                        artifactId = rootProject.archives_base_name + '-api'
+                        artifactId = rootProject.mod_id + '-api'
                         if (project.name == "neoforge") {
                             artifactId += '-mojmap'
                         } else if (project.name == "forge") {

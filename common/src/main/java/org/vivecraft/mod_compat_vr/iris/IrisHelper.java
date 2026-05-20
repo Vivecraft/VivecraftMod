@@ -33,6 +33,7 @@ public class IrisHelper {
     private static Object ShaderKey_ENTITIES_SOLID;
     private static Object ShaderKey_ENTITIES_CUTOUT;
     private static Object ShaderKey_ENTITIES_TRANSLUCENT;
+    private static Object ShaderKey_TEXTURED_COLOR;
     private static Object ShaderKey_BASIC_COLOR;
 
     // for iris/dh compat
@@ -111,6 +112,17 @@ public class IrisHelper {
             }
         }
         return Optional.empty();
+    }
+
+    public static Object getPipelineManager() {
+        if (init()) {
+            try {
+                return Iris_getPipelineManager.invoke(null);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't get iris pipeline manager:", e);
+            }
+        }
+        return null;
     }
 
     /**

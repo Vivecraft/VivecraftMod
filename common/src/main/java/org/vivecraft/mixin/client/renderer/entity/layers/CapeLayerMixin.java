@@ -11,6 +11,8 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import org.joml.Matrix3f;
@@ -22,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.utils.ModelUtils;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.utils.MathUtils;
 
 @Mixin(CapeLayer.class)
@@ -38,16 +41,15 @@ public abstract class CapeLayerMixin extends RenderLayer<AbstractClientPlayer, P
     }
 
     // DEBUG CAPE
-    /*
-    @WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/PlayerSkin;capeTexture()Lnet/minecraft/resources/ResourceLocation;"))
-    private ResourceLocation vivecraft$whiteCape(PlayerSkin skin, Operation<ResourceLocation> original) {
-        ResourceLocation capeTexture = original.call(skin);
+    //@WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/PlayerSkin;capeTexture()Lnet/minecraft/resources/ResourceLocation;"))
+    @Unique
+    private ResourceLocation vivecraft$debugCape(PlayerSkin instance, Operation<ResourceLocation> original) {
+        ResourceLocation capeTexture = original.call(instance);
         if (capeTexture == null) {
-            capeTexture = RenderHelper.WHITE_TEXTURE;
+            capeTexture = RenderHelper.DEBUG_CAPE;
         }
         return capeTexture;
     }
-    */
 
     @WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"))
     private void vivecraft$modifyOffset(

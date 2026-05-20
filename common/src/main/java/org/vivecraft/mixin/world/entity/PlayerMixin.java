@@ -91,7 +91,7 @@ public abstract class PlayerMixin extends LivingEntityMixin {
                 ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
                 // older clients don't reset the active hand
                 if (NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion) &&
-                    vivePlayer.activeBodyPart == VRBodyPart.OFF_HAND)
+                    vivePlayer.getActiveItemBodyPart() == VRBodyPart.OFF_HAND)
                 {
                     equipmentSlot = EquipmentSlot.OFFHAND;
                 }
