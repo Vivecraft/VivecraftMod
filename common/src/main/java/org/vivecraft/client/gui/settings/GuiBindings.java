@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.settings;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -57,14 +57,14 @@ public class GuiBindings extends GuiListScreen {
         }
 
         @Override
-        public void renderContent(
-            GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick)
+        public void extractContent(
+            GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
-            super.renderContent(guiGraphics, mouseX, mouseY, hovering, partialTick);
+            super.extractContent(graphics, mouseX, mouseY, hovering, partialTick);
             this.resetButton.setX(this.getContentRight() - 20);
             this.resetButton.setY(this.getContentY());
             this.resetButton.active = this.canReset.getAsBoolean();
-            this.resetButton.render(guiGraphics, mouseX, mouseY, partialTick);
+            this.resetButton.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
 
         @Override

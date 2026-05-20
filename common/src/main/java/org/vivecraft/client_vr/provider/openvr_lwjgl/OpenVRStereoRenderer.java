@@ -133,7 +133,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.framebufferEyeLeft = VRTextureTarget.builder("L Eye")
             .withSize(width, height)
             .withTexId(this.leftEyeTextureId)
-            .withLinearFilter()
             .build();
         VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEyeLeft);
         String leftError = RenderHelper.checkGLError("Left Eye framebuffer setup");
@@ -141,7 +140,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.framebufferEyeRight = VRTextureTarget.builder("R Eye")
             .withSize(width, height)
             .withTexId(this.rightEyeTextureId)
-            .withLinearFilter()
             .build();
         VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEyeRight);
         String rightError = RenderHelper.checkGLError("Right Eye framebuffer setup");

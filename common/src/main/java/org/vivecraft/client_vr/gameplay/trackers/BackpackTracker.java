@@ -10,7 +10,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
+import org.vivecraft.client_vr.provider.control.InputAction;
 import org.vivecraft.common.utils.MathUtils;
 
 import java.util.Arrays;
@@ -98,7 +98,7 @@ public class BackpackTracker implements Tracker {
                 if (keymapping != this.mc.options.keySwapOffhand ||
                     !this.dh.climbTracker.isClimbingWith(InteractionHand.OFF_HAND))
                 {
-                    VRInputAction vrinputaction = MCVR.get().getInputAction(keymapping);
+                    InputAction vrinputaction = MCVR.get().getInputAction(keymapping);
                     if (vrinputaction != null) {
                         vrinputaction.pressBinding();
                         // hold for 2 ticks, since this tracker runs in the middle of the tick,

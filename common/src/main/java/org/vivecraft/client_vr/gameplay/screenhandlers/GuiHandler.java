@@ -24,6 +24,7 @@ import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;

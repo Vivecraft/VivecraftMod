@@ -49,8 +49,9 @@ public class InputAction {
         return this.priority;
     }
 
-    public void setPriority(int priority) {
+    public InputAction setPriority(int priority) {
         this.priority = priority;
+        return this;
     }
 
     public boolean isHanded() {
@@ -114,7 +115,7 @@ public class InputAction {
         }
     }
 
-    public void setEnabled(boolean enabled) {
+    public InputAction setEnabled(boolean enabled) {
         if (this.isHanded()) {
             for (ControllerType controllertype : ControllerType.values()) {
                 this.enabled[controllertype.ordinal()] = enabled;
@@ -122,6 +123,7 @@ public class InputAction {
         } else {
             this.enabled[0] = enabled;
         }
+        return this;
     }
 
     public boolean isActive() {

@@ -159,8 +159,8 @@ public class ShaderHelper {
             for (int x = 0; x < 4; x++) {
                 for (int y = 0; y < 2; y++) {
                     RenderTarget target = switch (RenderPass.values()[x + 4 * y]) {
-                        case LEFT -> DATA_HOLDER.vrRenderer.framebufferEye0;
-                        case RIGHT -> DATA_HOLDER.vrRenderer.framebufferEye1;
+                        case LEFT -> DATA_HOLDER.vrRenderer.getLeftEyeTarget();
+                        case RIGHT -> DATA_HOLDER.vrRenderer.getRightEyeTarget();
                         case CENTER -> DATA_HOLDER.vrRenderer.framebufferUndistorted;
                         case THIRD -> DATA_HOLDER.vrRenderer.framebufferMR;
                         case GUI -> GuiHandler.GUI_FRAMEBUFFER;
@@ -170,8 +170,8 @@ public class ShaderHelper {
                         default -> null;
                     };
                     if (target != null) {
-                        ShaderHelper.blitToScreen(target, screenWidth * x, screenWidth,
-                            screenHeight, screenHeight * y, 0.0F, 0.0F, false, false);
+                        ShaderHelper.blitFramebufferCrop(target, MC.mainRenderTarget, screenWidth * x, screenHeight * y,
+                            screenWidth * (x + 1), screenHeight * (y + 1), 0.0F, 0.0F, false);
                     }
                 }
             }
@@ -194,20 +194,21 @@ public class ShaderHelper {
             ))
         {
             // show both eyes side by side
-            RenderTarget leftEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.framebufferEye1 :
-                DATA_HOLDER.vrRenderer.framebufferEye0;
-            RenderTarget rightEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.framebufferEye0 :
-                DATA_HOLDER.vrRenderer.framebufferEye1;
+            RenderTarget leftEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.getRightEyeTarget() :
+                DATA_HOLDER.vrRenderer.getLeftEyeTarget();
+            RenderTarget rightEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.getLeftEyeTarget() :
+                DATA_HOLDER.vrRenderer.getRightEyeTarget();
 
             int screenWidth = MC.mainRenderTarget.width / 2;
             int screenHeight = MC.mainRenderTarget.height;
 
             if (leftEye != null) {
-                ShaderHelper.blitFramebuffer(leftEye, 0, 0, screenWidth, screenHeight);
+                ShaderHelper.blitFramebufferCrop(leftEye, MC.mainRenderTarget, 0, 0, screenWidth, screenHeight, 0.0F, 0.0F, DATA_HOLDER.vrSettings.dualMirrorCrop);
             }
 
             if (rightEye != null) {
-                ShaderHelper.blitFramebuffer(rightEye, screenWidth, 0, MC.mainRenderTarget.width, screenHeight);
+                ShaderHelper.blitFramebuffer(rightEye, MC.mainRenderTarget, screenWidth, 0, MC.mainRenderTarget.width,
+                    screenHeight);
             }
         } else {
             // general single buffer case
@@ -246,8 +247,8 @@ public class ShaderHelper {
             // source = DataHolder.getInstance().vrRenderer.telescopeFramebufferR;
             //
             if (source != null) {
-                ShaderHelper.blitFramebufferCrop(source, 0, 0, MC.mainRenderTarget.width, MC.mainRenderTarget.height,
-                    xCrop, yCrop, keepAspect);
+                ShaderHelper.blitFramebufferCrop(source, MC.mainRenderTarget, 0, 0, MC.mainRenderTarget.width,
+                    MC.mainRenderTarget.height, xCrop, yCrop, keepAspect);
             }
             if (source != GuiHandler.GUI_FRAMEBUFFER) {
                 blitGui();
@@ -272,7 +273,7 @@ public class ShaderHelper {
                     source = DATA_HOLDER.vrRenderer.getRightEyeTarget();
                 }
             }
-            blitFramebuffer(source, MC.mainRenderTarget.width / 2, 0,
+            blitFramebuffer(source, MC.mainRenderTarget, MC.mainRenderTarget.width / 2, 0,
                 MC.mainRenderTarget.width, MC.mainRenderTarget.height / 2);
         }
 
@@ -433,8 +434,8 @@ public class ShaderHelper {
                 renderPass.setPipeline(VRShaders.BLIT_VR_BLEND_PIPELINE);
                 renderPass.setVertexBuffer(0, gpuBuffer);
 
-                renderPass.bindSampler(VRShaders.BLIT_VR_COLOR_SAMPLER,
-                    GuiHandler.GUI_FRAMEBUFFER.getColorTextureView());
+                renderPass.bindTexture(VRShaders.BLIT_VR_COLOR_SAMPLER,
+                    GuiHandler.GUI_FRAMEBUFFER.getColorTextureView(),
                     RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 
                 renderPass.setIndexBuffer(indexBuffer, indexType);
@@ -444,11 +445,12 @@ public class ShaderHelper {
     }
 
     /**
-     * blits the given {@code source} RenderTarget to the bound framebuffer<br>
+     * blits the given {@code source} RenderTarget to the {@code target}<br>
      * the {@code source} is drawn to the rectangle at {@code left},{@code top} with a size of {@code width},{@code height}<br>
      * if {@code xCropFactor} or {@code yCropFactor} are non 0 the {@code source} gets zoomed in
      *
-     * @param source      RenderTarget to draw to the screen
+     * @param source      RenderTarget to copy
+     * @param target      RenderTarget to draw to
      * @param left        left edge of the target area
      * @param top         top edge of the target area
      * @param right       right edge width of the target area
@@ -457,12 +459,12 @@ public class ShaderHelper {
      * @param yCropFactor horizontal crop factor for the {@code source}
      * @param keepAspect  keeps the aspect ratio in takt when cropping the buffer
      */
-    private static void blitFramebufferCrop(
-        RenderTarget source, int left, int top, int right, int bottom,
+    public static void blitFramebufferCrop(
+        RenderTarget source, RenderTarget target, int left, int top, int right, int bottom,
         float xCropFactor, float yCropFactor, boolean keepAspect)
     {
         if (keepAspect) {
-            float drawAspect = (float) MC.mainRenderTarget.width / (float) MC.mainRenderTarget.height;
+            float drawAspect = (float) target.width / (float) target.height;
             float bufferAspect = (float) source.width / (float) source.height;
             if (drawAspect > bufferAspect) {
                 // destination is wider than the buffer
@@ -483,26 +485,43 @@ public class ShaderHelper {
         int yMax = source.height - yMin;
 
         OpenGLHelper.blitFramebuffer(
-            source.getColorTexture(), MC.mainRenderTarget.getColorTexture(),
+            source.getColorTexture(), target.getColorTexture(),
             xMin, yMin, xMax, yMax,
             left, top, right, bottom,
             GL11C.GL_COLOR_BUFFER_BIT, GL11C.GL_LINEAR);
     }
 
     /**
-     * blits the given {@code source} RenderTarget to the bound framebuffer
+     * blits the full given {@code source} RenderTarget to {@code target}
      *
-     * @param source RenderTarget to draw to the screen
+     * @param source RenderTarget to copy
+     * @param target RenderTarget to draw to
+     */
+    public static void blitFramebuffer(
+        RenderTarget source, RenderTarget target)
+    {
+        OpenGLHelper.blitFramebuffer(
+            source.getColorTexture(), target.getColorTexture(),
+            0, 0, source.width, source.height,
+            0, 0, target.width, target.height,
+            GL11C.GL_COLOR_BUFFER_BIT, GL11C.GL_LINEAR);
+    }
+
+    /**
+     * blits the given {@code source} RenderTarget to {@code target}
+     *
+     * @param source RenderTarget to copy
+     * @param target RenderTarget to draw to
      * @param left   left edge of the target area
      * @param top    top edge of the target area
      * @param right  right edge width of the target area
      * @param bottom bottom edge of the target area
      */
     private static void blitFramebuffer(
-        RenderTarget source, int left, int top, int right, int bottom)
+        RenderTarget source, RenderTarget target, int left, int top, int right, int bottom)
     {
         OpenGLHelper.blitFramebuffer(
-            source.getColorTexture(), MC.mainRenderTarget.getColorTexture(),
+            source.getColorTexture(), target.getColorTexture(),
             0, 0, source.width, source.height,
             left, top, right, bottom,
             GL11C.GL_COLOR_BUFFER_BIT, GL11C.GL_LINEAR);

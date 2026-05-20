@@ -68,7 +68,7 @@ public class VRShaders {
         .withSampler(MIXED_REALITY_GUI_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
-        .withBlend(BlendFunction.TRANSLUCENT)
+        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .build();
 
     // vr post shader and its uniforms

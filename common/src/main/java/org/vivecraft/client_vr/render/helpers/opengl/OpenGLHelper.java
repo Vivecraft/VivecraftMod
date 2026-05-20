@@ -1,8 +1,10 @@
 package org.vivecraft.client_vr.render.helpers.opengl;
 
+import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.opengl.GlTextureView;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import org.lwjgl.opengl.GL30C;
@@ -44,7 +46,7 @@ public class OpenGLHelper {
         GpuTexture source, GpuTexture target, int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0,
         int dstX1, int dstY1, int mask, int filter)
     {
-        if (RenderSystem.getDevice() instanceof GlDevice glDevice && source instanceof GlTexture glSource &&
+        if (RenderSystem.getDevice().backend instanceof GlDevice glDevice && source instanceof GlTexture glSource &&
             target instanceof GlTexture glTarget)
         {
             glDevice.directStateAccess().blitFrameBuffers(glSource.getFbo(glDevice.directStateAccess(), null),
@@ -56,5 +58,4 @@ public class OpenGLHelper {
             throw new IllegalStateException("Vivecraft: only opengl textures are supported");
         }
     }
-
 }

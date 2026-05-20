@@ -86,8 +86,8 @@ public class VRPassHelper {
 
             // do post-processing
             ShaderHelper.doVrPostProcess(eye, rendertarget,
-                eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.framebufferEye0 :
-                    DATA_HOLDER.vrRenderer.framebufferEye1,
+                eye == RenderPass.LEFT ? DATA_HOLDER.vrRenderer.getLeftEyeTarget() :
+                    DATA_HOLDER.vrRenderer.getRightEyeTarget(),
                 ((LevelRenderStateExtension) MC.gameRenderer.getGameRenderState().levelRenderState).vivecraft$getVRRenderState().postProcessState);
 
             RenderHelper.checkGLError("post overlay" + eye);
@@ -96,8 +96,8 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
-            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, DATA_HOLDER.vrRenderer.cameraFramebuffer,
-                false);
+            ShaderHelper.blitFramebuffer(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer,
+                DATA_HOLDER.vrRenderer.cameraFramebuffer);
             Profiler.get().pop();
         }
 
