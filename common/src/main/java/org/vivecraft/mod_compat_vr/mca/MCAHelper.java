@@ -68,7 +68,8 @@ public class MCAHelper {
                     Xloader.getModloader().name + ".net.mca.entity.VillagerLike",
                     "net.conczin.mca.entity.VillagerLike");
 
-                VillagerLike_getRawScaleFactor = VillagerLike.getMethod("getRawScaleFactor");
+                VillagerLike_getRawScaleFactor = ClassUtils.getMethodWithAlternative(VillagerLike,
+                    "getRawScaleFactor", "getRawVerticalScaleFactor");
                 VillagerLike_getHorizontalScaleFactor = VillagerLike.getMethod("getHorizontalScaleFactor");
             } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException e) {
                 INIT_FAILED = true;

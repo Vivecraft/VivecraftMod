@@ -12,7 +12,8 @@ public class GuiPostEffectsSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.WATER_EFFECT),
         new VROptionEntry(VRSettings.VrOptions.PORTAL_EFFECT),
         new VROptionEntry(VRSettings.VrOptions.FREEZE_EFFECT),
-        new VROptionEntry(VRSettings.VrOptions.PUMPKIN_EFFECT)
+        new VROptionEntry(VRSettings.VrOptions.PUMPKIN_EFFECT),
+        new VROptionEntry(VRSettings.VrOptions.SLEEP_EFFECT)
     };
 
     public GuiPostEffectsSettings(Screen lastScreen) {

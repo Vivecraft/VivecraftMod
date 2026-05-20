@@ -284,7 +284,7 @@ public class ClientNetworking {
         } else {
             VRBodyPart bp = IS_LAST_BODY_PART_AIM ? getActiveBodyPart() :
                 ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ? VRBodyPart.HEAD :
-                    VRBodyPart.MAIN_HAND;
+                VRBodyPart.MAIN_HAND;
             return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(bp).getDirection();
         }
     }
@@ -316,7 +316,7 @@ public class ClientNetworking {
         } else {
             VRBodyPart bp = IS_LAST_BODY_PART_AIM ? getActiveBodyPart() :
                 ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD ? VRBodyPart.HEAD :
-                    VRBodyPart.MAIN_HAND;
+                VRBodyPart.MAIN_HAND;
             return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyPart(bp).getPosition();
         }
     }
