@@ -17,7 +17,7 @@ public class ForgeMouseHandlerVRMixin {
     // this is stupid, but the locals have differnt ordinals on different modloaders
     @Inject(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getTutorial()Lnet/minecraft/client/tutorial/Tutorial;"))
     private void vivecraft$modifyMouseTravel(
-        CallbackInfo ci, @Local(ordinal = 4) LocalDoubleRef forgeX, @Local(ordinal = 5) LocalDoubleRef forgeY)
+        CallbackInfo ci, @Local(ordinal = 5) LocalDoubleRef forgeX, @Local(ordinal = 6) LocalDoubleRef forgeY)
     {
         if (VRState.VR_RUNNING) {
             Vector2d aimVelocity = MCVR.get().getControllerVelocity();

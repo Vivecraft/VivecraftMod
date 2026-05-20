@@ -600,44 +600,39 @@ public class VREffectsHelper {
         // clear depth for menu environment
         RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
 
-        RenderSystem.getModelViewStack().pushMatrix().identity();
-        RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
-        RenderSystem.applyModelViewMatrix();
+        PoseStack poseStack = new PoseStack();
+        RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, poseStack);
 
         ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
 
-        renderMenuEnvironment();
+        renderMenuEnvironment(poseStack);
         // render the screen always on top in the menu room to prevent z fighting
-        renderGuiLayer(partialTick, true);
+        renderGuiLayer(partialTick, true, poseStack);
 
-        DebugRenderHelper.renderDebug(partialTick);
+        DebugRenderHelper.renderDebug(poseStack, partialTick);
 
         if (KeyboardHandler.SHOWING) {
             if (DATA_HOLDER.vrSettings.physicalKeyboard) {
-                renderPhysicalKeyboard(partialTick);
+                renderPhysicalKeyboard(partialTick, poseStack);
             } else {
                 render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
-                    KeyboardHandler.ROTATION_ROOM, DATA_HOLDER.vrSettings.menuAlwaysFollowFace);
+                    KeyboardHandler.ROTATION_ROOM, DATA_HOLDER.vrSettings.menuAlwaysFollowFace, poseStack);
             }
         }
 
         if (DATA_HOLDER.currentPass != RenderPass.CAMERA &&
             (DATA_HOLDER.currentPass != RenderPass.THIRD || DATA_HOLDER.vrSettings.mixedRealityRenderHands))
         {
-            VRArmHelper.renderVRHands(partialTick, true, true, true, true);
+            VRArmHelper.renderVRHands(partialTick, true, true, true, true, poseStack);
         }
-
-        RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
     }
 
     /**
      * renders the current menu environment
      */
-    public static void renderMenuEnvironment() {
+    public static void renderMenuEnvironment(PoseStack poseStack) {
         // MAIN MENU ENVIRONMENT
-
-        Matrix4fStack poseStack = new Matrix4fStack(8);
+        poseStack.pushPose();
 
         Vec3 eye = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(DATA_HOLDER.currentPass).getPosition();
         poseStack.translate((float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
@@ -645,7 +640,7 @@ public class VREffectsHelper {
             (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
 
         // remove world rotation or the room doesn't align with the screen
-        poseStack.rotate(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+        poseStack.mulPose(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
 
         if (DATA_HOLDER.menuWorldRenderer.isReady()) {
             try {
@@ -662,6 +657,7 @@ public class VREffectsHelper {
                 renderJrbuddasAwesomeMainMenuRoomNew(poseStack);
             }
         }
+        poseStack.popPose();
     }
 
     /**

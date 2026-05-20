@@ -17,7 +17,7 @@ public class FabricMouseHandlerVRMixin {
     // this is stupid, but the locals have differnt ordinals on different modloaders
     @Inject(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getTutorial()Lnet/minecraft/client/tutorial/Tutorial;"))
     private void vivecraft$modifyMouseTravel(
-        CallbackInfo ci, @Local(ordinal = 1) LocalDoubleRef fabricX, @Local(ordinal = 2) LocalDoubleRef fabricY)
+        CallbackInfo ci, @Local(ordinal = 2) LocalDoubleRef fabricX, @Local(ordinal = 3) LocalDoubleRef fabricY)
     {
         if (VRState.VR_RUNNING) {
             Vector2d aimVelocity = MCVR.get().getControllerVelocity();

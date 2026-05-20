@@ -32,7 +32,7 @@ dependencies {
     modRuntimeOnly "maven.modrinth:sodium:mc1.20.4-0.5.8"
 
     // for iris compat
-    modRuntimeOnly "maven.modrinth:iris:1.7.2+1.20.4"
+    modCompileOnly "maven.modrinth:iris:1.7.2+1.20.4"
     modCompileOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modCompileOnly 'io.github.douira:glsl-transformer:2.0.1' //temp iris
 
