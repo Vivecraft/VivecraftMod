@@ -643,7 +643,7 @@ public abstract class VRRenderer {
                                     .withStyle(style -> style.withUnderlined(true)
                                         .withColor(ChatFormatting.GREEN)
                                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                            CommonComponents.GUI_OPEN_IN_BROWSER))
+                                            Component.translatable("chat.link.open")))
                                         .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
                                             "https://www.vivecraft.org/faq/#gpu"))))));
             }
