@@ -645,7 +645,7 @@ public class VREffectsHelper {
             (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
 
         // remove world rotation or the room doesn't align with the screen
-        poseStack.mulPose(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+        poseStack.mulPose(Vector3f.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
 
         if (DATA_HOLDER.menuWorldRenderer.isReady()) {
             try {

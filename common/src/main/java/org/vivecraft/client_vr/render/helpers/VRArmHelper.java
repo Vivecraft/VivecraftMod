@@ -198,7 +198,7 @@ public class VRArmHelper {
             0.0F, InteractionHand.MAIN_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
             poseStack, bufferSource,
             LevelRenderer.getLightColor(MC.player.level,
-                BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
+                new BlockPos(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
         bufferSource.endBatch();
 
@@ -254,7 +254,7 @@ public class VRArmHelper {
                 0.0F, InteractionHand.OFF_HAND, MC.player.getAttackAnim(partialTick), item, 0.0F,
                 poseStack, bufferSource,
                 LevelRenderer.getLightColor(MC.player.level,
-                    BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
+                    new BlockPos(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
             bufferSource.endBatch();
 
