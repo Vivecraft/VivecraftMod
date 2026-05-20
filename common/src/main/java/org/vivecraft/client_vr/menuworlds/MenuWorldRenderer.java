@@ -44,6 +44,7 @@ import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.client.blaze3d.BufferBuilderAccessor;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sable.SableHelper;
@@ -514,10 +515,14 @@ public class MenuWorldRenderer {
                 if (layer == RenderType.translucent()) {
                     bufferBuilder.setQuadSortOrigin(0, Mth.frac(this.blockAccess.getGround()), 0);
                 }
-                BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();
-                if (!renderedBuffer.isEmpty()) {
-                    uploadGeometry(layer, renderedBuffer);
+                if (((BufferBuilderAccessor) bufferBuilder).getVertices() > 0) {
+                    bufferBuilder.end();
+                    uploadGeometry(layer, bufferBuilder);
                     count++;
+                } else {
+                    // discard empty buffers
+                    bufferBuilder.end();
+                    bufferBuilder.discard();
                 }
                 totalMemory += ((BufferBuilderExtension) bufferBuilder).vivecraft$getBufferSize();
                 ((BufferBuilderExtension) bufferBuilder).vivecraft$freeBuffer();
