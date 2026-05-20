@@ -47,6 +47,9 @@ public class XRCamera extends Camera {
         if (ClientDataHolderVR.getInstance().isFirstPass || ShadersHelper.isSlowMode()) {
             ShadersHelper.SHADOW_CAMERA_POSITION = this.getPosition();
         }
+
+        // no detaching in VR please
+        this.detached = false;
     }
 
     /**
@@ -74,7 +77,8 @@ public class XRCamera extends Camera {
         renderSelf &= !(RenderPass.isFirstPerson(ClientDataHolderVR.getInstance().currentPass) &&
             this.getEntity() instanceof LivingEntity && ((LivingEntity) this.getEntity()).isSleeping()
         );
-        return renderSelf;
+        // detached is only true if some other mod has changed it since update
+        return renderSelf || this.detached;
     }
 
     /**

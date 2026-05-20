@@ -36,7 +36,11 @@ public class PlayerItemInHandLayerMixin {
         }
     }
 
-    @ModifyExpressionValue(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"))
+    @ModifyExpressionValue(method = "renderArmWithItem", at = {
+        @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"),
+        // neoforge
+        @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;canPerformAction(Lnet/neoforged/neoforge/common/ItemAbility;)Z")
+    }, require = 1)
     private boolean vivecraft$noSpyglassInFirstPerson(
         boolean isSpyglass, @Local(argsOnly = true) LivingEntity livingEntity)
     {

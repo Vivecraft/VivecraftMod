@@ -131,7 +131,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         // feet make more damage with boots
         if (ServerConfig.DUAL_WIELDING.get() && ServerConfig.BOOTS_ARMOR_DAMAGE.get() > 0) {
             ServerVivePlayer vivePlayer = vivecraft$getVivePlayer();
-            if (vivePlayer.isVR() && vivePlayer.activeBodyPart.isFoot() &&
+            if (vivePlayer != null && vivePlayer.isVR() && vivePlayer.getActiveItemBodyPart().isFoot() &&
                 !this.getItemBySlot(EquipmentSlot.FEET).isEmpty())
             {
                 float addedDamage = 0F;

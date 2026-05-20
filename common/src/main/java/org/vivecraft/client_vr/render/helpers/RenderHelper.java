@@ -20,6 +20,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
@@ -34,7 +35,9 @@ import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class RenderHelper {
@@ -42,6 +45,7 @@ public class RenderHelper {
     private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
     private static final Minecraft MC = Minecraft.getInstance();
 
+    public static final ResourceLocation DEBUG_CAPE = new ResourceLocation("vivecraft:textures/cape.png");
     public static final ResourceLocation WHITE_TEXTURE = new ResourceLocation("vivecraft:textures/white.png");
     public static final ResourceLocation BLACK_TEXTURE = new ResourceLocation("vivecraft:textures/black.png");
 
@@ -607,6 +611,8 @@ public class RenderHelper {
             .endVertex();
     }
 
+    private static final Map<String, Pair<Integer, Integer>> GL_ERRORS = new HashMap<>();
+
     /**
      * checks if there were any opengl errors since this was last called
      *
@@ -615,7 +621,13 @@ public class RenderHelper {
      */
     public static String checkGLError(String errorSection) {
         int error = GlStateManager._getError();
-        if (error != 0) {
+        int count = 0;
+        Pair<Integer, Integer> oldError = GL_ERRORS.get(errorSection);
+        if (error != 0 && oldError != null && oldError.getLeft() == error) {
+            count = oldError.getRight() + 1;
+        }
+        GL_ERRORS.put(errorSection, Pair.of(error, count));
+        if (error != 0 && count < 5) {
             String errorString = switch (error) {
                 case GL11C.GL_INVALID_ENUM -> "invalid enum";
                 case GL11C.GL_INVALID_VALUE -> "invalid value";
@@ -630,8 +642,9 @@ public class RenderHelper {
             VRSettings.LOGGER.error("Vivecraft: @ {}", errorSection);
             VRSettings.LOGGER.error("Vivecraft: {}: {}", error, errorString);
             return errorString;
-        } else {
-            return "";
+        } else if (count == 5) {
+            VRSettings.LOGGER.error("Vivecraft: repeated gl errors for {}, not logging anymore", errorSection);
         }
+        return "";
     }
 }

@@ -154,7 +154,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     private void vivecraft$returnCurrentVRPipeline165(
         NamespacedId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir)
     {
-        if (!RenderPassType.isVanilla()) {
+        if (!RenderPassType.isVanilla() && vivecraft$getCurrentVRPipeline(newDimension) != null) {
             this.pipeline = vivecraft$getCurrentVRPipeline(newDimension);
             IrisHelper.swapSSBOs(this.pipeline, ClientDataHolderVR.getInstance().currentPass);
             cir.setReturnValue(this.pipeline);
