@@ -126,9 +126,6 @@ public abstract class GameRendererVRMixin
     @Final
     private Camera mainCamera;
 
-    @Shadow
-    private int confusionAnimationTick;
-
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     private Camera vivecraft$replaceCamera() {
         return new XRCamera();
