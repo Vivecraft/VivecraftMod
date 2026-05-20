@@ -454,6 +454,8 @@ public class VRSettings {
     public boolean freezeEffect = true;   // default to on
     @SettingField(VrOptions.PUMPKIN_EFFECT)
     public boolean pumpkinEffect = true;   // default to on
+    @SettingField(VrOptions.SLEEP_EFFECT)
+    public boolean sleepEffect = true;   // default to on
     @SettingField(value = VrOptions.FOV_REDUCTION, config = "fovReduction")
     public boolean useFOVReduction = false;   // default to off
     @SettingField(VrOptions.FOV_REDUCTION_OFFSET)
@@ -1806,6 +1808,7 @@ public class VRSettings {
         PORTAL_EFFECT(OptionType.BOOLEAN), // distortion when standing in portal
         FREEZE_EFFECT(OptionType.BOOLEAN), // blue tint when freezing
         PUMPKIN_EFFECT(OptionType.BOOLEAN), // orange fov reduction for carved pumpkin
+        SLEEP_EFFECT(OptionType.BOOLEAN), // screen dimming while sleeping
         MIRROR_DISPLAY { // Desktop Mirror
 
             @Override

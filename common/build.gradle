@@ -3,11 +3,11 @@ architectury {
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/vivecraft.accesswidener")
+    accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
 }
 
 dependencies {
-    compileOnly project(':stubs')
+    compileOnly project(":stubs")
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
     modCompileOnly "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
@@ -44,7 +44,7 @@ dependencies {
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly('com.electronwill.night-config:toml:3.6.6')
 
-    //LaunchPopup
+    // LaunchPopup
     implementation 'com.github.Vivecraft:LaunchPopup:1.1.1'
 }
 // extract the LaunchPopup classes

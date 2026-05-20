@@ -7,9 +7,16 @@ pluginManagement {
     }
 }
 
+Properties properties = new Properties()
+File file = new File(rootProject.getProjectDir(), "local.properties")
+if (file.exists())
+    properties.load(new FileReader(file))
+
 include("common")
 include("stubs")
-include("fabric")
-include("forge")
+if (!"true".equals(properties.getProperty("project.build.excludeFabric")))
+    include("fabric")
+if (!"true".equals(properties.getProperty("project.build.excludeForge")))
+    include("forge")
 
 rootProject.name = "vivecraft"

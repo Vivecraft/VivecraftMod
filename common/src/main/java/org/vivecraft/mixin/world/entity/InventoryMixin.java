@@ -51,7 +51,7 @@ public class InventoryMixin {
                 ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
                 // older clients don't reset the active hand
                 if (NetworkVersion.DUAL_WIELDING.accepts(vivePlayer.networkVersion)) {
-                    bodyPart = vivePlayer.activeBodyPart;
+                    bodyPart = vivePlayer.getActiveItemBodyPart();
                 }
             }
         }
