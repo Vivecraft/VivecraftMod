@@ -203,7 +203,8 @@ public class ShaderHelper {
             int screenHeight = MC.mainRenderTarget.height;
 
             if (leftEye != null) {
-                ShaderHelper.blitFramebufferCrop(leftEye, MC.mainRenderTarget, 0, 0, screenWidth, screenHeight, 0.0F, 0.0F, DATA_HOLDER.vrSettings.dualMirrorCrop);
+                ShaderHelper.blitFramebufferCrop(leftEye, MC.mainRenderTarget, 0, 0, screenWidth, screenHeight, 0.0F,
+                    0.0F, DATA_HOLDER.vrSettings.dualMirrorCrop);
             }
 
             if (rightEye != null) {
