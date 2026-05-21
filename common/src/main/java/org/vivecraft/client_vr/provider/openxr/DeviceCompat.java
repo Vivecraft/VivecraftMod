@@ -45,7 +45,8 @@ public interface DeviceCompat {
 
         @Override
         public void initOpenXRLoader(MemoryStack stack) {
-            VRSettings.LOGGER.info("Platform: {}", System.getProperty("os.version"));
+            VRSettings.LOGGER.info("Platform: {}, version: {}", System.getProperty("os.name"),
+                System.getProperty("os.version"));
         }
 
         @Override

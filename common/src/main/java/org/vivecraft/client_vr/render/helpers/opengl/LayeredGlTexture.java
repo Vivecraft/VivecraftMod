@@ -13,7 +13,6 @@ import org.lwjgl.opengl.GL30C;
 
 public class LayeredGlTexture extends GlTexture {
 
-    protected final int id;
     private final int layer;
     private final Int2IntMap fboCache = new Int2IntOpenHashMap();
 
@@ -22,7 +21,6 @@ public class LayeredGlTexture extends GlTexture {
         int layer)
     {
         super(usage, label, format, width, height, depthOrLayers, mipLevels, id);
-        this.id = id;
         this.layer = layer;
     }
 

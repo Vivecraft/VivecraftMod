@@ -45,8 +45,12 @@ neoForge {
         }*/
 
         // openxr
-        // Use custom OpenXR lib for Android and GLES bindings
-        bundle(implementation("QuestCraftPlusPlus:lwjgl3:${rootProject.lwjgl_openxr_version}:lwjgl-openxr-${rootProject.lwjgl_openxr_version}") { transitive = false })
+        if (rootProject.use_custom_openxr == "true") {
+            // Use custom OpenXR lib for Android and GLES bindings
+            bundle(implementation("QuestCraftPlusPlus:lwjgl3:${rootProject.lwjgl_openxr_version}:lwjgl-openxr-${rootProject.lwjgl_openxr_version}") { transitive = false })
+        } else {
+            bundle(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_openxr_version}") { transitive = false })
+        }
         bundle(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_openxr_version}:natives-linux") { transitive = false })
         bundle(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_openxr_version}:natives-linux-arm64") { transitive = false })
         bundle(implementation("org.lwjgl:lwjgl-openxr:${rootProject.lwjgl_openxr_version}:natives-windows") { transitive = false })

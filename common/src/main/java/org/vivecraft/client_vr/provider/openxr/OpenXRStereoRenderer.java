@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.provider.openxr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
@@ -124,8 +125,10 @@ public class OpenXRStereoRenderer extends VRRenderer {
     @Override
     public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         XrFovf fov = this.openxr.viewBuffer.get(eyeType).fov();
-        return new Matrix4f().setPerspectiveOffCenterFov(fov.angleLeft(), fov.angleRight(), fov.angleDown(),
-            fov.angleUp(), nearClip, farClip);
+        return new Matrix4f().frustum(
+            fov.angleLeft() * nearClip, fov.angleRight() * nearClip,
+            fov.angleDown() * nearClip, fov.angleUp() * nearClip,
+            nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
     }
 
     @Override

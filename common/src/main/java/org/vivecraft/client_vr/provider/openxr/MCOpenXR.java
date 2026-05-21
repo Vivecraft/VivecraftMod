@@ -75,6 +75,25 @@ public class MCOpenXR extends MCVR<XRInputAction> {
     public String systemName;
     private final String[] activeController = new String[2];
 
+    private static final List<String> SUPPORTED_EXTENSIONS = List.of(
+        BDControllerInteraction.XR_BD_CONTROLLER_INTERACTION_EXTENSION_NAME,
+        EXTHPMixedRealityController.XR_EXT_HP_MIXED_REALITY_CONTROLLER_EXTENSION_NAME,
+        HTCViveCosmosControllerInteraction.XR_HTC_VIVE_COSMOS_CONTROLLER_INTERACTION_EXTENSION_NAME,
+        FBDisplayRefreshRate.XR_FB_DISPLAY_REFRESH_RATE_EXTENSION_NAME
+    );
+
+    // if true attaches validation layers, they need to be set up
+    private static final boolean USE_VALIDATION = false;
+    private static final List<String> VALIDATION_EXTENSIONS = List.of(
+        EXTDebugUtils.XR_EXT_DEBUG_UTILS_EXTENSION_NAME
+    );
+    private static final List<String> VALIDATION_LAYERS = List.of(
+        "XR_APILAYER_LUNARG_core_validation",
+        "XR_APILAYER_KHRONOS_best_practices_validation"
+    );
+
+    private XrDebugUtilsMessengerEXT debugMessanger = null;
+
     public record ActionBind(VRInputActionSet actionSet, String path) {}
 
     public Map<ActionBind, Long> mappedBindings = new HashMap<>();
@@ -97,6 +116,10 @@ public class MCOpenXR extends MCVR<XRInputAction> {
         for (Long inputActionSet : this.actionSetHandles.values()) {
             error = XR10.xrDestroyActionSet(new XrActionSet(inputActionSet, this.instance));
             logError(error, "xrDestroyActionSet", "");
+        }
+        if (this.debugMessanger != null) {
+            error = EXTDebugUtils.xrDestroyDebugUtilsMessengerEXT(this.debugMessanger);
+            logError(error, "xrDestroyDebugUtilsMessengerEXT", "");
         }
         if (this.swapchain != null) {
             error = XR10.xrDestroySwapchain(this.swapchain);
@@ -622,13 +645,22 @@ public class MCOpenXR extends MCVR<XRInputAction> {
         }
     }
 
+    private int referenceSpaceBoundsErrorCount = 0;
+
     @Override
     public Vector2f getPlayAreaSize() {
+        // if this errored multiple times it prrobably means the runtime doesn't support it
+        if (this.referenceSpaceBoundsErrorCount >= 10) return null;
         try (MemoryStack stack = MemoryStack.stackPush()) {
             XrExtent2Df vec = XrExtent2Df.calloc(stack);
             int error = XR10.xrGetReferenceSpaceBoundsRect(this.session, XR10.XR_REFERENCE_SPACE_TYPE_STAGE, vec);
             logError(error, "xrGetReferenceSpaceBoundsRect", "");
-            return new Vector2f(vec.width(), vec.height());
+            if (error != XR10.XR_SPACE_BOUNDS_UNAVAILABLE) {
+                return new Vector2f(vec.width(), vec.height());
+            } else {
+                this.referenceSpaceBoundsErrorCount++;
+                return null;
+            }
         }
     }
 
@@ -694,7 +726,9 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             // get needed extensions
             String graphicsExtension = this.device.getGraphicsExtension();
             boolean missingGraphics = true;
-            PointerBuffer extensions = stack.callocPointer(5);
+            int foundValidationExtensions = 0;
+            PointerBuffer extensions = stack.callocPointer(
+                1 + SUPPORTED_EXTENSIONS.size() + (USE_VALIDATION ? VALIDATION_EXTENSIONS.size() : 0));
             while (properties.hasRemaining()) {
                 XrExtensionProperties prop = properties.get();
                 String extensionName = prop.extensionNameString();
@@ -702,34 +736,51 @@ public class MCOpenXR extends MCVR<XRInputAction> {
                     missingGraphics = false;
                     extensions.put(memAddress(stackUTF8(graphicsExtension)));
                 }
-                if (extensionName.equals(
-                    EXTHPMixedRealityController.XR_EXT_HP_MIXED_REALITY_CONTROLLER_EXTENSION_NAME))
-                {
-                    extensions.put(memAddress(
-                        stackUTF8(EXTHPMixedRealityController.XR_EXT_HP_MIXED_REALITY_CONTROLLER_EXTENSION_NAME)));
+                if (SUPPORTED_EXTENSIONS.contains(extensionName)) {
+                    extensions.put(memAddress(stackUTF8(extensionName)));
                 }
-                if (extensionName.equals(
-                    HTCViveCosmosControllerInteraction.XR_HTC_VIVE_COSMOS_CONTROLLER_INTERACTION_EXTENSION_NAME))
-                {
-                    extensions.put(memAddress(stackUTF8(
-                        HTCViveCosmosControllerInteraction.XR_HTC_VIVE_COSMOS_CONTROLLER_INTERACTION_EXTENSION_NAME)));
-                }
-                if (extensionName.equals(
-                    BDControllerInteraction.XR_BD_CONTROLLER_INTERACTION_EXTENSION_NAME))
-                {
-                    extensions.put(memAddress(stackUTF8(
-                        BDControllerInteraction.XR_BD_CONTROLLER_INTERACTION_EXTENSION_NAME)));
-                }
-                if (extensionName.equals(
-                    FBDisplayRefreshRate.XR_FB_DISPLAY_REFRESH_RATE_EXTENSION_NAME))
-                {
-                    extensions.put(memAddress(stackUTF8(
-                        FBDisplayRefreshRate.XR_FB_DISPLAY_REFRESH_RATE_EXTENSION_NAME)));
+                if (USE_VALIDATION && VALIDATION_EXTENSIONS.contains(extensionName)) {
+                    extensions.put(memAddress(stackUTF8(extensionName)));
+                    foundValidationExtensions++;
                 }
             }
 
             if (missingGraphics) {
                 throw new RuntimeException("OpenXR runtime is missing a supported graphics extension.");
+            }
+            if (USE_VALIDATION && foundValidationExtensions != VALIDATION_EXTENSIONS.size()) {
+                throw new RuntimeException("OpenXR Validation requested, but missing one of the needed extensions.");
+            }
+
+            PointerBuffer layers = null;
+            if (USE_VALIDATION) {
+                // api layers
+                IntBuffer numLayers = stack.callocInt(1);
+                error = XR10.xrEnumerateApiLayerProperties(numLayers, null);
+                logError(error, "xrEnumerateApiLayerProperties", "get count");
+
+                XrApiLayerProperties.Buffer apiProperties = new XrApiLayerProperties.Buffer(
+                    bufferStack(numLayers.get(0), XrApiLayerProperties.SIZEOF, XR10.XR_TYPE_API_LAYER_PROPERTIES)
+                );
+
+                // Load layers
+                error = XR10.xrEnumerateApiLayerProperties(numLayers, apiProperties);
+                logError(error, "xrEnumerateApiLayerProperties", "get layers");
+
+                // get needed layers
+                layers = stack.callocPointer(VALIDATION_LAYERS.size());
+                while (apiProperties.hasRemaining()) {
+                    XrApiLayerProperties prop = apiProperties.get();
+                    String layerName = prop.layerNameString();
+                    if (VALIDATION_LAYERS.contains(layerName)) {
+                        layers.put(memAddress(stackUTF8(layerName)));
+                    }
+                }
+                if (layers.position() != VALIDATION_LAYERS.size()) {
+                    throw new RuntimeException(
+                        "Validation layer not available, is the 'XR_API_LAYER_PATH' environment variable pointing to the OpenXR SDK layers?");
+                }
+                layers.flip();
             }
 
             // Create APP info
@@ -744,7 +795,8 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             createInfo.next(this.device.getPlatformInfo(stack));
             createInfo.createFlags(0);
             createInfo.applicationInfo(applicationInfo);
-            createInfo.enabledApiLayerNames(null);
+
+            createInfo.enabledApiLayerNames(layers);
             createInfo.enabledExtensionNames(extensions.flip());
 
             // Create XR instance
@@ -755,9 +807,13 @@ public class MCOpenXR extends MCVR<XRInputAction> {
             } else if (xrResult == XR10.XR_ERROR_INSTANCE_LOST) {
                 throw new RuntimeException("Failed to create xrInstance due to runtime updating");
             } else if (xrResult < 0) {
-                throw new RuntimeException("XR method returned " + xrResult);
+                throw new RuntimeException("XR method returned: " + getResultName(xrResult));
             }
             this.instance = new XrInstance(instancePtr.get(0), createInfo);
+
+            if (USE_VALIDATION) {
+                registerDebugCallback(stack);
+            }
 
             this.poseMatrices = new Matrix4f[64];
 
@@ -767,6 +823,53 @@ public class MCOpenXR extends MCVR<XRInputAction> {
 
             this.initSuccess = true;
         }
+    }
+
+    private void registerDebugCallback(MemoryStack stack) {
+        // register debug callback
+        XrDebugUtilsMessengerCreateInfoEXT debugCreateInfo = XrDebugUtilsMessengerCreateInfoEXT.calloc(stack);
+        debugCreateInfo.type(EXTDebugUtils.XR_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT);
+        debugCreateInfo.messageSeverities(
+            EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
+        debugCreateInfo.messageTypes(
+            EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT);
+        debugCreateInfo.userCallback((messageSeverity, messageTypes, callbackData, userData) -> {
+            // no closing, since we do not own the content
+            String message = XrDebugUtilsMessengerCallbackDataEXT.create(callbackData).messageString();
+
+            List<String> types = new ArrayList<>();
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) != 0) {
+                types.add("General");
+            }
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) != 0) {
+                types.add("Validation");
+            }
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) != 0) {
+                types.add("Performance");
+            }
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT) != 0) {
+                types.add("Conformance");
+            }
+            if (types.isEmpty()) {
+                types.add("Unknown(" + messageTypes + ")");
+            }
+
+            if (messageSeverity == EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+                VRSettings.LOGGER.error("Vivecraft: OpenXR: {}: {} ", String.join(",", types), message);
+            } else {
+                VRSettings.LOGGER.warn("Vivecraft: OpenXR: {}: {} ", String.join(",", types), message);
+            }
+            return XR10.XR_FALSE;
+        });
+        PointerBuffer messanger = stack.callocPointer(1);
+        EXTDebugUtils.xrCreateDebugUtilsMessengerEXT(this.instance, debugCreateInfo, messanger);
+        this.debugMessanger = new XrDebugUtilsMessengerEXT(messanger.get(), this.instance);
     }
 
     public static MCOpenXR get() {
@@ -820,7 +923,7 @@ public class MCOpenXR extends MCVR<XRInputAction> {
 
             PointerBuffer sessionPtr = stack.callocPointer(1);
             error = XR10.xrCreateSession(this.instance, info, sessionPtr);
-            logError(error, "xrCreateSession", "");
+            logErrorAndThrow(error, "xrCreateSession", "Failed to create session: ", "");
 
             this.session = new XrSession(sessionPtr.get(0), this.instance);
 
@@ -1442,8 +1545,26 @@ public class MCOpenXR extends MCVR<XRInputAction> {
         }
     }
 
+    /**
+     * logs only errors and throwns an exeption if it errored
+     *
+     * @param xrResult     result to check
+     * @param caller       where the xrResult came from
+     * @param errorMessage Message to show in the thrown exception
+     * @param args         arguments may be helpful in locating the error
+     * @throws RuntimeException if an error occured
+     */
+    protected void logErrorAndThrow(
+        int xrResult, String caller, String errorMessage, String... args) throws RuntimeException
+    {
+        if (xrResult < 0) {
+            logError(xrResult, caller, args);
+            throw new RuntimeException(errorMessage + " " + getResultName(xrResult));
+        }
+    }
+
     //TODO remove/rework
     public Map<String, XRInputAction> getBinds() {
-        return inputActions;
+        return this.inputActions;
     }
 }
