@@ -40,8 +40,8 @@ public class KeyboardHandlerVRMixin {
                 org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
 
                 // close chat with the keyboard
-                if (this.minecraft.screen instanceof ChatScreen) {
-                    this.minecraft.screen.onClose();
+                if (this.minecraft.gui.screen() instanceof ChatScreen) {
+                    this.minecraft.gui.screen().onClose();
                 }
                 ci.cancel();
             }

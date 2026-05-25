@@ -1,21 +1,27 @@
 package org.vivecraft.client_vr.provider;
 
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.ProjectionType;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.Util;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -29,8 +35,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -42,6 +48,8 @@ import oshi.hardware.GraphicsCard;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 public abstract class VRRenderer {
@@ -67,6 +75,7 @@ public abstract class VRRenderer {
 
     // Stencil mesh buffer for each eye
     protected float[][] hiddenMeshVertices = new float[2][];
+    private GpuBuffer[] bakedHiddenMesh = new GpuBuffer[2];
 
     // variables to check setting changes that need framebuffers reinits/resizes
     private boolean improvedTransparency = false;
@@ -79,7 +88,7 @@ public abstract class VRRenderer {
     public float renderScale;
 
     // render resolution set by the VR runtime, includes the supersampling factor
-    protected Tuple<Integer, Integer> resolution;
+    protected Vector2ic resolution;
 
     // supersampling set by the vr runtime
     public float ss = -1.0F;
@@ -155,6 +164,59 @@ public abstract class VRRenderer {
             return eye == RenderPass.LEFT ? this.hiddenMeshVertices[0] : this.hiddenMeshVertices[1];
         } else {
             return null;
+        }
+    }
+
+    /**
+     * gets a baked GpuBuffer of the stencil mesh, if there is one provided by this renderer
+     *
+     * @param eye which eye the stencil should be for
+     * @return the stencil for that eye, if available
+     */
+    public GpuBuffer getBakedStencilMask(RenderPass eye) {
+        if (eye == RenderPass.LEFT || eye == RenderPass.RIGHT) {
+            return eye == RenderPass.LEFT ? this.bakedHiddenMesh[0] : this.bakedHiddenMesh[1];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * bakes the stencil mesh for both eyes, if they are available
+     */
+    public void bakeStencilMasks() {
+        if (this.bakedHiddenMesh[0] != null) {
+            this.bakedHiddenMesh[0].close();
+            this.bakedHiddenMesh[0] = null;
+        }
+        if (this.bakedHiddenMesh[1] != null) {
+            this.bakedHiddenMesh[1].close();
+            this.bakedHiddenMesh[1] = null;
+        }
+        for (int i = 0; i < this.hiddenMeshVertices.length; ++i) {
+            float[] vertices = this.hiddenMeshVertices[i];
+            if (vertices == null) continue;
+            try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
+                vertices.length / 2 * DefaultVertexFormat.POSITION_COLOR.getVertexSize()))
+            {
+                BufferBuilder builder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLES,
+                    DefaultVertexFormat.POSITION_COLOR);
+
+                for (int v = 0; i < vertices.length; i += 2) {
+                    builder.addVertex(
+                            vertices[v] + 0.5F,
+                            vertices[v + 1] + 0.5F,
+                            0.0F)
+                        .setColor(0, 0, 0, 255);
+                }
+
+                try (MeshData meshData = builder.buildOrThrow()) {
+                    String eye = i == 0 ? "Left" : "Right";
+                    this.bakedHiddenMesh[i] = RenderSystem.getDevice()
+                        .createBuffer(() -> eye + " Stencil", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_VERTEX,
+                            meshData.vertexBuffer());
+                }
+            }
         }
     }
 
@@ -240,7 +302,8 @@ public abstract class VRRenderer {
      * @param height height of the circle in screen pixels
      */
     private void drawCircle(float width, float height) {
-        RenderType renderType = VRRenderTypes.triangleFanAlways();
+        // TODO
+        /*RenderType renderType = VRRenderTypes.triangleFanAlways();
         VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
         final float edges = 32.0F;
@@ -260,7 +323,7 @@ public abstract class VRRenderer {
                 .setColor(0, 0, 0, 255);
         }
 
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);*/
     }
 
     /**
@@ -268,21 +331,34 @@ public abstract class VRRenderer {
      */
     private void drawMask() {
         float[] verts = getStencilMask(ClientDataHolderVR.getInstance().currentPass);
-        if (verts == null) {
+        GpuBuffer buffer = getBakedStencilMask(ClientDataHolderVR.getInstance().currentPass);
+        if (verts == null || buffer == null) {
             return;
         }
 
-        RenderType renderType = VRRenderTypes.trianglesAlways();
-        VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
+        int count = verts.length / 2;
 
-        for (int i = 0; i < verts.length; i += 2) {
-            builder.addVertex(
-                    verts[i] * this.renderScale,
-                    verts[i + 1] * this.renderScale,
-                    0.0F)
-                .setColor(0, 0, 0, 255);
+        RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(PrimitiveTopology.TRIANGLES);
+        GpuBuffer indexBuffer = autoIndices.getBuffer(count);
+        GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
+            .writeTransform(RenderSystem.getModelViewMatrixCopy());
+
+        RenderTarget target = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+
+        try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
+            .createRenderPass(() -> "Stencil " + ClientDataHolderVR.getInstance().currentPass,
+                target.getColorTextureView(), Optional.empty(), target.getDepthTextureView(), OptionalDouble.empty()))
+        {
+            renderPass.setPipeline(VRShaders.TRIANGLES_ALWAYS);
+            RenderSystem.bindDefaultUniforms(renderPass);
+            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
+            renderPass.bindTexture("Sampler0",
+                Minecraft.getInstance().getTextureManager().getTexture(RenderHelper.BLACK_TEXTURE).getTextureView(),
+                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
+            renderPass.setVertexBuffer(0, buffer.slice());
+            renderPass.setIndexBuffer(indexBuffer, autoIndices.type());
+            renderPass.drawIndexed(count, 1, 0, 0, 0);
         }
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
     }
 
     /**
@@ -358,7 +434,7 @@ public abstract class VRRenderer {
     /**
      * @return resolution of the headset view
      */
-    public abstract Tuple<Integer, Integer> getRenderTextureSizes();
+    public abstract Vector2ic getRenderTextureSizes();
 
     /**
      * calculates the resolution of first/third person mirror view
@@ -368,7 +444,7 @@ public abstract class VRRenderer {
      * @param resolutionScale render scale from 3rd party mods
      * @return resolution of the desktop view mirror
      */
-    public Tuple<Integer, Integer> getMirrorTextureSize(int eyeFBWidth, int eyeFBHeight, float resolutionScale) {
+    public Vector2i getMirrorTextureSize(int eyeFBWidth, int eyeFBHeight, float resolutionScale) {
         this.mirrorFBWidth = (int) Math.ceil(
             ((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenWidth() *
                 resolutionScale);
@@ -388,7 +464,7 @@ public abstract class VRRenderer {
             this.mirrorFBWidth = eyeFBWidth;
             this.mirrorFBHeight = eyeFBHeight;
         }
-        return new Tuple<>(this.mirrorFBWidth, this.mirrorFBHeight);
+        return new Vector2i(this.mirrorFBWidth, this.mirrorFBHeight);
     }
 
     /**
@@ -398,7 +474,7 @@ public abstract class VRRenderer {
      * @param eyeFBHeight headset view height
      * @return resolution of the telescope view
      */
-    public Tuple<Integer, Integer> getTelescopeTextureSize(int eyeFBWidth, int eyeFBHeight) {
+    public Vector2i getTelescopeTextureSize(int eyeFBWidth, int eyeFBHeight) {
         int telescopeFBwidth = 720;
         int telescopeFBheight = 720;
 
@@ -406,7 +482,7 @@ public abstract class VRRenderer {
             telescopeFBwidth = eyeFBWidth;
             telescopeFBheight = eyeFBHeight;
         }
-        return new Tuple<>(telescopeFBwidth, telescopeFBheight);
+        return new Vector2i(telescopeFBwidth, telescopeFBheight);
     }
 
     /**
@@ -416,7 +492,7 @@ public abstract class VRRenderer {
      * @param eyeFBHeight headset view height
      * @return resolution of the screenshot camera view
      */
-    public Tuple<Integer, Integer> getCameraTextureSize(int eyeFBWidth, int eyeFBHeight) {
+    public Vector2i getCameraTextureSize(int eyeFBWidth, int eyeFBHeight) {
         int cameraFBwidth = Math.round(1920.0F * ClientDataHolderVR.getInstance().vrSettings.handCameraResScale);
         int cameraFBheight = Math.round(1080.0F * ClientDataHolderVR.getInstance().vrSettings.handCameraResScale);
 
@@ -431,7 +507,7 @@ public abstract class VRRenderer {
                 cameraFBheight = eyeFBHeight;
             }
         }
-        return new Tuple<>(cameraFBwidth, cameraFBheight);
+        return new Vector2i(cameraFBwidth, cameraFBheight);
     }
 
     /**
@@ -519,9 +595,9 @@ public abstract class VRRenderer {
         }
 
         if (this.resizeFrameBuffers && !this.reinitFrameBuffers) {
-            Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
-            int eyew = tuple.getA();
-            int eyeh = tuple.getB();
+            Vector2ic size = this.getRenderTextureSizes();
+            int eyew = size.x();
+            int eyeh = size.y();
 
             float resolutionScale =
                 ResolutionControlHelper.isLoaded() ? ResolutionControlHelper.getCurrentScaleFactor() : 1.0F;
@@ -530,9 +606,9 @@ public abstract class VRRenderer {
             int eyeFBWidth = (int) Math.ceil(eyew * this.renderScale);
             int eyeFBHeight = (int) Math.ceil(eyeh * this.renderScale);
 
-            Tuple<Integer, Integer> mirrorSize = getMirrorTextureSize(eyeFBWidth, eyeFBHeight, resolutionScale);
-            Tuple<Integer, Integer> telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
-            Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
+            Vector2i mirrorSize = getMirrorTextureSize(eyeFBWidth, eyeFBHeight, resolutionScale);
+            Vector2i telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
+            Vector2i cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
 
             // main render target
             if (dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported()) {
@@ -547,12 +623,12 @@ public abstract class VRRenderer {
             }
 
             // mirror
-            if (mirrorSize.getA() > 0 && mirrorSize.getB() > 0) {
+            if (mirrorSize.x > 0 && mirrorSize.y > 0) {
                 if (WorldRenderPass.CENTER != null) {
-                    WorldRenderPass.CENTER.resize(mirrorSize.getA(), mirrorSize.getB());
+                    WorldRenderPass.CENTER.resize(mirrorSize.x, mirrorSize.y);
                 }
                 if (WorldRenderPass.MIXED_REALITY != null) {
-                    WorldRenderPass.MIXED_REALITY.resize(mirrorSize.getA(), mirrorSize.getB());
+                    WorldRenderPass.MIXED_REALITY.resize(mirrorSize.x, mirrorSize.y);
                 }
                 this.mirrorFramebuffer.resize(
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
@@ -560,15 +636,15 @@ public abstract class VRRenderer {
             }
 
             // telescopes
-            WorldRenderPass.LEFT_TELESCOPE.resize(telescopeSize.getA(), telescopeSize.getB());
-            WorldRenderPass.RIGHT_TELESCOPE.resize(telescopeSize.getA(), telescopeSize.getB());
+            WorldRenderPass.LEFT_TELESCOPE.resize(telescopeSize.x, telescopeSize.y);
+            WorldRenderPass.RIGHT_TELESCOPE.resize(telescopeSize.x, telescopeSize.y);
 
             // camera
-            this.cameraFramebuffer.resize(cameraSize.getA(), cameraSize.getB());
+            this.cameraFramebuffer.resize(cameraSize.x, cameraSize.y);
             if (ShadersHelper.needsSameSizeBuffers()) {
                 WorldRenderPass.CAMERA.resize(eyeFBWidth, eyeFBHeight);
             } else {
-                WorldRenderPass.CAMERA.resize(cameraSize.getA(), cameraSize.getB());
+                WorldRenderPass.CAMERA.resize(cameraSize.x, cameraSize.y);
             }
 
             // resize gui, if changed
@@ -584,10 +660,10 @@ public abstract class VRRenderer {
 
                 ((RenderTargetExtension) KeyboardHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
                 KeyboardHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
-                if (minecraft.screen != null) {
+                if (minecraft.gui.screen() != null) {
                     int guiWidth = minecraft.getWindow().getGuiScaledWidth();
                     int guiHeight = minecraft.getWindow().getGuiScaledHeight();
-                    minecraft.screen.init(guiWidth, guiHeight);
+                    minecraft.gui.screen().init(guiWidth, guiHeight);
                 }
             }
             // need to recall this, for PostChains to get the right resize
@@ -601,7 +677,7 @@ public abstract class VRRenderer {
 
             // intel drivers have issues with opengl interop on windows so throw an error
             if (Util.getPlatform() == Util.OS.WINDOWS &&
-                RenderSystem.getDevice().getRenderer().toLowerCase().contains("intel") &&
+                RenderSystem.getDevice().getDeviceInfo().name().toLowerCase().contains("intel") &&
                 dataholder.vrSettings.blockIntelWindows)
             {
                 StringBuilder gpus = new StringBuilder();
@@ -620,7 +696,8 @@ public abstract class VRRenderer {
                 }
                 throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"),
                     Component.translatable("vivecraft.messages.intelgraphics1",
-                        Component.literal(RenderSystem.getDevice().getRenderer()).withStyle(ChatFormatting.GOLD),
+                        Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
+                            .withStyle(ChatFormatting.GOLD),
                         gpus.toString(),
                         onlyIntel ? Component.empty() :
                             Component.translatable("vivecraft.messages.intelgraphics2",
@@ -638,9 +715,9 @@ public abstract class VRRenderer {
                     Component.literal(this.getInitError()));
             }
 
-            Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
-            int eyew = tuple.getA();
-            int eyeh = tuple.getB();
+            Vector2ic size = this.getRenderTextureSizes();
+            int eyew = size.x();
+            int eyeh = size.y();
 
             destroyBuffers();
 
@@ -754,10 +831,10 @@ public abstract class VRRenderer {
             RenderHelper.checkGLError("Radial framebuffer setup");
 
 
-            Tuple<Integer, Integer> telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
+            Vector2i telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
 
             this.telescopeFramebufferR = VRTextureTarget.builder("TelescopeR")
-                .withSize(telescopeSize.getA(), telescopeSize.getB())
+                .withSize(telescopeSize.x, telescopeSize.y)
                 .withDepth()
                 .withClearColor(0F, 0F, 0F, 1F)
                 .build();
@@ -766,7 +843,7 @@ public abstract class VRRenderer {
             RenderHelper.checkGLError("TelescopeR framebuffer setup");
 
             this.telescopeFramebufferL = VRTextureTarget.builder("TelescopeL")
-                .withSize(telescopeSize.getA(), telescopeSize.getB())
+                .withSize(telescopeSize.x, telescopeSize.y)
                 .withDepth()
                 .withClearColor(0F, 0F, 0F, 1F)
                 .build();
@@ -774,9 +851,9 @@ public abstract class VRRenderer {
             VRSettings.LOGGER.info("Vivecraft: {}", this.telescopeFramebufferL);
             RenderHelper.checkGLError("TelescopeL framebuffer setup");
 
-            Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
-            int cameraRenderFBwidth = cameraSize.getA();
-            int cameraRenderFBheight = cameraSize.getB();
+            Vector2i cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
+            int cameraRenderFBwidth = cameraSize.x;
+            int cameraRenderFBheight = cameraSize.y;
 
             if (ShadersHelper.needsSameSizeBuffers()) {
                 cameraRenderFBwidth = eyeFBWidth;
@@ -784,7 +861,7 @@ public abstract class VRRenderer {
             }
 
             this.cameraFramebuffer = VRTextureTarget.builder("Handheld Camera")
-                .withSize(cameraSize.getA(), cameraSize.getB())
+                .withSize(cameraSize.x, cameraSize.y)
                 .withDepth()
                 .withClearColor(0F, 0F, 0F, 1F)
                 .build();
@@ -829,10 +906,10 @@ public abstract class VRRenderer {
             // update post effect chain
             minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
 
-            if (minecraft.screen != null) {
+            if (minecraft.gui.screen() != null) {
                 int w = minecraft.getWindow().getGuiScaledWidth();
                 int h = minecraft.getWindow().getGuiScaledHeight();
-                minecraft.screen.init(w, h);
+                minecraft.gui.screen().init(w, h);
             }
 
             long windowPixels =
@@ -866,12 +943,12 @@ public abstract class VRRenderer {
                 String.format("%.1f", windowPixels / 1000000.0F),
                 String.format("%.1f", pixelsPerFrame / 1000000.0F));
 
+            // updates the size of the outline target
+            minecraft.levelRenderer.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
+
             if (ClientDataHolderVR.getInstance().vrSettings.fullReloadOnInit) {
                 // do a full reload
                 minecraft.reloadResourcePacks();
-            } else {
-                // regenerates the outline target to have every pass in it
-                minecraft.levelRenderer.onResourceManagerReload(minecraft.getResourceManager());
             }
 
             ShadersHelper.maybeReloadShaders();

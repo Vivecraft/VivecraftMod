@@ -3,8 +3,9 @@ package org.vivecraft.client_vr.provider.nullvr;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.MCVR;
@@ -22,11 +23,10 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public Tuple<Integer, Integer> getRenderTextureSizes() {
+    public Vector2ic getRenderTextureSizes() {
         if (this.resolution == null) {
-            this.resolution = new Tuple<>(2048, 2048);
-            VRSettings.LOGGER.info("Vivecraft: NullVR Render Res {}x{}", this.resolution.getA(),
-                this.resolution.getB());
+            this.resolution = new Vector2i(2048, 2048);
+            VRSettings.LOGGER.info("Vivecraft: NullVR Render Res {}x{}", this.resolution.x(), this.resolution.y());
             this.ss = -1.0F;
             VRSettings.LOGGER.info("Vivecraft: NullVR Supersampling: {}", this.ss);
         }
@@ -51,7 +51,7 @@ public class NullVRStereoRenderer extends VRRenderer {
         return new Matrix4f().setPerspectiveOffCenter(
             Mth.DEG_TO_RAD * ClientDataHolderVR.getInstance().vrSettings.nullvrFOV,
             Mth.DEG_TO_RAD * ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle * (eyeType == 0 ? -1F : 1F), 0F,
-            1.0F, nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
+            1.0F, nearClip, farClip, RenderSystem.getDevice().getDeviceInfo().isZZeroToOne());
     }
 
     @Override

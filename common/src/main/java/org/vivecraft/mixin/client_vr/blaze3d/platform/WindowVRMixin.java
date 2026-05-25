@@ -28,9 +28,6 @@ public abstract class WindowVRMixin implements WindowExtension {
     private int height;
 
     @Shadow
-    private boolean isResized;
-
-    @Shadow
     @Final
     private WindowEventHandler eventHandler;
 
@@ -43,14 +40,14 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Inject(method = "getWidth", at = @At("HEAD"), cancellable = true)
     private void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
-            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().width);
+            cir.setReturnValue(Minecraft.getInstance().gameRenderer.mainRenderTarget().width);
         }
     }
 
     @Inject(method = "getHeight", at = @At("HEAD"), cancellable = true)
     private void vivecraft$getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
-            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().height);
+            cir.setReturnValue(Minecraft.getInstance().gameRenderer.mainRenderTarget().height);
         }
     }
 
@@ -73,7 +70,8 @@ public abstract class WindowVRMixin implements WindowExtension {
     private void vivecraft$getScaledHeight(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
             cir.setReturnValue(
-                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
+                Minecraft.getInstance().gui.screen() == null &&
+                    ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
                     GuiHandler.SCALED_HEIGHT_MAX : GuiHandler.SCALED_HEIGHT);
         }
     }
@@ -82,7 +80,8 @@ public abstract class WindowVRMixin implements WindowExtension {
     private void vivecraft$getScaledWidth(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
             cir.setReturnValue(
-                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
+                Minecraft.getInstance().gui.screen() == null &&
+                    ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
                     GuiHandler.SCALED_WIDTH_MAX : GuiHandler.SCALED_WIDTH);
         }
     }
@@ -91,7 +90,8 @@ public abstract class WindowVRMixin implements WindowExtension {
     private void vivecraft$getScaleFactor(CallbackInfoReturnable<Integer> cir) {
         if (VRState.VR_RUNNING) {
             cir.setReturnValue(
-                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
+                Minecraft.getInstance().gui.screen() == null &&
+                    ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
                     GuiHandler.GUI_SCALE_FACTOR_MAX : GuiHandler.GUI_SCALE_FACTOR);
         }
     }
@@ -123,7 +123,6 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Override
     @Unique
     public void vivecraft$resize() {
-        this.isResized = true;
-        this.eventHandler.resizeGui();
+        this.eventHandler.framebufferSizeChanged();
     }
 }

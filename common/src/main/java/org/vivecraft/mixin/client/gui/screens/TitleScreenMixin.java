@@ -65,7 +65,7 @@ public abstract class TitleScreenMixin extends Screen {
         this.addRenderableWidget(this.vivecraft$vrModeButton);
 
         this.vivecraft$updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"),
-            (button) -> this.minecraft.setScreen(new UpdateScreen()))
+            (button) -> this.minecraft.gui.setScreen(new UpdateScreen()))
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 96)
             .build();

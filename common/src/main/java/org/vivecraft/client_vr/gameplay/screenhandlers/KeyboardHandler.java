@@ -71,11 +71,11 @@ public class KeyboardHandler {
             }
 
             SHOWING = true;
-            orientOverlay(MC.screen != null);
+            orientOverlay(MC.gui.screen() != null);
             RadialHandler.setOverlayShowing(false, null);
 
-            if (DH.vrSettings.physicalKeyboard && MC.screen != null) {
-                GuiHandler.onScreenChanged(MC.screen, MC.screen, false);
+            if (DH.vrSettings.physicalKeyboard && MC.gui.screen() != null) {
+                GuiHandler.onScreenChanged(MC.gui.screen(), MC.gui.screen(), false);
             }
         } else {
             SHOWING = false;

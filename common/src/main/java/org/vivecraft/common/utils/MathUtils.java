@@ -33,6 +33,10 @@ public class MathUtils {
     public static final Vector3fc DARK_GRAY = new Vector3f(0.25F);
     public static final Vector3fc LIGHT_GRAY = new Vector3f(0.75F);
 
+    public static final Vector4fc BLACK_TRANSPARENT = new Vector4f(0F, 0F, 0F, 0F);
+    public static final Vector4fc BLACK_SOLID = new Vector4f(0F, 0F, 0F, 1F);
+    public static final Vector4fc WHITE_SOLID = new Vector4f(1F, 1F, 1F, 1F);
+
     public static final int RED_INT = 0xFFFF0000;
     public static final int GREEN_INT = 0xFF00FF00;
     public static final int BLUE_INT = 0xFF0000FF;

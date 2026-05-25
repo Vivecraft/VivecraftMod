@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
-import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -8,10 +8,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.ModelPartSubmitExtension;
+import org.vivecraft.client_vr.extensions.ModelFeatureRendererSubmitExtension;
 
-@Mixin(SubmitNodeStorage.ModelPartSubmit.class)
-public class ModelPartSubmitVRMixin implements ModelPartSubmitExtension {
+@Mixin(ModelFeatureRenderer.Submit.class)
+public class ModelFeatureRendererSubmitVRMixin implements ModelFeatureRendererSubmitExtension {
 
     @Unique
     private boolean vivecraft$isFpHand;

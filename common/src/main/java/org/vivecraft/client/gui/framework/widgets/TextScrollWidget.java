@@ -122,10 +122,10 @@ public class TextScrollWidget extends AbstractWidget {
             if (style != null && style.getClickEvent() != null) {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.player != null) {
-                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), mc, mc.screen);
+                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), mc, mc.gui.screen());
                 } else {
                     // skip the ingame click events and directly call the general ones
-                    Screen.defaultHandleClickEvent(style.getClickEvent(), mc, mc.screen);
+                    Screen.defaultHandleClickEvent(style.getClickEvent(), mc, mc.gui.screen());
                 }
             }
         }

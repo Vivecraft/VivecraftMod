@@ -16,7 +16,7 @@ public class UpdateScreen extends Screen {
 
     public UpdateScreen() {
         super(Component.translatable("vivecraft.messages.updateTitle"));
-        this.lastScreen = Minecraft.getInstance().screen;
+        this.lastScreen = Minecraft.getInstance().gui.screen();
     }
 
     @Override
@@ -40,7 +40,7 @@ public class UpdateScreen extends Screen {
                 .build());
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("gui.back"), (p) ->
-            Minecraft.getInstance().setScreen(this.lastScreen))
+            Minecraft.getInstance().gui.setScreen(this.lastScreen))
             .pos(this.width / 2 - 75, this.height - 32)
             .size(150, 20)
             .build());
@@ -54,6 +54,6 @@ public class UpdateScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.lastScreen);
+        this.minecraft.gui.setScreen(this.lastScreen);
     }
 }

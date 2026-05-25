@@ -28,7 +28,7 @@ public class RenderPassManager {
     public static void setWorldRenderPass(WorldRenderPass wrp) {
         RenderPassManager.WRP = wrp;
         RENDER_PASS_TYPE = RenderPassType.WORLD_ONLY;
-        MC.mainRenderTarget = wrp.target;
+        MC.gameRenderer.mainRenderTarget = wrp.target;
     }
 
     /**
@@ -38,7 +38,7 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.GUI_ONLY;
-        MC.mainRenderTarget = GuiHandler.GUI_FRAMEBUFFER;
+        MC.gameRenderer.mainRenderTarget = GuiHandler.GUI_FRAMEBUFFER;
     }
 
     /**
@@ -48,7 +48,7 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.MIRROR;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.GUI_ONLY;
-        MC.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.mirrorFramebuffer;
+        MC.gameRenderer.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.mirrorFramebuffer;
     }
 
     /**
@@ -58,6 +58,6 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.VANILLA;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.VANILLA;
-        MC.mainRenderTarget = INSTANCE.vanillaRenderTarget;
+        MC.gameRenderer.mainRenderTarget = INSTANCE.vanillaRenderTarget;
     }
 }

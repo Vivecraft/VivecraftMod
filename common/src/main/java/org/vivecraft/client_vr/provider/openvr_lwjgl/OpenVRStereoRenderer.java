@@ -3,8 +3,9 @@ package org.vivecraft.client_vr.provider.openvr_lwjgl;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.openvr.HiddenAreaMesh;
 import org.lwjgl.openvr.VR;
@@ -36,7 +37,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public Tuple<Integer, Integer> getRenderTextureSizes() {
+    public Vector2ic getRenderTextureSizes() {
         if (this.resolution == null) {
             // get texture size
             try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -44,9 +45,8 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 var renderSizeY = stack.callocInt(1);
                 VRSystem_GetRecommendedRenderTargetSize(renderSizeX, renderSizeY);
 
-                this.resolution = new Tuple<>(renderSizeX.get(0), renderSizeY.get(0));
-                VRSettings.LOGGER.info("Vivecraft: OpenVR Render Res {}x{}", this.resolution.getA(),
-                    this.resolution.getB());
+                this.resolution = new Vector2i(renderSizeX.get(0), renderSizeY.get(0));
+                VRSettings.LOGGER.info("Vivecraft: OpenVR Render Res {}x{}", this.resolution.x(), this.resolution.y());
 
                 this.ss = this.openvr.getSuperSampling();
                 VRSettings.LOGGER.info("Vivecraft: OpenVR Supersampling: {}", this.ss);
@@ -84,7 +84,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
             return new Matrix4f().frustum(
                 left.get() * nearClip, right.get() * nearClip,
                 top.get() * nearClip, bottom.get() * nearClip,
-                nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
+                nearClip, farClip, RenderSystem.getDevice().getDeviceInfo().isZZeroToOne());
         }
     }
 

@@ -6,8 +6,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -29,8 +29,8 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-@Mixin(Gui.class)
-public abstract class GuiVRMixin implements GuiExtension {
+@Mixin(Hud.class)
+public abstract class HudVRMixin implements GuiExtension {
 
     @Unique
     public boolean vivecraft$showPlayerList;
@@ -102,7 +102,7 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Inject(method = "extractItemHotbar", at = @At("HEAD"), cancellable = true)
     private void vivecraft$noHotbarOnScreens(CallbackInfo ci) {
-        if (VRState.VR_RUNNING && this.minecraft.screen != null) {
+        if (VRState.VR_RUNNING && this.minecraft.gui.screen() != null) {
             ci.cancel();
         }
     }
@@ -228,7 +228,7 @@ public abstract class GuiVRMixin implements GuiExtension {
                 graphics.fakeItem(new ItemStack(Items.RABBIT_FOOT), x2, y);
             }
             if (mobeffect != null) {
-                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Gui.getMobEffectSprite(mobeffect), x, y, 18, 18);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Hud.getMobEffectSprite(mobeffect), x, y, 18, 18);
             }
         }
     }

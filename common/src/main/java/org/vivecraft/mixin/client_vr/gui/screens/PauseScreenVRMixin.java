@@ -67,21 +67,21 @@ public abstract class PauseScreenVRMixin extends Screen {
         // on a multiplayer server also add the social button
         if (!Minecraft.getInstance().isMultiplayerServer()) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
-                (p) -> this.minecraft.setScreen(new ChatScreen("", false))).width(98).build());
+                (p) -> this.minecraft.gui.setScreen(new ChatScreen("", false))).width(98).build());
         } else {
             GridLayout gridWidgetChat_Social = new GridLayout();
             GridLayout.RowHelper rowHelperChat_Social = gridWidgetChat_Social.createRowHelper(2);
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
-                    (p) -> this.minecraft.setScreen(new ChatScreen("", false))).width(48).build(),
+                    (p) -> this.minecraft.gui.setScreen(new ChatScreen("", false))).width(48).build(),
                 LayoutSettings.defaults().paddingRight(2));
 
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.social"),
-                (p) -> this.minecraft.setScreen(new SocialInteractionsScreen())).width(48).build());
+                (p) -> this.minecraft.gui.setScreen(new SocialInteractionsScreen())).width(48).build());
             rowHelper.addChild(gridWidgetChat_Social);
         }
 
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.commands"),
-            (p) -> this.minecraft.setScreen(new GuiQuickCommandsInGame(this))).width(98).build());
+            (p) -> this.minecraft.gui.setScreen(new GuiQuickCommandsInGame(this))).width(98).build());
     }
 
     // use the disconnect button as an anchor, and shift by -3 to shift before the addChild call
@@ -95,20 +95,20 @@ public abstract class PauseScreenVRMixin extends Screen {
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"),
             (p) -> {
                 this.minecraft.debugEntries.toggleDebugOverlay();
-                this.minecraft.setScreen(null);
+                this.minecraft.gui.setScreen(null);
             }).width(48).build(), LayoutSettings.defaults().paddingRight(2));
 
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.profiler"),
             (p) -> {
-                this.minecraft.gui.getDebugOverlay().toggleProfilerChart();
-                this.minecraft.setScreen(null);
+                this.minecraft.getDebugOverlay().toggleProfilerChart();
+                this.minecraft.gui.setScreen(null);
             }).width(48).build());
 
         rowHelper.addChild(gridWidgetOverlay_Profiler);
 
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.screenshot"),
             (p) -> {
-                this.minecraft.setScreen(null);
+                this.minecraft.gui.setScreen(null);
                 ClientDataHolderVR.getInstance().grabScreenShot = true;
             }).width(98).build());
 
@@ -118,14 +118,14 @@ public abstract class PauseScreenVRMixin extends Screen {
             {
                 rowHelper.addChild(new Button.Builder(
                     Component.translatable("vivecraft.options.screen.fbtcalibration.button"),
-                    (p) -> this.minecraft.setScreen(new FBTCalibrationScreen(this)))
+                    (p) -> this.minecraft.gui.setScreen(new FBTCalibrationScreen(this)))
                     .width(98).build());
             } else {
                 rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.calibrateheight"),
                     (p) -> {
                         AutoCalibration.calibrateManual();
                         ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                        this.minecraft.setScreen(null);
+                        this.minecraft.gui.setScreen(null);
                     }).width(98).build());
             }
         }
@@ -134,7 +134,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.alignkatwalk"),
                 (p) -> {
                     jkatvr.resetYaw(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
-                    this.minecraft.setScreen(null);
+                    this.minecraft.gui.setScreen(null);
                 }).width(98).build());
         }
 

@@ -66,7 +66,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         if (hand != InteractionHand.MAIN_HAND) return false;
 
         if (this.dh.vrSettings.seated) return false;
-        if (this.mc.screen != null || !this.dh.vrSettings.vrTouchHotbar) return false;
+        if (this.mc.gui.screen() != null || !this.dh.vrSettings.vrTouchHotbar) return false;
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HEAD || !GuiHandler.HUD_POPUP) return false;
 
         // this shouldn't happen, the inventory is supposed to be final
@@ -172,7 +172,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
     @Override
     public void renderDebug(boolean isActive) {
         if (this.dh.vrSettings.seated) return;
-        if (this.mc.screen != null || !this.dh.vrSettings.vrTouchHotbar) return;
+        if (this.mc.gui.screen() != null || !this.dh.vrSettings.vrTouchHotbar) return;
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HEAD || !GuiHandler.HUD_POPUP) return;
 
         float scale =

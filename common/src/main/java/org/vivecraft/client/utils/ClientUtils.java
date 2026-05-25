@@ -3,16 +3,16 @@ package org.vivecraft.client.utils;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -97,7 +97,7 @@ public class ClientUtils {
      * @return combined sky/block light
      */
     public static int getCombinedLightWithMin(BlockAndTintGetter lightReader, BlockPos pos, int minLight) {
-        int light = LevelRenderer.getLightCoords(lightReader, pos);
+        int light = LightCoordsUtil.getLightCoords(lightReader, pos);
         int blockLight = (light >> 4) & 0xF;
 
         if (blockLight < minLight) {
@@ -150,13 +150,13 @@ public class ClientUtils {
 
     public static Component getNameFromSoundEvent(Identifier soundLocation) {
         String key = soundLocation.getPath();
-        if (I18n.exists(key)) {
+        if (Language.getInstance().has(key)) {
             return Component.translatable(key);
-        } else if (I18n.exists("subtitles." + key)) {
+        } else if (Language.getInstance().has("subtitles." + key)) {
             return Component.translatable("subtitles." + key);
         } else if (key.startsWith("music_disc.")) {
             String jukebox = key.replace("music_disc.", "jukebox_song.minecraft.");
-            if (I18n.exists(jukebox)) {
+            if (Language.getInstance().has(jukebox)) {
                 return Component.translatable(jukebox);
             }
         }
@@ -171,7 +171,7 @@ public class ClientUtils {
     public static void addChatMessage(Component message) {
         // can be null, when called very early
         if (MC.gui != null) {
-            MC.gui.getChat().addClientSystemMessage(message);
+            MC.gui.hud.getChat().addClientSystemMessage(message);
         }
         if (VRState.VR_RUNNING) {
             triggerChatHapticSound();

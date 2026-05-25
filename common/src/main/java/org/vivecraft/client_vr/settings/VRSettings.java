@@ -1587,24 +1587,27 @@ public class VRSettings {
 
             @Override
             Object loadOption(String value) {
-                Minecraft.getInstance().options.hideGui = value.equals("true");
+                boolean hidden = value.equals("true");
+                if (hidden != Minecraft.getInstance().gui.hud.isHidden()) {
+                    Minecraft.getInstance().gui.hud.toggle();
+                }
                 return false;
             }
 
             @Override
             String saveOption(Object value) {
-                return Boolean.toString(Minecraft.getInstance().options.hideGui);
+                return Boolean.toString(Minecraft.getInstance().gui.hud.isHidden());
             }
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                return Minecraft.getInstance().options.hideGui ? prefix + LangHelper.getYes() :
+                return Minecraft.getInstance().gui.hud.isHidden() ? prefix + LangHelper.getYes() :
                     prefix + LangHelper.getNo();
             }
 
             @Override
             Object setOptionValue(Object value) {
-                Minecraft.getInstance().options.hideGui = !Minecraft.getInstance().options.hideGui;
+                Minecraft.getInstance().gui.hud.toggle();
                 return false;
             }
         },
@@ -1616,7 +1619,8 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 // update screen pos
-                GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
+                GuiHandler.onScreenChanged(Minecraft.getInstance().gui.screen(), Minecraft.getInstance().gui.screen(),
+                    false);
             }
         },
         CROSSHAIR_OCCLUSION(OptionType.BOOLEAN), // Crosshair Occlusion
@@ -2309,7 +2313,7 @@ public class VRSettings {
             void onOptionChange() {
                 if (VRState.VR_RUNNING) {
                     MCVR.get().resetPosition();
-                    Minecraft.getInstance().setScreen(null);
+                    Minecraft.getInstance().gui.setScreen(null);
                 }
             }
         },

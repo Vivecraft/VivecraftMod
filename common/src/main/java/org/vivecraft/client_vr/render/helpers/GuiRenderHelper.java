@@ -4,7 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.util.profiling.Profiler;
 import org.vivecraft.mixin.client_vr.renderer.GameRendererAccessor;
@@ -29,8 +28,7 @@ public class GuiRenderHelper {
     public static void finish() {
         Profiler.get().push("render");
         GuiRenderer guiRenderer = ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).getGuiRenderer();
-        guiRenderer.render(((GameRendererAccessor) Minecraft.getInstance().gameRenderer).getFogRenderer()
-            .getBuffer(FogRenderer.FogMode.NONE));
+        guiRenderer.render();
         guiRenderer.endFrame();
         Profiler.get().pop();
     }
