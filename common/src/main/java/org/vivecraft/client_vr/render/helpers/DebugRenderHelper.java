@@ -156,8 +156,6 @@ public class DebugRenderHelper {
         }
 
         list.forEach(DebugRenderHelper::addAxes);
-
-        MC.renderBuffers().bufferSource().endBatch();
     }
 
     /**
@@ -200,7 +198,6 @@ public class DebugRenderHelper {
                 renderCube(trackerPos, 0.05F, MathUtils.DARK_GRAY_INT);
             }
         }
-        MC.renderBuffers().bufferSource().endLastBatch();
     }
 
     /**
