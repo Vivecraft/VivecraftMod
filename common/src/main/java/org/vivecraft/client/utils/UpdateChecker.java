@@ -3,7 +3,6 @@ package org.vivecraft.client.utils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.SharedConstants;
 import org.vivecraft.Xloader;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -49,7 +48,7 @@ public class UpdateChecker {
             String apiURL =
                 "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" +
                     Xloader.INSTANCE.getModloader().name + "%22]&game_versions=[%22" +
-                    SharedConstants.getCurrentVersion().name() + "%22]";
+                    ClientUtils.currentMcVersion() + "%22]";
             HttpURLConnection conn = (HttpURLConnection) new URL(apiURL).openConnection();
             // 10 seconds read and connect timeout
             conn.setConnectTimeout(10000);

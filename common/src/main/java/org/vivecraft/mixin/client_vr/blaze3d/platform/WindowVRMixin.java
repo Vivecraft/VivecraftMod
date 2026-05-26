@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -30,12 +29,6 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Shadow
     @Final
     private WindowEventHandler eventHandler;
-
-    // TODO: this doesn't disable sodium extras adaptive sync
-    @ModifyVariable(method = "updateVsync", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private boolean vivecraft$overwriteVsync(boolean vsync) {
-        return !VRState.VR_RUNNING && vsync;
-    }
 
     @Inject(method = "getWidth", at = @At("HEAD"), cancellable = true)
     private void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {

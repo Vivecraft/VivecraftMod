@@ -287,7 +287,7 @@ public class VREffectsHelper {
     public static int renderMenuPanorama(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.gameRenderer.mainRenderTarget().getColorTexture(), MathUtils.BLACK_SOLID,
-            MC.gameRenderer.mainRenderTarget().getDepthTexture(), 1.0);
+            MC.gameRenderer.mainRenderTarget().getDepthTexture(), 0.0);
 
         poseStack.pushPose();
 
@@ -432,7 +432,7 @@ public class VREffectsHelper {
     public static int renderJrbuddasAwesomeMainMenuRoomNew(SubmitNodeCollector output, PoseStack poseStack, int order) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.gameRenderer.mainRenderTarget().getColorTexture(), MathUtils.BLACK_SOLID,
-            MC.gameRenderer.mainRenderTarget().getDepthTexture(), 1.0);
+            MC.gameRenderer.mainRenderTarget().getDepthTexture(), 0.0);
 
         int repeat = 4; // texture wraps per meter
         float height = 2.5F;
@@ -549,7 +549,7 @@ public class VREffectsHelper {
                     new Vector4f(DATA_HOLDER.menuWorldRenderer.fogRenderer.fogColor.x,
                         DATA_HOLDER.menuWorldRenderer.fogRenderer.fogColor.y,
                         DATA_HOLDER.menuWorldRenderer.fogRenderer.fogColor.z, 0.0f),
-                    MC.gameRenderer.mainRenderTarget().getDepthTexture(), 1.0);
+                    MC.gameRenderer.mainRenderTarget().getDepthTexture(), 0.0);
 
             DATA_HOLDER.menuWorldRenderer.updateLightmap();
             // render world
@@ -609,7 +609,7 @@ public class VREffectsHelper {
     {
         // clear depth for menu environment
         RenderSystem.getDevice().createCommandEncoder()
-            .clearDepthTexture(MC.gameRenderer.mainRenderTarget.getDepthTexture(), 1.0);
+            .clearDepthTexture(MC.gameRenderer.mainRenderTarget.getDepthTexture(), 0.0);
 
         VRRenderState vrState = ((LevelRenderStateExtension) levelState).vivecraft$getVRRenderState();
         CameraRenderState cameraState = levelState.cameraRenderState;
@@ -742,7 +742,7 @@ public class VREffectsHelper {
         RenderSystem.getDevice().createCommandEncoder()
             .clearColorAndDepthTextures(extTargets.vivecraft$getUnoccluded().get().getColorTexture(),
                 MathUtils.BLACK_TRANSPARENT,
-                extTargets.vivecraft$getUnoccluded().get().getDepthTexture(), 1.0);
+                extTargets.vivecraft$getUnoccluded().get().getDepthTexture(), 0.0);
         RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getUnoccluded().get().getColorTextureView();
         RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getUnoccluded().get().getDepthTextureView();
 

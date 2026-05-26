@@ -1,11 +1,11 @@
 package org.vivecraft.client.extensions;
 
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -28,6 +28,12 @@ public interface RenderSetupExtension {
     RenderSetup vivecraft$setFogOverride(FogRenderer.FogMode fogOverride);
 
     /**
+     * @return the fog override, if one is set
+     */
+    @Nullable
+    FogRenderer.FogMode vivecraft$getFogOverride();
+
+    /**
      * sets a Fog override, to render things without fog mid level
      *
      * @return this RenderSetup for method chaining
@@ -35,11 +41,9 @@ public interface RenderSetupExtension {
     RenderSetup vivecraft$setUndistorted();
 
     /**
-     * applies the uniform overrides, if any is set
-     *
-     * @param renderPass RenderPass to apply the unoiform overrides to
+     * @return if this pass should render undistorted
      */
-    void vivecraft$applyUniformOverrides(RenderPass renderPass);
+    boolean vivecraft$getUndistorted();
 
     record GpuTextureBinding(GpuTextureView texture, Supplier<GpuSampler> sampler) {}
 }

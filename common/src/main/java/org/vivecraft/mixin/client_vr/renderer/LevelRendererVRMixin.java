@@ -246,16 +246,18 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         this.finalizedGizmos.alwaysOnTopPrimitives().submit(output, cameraState, true);
 
         // render
-        FeatureRenderDispatcher.PreparedFrame featureFrame = dispatcher.prepareFrame(output);
-        featureFrame.executeSolid();
-        featureFrame.executeTranslucent();
-        featureFrame.executeTranslucentAfterTerrain();
+        try (FeatureRenderDispatcher.PreparedFrame featureFrame = dispatcher.prepareFrame(output)) {
+            featureFrame.executeSolid();
+            featureFrame.executeTranslucent();
+            featureFrame.executeTranslucentAfterTerrain();
 
-        // always on top gizmos
-        if (featureFrame.hasAnyAlwaysOnTop()) {
-            RenderSystem.getDevice().createCommandEncoder()
-                .clearDepthTexture(this.gameRenderer.mainRenderTarget.getDepthTexture(), 0.0);
-            featureFrame.executeAlwaysOnTop();
+            // always on top gizmos
+            if (featureFrame.hasAnyAlwaysOnTop()) {
+                RenderSystem.getDevice().createCommandEncoder()
+                    .clearDepthTexture(this.gameRenderer.mainRenderTarget.getDepthTexture(),
+                        0.0);
+                featureFrame.executeAlwaysOnTop();
+            }
         }
         RenderSystem.outputColorTextureOverride = null;
         RenderSystem.outputDepthTextureOverride = null;

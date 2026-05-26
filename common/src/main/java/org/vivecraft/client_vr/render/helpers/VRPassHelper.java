@@ -39,7 +39,7 @@ public class VRPassHelper {
     public static void renderSingleView(RenderPass eye, DeltaTracker.Timer deltaTracker, boolean renderLevel) {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             MC.gameRenderer.mainRenderTarget().getColorTexture(), MathUtils.BLACK_SOLID,
-            MC.gameRenderer.mainRenderTarget().getDepthTexture(), 1.0);
+            MC.gameRenderer.mainRenderTarget().getDepthTexture(), 0.0);
 
         // THIS IS WHERE EVERYTHING IS RENDERED
         // reextract world state for the new pass
@@ -156,7 +156,7 @@ public class VRPassHelper {
             MC.gameRenderer.mainRenderTarget = KeyboardHandler.FRAMEBUFFER;
             RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
                 KeyboardHandler.FRAMEBUFFER.getColorTexture(), MathUtils.BLACK_TRANSPARENT,
-                KeyboardHandler.FRAMEBUFFER.getDepthTexture(), 1.0);
+                KeyboardHandler.FRAMEBUFFER.getDepthTexture(), 0.0);
             RenderHelper.drawScreen(KeyboardHandler.UI, true);
         }
 
@@ -165,7 +165,7 @@ public class VRPassHelper {
             MC.gameRenderer.mainRenderTarget = RadialHandler.FRAMEBUFFER;
             RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
                 RadialHandler.FRAMEBUFFER.getColorTexture(), MathUtils.BLACK_TRANSPARENT,
-                RadialHandler.FRAMEBUFFER.getDepthTexture(), 1.0);
+                RadialHandler.FRAMEBUFFER.getDepthTexture(), 0.0);
             RenderHelper.drawScreen(RadialHandler.UI, true);
         }
         Profiler.get().pop();
@@ -229,8 +229,6 @@ public class VRPassHelper {
                     }
 
                     ClientUtils.takeScreenshot(rendertarget);
-                    // TODO 26.2 is that need3ed for screenshots?
-                    // RenderSystem.flipFrame(null);
                     DATA_HOLDER.grabScreenShot = false;
                 }
             }

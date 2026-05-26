@@ -1,6 +1,7 @@
 package org.vivecraft.client.utils;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
@@ -55,6 +56,14 @@ public class ClientUtils {
             VRSettings.LOGGER.error("Vivecraft: error reading registry key: ", e);
         }
         return null;
+    }
+
+    public static String currentMcVersion() {
+        String mcVersion = SharedConstants.getCurrentVersion().name();
+        if (mcVersion.contains("Snapshot")) {
+            mcVersion = mcVersion.substring(0, mcVersion.indexOf(" "));
+        }
+        return mcVersion;
     }
 
     /**

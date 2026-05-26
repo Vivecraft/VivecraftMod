@@ -1,7 +1,5 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.SectionOcclusionGraph;
 import org.spongepowered.asm.mixin.Final;
@@ -19,8 +17,8 @@ public class NoSodiumLevelRendererVRMixin {
     @Final
     private SectionOcclusionGraph sectionOcclusionGraph;
 
-    @Inject(method = "cullTerrain", at = @At("HEAD"))
-    private void vivecraft$alwaysUpdateCull(CallbackInfo ci, @Local(argsOnly = true) Camera camera) {
+    @Inject(method = "render", at = @At("HEAD"))
+    private void vivecraft$alwaysUpdateCull(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             // if VR is on, always update the frustum, to fix flickering chunks between eyes
             this.sectionOcclusionGraph.invalidate();

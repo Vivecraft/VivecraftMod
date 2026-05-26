@@ -1625,7 +1625,7 @@ public class MenuWorldRenderer {
                 renderPass.setPipeline(RenderPipelines.LIGHTMAP);
                 RenderSystem.bindDefaultUniforms(renderPass);
                 renderPass.setUniform("LightmapInfo", this.lightMapUbo.currentBuffer());
-                renderPass.draw(3, 0, 0, 0);
+                renderPass.draw(3, 1, 0, 0);
             }
             this.lightMapUbo.rotate();
             this.lightmapUpdateNeeded = false;

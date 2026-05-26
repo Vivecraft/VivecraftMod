@@ -63,8 +63,9 @@ public class VRTextureTarget extends RenderTarget {
 
         if (this.clearColor != null) {
             if (this.useDepth) {
-                RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(this.colorTexture,
-                    this.clearColor, this.depthTexture, 1.0);
+                RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
+                    this.colorTexture, this.clearColor,
+                    this.depthTexture, 0.0);
             } else {
                 RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.colorTexture, this.clearColor);
             }

@@ -40,10 +40,25 @@ public class NullVRStereoRenderer extends VRRenderer {
         {
             // reset far clip plane to force a projection fetch
             this.lastFarClip = 0F;
+            this.lastReverseFarClip = 0F;
             this.lastFov = ClientDataHolderVR.getInstance().vrSettings.nullvrFOV;
             this.lastAngle = ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle;
         }
         return super.getCachedProjectionMatrix(eyeType, nearClip, farClip);
+    }
+
+    @Override
+    public Matrix4f getCachedReverseProjectionMatrix(int eyeType, float nearClip, float farClip) {
+        if (this.lastFov != ClientDataHolderVR.getInstance().vrSettings.nullvrFOV ||
+            this.lastAngle != ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle)
+        {
+            // reset far clip plane to force a projection fetch
+            this.lastFarClip = 0F;
+            this.lastReverseFarClip = 0F;
+            this.lastFov = ClientDataHolderVR.getInstance().vrSettings.nullvrFOV;
+            this.lastAngle = ClientDataHolderVR.getInstance().vrSettings.nullvrEyeAngle;
+        }
+        return super.getCachedReverseProjectionMatrix(eyeType, nearClip, farClip);
     }
 
     @Override

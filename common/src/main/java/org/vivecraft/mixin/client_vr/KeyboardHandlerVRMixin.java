@@ -2,12 +2,10 @@ package org.vivecraft.mixin.client_vr;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,9 +18,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.settings.VRHotkeys;
-
-import java.io.File;
-import java.util.function.Consumer;
 
 @Mixin(KeyboardHandler.class)
 public class KeyboardHandlerVRMixin {
@@ -57,12 +52,12 @@ public class KeyboardHandlerVRMixin {
         }
     }
 
-    @WrapOperation(method = "keyPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Ljava/io/File;Lcom/mojang/blaze3d/pipeline/RenderTarget;Ljava/util/function/Consumer;)V"))
+    @WrapOperation(method = "keyPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Lnet/minecraft/client/Minecraft;Z)V"))
     private void vivecraft$markScreenshot(
-        File gameDirectory, RenderTarget buffer, Consumer<Component> messageConsumer, Operation<Void> original)
+        Minecraft minecraft, boolean debugPanoramaRequested, Operation<Void> original)
     {
         if (!VRState.VR_RUNNING) {
-            original.call(gameDirectory, buffer, messageConsumer);
+            original.call(minecraft, debugPanoramaRequested);
         } else {
             ClientDataHolderVR.getInstance().grabScreenShot = true;
         }

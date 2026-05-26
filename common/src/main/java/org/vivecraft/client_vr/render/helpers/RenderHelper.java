@@ -246,7 +246,7 @@ public class RenderHelper {
     public static void drawVRConnectingMessage() {
         // clear depth, because text that was already there would be over ours
         RenderSystem.getDevice().createCommandEncoder()
-            .clearDepthTexture(MC.gameRenderer.mainRenderTarget().getDepthTexture(), 1.0);
+            .clearDepthTexture(MC.gameRenderer.mainRenderTarget().getDepthTexture(), 0.0);
 
         GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
 

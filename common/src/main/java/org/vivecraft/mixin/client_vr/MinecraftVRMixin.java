@@ -6,18 +6,18 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.CommandEncoder;
+import com.mojang.blaze3d.systems.GpuSurface;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -142,10 +142,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Final
     public Gui gui;
 
-    @Shadow
-    public abstract void invalidateSurfaceConfiguration();
-
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;gameRenderState()Lnet/minecraft/client/renderer/state/GameRenderState;"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;registerReloadListeners(Lnet/minecraft/server/packs/resources/ReloadableResourceManager;)V"))
     private void vivecraft$initVivecraft(CallbackInfo ci) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.gameRenderer.mainRenderTarget);
         VRSettings.initSettings();
@@ -328,19 +325,23 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(method = "renderFrame", at = @At(value = "CONSTANT", args = "stringValue=present"))
-    private void vivecraft$blitMirror(boolean advanceGameTime, CallbackInfo ci) {
+    @WrapOperation(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuSurface;blitFromTexture(Lcom/mojang/blaze3d/systems/CommandEncoder;Lcom/mojang/blaze3d/textures/GpuTextureView;)V"))
+    private void vivecraft$blitMirror(
+        GpuSurface instance, CommandEncoder commandEncoder, GpuTextureView textureView, Operation<Void> original)
+    {
         if (VRState.VR_RUNNING) {
             Profiler.get().popPush("vrMirror");
             RenderPassManager.setMirrorRenderPass();
             ShaderHelper.drawMirror();
             RenderHelper.checkGLError("post-mirror");
+            original.call(instance, commandEncoder, this.gameRenderer.mainRenderTarget.getColorTextureView());
             RenderPassManager.setGUIRenderPass();
         } else {
             if (VRState.VR_ENABLED && !VRState.VR_INITIALIZED) {
                 // show message that the game is connecting to the vr runtime
                 RenderHelper.drawVRConnectingMessage();
             }
+            original.call(instance, commandEncoder, textureView);
         }
     }
 
@@ -666,11 +667,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(method = "handleKeybinds", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER))
-    private void vivecraft$saveHideGuiOption(CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-    }
-
     @WrapWithCondition(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;checkEntityPostEffect(Lnet/minecraft/world/entity/Entity;)V"))
     private boolean vivecraft$noPostEffectVR(GameRenderer instance, Entity entity) {
         return !VRState.VR_RUNNING;
@@ -726,64 +722,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     private void vivecraft$resetRoomOrigin(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
-        }
-    }
-
-    @Inject(method = "setOverlay", at = @At("TAIL"))
-    private void vivecraft$onOverlaySet(CallbackInfo ci) {
-        GuiHandler.onScreenChanged(this.gui.screen(), this.gui.screen(), true);
-    }
-
-    @Inject(method = "setScreen", at = @At("HEAD"))
-    private void vivecraft$onScreenChange(
-        Screen guiScreen, CallbackInfo ci, @Share("guiScale") LocalIntRef guiScaleRef)
-    {
-        if (guiScreen == null) {
-            GuiHandler.GUI_APPEAR_OVER_BLOCK_ACTIVE = false;
-        }
-        // cache gui scale so it can be checked after screen apply
-        guiScaleRef.set(this.options.guiScale().get());
-    }
-
-    @Inject(method = "setScreen", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", ordinal = 0))
-    private void vivecraft$onScreenSet(Screen guiScreen, CallbackInfo ci) {
-        GuiHandler.onScreenChanged(this.gui.screen(), guiScreen, true);
-    }
-
-    @Inject(method = "setScreen", at = @At("RETURN"))
-    private void vivecraft$checkGuiScaleChangePost(CallbackInfo ci, @Share("guiScale") LocalIntRef guiScaleRef) {
-        if (guiScaleRef.get() != this.options.guiScale().get()) {
-            // checks if something changed the GuiScale during screen change
-            // and tries to adjust the VR GuiScale accordingly
-            int maxScale = VRState.VR_RUNNING ? GuiHandler.GUI_SCALE_FACTOR_MAX :
-                this.window.calculateScale(0, this.options.forceUnicodeFont().get());
-
-            // auto uses max scale
-            if (guiScaleRef.get() == 0) {
-                guiScaleRef.set(maxScale);
-            }
-
-            int newScale = this.options.guiScale().get() == 0 ? maxScale : this.options.guiScale().get();
-
-            if (newScale < guiScaleRef.get()) {
-                // if someone reduced the gui scale, try to reduce the VR gui scale by the same steps
-                int newVRScale = VRState.VR_RUNNING ? newScale :
-                    Math.max(1, GuiHandler.GUI_SCALE_FACTOR_MAX - (guiScaleRef.get() - newScale));
-                GuiHandler.GUI_SCALE_FACTOR = GuiHandler.calculateScale(newVRScale,
-                    this.options.forceUnicodeFont().get(),
-                    GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
-            } else {
-                // new gui scale is bigger than before, so just reset to the default
-                VRSettings vrSettings = ClientDataHolderVR.getInstance().vrSettings;
-                GuiHandler.GUI_SCALE_FACTOR = GuiHandler.calculateScale(
-                    vrSettings.doubleGUIResolution ? vrSettings.guiScale : (int) Math.ceil(vrSettings.guiScale * 0.5f),
-                    this.options.forceUnicodeFont().get(), GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
-            }
-
-            // resize the screen for the new gui scale
-            if (VRState.VR_RUNNING && this.gui.screen() != null) {
-                this.gui.screen().resize(GuiHandler.SCALED_WIDTH, GuiHandler.SCALED_HEIGHT);
-            }
         }
     }
 

@@ -55,7 +55,9 @@ import java.util.stream.Collectors;
 public abstract class VRRenderer {
     // projection matrices
     public Matrix4f[] eyeProj = new Matrix4f[2];
+    public Matrix4f[] eyeReverseProj = new Matrix4f[2];
     protected float lastFarClip = 0F;
+    protected float lastReverseFarClip = 0F;
 
     // render buffers
     public RenderTarget framebufferEye0;
@@ -128,6 +130,25 @@ public abstract class VRRenderer {
         }
 
         return this.eyeProj[eyeType];
+    }
+
+    /**
+     * gets the cached reversed projection matrix if the farClip distance matches with the last, else gets a new one from the VR runtime
+     *
+     * @param eyeType  which eye to get the projection matrix for, 0 = Left, 1 = Right
+     * @param nearClip near clip plane of the projection matrix
+     * @param farClip  far clip plane of the projection matrix
+     * @return the reversed projection matrix
+     */
+    public Matrix4f getCachedReverseProjectionMatrix(int eyeType, float nearClip, float farClip) {
+        if (farClip != this.lastReverseFarClip) {
+            this.lastReverseFarClip = farClip;
+            // fetch both at the same time to make sure they use the same clip planes
+            this.eyeReverseProj[0] = this.getProjectionMatrix(0, farClip, nearClip);
+            this.eyeReverseProj[1] = this.getProjectionMatrix(1, farClip, nearClip);
+        }
+
+        return this.eyeReverseProj[eyeType];
     }
 
     /**
