@@ -40,7 +40,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL11C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.EntityRenderStateExtension;
@@ -61,6 +60,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.renderstates.CrosshairRenderState;
 import org.vivecraft.client_vr.render.renderstates.ScreenRenderState;
 import org.vivecraft.client_vr.render.renderstates.VRRenderState;
@@ -206,7 +206,7 @@ public class VREffectsHelper {
     public static void drawEyeStencil() {
         if (DATA_HOLDER.vrSettings.vrUseStencil) {
             if (StencilHelper.stencilBufferSupported()) {
-                WAS_STENCIL_ON = GL11C.glIsEnabled(GL11C.GL_STENCIL_TEST);
+                WAS_STENCIL_ON = GraphicsHelper.INSTANCE.isStencil();
                 if (WAS_STENCIL_ON && !DATA_HOLDER.showedStencilMessage &&
                     DATA_HOLDER.vrSettings.showChatMessageStencil)
                 {
@@ -254,7 +254,7 @@ public class VREffectsHelper {
     public static void disableStencilTest() {
         // if we did enable the stencil test, disable it
         if (StencilHelper.stencilBufferSupported() && !WAS_STENCIL_ON) {
-            GL11C.glDisable(GL11C.GL_STENCIL_TEST);
+            GraphicsHelper.INSTANCE.setStencil(false);
         }
     }
 

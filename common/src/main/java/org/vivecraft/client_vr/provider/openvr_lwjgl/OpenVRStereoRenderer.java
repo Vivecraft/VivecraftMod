@@ -1,20 +1,20 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
-import org.lwjgl.opengl.GL11C;
 import org.lwjgl.openvr.HiddenAreaMesh;
 import org.lwjgl.openvr.VR;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.nio.FloatBuffer;
@@ -90,31 +90,41 @@ public class OpenVRStereoRenderer extends VRRenderer {
 
     @Override
     public void createRenderTexture(int width, int height) {
-        int boundTextureId = GlStateManager._getInteger(GL11C.GL_TEXTURE_BINDING_2D);
         // generate left eye texture
-        this.LeftEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.LeftEyeTextureId);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, width, height, 0, GL11C.GL_RGBA,
-            GL11C.GL_INT, null);
-        this.openvr.texType0.handle(this.LeftEyeTextureId);
+        this.framebufferEye0 = VRTextureTarget.builder("L Eye")
+            .withSize(width, height)
+            .withFormat(GpuFormat.RGBA8_UNORM)
+            .build();
+        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye0);
+        GraphicsHelper.INSTANCE.checkError("Left Eye framebuffer setup");
+
+        this.openvr.texType0.handle(GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye0.getColorTexture()));
         this.openvr.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
-        this.openvr.texType0.eType(VR.ETextureType_TextureType_OpenGL);
+        switch (GraphicsHelper.INSTANCE.getDeviceType()) {
+            case OPENGL -> this.openvr.texType0.eType(VR.ETextureType_TextureType_OpenGL);
+            case VULKAN -> this.openvr.texType0.eType(VR.ETextureType_TextureType_Vulkan);
+            default ->
+                throw new IllegalStateException("Unexpected device type: " + GraphicsHelper.INSTANCE.getDeviceType());
+        }
 
         // generate right eye texture
-        this.RightEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.RightEyeTextureId);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, width, height, 0, GL11C.GL_RGBA,
-            GL11C.GL_INT, null);
-        this.openvr.texType1.handle(this.RightEyeTextureId);
-        this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
-        this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
+        this.framebufferEye1 = VRTextureTarget.builder("R Eye")
+            .withSize(width, height)
+            .withFormat(GpuFormat.RGBA8_UNORM)
+            .build();
+        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye1);
+        GraphicsHelper.INSTANCE.checkError("Right Eye framebuffer setup");
 
-        GlStateManager._bindTexture(boundTextureId);
-        this.lastError = RenderHelper.checkGLError("create VR textures");
+        this.openvr.texType1.handle(GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye1.getColorTexture()));
+        this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        switch (GraphicsHelper.INSTANCE.getDeviceType()) {
+            case OPENGL -> this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
+            case VULKAN -> this.openvr.texType1.eType(VR.ETextureType_TextureType_Vulkan);
+            default ->
+                throw new IllegalStateException("Unexpected device type: " + GraphicsHelper.INSTANCE.getDeviceType());
+        }
+
+        this.lastError = GraphicsHelper.INSTANCE.checkError("create VR textures");
     }
 
     @Override
@@ -133,7 +143,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
         }
 
         // flush, recommended by the openvr docs
-        GL11C.glFlush();
+        GraphicsHelper.INSTANCE.flush();
     }
 
     public static String getCompositorError(int code) {
@@ -163,20 +173,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
     @Override
     public String getName() {
         return "OpenVR";
-    }
-
-    @Override
-    protected void destroyBuffers() {
-        super.destroyBuffers();
-        if (this.LeftEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.LeftEyeTextureId);
-            this.LeftEyeTextureId = -1;
-        }
-
-        if (this.RightEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.RightEyeTextureId);
-            this.RightEyeTextureId = -1;
-        }
     }
 
     @Override

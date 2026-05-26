@@ -1,16 +1,16 @@
 package org.vivecraft.client_vr.provider.nullvr;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
-import org.lwjgl.opengl.GL11;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class NullVRStereoRenderer extends VRRenderer {
@@ -71,24 +71,23 @@ public class NullVRStereoRenderer extends VRRenderer {
 
     @Override
     public void createRenderTexture(int lwidth, int lheight) {
-        this.LeftEyeTextureId = GlStateManager._genTexture();
-        int i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
-        GlStateManager._bindTexture(this.LeftEyeTextureId);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT,
-            null);
+        // generate left eye texture
+        this.framebufferEye0 = VRTextureTarget.builder("L Eye")
+            .withSize(lwidth, lheight)
+            .withFormat(GpuFormat.RGBA8_UNORM)
+            .build();
+        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye0);
+        GraphicsHelper.INSTANCE.checkError("Left Eye framebuffer setup");
 
-        GlStateManager._bindTexture(i);
-        this.RightEyeTextureId = GlStateManager._genTexture();
-        i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
-        GlStateManager._bindTexture(this.RightEyeTextureId);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT,
-            null);
-        GlStateManager._bindTexture(i);
-        this.lastError = RenderHelper.checkGLError("create VR textures");
+        // generate right eye texture
+        this.framebufferEye1 = VRTextureTarget.builder("R Eye")
+            .withSize(lwidth, lheight)
+            .withFormat(GpuFormat.RGBA8_UNORM)
+            .build();
+        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye1);
+        GraphicsHelper.INSTANCE.checkError("Right Eye framebuffer setup");
+
+        this.lastError = GraphicsHelper.INSTANCE.checkError("create VR textures");
     }
 
     @Override
@@ -102,19 +101,5 @@ public class NullVRStereoRenderer extends VRRenderer {
     @Override
     public String getName() {
         return "NullVR";
-    }
-
-    @Override
-    protected void destroyBuffers() {
-        super.destroyBuffers();
-        if (this.LeftEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.LeftEyeTextureId);
-            this.LeftEyeTextureId = -1;
-        }
-
-        if (this.RightEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.RightEyeTextureId);
-            this.RightEyeTextureId = -1;
-        }
     }
 }

@@ -9,7 +9,6 @@
     "client.blaze3d.BufferBuilderMixin",
     "client.blaze3d.ByteBufferBuilderAccessor",
     "client.blaze3d.RenderTargetMixin",
-    "client.blaze3d.opengl.GlDeviceMixin",
     "client.gui.GuiGraphicsExtractorAccessor",
     "client.gui.screens.JoinMultiplayerScreenMixin",
     "client.gui.screens.ScreenMixin",

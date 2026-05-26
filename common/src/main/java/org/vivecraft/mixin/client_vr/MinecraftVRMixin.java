@@ -79,6 +79,7 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.ShaderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -279,9 +280,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (VRState.VR_RUNNING) {
             try {
                 Profiler.get().push("setupRenderConfiguration");
-                RenderHelper.checkGLError("pre render setup");
+                GraphicsHelper.INSTANCE.checkError("pre render setup");
                 ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
-                RenderHelper.checkGLError("post render setup");
+                GraphicsHelper.INSTANCE.checkError("post render setup");
             } catch (Exception e) {
                 // something went wrong, disable VR
                 VRState.destroyVR(true);
@@ -333,7 +334,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             Profiler.get().popPush("vrMirror");
             RenderPassManager.setMirrorRenderPass();
             ShaderHelper.drawMirror();
-            RenderHelper.checkGLError("post-mirror");
+            GraphicsHelper.INSTANCE.checkError("post-mirror");
             original.call(instance, commandEncoder, this.gameRenderer.mainRenderTarget.getColorTextureView());
             RenderPassManager.setGUIRenderPass();
         } else {

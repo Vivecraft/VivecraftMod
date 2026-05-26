@@ -24,7 +24,6 @@ import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,6 +44,7 @@ import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -197,7 +197,7 @@ public abstract class GameRendererVRMixin
         }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
             Profiler.get().push("MainMenu");
-            GL11.glDisable(GL11.GL_STENCIL_TEST);
+            GraphicsHelper.INSTANCE.setStencil(false);
             VREffectsHelper.renderMenuRoom(this.featureRenderDispatcher, this.handAndScreenSubmitNodeStorage,
                 this.gameRenderState.levelRenderState);
             Profiler.get().pop();
