@@ -239,23 +239,21 @@ public class FakeBlockAccess implements LevelReader {
         if (i == 0) {
             return colorResolverIn.getColor(this.getBiome(blockPosIn).value(), blockPosIn.getX(), blockPosIn.getZ());
         } else {
-            int j = (i * 2 + 1) * (i * 2 + 1);
-            int k = 0;
-            int l = 0;
-            int i1 = 0;
+            int count = (i * 2 + 1) * (i * 2 + 1);
+            int r = 0, g = 0, b = 0;
             Cursor3D cursor3D = new Cursor3D(blockPosIn.getX() - i, blockPosIn.getY(), blockPosIn.getZ() - i,
                 blockPosIn.getX() + i, blockPosIn.getY(), blockPosIn.getZ() + i);
-            int j1;
 
-            for (BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(); cursor3D.advance(); i1 += j1 & 255)
-            {
+            BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+            while (cursor3D.advance()) {
                 blockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-                j1 = colorResolverIn.getColor(this.getBiome(blockPos).value(), blockPos.getX(), blockPos.getZ());
-                k += (j1 & 16711680) >> 16;
-                l += (j1 & 65280) >> 8;
+                int color = colorResolverIn.getColor(this.getBiome(blockPos).value(), blockPos.getX(), blockPos.getZ());
+                r += (color & 0x00FF0000) >> 16;
+                g += (color & 0x0000FF00) >> 8;
+                b += color & 0x000000FF;
             }
 
-            return (k / j & 255) << 16 | (l / j & 255) << 8 | i1 / j & 255;
+            return (r / count & 255) << 16 | (g / count & 255) << 8 | b / count & 255;
         }
     }
 

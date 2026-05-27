@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.render;
 
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
@@ -12,8 +13,10 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.ubos.LanczosUBO;
 import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
@@ -260,6 +263,9 @@ public class VRShaders {
 
     private static GpuSampler GUI_SAMPLER;
 
+    private static PerspectiveProjectionMatrixBuffer UNDISTORTED_PROJ;
+    public static GpuBufferSlice UNDISTORTED_PROJ_BUFFER;
+
     public static GpuSampler getGuiSampler() {
         if (GUI_SAMPLER == null) {
             updateGuiSampler();
@@ -278,12 +284,17 @@ public class VRShaders {
                     RenderSystem.getDevice().getMaxSupportedAnisotropy() : 1, OptionalDouble.empty());
     }
 
+    public static void setUndistortedProj(Matrix4f proj) {
+        UNDISTORTED_PROJ_BUFFER = UNDISTORTED_PROJ.getBuffer(proj);
+    }
+
     private VRShaders() {}
 
     public static void init() {
         MIXED_REALITY_UBO = new MixedRealityUBO();
         POST_PROCESS_UBO = new PostProcessUBO();
         LANCZOS_UBO = new LanczosUBO();
+        UNDISTORTED_PROJ = new PerspectiveProjectionMatrixBuffer("undistorted");
     }
 
     public static void close() {
@@ -302,6 +313,11 @@ public class VRShaders {
         if (GUI_SAMPLER != null) {
             GUI_SAMPLER.close();
             GUI_SAMPLER = null;
+        }
+        if (UNDISTORTED_PROJ != null) {
+            UNDISTORTED_PROJ.close();
+            UNDISTORTED_PROJ = null;
+            UNDISTORTED_PROJ_BUFFER = null;
         }
     }
 }

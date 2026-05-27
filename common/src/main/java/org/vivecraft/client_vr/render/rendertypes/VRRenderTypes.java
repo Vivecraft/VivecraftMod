@@ -65,9 +65,9 @@ public class VRRenderTypes {
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
                     VRShaders.getGuiSampler())))));
 
-    private static final Function<Identifier, RenderType> GUI_TEXTURED = Util.memoize(
-        identifier -> RenderType.create("gui_textured_vr",
-            RenderSetup.builder(VRShaders.GUI_TEXTURED)
+    private static final BiFunction<Identifier, Boolean, RenderType> GUI_TEXTURED = Util.memoize(
+        (identifier, depthAlways) -> RenderType.create("gui_textured_vr",
+            RenderSetup.builder(depthAlways ? VRShaders.GUI_TEXTURED_ALWAYS : VRShaders.GUI_TEXTURED)
                 .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, identifier)
                 .createRenderSetup()));
 
@@ -164,7 +164,11 @@ public class VRRenderTypes {
     }
 
     public static RenderType guiTextured(Identifier identifier) {
-        return GUI_TEXTURED.apply(identifier);
+        return guiTextured(identifier, false);
+    }
+
+    public static RenderType guiTextured(Identifier identifier, boolean depthAlways) {
+        return GUI_TEXTURED.apply(identifier, depthAlways);
     }
 
     public static RenderType guiTextureAlways(GpuTextureView texture) {

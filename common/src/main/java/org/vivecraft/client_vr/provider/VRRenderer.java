@@ -625,14 +625,14 @@ public abstract class VRRenderer {
                     Component.translatable("vivecraft.messages.intelgraphics1",
                         Component.literal(RenderSystem.getDevice().getRenderer()).withStyle(ChatFormatting.GOLD),
                         gpus.toString(),
-                        onlyIntel ? Component.empty()
-                            : Component.translatable("vivecraft.messages.intelgraphics2",
-                            Component.literal("https://www.vivecraft.org/faq/#gpu")
-                                .withStyle(style -> style.withUnderlined(true)
-                                    .withColor(ChatFormatting.GREEN)
-                                    .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                                    .withClickEvent(new ClickEvent.OpenUrl(
-                                        ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu")))))));
+                        onlyIntel ? Component.empty() :
+                            Component.translatable("vivecraft.messages.intelgraphics2",
+                                Component.literal("https://www.vivecraft.org/faq/#gpu")
+                                    .withStyle(style -> style.withUnderlined(true)
+                                        .withColor(ChatFormatting.GREEN)
+                                        .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
+                                        .withClickEvent(new ClickEvent.OpenUrl(
+                                            ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu")))))));
             }
 
             if (!this.isInitialized()) {
