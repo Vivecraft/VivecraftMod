@@ -23,6 +23,7 @@ import org.joml.Vector3fc;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.ClientVRPlayers;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ModelUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -325,24 +326,26 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
                     float offset =
                         (rotInfo.leftHanded ? -1F : 1f) * (model.slim ? 0.016F : 0.032F) * Mth.PI * armScale;
                     // main hand
-                    positionConnectedArm(mainHand, rotInfo.mainHandPos, rotInfo.mainHandQuat, renderState, rotInfo,
-                        xRot, offset, bodyYaw, isMainPlayer, attackArm == mainArm, attackArm, false,
+                    positionConnectedArm(mainHand, rotInfo.mainHandPos, rotInfo.mainHandQuat, player, rotInfo,
+                        xRot, offset, bodyYaw, isMainPlayer, attackArm == mainArm, attackArm, model.attackTime, false,
                         tempV, tempV2, tempM);
 
                     // offhand
-                    positionConnectedArm(offHand, rotInfo.offHandPos, rotInfo.offHandQuat, renderState, rotInfo,
-                        xRot, -offset, bodyYaw, isMainPlayer, attackArm != mainArm, attackArm, true,
+                    positionConnectedArm(offHand, rotInfo.offHandPos, rotInfo.offHandQuat, player, rotInfo,
+                        xRot, -offset, bodyYaw, isMainPlayer, attackArm != mainArm, attackArm, model.attackTime, true,
                         tempV, tempV2, tempM);
                 } else {
                     float xOffset = (model.slim ? 0.5F : 1F) * (rotInfo.leftHanded ? -1F : 1F);
                     // main hand
-                    positionFloatingArm(mainHand, rotInfo.mainHandPos, rotInfo.mainHandQuat, renderState, rotInfo,
-                        xRot, -xOffset, bodyYaw, isMainPlayer, armScale, attackArm == mainArm, attackArm, false,
+                    positionFloatingArm(mainHand, rotInfo.mainHandPos, rotInfo.mainHandQuat, player, rotInfo,
+                        xRot, -xOffset, bodyYaw, isMainPlayer, armScale, attackArm == mainArm, attackArm,
+                        model.attackTime, false,
                         tempV, tempV2, tempM);
 
                     // offhand
-                    positionFloatingArm(offHand, rotInfo.offHandPos, rotInfo.offHandQuat, renderState, rotInfo,
-                        xRot, xOffset, bodyYaw, isMainPlayer, armScale, attackArm != mainArm, attackArm, true,
+                    positionFloatingArm(offHand, rotInfo.offHandPos, rotInfo.offHandQuat, player, rotInfo,
+                        xRot, xOffset, bodyYaw, isMainPlayer, armScale, attackArm != mainArm, attackArm,
+                        model.attackTime, true,
                         tempV, tempV2, tempM);
                     model.leftArm.yScale = model.rightArm.yScale = armScale;
                 }
@@ -429,12 +432,12 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
 
 
     private static void positionConnectedArm(
-        ModelPart arm, Vector3fc armPos, Quaternionfc armRot, PlayerRenderState renderState,
+        ModelPart arm, Vector3fc armPos, Quaternionfc armRot, LivingEntity player,
         ClientVRPlayers.RotInfo rotInfo, float xRot, float zRotOffset, float bodyYaw, boolean isMainPlayer,
-        boolean applyAttackAnim, HumanoidArm attackArm, boolean setGuiOrientation,
+        boolean applyAttackAnim, HumanoidArm attackArm, float attackTime, boolean setGuiOrientation,
         Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
     {
-        ModelUtils.worldToModel(renderState, armPos, rotInfo, bodyYaw,
+        ModelUtils.worldToModel(player, armPos, rotInfo, bodyYaw,
             isMainPlayer || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
         tempV.sub(arm.x, arm.y, arm.z);
         // move shoulders up when having the arms up, since the rotation point is slightly offset
@@ -456,14 +459,14 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
         }
 
         if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && applyAttackAnim) {
-            ModelUtils.swingAnimation(attackArm, renderState.attackTime, isMainPlayer, tempM, tempV);
+            ModelUtils.swingAnimation(attackArm, attackTime, isMainPlayer, tempM, tempV);
             arm.x -= tempV.x;
             arm.y -= tempV.y;
             arm.z += tempV.z;
         }
 
         if (setGuiOrientation && isMainPlayer) {
-            positionGUI(arm, renderState, rotInfo, bodyYaw, 0.584F, tempV, tempV2, tempM);
+            positionGUI(arm, player, rotInfo, bodyYaw, 0.584F, tempV, tempV2, tempM);
         }
 
         tempM.rotateLocalX(-xRot);
@@ -471,14 +474,14 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
     }
 
     private static void positionFloatingArm(
-        ModelPart arm, Vector3fc armPos, Quaternionfc armRot, PlayerRenderState renderState,
+        ModelPart arm, Vector3fc armPos, Quaternionfc armRot, LivingEntity player,
         ClientVRPlayers.RotInfo rotInfo, float xRot, float xOffset, float bodyYaw, boolean isMainPlayer,
-        float armScale, boolean applyAttackAnim, HumanoidArm attackArm, boolean setGuiOrientation,
+        float armScale, boolean applyAttackAnim, HumanoidArm attackArm, float attackTime, boolean setGuiOrientation,
         Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
     {
 
         // place lower directly at the lower point
-        ModelUtils.worldToModel(renderState, armPos, rotInfo, bodyYaw,
+        ModelUtils.worldToModel(player, armPos, rotInfo, bodyYaw,
             isMainPlayer || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
 
         ModelUtils.toModelDir(bodyYaw, armRot, tempM);
@@ -487,12 +490,12 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
         arm.setPos(tempV.x, tempV.y, tempV.z);
 
         if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && applyAttackAnim) {
-            ModelUtils.swingAnimation(arm, attackArm, 2F * armScale, renderState.attackTime,
+            ModelUtils.swingAnimation(arm, attackArm, 2F * armScale, attackTime,
                 isMainPlayer, tempM, tempV, tempV2);
         }
 
         if (setGuiOrientation && isMainPlayer) {
-            positionGUI(arm, renderState, rotInfo, bodyYaw, 0.584F * armScale, tempV, tempV2, tempM);
+            positionGUI(arm, player, rotInfo, bodyYaw, 0.584F * armScale, tempV, tempV2, tempM);
         }
 
         tempM.rotateLocalX(-xRot);
@@ -500,7 +503,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
     }
 
     private static void positionGUI(
-        ModelPart arm, PlayerRenderState renderState, ClientVRPlayers.RotInfo rotInfo, float bodyYaw,
+        ModelPart arm, LivingEntity player, ClientVRPlayers.RotInfo rotInfo, float bodyYaw,
         float guiOffset, Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
     {
         if (ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
@@ -516,15 +519,14 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
             GuiHandler.GUI_ROTATION_PLAYER_MODEL.transformDirection(MathUtils.BACK, tempV)
                 .mul(guiOffset * rotInfo.worldScale);
 
-            ModelUtils.modelToWorld(renderState, arm.x, arm.y, arm.z, rotInfo, bodyYaw, true, true, tempV2);
+            ModelUtils.modelToWorld(player, arm.x, arm.y, arm.z, rotInfo, bodyYaw, true, true, tempV2);
             if (MCAHelper.isLoaded()) {
-                // TODO MCA isn't updated yet so no clue how to do this yet
-                // MCAHelper.applyPlayerScale(player, tempV);
+                MCAHelper.applyPlayerScale(player, tempV);
             }
 
             tempV2.add(tempV);
 
-            GuiHandler.GUI_POS_PLAYER_MODEL = new Vec3(renderState.x, renderState.y, renderState.z)
+            GuiHandler.GUI_POS_PLAYER_MODEL = player.getPosition(ClientUtils.getCurrentPartialTick())
                 .add(tempV2.x, tempV2.y, tempV2.z);
         }
     }
