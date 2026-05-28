@@ -108,7 +108,7 @@ jobs:
           
           # use archives_base_name if it exists, else use mod_name
           final_name="${archives_base_name:+${archives_base_name^}}"
-          final_name="${final_name:-${$mod_name}}"
+          final_name="${final_name:-${mod_name}}"
           
           echo "mod_name=${final_name} ${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
           echo "mod_version=${minecraft_version}-${mod_version}" >> $GITHUB_OUTPUT
