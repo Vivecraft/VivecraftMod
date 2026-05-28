@@ -1,0 +1,41 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "mna:spell",
+      "required": false
+    },
+    {
+      "id": "mna:spell_book",
+      "required": false
+    },
+    {
+      "id": "mna:book_of_rote",
+      "required": false
+    },
+    {
+      "id": "mna:grimoire",
+      "required": false
+    },
+    {
+      "id": "mna:grimoire_council",
+      "required": false
+    },
+    {
+      "id": "mna:grimoire_demon",
+      "required": false
+    },
+    {
+      "id": "mna:grimoire_fey",
+      "required": false
+    },
+    {
+      "id": "mna:grimoire_undead",
+      "required": false
+    },
+    {
+      "id": "#mna:wands",
+      "required": false
+    }
+  ]
+}

@@ -176,8 +176,6 @@ public class DebugRenderHelper {
         }
 
         list.forEach(p -> addAxes(consumer, data, p));
-
-        MC.renderBuffers().bufferSource().endBatch();
     }
 
     /**
@@ -225,7 +223,6 @@ public class DebugRenderHelper {
                 renderCube(pos, 0.05F, MathUtils.DARK_GRAY);
             }
         }
-        MC.renderBuffers().bufferSource().endLastBatch();
     }
 
     /**

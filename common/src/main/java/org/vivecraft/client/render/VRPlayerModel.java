@@ -11,7 +11,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
+import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.ClientVRPlayers;
@@ -264,101 +266,29 @@ public class VRPlayerModel extends PlayerModel {
                 ModelPart offHand = rotInfo.leftHanded ? model.rightArm : model.leftArm;
                 ModelPart mainHand = rotInfo.leftHanded ? model.leftArm : model.rightArm;
 
-                // rotation offset, since the rotation point isn't in the center.
-                // this rotates the arm 0.5 or 1 pixels at full arm distance, so that the hand matches up with the center
-                float offset =
-                    (rotInfo.leftHanded ? -1F : 1f) * (model.slim ? 0.016F : 0.032F) * Mth.PI * data.armScale();
+                if (ClientDataHolderVR.getInstance().vrSettings.playerLimbsConnected) {
+                    // rotation offset, since the rotation point isn't in the center.
+                    // this rotates the arm 0.5 or 1 pixels at full arm distance, so that the hand matches up with the center
+                    float offset =
+                        (rotInfo.leftHanded ? -1F : 1f) * (model.slim ? 0.016F : 0.032F) * Mth.PI * data.armScale();
+                    // main hand
+                    positionConnectedArm(mainHand, rotInfo.mainHandPos, rotInfo.mainHandQuat, renderState, rotInfo,
+                        data, offset, data.attackArm() == data.mainArm(), false, tempV, tempV2, tempM);
 
-                // main hand
-                ModelUtils.worldToModel(renderState, rotInfo.mainHandPos, rotInfo, data.bodyYaw(),
-                    data.isMainPlayer() || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
-                tempV.sub(mainHand.x, mainHand.y, mainHand.z);
-                // move shoulders up when having the arms up, since the rotation point is slightly offset
-                mainHand.y -= 2F * Math.max(0F, -tempV.y / tempV.length());
-
-                ModelUtils.pointAtModelWithLocal(rotInfo.mainHandQuat, data.bodyYaw(), tempV, tempV2, tempM);
-
-                float controllerDist = tempV.length();
-
-                if (!ClientDataHolderVR.getInstance().vrSettings.playerLimbsLimit && controllerDist > 10F) {
-                    tempV.normalize().mul(controllerDist - 10F);
-                    mainHand.x += tempV.x;
-                    mainHand.y += tempV.y;
-                    mainHand.z += tempV.z;
-                    tempM.rotateZ(-offset);
+                    // offhand
+                    positionConnectedArm(offHand, rotInfo.offHandPos, rotInfo.offHandQuat, renderState, rotInfo,
+                        data, -offset, data.attackArm() != data.mainArm(), true, tempV, tempV2, tempM);
                 } else {
-                    // reduce correction angle with distance
-                    tempM.rotateZ(-offset * Math.min(10F / controllerDist, 1F));
+                    float xOffset = (model.slim ? 0.5F : 1F) * (rotInfo.leftHanded ? -1F : 1F);
+                    // main hand
+                    positionFloatingArm(mainHand, rotInfo.mainHandPos, rotInfo.mainHandQuat, renderState, rotInfo,
+                        data, -xOffset, data.attackArm() == data.mainArm(), false, tempV, tempV2, tempM);
+
+                    // offhand
+                    positionFloatingArm(offHand, rotInfo.offHandPos, rotInfo.offHandQuat, renderState, rotInfo,
+                        data, xOffset, data.attackArm() != data.mainArm(), true, tempV, tempV2, tempM);
+                    model.leftArm.yScale = model.rightArm.yScale = data.armScale();
                 }
-
-                if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && data.attackArm() == data.mainArm()) {
-                    ModelUtils.swingAnimation(data.attackArm(), renderState.attackTime, data.isMainPlayer(), tempM,
-                        tempV);
-                    mainHand.x -= tempV.x;
-                    mainHand.y -= tempV.y;
-                    mainHand.z += tempV.z;
-                }
-                tempM.rotateLocalX(-data.xRot());
-                ModelUtils.setRotation(mainHand, tempM, tempV);
-
-                // offhand
-                ModelUtils.worldToModel(renderState, rotInfo.offHandPos, rotInfo, data.bodyYaw(),
-                    data.isMainPlayer() || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
-                tempV.sub(offHand.x, offHand.y, offHand.z);
-                // move shoulders up when having the arms up, since the rotation point is slightly offset
-                offHand.y -= 2F * Math.max(0F, -tempV.y / tempV.length());
-
-                ModelUtils.pointAtModelWithLocal(rotInfo.offHandQuat, data.bodyYaw(), tempV, tempV2, tempM);
-
-                controllerDist = tempV.length();
-
-                if (!ClientDataHolderVR.getInstance().vrSettings.playerLimbsLimit && controllerDist > 10F) {
-                    tempV.normalize().mul(controllerDist - 10F);
-                    offHand.x += tempV.x;
-                    offHand.y += tempV.y;
-                    offHand.z += tempV.z;
-                    tempM.rotateZ(offset);
-                } else {
-                    // reduce correction angle with distance
-                    tempM.rotateZ(offset * Math.min(10F / controllerDist, 1F));
-                }
-
-                if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && data.attackArm() != data.mainArm()) {
-                    ModelUtils.swingAnimation(data.attackArm(), renderState.attackTime, data.isMainPlayer(), tempM,
-                        tempV);
-                    offHand.x -= tempV.x;
-                    offHand.y -= tempV.y;
-                    offHand.z += tempV.z;
-                }
-
-                if (data.isMainPlayer() && ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
-                    ClientDataHolderVR.getInstance().vrSettings.modelArmsMode != VRSettings.ModelArmsMode.OFF)
-                {
-                    GuiHandler.GUI_ROTATION_PLAYER_MODEL.set3x3(tempM);
-                    // ModelParts are rotated 90°
-                    GuiHandler.GUI_ROTATION_PLAYER_MODEL.rotateX(-Mth.HALF_PI);
-                    // undo body yaw
-                    GuiHandler.GUI_ROTATION_PLAYER_MODEL.rotateLocalY(-data.bodyYaw() - Mth.PI);
-
-                    // arm vector
-                    GuiHandler.GUI_ROTATION_PLAYER_MODEL.transformDirection(MathUtils.BACK, tempV)
-                        .mul(0.584F * rotInfo.worldScale);
-
-                    ModelUtils.modelToWorld(renderState, offHand.x, offHand.y, offHand.z, rotInfo, data.bodyYaw(), true,
-                        true,
-                        tempV2);
-                    if (MCAHelper.isLoaded()) {
-                        // TODO MCA isn't updated yet so no clue how to do this yet
-                        // MCAHelper.applyPlayerScale(player, tempV);
-                    }
-
-                    tempV2.add(tempV);
-
-                    GuiHandler.GUI_POS_PLAYER_MODEL = new Vec3(renderState.x, renderState.y, renderState.z)
-                        .add(tempV2.x, tempV2.y, tempV2.z);
-                }
-                tempM.rotateLocalX(-data.xRot());
-                ModelUtils.setRotation(offHand, tempM, tempV);
             }
 
             // legs only when not sitting
@@ -420,6 +350,106 @@ public class VRPlayerModel extends PlayerModel {
             if (!(model instanceof VRPlayerModel_WithArmsLegs)) {
                 spinOffset(model.leftLeg, model.rightLeg);
             }
+        }
+    }
+
+
+    private static void positionConnectedArm(
+        ModelPart arm, Vector3fc armPos, Quaternionfc armRot, AvatarRenderState renderState,
+        ClientVRPlayers.RotInfo rotInfo, VRPlayerRenderData data, float zRotOffset, boolean applyAttackAnim,
+        boolean setGuiOrientation, Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
+    {
+        ModelUtils.worldToModel(renderState, armPos, rotInfo, data.bodyYaw(),
+            data.isMainPlayer() || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
+        tempV.sub(arm.x, arm.y, arm.z);
+        // move shoulders up when having the arms up, since the rotation point is slightly offset
+        arm.y -= 2F * Math.max(0F, -tempV.y / tempV.length());
+
+        ModelUtils.pointAtModelWithLocal(armRot, data.bodyYaw(), tempV, tempV2, tempM);
+
+        float controllerDist = tempV.length();
+
+        if (!ClientDataHolderVR.getInstance().vrSettings.playerLimbsLimit && controllerDist > 10F) {
+            tempV.normalize().mul(controllerDist - 10F);
+            arm.x += tempV.x;
+            arm.y += tempV.y;
+            arm.z += tempV.z;
+            tempM.rotateZ(-zRotOffset);
+        } else {
+            // reduce correction angle with distance
+            tempM.rotateZ(-zRotOffset * Math.min(10F / controllerDist, 1F));
+        }
+
+        if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && applyAttackAnim) {
+            ModelUtils.swingAnimation(data.attackArm(), renderState.attackTime, data.isMainPlayer(), tempM, tempV);
+            arm.x -= tempV.x;
+            arm.y -= tempV.y;
+            arm.z += tempV.z;
+        }
+
+        if (setGuiOrientation && data.isMainPlayer()) {
+            positionGUI(arm, renderState, rotInfo, data, 0.584F, tempV, tempV2, tempM);
+        }
+
+        tempM.rotateLocalX(-data.xRot());
+        ModelUtils.setRotation(arm, tempM, tempV);
+    }
+
+    private static void positionFloatingArm(
+        ModelPart arm, Vector3fc armPos, Quaternionfc armRot, AvatarRenderState renderState,
+        ClientVRPlayers.RotInfo rotInfo, VRPlayerRenderData data, float xOffset, boolean applyAttackAnim,
+        boolean setGuiOrientation, Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
+    {
+
+        // place lower directly at the lower point
+        ModelUtils.worldToModel(renderState, armPos, rotInfo, data.bodyYaw(),
+            data.isMainPlayer() || ClientDataHolderVR.getInstance().vrSettings.applyPlayerWorldscale, tempV);
+
+        ModelUtils.toModelDir(data.bodyYaw(), armRot, tempM);
+        tempM.transform(xOffset * data.armScale(), 10 * data.armScale(), 0, tempV2);
+        tempV.sub(tempV2.x, tempV2.y, -tempV2.z);
+        arm.setPos(tempV.x, tempV.y, tempV.z);
+
+        if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && applyAttackAnim) {
+            ModelUtils.swingAnimation(arm, data.attackArm(), 2F * data.armScale(), renderState.attackTime,
+                data.isMainPlayer(), tempM, tempV, tempV2);
+        }
+
+        if (setGuiOrientation && data.isMainPlayer()) {
+            positionGUI(arm, renderState, rotInfo, data, 0.584F * data.armScale(), tempV, tempV2, tempM);
+        }
+
+        tempM.rotateLocalX(-data.xRot());
+        ModelUtils.setRotation(arm, tempM, tempV);
+    }
+
+    private static void positionGUI(
+        ModelPart arm, AvatarRenderState renderState, ClientVRPlayers.RotInfo rotInfo, VRPlayerRenderData data,
+        float guiOffset, Vector3f tempV, Vector3f tempV2, Matrix3f tempM)
+    {
+        if (ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
+            ClientDataHolderVR.getInstance().vrSettings.modelArmsMode != VRSettings.ModelArmsMode.OFF)
+        {
+            GuiHandler.GUI_ROTATION_PLAYER_MODEL.set3x3(tempM);
+            // ModelParts are rotated 90°
+            GuiHandler.GUI_ROTATION_PLAYER_MODEL.rotateX(-Mth.HALF_PI);
+            // undo body yaw
+            GuiHandler.GUI_ROTATION_PLAYER_MODEL.rotateLocalY(-data.bodyYaw() - Mth.PI);
+
+            // arm vector
+            GuiHandler.GUI_ROTATION_PLAYER_MODEL.transformDirection(MathUtils.BACK, tempV)
+                .mul(guiOffset * rotInfo.worldScale);
+
+            ModelUtils.modelToWorld(renderState, arm.x, arm.y, arm.z, rotInfo, data.bodyYaw(), true, true, tempV2);
+            if (MCAHelper.isLoaded()) {
+                // TODO MCA isn't updated yet so no clue how to do this yet
+                // MCAHelper.applyPlayerScale(player, tempV);
+            }
+
+            tempV2.add(tempV);
+
+            GuiHandler.GUI_POS_PLAYER_MODEL = new Vec3(renderState.x, renderState.y, renderState.z)
+                .add(tempV2.x, tempV2.y, tempV2.z);
         }
     }
 
