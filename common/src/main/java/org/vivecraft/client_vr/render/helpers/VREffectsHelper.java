@@ -602,7 +602,8 @@ public class VREffectsHelper {
         RenderSystem.getModelViewStack().pushMatrix().identity();
         RenderHelper.applyVRModelView(DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
 
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
+        Matrix4f proj = ((GameRendererExtension) MC.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
+        VRShaders.setUndistortedProj(proj);
 
         renderMenuEnvironment();
         // render the screen always on top in the menu room to prevent z fighting

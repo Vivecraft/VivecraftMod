@@ -680,8 +680,9 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public void vivecraft$resetProjectionMatrix(float partialTick) {
-        RenderSystem.setProjectionMatrix(this.levelProjectionMatrixBuffer.getBuffer(
-            this.getProjectionMatrix(this.getFov(this.mainCamera, partialTick, true))), ProjectionType.PERSPECTIVE);
+    public Matrix4f vivecraft$resetProjectionMatrix(float partialTick) {
+        Matrix4f proj = this.getProjectionMatrix(this.getFov(this.mainCamera, partialTick, true));
+        RenderSystem.setProjectionMatrix(this.levelProjectionMatrixBuffer.getBuffer(proj), ProjectionType.PERSPECTIVE);
+        return proj;
     }
 }
