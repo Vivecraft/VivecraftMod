@@ -47,7 +47,7 @@ public interface GameRendererExtension {
      *
      * @param partialTick partial ticks to interpolate fov changes
      */
-    Matrix4f vivecraft$resetProjectionMatrix(float partialTick);
+    void vivecraft$resetProjectionMatrix(float partialTick);
 
     /**
      * @return the projection matrix of the third person pass, only valid if that pass was rendered before
