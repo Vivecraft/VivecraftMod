@@ -110,6 +110,9 @@ public class VRPassHelper {
             // copy optifine depth buffer, since we need it for the mixed reality split
             OptifineHelper.copyOptifineShaderDepth(DATA_HOLDER.vrRenderer.framebufferMR);
         }
+
+        // need to do this or clouds would crash with sodium for some reason
+        RenderSystem.getDevice().createCommandEncoder().submit();
     }
 
     /**

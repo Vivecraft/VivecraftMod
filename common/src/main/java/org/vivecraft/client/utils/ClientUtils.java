@@ -60,10 +60,7 @@ public class ClientUtils {
 
     public static String currentMcVersion() {
         String mcVersion = SharedConstants.getCurrentVersion().name();
-        if (mcVersion.contains("Snapshot")) {
-            mcVersion = mcVersion.substring(0, mcVersion.indexOf(" "));
-        }
-        return mcVersion;
+        return mcVersion.substring(0, mcVersion.indexOf(" "));
     }
 
     /**

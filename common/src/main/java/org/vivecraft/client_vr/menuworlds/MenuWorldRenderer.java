@@ -908,9 +908,10 @@ public class MenuWorldRenderer {
                 poseStack.rotate(Axis.ZP.rotationDegrees(90.0f));
 
                 poseStack.scale(1.0f, 1.0f, sunriseAlpha);
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(poseStack,
-                    new Vector4f(ARGB.redFloat(sunriseColor), ARGB.greenFloat(sunriseColor),
-                        ARGB.blueFloat(sunriseColor), sunriseAlpha), new Vector3f(), new Matrix4f());
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
+                    .writeTransform(new Matrix4f(poseStack),
+                        new Vector4f(ARGB.redFloat(sunriseColor), ARGB.greenFloat(sunriseColor),
+                            ARGB.blueFloat(sunriseColor), sunriseAlpha), new Vector3f(), new Matrix4f());
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Sunrise sunset",
                         this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
@@ -942,8 +943,8 @@ public class MenuWorldRenderer {
                 poseStack.translate(0.0f, 100.0f, 0.0f);
                 poseStack.scale(30.0f, 1.0f, 30.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(poseStack, new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility), new Vector3f(),
-                        new Matrix4f());
+                    .writeTransform(new Matrix4f(poseStack), new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility),
+                        new Vector3f(), new Matrix4f());
                 GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Sky sun",
@@ -970,8 +971,8 @@ public class MenuWorldRenderer {
                 poseStack.translate(0.0f, 100.0f, 0.0f);
                 poseStack.scale(20.0f, 1.0f, 20.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(poseStack, new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility), new Vector3f(),
-                        new Matrix4f());
+                    .writeTransform(new Matrix4f(poseStack), new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility),
+                        new Vector3f(), new Matrix4f());
                 GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Sky moon",
@@ -998,7 +999,8 @@ public class MenuWorldRenderer {
                 poseStack.rotate(Axis.XP.rotation(
                     getValue(EnvironmentAttributes.STAR_ANGLE, ClientUtils.getCurrentPartialTick()) * Mth.DEG_TO_RAD));
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(poseStack, new Vector4f(starBrightness), new Vector3f(), new Matrix4f());
+                    .writeTransform(new Matrix4f(poseStack), new Vector4f(starBrightness), new Vector3f(),
+                        new Matrix4f());
                 GpuBuffer indexBuffer = this.quadIndices.getBuffer(this.starIndexCount);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Menuworld Stars",
@@ -1021,11 +1023,11 @@ public class MenuWorldRenderer {
             double horizonDistance = position.y - this.blockAccess.getHorizon();
 
             if (horizonDistance < 0.0D) {
-                Matrix4fStack stack = RenderSystem.getModelViewStack();
-                stack.pushMatrix();
-                stack.translate(0.0f, 12.0f, 0.0f);
+                poseStack.pushMatrix();
+                poseStack.translate(0.0f, 12.0f, 0.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(stack, new Vector4f(0F, 0F, 0F, 1F), new Vector3f(), new Matrix4f());
+                    .writeTransform(new Matrix4f(poseStack), new Vector4f(0F, 0F, 0F, 1F), new Vector3f(),
+                        new Matrix4f());
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Menuworld Dark Kky",
                         this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
@@ -1037,7 +1039,7 @@ public class MenuWorldRenderer {
                     renderPass.setVertexBuffer(0, this.sky2VBO.slice());
                     renderPass.draw(10, 1, 0, 0);
                 }
-                stack.popMatrix();
+                poseStack.popMatrix();
             }
         }
     }
@@ -1080,7 +1082,7 @@ public class MenuWorldRenderer {
         poseStack.translate(0.0f, 100.0f, 0.0f);
         poseStack.scale(60.0f, 1.0f, 60.0f);
         GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-            .writeTransform(poseStack, new Vector4f(this.endFlashState.getIntensity(1F)), new Vector3f(),
+            .writeTransform(new Matrix4f(poseStack), new Vector4f(this.endFlashState.getIntensity(1F)), new Vector3f(),
                 new Matrix4f());
         GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
         try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
