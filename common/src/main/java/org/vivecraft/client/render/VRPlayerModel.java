@@ -131,6 +131,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
 
         float bodyScale = 1F;
         float armScale = 1F;
+        float armYScale = 1F;
         float legScale = 1F;
 
         // this check is similar to VREffectsHelper#isFirstPersonEntityPass,
@@ -347,7 +348,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
                         xRot, xOffset, bodyYaw, isMainPlayer, armScale, attackArm != mainArm, attackArm,
                         model.attackTime, true,
                         tempV, tempV2, tempM);
-                    model.leftArm.yScale = model.rightArm.yScale = armScale;
+                    armYScale = armScale;
                 }
             }
 
@@ -392,8 +393,8 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
                     model.leftLeg, model.rightLeg);
             }
         }
-        ((ModelPartExtension) (Object) model.leftArm).vivecraft$setScale(armScale, 1F, armScale);
-        ((ModelPartExtension) (Object) model.rightArm).vivecraft$setScale(armScale, 1F, armScale);
+        ((ModelPartExtension) (Object) model.leftArm).vivecraft$setScale(armScale, armYScale, armScale);
+        ((ModelPartExtension) (Object) model.rightArm).vivecraft$setScale(armScale, armYScale, armScale);
 
         ((ModelPartExtension) (Object) model.body).vivecraft$setScale(bodyScale, 1F, bodyScale);
 
