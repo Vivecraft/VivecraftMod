@@ -217,6 +217,8 @@ public class VRWidgetHelper {
         if (!widgetState.displayModelState.isEmpty() &&
             !widgetState.displayModelState.layers[0].prepareQuadList().isEmpty())
         {
+            poseStack.pushPose();
+            poseStack.translate(-0.5F, -0.5F, -0.5F);
             output.submitCustomGeometry(poseStack,
                 VRRenderTypes.entitySolidNoCardinalLight(displaySupFunc.get(), true),
                 (pose, consumer) -> {
@@ -269,6 +271,7 @@ public class VRWidgetHelper {
                         }
                     }
                 });
+            poseStack.popPose();
         }
         poseStack.popPose();
     }
