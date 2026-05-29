@@ -225,7 +225,7 @@ public class DebugRenderHelper {
                 renderCube(pos, 0.05F, MathUtils.DARK_GRAY);
             }
         }
-        MC.renderBuffers().bufferSource().endLastBatch();
+        MC.renderBuffers().bufferSource().endBatch();
     }
 
     /**
