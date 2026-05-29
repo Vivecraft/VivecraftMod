@@ -797,8 +797,7 @@ public class VRPlayer {
 
                 if (ClientDataHolderVR.getInstance().katVr) {
                     jkatvr.query();
-                    horizontalInput =
-                        jkatvr.getSpeed() * jkatvr.walkDirection() * this.dh.vrSettings.movementSpeedMultiplier;
+                    horizontalInput = jkatvr.getSpeed() * jkatvr.walkDirection();
                     direction = new Vec3(0.0D, 0.0D, horizontalInput);
 
                     if (isFlyingOrSwimming) {
@@ -809,8 +808,7 @@ public class VRPlayer {
                         -jkatvr.getYaw() * Mth.DEG_TO_RAD + this.vrdata_world_pre.rotation_radians);
                 } else if (ClientDataHolderVR.getInstance().infinadeck) {
                     jinfinadeck.query();
-                    horizontalInput = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() *
-                        this.dh.vrSettings.movementSpeedMultiplier;
+                    horizontalInput = jinfinadeck.getSpeed() * jinfinadeck.walkDirection();
                     direction = new Vec3(0.0D, 0.0D, horizontalInput);
 
                     if (isFlyingOrSwimming) {
@@ -858,6 +856,8 @@ public class VRPlayer {
                         };
                     }
                 }
+
+                direction = direction.scale(this.dh.vrSettings.movementSpeedMultiplier);
 
                 mX = direction.x;
                 mY = direction.y;
