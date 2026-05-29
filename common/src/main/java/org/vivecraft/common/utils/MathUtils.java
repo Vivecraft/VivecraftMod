@@ -285,30 +285,35 @@ public class MathUtils {
      * @return ywa in radians
      */
     public static float bodyYawRad(Vector3fc rightHand, Vector3fc leftHand, Vector3fc headDir) {
-        // use an average of controller forward and head dir
+        // Flatten head and normalize so a steep pitch doesn't mess up the yaw
+        Vector3f headYaw = new Vector3f(headDir.x(), 0F, headDir.z());
+        headYaw.normalize();
 
         // use this when the hands are in front of the head
         Vector3f dir = leftHand.add(rightHand, new Vector3f());
 
-        float hDot = MathUtils.normalizedDotXZ(dir, headDir);
+        float hDot = MathUtils.normalizedDotXZ(dir, headYaw);
 
         // BEHIND HEAD
         // use this when the hands are behind of the head
         // assuming the left controller is on the left side of the body, and the right one on the right side
         Vector3f armsForward = leftHand.sub(rightHand, new Vector3f()).rotateY(-Mth.HALF_PI);
 
-        // TODO FBT this causes the body to flip when having the hands opposite each other, and looking 90° to the side
         // if hands are crossed, flip them
-        if (armsForward.dot(headDir) < 0.0F) {
+        float alignDot = armsForward.dot(headYaw);
+        if (alignDot < 0.0F) {
             armsForward.mul(-1.0F);
         }
         // BEHIND HEAD END
 
-        // mix them based on how far they are to the side, to avoid jumping
+        // Reduce arm impact when perpendicular to head
+        float armsReliability = Mth.clamp(Math.abs(alignDot) * 3.0F, 0.0F, 1.0F);
+
+        // Blend armsForward toward hand midpoint when hands are in front of head
         armsForward.lerp(dir, Math.max(0F, hDot), dir);
 
-        // average with the head direction
-        dir.normalize().lerp(headDir, 0.5F, dir);
+        // Weight more on head when arms are unreliable
+        dir.normalize().lerp(headYaw, Mth.lerp(armsReliability, 0.8F, 0.3F), dir);
         return (float) Math.atan2(-dir.x, dir.z);
     }
 }
