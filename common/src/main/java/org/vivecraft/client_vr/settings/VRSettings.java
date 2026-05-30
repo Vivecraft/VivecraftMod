@@ -596,6 +596,8 @@ public class VRSettings {
     public HUDLock vrHudLockMode = HUDLock.WRIST;
     @SettingField(VrOptions.HUD_WRIST_OFFSET)
     public float vrHudWristOffset = 1F;
+    @SettingField(VrOptions.FORCE_GUI_TO_HUD)
+    public boolean forceGuiToHUD = false;
     @SettingField(VrOptions.HUD_OCCLUSION)
     public boolean hudOcclusion = true;
     @SettingField(VrOptions.CROSSHAIR_SCALE)
@@ -1565,6 +1567,7 @@ public class VRSettings {
                 }
             }
         },
+        FORCE_GUI_TO_HUD(OptionType.BOOLEAN), // puts any screen to the HUD Lock position, instead of fixed in the room
         HUD_WRIST_OFFSET(0.0f, 4.0f, 0.25f, -1), // HUD Offset to the arm
         HUD_OPACITY(0.15f, 1.0f, 0.05f, -1) { // HUD Opacity
 

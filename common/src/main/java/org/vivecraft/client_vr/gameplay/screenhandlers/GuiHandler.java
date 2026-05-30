@@ -529,11 +529,13 @@ public class GuiHandler {
         Vector3f guilocal = new Vector3f();
         float scale = GUI_SCALE;
 
-        if (GUI_POS_ROOM == null) {
+        boolean forceGuiToHUD = DH.vrSettings.forceGuiToHUD && MC.level != null && !MethodHolder.isInMenuRoom();
+
+        if (GUI_POS_ROOM == null || forceGuiToHUD) {
             guirot = null;
             scale = 1.0F;
 
-            if (MC.level != null && (MC.screen == null || !DH.vrSettings.floatInventory)) {
+            if (MC.level != null && (MC.screen == null || forceGuiToHUD || !DH.vrSettings.floatInventory)) {
                 // HUD view - attach to head or controller
                 int side = 1;
 
@@ -622,6 +624,15 @@ public class GuiHandler {
                         guirot.rotateZ(Mth.HALF_PI * side);
                         guirot.rotateY(Mth.HALF_PI * side);
                     }
+                }
+                if (forceGuiToHUD) {
+                    // convert previously calculated coords to world coords
+                    GUI_POS_ROOM = VRPlayer.worldToRoomPos(
+                        guipos.add(new Vec3(guirot.transformDirection(guilocal, new Vector3f()))),
+                        DH.vrPlayer.vrdata_world_render);
+                    GUI_ROTATION_ROOM = new Matrix4f().rotationY(-DH.vrPlayer.vrdata_world_render.rotation_radians)
+                        .mul(guirot);
+                    GUI_SCALE = scale;
                 }
             }
         } else {
