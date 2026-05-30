@@ -857,7 +857,11 @@ public class VRPlayer {
                     }
                 }
 
-                direction = direction.scale(this.dh.vrSettings.movementSpeedMultiplier);
+                if (player.isSprinting() && this.dh.vrSettings.sprintMovementSpeedMultiplier > 0.145F) {
+                    direction = direction.scale(this.dh.vrSettings.sprintMovementSpeedMultiplier);
+                } else {
+                    direction = direction.scale(this.dh.vrSettings.movementSpeedMultiplier);
+                }
 
                 mX = direction.x;
                 mY = direction.y;

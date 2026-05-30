@@ -360,6 +360,8 @@ public class VRSettings {
     public boolean roomscaleSpearLunge = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
+    @SettingField(VrOptions.SPRINT_MOVEMENT_MULTIPLIER)
+    public float sprintMovementSpeedMultiplier = 0f;   // values under 0.15 will use the same as regular movement multiplieer
     @SettingField(VrOptions.FREEMOVE_MODE)
     public FreeMove vrFreeMoveMode = FreeMove.CONTROLLER;
     @SettingField(VrOptions.FREEMOVE_FLY_MODE)
@@ -1931,6 +1933,17 @@ public class VRSettings {
         WALK_UP_BLOCKS(OptionType.BOOLEAN), // Walk up blocks
         // Movement/aiming controls
         MOVEMENT_MULTIPLIER(0.15f, 1.3f, 0.01f, 2), // Move. Speed Multiplier
+        SPRINT_MOVEMENT_MULTIPLIER(0.14f, 1.3f, 0.01f, 2) { // sprint Move. Speed Multiplier
+
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                if ((float) value > 0.145F) {
+                    return super.getDisplayString(prefix, value);
+                } else {
+                    return prefix + I18n.get("vivecraft.options.sprintmovementmultiplier.same");
+                }
+            }
+        },
         INERTIA_FACTOR { // Player Inertia
 
             @Override
