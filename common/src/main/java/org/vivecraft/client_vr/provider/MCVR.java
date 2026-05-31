@@ -119,6 +119,7 @@ public abstract class MCVR {
 
     // seated
     public float seatedRot;
+    private float seatedPrevRot;
     public float aimPitch = 0.0F;
     //
     protected int moveModeSwitchCount = 0;
@@ -650,6 +651,7 @@ public abstract class MCVR {
 
                 Vector3f hmdDir = this.getHmdVector();
 
+                this.seatedPrevRot = this.seatedRot;
                 if (hPos < -rotStart) {
                     this.seatedRot += rotSpeed * rotMul;
                     this.seatedRot %= 360.0F;
@@ -1439,9 +1441,22 @@ public abstract class MCVR {
         Vector3f cur = this.controllerForwardHistory[mainController].averagePosition(0.1).normalize();
         Vector3f prev = this.controllerForwardHistory[mainController].averagePosition(0.3).normalize();
 
+        double yaw = 0;
+        // no 0 or those angles are invalid
+        if (prev.x != 0 && prev.z != 0 && cur.x != 0 && cur.z != 0) {
+            yaw = (Math.atan2(-prev.x, prev.z) - Math.atan2(-cur.x, cur.z)) * Mth.RAD_TO_DEG;
+            yaw = yaw > 180.0 ? yaw - 360.0 : (yaw < -180.0 ? yaw + 360.0 : yaw);
+            if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+                double seatedYaw = this.seatedPrevRot - this.seatedRot;
+                seatedYaw =
+                    seatedYaw > 180.0 ? seatedYaw - 360.0 : (seatedYaw < -180.0 ? seatedYaw + 360.0 : seatedYaw);
+                yaw -= seatedYaw * 30;
+            }
+        }
+
         return new Vector2d(
             // yaw
-            (Math.atan2(-prev.x, prev.z) - Math.atan2(-cur.x, cur.z)) * Mth.RAD_TO_DEG,
+            -yaw,
             // pitch
             (Math.asin(prev.y) - Math.asin(cur.y)) * (up.y < 0 ? -1 : 1) * Mth.RAD_TO_DEG
         );
