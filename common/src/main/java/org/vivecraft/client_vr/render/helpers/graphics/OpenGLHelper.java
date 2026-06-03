@@ -14,11 +14,6 @@ import java.util.Map;
 public class OpenGLHelper implements GraphicsHelper {
 
     @Override
-    public DeviceType getDeviceType() {
-        return DeviceType.OPENGL;
-    }
-
-    @Override
     public long getTextureHandle(GpuTexture texture) {
         if (texture instanceof GlTexture glTexture) {
             return glTexture.glId();

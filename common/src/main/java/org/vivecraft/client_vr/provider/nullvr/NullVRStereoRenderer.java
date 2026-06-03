@@ -71,21 +71,15 @@ public class NullVRStereoRenderer extends VRRenderer {
 
     @Override
     public void createRenderTexture(int lwidth, int lheight) {
-        // generate left eye texture
-        this.framebufferEye0 = VRTextureTarget.builder("L Eye")
-            .withSize(lwidth, lheight)
-            .withFormat(GpuFormat.RGBA8_UNORM)
-            .build();
-        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye0);
-        GraphicsHelper.INSTANCE.checkError("Left Eye framebuffer setup");
-
-        // generate right eye texture
-        this.framebufferEye1 = VRTextureTarget.builder("R Eye")
-            .withSize(lwidth, lheight)
-            .withFormat(GpuFormat.RGBA8_UNORM)
-            .build();
-        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye1);
-        GraphicsHelper.INSTANCE.checkError("Right Eye framebuffer setup");
+        // generate eye textures
+        for (int i = 0; i < 2; i++) {
+            this.framebufferEye[i] = VRTextureTarget.builder((i == 0 ? "L" : "R") + " Eye")
+                .withSize(lwidth, lheight)
+                .withFormat(GpuFormat.RGBA8_UNORM)
+                .build();
+            VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[i]);
+            GraphicsHelper.INSTANCE.checkError((i == 0 ? "Left" : "Right") + " Eye framebuffer setup");
+        }
 
         this.lastError = GraphicsHelper.INSTANCE.checkError("create VR textures");
     }

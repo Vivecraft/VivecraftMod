@@ -712,6 +712,13 @@ public class VRSettings {
     // when set attaches the 3rd person camera tracker to the right controller
     public boolean debugCameraTracker;
 
+    // required vulkan stuff for vr, requested by the runtime
+    @SettingField
+    public String requiredVulkanInstanceExtensions = "";
+
+    @SettingField
+    public String requiredVulkanDeviceExtensions = "";
+
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
      */
@@ -1588,27 +1595,36 @@ public class VRSettings {
             @Override
             Object loadOption(String value) {
                 boolean hidden = value.equals("true");
-                if (hidden != Minecraft.getInstance().gui.hud.isHidden()) {
-                    Minecraft.getInstance().gui.hud.toggle();
+                // is null during first init
+                if (Minecraft.getInstance().gui != null) {
+                    if (hidden != Minecraft.getInstance().gui.hud.isHidden()) {
+                        Minecraft.getInstance().gui.hud.toggle();
+                    }
                 }
-                return false;
+                return hidden;
             }
 
             @Override
             String saveOption(Object value) {
-                return Boolean.toString(Minecraft.getInstance().gui.hud.isHidden());
+                return Boolean.toString(isHiddenWithFallback((boolean) value));
             }
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                return Minecraft.getInstance().gui.hud.isHidden() ? prefix + LangHelper.getYes() :
+                return isHiddenWithFallback((boolean) value) ? prefix + LangHelper.getYes() :
                     prefix + LangHelper.getNo();
             }
 
             @Override
             Object setOptionValue(Object value) {
-                Minecraft.getInstance().gui.hud.toggle();
-                return false;
+                if (Minecraft.getInstance().gui != null) {
+                    Minecraft.getInstance().gui.hud.toggle();
+                }
+                return isHiddenWithFallback((boolean) value);
+            }
+
+            private boolean isHiddenWithFallback(boolean fallback) {
+                return Minecraft.getInstance().gui != null ? Minecraft.getInstance().gui.hud.isHidden() : fallback;
             }
         },
         RENDER_MENU_BACKGROUND(OptionType.BOOLEAN), // HUD/GUI Background
@@ -2197,7 +2213,7 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 if (VRState.VR_INITIALIZED) {
-                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
+                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye[0];
                     return prefix + Math.round((float) value * 100) + "% (" +
                         (int) Math.ceil(eye0.width * Math.sqrt((float) value)) + "x" +
                         (int) Math.ceil(eye0.height * Math.sqrt((float) value)) + ")";

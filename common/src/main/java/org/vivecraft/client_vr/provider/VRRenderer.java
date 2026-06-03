@@ -5,14 +5,17 @@ import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.DeviceType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vulkan.VulkanDevice;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
@@ -25,6 +28,7 @@ import org.joml.Vector2ic;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
+import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.StencilHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -61,8 +65,7 @@ public abstract class VRRenderer {
     protected float lastReverseFarClip = 0F;
 
     // render buffers
-    public RenderTarget framebufferEye0;
-    public RenderTarget framebufferEye1;
+    public final VRTextureTarget[] framebufferEye = new VRTextureTarget[2];
     public RenderTarget framebufferMR;
     public RenderTarget framebufferUndistorted;
     public RenderTarget framebufferVrRender;
@@ -76,7 +79,7 @@ public abstract class VRRenderer {
 
     // Stencil mesh buffer for each eye
     protected float[][] hiddenMeshVertices = new float[2][];
-    private GpuBuffer[] bakedHiddenMesh = new GpuBuffer[2];
+    private final GpuBuffer[] bakedHiddenMesh = new GpuBuffer[2];
 
     // variables to check setting changes that need framebuffers reinits/resizes
     private boolean improvedTransparency = false;
@@ -102,6 +105,13 @@ public abstract class VRRenderer {
 
     public VRRenderer(MCVR vr) {
         this.vr = vr;
+    }
+
+    /**
+     * @throws RenderConfigException if the current graphics setup is unsupported
+     */
+    public void checkCapabilities() throws RenderConfigException {
+        this.checkIfSupportedGpu();
     }
 
     /**
@@ -195,6 +205,9 @@ public abstract class VRRenderer {
      */
     public GpuBuffer getBakedStencilMask(RenderPass eye) {
         if (eye == RenderPass.LEFT || eye == RenderPass.RIGHT) {
+            if (this.bakedHiddenMesh[0] == null || this.bakedHiddenMesh[1] == null) {
+                this.bakeStencilMasks();
+            }
             return eye == RenderPass.LEFT ? this.bakedHiddenMesh[0] : this.bakedHiddenMesh[1];
         } else {
             return null;
@@ -222,11 +235,8 @@ public abstract class VRRenderer {
                 BufferBuilder builder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLES,
                     DefaultVertexFormat.POSITION_COLOR);
 
-                for (int v = 0; i < vertices.length; i += 2) {
-                    builder.addVertex(
-                            vertices[v] + 0.5F,
-                            vertices[v + 1] + 0.5F,
-                            0.0F)
+                for (int v = 0; v < vertices.length; v += 2) {
+                    builder.addVertex(vertices[v], vertices[v + 1], 0.0F)
                         .setColor(0, 0, 0, 255);
                 }
 
@@ -285,7 +295,7 @@ public abstract class VRRenderer {
 
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(this.stencilProjectionMatrix.getBuffer(
-                new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F)),
+                new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 20.0F, 0.0F)),
             ProjectionType.ORTHOGRAPHIC);
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().identity();
@@ -351,8 +361,11 @@ public abstract class VRRenderer {
      */
     private void drawMask() {
         float[] verts = getStencilMask(ClientDataHolderVR.getInstance().currentPass);
+        if (verts == null) {
+            return;
+        }
         GpuBuffer buffer = getBakedStencilMask(ClientDataHolderVR.getInstance().currentPass);
-        if (verts == null || buffer == null) {
+        if (buffer == null) {
             return;
         }
 
@@ -695,40 +708,6 @@ public abstract class VRRenderer {
         if (this.reinitFrameBuffers) {
             GraphicsHelper.INSTANCE.checkError("Start Init");
 
-            // intel drivers have issues with opengl interop on windows so throw an error
-            if (Util.getPlatform() == Util.OS.WINDOWS &&
-                RenderSystem.getDevice().getDeviceInfo().name().toLowerCase().contains("intel") &&
-                dataholder.vrSettings.blockIntelWindows)
-            {
-                StringBuilder gpus = new StringBuilder();
-                boolean onlyIntel = true;
-                for (GraphicsCard gpu : (new SystemInfo()).getHardware().getGraphicsCards()) {
-                    gpus.append("\n");
-                    if (gpu.getVendor().toLowerCase().contains("intel") ||
-                        gpu.getName().toLowerCase().contains("intel"))
-                    {
-                        gpus.append("§c❌§r ");
-                    } else {
-                        onlyIntel = false;
-                        gpus.append("§a✔§r ");
-                    }
-                    gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
-                }
-                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"),
-                    Component.translatable("vivecraft.messages.intelgraphics1",
-                        Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
-                            .withStyle(ChatFormatting.GOLD),
-                        gpus.toString(),
-                        onlyIntel ? Component.empty() :
-                            Component.translatable("vivecraft.messages.intelgraphics2",
-                                Component.literal("https://www.vivecraft.org/faq/#gpu")
-                                    .withStyle(style -> style.withUnderlined(true)
-                                        .withColor(ChatFormatting.GREEN)
-                                        .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                                        .withClickEvent(new ClickEvent.OpenUrl(
-                                            ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu")))))));
-            }
-
             if (!this.isInitialized()) {
                 throw new RenderConfigException(
                     Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
@@ -743,7 +722,7 @@ public abstract class VRRenderer {
 
             this.createRenderTexture(eyew, eyeh);
 
-            if (this.framebufferEye0 == null || this.framebufferEye1 == null) {
+            if (this.framebufferEye[0] == null || this.framebufferEye[1] == null) {
                 throw new RenderConfigException(
                     Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
                     Component.literal(this.getLastError()));
@@ -956,6 +935,77 @@ public abstract class VRRenderer {
         }
     }
 
+    private void checkIfSupportedGpu() throws RenderConfigException {
+        // intel drivers have issues with opengl interop on windows so throw an error
+        if (!(RenderSystem.getDevice().backend instanceof VulkanDevice) &&
+            Util.getPlatform() == Util.OS.WINDOWS &&
+            RenderSystem.getDevice().getDeviceInfo().name().toLowerCase().contains("intel") &&
+            ClientDataHolderVR.getInstance().vrSettings.blockIntelWindows)
+        {
+            StringBuilder gpus = new StringBuilder();
+            boolean onlyIntel = true;
+            for (GraphicsCard gpu : (new SystemInfo()).getHardware().getGraphicsCards()) {
+                gpus.append("\n");
+                if (gpu.getVendor().toLowerCase().contains("intel") ||
+                    gpu.getName().toLowerCase().contains("intel"))
+                {
+                    gpus.append("§c❌§r ");
+                } else if (gpu.getVendor().toLowerCase().contains("amd") ||
+                    gpu.getName().toLowerCase().contains("amd") ||
+                    gpu.getVendor().toLowerCase().contains("nvidia") ||
+                    gpu.getName().toLowerCase().contains("nvidia"))
+                {
+                    onlyIntel = false;
+                    gpus.append("§a✔§r ");
+                }
+                gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
+            }
+            Component message;
+            if (onlyIntel || RenderSystem.getDevice().getDeviceInfo().type() == DeviceType.DISCRETE) {
+
+                Minecraft mc = Minecraft.getInstance();
+                Component vulkan = Component.translatable("vivecraft.messages.intelgraphicsvulkanapi",
+                    Component.translatable("options.videoTitle")
+                        .withStyle(style -> style.withUnderlined(true)
+                            .withColor(ChatFormatting.GREEN)
+                            .withHoverEvent(
+                                new HoverEvent.ShowText(
+                                    Component.translatable("vivecraft.messages.openSettings")))
+                            .withClickEvent(
+                                new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
+                                    () -> new VideoSettingsScreen(mc.gui.screen(), mc, mc.options)))));
+                /*
+                Component vulkanmod = Component.translatable("vivecraft.messages.intelgraphicsvulkanmod",
+                    Component.literal("https://modrinth.com/mod/vulkanmod")
+                        .withStyle(style -> style.withUnderlined(true)
+                            .withColor(ChatFormatting.GREEN)
+                            .withHoverEvent(
+                                new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
+                            .withClickEvent(new ClickEvent.OpenUrl(
+                                ClientUtils.parseUri("https://modrinth.com/mod/vulkanmod")))));
+                 */
+                message = Component.translatable("vivecraft.messages.intelgraphicsvulkan",
+                    vulkan,
+                    Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
+                        .withStyle(ChatFormatting.GOLD));
+            } else {
+                message = Component.translatable("vivecraft.messages.intelgraphics1",
+                    Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
+                        .withStyle(ChatFormatting.GOLD),
+                    gpus.toString(),
+                    Component.translatable("vivecraft.messages.intelgraphics2",
+                        Component.literal("https://www.vivecraft.org/faq/#gpu")
+                            .withStyle(style -> style.withUnderlined(true)
+                                .withColor(ChatFormatting.GREEN)
+                                .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
+                                .withClickEvent(new ClickEvent.OpenUrl(
+                                    ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu"))))));
+            }
+
+            throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"), message);
+        }
+    }
+
     /**
      * only destroys the render buffers, everything else stays in takt
      */
@@ -1032,14 +1082,11 @@ public abstract class VRRenderer {
             this.fsaaLastPassResultFBO = null;
         }
 
-        if (this.framebufferEye0 != null) {
-            this.framebufferEye0.destroyBuffers();
-            this.framebufferEye0 = null;
-        }
-
-        if (this.framebufferEye1 != null) {
-            this.framebufferEye1.destroyBuffers();
-            this.framebufferEye1 = null;
+        for (int i = 0; i < 2; i++) {
+            if (this.framebufferEye[i] != null) {
+                this.framebufferEye[i].destroyBuffers();
+                this.framebufferEye[i] = null;
+            }
         }
 
         if (this.mirrorFramebuffer != null) {
@@ -1054,5 +1101,13 @@ public abstract class VRRenderer {
     public void destroy() {
         destroyBuffers();
         this.stencilProjectionMatrix.close();
+        if (this.bakedHiddenMesh[0] != null) {
+            this.bakedHiddenMesh[0].close();
+            this.bakedHiddenMesh[0] = null;
+        }
+        if (this.bakedHiddenMesh[1] != null) {
+            this.bakedHiddenMesh[1].close();
+            this.bakedHiddenMesh[1] = null;
+        }
     }
 }

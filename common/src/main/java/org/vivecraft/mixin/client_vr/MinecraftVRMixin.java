@@ -143,12 +143,20 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Final
     public Gui gui;
 
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;getBackendDescription()Ljava/lang/String;"))
+    private void vivecraft$initVivecraftSettings(CallbackInfo ci) {
+        VRSettings.initSettings();
+    }
+
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;registerReloadListeners(Lnet/minecraft/server/packs/resources/ReloadableResourceManager;)V"))
     private void vivecraft$initVivecraft(CallbackInfo ci) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.gameRenderer.mainRenderTarget);
-        VRSettings.initSettings();
         new Thread(UpdateChecker::checkForUpdates, "VivecraftUpdateThread").start();
         ShadersHelper.registerPipelines();
+        // need to manually set this, since that was loaded before the hud existed
+        if (ClientDataHolderVR.getInstance().vrSettings.hideGUI != this.gui.hud.isHidden()) {
+            this.gui.hud.toggle();
+        }
     }
 
     @Inject(method = "onGameLoadFinished", at = @At("TAIL"))
@@ -515,7 +523,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     Component.literal(UpdateChecker.NEWEST_VERSION)
                         .withStyle(ChatFormatting.ITALIC, ChatFormatting.GREEN)).withStyle(
                     style -> style.withClickEvent(
-                            new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new UpdateScreen()))
+                            new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, UpdateScreen::new))
                         .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))));
             }
 
@@ -596,7 +604,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
                         Component.translatable("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
+                                () -> new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
                             .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
                     ClientNetworking.SERVER_VR_CHANGES_LIST = null;

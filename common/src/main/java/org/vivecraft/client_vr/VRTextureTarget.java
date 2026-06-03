@@ -19,11 +19,14 @@ public class VRTextureTarget extends RenderTarget {
     @Nullable
     private final Vector4fc clearColor;
 
+    public final GpuFormat gpuFormat;
+
     private VRTextureTarget(
         String name, int width, int height, boolean useDepth, boolean mipmaps, boolean useStencil,
         @Nullable Vector4fc clearColor, GpuFormat format)
     {
         super(name, useDepth, format);
+        this.gpuFormat = format;
         RenderSystem.assertOnRenderThread();
         ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
         this.clearColor = clearColor;

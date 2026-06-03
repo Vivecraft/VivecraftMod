@@ -77,7 +77,6 @@ public class VRShaders {
         .withBindGroupLayout(MIXED_REALITY_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // vr post shader and its uniforms
@@ -94,7 +93,6 @@ public class VRShaders {
         .withBindGroupLayout(POST_PROCESS_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // blit shader
@@ -109,7 +107,6 @@ public class VRShaders {
         .withBindGroupLayout(BLIT_VR_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(
             new ColorTargetState(Optional.empty(), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_COLOR))
         .build();
@@ -121,7 +118,6 @@ public class VRShaders {
         .withBindGroupLayout(BLIT_VR_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .build();
 
@@ -131,7 +127,6 @@ public class VRShaders {
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withVertexBinding(0, DefaultVertexFormat.POSITION)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
         .withColorTargetState(
             new ColorTargetState(Optional.empty(), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_ALPHA))
         .build();

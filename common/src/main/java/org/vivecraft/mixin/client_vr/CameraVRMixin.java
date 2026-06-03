@@ -176,8 +176,8 @@ public abstract class CameraVRMixin {
             }
             return dest;
         } else {
-            // todo 26.2 iris I assume this is how this should work?
-            if (IrisHelper.isLoaded()) {
+            // TODO for full iris release comment taht out
+            if (IrisHelper.isLoaded()) {// && IrisHelper.isShaderActive()) {
                 return dest.set(dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(),
                     this.projection.zNear(), this.projection.zFar()));
             } else {

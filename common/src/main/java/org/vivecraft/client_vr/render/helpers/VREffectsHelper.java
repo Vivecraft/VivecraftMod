@@ -218,7 +218,7 @@ public class VREffectsHelper {
                                 Component.translatable("vivecraft.options.screen.stereorendering"))
                             .withStyle(style -> style.withClickEvent(
                                     new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                        new GuiRenderOpticsSettings(null)))
+                                        () -> new GuiRenderOpticsSettings(null)))
                                 .withHoverEvent(new HoverEvent.ShowText(
                                     Component.translatable("vivecraft.messages.openSettings")))
                                 .withColor(ChatFormatting.GREEN)
@@ -229,7 +229,7 @@ public class VREffectsHelper {
                                 Component.translatable("vivecraft.options.screen.guiother"))
                             .withStyle(style -> style.withClickEvent(
                                     new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                        new GuiOtherHUDSettings(null)))
+                                        () -> new GuiOtherHUDSettings(null)))
                                 .withHoverEvent(new HoverEvent.ShowText(
                                     Component.translatable("vivecraft.messages.openSettings")))
                                 .withColor(ChatFormatting.GREEN)
