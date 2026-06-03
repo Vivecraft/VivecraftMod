@@ -234,7 +234,7 @@ public class IrisHelper {
         }
 
         // fallback to regular api if something failed
-        IrisProgram program = IrisProgram.valueOf(type.name());
+        IrisProgram program = IrisProgram.valueOf(type.irisFallback);
         IrisApi.getInstance().assignPipeline(pipeline, program);
     }
 
