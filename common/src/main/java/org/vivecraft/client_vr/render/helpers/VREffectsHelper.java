@@ -1291,6 +1291,8 @@ public class VREffectsHelper {
             crosshairRenderState.brightness = 1.0F;
         }
 
+        crosshairRenderState.occlude = DATA_HOLDER.vrSettings.useCrosshairOcclusion;
+
         Profiler.get().pop();
     }
 
