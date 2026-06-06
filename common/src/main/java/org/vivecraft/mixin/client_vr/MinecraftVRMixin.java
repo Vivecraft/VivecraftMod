@@ -727,6 +727,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         return isMouseGrabbed || VRState.VR_RUNNING;
     }
 
+    @WrapOperation(method = "handleGlobalKeyPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Lnet/minecraft/client/Minecraft;Z)V"))
+    private void vivecraft$markScreenshot(
+        Minecraft minecraft, boolean debugPanoramaRequested, Operation<Void> original)
+    {
+        if (!VRState.VR_RUNNING) {
+            original.call(minecraft, debugPanoramaRequested);
+        } else {
+            ClientDataHolderVR.getInstance().grabScreenShot = true;
+        }
+    }
+
     @Inject(method = "setLevel", at = @At("HEAD"))
     private void vivecraft$resetRoomOrigin(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {

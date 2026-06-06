@@ -1,7 +1,5 @@
 package org.vivecraft.mixin.client_vr;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -14,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 
@@ -49,17 +45,6 @@ public class KeyboardHandlerVRMixin {
 
         if (VRHotkeys.handleKeyboardInputs(keyEvent.key(), keyEvent.scancode(), action, keyEvent.modifiers())) {
             ci.cancel();
-        }
-    }
-
-    @WrapOperation(method = "keyPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Lnet/minecraft/client/Minecraft;Z)V"))
-    private void vivecraft$markScreenshot(
-        Minecraft minecraft, boolean debugPanoramaRequested, Operation<Void> original)
-    {
-        if (!VRState.VR_RUNNING) {
-            original.call(minecraft, debugPanoramaRequested);
-        } else {
-            ClientDataHolderVR.getInstance().grabScreenShot = true;
         }
     }
 }

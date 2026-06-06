@@ -31,8 +31,8 @@ public class LevelExtractorVRMixin {
     @Shadow
     private @Nullable ClientLevel level;
 
-    @ModifyExpressionValue(method = "extractVisibleEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"))
-    private boolean vivecraft$dontCullPlayer(boolean doRender, @Local Entity entity) {
+    @ModifyExpressionValue(method = "isEntityVisible", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"))
+    private boolean vivecraft$dontCullPlayer(boolean doRender, @Local(argsOnly = true) Entity entity) {
         return doRender ||
             (ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf && entity == Minecraft.getInstance().player);
     }
