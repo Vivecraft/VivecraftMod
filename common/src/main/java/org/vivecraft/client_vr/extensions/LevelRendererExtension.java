@@ -1,8 +1,11 @@
 package org.vivecraft.client_vr.extensions;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+
+import javax.annotation.Nullable;
 
 public interface LevelRendererExtension {
     /**
@@ -14,4 +17,22 @@ public interface LevelRendererExtension {
      */
     void vivecraft$renderGizmos(
         CameraRenderState cameraState, SubmitNodeStorage output, FeatureRenderDispatcher dispatcher);
+
+    /**
+     * @return the rendertarget to render the VR hands into
+     */
+    @Nullable
+    RenderTarget vivecraft$getHandsTarget();
+
+    /**
+     * @return the rendertarget to render VR occluded things into
+     */
+    @Nullable
+    RenderTarget vivecraft$getVrOccludedTarget();
+
+    /**
+     * @return the rendertarget to render VR unoccluded things into
+     */
+    @Nullable
+    RenderTarget vivecraft$getVrUnoccludedTarget();
 }

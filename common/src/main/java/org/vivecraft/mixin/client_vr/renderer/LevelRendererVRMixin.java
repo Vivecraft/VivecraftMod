@@ -41,6 +41,7 @@ import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 // priority 990 to inject before iris, for the vrFast rendering
@@ -50,10 +51,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Unique
     private static final Identifier vivecraft$VR_TRANSPARENCY_POST_CHAIN_ID = Identifier.fromNamespaceAndPath(
         "vivecraft", "vrtransparency");
-
-    @Final
-    @Shadow
-    private RenderBuffers renderBuffers;
 
     @Shadow
     protected abstract void submitHitOutline(
@@ -164,23 +161,31 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    @Inject(method = "lambda$addMainPass$0*", at = @At("TAIL"))
-    private void vivecraft$renderVrFabulous(
-        CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState)
-    {
+    @Inject(method = "lambda$addMainPass$0*", at = @At(value = "CONSTANT", args = "stringValue=renderSolidFeatures"))
+    private void vivecraft$clearVrFabulous(CallbackInfo ci) {
         if (RenderPassType.isVanilla() || this.targets.translucent == null) return;
-
-        VREffectsHelper.renderVRFabulous(this.featureRenderDispatcher, this.submitNodeStorage, levelRenderState,
-            new PoseStack(), this.targets);
+        if (this.targets instanceof LevelTargetBundleExtension ext) {
+            if (ext.vivecraft$getOccluded() != null) {
+                (ext.vivecraft$getOccluded().get()).copyDepthFrom(this.targets.main.get());
+            }
+            if (ext.vivecraft$getHands() != null) {
+                (ext.vivecraft$getHands().get()).copyDepthFrom(this.targets.main.get());
+            }
+            // no depth copy for unoccluded
+        }
     }
 
     @Inject(method = "submitFeatures*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;finalizeGizmoCollection()V"))
     private void vivecraft$renderVrStuffPart1(
         CallbackInfo ci, @Local(argsOnly = true) LevelRenderState levelRenderState, @Local PoseStack poseStack)
     {
-        if (RenderPassType.isVanilla() || this.targets.translucent != null) return;
+        if (RenderPassType.isVanilla()) return;
 
-        VREffectsHelper.renderVrFast(this.submitNodeStorage, levelRenderState, poseStack, false);
+        if (this.gameRenderer.gameRenderState().useShaderTransparency()) {
+            VREffectsHelper.renderVRFabulous(this.submitNodeStorage, levelRenderState, poseStack);
+        } else {
+            VREffectsHelper.renderVrFast(this.submitNodeStorage, levelRenderState, poseStack, false);
+        }
     }
 
     // if the gui didn't render yet, render it now.
@@ -261,5 +266,30 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
         RenderSystem.outputColorTextureOverride = null;
         RenderSystem.outputDepthTextureOverride = null;
+    }
+
+
+    @Unique
+    @Override
+    @Nullable
+    public RenderTarget vivecraft$getHandsTarget() {
+        return this.targets instanceof LevelTargetBundleExtension ext && ext.vivecraft$getHands() != null ?
+            ext.vivecraft$getHands().get() : null;
+    }
+
+    @Unique
+    @Override
+    @Nullable
+    public RenderTarget vivecraft$getVrOccludedTarget() {
+        return this.targets instanceof LevelTargetBundleExtension ext && ext.vivecraft$getOccluded() != null ?
+            ext.vivecraft$getOccluded().get() : null;
+    }
+
+    @Unique
+    @Override
+    @Nullable
+    public RenderTarget vivecraft$getVrUnoccludedTarget() {
+        return this.targets instanceof LevelTargetBundleExtension ext && ext.vivecraft$getUnoccluded() != null ?
+            ext.vivecraft$getUnoccluded().get() : null;
     }
 }

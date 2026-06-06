@@ -15,6 +15,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.tuple.Triple;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
@@ -25,7 +27,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientUtils {
 
@@ -211,5 +215,20 @@ public class ClientUtils {
                     });
             }
         }
+    }
+
+    public static <A, B, C, R> TriFunction<A, B, C, R> memoize(final TriFunction<A, B, C, R> function) {
+        return new TriFunction<A, B, C, R>() {
+            private final Map<Triple<A, B, C>, R> cache = new ConcurrentHashMap<>();
+
+            public R apply(final A a, final B b, final C c) {
+                return (R) this.cache.computeIfAbsent(Triple.of(a, b, c),
+                    (args) -> function.apply(args.getLeft(), args.getMiddle(), args.getRight()));
+            }
+
+            public String toString() {
+                return "memoize/3[function=" + function + ", size=" + this.cache.size() + "]";
+            }
+        };
     }
 }

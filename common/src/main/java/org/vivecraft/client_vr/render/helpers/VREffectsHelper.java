@@ -10,11 +10,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
@@ -53,7 +53,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
-import org.vivecraft.client_vr.extensions.LevelTargetBundleExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -694,15 +693,12 @@ public class VREffectsHelper {
      * renders the vivecraft stuff into separate buffers for the fabulous settings
      * this includes hands, vr shadow, gui, camera widgets and other stuff
      *
-     * @param featureRender FeatureRenderDispatcher to render with
-     * @param output        SubmitNodeStorage to output to
-     * @param levelState    LevelRenderState to getthe vr renderstate and camera state from
-     * @param poseStack     PoseStack to use for positioning
-     * @param targets       RenderTarget bundle that holds the framebuffers for rendering
+     * @param output     SubmitNodeStorage to output to
+     * @param levelState LevelRenderState to getthe vr renderstate and camera state from
+     * @param poseStack  PoseStack to use for positioning
      */
     public static void renderVRFabulous(
-        FeatureRenderDispatcher featureRender, SubmitNodeStorage output, LevelRenderState levelState,
-        PoseStack poseStack, LevelTargetBundle targets)
+        SubmitNodeStorage output, LevelRenderState levelState, PoseStack poseStack)
     {
         VRRenderState vrState = ((LevelRenderStateExtension) levelState).vivecraft$getVRRenderState();
         if (vrState.currentPass == RenderPass.SCOPEL || vrState.currentPass == RenderPass.SCOPER) {
@@ -710,24 +706,13 @@ public class VREffectsHelper {
             return;
         }
 
-        int order = 0;
-
         Profiler.get().push("VR");
-        renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack, order);
-        // render stuff
-        featureRender.renderAllFeatures(output);
+        renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack, 0);
 
         // switch to VR Occluded buffer, and copy main depth for occlusion
-        LevelTargetBundleExtension extTargets = (LevelTargetBundleExtension) targets;
+        VRRenderTypes.VR_OUTPUT_TARGET = VRRenderTypes.OCCLUDED_TARGET;
 
-        RenderSystem.getDevice().createCommandEncoder()
-            .clearColorTexture(extTargets.vivecraft$getOccluded().get().getColorTexture(), MathUtils.BLACK_TRANSPARENT);
-        extTargets.vivecraft$getOccluded().get().copyDepthFrom(targets.main.get());
-
-        RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getOccluded().get().getColorTextureView();
-        RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getOccluded().get().getDepthTextureView();
-
-        order = 0;
+        int order = 0;
         if (vrState.occludeGui) {
             order = renderGuiAndShadow(output, vrState, levelState.cameraRenderState, poseStack, false, false, order);
             order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
@@ -735,16 +720,8 @@ public class VREffectsHelper {
                 vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true, order);
         }
 
-        // render stuff
-        featureRender.renderAllFeatures(output);
-
-        // switch to VR UnOccluded buffer, no depth copy
-        RenderSystem.getDevice().createCommandEncoder()
-            .clearColorAndDepthTextures(extTargets.vivecraft$getUnoccluded().get().getColorTexture(),
-                MathUtils.BLACK_TRANSPARENT,
-                extTargets.vivecraft$getUnoccluded().get().getDepthTexture(), 0.0);
-        RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getUnoccluded().get().getColorTextureView();
-        RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getUnoccluded().get().getDepthTextureView();
+        // switch to VR UnOccluded buffer
+        VRRenderTypes.VR_OUTPUT_TARGET = VRRenderTypes.UNOCCLUDED_TARGET;
 
         order = 0;
         if (!vrState.occludeGui) {
@@ -763,26 +740,15 @@ public class VREffectsHelper {
                 vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true, order);
         }
 
-        // render stuff
-        featureRender.renderAllFeatures(output);
-
         // switch to VR hands buffer
-        RenderSystem.getDevice().createCommandEncoder()
-            .clearColorTexture(extTargets.vivecraft$getHands().get().getColorTexture(), MathUtils.BLACK_TRANSPARENT);
-        extTargets.vivecraft$getHands().get().copyDepthFrom(targets.main.get());
-        RenderSystem.outputColorTextureOverride = extTargets.vivecraft$getHands().get().getColorTextureView();
-        RenderSystem.outputDepthTextureOverride = extTargets.vivecraft$getHands().get().getDepthTextureView();
+        VRRenderTypes.VR_OUTPUT_TARGET = VRRenderTypes.HANDS_TARGET;
 
         order = 0;
         order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
             vrState.armsState.renderHands && !vrState.armsState.menuHandMain,
             vrState.armsState.renderHands && !vrState.armsState.menuHandOff, false, false, order);
 
-        // render stuff
-        featureRender.renderAllFeatures(output);
-
-        RenderSystem.outputColorTextureOverride = null;
-        RenderSystem.outputDepthTextureOverride = null;
+        VRRenderTypes.VR_OUTPUT_TARGET = OutputTarget.MAIN_TARGET;
         Profiler.get().pop();
     }
 
