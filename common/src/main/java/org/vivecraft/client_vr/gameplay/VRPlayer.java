@@ -519,7 +519,7 @@ public class VRPlayer {
         if (this.mc.level.noCollision(player, bb)) {
             // no collision
             // don't call setPosition style functions to avoid shifting room origin
-            player.setPosRaw(x, !this.dh.vrSettings.simulateFalling ? y : player.getY(), z);
+            player.setPosRaw(x, y/*!this.dh.vrSettings.simulateFalling ? y : player.getY()*/, z);
             player.setBoundingBox(bb);
             player.fallDistance = 0.0F;
         } else if (
