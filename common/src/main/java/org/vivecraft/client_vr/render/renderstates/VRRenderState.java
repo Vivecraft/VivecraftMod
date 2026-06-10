@@ -30,6 +30,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
+import org.vivecraft.client_vr.render.helpers.VRArmHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.render.helpers.VRWidgetHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -104,6 +105,7 @@ public class VRRenderState {
 
         // depends on render pass
         this.occludeGui = VREffectsHelper.shouldOccludeGui();
+        this.armsState.renderHands = VRArmHelper.shouldRenderHands();
 
         // overlay status
         this.inBlock = false;
@@ -121,7 +123,7 @@ public class VRRenderState {
 
         DebugRenderHelper.extractDebug(partialTick);
 
-        // everything after tzhis just needs to be done once per frame
+        // everything after this just needs to be done once per frame
         if (!dataHolder.isFirstPass) return;
 
         this.partialTick = partialTick;

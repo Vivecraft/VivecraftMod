@@ -19,7 +19,11 @@ import org.vivecraft.data.ViveItems;
 
 @Mixin(ArmedEntityRenderState.class)
 public class ArmedEntityRenderStateMixin {
-    @ModifyExpressionValue(method = "extractArmedEntityRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getMainArm()Lnet/minecraft/world/entity/HumanoidArm;"))
+    @ModifyExpressionValue(method = "extractArmedEntityRenderState", at = {
+        @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getMainArm()Lnet/minecraft/world/entity/HumanoidArm;"),
+        @At(value = "FIELD", target = "Lnet/minecraft/world/entity/HumanoidArm;RIGHT:Lnet/minecraft/world/entity/HumanoidArm;"),
+        @At(value = "FIELD", target = "Lnet/minecraft/world/entity/HumanoidArm;LEFT:Lnet/minecraft/world/entity/HumanoidArm;")
+    })
     private static HumanoidArm vivecraft$leftHanded(HumanoidArm original, @Local(argsOnly = true) LivingEntity entity) {
         if (ClientVRPlayers.getInstance().isVRAndLeftHanded(entity.getUUID())) {
             return original.getOpposite();

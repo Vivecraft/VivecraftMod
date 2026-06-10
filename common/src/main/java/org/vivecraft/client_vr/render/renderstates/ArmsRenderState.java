@@ -40,7 +40,6 @@ public class ArmsRenderState {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
-        this.renderHands = VRArmHelper.shouldRenderHands();
         // render hands in second pass when gui is open
         this.handsSecond = RadialHandler.isShowing() || KeyboardHandler.SHOWING || mc.screen != null;
         this.menuHandMain = dataHolder.menuHandMain;
