@@ -3,8 +3,11 @@ package org.vivecraft.common.utils;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;
+import org.vivecraft.api.data.FBTMode;
 
+import javax.annotation.Nullable;
 import java.lang.Math;
+import java.util.function.Supplier;
 
 public class MathUtils {
 
@@ -284,14 +287,45 @@ public class MathUtils {
     }
 
     /**
+     * calculates the body yaw based
+     *
+     * @param seated            if the palyer is in seated mode
+     * @param swappedHands      if the left hand is equal to the main hand
+     * @param fbtMode           FBTMode of available trackers
+     * @param headDirection     head direction
+     * @param mainHandPos       mainhand position, {@code null} if invalid
+     * @param offHandPos        offhand position, {@code null} if invalid
+     * @param waistDirectionSup supplier to getthe waist direction
+     * @return yaw in radians
+     */
+    public static float estimateBodyYawRad(
+        boolean seated, boolean swappedHands, FBTMode fbtMode, Vector3fc headDirection,
+        @Nullable Vector3fc mainHandPos, @Nullable Vector3fc offHandPos, Supplier<Vector3fc> waistDirectionSup)
+    {
+        if (seated || fbtMode == FBTMode.ARMS_ONLY && (offHandPos == null || mainHandPos == null)) {
+            // in seated use the head direction
+            return (float) Math.atan2(-headDirection.x(), headDirection.z());
+        } else if (fbtMode != FBTMode.ARMS_ONLY) {
+            // use average of head and waist
+            Vector3f dir = waistDirectionSup.get().lerp(headDirection, 0.5F, new Vector3f());
+            return (float) Math.atan2(-dir.x, dir.z);
+        } else {
+            return MathUtils.bodyYawRad(
+                swappedHands ? offHandPos : mainHandPos,
+                swappedHands ? mainHandPos : offHandPos,
+                headDirection);
+        }
+    }
+
+    /**
      * calculates the body yaw based on the two controller positions and the head direction
      *
      * @param rightHand right controller position
      * @param leftHand  left controller position
      * @param headDir   head direction
-     * @return ywa in radians
+     * @return yaw in radians
      */
-    public static float bodyYawRad(Vector3fc rightHand, Vector3fc leftHand, Vector3fc headDir) {
+    private static float bodyYawRad(Vector3fc rightHand, Vector3fc leftHand, Vector3fc headDir) {
         // use an average of controller forward and head dir
 
         // use this when the hands are in front of the head

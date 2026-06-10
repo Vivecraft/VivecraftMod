@@ -103,6 +103,7 @@
     "client_vr.renderer.item.BlockModelWrapper$UnbakedVRMixin",
     "client_vr.renderer.item.BlockModelWrapperVRMixin",
     "client_vr.renderer.item.properties.conditional.IsUsingItemVRMixin",
+    "client_vr.renderer.item.properties.numeric.CompassAngleStateVRMixin",
     "client_vr.renderer.item.properties.numeric.UseDurationVRMixin",
     "client_vr.renderer.rendertype.RenderSetupVRMixin",
     "client_vr.renderer.rendertype.RenderTypeVRMixin",
@@ -146,6 +147,7 @@
     "world.entity.projectile.ThrownTridentMixin",
     "world.item.CrossbowItemMixin",
     "world.item.ItemMixin",
-    "world.level.block.FenceGateBlockServerMixin"
+    "world.level.block.FenceGateBlockServerMixin",
+    "world.level.savedata.maps.MapItemSavedDataMixin"
   ]
 }

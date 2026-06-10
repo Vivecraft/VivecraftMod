@@ -566,27 +566,24 @@ public class ClientVRPlayers {
         // API pose object representing the data of this object
         private VRPose vrPose;
 
-        /**
-         * IMPORTANT!!! when changing this, also change {@link VRData#getBodyYawRad()}
-         */
+        private float bodyYawRad = Float.MAX_VALUE;
+
         public float getBodyYawRad() {
-            Vector3f dir = new Vector3f();
-            if (this.seated ||
-                (this.fbtMode == FBTMode.ARMS_ONLY && this.offHandPos.distanceSquared(this.mainHandPos) == 0.0F))
-            {
-                // in seated use the head direction
-                dir.set(this.headRot);
-            } else if (this.fbtMode != FBTMode.ARMS_ONLY) {
-                // use average of head and waist
-                this.waistQuat.transform(MathUtils.BACK, dir)
-                    .lerp(this.headRot, 0.5F);
-            } else {
-                return MathUtils.bodyYawRad(
-                    this.leftHanded ? this.offHandPos : this.mainHandPos,
-                    this.leftHanded ? this.mainHandPos : this.offHandPos,
-                    this.headRot);
+            // cache the body yaw, in case it is needed multiple times
+            if (this.bodyYawRad == Float.MAX_VALUE) {
+                Vector3fc mainHandPos = null;
+                Vector3fc offHandPos = null;
+                // if they do not track they are invalid
+                if (this.offHandPos.distanceSquared(this.mainHandPos) != 0.0F) {
+                    offHandPos = this.offHandPos;
+                    mainHandPos = this.mainHandPos;
+                }
+
+                this.bodyYawRad = MathUtils.estimateBodyYawRad(this.seated, this.leftHanded, this.fbtMode, this.headRot,
+                    mainHandPos, offHandPos, () -> this.waistQuat.transform(MathUtils.BACK, new Vector3f()));
             }
-            return (float) Math.atan2(-dir.x, dir.z);
+
+            return this.bodyYawRad;
         }
 
         public VRPose asVRPose(Vec3 playerPos) {
