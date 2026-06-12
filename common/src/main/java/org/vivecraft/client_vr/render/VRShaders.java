@@ -51,7 +51,6 @@ public class VRShaders {
         .withBindGroupLayout(LANCZOS_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // mixed reality shader and its uniforms
