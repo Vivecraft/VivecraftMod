@@ -5,17 +5,14 @@ import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.DeviceType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vulkan.VulkanDevice;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
@@ -28,7 +25,6 @@ import org.joml.Vector2ic;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
-import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.StencilHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -936,9 +932,8 @@ public abstract class VRRenderer {
     }
 
     private void checkIfSupportedGpu() throws RenderConfigException {
-        // intel drivers have issues with opengl interop on windows so throw an error
-        if (!(RenderSystem.getDevice().backend instanceof VulkanDevice) &&
-            Util.getPlatform() == Util.OS.WINDOWS &&
+        // intel drivers have issues with interop on windows so throw an error
+        if (Util.getPlatform() == Util.OS.WINDOWS &&
             RenderSystem.getDevice().getDeviceInfo().name().toLowerCase().contains("intel") &&
             ClientDataHolderVR.getInstance().vrSettings.blockIntelWindows)
         {
@@ -961,38 +956,11 @@ public abstract class VRRenderer {
                 gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
             }
             Component message;
-            if (onlyIntel || RenderSystem.getDevice().getDeviceInfo().type() == DeviceType.DISCRETE) {
-
-                Minecraft mc = Minecraft.getInstance();
-                Component vulkan = Component.translatable("vivecraft.messages.intelgraphicsvulkanapi",
-                    Component.translatable("options.videoTitle")
-                        .withStyle(style -> style.withUnderlined(true)
-                            .withColor(ChatFormatting.GREEN)
-                            .withHoverEvent(
-                                new HoverEvent.ShowText(
-                                    Component.translatable("vivecraft.messages.openSettings")))
-                            .withClickEvent(
-                                new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                    () -> new VideoSettingsScreen(mc.gui.screen(), mc, mc.options)))));
-                /*
-                Component vulkanmod = Component.translatable("vivecraft.messages.intelgraphicsvulkanmod",
-                    Component.literal("https://modrinth.com/mod/vulkanmod")
-                        .withStyle(style -> style.withUnderlined(true)
-                            .withColor(ChatFormatting.GREEN)
-                            .withHoverEvent(
-                                new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                            .withClickEvent(new ClickEvent.OpenUrl(
-                                ClientUtils.parseUri("https://modrinth.com/mod/vulkanmod")))));
-                 */
-                message = Component.translatable("vivecraft.messages.intelgraphicsvulkan",
-                    vulkan,
-                    Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
-                        .withStyle(ChatFormatting.GOLD));
-            } else {
-                message = Component.translatable("vivecraft.messages.intelgraphics1",
-                    Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
-                        .withStyle(ChatFormatting.GOLD),
-                    gpus.toString(),
+            message = Component.translatable("vivecraft.messages.intelgraphics1",
+                Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
+                    .withStyle(ChatFormatting.GOLD),
+                gpus.toString(),
+                onlyIntel ? Component.empty() :
                     Component.translatable("vivecraft.messages.intelgraphics2",
                         Component.literal("https://www.vivecraft.org/faq/#gpu")
                             .withStyle(style -> style.withUnderlined(true)
@@ -1000,7 +968,6 @@ public abstract class VRRenderer {
                                 .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
                                 .withClickEvent(new ClickEvent.OpenUrl(
                                     ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu"))))));
-            }
 
             throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"), message);
         }
