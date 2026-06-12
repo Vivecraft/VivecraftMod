@@ -628,6 +628,8 @@ public class VRSettings {
     public int forceHardwareDetection = 0; // 0 = off, 1 = vive, 2 = oculus
     @SettingField(VrOptions.RADIAL_MODE_HOLD)
     public boolean radialModeHold = true;
+    @SettingField(VrOptions.RADIAL_REPEAT)
+    public boolean radialRepeat = true;
     @SettingField(VrOptions.RADIAL_NUMBER)
     public int vrRadialButtons = 8;
     @SettingField(VrOptions.PHYSICAL_KEYBOARD)
@@ -1692,6 +1694,7 @@ public class VRSettings {
         AUTO_OPEN_KEYBOARD, // Always Open Keyboard
         AUTO_CLOSE_KEYBOARD(OptionType.BOOLEAN), // Close Keyboard on Screenchange
         RADIAL_MODE_HOLD("vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
+        RADIAL_REPEAT(OptionType.BOOLEAN), // repeat last radial action
         RADIAL_NUMBER(4, 14, 2, 0), // number of radial buttons
         PHYSICAL_KEYBOARD("vivecraft.options.keyboard.physical",
             "vivecraft.options.keyboard.pointer") { // Keyboard Type
