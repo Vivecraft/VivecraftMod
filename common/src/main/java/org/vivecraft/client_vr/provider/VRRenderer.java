@@ -201,10 +201,9 @@ public abstract class VRRenderer {
         RenderSystem.clearStencil(0);
         */
 
-        RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(this.stencilProjectionMatrix.getBuffer(
-                new Matrix4f().setOrtho(0.0F, fb.width, 0.0F, fb.height, 0.0F, 20.0F)),
+                new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F)),
             ProjectionType.ORTHOGRAPHIC);
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().identity();
@@ -214,7 +213,7 @@ public abstract class VRRenderer {
         }
 
         if (dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER) {
-            drawCircle(fb.width, fb.height);
+            drawCircle(1.0F, 1.0F);
         } else if (providesStencilMask() &&
             (dataholder.currentPass == RenderPass.LEFT || dataholder.currentPass == RenderPass.RIGHT))
         {
@@ -248,7 +247,8 @@ public abstract class VRRenderer {
         float radius = width / 2.0F;
 
         // put middle vertex
-        builder.addVertex(radius, radius, 0.0F);
+        builder.addVertex(radius, radius, 0.0F)
+            .setColor(0, 0, 0, 255);
 
         // put outer vertices
         for (int i = 0; i < edges + 1; i++) {
@@ -279,8 +279,8 @@ public abstract class VRRenderer {
 
         for (int i = 0; i < verts.length; i += 2) {
             builder.addVertex(
-                    verts[i] * this.renderScale + 0.5F,
-                    verts[i + 1] * this.renderScale + 0.5F,
+                    verts[i] * this.renderScale,
+                    verts[i + 1] * this.renderScale,
                     0.0F)
                 .setColor(0, 0, 0, 255);
         }

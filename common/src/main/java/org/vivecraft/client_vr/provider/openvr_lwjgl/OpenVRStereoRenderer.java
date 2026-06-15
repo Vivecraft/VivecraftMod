@@ -65,11 +65,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
                     MemoryUtil.memFloatBuffer(MemoryUtil.memAddress(this.hiddenMeshes[eye].pVertexData()),
                         this.hiddenMeshVertices[eye].length).get(this.hiddenMeshVertices[eye]);
 
-                    for (int vertex = 0; vertex < this.hiddenMeshVertices[eye].length; vertex += 2) {
-                        this.hiddenMeshVertices[eye][vertex] *= (float) this.resolution.getA();
-                        this.hiddenMeshVertices[eye][vertex + 1] *= (float) this.resolution.getB();
-                    }
-
                     VRSettings.LOGGER.info("Vivecraft: Stencil mesh loaded for eye '{}'", eye);
                 }
             }
