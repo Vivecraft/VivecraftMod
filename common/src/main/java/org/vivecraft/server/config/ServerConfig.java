@@ -70,6 +70,8 @@ public class ServerConfig {
     public static ConfigBuilder.DoubleValue PROJECTILE_INACCURACY_MULTIPLIER;
     public static ConfigBuilder.BooleanValue ALLOW_FASTER_BLOCK_BREAKING;
     public static ConfigBuilder.BooleanValue ALLOW_ROOMSCALE_SHIELD_BLOCKING;
+    public static ConfigBuilder.IntValue ROOMSCALE_SHIELD_COOLDOWN;
+    public static ConfigBuilder.DoubleValue ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER;
     public static ConfigBuilder.BooleanValue ALLOW_ATTACKS_WHILE_BLOCKING;
     // bow
     public static ConfigBuilder.DoubleValue BOW_STANDING_MULTIPLIER;
@@ -301,6 +303,12 @@ public class ServerConfig {
         ALLOW_ROOMSCALE_SHIELD_BLOCKING = BUILDER
             .push("allowRoomscaleShieldBlocking")
             .define(true);
+        ROOMSCALE_SHIELD_COOLDOWN = BUILDER
+            .push("roomscaleShieldCooldown")
+            .defineInRange(0, 0, 1000);
+        ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER = BUILDER
+            .push("roomscaleShieldCooldownDamageTrigger")
+            .defineInRange(3.0, 0.0, 100.0);
         ALLOW_ATTACKS_WHILE_BLOCKING = BUILDER
             .push("allowAttacksWhileBlocking")
             .define(true)

@@ -156,7 +156,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
      */
     @Override
     protected ItemStack vivecraft$roomscaleShieldBlockingItem(
-        ItemStack original, DamageSource damageSource, LocalDoubleRef roomscaleBlockAngle)
+        ItemStack original, DamageSource damageSource, float damage, LocalDoubleRef roomscaleBlockAngle)
     {
         // in case it wasn't reset the last time, since isDamageSourceBlocked is not just called from the serverHurt
         this.vivecraft$roomscaleShieldItem = null;
@@ -215,6 +215,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                     if (angle > 0.5) {
                         roomscaleBlockAngle.set(angle);
                         this.vivecraft$roomscaleShieldItem = stack;
+                        if (ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get() > 0 &&
+                            damage >= ServerConfig.ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER.get())
+                        {
+                            this.getCooldowns().addCooldown(stack, ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get());
+                        }
                         return stack;
                     }
                 }
