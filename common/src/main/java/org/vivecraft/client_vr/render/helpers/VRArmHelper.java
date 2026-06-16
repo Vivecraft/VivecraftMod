@@ -20,7 +20,6 @@ import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.data.ViveItems;
-import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 public class VRArmHelper {
 
@@ -168,20 +167,10 @@ public class VRArmHelper {
             vrState.armsState.mainHandWorldPos.z - cameraState.pos.z);
         poseStack.mulPose(vrState.armsState.mainHandWorldRot);
 
-        // TODO 26.1 optifine this doesn't work like that, do we still need that?
-        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-            // if we don't do this shaders render the hands wrong
-            OptifineHelper.beginEntities();
-        }
-
         MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, vrState.partialTick, 0.0F,
             InteractionHand.MAIN_HAND, MC.player.getAttackAnim(vrState.partialTick),
             vrState.armsState.mainHandRenderItem, 0.0F, poseStack, output, vrState.armsState.rawHeadLightCoords);
 
-        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-            // undo the thing we did before
-            OptifineHelper.endEntities();
-        }
         poseStack.popPose();
     }
 
@@ -210,20 +199,9 @@ public class VRArmHelper {
         if (!vrState.armsState.skipOffHandItemRendering) {
             poseStack.pushPose();
 
-            // TODO 26.1 optifine this doesn't work like that, do we still need that?
-            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-                // if we don't do this shaders render the hands wrong
-                OptifineHelper.beginEntities();
-            }
-
             MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, vrState.partialTick, 0.0F,
                 InteractionHand.OFF_HAND, MC.player.getAttackAnim(vrState.partialTick),
                 vrState.armsState.offHandRenderItem, 0.0F, poseStack, output, vrState.armsState.rawHeadLightCoords);
-
-            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-                // undo the thing we did before
-                OptifineHelper.endEntities();
-            }
 
             // back to hmd rendering
             poseStack.popPose();

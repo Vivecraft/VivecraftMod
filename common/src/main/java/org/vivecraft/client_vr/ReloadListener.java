@@ -7,6 +7,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.server.config.ServerConfig;
@@ -62,5 +63,9 @@ public class ReloadListener implements ResourceManagerReloadListener {
         this.lastTextureFiltering = Minecraft.getInstance().options.textureFiltering().get();
         this.lastMipmaps = Minecraft.getInstance().options.mipmapLevels().get();
         this.lastAnisotropy = Minecraft.getInstance().options.maxAnisotropyBit().get();
+
+        // make sure these are always loaded
+        RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE);
+        RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE);
     }
 }

@@ -275,8 +275,6 @@ public abstract class VRRenderer {
         RenderType renderType = VRRenderTypes.trianglesAlways();
         VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
-        ShadersHelper.bindTexture(RenderHelper.BLACK_TEXTURE);
-
         for (int i = 0; i < verts.length; i += 2) {
             builder.addVertex(
                     verts[i] * this.renderScale,

@@ -13,7 +13,6 @@ import net.minecraft.util.Util;
 import org.vivecraft.client.extensions.RenderSetupExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.VRShaders;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -126,28 +125,23 @@ public class VRRenderTypes {
     private static final RenderType QUADS = RenderType.create("quads_vr",
         setUndistorted(
             RenderSetup.builder(VRShaders.QUADS)
-                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
                 .createRenderSetup()));
 
     private static final RenderType QUADS_ALWAYS = RenderType.create("quads_always_vr",
         setUndistorted(
             RenderSetup.builder(VRShaders.QUADS_ALWAYS)
-                .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
                 .createRenderSetup()));
 
     private static final RenderType TRIANGLES_ALWAYS = RenderType.create("triangles_always_vr",
         RenderSetup.builder(VRShaders.TRIANGLES_ALWAYS)
-            .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
             .createRenderSetup());
 
     private static final RenderType TRIANGLE_FAN_ALWAYS = RenderType.create("triangle_fan_always_vr",
         RenderSetup.builder(VRShaders.TRIANGLE_FAN_ALWAYS)
-            .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
             .createRenderSetup());
 
     private static final RenderType LINE_STRIP = RenderType.create("line_strip_vr",
         RenderSetup.builder(VRShaders.LINE_STRIP)
-            .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, RenderHelper.WHITE_TEXTURE)
             .createRenderSetup());
 
     private static final Function<Identifier, RenderType> TEXT_NO_CULL = Util.memoize(
