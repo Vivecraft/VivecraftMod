@@ -785,6 +785,8 @@
   "vivecraft.serverSettings.general.messageAndKickDelay": "Nachricht und Kick Verzögerung",
   "vivecraft.serverSettings.general.vrFun": "VR Easteregg Gegenstände",
   "vivecraft.serverSettings.general.sendDataToOwner": "Sende Daten an Besitzer",
+  "vivecraft.serverSettings.general.kickPlayersOnSettingUpdate": "Kicke Spieler bei Äanderungen",
+  "vivecraft.serverSettings.general.minViveVersion": "Mindest Vivecraft Version",
 
   "vivecraft.serverSettings.messages": "Nachrichten Einstellungen",
   "vivecraft.serverSettings.messages.enabled": "Aktiviere Nachrichten",
@@ -795,6 +797,7 @@
   "vivecraft.serverSettings.messages.leaveMessage": "Verlassensnachricht",
   "vivecraft.serverSettings.messages.KickViveOnly": "Nur Vivecraft Kicknachricht",
   "vivecraft.serverSettings.messages.KickVROnly": "Nur VR Kicknachricht",
+  "vivecraft.serverSettings.messages.KickOutdatedViveVersion": "Mindest Vivecraft Version Kicknachricht",
   "vivecraft.serverSettings.messages.deathVR": "VR Todesnachricht",
   "vivecraft.serverSettings.messages.deathNonVR": "NonVR Todesnachricht",
   "vivecraft.serverSettings.messages.deathSeated": "Sitzend VR Todesnachricht",
@@ -878,9 +881,11 @@
   "vivecraft.serverSettings.general.messageAndKickDelay.tooltip": "Sekunden die gewartet wird, bevor Spieler gekickt oder Willkommensnachrichten gesendet werden.\n Dem Spieler sein Client muss die Vivecraft VERSION Informationen in dieser Zeit senden.",
   "vivecraft.serverSettings.general.vrFun.tooltip": "Gibt VR Spielern zufällig spaßige Kuchen und Trinken, wenn sie wiederbelebt werden.",
   "vivecraft.serverSettings.general.sendDataToOwner.tooltip": "Sendet die Spieler Positionsdaten zurück an den Spieler, der sie gesendet hat, wird normalerweise nicht benötigt.\n Aktiviere dies auf einem dedizierten Server, wenn Replay mod oder dergleichen verwendet werden.",
+  "vivecraft.serverSettings.general.kickPlayersOnSettingUpdate.tooltip": "Kickt Spiler beim ändern von Servereinstellungen, wenn dies das sofortige ändern der Einstellung nicht unterstzützen. Dies zwingt diese sich erneut zu verbinden.",
+  "vivecraft.serverSettings.general.minViveVersion.tooltip": "Mindest Vivecraft Version welche es erlaubt dem Server beizutreten.\n Wenn ein Spieler mit einer niedrigeren Version beitritt, wird er/sie gekickt.\n Format ist: X.X.X",
 
   "vivecraft.serverSettings.messages.tooltip": "Konfiguriere Nachrichten, wenn Spieler bestimmte aktionen ausführen.",
-  "vivecraft.serverSettings.messages.tooltipall": "Setze Nachrichten auf Nichts zum nicht senden. z.b.: leaveMessage = \"\"\n Benutze '%s' in Nachrichten für den Spielernamen.\n Für Nachrichten mit zwei Platzhaltern (d.h. Tod durch Kreatur) benutze '%1$s' für den Spielernamen und '%2$s' für den zweiten Platzhalter.",
+  "vivecraft.serverSettings.messages.tooltipall": "Setze Nachrichten auf Nichts zum nicht senden. z.b.: leaveMessage = \"\"\n Benutze '&player' in Nachrichten für den Spielernamen.\n Für Nachrichten mit zwei Platzhaltern (d.h. Tod durch Kreatur) benutze '&cause' für den zweiten Platzhalter.",
   "vivecraft.serverSettings.messages.enabled.tooltip": "Aktiviere oder deaktiviere alle Nachrichten.",
   "vivecraft.serverSettings.messages.welcomeVR.tooltip": "Nachricht die gesendet wird, wenn ein Spieler mit aktivem VR beitritt.",
   "vivecraft.serverSettings.messages.welcomeNonVR.tooltip": "Nachricht die gesendet wird, wenn ein Spieler mit deaktiviertem VR beitritt.",
@@ -897,6 +902,7 @@
   "vivecraft.serverSettings.messages.deathByMobNonVR.tooltip": "Nachricht die gesendet wird, wenn ein Spieler, wegen einer Kreatur, mit VR deaktiviert stirbt.",
   "vivecraft.serverSettings.messages.deathByMobSeated.tooltip": "Nachricht die gesendet wird, wenn ein Spieler, wegen einer Kreatur, mit VR im sitzenden Modus stirbt.",
   "vivecraft.serverSettings.messages.deathByMobVanilla.tooltip": "Nachricht die gesendet wird, wenn ein Spieler, wegen einer Kreatur, ohne Vivecraft stirbt.",
+  "vivecraft.serverSettings.messages.KickOutdatedViveVersion.tooltip": "Nachricht die gesendet wird, wenn ein Spieler wegen der 'Mindest Vivecraft Version' Einstellung gekickt wird.\n Benutze '&minVersion' um auf die benötigte Vivecraft version zuzugreifen. \n Benutze '&userVersion' um auf die Vivecraft version des Spielers zuzugreifen.",
 
   "vivecraft.serverSettings.vrChanges.creeperSwellDistance.tooltip": "Distanz bei welcher sich Creeper für stehende VR spieler aufblähen und explodieren.\n Vanilla Distanz: 3",
   "vivecraft.serverSettings.vrChanges.mobAttackRangeAdjustment.tooltip": "Passt die Reichweite an, mit welcher Kreaturen Nahkampfangriffe gegen stehende VR Spieler ausführen können.\n Dies ist eine Reduzierung von der Vanilla Reichweite (0.8 Blöcke), 0.0 macht keine Änderung und mit -0.7 müssen Kreaturen den Spieler fast berühren, um einen Angriff auszuführen.\n Wenn dies sehr niedrig ist, kann es passieren, dass Kreaturen vor dem Spieler stehen bleiben, ohne anzugreifen!",

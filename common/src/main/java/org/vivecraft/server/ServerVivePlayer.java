@@ -8,6 +8,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
+import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.NetworkVersion;
@@ -48,6 +49,8 @@ public class ServerVivePlayer {
     // network protocol this player is communicating with
     public NetworkVersion networkVersion = NetworkVersion.fromProtocolVersion(
         CommonNetworkHelper.MAX_SUPPORTED_NETWORK_PROTOCOL);
+    // version the player sent on join
+    public UpdateChecker.Version version = UpdateChecker.Version.UNKNOWN;
     // if the client requested damage direction data
     public boolean wantsDamageDirection = false;
 

@@ -787,6 +787,8 @@
   "vivecraft.serverSettings.general.messageAndKickDelay": "Message and Kick Delay",
   "vivecraft.serverSettings.general.vrFun": "VR Easteregg items",
   "vivecraft.serverSettings.general.sendDataToOwner": "Send Data to Owner",
+  "vivecraft.serverSettings.general.kickPlayersOnSettingUpdate": "Kick players on setting change",
+  "vivecraft.serverSettings.general.minViveVersion": "Minimum Vivecraft Version",
 
   "vivecraft.serverSettings.messages": "Messages Settings",
   "vivecraft.serverSettings.messages.enabled": "Enable Messages",
@@ -797,6 +799,7 @@
   "vivecraft.serverSettings.messages.leaveMessage": "Leave Message",
   "vivecraft.serverSettings.messages.KickViveOnly": "Vivecraft Only Kick Message",
   "vivecraft.serverSettings.messages.KickVROnly": "VR Only Kick Message",
+  "vivecraft.serverSettings.messages.KickOutdatedViveVersion": "Minimum Vivecraft Version Kick Message",
   "vivecraft.serverSettings.messages.deathVR": "VR Death Message",
   "vivecraft.serverSettings.messages.deathNonVR": "NonVR Death Message",
   "vivecraft.serverSettings.messages.deathSeated": "Seated VR Death Message",
@@ -880,9 +883,11 @@
   "vivecraft.serverSettings.general.messageAndKickDelay.tooltip": "Seconds to wait before kicking a player or sending the welcome messages.\n The player's client must send the Vivecraft VERSION info in this time.",
   "vivecraft.serverSettings.general.vrFun.tooltip": "Gives VR Players fun cakes and drinks at random, when they respawn.",
   "vivecraft.serverSettings.general.sendDataToOwner.tooltip": "Sends the player position data also back to the player that sent it, usually not needed.\n Enable this on a dedicated server when using replay mod or something similar.",
+  "vivecraft.serverSettings.general.kickPlayersOnSettingUpdate.tooltip": "Kicks players on setting changes, if they don't support updating that setting on the fly. So it forces a rejoin.",
+  "vivecraft.serverSettings.general.minViveVersion.tooltip": "Minimum Vivecraft Version that is allowed to join the Server.\n If a player joins with a lower version, they will be kicked.\n Format should be: X.X.X",
 
   "vivecraft.serverSettings.messages.tooltip": "Configure messages that are sent when players do specific actions.",
-  "vivecraft.serverSettings.messages.tooltipall": "Set message to nothing to not send. e.g., leaveMessage = \"\"\n Use '%s' in any message for the player name.\n For messages that take two placeholders (i.e., death by mob) use '%1$s' for the player name and '%2$s' for the second placeholder.",
+  "vivecraft.serverSettings.messages.tooltipall": "Set message to nothing to not send. e.g., leaveMessage = \"\"\n Use '&player' in any message for the player name.\n For messages that take two placeholders (i.e., death by mob) use '&cause' for the second placeholder.",
   "vivecraft.serverSettings.messages.enabled.tooltip": "Enable or disable all messages.",
   "vivecraft.serverSettings.messages.welcomeVR.tooltip": "Message sent when a player joins with VR active.",
   "vivecraft.serverSettings.messages.welcomeNonVR.tooltip": "Message sent when a player joins with VR not active.",
@@ -899,6 +904,7 @@
   "vivecraft.serverSettings.messages.deathByMobNonVR.tooltip": "Message sent when a player dies because of a mob with VR not active.",
   "vivecraft.serverSettings.messages.deathByMobSeated.tooltip": "Message sent when a player dies because of a mob with VR in seated mode.",
   "vivecraft.serverSettings.messages.deathByMobVanilla.tooltip": "Message sent when a player dies because of a mob without Vivecraft.",
+  "vivecraft.serverSettings.messages.KickOutdatedViveVersion.tooltip": "Message sent to a player when they get kicked because of the 'Minimum Vivecraft Version' setting.\n Use '&minVersion' to access the required Vivecraft version. \n Use '&userVersion' to access the users Vivecraft version.",
 
   "vivecraft.serverSettings.vrChanges.creeperSwellDistance.tooltip": "Distance at which creepers swell and explode for standing VR players.\n Vanilla distance: 3",
   "vivecraft.serverSettings.vrChanges.mobAttackRangeAdjustment.tooltip": "Adjusts the range in which mobs can use melee attacks against standing VR players.\n This is a reduction to the vanilla range (0.8 blocks), so 0.0 causes no change, and -0.7 means the mobs need to almost touch the player to cause an attack.\n When set very low, mobs might stop right in front of the player without attacking!",
