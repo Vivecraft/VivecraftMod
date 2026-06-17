@@ -31,6 +31,7 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.helpers.graphics.OpenGLHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.common.utils.MathUtils;
@@ -214,7 +215,7 @@ public class RenderHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps for Gui layer
-            OpenGLHelper.genMipmaps(MC.gameRenderer.mainRenderTarget.getColorTexture());
+            GraphicsHelper.INSTANCE.genMipmaps(MC.gameRenderer.mainRenderTarget.getColorTexture());
         }
     }
 

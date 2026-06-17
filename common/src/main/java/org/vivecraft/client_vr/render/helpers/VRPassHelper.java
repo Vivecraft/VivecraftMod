@@ -151,7 +151,7 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps
-            OpenGLHelper.genMipmaps(MC.gameRenderer.mainRenderTarget.getColorTexture());
+            GraphicsHelper.INSTANCE.genMipmaps(MC.gameRenderer.mainRenderTarget.getColorTexture());
         }
 
         Profiler.get().popPush("2D Keyboard");

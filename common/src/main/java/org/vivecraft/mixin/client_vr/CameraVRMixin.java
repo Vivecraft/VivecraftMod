@@ -176,8 +176,7 @@ public abstract class CameraVRMixin {
             }
             return dest;
         } else {
-            // TODO for full iris release comment taht out
-            if (IrisHelper.isLoaded()) {// && IrisHelper.isShaderActive()) {
+            if (IrisHelper.isLoaded() && IrisHelper.isShaderActive()) {
                 return dest.set(dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(),
                     this.projection.zNear(), this.projection.zFar()));
             } else {

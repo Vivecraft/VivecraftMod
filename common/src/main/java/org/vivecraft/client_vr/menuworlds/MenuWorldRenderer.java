@@ -869,8 +869,8 @@ public class MenuWorldRenderer {
             int skyColor = this.getSkyColor();
 
             if (OptifineHelper.isOptifineLoaded()) {
-                skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.blockAccess, position.localX, position.y,
-                    position.localZ);
+                skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.blockAccess, position.x, position.y,
+                    position.z);
             }
 
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled()) {
@@ -1840,19 +1840,19 @@ public class MenuWorldRenderer {
                 // custom fog colors
                 if (fogType == FogType.WATER) {
                     Vec3 colUnderwater = OptifineHelper.getCustomUnderwaterColor(this.menuWorldRenderer.blockAccess,
-                        eyePos.localX, eyePos.y, eyePos.localZ);
+                        eyePos.x, eyePos.y, eyePos.z);
                     if (colUnderwater != null) {
-                        this.fogColor.localX = (float) colUnderwater.localX;
+                        this.fogColor.x = (float) colUnderwater.x;
                         this.fogColor.y = (float) colUnderwater.y;
-                        this.fogColor.localZ = (float) colUnderwater.localZ;
+                        this.fogColor.z = (float) colUnderwater.z;
                     }
                 } else if (fogType == FogType.LAVA) {
                     Vec3 colUnderlava = OptifineHelper.getCustomUnderlavaColor(this.menuWorldRenderer.blockAccess,
-                        eyePos.localX, eyePos.y, eyePos.localZ);
+                        eyePos.x, eyePos.y, eyePos.z);
                     if (colUnderlava != null) {
-                        this.fogColor.localX = (float) colUnderlava.localX;
+                        this.fogColor.x = (float) colUnderlava.x;
                         this.fogColor.y = (float) colUnderlava.y;
-                        this.fogColor.localZ = (float) colUnderlava.localZ;
+                        this.fogColor.z = (float) colUnderlava.z;
                     }
                 }
             }
@@ -1866,8 +1866,8 @@ public class MenuWorldRenderer {
             if (OptifineHelper.isOptifineLoaded()) {
                 if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.OVERWORLD) {
                     Vec3 eyePos = this.menuWorldRenderer.getEyePos();
-                    skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.menuWorldRenderer.blockAccess, eyePos.localX,
-                        eyePos.y, eyePos.localZ);
+                    skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.menuWorldRenderer.blockAccess, eyePos.x,
+                        eyePos.y, eyePos.z);
                 } else if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.END) {
                     skyColor = ARGB.color(
                         OptifineHelper.getCustomSkyColorEnd(new Vec3(ARGB.vector3fFromRGB24(skyColor))));
@@ -1884,8 +1884,8 @@ public class MenuWorldRenderer {
                 if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.OVERWORLD) {
                     Vec3 eyePos = this.menuWorldRenderer.getEyePos();
                     fogColor = ARGB.color(
-                        OptifineHelper.getCustomFogColor(color, this.menuWorldRenderer.blockAccess, eyePos.localX, eyePos.y,
-                            eyePos.localZ));
+                        OptifineHelper.getCustomFogColor(color, this.menuWorldRenderer.blockAccess, eyePos.x, eyePos.y,
+                            eyePos.z));
                 } else if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.END) {
                     fogColor = ARGB.color(OptifineHelper.getCustomFogColorEnd(color));
                 } else if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.NONE) {

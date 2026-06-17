@@ -169,6 +169,10 @@ public class ShaderHelper {
             SCREEN_UV_VBO.close();
             SCREEN_UV_VBO = null;
         }
+        if (SCREEN_UV_VBO_FLIPPED != null) {
+            SCREEN_UV_VBO_FLIPPED.close();
+            SCREEN_UV_VBO_FLIPPED = null;
+        }
     }
 
     /**
@@ -486,11 +490,6 @@ public class ShaderHelper {
         blitToScreen(GuiHandler.GUI_FRAMEBUFFER, x, width, height, y, 0, 0, true, true, false);
     }
 
-    // TODO 26.2 close
-    private static final GpuBuffer BLIT_QUAD_BUFFER = RenderSystem.getDevice()
-        .createBuffer(() -> "vr blit quad vertex buffer", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
-            6L * DefaultVertexFormat.POSITION_TEX.getVertexSize());
-
     /**
      * blits the given {@code source} RenderTarget to the screen/bound buffer<br>
      * the {@code source} is drawn to the rectangle at {@code left},{@code top} with a size of {@code width},{@code height}<br>
@@ -555,7 +554,7 @@ public class ShaderHelper {
 
             try (MeshData meshData = bufferBuilder.buildOrThrow()) {
                 RenderSystem.getDevice().createCommandEncoder()
-                    .writeToBuffer(BLIT_QUAD_BUFFER.slice(), meshData.vertexBuffer());
+                    .writeToBuffer(VRShaders.BLIT_QUAD_BUFFER.slice(), meshData.vertexBuffer());
             }
         }
 
@@ -573,7 +572,7 @@ public class ShaderHelper {
             } else {
                 renderPass.setPipeline(VRShaders.BLIT_VR_PIPELINE);
             }
-            renderPass.setVertexBuffer(0, BLIT_QUAD_BUFFER.slice());
+            renderPass.setVertexBuffer(0, VRShaders.BLIT_QUAD_BUFFER.slice());
 
             renderPass.bindTexture(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));

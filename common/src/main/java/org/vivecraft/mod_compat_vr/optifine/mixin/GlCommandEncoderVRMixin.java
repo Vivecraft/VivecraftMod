@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.ClassDependentMixin;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.OpenGLHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 

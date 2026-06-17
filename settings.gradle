@@ -52,8 +52,8 @@ include("stubs")
 if (!"true".equals(properties.getProperty("project.build.excludeFabric")))
     include("fabric")
 /*if (!"true".equals(properties.getProperty("project.build.excludeForge")))
-    include("forge")
+    include("forge")*/
 if (!"true".equals(properties.getProperty("project.build.excludeNeoforge")))
     include("neoforge")
-*/
+
 rootProject.name = "vivecraft"

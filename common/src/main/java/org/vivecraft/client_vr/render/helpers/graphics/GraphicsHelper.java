@@ -21,7 +21,19 @@ public interface GraphicsHelper {
         }
     }
 
+    /**
+     * Generates api texture handle for the given GpuTexture
+     *
+     * @param texture GpuTexture to get the texture handle for
+     */
     long getTextureHandle(GpuTexture texture);
+
+    /**
+     * Generates mipmaps for the given GpuTexture
+     *
+     * @param texture GpuTexture to generate mipmaps for
+     */
+    void genMipmaps(GpuTexture texture);
 
     String checkError(String errorSection);
 

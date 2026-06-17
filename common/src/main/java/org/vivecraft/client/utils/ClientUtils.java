@@ -65,7 +65,11 @@ public class ClientUtils {
     public static String currentMcVersion() {
         String mcVersion = SharedConstants.getCurrentVersion().name();
         // we don't care about Pre-Releases or Release Candidate when we use this
-        return mcVersion.substring(0, mcVersion.indexOf(" "));
+        if (mcVersion.contains(" ")) {
+            return mcVersion.substring(0, mcVersion.indexOf(" "));
+        } else {
+            return mcVersion;
+        }
     }
 
     /**

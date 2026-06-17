@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.BlockPos;
@@ -95,7 +96,7 @@ public class VRRenderState {
 
     public final PostProcessRenderState postProcessState = new PostProcessRenderState();
 
-    public void extract(@Nullable LocalPlayer player, float partialTick) {
+    public void extract(@Nullable LocalPlayer player, float partialTick, SubmitNodeStorage submitNodeStorage) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
         VRData worldData = dataHolder.vrPlayer.getVRDataWorld();
@@ -117,9 +118,11 @@ public class VRRenderState {
             Pair<BlockState, BlockPos> block = VREffectsHelper.getNearOpaqueBlock(cameraPos, 0.02);
 
             this.inBlock = block != null &&
-                !Xevents.INSTANCE.renderBlockOverlay(player, new PoseStack(), block.getLeft(), block.getRight());
+                !Xevents.INSTANCE.renderBlockOverlay(player, new PoseStack(), block.getLeft(), block.getRight(),
+                    submitNodeStorage);
             this.inWater =
-                player.isEyeInFluid(FluidTags.WATER) && !Xevents.INSTANCE.renderWaterOverlay(player, new PoseStack());
+                player.isEyeInFluid(FluidTags.WATER) &&
+                    !Xevents.INSTANCE.renderWaterOverlay(player, new PoseStack(), submitNodeStorage);
         }
 
         DebugRenderHelper.extractDebug(partialTick);
@@ -135,7 +138,7 @@ public class VRRenderState {
 
         // first person effects
         this.firstPersonFire = player != null && !player.isSpectator() && player.isOnFire() &&
-            !Xevents.INSTANCE.renderFireOverlay(player, new PoseStack());
+            !Xevents.INSTANCE.renderFireOverlay(player, new PoseStack(), submitNodeStorage);
         this.fireHeight = (float) (worldData.getHeadPivot().y -
             ((GameRendererExtension) mc.gameRenderer).vivecraft$getRveY()
         );

@@ -4,8 +4,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vulkan.VulkanDevice;
 import com.mojang.blaze3d.vulkan.VulkanGpuTexture;
+import com.mojang.blaze3d.vulkan.VulkanUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.*;
 import org.vivecraft.client_vr.extensions.vulkan.VulkanDeviceExtension;
 import org.vivecraft.client_vr.extensions.vulkan.VulkanInstanceExtension;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -25,12 +28,169 @@ public class VulkanHelper implements GraphicsHelper {
         }
     }
 
-    @Override
-    public long getTextureHandle(GpuTexture texture) {
+    private VulkanGpuTexture getVulkanTexture(GpuTexture texture) {
         if (texture instanceof VulkanGpuTexture vulkanTexture) {
-            return vulkanTexture.vkImage();
+            return vulkanTexture;
         }
         throw new IllegalArgumentException("Vivecraft: not a vulkan texture in vulkan context");
+    }
+
+    @Override
+    public long getTextureHandle(GpuTexture texture) {
+        return getVulkanTexture(texture).vkImage();
+    }
+
+    @Override
+    public void genMipmaps(GpuTexture texture) {
+        VulkanGpuTexture vulkanTexture = getVulkanTexture(texture);
+
+        VkCommandBuffer blitCommandBuffer = getVulkanDevice().createCommandEncoder()
+            .allocateAndBeginTransientCommandBuffer();
+
+        // transfer base level to src optimal
+        transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
+            0, 1,
+            VK10.VK_IMAGE_LAYOUT_GENERAL, VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            VK10.VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK10.VK_ACCESS_TRANSFER_READ_BIT,
+            VK10.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK10.VK_PIPELINE_STAGE_TRANSFER_BIT);
+
+        for (int i = 1; i < texture.getMipLevels(); i++) {
+            // transition the target layer to dst optimal
+            transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
+                i, 1,
+                VK10.VK_IMAGE_LAYOUT_GENERAL, VK10.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                0, VK10.VK_ACCESS_TRANSFER_WRITE_BIT,
+                0, VK10.VK_PIPELINE_STAGE_TRANSFER_BIT);
+
+            // blit
+            blitTexture(blitCommandBuffer,
+                vulkanTexture.vkImage(), i - 1, 0, 0, vulkanTexture.getWidth(i - 1), vulkanTexture.getHeight(i - 1),
+                vulkanTexture.vkImage(), i, 0, 0, vulkanTexture.getWidth(i), vulkanTexture.getHeight(i));
+
+            // transition the source layer to src optimal for next layer
+            transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
+                i, 1,
+                VK10.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                VK10.VK_ACCESS_TRANSFER_WRITE_BIT, VK10.VK_ACCESS_TRANSFER_READ_BIT,
+                VK10.VK_PIPELINE_STAGE_TRANSFER_BIT, VK10.VK_PIPELINE_STAGE_TRANSFER_BIT);
+        }
+
+        // every mip is now in src optimal, transfer all mips at once back into the genreal layout
+        transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
+            0, vulkanTexture.getMipLevels(),
+            VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK10.VK_IMAGE_LAYOUT_GENERAL,
+            VK10.VK_ACCESS_TRANSFER_READ_BIT, VK10.VK_ACCESS_SHADER_READ_BIT,
+            VK10.VK_PIPELINE_STAGE_TRANSFER_BIT, VK10.VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+
+        VulkanUtils.crashIfFailure(getVulkanDevice(), VK12.vkEndCommandBuffer(blitCommandBuffer),
+            "Failed to end VkCommandBuffer");
+        getVulkanDevice().createCommandEncoder().execute(blitCommandBuffer);
+    }
+
+    /**
+     * blits the source image/mip rectangle to the target image/mip rectangle, with linear interpolation
+     *
+     * @param commandBuffer commandbuffer to submit the calls to
+     * @param sourceImage   source image handle
+     * @param sourceMip     mip level of the source image to copy frome
+     * @param sourceX       source X position to copy from
+     * @param sourceY       source Y position to copy from
+     * @param sourceWidth   width of the source rectangle to copy from
+     * @param sourceHeight  height of the source rectangle to copy from
+     * @param targetImage   target image handle
+     * @param targetMip     mip level of the target image to copy to
+     * @param targetX       target X position to copy to
+     * @param targetY       target Y position to copy to
+     * @param targetWidth   width of the target rectangle to copy to
+     * @param targetHeight  height of the target rectangle to copy to
+     */
+    private void blitTexture(
+        VkCommandBuffer commandBuffer,
+        long sourceImage, int sourceMip, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
+        long targetImage, int targetMip, int targetX, int targetY, int targetWidth, int targetHeight)
+    {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            VkOffset3D.Buffer srcOffsets = VkOffset3D.calloc(2, stack);
+            srcOffsets.x(sourceX)
+                .y(sourceY)
+                .z(0);
+            srcOffsets.position(1);
+            srcOffsets.x(sourceX + sourceWidth)
+                .y(sourceY + sourceHeight)
+                .z(1);
+            srcOffsets.position(0);
+
+            VkOffset3D.Buffer dstOffsets = VkOffset3D.calloc(2, stack);
+            dstOffsets.x(targetX)
+                .y(targetY)
+                .z(0);
+            dstOffsets.position(1);
+            dstOffsets.x(targetX + targetWidth)
+                .y(targetY + targetHeight)
+                .z(1);
+            dstOffsets.position(0);
+
+            VkImageSubresourceLayers srcSubresource = VkImageSubresourceLayers.calloc(stack);
+            srcSubresource.aspectMask(VK10.VK_IMAGE_ASPECT_COLOR_BIT);
+            srcSubresource.mipLevel(sourceMip);
+            srcSubresource.baseArrayLayer(0);
+            srcSubresource.layerCount(1);
+
+            VkImageSubresourceLayers dstSubresource = VkImageSubresourceLayers.calloc(stack);
+            dstSubresource.aspectMask(VK10.VK_IMAGE_ASPECT_COLOR_BIT);
+            dstSubresource.mipLevel(targetMip);
+            dstSubresource.baseArrayLayer(0);
+            dstSubresource.layerCount(1);
+
+            VkImageBlit.Buffer blitRegion = VkImageBlit.calloc(1, stack);
+            blitRegion.srcSubresource(srcSubresource);
+            blitRegion.srcOffsets(srcOffsets);
+            blitRegion.dstSubresource(dstSubresource);
+            blitRegion.dstOffsets(dstOffsets);
+
+            VK12.vkCmdBlitImage(commandBuffer,
+                sourceImage, VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                targetImage, VK10.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                blitRegion, VK10.VK_FILTER_LINEAR);
+        }
+    }
+
+    /**
+     * transitions the layout of the given image to the specified one
+     *
+     * @param commandBuffer command buffer to add the layout barrier to
+     * @param vkImage       image to changethe layout of
+     * @param baseMip       mip level to transition
+     * @param numberOfMips  count of mips that should be transitioned (including the base mip)
+     * @param oldLayout     cuurrent layout of the image
+     * @param newLayout     new layout of the image
+     * @param srcAccessMask access bits of what has been done with the image so far
+     * @param dstAccessMask access bits of what the intent of the image is now
+     * @param srcStageMask  stage bits of what has been done with the image so far
+     * @param dstStageMask  stage bits of what the intent of the image is now
+     */
+    protected void transitionImageLayoutTo(
+        VkCommandBuffer commandBuffer, long vkImage, int baseMip, int numberOfMips, int oldLayout, int newLayout,
+        int srcAccessMask, int dstAccessMask, int srcStageMask, int dstStageMask)
+    {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            VkImageMemoryBarrier.Buffer barrier = VkImageMemoryBarrier.calloc(1, stack).sType$Default();
+            barrier.oldLayout(oldLayout);
+            barrier.newLayout(newLayout);
+            barrier.srcAccessMask(srcAccessMask);
+            barrier.dstAccessMask(dstAccessMask);
+            barrier.srcQueueFamilyIndex(VK10.VK_QUEUE_FAMILY_IGNORED);
+            barrier.dstQueueFamilyIndex(VK10.VK_QUEUE_FAMILY_IGNORED);
+            barrier.image(vkImage);
+            VkImageSubresourceRange subresourceRange = barrier.subresourceRange();
+            subresourceRange.aspectMask(VK10.VK_IMAGE_ASPECT_COLOR_BIT);
+            subresourceRange.baseMipLevel(baseMip);
+            subresourceRange.levelCount(numberOfMips);
+            subresourceRange.baseArrayLayer(0);
+            subresourceRange.layerCount(1);
+
+            VK12.vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, 0, null, null, barrier);
+        }
     }
 
     @Override

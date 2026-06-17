@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.*;
 import com.mojang.blaze3d.platform.BlendFactor;
@@ -272,6 +273,8 @@ public class VRShaders {
     private static ProjectionMatrixBuffer UNDISTORTED_PROJ;
     public static GpuBufferSlice UNDISTORTED_PROJ_BUFFER;
 
+    public static GpuBuffer BLIT_QUAD_BUFFER;
+
     public static GpuSampler getGuiSampler() {
         if (GUI_SAMPLER == null || GUI_SAMPLER_AF == null) {
             updateGuiSampler();
@@ -307,6 +310,9 @@ public class VRShaders {
         POST_PROCESS_UBO = new PostProcessUBO();
         LANCZOS_UBO = new LanczosUBO();
         UNDISTORTED_PROJ = new ProjectionMatrixBuffer("undistorted");
+        BLIT_QUAD_BUFFER = RenderSystem.getDevice()
+            .createBuffer(() -> "vr blit quad vertex buffer", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
+                6L * DefaultVertexFormat.POSITION_TEX.getVertexSize());
     }
 
     public static void close() {
@@ -334,6 +340,10 @@ public class VRShaders {
             UNDISTORTED_PROJ.close();
             UNDISTORTED_PROJ = null;
             UNDISTORTED_PROJ_BUFFER = null;
+        }
+        if(BLIT_QUAD_BUFFER != null) {
+            BLIT_QUAD_BUFFER.close();
+            BLIT_QUAD_BUFFER = null;
         }
         ShaderHelper.close();
     }

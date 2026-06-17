@@ -230,7 +230,8 @@ public abstract class GameRendererVRMixin
     @Inject(method = "extract", at = @At("TAIL"))
     private void vivecraft$extractVRState(CallbackInfo ci, @Local(ordinal = 0) float partialTick) {
         if (VRState.VR_RUNNING) {
-            vivecraft$getVRRenderState().extract(this.minecraft.player, partialTick);
+            vivecraft$getVRRenderState().extract(this.minecraft.player, partialTick,
+                this.handAndScreenSubmitNodeStorage);
         }
     }
 

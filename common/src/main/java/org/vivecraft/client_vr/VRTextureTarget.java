@@ -7,6 +7,7 @@ import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.helpers.graphics.OpenGLHelper;
 
 import javax.annotation.Nullable;
@@ -58,7 +59,7 @@ public class VRTextureTarget extends RenderTarget {
 
         if (((RenderTargetExtension) this).vivecraft$hasMipmaps()) {
             // generate mipmaps so they are initialized
-            OpenGLHelper.genMipmaps(this.colorTexture);
+            GraphicsHelper.INSTANCE.genMipmaps(this.colorTexture);
         }
     }
 
