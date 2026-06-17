@@ -54,6 +54,7 @@
     "client_vr.gui.EditBoxVRMixin",
     "client_vr.gui.GuiVRMixin",
     "client_vr.gui.HudVRMixin",
+    "client_vr.gui.SpectatorGuiVRMixin",
     "client_vr.gui.screens.OptionsScreenVRMixin",
     "client_vr.gui.screens.PauseScreenVRMixin",
     "client_vr.gui.screens.ScreenVRMixin",
