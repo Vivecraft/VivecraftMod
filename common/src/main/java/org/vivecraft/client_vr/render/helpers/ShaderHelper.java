@@ -109,6 +109,17 @@ public class ShaderHelper {
         throw new IllegalStateException("Unsupported Vertex format: " + format);
     }
 
+    public static void close() {
+        if (SCREEN_VBO != null) {
+            SCREEN_VBO.close();
+            SCREEN_VBO = null;
+        }
+        if (SCREEN_UV_VBO != null) {
+            SCREEN_UV_VBO.close();
+            SCREEN_UV_VBO = null;
+        }
+    }
+
     /**
      * does post-processing for the vr pass
      * this includes red damage indicator

@@ -32,7 +32,7 @@ public class VRRenderTypes {
                         .sortOnUpload()
                         .createRenderSetup(),
                     Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                        VRShaders.getGuiSampler()))))));
+                        VRShaders::getGuiSampler))))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT_NO_FOG_LINEAR = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_translucent_no_fog_vr",
@@ -47,7 +47,7 @@ public class VRRenderTypes {
                             .sortOnUpload()
                             .createRenderSetup(),
                         Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                            VRShaders.getGuiSampler()))),
+                            VRShaders::getGuiSampler))),
                     FogRenderer.FogMode.NONE))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_SOLID_NO_CARDINAL_LIGHT = Util.memoize(
@@ -59,7 +59,8 @@ public class VRRenderTypes {
                     .affectsCrumbling()
                     .createRenderSetup(),
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    RenderSystem.getSamplerCache().getClampToEdge(linear ? FilterMode.LINEAR : FilterMode.NEAREST))))));
+                    () -> RenderSystem.getSamplerCache()
+                        .getClampToEdge(linear ? FilterMode.LINEAR : FilterMode.NEAREST))))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_CUTOUT_NO_CARDINAL_LIGHT_LINEAR = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_cutout_vr",
@@ -71,7 +72,7 @@ public class VRRenderTypes {
                     .affectsCrumbling()
                     .createRenderSetup(),
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    VRShaders.getGuiSampler())))));
+                    VRShaders::getGuiSampler)))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_CUTOUT_NO_CARDINAL_LIGHT_NO_FOG_LINEAR = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_cutout_no_fog_vr",
@@ -84,7 +85,7 @@ public class VRRenderTypes {
                         .affectsCrumbling()
                         .createRenderSetup(),
                     Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                        VRShaders.getGuiSampler()))),
+                        VRShaders::getGuiSampler))),
                 FogRenderer.FogMode.NONE)));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> GUI_TEXTURED_VIEW = Util.memoize(
@@ -94,7 +95,7 @@ public class VRRenderTypes {
                     RenderSetup.builder(depthAlways ? VRShaders.GUI_TEXTURED_ALWAYS : VRShaders.GUI_TEXTURED)
                         .createRenderSetup(),
                     Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                        VRShaders.getGuiSampler()))))));
+                        VRShaders::getGuiSampler))))));
 
     private static final BiFunction<Identifier, Boolean, RenderType> GUI_TEXTURED = Util.memoize(
         (identifier, depthAlways) -> RenderType.create("gui_textured_vr",
@@ -159,7 +160,7 @@ public class VRRenderTypes {
                     .createRenderSetup(),
                 Map.of(VRShaders.CORE_LIGHTMAP_SAMPLER, new RenderSetupExtension.GpuTextureBinding(
                     ClientDataHolderVR.getInstance().menuWorldRenderer.lightMapView,
-                    RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
+                    () -> RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
 
     private static RenderSetup setGpuTextures(
         RenderSetup renderSetup, Map<String, RenderSetupExtension.GpuTextureBinding> gpuTextures)

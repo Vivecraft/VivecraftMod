@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 import org.vivecraft.client_vr.render.ubos.LanczosUBO;
 import org.vivecraft.client_vr.render.ubos.MixedRealityUBO;
 import org.vivecraft.client_vr.render.ubos.PostProcessUBO;
@@ -34,7 +35,7 @@ public class VRShaders {
     public static final String CORE_LIGHTMAP_SAMPLER = "Sampler2";
 
     // FSAA shader and its uniforms
-    public static LanczosUBO LANCZOS_UBO = new LanczosUBO();
+    public static LanczosUBO LANCZOS_UBO;
     public static final String LANCZOS_COLOR_SAMPLER = "Sampler0";
     public static final String LANCZOS_DEPTH_SAMPLER = "Sampler1";
 
@@ -254,15 +255,16 @@ public class VRShaders {
         .withCull(false).build();
 
     private static GpuSampler GUI_SAMPLER;
+    private static GpuSampler GUI_SAMPLER_AF;
 
     private static ProjectionMatrixBuffer UNDISTORTED_PROJ;
     public static GpuBufferSlice UNDISTORTED_PROJ_BUFFER;
 
     public static GpuSampler getGuiSampler() {
-        if (GUI_SAMPLER == null) {
+        if (GUI_SAMPLER == null || GUI_SAMPLER_AF == null) {
             updateGuiSampler();
         }
-        return GUI_SAMPLER;
+        return ClientDataHolderVR.getInstance().vrSettings.guiAnisotropicFiltering ? GUI_SAMPLER_AF : GUI_SAMPLER;
     }
 
     public static void updateGuiSampler() {
@@ -270,10 +272,16 @@ public class VRShaders {
             GUI_SAMPLER.close();
             GUI_SAMPLER = null;
         }
+        if (GUI_SAMPLER_AF != null) {
+            GUI_SAMPLER_AF.close();
+            GUI_SAMPLER_AF = null;
+        }
         GUI_SAMPLER = RenderSystem.getDevice()
             .createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.LINEAR, FilterMode.LINEAR,
-                ClientDataHolderVR.getInstance().vrSettings.guiAnisotropicFiltering ?
-                    RenderSystem.getDevice().getMaxSupportedAnisotropy() : 1, OptionalDouble.empty());
+                1, OptionalDouble.empty());
+        GUI_SAMPLER_AF = RenderSystem.getDevice()
+            .createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.LINEAR, FilterMode.LINEAR,
+                RenderSystem.getDevice().getMaxSupportedAnisotropy(), OptionalDouble.empty());
     }
 
     public static void setUndistortedProj(Matrix4f proj) {
@@ -306,10 +314,15 @@ public class VRShaders {
             GUI_SAMPLER.close();
             GUI_SAMPLER = null;
         }
+        if (GUI_SAMPLER_AF != null) {
+            GUI_SAMPLER_AF.close();
+            GUI_SAMPLER_AF = null;
+        }
         if (UNDISTORTED_PROJ != null) {
             UNDISTORTED_PROJ.close();
             UNDISTORTED_PROJ = null;
             UNDISTORTED_PROJ_BUFFER = null;
         }
+        ShaderHelper.close();
     }
 }

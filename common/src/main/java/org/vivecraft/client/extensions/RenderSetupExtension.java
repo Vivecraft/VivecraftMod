@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 public interface RenderSetupExtension {
 
@@ -40,5 +41,5 @@ public interface RenderSetupExtension {
      */
     void vivecraft$applyUniformOverrides(RenderPass renderPass);
 
-    record GpuTextureBinding(GpuTextureView texture, GpuSampler sampler) {}
+    record GpuTextureBinding(GpuTextureView texture, Supplier<GpuSampler> sampler) {}
 }

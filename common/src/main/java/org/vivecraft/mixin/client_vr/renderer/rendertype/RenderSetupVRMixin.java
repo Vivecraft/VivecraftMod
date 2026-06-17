@@ -72,7 +72,7 @@ public class RenderSetupVRMixin implements RenderSetupExtension {
             }
             for (Map.Entry<String, GpuTextureBinding> entry : this.vivecraft$gpuTextures.entrySet()) {
                 original.put(entry.getKey(),
-                    new RenderSetup.TextureAndSampler(entry.getValue().texture(), entry.getValue().sampler()));
+                    new RenderSetup.TextureAndSampler(entry.getValue().texture(), entry.getValue().sampler().get()));
             }
         }
         return original;
