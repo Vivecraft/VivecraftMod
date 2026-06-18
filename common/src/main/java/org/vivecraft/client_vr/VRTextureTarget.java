@@ -8,7 +8,6 @@ import org.joml.Vector4fc;
 import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
-import org.vivecraft.client_vr.render.helpers.graphics.OpenGLHelper;
 
 import javax.annotation.Nullable;
 

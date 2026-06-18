@@ -1,7 +1,9 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -9,6 +11,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,13 +43,36 @@ public abstract class PauseScreenVRMixin extends Screen {
             (p) -> this.minecraft.gui.setScreen(new ChatScreen("", false))).width(48).build());
     }
 
-    @Inject(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;ILnet/minecraft/client/gui/layouts/LayoutSettings;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 1))
-    private void vivecraft$addTopButtons2(CallbackInfo ci, @Local LinearLayout rowHelper) {
+    @ModifyExpressionValue(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LayoutSettings;alignHorizontallyCenter()Lnet/minecraft/client/gui/layouts/LayoutSettings;"))
+    private LayoutSettings vivecraft$addTopButtons2(
+        LayoutSettings layoutSettings, @Local(ordinal = 0) LinearLayout rowHelper)
+    {
         if (!VRState.VR_INITIALIZED || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
-            return;
+            return layoutSettings;
         }
-        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.commands"),
-            (p) -> this.minecraft.gui.setScreen(new GuiQuickCommandsInGame(this))).width(56).build());
+
+        Button commands;
+        if (ClientDataHolderVR.getInstance().vrSettings.commandsButtonIcon) {
+            commands = SpriteIconButton.builder(Component.translatable("vivecraft.gui.commands"),
+                    (p) -> this.minecraft.gui.setScreen(new GuiQuickCommandsInGame(this)), true)
+                .width(20)
+                .sprite(Identifier.fromNamespaceAndPath("vivecraft", "icon/commands"), 15, 15)
+                .withTootip()
+                .build();
+        } else {
+            commands = new Button.Builder(Component.translatable("vivecraft.gui.commands"),
+                (p) -> this.minecraft.gui.setScreen(new GuiQuickCommandsInGame(this))).width(56).build();
+        }
+        rowHelper.addChild(commands);
+
+        // calculate width of the row
+        rowHelper.arrangeElements();
+        // if it is wider than the button gred offset it to the left, so that it is centered
+        if (rowHelper.getWidth() > 204) {
+            return layoutSettings.paddingHorizontal((204 - rowHelper.getWidth()) / 2 - 8);
+        } else {
+            return layoutSettings;
+        }
     }
 
     // use the disconnect button as an anchor, and shift by -3 to shift before the addChild call

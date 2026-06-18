@@ -694,6 +694,8 @@ public class VRSettings {
     public boolean vrSettingsButtonEnabled = true;
     @SettingField(VrOptions.VR_SETTINGS_BUTTON_POSITION)
     public boolean vrSettingsButtonPositionLeft = true;
+    @SettingField(VrOptions.COMMANDS_BUTTON_ICON)
+    public boolean commandsButtonIcon = true;
     @SettingField(VrOptions.MODIFY_PAUSE_MENU)
     public boolean modifyPauseMenu = true;
     @SettingField(VrOptions.FULL_RELOAD_ON_INIT)
@@ -1811,6 +1813,7 @@ public class VRSettings {
         VR_SETTINGS_BUTTON_VISIBLE(OptionType.BOOLEAN), // setting button in options
         VR_SETTINGS_BUTTON_POSITION("vivecraft.options.left",
             "vivecraft.options.right"), // setting button position
+        COMMANDS_BUTTON_ICON(OptionType.BOOLEAN), // shows a command block icon for the commands button
         MODIFY_PAUSE_MENU(OptionType.BOOLEAN), // if the pause menu should be altered
         FULL_RELOAD_ON_INIT(OptionType.BOOLEAN) { // causes a full resource reload on reinit
 

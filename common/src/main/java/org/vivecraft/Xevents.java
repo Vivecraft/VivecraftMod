@@ -19,7 +19,9 @@ public interface Xevents {
      * @param blockPos   position of the block the camera is in
      * @return true if the rendering was canceled
      */
-    boolean renderBlockOverlay(Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos, SubmitNodeCollector submitNodeCollector);
+    boolean renderBlockOverlay(
+        Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos,
+        SubmitNodeCollector submitNodeCollector);
 
     /**
      * checks if someone wants to cancel the water overlay

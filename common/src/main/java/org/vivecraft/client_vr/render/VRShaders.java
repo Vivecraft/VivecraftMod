@@ -341,7 +341,7 @@ public class VRShaders {
             UNDISTORTED_PROJ = null;
             UNDISTORTED_PROJ_BUFFER = null;
         }
-        if(BLIT_QUAD_BUFFER != null) {
+        if (BLIT_QUAD_BUFFER != null) {
             BLIT_QUAD_BUFFER.close();
             BLIT_QUAD_BUFFER = null;
         }
