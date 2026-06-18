@@ -567,7 +567,8 @@ public class GuiHandler {
                     scale = DH.vrSettings.hudScale;
                 } else {
                     // attach to controller
-                    boolean modelArms = GUI_POS_PLAYER_MODEL != Vec3.ZERO && DH.vrSettings.shouldRenderSelf &&
+                    boolean modelArms = !MC.player.isSpectator() && GUI_POS_PLAYER_MODEL != Vec3.ZERO &&
+                        DH.vrSettings.shouldRenderSelf &&
                         DH.vrSettings.modelArmsMode == VRSettings.ModelArmsMode.COMPLETE;
                     if (modelArms) {
                         guirot = new Matrix4f().set3x3(GUI_ROTATION_PLAYER_MODEL);
