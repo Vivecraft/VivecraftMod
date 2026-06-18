@@ -29,6 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -143,13 +144,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Final
     public Gui gui;
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;getBackendDescription()Ljava/lang/String;"))
-    private void vivecraft$initVivecraftSettings(CallbackInfo ci) {
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;getBackendDescription()Ljava/lang/String;"))
+    private String vivecraft$initVivecraftSettings(Operation<String> original) {
         VRSettings.initSettings();
+        return original.call();
     }
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;registerReloadListeners(Lnet/minecraft/server/packs/resources/ReloadableResourceManager;)V"))
-    private void vivecraft$initVivecraft(CallbackInfo ci) {
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;registerReloadListeners(Lnet/minecraft/server/packs/resources/ReloadableResourceManager;)V"))
+    private ReloadableResourceManager vivecraft$initVivecraft(ReloadableResourceManager resourceManager) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.gameRenderer.mainRenderTarget);
         new Thread(UpdateChecker::checkForUpdates, "VivecraftUpdateThread").start();
         ShadersHelper.registerPipelines();
@@ -157,6 +159,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (ClientDataHolderVR.getInstance().vrSettings.hideGUI != this.gui.hud.isHidden()) {
             this.gui.hud.toggle();
         }
+        return resourceManager;
     }
 
     @Inject(method = "onGameLoadFinished", at = @At("TAIL"))

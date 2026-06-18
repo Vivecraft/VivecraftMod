@@ -39,6 +39,6 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void registerPiPRenderers(RegisterPictureInPictureRendererEvent event) {
-        event.register(new GuiFBTPlayerRenderer(event.getBufferSource()));
+        event.register(new GuiFBTPlayerRenderer());
     }
 }
