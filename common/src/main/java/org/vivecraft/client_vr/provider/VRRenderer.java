@@ -381,9 +381,6 @@ public abstract class VRRenderer {
             renderPass.setPipeline(VRShaders.TRIANGLES_ALWAYS);
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-            renderPass.bindTexture("Sampler0",
-                Minecraft.getInstance().getTextureManager().getTexture(RenderHelper.BLACK_TEXTURE).getTextureView(),
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
             renderPass.setVertexBuffer(0, buffer.slice());
             renderPass.setIndexBuffer(indexBuffer, autoIndices.type());
             renderPass.drawIndexed(count, 1, 0, 0, 0);
