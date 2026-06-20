@@ -3,7 +3,10 @@ package org.vivecraft.api.server;
 import net.minecraft.server.level.ServerPlayer;
 import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.api.data.ViveVersion;
 import org.vivecraft.server.api_impl.VRServerAPIImpl;
+
+import javax.annotation.Nullable;
 
 /**
  * The main interface for interacting with Vivecraft from server code.
@@ -21,6 +24,31 @@ public interface VRServerAPI {
     static VRServerAPI instance() {
         return VRServerAPIImpl.INSTANCE;
     }
+
+    /**
+     * Checks whether a given player connected with Vivecraft.
+     * <br>
+     * This can return false for a player with Vivecraft, if they didn't send the vivecraft version yet.
+     *
+     * @param player The player to check if they connected with Vivecraft.
+     * @return true if the player connected with Vivecraft.
+     * @since 1.3.14
+     */
+    boolean hasVivecraft(ServerPlayer player);
+
+    /**
+     * Returns the Vivecraft version the given player joined the server with.
+     * <br>
+     * Will return version 0.0.0 if they joined with a legacy or unparsable version.
+     * <br>
+     * Will return {@code null} if they joined without Vivecraft, or have not sent the their Vivecraft version yet.
+     *
+     * @param player The player to get the Vivecraft version of.
+     * @return The version the palyer joined with
+     * @since 1.3.14
+     */
+    @Nullable
+    ViveVersion getVivecraftVersion(ServerPlayer player);
 
     /**
      * Sends a haptic pulse (vibration/rumble) for the specified VRBodyPart, if possible, to the given player.
