@@ -28,7 +28,7 @@ public interface VRServerAPI {
     /**
      * Checks whether a given player connected with Vivecraft.
      * <br>
-     * This can return false for a player with Vivecraft, if they didn't send the vivecraft version yet.
+     * This can return false for a player with Vivecraft, if they have not sent their Vivecraft version yet.
      *
      * @param player The player to check if they connected with Vivecraft.
      * @return true if the player connected with Vivecraft.
@@ -41,10 +41,10 @@ public interface VRServerAPI {
      * <br>
      * Will return version 0.0.0 if they joined with a legacy or unparsable version.
      * <br>
-     * Will return {@code null} if they joined without Vivecraft, or have not sent the their Vivecraft version yet.
+     * Will return {@code null} if they joined without Vivecraft, or have not sent their Vivecraft version yet.
      *
      * @param player The player to get the Vivecraft version of.
-     * @return The version the palyer joined with
+     * @return The version the player joined with.
      * @since 1.3.14
      */
     @Nullable
