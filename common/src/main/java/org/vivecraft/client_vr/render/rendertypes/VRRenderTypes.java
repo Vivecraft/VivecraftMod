@@ -31,7 +31,7 @@ public class VRRenderTypes {
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                        VRShaders::getGuiSampler))))));
+                    VRShaders::getGuiSampler)))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_SOLID_NO_CARDINAL_LIGHT = Util.memoize(
         (gpuTexture, linear) -> RenderType.create("entity_solid_vr",
@@ -64,7 +64,7 @@ public class VRRenderTypes {
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    VRShaders.getGuiSampler())))));
+                    VRShaders::getGuiSampler)))));
 
     private static final BiFunction<Identifier, Boolean, RenderType> GUI_TEXTURED = Util.memoize(
         (identifier, depthAlways) -> RenderType.create("gui_textured_vr",
@@ -162,10 +162,6 @@ public class VRRenderTypes {
 
     public static RenderType entityTranslucentNoCardinalLightLinear(GpuTextureView texture, boolean depthAlways) {
         return ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT_LINEAR.apply(texture, depthAlways);
-    }
-
-    public static RenderType entityTranslucentHand(Identifier texture) {
-        return ENTITY_TRANSLUCENT_HAND.apply(texture);
     }
 
     public static RenderType guiTextured(Identifier identifier) {

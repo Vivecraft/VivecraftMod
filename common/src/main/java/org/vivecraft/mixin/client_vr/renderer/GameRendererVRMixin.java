@@ -34,6 +34,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -80,7 +81,7 @@ public abstract class GameRendererVRMixin
     @Unique
     private boolean vivecraft$inwater;
     @Unique
-    private float vivecraft$inBlock = 0.0F;
+    private boolean vivecraft$inBlock = false;
     @Unique
     private double vivecraft$rveX;
     @Unique
@@ -608,23 +609,17 @@ public abstract class GameRendererVRMixin
 
     @Unique
     private void vivecraft$setupOverlayStatus() {
-        this.vivecraft$inBlock = 0.0F;
+        this.vivecraft$inBlock = false;
         this.vivecraft$inwater = false;
 
         if (!this.minecraft.player.isSpectator() && !MethodHolder.isInMenuRoom() && this.minecraft.player.isAlive()) {
             Vec3 cameraPos = vivecraft$DATA_HOLDER.vrPlayer.getVRDataWorld().getEye(vivecraft$DATA_HOLDER.currentPass)
                 .getPosition();
-            Triple<Float, BlockState, BlockPos> triple = VREffectsHelper.getNearOpaqueBlock(cameraPos,
+            Pair<BlockState, BlockPos> pair = VREffectsHelper.getNearOpaqueBlock(cameraPos,
                 vivecraft$MIN_CLIP_DISTANCE);
 
-            if (triple != null &&
-                !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(),
-                    triple.getRight()))
-            {
-                this.vivecraft$inBlock = triple.getLeft();
-            } else {
-                this.vivecraft$inBlock = 0.0F;
-            }
+            this.vivecraft$inBlock = pair != null &&
+                !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), pair.getLeft(), pair.getRight());
 
             this.vivecraft$inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER) &&
                 !Xevents.renderWaterOverlay(this.minecraft.player, new PoseStack());
@@ -639,7 +634,7 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public float vivecraft$isInBlock() {
+    public boolean vivecraft$isInBlock() {
         return this.vivecraft$inBlock;
     }
 

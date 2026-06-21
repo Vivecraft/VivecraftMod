@@ -133,7 +133,7 @@ public class ShadersHelper {
     public static void addMacros(Consumer<String> createMacro, BiConsumer<String, Integer> createValueMacro) {
         if (Xloader.isModLoadedSuccess()) {
             createMacro.accept("VIVECRAFT");
-            UpdateChecker.Version modVersion = UpdateChecker.Version.fromClient(Xloader.INSTANCE.getModVersion());
+            UpdateChecker.Version modVersion = UpdateChecker.Version.fromClient(Xloader.getModVersion());
             int version = modVersion.getMajor() * 10000 +
                 modVersion.getMinor() * 100 +
                 modVersion.getPatch();

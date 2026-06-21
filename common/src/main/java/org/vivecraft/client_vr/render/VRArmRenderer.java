@@ -7,11 +7,11 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 
 public class VRArmRenderer extends AvatarRenderer<AbstractClientPlayer> {
 
@@ -67,7 +67,7 @@ public class VRArmRenderer extends AvatarRenderer<AbstractClientPlayer> {
         playermodel.rightSleeve.visible = sleeve;
 
         // render hand
-        collector.submitModelPart(rendererArm, poseStack, VRRenderTypes.entityTranslucentHand(identifier),
+        collector.submitModelPart(rendererArm, poseStack, RenderTypes.entityTranslucent(identifier),
             combinedLight, OverlayTexture.NO_OVERLAY, null, ARGB.white(this.armAlpha), null);
     }
 }

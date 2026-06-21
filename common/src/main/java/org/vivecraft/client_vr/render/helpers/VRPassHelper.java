@@ -72,7 +72,7 @@ public class VRPassHelper {
             // do post-processing
             ShaderHelper.doVrPostProcess(eye, rendertarget,
                 DATA_HOLDER.vrRenderer.framebufferEye[eye == RenderPass.LEFT ? 0 : 1],
-                ((LevelRenderStateExtension) MC.gameRenderer.getGameRenderState().levelRenderState).vivecraft$getVRRenderState().postProcessState);
+                deltaTracker.getGameTimeDeltaPartialTick(false));
 
             GraphicsHelper.INSTANCE.checkError("post overlay" + eye);
             Profiler.get().pop();

@@ -518,20 +518,4 @@ public class RenderHelper {
         consumer.addVertex(matrix, (float) pos.x, (float) pos.y, (float) pos.z)
             .setColor(color.getX(), color.getY(), color.getZ(), alpha);
     }
-
-    /**
-     * adds the given CustomGeometryRenderer to render after Translucnets
-     *
-     * @param output                 order to render at
-     * @param poseStack              PoseStack to use for the submit
-     * @param renderType             rendertype to submit as
-     * @param customGeometryRenderer renderer to add
-     */
-    public static void submitLateCustomGeometry(
-        OrderedSubmitNodeCollector output, PoseStack poseStack, RenderType renderType,
-        SubmitNodeCollector.CustomGeometryRenderer customGeometryRenderer)
-    {
-        ((SubmitNodeCollectionExtension) output).vivecraft$submitLateCustomGeometry(poseStack, renderType,
-            customGeometryRenderer);
-    }
 }

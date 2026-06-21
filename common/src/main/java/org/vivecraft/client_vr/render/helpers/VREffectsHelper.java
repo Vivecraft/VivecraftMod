@@ -1010,7 +1010,7 @@ public class VREffectsHelper {
         }
 
         if (MC.level != null) {
-            if (isInsideOpaqueBlock(pos) || ((GameRendererExtension) MC.gameRenderer).vivecraft$isInBlock() > 0.0F) {
+            if (isInsideOpaqueBlock(pos) || ((GameRendererExtension) MC.gameRenderer).vivecraft$isInBlock()) {
                 pos = DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition();
             }
 
@@ -1117,7 +1117,7 @@ public class VREffectsHelper {
      * @param partialTick current partial tick
      */
     public static void renderFaceOverlay(float partialTick) {
-        if (((GameRendererExtension) MC.gameRenderer).vivecraft$isInBlock() > 0.0F) {
+        if (((GameRendererExtension) MC.gameRenderer).vivecraft$isInBlock()) {
             renderFaceInBlock();
 
             // because this runs after the gameRenderer, the ModelViewStack is reset
