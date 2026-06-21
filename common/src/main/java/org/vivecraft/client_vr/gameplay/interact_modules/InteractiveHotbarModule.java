@@ -165,6 +165,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
             if (this.hotbar >= 0 && this.hotbar < 9) {
                 ((SpectatorGuiExtension) this.mc.gui.hud.getSpectatorGui()).vivecraft$selectAndActivateSlot(
                     this.hotbar);
+                return true;
             }
         } else {
             if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().getSelectedSlot() != this.hotbar &&
