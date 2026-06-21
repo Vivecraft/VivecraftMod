@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client_vr.gui;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
@@ -64,9 +64,9 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         }
     }
 
-    @Inject(method = "extractPage", at = @At(value = "TAIL"))
+    @Inject(method = "renderPage", at = @At(value = "TAIL"))
     private void vivecraft$hotbarContextIndicator(
-        CallbackInfo ci, @Local(argsOnly = true) GuiGraphicsExtractor graphics)
+        CallbackInfo ci, @Local(argsOnly = true) GuiGraphics graphics)
     {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
@@ -79,7 +79,7 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         }
     }
 
-    @ModifyExpressionValue(method = "extractAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/spectator/SpectatorMenu;getSelectedItem()Lnet/minecraft/client/gui/spectator/SpectatorMenuItem;"))
+    @ModifyExpressionValue(method = "renderAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/spectator/SpectatorMenu;getSelectedItem()Lnet/minecraft/client/gui/spectator/SpectatorMenuItem;"))
     private SpectatorMenuItem vivecraft$hotbarContextText(SpectatorMenuItem original) {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&

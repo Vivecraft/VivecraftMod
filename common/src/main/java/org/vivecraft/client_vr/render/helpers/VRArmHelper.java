@@ -21,6 +21,7 @@ import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.data.ViveItems;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 public class VRArmHelper {
@@ -68,7 +69,7 @@ public class VRArmHelper {
             DATA_HOLDER.isMainHand = true;
 
             if (menuHandMain) {
-                renderMainMenuHand(0, false);
+                renderMenuHand(0, false);
             } else {
                 renderVRHand_Main(partialTick);
             }
@@ -78,7 +79,7 @@ public class VRArmHelper {
 
         if (renderOff) {
             if (menuHandOff) {
-                renderMainMenuHand(1, false);
+                renderMenuHand(1, false);
             } else {
                 renderVRHand_Offhand(partialTick, true);
             }
@@ -102,13 +103,9 @@ public class VRArmHelper {
      * @param c           controller to render the hand for
      * @param depthAlways if depth testing should be disabled for rendering
      */
-    public static void renderMainMenuHand(int c, boolean depthAlways) {
+    public static void renderMenuHand(int c, boolean depthAlways) {
         Matrix4f modelView = new Matrix4f();
         RenderHelper.setupRenderingAtController(c, modelView);
-
-        if (MC.getOverlay() == null) {
-            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
-        }
 
         Vec3i color = new Vec3i(64, 64, 64);
         byte alpha = (byte) 255;
@@ -183,6 +180,10 @@ public class VRArmHelper {
             LevelRenderer.getLightColor(MC.player.level(),
                 BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
+        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            // undo the thing we did before
+            OptifineHelper.endEntities();
+        }
     }
 
     /**
@@ -225,6 +226,11 @@ public class VRArmHelper {
                 poseStack, MC.gameRenderer.getSubmitNodeStorage(),
                 LevelRenderer.getLightColor(MC.player.level(),
                     BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
+
+            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                // undo the thing we did before
+                OptifineHelper.endEntities();
+            }
 
             // back to hmd rendering
             poseStack.popPose();
@@ -334,9 +340,6 @@ public class VRArmHelper {
             Profiler.get().push("teleportArc");
 
             // TODO SHADERS use a shader with lightmaps
-
-            // to make shaders work
-            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
             RenderType renderType = VRRenderTypes.quads(false);
             VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);

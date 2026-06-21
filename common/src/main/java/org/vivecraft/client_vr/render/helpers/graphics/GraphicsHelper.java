@@ -9,14 +9,14 @@ public interface GraphicsHelper {
     GraphicsHelper INSTANCE = getHelper();
 
     private static GraphicsHelper getHelper() {
-        if (RenderSystem.getDevice().backend instanceof GlDevice) {
+        if (RenderSystem.getDevice() instanceof GlDevice) {
             return new OpenGLHelper();
             //} else if (RenderSystem.getDevice().backend instanceof VulkanDevice) {
             //    return new VulkanHelper();
         } else {
             throw new IllegalStateException(
-                "Vivecraft: Unsupported backend: " + RenderSystem.getDevice().backend.getBackendName() +
-                    " with class: " + RenderSystem.getDevice().backend.getClass().getName());
+                "Vivecraft: Unsupported backend: " + RenderSystem.getDevice().getBackendName() +
+                    " with class: " + RenderSystem.getDevice().getClass().getName());
         }
     }
 
