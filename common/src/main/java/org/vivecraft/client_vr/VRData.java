@@ -189,7 +189,7 @@ public class VRData {
 
         // fbt
         if (mcVR.hasFBT() && dataHolder.vrSettings.fbtCalibrated &&
-            !(Minecraft.getInstance().gui.screen() instanceof FBTCalibrationScreen))
+            !(Minecraft.getInstance().screen instanceof FBTCalibrationScreen))
         {
             this.waist = new VRDevicePose(this,
                 mcVR.getAimRotation(MCVR.WAIST_TRACKER),

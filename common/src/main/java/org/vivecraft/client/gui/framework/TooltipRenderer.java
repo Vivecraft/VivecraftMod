@@ -40,9 +40,7 @@ public class TooltipRenderer {
             ) / mc.font.width(" "));
 
             // if tooltip is not too low, draw below button, else above
-            if (widgetY + widgetHeight + formattedText.size() * (mc.font.lineHeight + 1) + 14 <
-                mc.gui.screen().height)
-            {
+            if (widgetY + widgetHeight + formattedText.size() * (mc.font.lineHeight + 1) + 14 < mc.screen.height) {
                 graphics.tooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
                         .map(ClientTooltipComponent::create).toList(), tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
                     widgetY + widgetHeight + 14, DefaultTooltipPositioner.INSTANCE, null);

@@ -1,10 +1,10 @@
-package org.vivecraft.mixin.client_vr.renderer;
+package org.vivecraft.mixin.client_vr.renderer.feature;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.SubmitNodeCollection;
+import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
@@ -17,10 +17,10 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.common.utils.MathUtils;
 
-@Mixin(SubmitNodeCollection.class)
-public class SubmitNodeCollectionVRMixin {
+@Mixin(NameTagFeatureRenderer.Storage.class)
+public class NameTagFeatureRendererVRMixin {
 
-    @WrapOperation(method = "submitNameTag", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraRenderState;orientation:Lorg/joml/Quaternionf;"))
+    @WrapOperation(method = "add", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraRenderState;orientation:Lorg/joml/Quaternionf;"))
     private Quaternionf vivecraft$cameraOffset(
         CameraRenderState camera, Operation<Quaternionf> original, @Local(argsOnly = true) PoseStack poseStack)
     {

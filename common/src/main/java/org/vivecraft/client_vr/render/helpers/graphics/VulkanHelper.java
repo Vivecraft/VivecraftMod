@@ -1,16 +1,10 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.vulkan.VulkanDevice;
-import com.mojang.blaze3d.vulkan.VulkanGpuTexture;
-import com.mojang.blaze3d.vulkan.VulkanUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
-import org.vivecraft.client_vr.extensions.vulkan.VulkanDeviceExtension;
-import org.vivecraft.client_vr.extensions.vulkan.VulkanInstanceExtension;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -18,37 +12,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class VulkanHelper implements GraphicsHelper {
+public abstract class VulkanHelper implements GraphicsHelper {
 
-    private VulkanDevice getVulkanDevice() {
-        if (RenderSystem.getDevice().backend instanceof VulkanDevice vulkanDevice) {
-            return vulkanDevice;
-        } else {
-            throw new IllegalArgumentException("Vivecraft: not a vulkan device in vulkan context");
-        }
-    }
+    protected abstract VkCommandBuffer allocateAndBeginCommandBuffer();
 
-    private VulkanGpuTexture getVulkanTexture(GpuTexture texture) {
-        if (texture instanceof VulkanGpuTexture vulkanTexture) {
-            return vulkanTexture;
-        }
-        throw new IllegalArgumentException("Vivecraft: not a vulkan texture in vulkan context");
-    }
+    protected abstract void endCommandBuffer(VkCommandBuffer commandBuffer);
 
     @Override
-    public long getTextureHandle(GpuTexture texture) {
-        return getVulkanTexture(texture).vkImage();
-    }
+    public abstract long getTextureHandle(GpuTexture texture);
 
     @Override
     public void genMipmaps(GpuTexture texture) {
-        VulkanGpuTexture vulkanTexture = getVulkanTexture(texture);
+        long vkImage = getTextureHandle(texture);
 
-        VkCommandBuffer blitCommandBuffer = getVulkanDevice().createCommandEncoder()
-            .allocateAndBeginTransientCommandBuffer();
+        VkCommandBuffer blitCommandBuffer = this.allocateAndBeginCommandBuffer();
 
         // transfer base level to src optimal
-        transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
+        transitionImageLayoutTo(blitCommandBuffer, vkImage,
             0, 1,
             VK10.VK_IMAGE_LAYOUT_GENERAL, VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
             VK10.VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK10.VK_ACCESS_TRANSFER_READ_BIT,
@@ -56,7 +36,7 @@ public class VulkanHelper implements GraphicsHelper {
 
         for (int i = 1; i < texture.getMipLevels(); i++) {
             // transition the target layer to dst optimal
-            transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
+            transitionImageLayoutTo(blitCommandBuffer, vkImage,
                 i, 1,
                 VK10.VK_IMAGE_LAYOUT_GENERAL, VK10.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 0, VK10.VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -64,11 +44,11 @@ public class VulkanHelper implements GraphicsHelper {
 
             // blit
             blitTexture(blitCommandBuffer,
-                vulkanTexture.vkImage(), i - 1, 0, 0, vulkanTexture.getWidth(i - 1), vulkanTexture.getHeight(i - 1),
-                vulkanTexture.vkImage(), i, 0, 0, vulkanTexture.getWidth(i), vulkanTexture.getHeight(i));
+                vkImage, i - 1, 0, 0, texture.getWidth(i - 1), texture.getHeight(i - 1),
+                vkImage, i, 0, 0, texture.getWidth(i), texture.getHeight(i));
 
             // transition the source layer to src optimal for next layer
-            transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
+            transitionImageLayoutTo(blitCommandBuffer, vkImage,
                 i, 1,
                 VK10.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                 VK10.VK_ACCESS_TRANSFER_WRITE_BIT, VK10.VK_ACCESS_TRANSFER_READ_BIT,
@@ -76,15 +56,13 @@ public class VulkanHelper implements GraphicsHelper {
         }
 
         // every mip is now in src optimal, transfer all mips at once back into the genreal layout
-        transitionImageLayoutTo(blitCommandBuffer, vulkanTexture.vkImage(),
-            0, vulkanTexture.getMipLevels(),
+        transitionImageLayoutTo(blitCommandBuffer, vkImage,
+            0, texture.getMipLevels(),
             VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK10.VK_IMAGE_LAYOUT_GENERAL,
             VK10.VK_ACCESS_TRANSFER_READ_BIT, VK10.VK_ACCESS_SHADER_READ_BIT,
             VK10.VK_PIPELINE_STAGE_TRANSFER_BIT, VK10.VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 
-        VulkanUtils.crashIfFailure(getVulkanDevice(), VK12.vkEndCommandBuffer(blitCommandBuffer),
-            "Failed to end VkCommandBuffer");
-        getVulkanDevice().createCommandEncoder().execute(blitCommandBuffer);
+        this.endCommandBuffer(blitCommandBuffer);
     }
 
     /**
@@ -225,11 +203,11 @@ public class VulkanHelper implements GraphicsHelper {
     public void checkExtensionSupport(
         List<String> instanceExtensions, List<String> deviceExtensions) throws RenderConfigException
     {
-        VulkanDevice vulkanDevice = getVulkanDevice();
         // get all supported extensions
-        Set<String> availableDeviceExtensions = ((VulkanDeviceExtension) vulkanDevice).vivecraft$getAvailableDeviceExtensions();
+        Set<String> availableDeviceExtensions = this.getAvailableDeviceExtensions();
+        this.getAvailableInstanceExtensions();
 
-        Set<String> availableInstanceExtensions = ((VulkanInstanceExtension) vulkanDevice.instance()).vivecraft$getAvailableExtensions();
+        Set<String> availableInstanceExtensions = this.getAvailableInstanceExtensions();
 
         Set<String> missingExtensions = new HashSet<>();
         for (String extension : instanceExtensions) {
@@ -254,7 +232,7 @@ public class VulkanHelper implements GraphicsHelper {
             throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"), error);
         }
         // all extensions supported, check if they are already enabled
-        Set<String> enabledExtensions = vulkanDevice.getDeviceInfo().underlyingExtensions();
+        Set<String> enabledExtensions = this.getEnabledExtensions();
         for (String extension : instanceExtensions) {
             if (!enabledExtensions.contains(extension + " (I)")) {
                 missingExtensions.add("Instance extension: " + extension);
@@ -275,23 +253,19 @@ public class VulkanHelper implements GraphicsHelper {
         }
     }
 
-    public long getDevicePointer() {
-        return getVulkanDevice().vkDevice().address();
-    }
+    protected abstract Set<String> getAvailableInstanceExtensions();
 
-    public long getPhysicalDevicePointer() {
-        return getVulkanDevice().vkDevice().getPhysicalDevice().address();
-    }
+    protected abstract Set<String> getAvailableDeviceExtensions();
 
-    public long getQueuePointer() {
-        return getVulkanDevice().graphicsQueue().vkQueue().address();
-    }
+    protected abstract Set<String> getEnabledExtensions();
 
-    public int getQueueFamilyIndex() {
-        return getVulkanDevice().graphicsQueue().queueFamilyIndex();
-    }
+    public abstract long getDevicePointer();
 
-    public long getInstancePointer() {
-        return getVulkanDevice().instance().vkInstance().address();
-    }
+    public abstract long getPhysicalDevicePointer();
+
+    public abstract long getQueuePointer();
+
+    public abstract int getQueueFamilyIndex();
+
+    public abstract long getInstancePointer();
 }

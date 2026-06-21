@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.menuworlds;
 
-import org.vivecraft.client.utils.ClientUtils;
+import net.minecraft.SharedConstants;
 import org.vivecraft.client.utils.FileUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class MenuWorldDownloader {
     private static final String BASE_URL = "https://cache.techjargaming.com/vivecraft/115/";
-    public static final String CUSTOM_WORLD_FOLDER = "menuworlds/custom_262";
+    public static final String CUSTOM_WORLD_FOLDER = "menuworlds/custom_261";
 
     private static String LAST_WORLD = "";
     private static boolean INIT;
@@ -111,7 +111,7 @@ public class MenuWorldDownloader {
         List<MenuWorldItem> list = new ArrayList<>();
         List<String> resultList = FileUtils.httpReadAllLines(
             BASE_URL + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" +
-                MenuWorldExporter.VERSION + "&mcver=" + ClientUtils.currentMcVersion());
+                MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.getCurrentVersion().name());
         for (String str : resultList) {
             list.add(new MenuWorldItem("menuworlds/" + str, null));
         }

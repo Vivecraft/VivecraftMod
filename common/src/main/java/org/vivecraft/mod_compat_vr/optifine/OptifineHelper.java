@@ -181,7 +181,6 @@ public class OptifineHelper {
                 return;
             }
 
-            // TODO 26.2 optifine
             GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
             GlStateManager._bindTexture(glTexture.glId());
 

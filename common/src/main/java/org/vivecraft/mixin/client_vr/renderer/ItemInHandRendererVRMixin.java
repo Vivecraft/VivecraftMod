@@ -119,7 +119,7 @@ public abstract class ItemInHandRendererVRMixin {
         }
     }
 
-    @Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
     private void vivecraft$overrideArmItem(
         AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand, float swingProgress,
         ItemStack itemStack, float equippedProgress, PoseStack poseStack, SubmitNodeCollector collector,

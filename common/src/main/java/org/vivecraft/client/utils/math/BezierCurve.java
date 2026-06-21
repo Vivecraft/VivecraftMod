@@ -1,9 +1,8 @@
 package org.vivecraft.client.utils.math;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
@@ -78,19 +77,22 @@ public class BezierCurve {
         }
     }
 
-    public void render(SubmitNodeStorage output, PoseStack poseStack, int vertexCount, Color c, float partialTick) {
+    public void render(int vertexCount, Color c, float partialTick) {
         Player player = Minecraft.getInstance().player;
         double x = player.xOld + (player.getX() - player.xOld) * partialTick;
         double y = player.yOld + (player.getY() - player.yOld) * partialTick;
         double z = player.zOld + (player.getZ() - player.zOld) * partialTick;
 
-        output.submitCustomGeometry(poseStack, VRRenderTypes.linesStrip(), (pose, consumer) -> {
-            Vec3[] avec3 = this.getLinearInterpolation(vertexCount / this.nodes.size());
+        RenderType renderType = VRRenderTypes.linesStrip();
+        VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
-            for (int i = 0; i < avec3.length; i++) {
-                this.renderVertex(consumer, avec3[i], c, x, y, z);
-            }
-        });
+        Vec3[] avec3 = this.getLinearInterpolation(vertexCount / this.nodes.size());
+
+        for (int i = 0; i < avec3.length; i++) {
+            this.renderVertex(buffer, avec3[i], c, x, y, z);
+        }
+
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
     }
 
     void renderVertex(VertexConsumer buffer, Vec3 vert, Color color, double offX, double offY, double offZ) {

@@ -46,18 +46,18 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
     };
     private final VROptionEntry[] MROptions = new VROptionEntry[]{new VROptionEntry(
         "vivecraft.options.screen.mixedreality.button", (button, mousePos) -> {
-        Minecraft.getInstance().gui.setScreen(new GuiMixedRealitySettings(this));
+        Minecraft.getInstance().setScreen(new GuiMixedRealitySettings(this));
         return true;
     })};
     private final VROptionEntry[] postAndShader = new VROptionEntry[]{
         new VROptionEntry(
             "vivecraft.options.screen.posteffects.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiPostEffectsSettings(this));
+            Minecraft.getInstance().setScreen(new GuiPostEffectsSettings(this));
             return true;
         }),
         new VROptionEntry(
             "vivecraft.options.screen.shadercompat.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiShaderCompatSettings(this));
+            Minecraft.getInstance().setScreen(new GuiShaderCompatSettings(this));
             return true;
         })};
 

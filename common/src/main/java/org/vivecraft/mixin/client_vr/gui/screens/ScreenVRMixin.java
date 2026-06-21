@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(Screen.class)
 public abstract class ScreenVRMixin {
 
-    @Inject(method = {"extractBackground", "extractPanorama", "extractTransparentBackground", "extractMenuBackground", "extractBlurredBackground"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = {"extractBackground", "extractPanorama", "extractTransparentBackground"}, at = @At("HEAD"), cancellable = true)
     private void vivecraft$vrNoBackground(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             if (!ClientDataHolderVR.getInstance().vrSettings.menuBackground &&

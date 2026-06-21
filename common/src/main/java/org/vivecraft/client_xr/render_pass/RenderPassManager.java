@@ -63,9 +63,6 @@ public class RenderPassManager {
     }
 
     private static void setRenderTarget(RenderTarget target) {
-        MC.gameRenderer.mainRenderTarget = target;
-        if (MC.levelRenderer.skyRenderer() != null) {
-            MC.levelRenderer.skyRenderer().renderTarget = target;
-        }
+        MC.mainRenderTarget = target;
     }
 }

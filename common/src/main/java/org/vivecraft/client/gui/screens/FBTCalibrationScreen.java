@@ -114,7 +114,7 @@ public class FBTCalibrationScreen extends Screen {
         this.resetButton.visible = this.calibrated;
 
         this.cancelButton = Button.builder(Component.translatable(this.calibrated ? "vivecraft.gui.ok" : "gui.cancel"),
-                p -> this.minecraft.gui.setScreen(this.parent))
+                p -> this.minecraft.setScreen(this.parent))
             .pos(this.width / 2 - 75, this.height - 32)
             .width(150)
             .build();
@@ -146,7 +146,7 @@ public class FBTCalibrationScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.gui.setScreen(this.parent);
+        this.minecraft.setScreen(this.parent);
     }
 
     @Override
@@ -242,7 +242,7 @@ public class FBTCalibrationScreen extends Screen {
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.fbtcalibrationsuccess"));
                     this.calibrated = true;
                     if (!this.usingUnlabeledTrackers) {
-                        this.minecraft.gui.setScreen(this.parent);
+                        this.minecraft.setScreen(this.parent);
                     } else {
                         this.cancelButton.setMessage(Component.translatable("vivecraft.gui.ok"));
                         this.resetButton.visible = true;

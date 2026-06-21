@@ -103,7 +103,7 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
             return false;
         } else if (this.mc.gameMode == null) {
             return false;
-        } else if (this.mc.gui.screen() != null) {
+        } else if (this.mc.screen != null) {
             return false;
         } else if (KeyboardHandler.SHOWING) {
             return false;

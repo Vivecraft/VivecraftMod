@@ -120,7 +120,7 @@ public class InputSimulator {
             if (code != GLFW.GLFW_KEY_UNKNOWN) {
                 pressKey(code);
             }
-        } else if (minecraft.gui.screen() == null && ClientUtils.milliTime() - AIR_TYPING_WARNING_TIME >= 30000) {
+        } else if (minecraft.screen == null && ClientUtils.milliTime() - AIR_TYPING_WARNING_TIME >= 30000) {
             ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.airtypingwarning"));
             AIR_TYPING_WARNING_TIME = ClientUtils.milliTime();
         }

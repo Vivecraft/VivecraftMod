@@ -1,14 +1,9 @@
 package org.vivecraft.client_vr.menuworlds;
 
-import com.google.common.collect.Streams;
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.IndexType;
-import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.*;
@@ -28,7 +23,6 @@ import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -62,8 +56,8 @@ import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.OptionInstanceExtension;
+import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
@@ -123,9 +117,8 @@ public class MenuWorldRenderer {
     private GpuBuffer sunriseVBO;
     private GpuBuffer endFlashVBO;
     private EndFlashState endFlashState;
-    private GpuBuffer weatherBuffer;
     private final RenderSystem.AutoStorageIndexBuffer quadIndices = RenderSystem.getSequentialBuffer(
-        PrimitiveTopology.QUADS);
+        VertexFormat.Mode.QUADS);
     private int renderDistance;
     private int renderDistanceChunks;
     public final MenuFogRenderer fogRenderer;
@@ -169,10 +162,10 @@ public class MenuWorldRenderer {
 
         this.lightMap = RenderSystem.getDevice().createTexture("MenuWOrld Light Texture",
             GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT,
-            GpuFormat.RGBA8_UNORM,
+            TextureFormat.RGBA8,
             16, 16, 1, 1);
         this.lightMapView = RenderSystem.getDevice().createTextureView(this.lightMap);
-        RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.lightMap, MathUtils.WHITE_SOLID);
+        RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.lightMap, 0xFFFFFFFF);
         this.lightMapUbo = new MappableRingBuffer(() -> "Menuworld Lightmap UBO",
             GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
             new Std140SizeCalculator().putFloat().putFloat().putFloat().putFloat().putFloat().putFloat().putVec3()
@@ -316,18 +309,18 @@ public class MenuWorldRenderer {
             GpuTextureView blockAtlas = this.mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS)
                 .getTextureView();
             GpuBufferSlice chunkSection = RenderSystem.getDynamicUniforms()
-                .writeChunkSections(new DynamicUniforms.ChunkSectionInfo(RenderSystem.getModelViewMatrixCopy(),
+                .writeChunkSections(new DynamicUniforms.ChunkSectionInfo(RenderSystem.getModelViewMatrix(),
                     0, 0, 0, 1.0F, blockAtlas.getWidth(0), blockAtlas.getHeight(0)))[0];
 
             for (Pair<Integer, GpuBuffer> buffer : buffers) {
                 RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(
-                    PrimitiveTopology.QUADS);
+                    VertexFormat.Mode.QUADS);
                 GpuBuffer indexBuffer = autoStorageIndexBuffer.getBuffer(buffer.getLeft());
 
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
                     () -> "Menuworld: " + layer.label(),
-                    this.mc.gameRenderer.mainRenderTarget.getColorTextureView(), Optional.empty(),
-                    this.mc.gameRenderer.mainRenderTarget.getDepthTextureView(), OptionalDouble.empty()))
+                    this.mc.mainRenderTarget.getColorTextureView(), OptionalInt.empty(),
+                    this.mc.mainRenderTarget.getDepthTextureView(), OptionalDouble.empty()))
                 {
                     renderPass.setUniform("ChunkSection", chunkSection);
                     RenderSystem.bindDefaultUniforms(renderPass);
@@ -338,9 +331,9 @@ public class MenuWorldRenderer {
                         this.mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).getTextureView(),
                         this.chunkLayerSampler);
                     // TODO 1.21.6 maybe use drawMultipleIndexed
-                    renderPass.setVertexBuffer(0, buffer.getRight().slice());
+                    renderPass.setVertexBuffer(0, buffer.getRight());
                     renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type());
-                    renderPass.drawIndexed(buffer.getLeft(), 1, 0, 0, 0);
+                    renderPass.drawIndexed(0, 0, buffer.getLeft(), 1);
                 }
             }
         }
@@ -422,7 +415,7 @@ public class MenuWorldRenderer {
 
             // 32768 yields most efficient memory use for some reason
             builder = new BufferBuilder(new ByteBufferBuilder(32768),
-                PrimitiveTopology.QUADS, DefaultVertexFormat.BLOCK);
+                VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
             if (!wasSkipping && IrisHelper.isLoaded()) {
                 IrisHelper.setSkipBufferExtension(false);
@@ -739,10 +732,6 @@ public class MenuWorldRenderer {
             this.chunkLayerSampler.close();
             this.chunkLayerSampler = null;
         }
-        if (this.weatherBuffer != null) {
-            this.weatherBuffer.close();
-            this.weatherBuffer = null;
-        }
 
         this.fogRenderer.close();
         this.lightMap.close();
@@ -875,19 +864,19 @@ public class MenuWorldRenderer {
 
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled()) {
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(RenderSystem.getModelViewMatrixCopy(),
+                    .writeTransform(RenderSystem.getModelViewMatrix(),
                         ARGB.vector4fFromARGB32(skyColor), new Vector3f(),
                         new Matrix4f());
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Menuworld sky",
-                        this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                        this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
+                    .createRenderPass(() -> "Menuworld sky", this.mc.getMainRenderTarget().getColorTextureView(),
+                        OptionalInt.empty(),
+                        this.mc.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
                 {
                     renderPass.setPipeline(RenderPipelines.SKY);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.setVertexBuffer(0, this.skyVBO.slice());
-                    renderPass.draw(10, 1, 0, 0);
+                    renderPass.setVertexBuffer(0, this.skyVBO);
+                    renderPass.draw(0, 10);
                 }
             }
 
@@ -908,20 +897,19 @@ public class MenuWorldRenderer {
                 poseStack.rotate(Axis.ZP.rotationDegrees(90.0f));
 
                 poseStack.scale(1.0f, 1.0f, sunriseAlpha);
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(new Matrix4f(poseStack),
-                        new Vector4f(ARGB.redFloat(sunriseColor), ARGB.greenFloat(sunriseColor),
-                            ARGB.blueFloat(sunriseColor), sunriseAlpha), new Vector3f(), new Matrix4f());
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(poseStack,
+                    new Vector4f(ARGB.redFloat(sunriseColor), ARGB.greenFloat(sunriseColor),
+                        ARGB.blueFloat(sunriseColor), sunriseAlpha), new Vector3f(), new Matrix4f());
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
                     .createRenderPass(() -> "Sunrise sunset",
-                        this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                        this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
+                        this.mc.getMainRenderTarget().getColorTextureView(), OptionalInt.empty(),
+                        this.mc.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
                 {
                     renderPass.setPipeline(RenderPipelines.SUNRISE_SUNSET);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.setVertexBuffer(0, this.sunriseVBO.slice());
-                    renderPass.draw(18, 1, 0, 0);
+                    renderPass.setVertexBuffer(0, this.sunriseVBO);
+                    renderPass.draw(0, 18);
                 }
                 poseStack.popMatrix();
             }
@@ -943,21 +931,21 @@ public class MenuWorldRenderer {
                 poseStack.translate(0.0f, 100.0f, 0.0f);
                 poseStack.scale(30.0f, 1.0f, 30.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(new Matrix4f(poseStack), new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility),
-                        new Vector3f(), new Matrix4f());
+                    .writeTransform(poseStack, new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility), new Vector3f(),
+                        new Matrix4f());
                 GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Sky sun",
-                        this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                        this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
+                    .createRenderPass(() -> "Sky sun", this.mc.getMainRenderTarget().getColorTextureView(),
+                        OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
+                        OptionalDouble.empty()))
                 {
                     renderPass.setPipeline(RenderPipelines.CELESTIAL);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
                     renderPass.bindTexture("Sampler0", celestialsAtlas.getTextureView(), celestialsAtlas.getSampler());
-                    renderPass.setVertexBuffer(0, this.sunVBO.slice());
+                    renderPass.setVertexBuffer(0, this.sunVBO);
                     renderPass.setIndexBuffer(gpuBuffer, this.quadIndices.type());
-                    renderPass.drawIndexed(6, 1, 0, 0, 0);
+                    renderPass.drawIndexed(0, 0, 6, 1);
                 }
                 poseStack.popMatrix();
             }
@@ -971,21 +959,21 @@ public class MenuWorldRenderer {
                 poseStack.translate(0.0f, 100.0f, 0.0f);
                 poseStack.scale(20.0f, 1.0f, 20.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(new Matrix4f(poseStack), new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility),
-                        new Vector3f(), new Matrix4f());
+                    .writeTransform(poseStack, new Vector4f(1.0f, 1.0f, 1.0f, skyVisibility), new Vector3f(),
+                        new Matrix4f());
                 GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Sky moon",
-                        this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                        this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
+                    .createRenderPass(() -> "Sky moon", this.mc.getMainRenderTarget().getColorTextureView(),
+                        OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
+                        OptionalDouble.empty()))
                 {
                     renderPass.setPipeline(RenderPipelines.CELESTIAL);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
                     renderPass.bindTexture("Sampler0", celestialsAtlas.getTextureView(), celestialsAtlas.getSampler());
-                    renderPass.setVertexBuffer(0, this.moonVBO.slice());
+                    renderPass.setVertexBuffer(0, this.moonVBO);
                     renderPass.setIndexBuffer(gpuBuffer, this.quadIndices.type());
-                    renderPass.drawIndexed(6, 1, startIndex, 0, 0);
+                    renderPass.drawIndexed(startIndex, 0, 6, 1);
                 }
                 poseStack.popMatrix();
             }
@@ -999,20 +987,19 @@ public class MenuWorldRenderer {
                 poseStack.rotate(Axis.XP.rotation(
                     getValue(EnvironmentAttributes.STAR_ANGLE, ClientUtils.getCurrentPartialTick()) * Mth.DEG_TO_RAD));
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(new Matrix4f(poseStack), new Vector4f(starBrightness), new Vector3f(),
-                        new Matrix4f());
+                    .writeTransform(poseStack, new Vector4f(starBrightness), new Vector3f(), new Matrix4f());
                 GpuBuffer indexBuffer = this.quadIndices.getBuffer(this.starIndexCount);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Menuworld Stars",
-                        this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                        this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
+                    .createRenderPass(() -> "Menuworld Stars", this.mc.getMainRenderTarget().getColorTextureView(),
+                        OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(),
+                        OptionalDouble.empty()))
                 {
                     renderPass.setPipeline(RenderPipelines.STARS);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.setVertexBuffer(0, this.starVBO.slice());
+                    renderPass.setVertexBuffer(0, this.starVBO);
                     renderPass.setIndexBuffer(indexBuffer, this.quadIndices.type());
-                    renderPass.drawIndexed(this.starIndexCount, 1, 0, 0, 0);
+                    renderPass.drawIndexed(0, 0, this.starIndexCount, 1);
                 }
                 poseStack.popMatrix();
             }
@@ -1023,23 +1010,23 @@ public class MenuWorldRenderer {
             double horizonDistance = position.y - this.blockAccess.getHorizon();
 
             if (horizonDistance < 0.0D) {
-                poseStack.pushMatrix();
-                poseStack.translate(0.0f, 12.0f, 0.0f);
+                Matrix4fStack stack = RenderSystem.getModelViewStack();
+                stack.pushMatrix();
+                stack.translate(0.0f, 12.0f, 0.0f);
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                    .writeTransform(new Matrix4f(poseStack), new Vector4f(0F, 0F, 0F, 1F), new Vector3f(),
-                        new Matrix4f());
+                    .writeTransform(stack, new Vector4f(0F, 0F, 0F, 1F), new Vector3f(), new Matrix4f());
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                    .createRenderPass(() -> "Menuworld Dark Kky",
-                        this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                        this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
+                    .createRenderPass(() -> "Menuworld Dark Kky", this.mc.getMainRenderTarget().getColorTextureView(),
+                        OptionalInt.empty(),
+                        this.mc.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
                 {
                     renderPass.setPipeline(RenderPipelines.SKY);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.setVertexBuffer(0, this.sky2VBO.slice());
-                    renderPass.draw(10, 1, 0, 0);
+                    renderPass.setVertexBuffer(0, this.sky2VBO);
+                    renderPass.draw(0, 10);
                 }
-                poseStack.popMatrix();
+                stack.popMatrix();
             }
         }
     }
@@ -1049,25 +1036,23 @@ public class MenuWorldRenderer {
             AbstractTexture endSkyTexture = this.mc.getTextureManager().getTexture(END_SKY_LOCATION);
 
             RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(
-                PrimitiveTopology.QUADS);
+                VertexFormat.Mode.QUADS);
             GpuBuffer indexBuffer = autoStorageIndexBuffer.getBuffer(36);
 
             GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                .writeTransform(RenderSystem.getModelViewMatrixCopy(), new Vector4f(1F), new Vector3f(),
-                    new Matrix4f());
+                .writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1F), new Vector3f(), new Matrix4f());
 
             try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                .createRenderPass(() -> "Menuworld Endsky",
-                    this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                    this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
+                .createRenderPass(() -> "Menuworld Endsky", this.mc.getMainRenderTarget().getColorTextureView(),
+                    OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty()))
             {
                 renderPass.setPipeline(RenderPipelines.END_SKY);
                 RenderSystem.bindDefaultUniforms(renderPass);
                 renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
                 renderPass.bindTexture("Sampler0", endSkyTexture.getTextureView(), endSkyTexture.getSampler());
-                renderPass.setVertexBuffer(0, this.endSkyVBO.slice());
+                renderPass.setVertexBuffer(0, this.endSkyVBO);
                 renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type());
-                renderPass.drawIndexed(36, 1, 0, 0, 0);
+                renderPass.drawIndexed(0, 0, 36, 1);
             }
         }
     }
@@ -1082,21 +1067,20 @@ public class MenuWorldRenderer {
         poseStack.translate(0.0f, 100.0f, 0.0f);
         poseStack.scale(60.0f, 1.0f, 60.0f);
         GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-            .writeTransform(new Matrix4f(poseStack), new Vector4f(this.endFlashState.getIntensity(1F)), new Vector3f(),
+            .writeTransform(poseStack, new Vector4f(this.endFlashState.getIntensity(1F)), new Vector3f(),
                 new Matrix4f());
         GpuBuffer gpuBuffer = this.quadIndices.getBuffer(6);
         try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-            .createRenderPass(() -> "End flash",
-                this.mc.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
-                this.mc.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty());)
+            .createRenderPass(() -> "End flash", this.mc.getMainRenderTarget().getColorTextureView(),
+                OptionalInt.empty(), this.mc.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty());)
         {
             renderPass.setPipeline(RenderPipelines.CELESTIAL);
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
             renderPass.bindTexture("Sampler0", celestialsAtlas.getTextureView(), celestialsAtlas.getSampler());
-            renderPass.setVertexBuffer(0, this.endFlashVBO.slice());
+            renderPass.setVertexBuffer(0, this.endFlashVBO);
             renderPass.setIndexBuffer(gpuBuffer, this.quadIndices.type());
-            renderPass.drawIndexed(6, 1, 0, 0, 0);
+            renderPass.drawIndexed(0, 0, 6, 1);
         }
         poseStack.popMatrix();
     }
@@ -1107,7 +1091,7 @@ public class MenuWorldRenderer {
 
         if (ARGB.alpha(cloudColor) > 0 && this.mc.options.getCloudStatus() != CloudStatus.OFF) {
             // use the LevelRenderer CloudRenderer for the clouds
-            this.mc.levelRenderer.cloudRenderer()
+            this.mc.levelRenderer.getCloudRenderer()
                 .render(cloudColor, this.mc.options.getCloudStatus(), cloudHeight, this.mc.options.cloudRange().get(),
                     new Vec3(x, y, z), this.ticks, this.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         }
@@ -1121,13 +1105,11 @@ public class MenuWorldRenderer {
         int xFloor = Mth.floor(inX);
         int yFloor = Mth.floor(inY);
         int zFloor = Mth.floor(inZ);
-
+        VertexConsumer vertexConsumer;
         int rainDistance = Minecraft.getInstance().options.weatherRadius().get();
         float rainAnimationTime = this.ticks + ClientUtils.getCurrentPartialTick();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-        List<WeatherSegment> rainSegments = new ArrayList<>();
-        List<WeatherSegment> snowSegments = new ArrayList<>();
+        MultiBufferSource.BufferSource bufferSource = this.mc.renderBuffers().bufferSource();
 
         for (int rainZ = zFloor - rainDistance; rainZ <= zFloor + rainDistance; ++rainZ) {
             for (int rainX = xFloor - rainDistance; rainX <= xFloor + rainDistance; ++rainX) {
@@ -1172,6 +1154,8 @@ public class MenuWorldRenderer {
                 int blockLight = this.blockAccess.getBrightness(LightLayer.BLOCK, mutableBlockPos) << 4;
 
                 if (precipitation == Biome.Precipitation.RAIN) {
+                    vertexConsumer = bufferSource.getBuffer(VRRenderTypes.weatherMenuworldLightmap(RAIN_LOCATION));
+
                     blend = ((1.0f - distance * distance) * 0.5f + 0.5f);
                     int x =
                         this.ticks + rainX * rainX * 3121 + rainX * 45238971 + rainZ * rainZ * 418711 +
@@ -1181,6 +1165,8 @@ public class MenuWorldRenderer {
                         -((float) x + ClientUtils.getCurrentPartialTick()) / 32.0f *
                             (3.0f + randomSource.nextFloat());
                 } else if (precipitation == Biome.Precipitation.SNOW) {
+                    vertexConsumer = bufferSource.getBuffer(VRRenderTypes.weatherMenuworldLightmap(SNOW_LOCATION));
+
                     blend = ((1.0f - distance * distance) * 0.3f + 0.5f);
                     xOffset = (float) (randomSource.nextDouble() +
                         (double) rainAnimationTime * 0.01 * (double) ((float) randomSource.nextGaussian())
@@ -1197,104 +1183,25 @@ public class MenuWorldRenderer {
                 } else {
                     continue;
                 }
-                WeatherSegment segment = new WeatherSegment(localX, localZ, r, s, upper, lower, xOffset,
-                    yOffset, blend, blockLight, skyLight);
-                if (precipitation == Biome.Precipitation.RAIN) {
-                    rainSegments.add(segment);
-                } else {
-                    snowSegments.add(segment);
-                }
+                vertexConsumer
+                    .addVertex((float) (localX - r), upper - (float) inY, (float) (localZ - s))
+                    .setUv(0.0f + xOffset, (float) lower * 0.25f + yOffset)
+                    .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
+                vertexConsumer
+                    .addVertex((float) (localX + r), upper - (float) inY, (float) (localZ + s))
+                    .setUv(1.0f + xOffset, (float) lower * 0.25f + yOffset)
+                    .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
+                vertexConsumer
+                    .addVertex((float) (localX + r), lower - (float) inY, (float) (localZ + s))
+                    .setUv(1.0f + xOffset, (float) upper * 0.25f + yOffset)
+                    .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
+                vertexConsumer
+                    .addVertex((float) (localX - r), lower - (float) inY, (float) (localZ - s))
+                    .setUv(0.0f + xOffset, (float) upper * 0.25f + yOffset)
+                    .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
             }
         }
-
-        int count = rainSegments.size() + snowSegments.size();
-        if (count == 0) return;
-
-        GpuBuffer indexBuffer;
-        IndexType indexType;
-
-        try (ByteBufferBuilder byteBuffer = ByteBufferBuilder.exactlySized(
-            count * DefaultVertexFormat.PARTICLE.getVertexSize() * 4))
-        {
-            BufferBuilder builder = new BufferBuilder(byteBuffer, PrimitiveTopology.QUADS,
-                DefaultVertexFormat.PARTICLE);
-            for (WeatherSegment segment : Streams.concat(rainSegments.stream(), snowSegments.stream()).toList()) {
-                builder.addVertex((float) (segment.localX - segment.r),
-                        segment.upper - (float) inY,
-                        (float) (segment.localZ - segment.s))
-                    .setUv(0.0f + segment.xOffset, segment.lower * 0.25f + segment.yOffset)
-                    .setColor(1.0f, 1.0f, 1.0f, segment.blend).setUv2(segment.blockLight, segment.skyLight);
-                builder.addVertex((float) (segment.localX + segment.r),
-                        segment.upper - (float) inY,
-                        (float) (segment.localZ + segment.s))
-                    .setUv(1.0f + segment.xOffset, segment.lower * 0.25f + segment.yOffset)
-                    .setColor(1.0f, 1.0f, 1.0f, segment.blend).setUv2(segment.blockLight, segment.skyLight);
-                builder.addVertex((float) (segment.localX + segment.r),
-                        segment.lower - (float) inY,
-                        (float) (segment.localZ + segment.s))
-                    .setUv(1.0f + segment.xOffset, segment.upper * 0.25f + segment.yOffset)
-                    .setColor(1.0f, 1.0f, 1.0f, segment.blend).setUv2(segment.blockLight, segment.skyLight);
-                builder.addVertex((float) (segment.localX - segment.r),
-                        segment.lower - (float) inY,
-                        (float) (segment.localZ - segment.s))
-                    .setUv(0.0f + segment.xOffset, segment.upper * 0.25f + segment.yOffset)
-                    .setColor(1.0f, 1.0f, 1.0f, segment.blend).setUv2(segment.blockLight, segment.skyLight);
-            }
-
-            try (MeshData mesh = builder.buildOrThrow()) {
-                this.uploadWeatherBuffer(mesh.vertexBuffer());
-                RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(
-                    mesh.drawState().primitiveTopology());
-                indexBuffer = autoIndices.getBuffer(mesh.drawState().indexCount());
-                indexType = autoIndices.type();
-            }
-        }
-
-        GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-            .writeTransform(RenderSystem.getModelViewMatrixCopy());
-
-        TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        AbstractTexture rainTexture = textureManager.getTexture(RAIN_LOCATION);
-        AbstractTexture snowTexture = textureManager.getTexture(SNOW_LOCATION);
-
-        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-            .createRenderPass(() -> "Menuworld Weather Effect",
-                this.mc.gameRenderer.mainRenderTarget.getColorTextureView(), Optional.empty(),
-                this.mc.gameRenderer.mainRenderTarget.getDepthTextureView(), OptionalDouble.empty()))
-        {
-            renderPass.setPipeline(RenderPipelines.WEATHER_DEPTH_WRITE);
-            RenderSystem.bindDefaultUniforms(renderPass);
-            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-            renderPass.bindTexture("Sampler2", this.lightMapView,
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-            renderPass.setIndexBuffer(indexBuffer, indexType);
-            renderPass.setVertexBuffer(0, this.weatherBuffer.slice());
-
-            // render rain
-            renderPass.bindTexture("Sampler0", rainTexture.getTextureView(), rainTexture.getSampler());
-            renderPass.drawIndexed(rainSegments.size() * 6, 1, 0, 0, 0);
-
-            // render snow
-            renderPass.bindTexture("Sampler0", snowTexture.getTextureView(), snowTexture.getSampler());
-            renderPass.drawIndexed(snowSegments.size() * 6, 1, rainSegments.size() * 6, 0, 0);
-        }
-    }
-
-    private record WeatherSegment(double localX, double localZ, double r, double s, float upper, float lower,
-                                  float xOffset, float yOffset, float blend, int blockLight, int skyLight) {}
-
-
-    private void uploadWeatherBuffer(ByteBuffer buffer) {
-        GpuDevice device = RenderSystem.getDevice();
-        if (this.weatherBuffer == null || this.weatherBuffer.size() < buffer.remaining()) {
-            if (this.weatherBuffer != null) {
-                this.weatherBuffer.close();
-            }
-
-            this.weatherBuffer = device.createBuffer(() -> "Weather Vertex Buffer",
-                GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST, buffer.remaining());
-        }
-        device.createCommandEncoder().writeToBuffer(this.weatherBuffer.slice(), buffer);
+        bufferSource.endBatch();
     }
 
     public static int getLightCoords(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos) {
@@ -1351,7 +1258,7 @@ public class MenuWorldRenderer {
         try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(
             10 * DefaultVertexFormat.POSITION.getVertexSize()))
         {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLE_FAN,
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLE_FAN,
                 DefaultVertexFormat.POSITION);
             buildSkyDisc(bufferBuilder, 16.0f);
             try (MeshData meshData = bufferBuilder.buildOrThrow()) {
@@ -1360,7 +1267,7 @@ public class MenuWorldRenderer {
                         meshData.vertexBuffer());
             }
 
-            bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLE_FAN,
+            bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLE_FAN,
                 DefaultVertexFormat.POSITION);
             buildSkyDisc(bufferBuilder, -16.0f);
             try (MeshData meshData = bufferBuilder.buildOrThrow()) {
@@ -1378,7 +1285,7 @@ public class MenuWorldRenderer {
         try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(
             24 * DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize()))
         {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS,
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
                 DefaultVertexFormat.POSITION_TEX_COLOR);
 
             for (int i = 0; i < 6; ++i) {
@@ -1440,7 +1347,7 @@ public class MenuWorldRenderer {
         try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(
             DefaultVertexFormat.POSITION.getVertexSize() * starCount * 4))
         {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS,
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
                 DefaultVertexFormat.POSITION);
             for (int i = 0; i < starCount; i++) {
                 Vector3f starPoint = new Vector3f(randomSource.nextFloat(), randomSource.nextFloat(),
@@ -1477,7 +1384,7 @@ public class MenuWorldRenderer {
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
             18 * DefaultVertexFormat.POSITION_COLOR.getVertexSize()))
         {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLE_FAN,
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLE_FAN,
                 DefaultVertexFormat.POSITION_COLOR);
             int solid = ARGB.white(1.0f);
             int transparent = ARGB.white(0.0f);
@@ -1512,7 +1419,7 @@ public class MenuWorldRenderer {
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
             4 * MoonPhase.values().length * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
         {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS,
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
                 DefaultVertexFormat.POSITION_TEX);
             // 8 moonphases
             for (MoonPhase moonPhase : MoonPhase.values()) {
@@ -1534,7 +1441,7 @@ public class MenuWorldRenderer {
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
             4 * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
         {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS,
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
                 DefaultVertexFormat.POSITION_TEX);
             bufferBuilder.addVertex(-1.0F, 0.0F, -1.0F).setUv(sprite.getU0(), sprite.getV0());
             bufferBuilder.addVertex(1.0F, 0.0F, -1.0F).setUv(sprite.getU1(), sprite.getV0());
@@ -1607,7 +1514,9 @@ public class MenuWorldRenderer {
             int ambientColor = getValue(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ClientUtils.getCurrentPartialTick());
             int nightVisionColor = getValue(EnvironmentAttributes.NIGHT_VISION_COLOR,
                 ClientUtils.getCurrentPartialTick());
-            try (GpuBufferSlice.MappedView buffer = this.lightMapUbo.currentBuffer().map(false, true)) {
+            try (GpuBuffer.MappedView buffer = RenderSystem.getDevice().createCommandEncoder()
+                .mapBuffer(this.lightMapUbo.currentBuffer(), false, true))
+            {
                 Std140Builder.intoBuffer(buffer.data())
                     .putFloat(effectiveSkyLight)
                     .putFloat(this.blockLightRedFlicker + 1.4F)
@@ -1622,12 +1531,12 @@ public class MenuWorldRenderer {
             }
 
             try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-                .createRenderPass(() -> "Menuworld Lightmap", this.lightMapView, Optional.empty()))
+                .createRenderPass(() -> "Menuworld Lightmap", this.lightMapView, OptionalInt.empty()))
             {
                 renderPass.setPipeline(RenderPipelines.LIGHTMAP);
                 RenderSystem.bindDefaultUniforms(renderPass);
                 renderPass.setUniform("LightmapInfo", this.lightMapUbo.currentBuffer());
-                renderPass.draw(3, 1, 0, 0);
+                renderPass.draw(0, 3);
             }
             this.lightMapUbo.rotate();
             this.lightmapUpdateNeeded = false;
@@ -2026,7 +1935,9 @@ public class MenuWorldRenderer {
             fogData.renderDistanceStart = this.menuWorldRenderer.renderDistance - h;
             fogData.renderDistanceEnd = this.menuWorldRenderer.renderDistance;
 
-            try (GpuBufferSlice.MappedView mappedView = this.fogBuffer.currentBuffer().map(false, true)) {
+            try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
+                .mapBuffer(this.fogBuffer.currentBuffer(), false, true))
+            {
                 mappedView.data().position(0);
                 Std140Builder.intoBuffer(mappedView.data()).putVec4(this.fogColor).putFloat(fogData.environmentalStart)
                     .putFloat(fogData.environmentalEnd).putFloat(fogData.renderDistanceStart)

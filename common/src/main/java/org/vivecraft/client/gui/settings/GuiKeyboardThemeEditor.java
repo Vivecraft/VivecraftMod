@@ -86,7 +86,7 @@ public class GuiKeyboardThemeEditor extends Screen {
         this.addRenderableWidget(
             new Button.Builder(
                 Component.translatable("vivecraft.options.screen.loadkeyboardtheme.button"), button ->
-                this.minecraft.gui.setScreen(new GuiSelectionListScreen<>(
+                this.minecraft.setScreen(new GuiSelectionListScreen<>(
                     Component.translatable("vivecraft.options.screen.loadkeyboardtheme"), this,
                     () -> Arrays.stream(KeyboardTheme.values()).filter(t -> t != KeyboardTheme.CUSTOM).toList(),
                     theme -> Component.translatable(theme.getLangKey()),
@@ -125,6 +125,6 @@ public class GuiKeyboardThemeEditor extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.gui.setScreen(this.parent);
+        this.minecraft.setScreen(this.parent);
     }
 }

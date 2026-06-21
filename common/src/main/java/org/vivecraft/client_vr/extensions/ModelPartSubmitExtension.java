@@ -1,5 +1,5 @@
 package org.vivecraft.client_vr.extensions;
 
-public interface ModelFeatureRendererSubmitExtension {
+public interface ModelPartSubmitExtension {
     boolean vivecraft$isFirstPerson();
 }

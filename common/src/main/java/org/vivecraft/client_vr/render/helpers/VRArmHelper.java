@@ -167,7 +167,7 @@ public class VRArmHelper {
             vrState.armsState.mainHandWorldPos.z - cameraState.pos.z);
         poseStack.mulPose(vrState.armsState.mainHandWorldRot);
 
-        MC.gameRenderer.itemInHandRenderer.submitArmWithItem(MC.player, vrState.partialTick, 0.0F,
+        MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, vrState.partialTick, 0.0F,
             InteractionHand.MAIN_HAND, MC.player.getAttackAnim(vrState.partialTick),
             vrState.armsState.mainHandRenderItem, 0.0F, poseStack, output, vrState.armsState.rawHeadLightCoords);
 
@@ -199,7 +199,7 @@ public class VRArmHelper {
         if (!vrState.armsState.skipOffHandItemRendering) {
             poseStack.pushPose();
 
-            MC.gameRenderer.itemInHandRenderer.submitArmWithItem(MC.player, vrState.partialTick, 0.0F,
+            MC.gameRenderer.itemInHandRenderer.renderArmWithItem(MC.player, vrState.partialTick, 0.0F,
                 InteractionHand.OFF_HAND, MC.player.getAttackAnim(vrState.partialTick),
                 vrState.armsState.offHandRenderItem, 0.0F, poseStack, output, vrState.armsState.rawHeadLightCoords);
 

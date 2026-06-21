@@ -39,10 +39,10 @@ public class KeyboardInputVRMixin extends ClientInput {
 
             ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
-            jump &= Minecraft.getInstance().gui.screen() == null && !climbing.get() &&
+            jump &= Minecraft.getInstance().screen == null && !climbing.get() &&
                 (dataHolder.vrPlayer.getFreeMove() || dataHolder.vrSettings.simulateFalling);
 
-            shift = Minecraft.getInstance().gui.screen() == null &&
+            shift = Minecraft.getInstance().screen == null &&
                 (dataHolder.sneakTracker.sneakCounter > 0 || dataHolder.sneakTracker.sneakOverride || shift);
         }
         return original.call(forward, backward, left, right, jump, shift, sprint);

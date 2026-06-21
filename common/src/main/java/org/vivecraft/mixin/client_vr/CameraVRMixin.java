@@ -8,7 +8,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.Projection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,7 +33,6 @@ import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Mixin(Camera.class)
@@ -157,11 +155,6 @@ public abstract class CameraVRMixin {
         }
     }
 
-    @WrapOperation(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
-    private boolean vivecraft$nullcheck(LocalPlayer instance, Operation<Boolean> original) {
-        return instance != null && original.call(instance);
-    }
-
     @WrapOperation(method = {"getViewRotationProjectionMatrix", "extractRenderState"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Projection;getMatrix(Lorg/joml/Matrix4f;)Lorg/joml/Matrix4f;"))
     private Matrix4f vivecraft$vrProjection(
         Projection instance, Matrix4f dest, Operation<Matrix4f> original)
@@ -176,13 +169,8 @@ public abstract class CameraVRMixin {
             }
             return dest;
         } else {
-            if (IrisHelper.isLoaded() && IrisHelper.isShaderActive()) {
-                return dest.set(dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(),
-                    this.projection.zNear(), this.projection.zFar()));
-            } else {
-                return dest.set(dataHolder.vrRenderer.getCachedReverseProjectionMatrix(dataHolder.currentPass.ordinal(),
-                    this.projection.zNear(), this.projection.zFar()));
-            }
+            return dest.set(dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(),
+                this.projection.zNear(), this.projection.zFar()));
         }
     }
 

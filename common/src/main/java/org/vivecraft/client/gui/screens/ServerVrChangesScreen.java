@@ -18,7 +18,7 @@ public class ServerVrChangesScreen extends Screen {
 
     public ServerVrChangesScreen(Map<String, String> changes) {
         super(Component.translatable("vivecraft.messages.nondefaultvrchanges.title"));
-        this.lastScreen = Minecraft.getInstance().gui.screen();
+        this.lastScreen = Minecraft.getInstance().screen;
         StringBuilder builder = new StringBuilder();
         changes.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
             builder.append(I18n.get("vivecraft.serverSettings." + entry.getKey())).append(": §c");
@@ -53,6 +53,6 @@ public class ServerVrChangesScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.gui.setScreen(this.lastScreen);
+        this.minecraft.setScreen(this.lastScreen);
     }
 }

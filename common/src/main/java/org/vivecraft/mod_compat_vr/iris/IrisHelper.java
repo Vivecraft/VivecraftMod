@@ -7,8 +7,6 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.vivecraft.Xloader;
 import org.vivecraft.api.client.data.RenderPass;
-import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
-import org.vivecraft.client_vr.render.helpers.graphics.OpenGLHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.ClassUtils;
@@ -63,9 +61,7 @@ public class IrisHelper {
     private static Method CapturedRenderingState_getGbufferProjection;
 
     public static boolean isLoaded() {
-        return (Xloader.INSTANCE.isModLoaded("iris") || Xloader.INSTANCE.isModLoaded("oculus")) &&
-            // iris disables itself with vulkan
-            GraphicsHelper.INSTANCE instanceof OpenGLHelper;
+        return Xloader.INSTANCE.isModLoaded("iris") || Xloader.INSTANCE.isModLoaded("oculus");
     }
 
     /**

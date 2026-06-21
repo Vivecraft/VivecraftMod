@@ -18,11 +18,11 @@ public class GuiStandingSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.FORCE_STANDING_FREE_MOVE, true),
         new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
         new VROptionEntry("vivecraft.options.screen.teleport.button", (button, mousePos) -> {
-            this.minecraft.gui.setScreen(new GuiTeleportSettings(this));
+            this.minecraft.setScreen(new GuiTeleportSettings(this));
             return true;
         }),
         new VROptionEntry("vivecraft.options.screen.freemove.button", (button, mousePos) -> {
-            this.minecraft.gui.setScreen(new GuiFreeMoveSettings(this));
+            this.minecraft.setScreen(new GuiFreeMoveSettings(this));
             return true;
         })
     };

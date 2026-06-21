@@ -28,7 +28,7 @@ public class GuiPlayerModelSettings extends GuiVROptionsBase {
 
     private final VROptionEntry[] fbtCalibration = new VROptionEntry[]{new VROptionEntry(
         "vivecraft.options.screen.fbtcalibration.button", (button, mousePos) -> {
-        Minecraft.getInstance().gui.setScreen(new FBTCalibrationScreen(this));
+        Minecraft.getInstance().setScreen(new FBTCalibrationScreen(this));
         return true;
     })};
 

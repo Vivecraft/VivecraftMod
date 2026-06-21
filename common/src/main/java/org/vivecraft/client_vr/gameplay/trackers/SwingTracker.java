@@ -106,7 +106,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
             return false;
         } else if (player.isSleeping()) {
             return false;
-        } else if (this.mc.gui.screen() != null) {
+        } else if (this.mc.screen != null) {
             return false;
         } else if (this.dh.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF) {
             return false;

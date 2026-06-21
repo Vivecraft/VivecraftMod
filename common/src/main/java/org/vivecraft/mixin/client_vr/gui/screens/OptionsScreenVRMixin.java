@@ -50,7 +50,7 @@ public class OptionsScreenVRMixin extends Screen {
             this.vivecraft$settings = new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"),
                 (p) -> {
                     Minecraft.getInstance().options.save();
-                    Minecraft.getInstance().gui.setScreen(new GuiMainVRSettings(this));
+                    Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
                 }).build();
 
             if (!ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {

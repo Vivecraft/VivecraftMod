@@ -156,7 +156,7 @@ public class ShadersHelper {
             // main hand
             UNIFORMS.add(Triple.of("vivecraftRelativeMainHandPos", UniformType.VECTOR3F, () -> {
                 if (VRState.VR_RUNNING) {
-                    return MathUtils.subtractToVector3f(mc.gameRenderer.mainCamera().position(),
+                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().position(),
                         RenderHelper.getControllerRenderPos(0));
                 } else {
                     return MathUtils.ZERO;
@@ -173,7 +173,7 @@ public class ShadersHelper {
             // offhand
             UNIFORMS.add(Triple.of("vivecraftRelativeOffHandPos", UniformType.VECTOR3F, () -> {
                 if (VRState.VR_RUNNING) {
-                    return MathUtils.subtractToVector3f(mc.gameRenderer.mainCamera().position(),
+                    return MathUtils.subtractToVector3f(mc.gameRenderer.getMainCamera().position(),
                         RenderHelper.getControllerRenderPos(1));
                 } else {
                     return MathUtils.ZERO;
@@ -203,7 +203,7 @@ public class ShadersHelper {
                 Triple.of("vivecraftShadowCameraOffset", UniformType.VECTOR3F, () -> {
                     if (VRState.VR_RUNNING) {
                         return MathUtils.subtractToVector3f(SHADOW_CAMERA_POSITION,
-                            Minecraft.getInstance().gameRenderer.mainCamera().position());
+                            Minecraft.getInstance().gameRenderer.getMainCamera().position());
                     } else {
                         return MathUtils.ZERO;
                     }

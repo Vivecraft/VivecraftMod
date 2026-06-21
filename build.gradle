@@ -52,6 +52,9 @@ subprojects {
         // bHaptics Integration
         implementation("com.github.bhaptics:tact-java:0.1.4")
 
+        // for potential vulkan support
+        compileOnly("org.lwjgl:lwjgl-vulkan:${rootProject.lwjgl_version}") { transitive = false }
+
         // needed dependencies
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 

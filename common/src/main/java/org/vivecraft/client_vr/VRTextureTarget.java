@@ -1,11 +1,16 @@
 package org.vivecraft.client_vr;
 
-import com.mojang.blaze3d.GpuFormat;
+import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.TextureFormat;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import org.vivecraft.Xplat;
+import org.vivecraft.client.extensions.GlDeviceExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 
@@ -19,14 +24,11 @@ public class VRTextureTarget extends RenderTarget {
     @Nullable
     private final Vector4fc clearColor;
 
-    public final GpuFormat gpuFormat;
-
     private VRTextureTarget(
-        String name, int width, int height, boolean useDepth, boolean mipmaps, boolean useStencil,
-        @Nullable Vector4fc clearColor, GpuFormat format)
+        String name, int width, int height, boolean useDepth, int texId, boolean mipmaps, boolean useStencil,
+        @Nullable Vector4fc clearColor)
     {
-        super(name, useDepth, format);
-        this.gpuFormat = format;
+        super(name, useDepth);
         RenderSystem.assertOnRenderThread();
         ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
         this.clearColor = clearColor;
@@ -39,7 +41,21 @@ public class VRTextureTarget extends RenderTarget {
             // use our stencil only if the modloader doesn't support it
             ((RenderTargetExtension) this).vivecraft$setStencil(true);
         }
-        this.resize(width, height);
+        if (texId >= 0) {
+            // hardcoded opengl here
+            if (RenderSystem.getDevice().backend instanceof GlDevice glDevice) {
+                this.colorTexture = ((GlDeviceExtension) glDevice).vivecraft$createFixedIdTexture(
+                    this.label + " / Color",
+                    GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC | GpuTexture.USAGE_TEXTURE_BINDING |
+                        GpuTexture.USAGE_RENDER_ATTACHMENT, TextureFormat.RGBA8, width, height, 1,
+                    mipmaps ? Math.max(Mth.log2(width), Mth.log2(height)) : 1, texId);
+                this.colorTextureView = glDevice.createTextureView(this.colorTexture);
+            } else {
+                throw new IllegalStateException("Only Opengl is currently supported by Vivecraft");
+            }
+        } else {
+            this.resize(width, height);
+        }
     }
 
     @Override
@@ -48,11 +64,13 @@ public class VRTextureTarget extends RenderTarget {
 
         if (this.clearColor != null) {
             if (this.useDepth) {
-                RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-                    this.colorTexture, this.clearColor,
-                    this.depthTexture, 0.0);
+                RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(this.colorTexture,
+                    ARGB.colorFromFloat(this.clearColor.w(), this.clearColor.x(), this.clearColor.y(),
+                        this.clearColor.z()), this.depthTexture, 1.0);
             } else {
-                RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.colorTexture, this.clearColor);
+                RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.colorTexture,
+                    ARGB.colorFromFloat(this.clearColor.w(), this.clearColor.x(), this.clearColor.y(),
+                        this.clearColor.z()));
             }
         }
 
@@ -86,14 +104,13 @@ public class VRTextureTarget extends RenderTarget {
         private int height;
 
         private boolean useDepth;
+        private int texId = -1;
 
         private boolean mipmaps;
 
         private boolean stencil;
 
         private Vector4f clearColor;
-
-        private GpuFormat format = GpuFormat.RGBA8_UNORM;
 
         private Builder(String name) {
             this.name = name;
@@ -102,6 +119,11 @@ public class VRTextureTarget extends RenderTarget {
         public Builder withSize(int width, int height) {
             this.width = width;
             this.height = height;
+            return this;
+        }
+
+        public Builder withTexId(int texId) {
+            this.texId = texId;
             return this;
         }
 
@@ -125,11 +147,6 @@ public class VRTextureTarget extends RenderTarget {
             return this;
         }
 
-        public Builder withFormat(GpuFormat format) {
-            this.format = format;
-            return this;
-        }
-
         public VRTextureTarget build() {
             if (this.width <= 0 || this.height <= 0) {
                 throw new IllegalArgumentException("Width and height must be greater than 0");
@@ -138,10 +155,10 @@ public class VRTextureTarget extends RenderTarget {
                 this.name,
                 this.width, this.height,
                 this.useDepth,
+                this.texId,
                 this.mipmaps,
                 this.stencil,
-                this.clearColor,
-                this.format);
+                this.clearColor);
         }
     }
 }

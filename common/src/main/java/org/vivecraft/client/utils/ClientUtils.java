@@ -1,22 +1,19 @@
 package org.vivecraft.client.utils;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.function.TriFunction;
-import org.apache.commons.lang3.tuple.Triple;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
@@ -27,9 +24,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientUtils {
 
@@ -60,16 +55,6 @@ public class ClientUtils {
             VRSettings.LOGGER.error("Vivecraft: error reading registry key: ", e);
         }
         return null;
-    }
-
-    public static String currentMcVersion() {
-        String mcVersion = SharedConstants.getCurrentVersion().name();
-        // we don't care about Pre-Releases or Release Candidate when we use this
-        if (mcVersion.contains(" ")) {
-            return mcVersion.substring(0, mcVersion.indexOf(" "));
-        } else {
-            return mcVersion;
-        }
     }
 
     /**
@@ -112,7 +97,7 @@ public class ClientUtils {
      * @return combined sky/block light
      */
     public static int getCombinedLightWithMin(BlockAndTintGetter lightReader, BlockPos pos, int minLight) {
-        int light = LightCoordsUtil.getLightCoords(lightReader, pos);
+        int light = LevelRenderer.getLightCoords(lightReader, pos);
         int blockLight = (light >> 4) & 0xF;
 
         if (blockLight < minLight) {
@@ -165,13 +150,13 @@ public class ClientUtils {
 
     public static Component getNameFromSoundEvent(Identifier soundLocation) {
         String key = soundLocation.getPath();
-        if (Language.getInstance().has(key)) {
+        if (I18n.exists(key)) {
             return Component.translatable(key);
-        } else if (Language.getInstance().has("subtitles." + key)) {
+        } else if (I18n.exists("subtitles." + key)) {
             return Component.translatable("subtitles." + key);
         } else if (key.startsWith("music_disc.")) {
             String jukebox = key.replace("music_disc.", "jukebox_song.minecraft.");
-            if (Language.getInstance().has(jukebox)) {
+            if (I18n.exists(jukebox)) {
                 return Component.translatable(jukebox);
             }
         }
@@ -186,7 +171,7 @@ public class ClientUtils {
     public static void addChatMessage(Component message) {
         // can be null, when called very early
         if (MC.gui != null) {
-            MC.gui.hud.getChat().addClientSystemMessage(message);
+            MC.gui.getChat().addClientSystemMessage(message);
         }
         if (VRState.VR_RUNNING) {
             triggerChatHapticSound();
@@ -220,20 +205,5 @@ public class ClientUtils {
                     });
             }
         }
-    }
-
-    public static <A, B, C, R> TriFunction<A, B, C, R> memoize(final TriFunction<A, B, C, R> function) {
-        return new TriFunction<A, B, C, R>() {
-            private final Map<Triple<A, B, C>, R> cache = new ConcurrentHashMap<>();
-
-            public R apply(final A a, final B b, final C c) {
-                return (R) this.cache.computeIfAbsent(Triple.of(a, b, c),
-                    (args) -> function.apply(args.getLeft(), args.getMiddle(), args.getRight()));
-            }
-
-            public String toString() {
-                return "memoize/3[function=" + function + ", size=" + this.cache.size() + "]";
-            }
-        };
     }
 }

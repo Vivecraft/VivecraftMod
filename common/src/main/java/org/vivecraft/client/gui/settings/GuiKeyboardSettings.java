@@ -16,17 +16,17 @@ public class GuiKeyboardSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME),
         new VROptionEntry(
             "vivecraft.options.screen.customkeyboardeditor.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiKeyboardLayoutEditor(this));
+            Minecraft.getInstance().setScreen(new GuiKeyboardLayoutEditor(this));
             return true;
         }),
         new VROptionEntry(
             "vivecraft.options.screen.customkeyboardthemeeditor.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiKeyboardThemeEditor(this));
+            Minecraft.getInstance().setScreen(new GuiKeyboardThemeEditor(this));
             return true;
         }),
         new VROptionEntry(
             "vivecraft.options.screen.activekeyboardlayouts.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiActiveKeyboardLayoutSelector(this));
+            Minecraft.getInstance().setScreen(new GuiActiveKeyboardLayoutSelector(this));
             return true;
         })
     };

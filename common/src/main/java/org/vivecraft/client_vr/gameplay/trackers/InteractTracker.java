@@ -55,7 +55,7 @@ public class InteractTracker implements DebugRenderTracker {
             return false;
         } else if (player == null) {
             return false;
-        } else if (this.mc.gui.screen() instanceof FBTCalibrationScreen) {
+        } else if (this.mc.screen instanceof FBTCalibrationScreen) {
             return false;
         } else if (!player.isAlive()) {
             return false;
@@ -70,7 +70,7 @@ public class InteractTracker implements DebugRenderTracker {
 
     @Override
     public void inactiveProcess(LocalPlayer player) {
-        if (this.mc.gui.screen() instanceof FBTCalibrationScreen) {
+        if (this.mc.screen instanceof FBTCalibrationScreen) {
             // the FBT screen uses the interact binding, so don't mess with it
             return;
         }

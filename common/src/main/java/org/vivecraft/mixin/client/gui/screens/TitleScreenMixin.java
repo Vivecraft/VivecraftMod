@@ -35,7 +35,7 @@ public abstract class TitleScreenMixin extends Screen {
     /**
      * injects after the multiplayer button to be in the right spot for the tab navigation
      */
-    @Inject(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 2))
+    @Inject(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1))
     private void vivecraft$initFullGame(CallbackInfoReturnable<Integer> cir) {
         vivecraft$addVRModeButton();
     }
@@ -65,7 +65,7 @@ public abstract class TitleScreenMixin extends Screen {
         this.addRenderableWidget(this.vivecraft$vrModeButton);
 
         this.vivecraft$updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"),
-            (button) -> this.minecraft.gui.setScreen(new UpdateScreen()))
+            (button) -> this.minecraft.setScreen(new UpdateScreen()))
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 96)
             .build();

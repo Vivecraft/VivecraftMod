@@ -25,7 +25,7 @@ public class BlockedServerScreen extends Screen {
     protected void init() {
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("gui.back"), (p) ->
-            Minecraft.getInstance().gui.setScreen(this.lastScreen))
+            Minecraft.getInstance().setScreen(this.lastScreen))
             .pos(this.width / 2 + 5, this.height - 32)
             .size(150, 20)
             .build());

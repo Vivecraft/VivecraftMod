@@ -74,7 +74,7 @@ public class VRWidgetHelper {
                 () -> {
                     if (VREffectsHelper.getNearOpaqueBlock(
                         DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(),
-                        MC.gameRenderer.mainCamera().projection.zNear()) == null)
+                        MC.gameRenderer.getMainCamera().projection.zNear()) == null)
                     {
                         return DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTextureView();
                     } else {

@@ -21,10 +21,11 @@ public class FabricGameRendererMixin {
     @Final
     private RenderBuffers renderBuffers;
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/renderer/state/gui/GuiRenderState;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/renderer/state/gui/GuiRenderState;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
     private List<PictureInPictureRenderer<?>> vivecraft$addFBTPLayerRendererFabric(
         List<PictureInPictureRenderer<?>> pips)
     {
-        return Streams.concat(pips.stream(), Stream.of(new GuiFBTPlayerRenderer())).collect(Collectors.toList());
+        return Streams.concat(pips.stream(), Stream.of(new GuiFBTPlayerRenderer(this.renderBuffers.bufferSource())))
+            .collect(Collectors.toList());
     }
 }

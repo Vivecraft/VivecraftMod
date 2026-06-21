@@ -166,7 +166,7 @@ public class KeyboardKeys {
                     InputSimulator.typeChar(keyChar);
                 }
 
-                if (keyChar == '/' && Minecraft.getInstance().gui.screen() == null) {
+                if (keyChar == '/' && Minecraft.getInstance().screen == null) {
                     // this is dumb but whatever
                     InputSimulator.pressKey(GLFW.GLFW_KEY_SLASH);
                     InputSimulator.releaseKey(GLFW.GLFW_KEY_SLASH);

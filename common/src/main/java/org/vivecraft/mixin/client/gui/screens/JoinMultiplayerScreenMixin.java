@@ -26,7 +26,7 @@ public class JoinMultiplayerScreenMixin extends Screen {
     private void vivecraft$checkBlocked(ServerData serverData, CallbackInfo ci) {
         String[] blacklist = ClientDataHolderVR.getInstance().vrSettings.vrServerBlacklist;
         if (Arrays.stream(blacklist).anyMatch(ip -> ip.equals(serverData.ip))) {
-            this.minecraft.gui.setScreen(
+            this.minecraft.setScreen(
                 new BlockedServerScreen(
                     this,
                     serverData.ip,

@@ -15,7 +15,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
@@ -199,9 +198,9 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 option, true);
             case KEYMAPPING ->
                 Button.builder(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)), button -> {
-                        Minecraft.getInstance().gui.setScreen(
+                        Minecraft.getInstance().setScreen(
                             new KeymappingSelectionScreen(Component.translatable("vivecraft.options." + option.name()),
-                                Minecraft.getInstance().gui.screen(), keymapping -> {
+                                Minecraft.getInstance().screen, keymapping -> {
                                 dh.vrSettings.setOptionValue(option, keymapping == null ? "" : keymapping.getName());
                                 button.setMessage(
                                     Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
@@ -283,7 +282,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick)
         {
             graphics.text(Minecraft.getInstance().font, this.getMessage(),
-                Minecraft.getInstance().gui.screen().width / 2 - this.width / 2,
+                Minecraft.getInstance().screen.width / 2 - this.width / 2,
                 this.getContentBottom() - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFFFF);
         }
 
@@ -453,10 +452,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     public static class ScreenEntry extends WidgetEntry {
         public ScreenEntry(String langKey, Function<Screen, Screen> screenFunction) {
             super(Component.translatable(langKey), Button.builder(Component.translatable(langKey),
-                        b -> Minecraft.getInstance().gui.setScreen(screenFunction.apply(Minecraft.getInstance().gui.screen())))
+                        b -> Minecraft.getInstance().setScreen(screenFunction.apply(Minecraft.getInstance().screen)))
                     .size(WidgetEntry.VALUE_BUTTON_WIDTH, 20)
                     .build(),
-                () -> Language.getInstance().has(langKey + ".tooltip") ? I18n.get(langKey + ".tooltip") : "");
+                () -> I18n.exists(langKey + ".tooltip") ? I18n.get(langKey + ".tooltip") : "");
         }
     }
 

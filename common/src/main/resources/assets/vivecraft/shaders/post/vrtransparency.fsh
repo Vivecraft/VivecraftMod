@@ -40,7 +40,7 @@ void try_insert(vec4 color, float depth) {
 
     int jj = active_layers++;
     int ii = jj - 1;
-    while (jj > 0 && depth_layers[jj] < depth_layers[ii]) {
+    while (jj > 0 && depth_layers[jj] > depth_layers[ii]) {
         float depthTemp = depth_layers[ii];
         depth_layers[ii] = depth_layers[jj];
         depth_layers[jj] = depthTemp;
@@ -70,9 +70,9 @@ void main() {
     try_insert(texture(VrOccludedSampler, texCoord), texture(VrOccludedDepthSampler, texCoord).r);
     hdepth = texture(VrHandsDepthSampler, texCoord).r;
     udepth = texture(VrUnoccludedDepthSampler, texCoord).r;
-    try_insert(texture(VrUnoccludedSampler, texCoord), 1.0);
-    if (hdepth>udepth && udepth > 0.0)
-    try_insert(texture(VrHandsSampler, texCoord), 1.0);
+    try_insert(texture(VrUnoccludedSampler, texCoord), 0.0);
+    if (hdepth<udepth && udepth < 1.0)
+    try_insert(texture(VrHandsSampler, texCoord), 0.0);
     else
     try_insert(texture(VrHandsSampler, texCoord), hdepth);
 

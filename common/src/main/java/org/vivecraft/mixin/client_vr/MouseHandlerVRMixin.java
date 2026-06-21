@@ -42,7 +42,7 @@ public class MouseHandlerVRMixin {
 
     @Inject(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;isMouseGrabbed()Z"))
     private void vivecraft$modifyMouseTravel(CallbackInfo ci) {
-        if (VRState.VR_RUNNING && this.minecraft.gui.screen() == null) {
+        if (VRState.VR_RUNNING && this.minecraft.screen == null) {
             VRData.VRDevicePose aim = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getAim();
             Vector3f dir = aim.getDirection()
                 .normalize();

@@ -43,7 +43,7 @@ public class GuiActiveKeyboardLayoutSelector extends GuiOrderedListEditorScreen<
 
     @Override
     protected void addNewValue() {
-        this.minecraft.gui.setScreen(getSelectionScreen(this,
+        this.minecraft.setScreen(getSelectionScreen(this,
             layout -> this.elements.stream().noneMatch(e -> e.id().equals(layout.id())),
             layout -> {
                 super.addNewValue();

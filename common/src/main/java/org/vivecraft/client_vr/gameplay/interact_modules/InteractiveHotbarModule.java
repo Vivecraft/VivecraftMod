@@ -67,7 +67,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         if (hand != InteractionHand.MAIN_HAND) return false;
 
         if (this.dh.vrSettings.seated) return false;
-        if (this.mc.gui.screen() != null || !this.dh.vrSettings.vrTouchHotbar) return false;
+        if (this.mc.screen != null || !this.dh.vrSettings.vrTouchHotbar) return false;
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HEAD || !GuiHandler.HUD_POPUP) return false;
 
         // this shouldn't happen, the inventory is supposed to be final
@@ -135,7 +135,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
         if (player.isSpectator() && this.hotbar >= 0 && this.hotbar < 9) {
             // show the command bar
-            ((SpectatorGuiExtension) this.mc.gui.hud.getSpectatorGui()).vivecraft$showMenu();
+            ((SpectatorGuiExtension) this.mc.gui.getSpectatorGui()).vivecraft$showMenu();
         }
 
         // active if any slot is selected
@@ -163,7 +163,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
     public boolean onPress(LocalPlayer player, InteractionHand hand) {
         if (player.isSpectator()) {
             if (this.hotbar >= 0 && this.hotbar < 9) {
-                ((SpectatorGuiExtension) this.mc.gui.hud.getSpectatorGui()).vivecraft$selectAndActivateSlot(
+                ((SpectatorGuiExtension) this.mc.gui.getSpectatorGui()).vivecraft$selectAndActivateSlot(
                     this.hotbar);
                 return true;
             }
@@ -186,7 +186,7 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
     @Override
     public void renderDebug(boolean isActive) {
         if (this.dh.vrSettings.seated) return;
-        if (this.mc.gui.screen() != null || !this.dh.vrSettings.vrTouchHotbar) return;
+        if (this.mc.screen != null || !this.dh.vrSettings.vrTouchHotbar) return;
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HEAD || !GuiHandler.HUD_POPUP) return;
 
         float scale =

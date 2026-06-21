@@ -783,7 +783,7 @@ public class MCOpenVR extends MCVR {
         activeSets.add(VRInputActionSet.MIXED_REALITY);
         activeSets.add(VRInputActionSet.TECHNICAL);
 
-        if (this.mc.gui.screen() == null) {
+        if (this.mc.screen == null) {
             activeSets.add(VRInputActionSet.INGAME);
             activeSets.add(VRInputActionSet.CONTEXTUAL);
         } else {
@@ -791,7 +791,7 @@ public class MCOpenVR extends MCVR {
             if (ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui) {
                 activeSets.add(VRInputActionSet.INGAME);
             }
-            if (this.mc.gui.screen() instanceof FBTCalibrationScreen) {
+            if (this.mc.screen instanceof FBTCalibrationScreen) {
                 activeSets.add(VRInputActionSet.CONTEXTUAL);
             }
         }
@@ -1245,7 +1245,7 @@ public class MCOpenVR extends MCVR {
             (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui ||
                 !(action.actionSet == VRInputActionSet.INGAME &&
                     action.keyBinding.key == InputConstants.Type.MOUSE.getOrCreate(GLFW.GLFW_MOUSE_BUTTON_LEFT) &&
-                    this.mc.gui.screen() != null
+                    this.mc.screen != null
                 )
             ))
         {

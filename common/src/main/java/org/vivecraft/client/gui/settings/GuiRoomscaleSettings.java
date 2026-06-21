@@ -8,15 +8,15 @@ import org.vivecraft.client_vr.settings.VRSettings;
 public class GuiRoomscaleSettings extends GuiVROptionsBase {
     private final VROptionEntry[] roomScaleSettings = new VROptionEntry[]{
         new VROptionEntry("vivecraft.options.screen.weaponcollision.button", (button, mousePos) -> {
-            this.minecraft.gui.setScreen(new GuiWeaponCollisionSettings(this));
+            this.minecraft.setScreen(new GuiWeaponCollisionSettings(this));
             return true;
         }),
         new VROptionEntry("vivecraft.options.screen.backpackswitching.button", (button, mousePos) -> {
-            this.minecraft.gui.setScreen(new GuiBackpackSwitchingSettings(this));
+            this.minecraft.setScreen(new GuiBackpackSwitchingSettings(this));
             return true;
         }),
         new VROptionEntry("vivecraft.options.screen.climbing.button", (button, mousePos) -> {
-            this.minecraft.gui.setScreen(new GuiClimbingSettings(this));
+            this.minecraft.setScreen(new GuiClimbingSettings(this));
             return true;
         }),
         new VROptionEntry(VRSettings.VrOptions.REALISTIC_JUMP),

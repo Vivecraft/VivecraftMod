@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.render.helpers.graphics;
 import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.vulkan.VulkanDevice;
 
 public interface GraphicsHelper {
 
@@ -12,11 +11,11 @@ public interface GraphicsHelper {
     private static GraphicsHelper getHelper() {
         if (RenderSystem.getDevice().backend instanceof GlDevice) {
             return new OpenGLHelper();
-        } else if (RenderSystem.getDevice().backend instanceof VulkanDevice) {
-            return new VulkanHelper();
+            //} else if (RenderSystem.getDevice().backend instanceof VulkanDevice) {
+            //    return new VulkanHelper();
         } else {
             throw new IllegalStateException(
-                "Vivecraft: Unsupported backend: " + RenderSystem.getDevice().getDeviceInfo().backendName() +
+                "Vivecraft: Unsupported backend: " + RenderSystem.getDevice().backend.getBackendName() +
                     " with class: " + RenderSystem.getDevice().backend.getClass().getName());
         }
     }

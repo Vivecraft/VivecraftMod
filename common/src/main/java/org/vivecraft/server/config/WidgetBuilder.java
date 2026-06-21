@@ -151,9 +151,9 @@ public class WidgetBuilder {
         if (first == null || first instanceof String) {
             ConfigBuilder.ListValue<String> stringValue = (ConfigBuilder.ListValue<String>) listValue;
             return () -> Button.builder(Component.translatable("vivecraft.options.editlist"),
-                    button -> Minecraft.getInstance().gui.setScreen(new GuiStringListEditorScreen(
+                    button -> Minecraft.getInstance().setScreen(new GuiStringListEditorScreen(
                         Component.translatable("vivecraft.serverSettings." + listValue.getPath()),
-                        Minecraft.getInstance().gui.screen(), false, stringValue::get, stringValue::reset, list -> {
+                        Minecraft.getInstance().screen, false, stringValue::get, stringValue::reset, list -> {
                         stringValue.set(list);
                         updateSettingsSinglePlayer(stringValue);
                     })))

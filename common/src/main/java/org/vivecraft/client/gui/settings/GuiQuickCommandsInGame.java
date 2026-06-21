@@ -27,7 +27,7 @@ public class GuiQuickCommandsInGame extends Screen {
             String command = chatCommands[i];
             this.addRenderableWidget(new Button.Builder(Component.translatable(command), (p) ->
             {
-                this.minecraft.gui.setScreen(null);
+                this.minecraft.setScreen(null);
                 if (p.getMessage().getString().startsWith("/")) {
                     this.minecraft.player.connection.sendCommand(p.getMessage().getString().substring(1));
                 } else {
@@ -40,7 +40,7 @@ public class GuiQuickCommandsInGame extends Screen {
         }
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("gui.cancel"),
-            (p) -> this.minecraft.gui.setScreen(this.parentScreen))
+            (p) -> this.minecraft.setScreen(this.parentScreen))
             .size(100, 20)
             .pos(this.width / 2 - 50, this.height - 46)
             .build());

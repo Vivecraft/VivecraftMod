@@ -77,7 +77,7 @@ public abstract class GuiListScreen extends Screen {
      */
     protected void addLowerButtons(int top) {
         this.addRenderableWidget(
-            Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.gui.setScreen(this.lastScreen))
+            Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
                 .bounds(this.width / 2 - 100, top, 200, 20).build());
     }
 
@@ -88,7 +88,7 @@ public abstract class GuiListScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.gui.setScreen(this.lastScreen);
+        this.minecraft.setScreen(this.lastScreen);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class ShadersVRMixin {
     @WrapOperation(method = "setCameraShadow", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;position()Lnet/minecraft/world/phys/Vec3;"))
     private static Vec3 vivecraft$positionCameraForShadows(Camera camera, Operation<Vec3> original) {
         if (!VRState.VR_RUNNING || ShadersHelper.isSlowMode() || ClientDataHolderVR.getInstance().isFirstPass) {
-            ShadersHelper.SHADOW_CAMERA_POSITION = Minecraft.getInstance().gameRenderer.mainCamera().position();
+            ShadersHelper.SHADOW_CAMERA_POSITION = Minecraft.getInstance().gameRenderer.getMainCamera().position();
         }
         if (RenderPassType.isVanilla() || ShadersHelper.isSlowMode()) {
             return original.call(camera);
@@ -59,7 +59,7 @@ public class ShadersVRMixin {
         OptifineHelper.updateUniforms();
 
         if (!RenderPassType.isVanilla() && !ShadersHelper.isSlowMode()) {
-            Vec3 offset = Minecraft.getInstance().gameRenderer.mainCamera().position()
+            Vec3 offset = Minecraft.getInstance().gameRenderer.getMainCamera().position()
                 .subtract(ShadersHelper.SHADOW_CAMERA_POSITION);
             shadowModelViewMat.translate((float) offset.x, (float) offset.y, (float) offset.z);
         }

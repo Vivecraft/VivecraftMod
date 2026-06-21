@@ -42,7 +42,7 @@ public class VRRenderingAPIImpl implements VRRenderingAPI {
     @Override
     public Matrix4f getRenderPassMatrix(RenderPass pass) {
         if (!VRState.VR_RUNNING || pass == RenderPass.VANILLA || pass == RenderPass.MIRROR || pass == RenderPass.GUI) {
-            return Minecraft.getInstance().gameRenderer.mainCamera().rotation().get(new Matrix4f());
+            return Minecraft.getInstance().gameRenderer.getMainCamera().rotation().get(new Matrix4f());
         } else {
             return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(pass).getMatrix();
         }

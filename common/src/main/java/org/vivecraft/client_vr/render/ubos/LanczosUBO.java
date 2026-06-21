@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr.render.ubos;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.MappableRingBuffer;
 
 public class LanczosUBO {
@@ -17,7 +17,9 @@ public class LanczosUBO {
     }
 
     public void updateBuffer(float texelWidthOffset, float texelHeightOffset) {
-        try (GpuBufferSlice.MappedView mappedView = this.lanczosBuffer.currentBuffer().map(false, true)) {
+        try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
+            .mapBuffer(this.lanczosBuffer.currentBuffer(), false, true))
+        {
             Std140Builder.intoBuffer(mappedView.data())
                 .putFloat(texelWidthOffset)
                 .putFloat(texelHeightOffset);

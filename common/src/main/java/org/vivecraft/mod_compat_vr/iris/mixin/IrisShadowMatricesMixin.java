@@ -26,7 +26,7 @@ public class IrisShadowMatricesMixin {
         float xOffset, @Local(argsOnly = true) float shadowIntervalSize, @Share("curPos") LocalRef<Vec3> curPos)
     {
         if (!RenderPassType.isVanilla() && !ShadersHelper.isSlowMode()) {
-            curPos.set(Minecraft.getInstance().gameRenderer.mainCamera().position());
+            curPos.set(Minecraft.getInstance().gameRenderer.getMainCamera().position());
             return (float) (ShadersHelper.SHADOW_CAMERA_POSITION.x % shadowIntervalSize -
                 (ShadersHelper.SHADOW_CAMERA_POSITION.x - curPos.get().x)
             );

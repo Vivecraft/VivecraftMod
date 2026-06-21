@@ -38,7 +38,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionDefaults;
@@ -363,14 +362,11 @@ public class MenuWorldExporter {
             dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
         }
 
-        HolderGetter<Block> blockHolder = VanillaRegistries.createLookup().lookup(Registries.BLOCK).orElse(null);
-
         DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, false,
             1.0,
-            dimMinY, ySize, ySize,
-            blockHolder != null ? blockHolder.getOrThrow(BlockTags.INFINIBURN_OVERWORLD) : HolderSet.empty(),
-            dimAmbientLight, new DimensionType.MonsterSettings(ConstantInt.of(0), 0),
-            skybox, cardinalLightingType, attributes.build(), timeline, Optional.empty());
+            dimMinY, ySize, ySize, BlockTags.INFINIBURN_OVERWORLD, dimAmbientLight,
+            new DimensionType.MonsterSettings(ConstantInt.of(0), 0), skybox, cardinalLightingType, attributes.build(),
+            timeline, Optional.empty());
 
         float rotation = 0.0f;
         boolean rain = false;

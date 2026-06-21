@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr.render.ubos;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import org.joml.Matrix4fc;
 import org.joml.Vector3fc;
@@ -24,7 +24,9 @@ public class MixedRealityUBO {
         Vector3fc hmdPlaneNormal, boolean firstPersonPass, Vector3fc keyColor, boolean alphaMode, int guiMask,
         boolean flipFirstPersonPass)
     {
-        try (GpuBufferSlice.MappedView mappedView = this.mixedRealityBuffer.currentBuffer().map(false, true)) {
+        try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
+            .mapBuffer(this.mixedRealityBuffer.currentBuffer(), false, true))
+        {
             Std140Builder.intoBuffer(mappedView.data())
                 .putMat4f(thirdProjectionMat)
                 .putMat4f(thirdViewMat)

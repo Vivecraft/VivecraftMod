@@ -119,7 +119,7 @@ public class GuiKeyboardLayoutEditor extends Screen {
 
         this.addRenderableWidget(new Button.Builder(
             Component.translatable("vivecraft.options.screen.loadkeyboardlayout.button"), button ->
-            this.minecraft.gui.setScreen(GuiActiveKeyboardLayoutSelector.getSelectionScreen(this,
+            this.minecraft.setScreen(GuiActiveKeyboardLayoutSelector.getSelectionScreen(this,
                 keyboard -> !keyboard.id().equals("custom"),
                 keyboard -> {
                     VRSettings.KeyboardLayout newLayout =
@@ -159,6 +159,6 @@ public class GuiKeyboardLayoutEditor extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.gui.setScreen(this.parent);
+        this.minecraft.setScreen(this.parent);
     }
 }

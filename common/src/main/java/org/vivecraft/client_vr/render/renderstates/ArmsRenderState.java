@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.render.renderstates;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.InteractionHand;
@@ -40,7 +41,7 @@ public class ArmsRenderState {
         Minecraft mc = Minecraft.getInstance();
 
         // render hands in second pass when gui is open
-        this.handsSecond = RadialHandler.isShowing() || KeyboardHandler.SHOWING || mc.gui.screen() != null;
+        this.handsSecond = RadialHandler.isShowing() || KeyboardHandler.SHOWING || mc.screen != null;
         this.menuHandMain = dataHolder.menuHandMain;
         this.menuHandOff = dataHolder.menuHandOff;
         this.mainHandWorldPos = RenderHelper.setupRenderingAtController(0, this.mainHandWorldRot.identity(), false);
@@ -49,7 +50,7 @@ public class ArmsRenderState {
             Math.max(ShadersHelper.ShaderLight(),
                 player.level().getMaxLocalRawBrightness(BlockPos.containing(headPos)));
         this.rawHeadLightCoords =
-            player != null ? LightCoordsUtil.getLightCoords(player.level(), BlockPos.containing(headPos)) :
+            player != null ? LevelRenderer.getLightCoords(player.level(), BlockPos.containing(headPos)) :
                 LightCoordsUtil.FULL_BRIGHT;
         this.mainHandRenderItem = VRArmHelper.extractHandRenderItem(player, InteractionHand.MAIN_HAND);
         this.offHandRenderItem = VRArmHelper.extractHandRenderItem(player, InteractionHand.OFF_HAND);

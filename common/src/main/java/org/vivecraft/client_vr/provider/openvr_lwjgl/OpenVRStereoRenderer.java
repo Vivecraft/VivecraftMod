@@ -1,20 +1,20 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.mojang.blaze3d.GpuFormat;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vulkan.VulkanConst;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.openvr.HiddenAreaMesh;
 import org.lwjgl.openvr.VR;
 import org.lwjgl.openvr.VRCompositor;
 import org.lwjgl.openvr.VRVulkanTextureData;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.vulkan.VK10;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -126,7 +126,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
             return new Matrix4f().frustum(
                 left.get() * nearClip, right.get() * nearClip,
                 top.get() * nearClip, bottom.get() * nearClip,
-                nearClip, farClip, RenderSystem.getDevice().getDeviceInfo().isZZeroToOne());
+                nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
         }
     }
 
@@ -134,11 +134,16 @@ public class OpenVRStereoRenderer extends VRRenderer {
     public void createRenderTexture(int width, int height) {
         // generate eye textures
         for (int i = 0; i < 2; i++) {
-            this.framebufferEye[i] = VRTextureTarget.builder((i == 0 ? "L" : "R") + " Eye")
-                .withSize(width, height)
-                .withFormat(GpuFormat.RGBA8_UNORM)
-                .build();
-            VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[i]);
+            int prevTexture = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
+            this.eyeTextureId[i] = GlStateManager._genTexture();
+            GlStateManager._bindTexture(this.eyeTextureId[i]);
+            GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+            GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+            GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, width, height, 0, GL11.GL_RGBA,
+                GL11.GL_INT,
+                null);
+
+            GlStateManager._bindTexture(prevTexture);
             GraphicsHelper.INSTANCE.checkError((i == 0 ? "Left" : "Right") + " Eye framebuffer setup");
         }
 
@@ -155,11 +160,11 @@ public class OpenVRStereoRenderer extends VRRenderer {
     }
 
     private void setupOpenGL() {
-        this.openvr.texType0.handle(GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[0].getColorTexture()));
+        this.openvr.texType0.handle(this.eyeTextureId[0]);
         this.openvr.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.openvr.texType0.eType(VR.ETextureType_TextureType_OpenGL);
 
-        this.openvr.texType1.handle(GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[1].getColorTexture()));
+        this.openvr.texType1.handle(this.eyeTextureId[1]);
         this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
     }
@@ -185,7 +190,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 this.vkEyeData[i].m_nQueueFamilyIndex(vkHelper.getQueueFamilyIndex());
                 this.vkEyeData[i].m_nWidth(this.framebufferEye[i].width);
                 this.vkEyeData[i].m_nHeight(this.framebufferEye[i].height);
-                this.vkEyeData[i].m_nFormat(VulkanConst.toVk(this.framebufferEye[i].gpuFormat));
+                this.vkEyeData[i].m_nFormat(VK10.VK_FORMAT_R8G8B8_UNORM);
                 // hardcoded, maybe mixin to store per target?
                 this.vkEyeData[i].m_nSampleCount(1);
             }
@@ -194,11 +199,8 @@ public class OpenVRStereoRenderer extends VRRenderer {
         }
     }
 
-
     @Override
     public void endFrame() throws RenderConfigException {
-        // technically we are supposed to transition Vulkan images to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-        // vanilla has them in VK_IMAGE_LAYOUT_GENERAL by default which should also work though
         int leftError = VRCompositor_Submit(VR.EVREye_Eye_Left, this.openvr.texType0, null,
             VR.EVRSubmitFlags_Submit_Default);
         int rightError = VRCompositor_Submit(VR.EVREye_Eye_Right, this.openvr.texType1, null,
@@ -243,6 +245,20 @@ public class OpenVRStereoRenderer extends VRRenderer {
     @Override
     public String getName() {
         return "OpenVR";
+    }
+
+    @Override
+    protected void destroyBuffers() {
+        super.destroyBuffers();
+        if (this.eyeTextureId[0] > -1) {
+            GlStateManager._deleteTexture(this.eyeTextureId[0]);
+            this.eyeTextureId[0] = -1;
+        }
+
+        if (this.eyeTextureId[1] > -1) {
+            GlStateManager._deleteTexture(this.eyeTextureId[1]);
+            this.eyeTextureId[1] = -1;
+        }
     }
 
     @Override

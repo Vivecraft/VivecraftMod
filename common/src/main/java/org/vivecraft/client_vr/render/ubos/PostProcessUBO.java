@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr.render.ubos;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.MappableRingBuffer;
 
 public class PostProcessUBO {
@@ -21,7 +21,9 @@ public class PostProcessUBO {
         float circle_radius, float circle_offset, float border, float water, float portal, float portalTime,
         float pumpkin, float redAlpha, float blueAlpha, float blackAlpha, int eye)
     {
-        try (GpuBufferSlice.MappedView mappedView = this.postProcessBuffer.currentBuffer().map(false, true)) {
+        try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
+            .mapBuffer(this.postProcessBuffer.currentBuffer(), false, true))
+        {
             Std140Builder.intoBuffer(mappedView.data())
                 .putFloat(circle_radius)
                 .putFloat(circle_offset)

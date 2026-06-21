@@ -92,13 +92,13 @@ public class VRHotkeys {
             }
 
             if (key == GLFW.GLFW_KEY_F12 && DEBUG) {
-                Screen current = minecraft.gui.screen();
-                minecraft.gui.setScreen(new WinScreen(false, () -> minecraft.gui.setScreen(current)));
+                Screen current = minecraft.screen;
+                minecraft.setScreen(new WinScreen(false, () -> minecraft.setScreen(current)));
                 gotKey = true;
             }
 
             // toggle mirror mode
-            if (key == GLFW.GLFW_KEY_F5 && (minecraft.level == null || minecraft.gui.screen() != null) &&
+            if (key == GLFW.GLFW_KEY_F5 && (minecraft.level == null || minecraft.screen != null) &&
                 VRState.VR_INITIALIZED)
             {
                 dataHolder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);

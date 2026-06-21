@@ -32,13 +32,13 @@ public class ClientEvents {
         registerClientCommandsEvent.getDispatcher()
             .register(Commands.literal("vivecraft-client-config").executes(context -> {
                 Minecraft mc = Minecraft.getInstance();
-                mc.schedule(() -> mc.gui.setScreen(new VivecraftMainSettings(mc.gui.screen())));
+                mc.schedule(() -> mc.setScreen(new VivecraftMainSettings(mc.screen)));
                 return 1;
             }));
     }
 
     @SubscribeEvent
     public static void registerPiPRenderers(RegisterPictureInPictureRendererEvent event) {
-        event.register(new GuiFBTPlayerRenderer());
+        event.register(new GuiFBTPlayerRenderer(event.getBufferSource()));
     }
 }

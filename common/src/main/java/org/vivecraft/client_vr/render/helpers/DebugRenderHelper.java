@@ -48,9 +48,9 @@ public class DebugRenderHelper {
             renderPlayerAxes(partialTick);
         }
 
-        if (DATA_HOLDER.vrSettings.renderTrackerPositions || MC.gui.screen() instanceof FBTCalibrationScreen) {
+        if (DATA_HOLDER.vrSettings.renderTrackerPositions || MC.screen instanceof FBTCalibrationScreen) {
             boolean showNames = true;
-            if (MC.gui.screen() instanceof FBTCalibrationScreen fbtScreen) {
+            if (MC.screen instanceof FBTCalibrationScreen fbtScreen) {
                 showNames = fbtScreen.isCalibrated();
             }
             renderTackerPositions(showNames);

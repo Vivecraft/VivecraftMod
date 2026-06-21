@@ -20,7 +20,7 @@ public class GuiOtherHUDSettings extends GuiVROptionsBase {
     };
     private final VROptionEntry[] chat = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.CHAT_NOTIFICATION_SOUND, (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiChatNotificationSelection(this));
+            Minecraft.getInstance().setScreen(new GuiChatNotificationSelection(this));
             return true;
         })};
 

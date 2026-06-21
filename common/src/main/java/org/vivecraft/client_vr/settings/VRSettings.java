@@ -694,8 +694,6 @@ public class VRSettings {
     public boolean vrSettingsButtonEnabled = true;
     @SettingField(VrOptions.VR_SETTINGS_BUTTON_POSITION)
     public boolean vrSettingsButtonPositionLeft = true;
-    @SettingField(VrOptions.COMMANDS_BUTTON_ICON)
-    public boolean commandsButtonIcon = true;
     @SettingField(VrOptions.MODIFY_PAUSE_MENU)
     public boolean modifyPauseMenu = true;
     @SettingField(VrOptions.FULL_RELOAD_ON_INIT)
@@ -1596,37 +1594,25 @@ public class VRSettings {
 
             @Override
             Object loadOption(String value) {
-                boolean hidden = value.equals("true");
-                // is null during first init
-                if (Minecraft.getInstance().gui != null) {
-                    if (hidden != Minecraft.getInstance().gui.hud.isHidden()) {
-                        Minecraft.getInstance().gui.hud.toggle();
-                    }
-                }
-                return hidden;
+                Minecraft.getInstance().options.hideGui = value.equals("true");
+                return false;
             }
 
             @Override
             String saveOption(Object value) {
-                return Boolean.toString(isHiddenWithFallback((boolean) value));
+                return Boolean.toString(Minecraft.getInstance().options.hideGui);
             }
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                return isHiddenWithFallback((boolean) value) ? prefix + LangHelper.getYes() :
+                return Minecraft.getInstance().options.hideGui ? prefix + LangHelper.getYes() :
                     prefix + LangHelper.getNo();
             }
 
             @Override
             Object setOptionValue(Object value) {
-                if (Minecraft.getInstance().gui != null) {
-                    Minecraft.getInstance().gui.hud.toggle();
-                }
-                return isHiddenWithFallback((boolean) value);
-            }
-
-            private boolean isHiddenWithFallback(boolean fallback) {
-                return Minecraft.getInstance().gui != null ? Minecraft.getInstance().gui.hud.isHidden() : fallback;
+                Minecraft.getInstance().options.hideGui = !Minecraft.getInstance().options.hideGui;
+                return false;
             }
         },
         RENDER_MENU_BACKGROUND(OptionType.BOOLEAN), // HUD/GUI Background
@@ -1637,8 +1623,7 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 // update screen pos
-                GuiHandler.onScreenChanged(Minecraft.getInstance().gui.screen(), Minecraft.getInstance().gui.screen(),
-                    false);
+                GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
             }
         },
         CROSSHAIR_OCCLUSION(OptionType.BOOLEAN), // Crosshair Occlusion
@@ -1813,7 +1798,6 @@ public class VRSettings {
         VR_SETTINGS_BUTTON_VISIBLE(OptionType.BOOLEAN), // setting button in options
         VR_SETTINGS_BUTTON_POSITION("vivecraft.options.left",
             "vivecraft.options.right"), // setting button position
-        COMMANDS_BUTTON_ICON(OptionType.BOOLEAN), // shows a command block icon for the commands button
         MODIFY_PAUSE_MENU(OptionType.BOOLEAN), // if the pause menu should be altered
         FULL_RELOAD_ON_INIT(OptionType.BOOLEAN) { // causes a full resource reload on reinit
 
@@ -2332,7 +2316,7 @@ public class VRSettings {
             void onOptionChange() {
                 if (VRState.VR_RUNNING) {
                     MCVR.get().resetPosition();
-                    Minecraft.getInstance().gui.setScreen(null);
+                    Minecraft.getInstance().setScreen(null);
                 }
             }
         },

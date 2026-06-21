@@ -1,26 +1,22 @@
 package org.vivecraft.client_vr.provider;
 
-import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import org.joml.Matrix4f;
-import org.joml.Vector2i;
-import org.joml.Vector2ic;
+import org.joml.*;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -36,6 +32,7 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
+import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -45,21 +42,21 @@ import oshi.SystemInfo;
 import oshi.hardware.GraphicsCard;
 
 import java.io.IOException;
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 public abstract class VRRenderer {
     // projection matrices
     public Matrix4f[] eyeProj = new Matrix4f[2];
-    public Matrix4f[] eyeReverseProj = new Matrix4f[2];
     protected float lastFarClip = 0F;
-    protected float lastReverseFarClip = 0F;
 
     // render buffers
     public final VRTextureTarget[] framebufferEye = new VRTextureTarget[2];
+    public final int[] eyeTextureId = {-1, -1};
     public RenderTarget framebufferMR;
     public RenderTarget framebufferUndistorted;
     public RenderTarget framebufferVrRender;
@@ -136,25 +133,6 @@ public abstract class VRRenderer {
     }
 
     /**
-     * gets the cached reversed projection matrix if the farClip distance matches with the last, else gets a new one from the VR runtime
-     *
-     * @param eyeType  which eye to get the projection matrix for, 0 = Left, 1 = Right
-     * @param nearClip near clip plane of the projection matrix
-     * @param farClip  far clip plane of the projection matrix
-     * @return the reversed projection matrix
-     */
-    public Matrix4f getCachedReverseProjectionMatrix(int eyeType, float nearClip, float farClip) {
-        if (farClip != this.lastReverseFarClip) {
-            this.lastReverseFarClip = farClip;
-            // fetch both at the same time to make sure they use the same clip planes
-            this.eyeReverseProj[0] = this.getProjectionMatrix(0, farClip, nearClip);
-            this.eyeReverseProj[1] = this.getProjectionMatrix(1, farClip, nearClip);
-        }
-
-        return this.eyeReverseProj[eyeType];
-    }
-
-    /**
      * gets the projection matrix from the vr runtime with the given parameters
      *
      * @param eyeType  which eye to get the projection matrix for, 0 = Left, 1 = Right
@@ -226,7 +204,7 @@ public abstract class VRRenderer {
             try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
                 vertices.length / 2 * DefaultVertexFormat.POSITION_COLOR.getVertexSize()))
             {
-                BufferBuilder builder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLES,
+                BufferBuilder builder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES,
                     DefaultVertexFormat.POSITION_COLOR);
 
                 for (int v = 0; v < vertices.length; v += 2) {
@@ -289,7 +267,7 @@ public abstract class VRRenderer {
 
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(this.stencilProjectionMatrix.getBuffer(
-                new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 20.0F, 0.0F)),
+                new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F)),
             ProjectionType.ORTHOGRAPHIC);
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().identity();
@@ -326,8 +304,7 @@ public abstract class VRRenderer {
      * @param height height of the circle in screen pixels
      */
     private void drawCircle(float width, float height) {
-        // TODO
-        /*RenderType renderType = VRRenderTypes.triangleFanAlways();
+        RenderType renderType = VRRenderTypes.triangleFanAlways();
         VertexConsumer builder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
 
         final float edges = 32.0F;
@@ -347,7 +324,7 @@ public abstract class VRRenderer {
                 .setColor(0, 0, 0, 255);
         }
 
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);*/
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(renderType);
     }
 
     /**
@@ -365,23 +342,24 @@ public abstract class VRRenderer {
 
         int count = verts.length / 2;
 
-        RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(PrimitiveTopology.TRIANGLES);
+        RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES);
         GpuBuffer indexBuffer = autoIndices.getBuffer(count);
         GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-            .writeTransform(RenderSystem.getModelViewMatrixCopy());
+            .writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1F), new Vector3f(), new Matrix4f());
 
-        RenderTarget target = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 
         try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
             .createRenderPass(() -> "Stencil " + ClientDataHolderVR.getInstance().currentPass,
-                target.getColorTextureView(), Optional.empty(), target.getDepthTextureView(), OptionalDouble.empty()))
+                target.getColorTextureView(), OptionalInt.empty(),
+                target.getDepthTextureView(), OptionalDouble.empty()))
         {
             renderPass.setPipeline(VRShaders.TRIANGLES_ALWAYS);
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-            renderPass.setVertexBuffer(0, buffer.slice());
+            renderPass.setVertexBuffer(0, buffer);
             renderPass.setIndexBuffer(indexBuffer, autoIndices.type());
-            renderPass.drawIndexed(count, 1, 0, 0, 0);
+            renderPass.drawIndexed(0, 0, count, 1);
         }
     }
 
@@ -684,10 +662,10 @@ public abstract class VRRenderer {
 
                 ((RenderTargetExtension) KeyboardHandler.FRAMEBUFFER).vivecraft$setMipmaps(mipmaps);
                 KeyboardHandler.FRAMEBUFFER.resize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT);
-                if (minecraft.gui.screen() != null) {
+                if (minecraft.screen != null) {
                     int guiWidth = minecraft.getWindow().getGuiScaledWidth();
                     int guiHeight = minecraft.getWindow().getGuiScaledHeight();
-                    minecraft.gui.screen().init(guiWidth, guiHeight);
+                    minecraft.screen.init(guiWidth, guiHeight);
                 }
             }
             // need to recall this, for PostChains to get the right resize
@@ -711,17 +689,39 @@ public abstract class VRRenderer {
 
             destroyBuffers();
 
-            this.createRenderTexture(eyew, eyeh);
+            if (this.eyeTextureId[0] == -1) {
+                this.createRenderTexture(eyew, eyeh);
 
-            if (this.framebufferEye[0] == null || this.framebufferEye[1] == null) {
-                throw new RenderConfigException(
-                    Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
-                    Component.literal(this.getLastError()));
+                if (this.eyeTextureId[0] == -1) {
+                    throw new RenderConfigException(
+                        Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
+                        Component.literal(this.getLastError()));
+                }
+
+                VRSettings.LOGGER.info("Vivecraft: VR Provider supplied render texture IDs: {}, {}",
+                    this.eyeTextureId[0], this.eyeTextureId[1]);
+                VRSettings.LOGGER.info("Vivecraft: VR Provider supplied texture resolution: {} x {}", eyew, eyeh);
             }
 
-            VRSettings.LOGGER.info("Vivecraft: VR Provider supplied texture resolution: {} x {}", eyew, eyeh);
-
             GraphicsHelper.INSTANCE.checkError("Render Texture setup");
+
+            if (this.framebufferEye[0] == null) {
+                this.framebufferEye[0] = VRTextureTarget.builder("L Eye")
+                    .withSize(eyew, eyeh)
+                    .withTexId(this.eyeTextureId[0])
+                    .build();
+                VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[0]);
+                GraphicsHelper.INSTANCE.checkError("Left Eye framebuffer setup");
+            }
+
+            if (this.framebufferEye[1] == null) {
+                this.framebufferEye[1] = VRTextureTarget.builder("R Eye")
+                    .withSize(eyew, eyeh)
+                    .withTexId(this.eyeTextureId[1])
+                    .build();
+                VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[1]);
+                GraphicsHelper.INSTANCE.checkError("Right Eye framebuffer setup");
+            }
 
             float resolutionScale =
                 ResolutionControlHelper.isLoaded() ? ResolutionControlHelper.getCurrentScaleFactor() : 1.0F;
@@ -874,10 +874,10 @@ public abstract class VRRenderer {
             // update post effect chain
             minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
 
-            if (minecraft.gui.screen() != null) {
+            if (minecraft.screen != null) {
                 int w = minecraft.getWindow().getGuiScaledWidth();
                 int h = minecraft.getWindow().getGuiScaledHeight();
-                minecraft.gui.screen().init(w, h);
+                minecraft.screen.init(w, h);
             }
 
             long windowPixels =
@@ -911,12 +911,12 @@ public abstract class VRRenderer {
                 String.format("%.1f", windowPixels / 1000000.0F),
                 String.format("%.1f", pixelsPerFrame / 1000000.0F));
 
-            // updates the size of the outline target
-            minecraft.levelRenderer.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
-
             if (ClientDataHolderVR.getInstance().vrSettings.fullReloadOnInit) {
                 // do a full reload
                 minecraft.reloadResourcePacks();
+            } else {
+                // regenerates the outline target to have every pass in it
+                minecraft.levelRenderer.onResourceManagerReload(minecraft.getResourceManager());
             }
 
             ShadersHelper.maybeReloadShaders();
@@ -929,7 +929,7 @@ public abstract class VRRenderer {
     private void checkIfSupportedGpu() throws RenderConfigException {
         // intel drivers have issues with interop on windows so throw an error
         if (Util.getPlatform() == Util.OS.WINDOWS &&
-            RenderSystem.getDevice().getDeviceInfo().name().toLowerCase().contains("intel") &&
+            RenderSystem.getDevice().getRenderer().toLowerCase().contains("intel") &&
             ClientDataHolderVR.getInstance().vrSettings.blockIntelWindows)
         {
             StringBuilder gpus = new StringBuilder();
@@ -952,7 +952,7 @@ public abstract class VRRenderer {
             }
             Component message;
             message = Component.translatable("vivecraft.messages.intelgraphics1",
-                Component.literal(RenderSystem.getDevice().getDeviceInfo().name())
+                Component.literal(RenderSystem.getDevice().getRenderer())
                     .withStyle(ChatFormatting.GOLD),
                 gpus.toString(),
                 onlyIntel ? Component.empty() :
@@ -1048,6 +1048,7 @@ public abstract class VRRenderer {
             if (this.framebufferEye[i] != null) {
                 this.framebufferEye[i].destroyBuffers();
                 this.framebufferEye[i] = null;
+                this.eyeTextureId[i] = -1;
             }
         }
 

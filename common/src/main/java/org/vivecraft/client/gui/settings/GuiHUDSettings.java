@@ -21,15 +21,15 @@ public class GuiHUDSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.HUD_WRIST_OFFSET),
         new VROptionEntry(VRSettings.VrOptions.FORCE_GUI_TO_HUD),
         new VROptionEntry("vivecraft.options.screen.guirendering.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiRenderingSettings(this));
+            Minecraft.getInstance().setScreen(new GuiRenderingSettings(this));
             return true;
         }),
         new VROptionEntry("vivecraft.options.screen.keyboard.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiKeyboardSettings(this));
+            Minecraft.getInstance().setScreen(new GuiKeyboardSettings(this));
             return true;
         }),
         new VROptionEntry("vivecraft.options.screen.menuworld.button", (button, mousePos) -> {
-            Minecraft.getInstance().gui.setScreen(new GuiMenuWorldSettings(this));
+            Minecraft.getInstance().setScreen(new GuiMenuWorldSettings(this));
             return true;
         }),
     };
@@ -48,8 +48,6 @@ public class GuiHUDSettings extends GuiVROptionsBase {
     @Override
     protected void loadDefaults() {
         super.loadDefaults();
-        if (this.minecraft.gui.hud.isHidden()) {
-            this.minecraft.gui.hud.toggle();
-        }
+        this.minecraft.options.hideGui = false;
     }
 }

@@ -7,8 +7,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -214,7 +214,7 @@ public class RenderHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps for Gui layer
-            GraphicsHelper.INSTANCE.genMipmaps(MC.gameRenderer.mainRenderTarget.getColorTexture());
+            GraphicsHelper.INSTANCE.genMipmaps(MC.mainRenderTarget.getColorTexture());
         }
     }
 
@@ -229,7 +229,7 @@ public class RenderHelper {
         float size = 15.0F * Math.max(ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale,
             1.0F / (float) MC.getWindow().getGuiScale());
 
-        graphics.blitSprite(VRShaders.CROSSHAIR_MENU, Hud.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
+        graphics.blitSprite(VRShaders.CROSSHAIR_MENU, Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1),
             (int) (mouseY - size * 0.5F + 1), (int) size, (int) size);
     }
 
@@ -239,7 +239,7 @@ public class RenderHelper {
     public static void drawVRConnectingMessage() {
         // clear depth, because text that was already there would be over ours
         RenderSystem.getDevice().createCommandEncoder()
-            .clearDepthTexture(MC.gameRenderer.mainRenderTarget().getDepthTexture(), 0.0);
+            .clearDepthTexture(MC.getMainRenderTarget().getDepthTexture(), 1.0);
 
         GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
 

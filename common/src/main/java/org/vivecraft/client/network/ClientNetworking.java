@@ -503,9 +503,9 @@ public class ClientNetworking {
                         }
                     }
                 }
-                if (Minecraft.getInstance().gui.screen() != null) {
+                if (Minecraft.getInstance().screen != null) {
                     // reinit screen, since overrides affect some option availability
-                    Minecraft.getInstance().gui.screen().init(
+                    Minecraft.getInstance().screen.init(
                         Minecraft.getInstance().getWindow().getGuiScaledWidth(),
                         Minecraft.getInstance().getWindow().getGuiScaledHeight());
                 }

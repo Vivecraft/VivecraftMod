@@ -19,11 +19,11 @@ public class GuiSeatedOptions extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.RIGHT_CLICK_DELAY),
         new VROptionEntry(VRSettings.VrOptions.AIM_DEVICE),
         new VROptionEntry("vivecraft.options.screen.freemove.button", (button, mousePos) -> {
-            this.minecraft.gui.setScreen(new GuiFreeMoveSettings(this));
+            this.minecraft.setScreen(new GuiFreeMoveSettings(this));
             return true;
         }),
         new VROptionEntry("vivecraft.options.screen.teleport.button", (button, mousePos) -> {
-            this.minecraft.gui.setScreen(new GuiTeleportSettings(this));
+            this.minecraft.setScreen(new GuiTeleportSettings(this));
             return true;
         })
     };

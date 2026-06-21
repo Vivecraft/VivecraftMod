@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -34,23 +33,22 @@ public class MultiPassTextureTarget extends TextureTarget {
 
     private final TextureTarget vanilla;
 
-    public MultiPassTextureTarget(String name, int width, int height, boolean useDepth, GpuFormat format) {
-        super(name, width, height, useDepth, format);
+    public MultiPassTextureTarget(String name, int width, int height, boolean useDepth) {
+        super(name, width, height, useDepth);
         super.destroyBuffers();
 
         this.vrTargets = new EnumMap<>(RenderPass.class);
 
         this.isVanilla = true;
-        this.vanilla = new TextureTarget(name, width, height, useDepth, format);
+        this.vanilla = new TextureTarget(name, width, height, useDepth);
         this.isVanilla = false;
 
         for (RenderPass pass : RenderPass.values()) {
             // create one TextureTarget for each active render pass
             WorldRenderPass worldPass = WorldRenderPass.getByRenderPass(pass);
-            // we always need all targets, use the vanilla size if the worldpass doesn't exists
-            RenderTarget original = worldPass == null ? this.vanilla : worldPass.target;
-            this.vrTargets.put(pass,
-                new TextureTarget(name + " " + pass, original.width, original.height, useDepth, format));
+            if (worldPass == null) continue;
+            RenderTarget original = worldPass.target;
+            this.vrTargets.put(pass, new TextureTarget(name + " " + pass, original.width, original.height, useDepth));
         }
         // set vanilla as default
         setLast(this.vanilla);
@@ -106,12 +104,21 @@ public class MultiPassTextureTarget extends TextureTarget {
     }
 
     @Override
-    public void blitAndBlendToTexture(GpuTextureView output, GpuTextureView outputDepth) {
+    public void blitToScreen() {
         if (this.vrTargets == null) {
-            super.blitAndBlendToTexture(output, outputDepth);
+            super.blitToScreen();
             return;
         }
-        callOnTarget(r -> r.blitAndBlendToTexture(output, outputDepth));
+        callOnTarget(RenderTarget::blitToScreen);
+    }
+
+    @Override
+    public void blitAndBlendToTexture(GpuTextureView gpuTextureView) {
+        if (this.vrTargets == null) {
+            super.blitAndBlendToTexture(gpuTextureView);
+            return;
+        }
+        callOnTarget(r -> r.blitAndBlendToTexture(gpuTextureView));
     }
 
     @Override

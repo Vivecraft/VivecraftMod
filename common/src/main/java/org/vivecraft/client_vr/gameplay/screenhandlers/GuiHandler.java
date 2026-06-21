@@ -209,7 +209,7 @@ public class GuiHandler {
         if (DH.vrSettings.seated) return;
         if (!MCVR.get().isControllerTracking(0)) return;
         // some mods ungrab the mouse when there is no screen
-        if (MC.gui.screen() == null && MC.mouseHandler.isMouseGrabbed()) return;
+        if (MC.screen == null && MC.mouseHandler.isMouseGrabbed()) return;
 
         Vector2f tex = getTexCoordsForCursor(GUI_POS_ROOM, GUI_ROTATION_ROOM, GUI_SCALE,
             DH.vrPlayer.vrdata_room_pre.getController(0));
@@ -306,7 +306,7 @@ public class GuiHandler {
             CONTROLLER_MOUSE_Y >= 0.0D && CONTROLLER_MOUSE_Y < MC.getWindow().getScreenWidth();
 
         // LMB
-        if (KEY_LEFT_CLICK.consumeClick() && MC.gui.screen() != null && mouseValid) {
+        if (KEY_LEFT_CLICK.consumeClick() && MC.screen != null && mouseValid) {
             InputSimulator.pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
             LAST_PRESSED_LEFT_CLICK = true;
         }
@@ -316,7 +316,7 @@ public class GuiHandler {
         }
 
         // RMB
-        if (KEY_RIGHT_CLICK.consumeClick() && MC.gui.screen() != null && mouseValid) {
+        if (KEY_RIGHT_CLICK.consumeClick() && MC.screen != null && mouseValid) {
             InputSimulator.pressMouse(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
             LAST_PRESSED_RIGHT_CLICK = true;
         }
@@ -326,7 +326,7 @@ public class GuiHandler {
         }
 
         // MMB
-        if (KEY_MIDDLE_CLICK.consumeClick() && MC.gui.screen() != null && mouseValid) {
+        if (KEY_MIDDLE_CLICK.consumeClick() && MC.screen != null && mouseValid) {
             InputSimulator.pressMouse(GLFW.GLFW_MOUSE_BUTTON_MIDDLE);
             LAST_PRESSED_MIDDLE_CLICK = true;
         }
@@ -336,7 +336,7 @@ public class GuiHandler {
         }
 
         // Shift
-        if (KEY_SHIFT.consumeClick() && MC.gui.screen() != null) {
+        if (KEY_SHIFT.consumeClick() && MC.screen != null) {
             InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_SHIFT);
             LAST_PRESSED_SHIFT = true;
         }
@@ -346,7 +346,7 @@ public class GuiHandler {
         }
 
         // Crtl
-        if (KEY_CTRL.consumeClick() && MC.gui.screen() != null) {
+        if (KEY_CTRL.consumeClick() && MC.screen != null) {
             InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
             LAST_PRESSED_CRTL = true;
         }
@@ -356,7 +356,7 @@ public class GuiHandler {
         }
 
         // Alt
-        if (KEY_ALT.consumeClick() && MC.gui.screen() != null) {
+        if (KEY_ALT.consumeClick() && MC.screen != null) {
             InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_ALT);
             LAST_PRESSED_ALT = true;
         }
@@ -366,11 +366,11 @@ public class GuiHandler {
         }
 
         // scroll mouse
-        if (KEY_SCROLL_UP.consumeClick() && MC.gui.screen() != null) {
+        if (KEY_SCROLL_UP.consumeClick() && MC.screen != null) {
             InputSimulator.scrollMouse(0.0D, 4.0D);
         }
 
-        if (KEY_SCROLL_DOWN.consumeClick() && MC.gui.screen() != null) {
+        if (KEY_SCROLL_DOWN.consumeClick() && MC.screen != null) {
             InputSimulator.scrollMouse(0.0D, -4.0D);
         }
     }
@@ -509,16 +509,16 @@ public class GuiHandler {
     public static void extractGui(ScreenRenderState screenState) {
         Profiler.get().push("extrract GUIModelView");
 
-        if (MC.gui.screen() != null && GUI_POS_ROOM == null) {
+        if (MC.screen != null && GUI_POS_ROOM == null) {
             // naughty mods!
-            onScreenChanged(null, MC.gui.screen(), false);
-        } else if (MC.gui.screen() == null && !MC.mouseHandler.isMouseGrabbed()) {
+            onScreenChanged(null, MC.screen, false);
+        } else if (MC.screen == null && !MC.mouseHandler.isMouseGrabbed()) {
             // some mod want's to do a mouse selection overlay
             if (GUI_POS_ROOM == null) {
                 onScreenChanged(null, new Screen(Component.empty()) {
                 }, false, true);
             }
-        } else if (MC.gui.screen() == null && GUI_POS_ROOM != null) {
+        } else if (MC.screen == null && GUI_POS_ROOM != null) {
             // even naughtier mods!
             // someone canceled the setScreen, so guiPos didn't get reset
             onScreenChanged(null, null, false);
@@ -535,7 +535,7 @@ public class GuiHandler {
             guirot = null;
             scale = 1.0F;
 
-            if (MC.level != null && (MC.gui.screen() == null || forceGuiToHUD || !DH.vrSettings.floatInventory)) {
+            if (MC.level != null && (MC.screen == null || forceGuiToHUD || !DH.vrSettings.floatInventory)) {
                 // HUD view - attach to head or controller
                 int side = 1;
 

@@ -13,7 +13,6 @@ public class ImprovedFramebufferMixin {
     @ModifyExpressionValue(method = "forceAsMainRenderTarget", at = @At(value = "FIELD", target = "Lxaero/common/graphics/ImprovedFramebuffer;mainRenderTargetBackup:Lcom/mojang/blaze3d/pipeline/RenderTarget;", ordinal = 0))
     private RenderTarget vivecraft$fixConstantReference(RenderTarget mainRenderTarget) {
         // refetch main target when not an improved buffer, to get the new gui buffer
-        return this.getClass().isInstance(Minecraft.getInstance().gameRenderer.mainRenderTarget) ? mainRenderTarget :
-            null;
+        return this.getClass().isInstance(Minecraft.getInstance().mainRenderTarget) ? mainRenderTarget : null;
     }
 }

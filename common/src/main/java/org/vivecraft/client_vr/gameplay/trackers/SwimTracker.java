@@ -30,7 +30,7 @@ public class SwimTracker implements Tracker {
             return false;
         } else if (!this.dh.vrSettings.realisticSwimEnabled) {
             return false;
-        } else if (this.mc.gui.screen() != null) {
+        } else if (this.mc.screen != null) {
             return false;
         } else if (player == null || !player.isAlive()) {
             return false;

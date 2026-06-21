@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -18,10 +17,8 @@ public class MultiPassRenderTarget extends RenderTarget {
     private final RenderTarget mainTarget;
     private final Function<RenderPass, RenderTarget> vrTargets;
 
-    public MultiPassRenderTarget(
-        String name, RenderTarget mainTarget, Function<RenderPass, RenderTarget> vrTargets, GpuFormat format)
-    {
-        super(name, mainTarget.useDepth, format);
+    public MultiPassRenderTarget(String name, RenderTarget mainTarget, Function<RenderPass, RenderTarget> vrTargets) {
+        super(name, mainTarget.useDepth);
         this.mainTarget = mainTarget;
         this.vrTargets = vrTargets;
 
@@ -52,8 +49,13 @@ public class MultiPassRenderTarget extends RenderTarget {
     }
 
     @Override
-    public void blitAndBlendToTexture(GpuTextureView gpuTextureView, GpuTextureView depthView) {
-        callOnTarget(r -> r.blitAndBlendToTexture(gpuTextureView, depthView));
+    public void blitToScreen() {
+        callOnTarget(RenderTarget::blitToScreen);
+    }
+
+    @Override
+    public void blitAndBlendToTexture(GpuTextureView gpuTextureView) {
+        callOnTarget(r -> r.blitAndBlendToTexture(gpuTextureView));
     }
 
     @Override

@@ -48,7 +48,7 @@ public abstract class GuiVROptionsBase extends Screen {
 
     protected void addDefaultButtons() {
         Button search = SpriteIconButton.builder(Component.translatable("vivecraft.options.screen.search"),
-                (p) -> this.minecraft.gui.setScreen(new GuiAllSettings(this)), true)
+                (p) -> this.minecraft.setScreen(new GuiAllSettings(this)), true)
             .sprite(SEARCH_ICON, 15, 15)
             .size(20, 20)
             .build();
@@ -67,7 +67,7 @@ public abstract class GuiVROptionsBase extends Screen {
         this.addRenderableWidget(this.btnDone = new Button.Builder(Component.translatable("gui.back"), (p) -> {
             if (!this.onDoneClicked()) {
                 this.dataHolder.vrSettings.saveOptions();
-                this.minecraft.gui.setScreen(this.lastScreen);
+                this.minecraft.setScreen(this.lastScreen);
             }
         })
             .pos(this.width / 2 + 5, this.height - 30)
@@ -154,8 +154,7 @@ public abstract class GuiVROptionsBase extends Screen {
                             }
 
                             this.vrSettings.saveOptions();
-                            this.minecraft.gui.setScreen(
-                                layout.getScreen().getConstructor(Screen.class).newInstance(this));
+                            this.minecraft.setScreen(layout.getScreen().getConstructor(Screen.class).newInstance(this));
                         } catch (ReflectiveOperationException e) {
                             VRSettings.LOGGER.error("Vivecraft: error setting screen: ", e);
                         }
@@ -320,7 +319,7 @@ public abstract class GuiVROptionsBase extends Screen {
         if (keyEvent.key() == GLFW.GLFW_KEY_ESCAPE) {
             if (!this.onDoneClicked()) {
                 this.dataHolder.vrSettings.saveOptions();
-                this.minecraft.gui.setScreen(this.lastScreen);
+                this.minecraft.setScreen(this.lastScreen);
             }
 
             return true;

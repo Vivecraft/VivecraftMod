@@ -25,7 +25,7 @@ public class GarbageCollectorScreen extends Screen implements ChangeableParentSc
 
     public GarbageCollectorScreen(String currentGarbageCollector) {
         super(Component.translatable("vivecraft.messages.gctitle"));
-        this.lastScreen = Minecraft.getInstance().gui.screen();
+        this.lastScreen = Minecraft.getInstance().screen;
         this.currentGarbageCollector = currentGarbageCollector;
     }
 
@@ -82,6 +82,6 @@ public class GarbageCollectorScreen extends Screen implements ChangeableParentSc
     @Override
     public void onClose() {
         ClientDataHolderVR.getInstance().cachedScreen = null;
-        this.minecraft.gui.setScreen(this.lastScreen);
+        this.minecraft.setScreen(this.lastScreen);
     }
 }

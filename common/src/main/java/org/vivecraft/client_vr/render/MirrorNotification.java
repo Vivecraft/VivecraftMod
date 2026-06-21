@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.state.WindowRenderState;
 import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
-import org.vivecraft.common.utils.MathUtils;
 
 import java.util.ArrayList;
 
@@ -42,10 +41,10 @@ public class MirrorNotification {
      */
     public static void render() {
         if (System.currentTimeMillis() < MIRROR_NOTIFY_START + MIRROR_NOTIFY_LEN) {
-            int screenX = MC.gameRenderer.mainRenderTarget.width;
+            int screenX = MC.mainRenderTarget.width;
 
             // override the gui scale, to be in absolute size
-            WindowRenderState windowState = MC.gameRenderer.gameRenderState().windowRenderState;
+            WindowRenderState windowState = MC.gameRenderer.getGameRenderState().windowRenderState;
             int backupGuiScale = windowState.guiScale;
             windowState.guiScale = 1;
             int backupWidth = windowState.width;
@@ -58,7 +57,7 @@ public class MirrorNotification {
 
             if (MIRROR_NOTIFY_CLEAR) {
                 RenderSystem.getDevice().createCommandEncoder()
-                    .clearColorTexture(MC.gameRenderer.mainRenderTarget.getColorTexture(), MathUtils.BLACK_SOLID);
+                    .clearColorTexture(MC.mainRenderTarget.getColorTexture(), 0xFF000000);
             }
 
             final int TEXT_WORDWRAP_LEN = screenX / 22;

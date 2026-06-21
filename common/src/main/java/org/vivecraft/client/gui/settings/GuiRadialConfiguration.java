@@ -89,7 +89,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
 
             String label = keyMapping.map(mapping -> I18n.get(mapping.getName())).orElse("");
             this.addRenderableWidget(GuiRadial.createButton(label, (p) -> {
-                this.minecraft.gui.setScreen(new KeymappingSelectionScreen(
+                this.minecraft.setScreen(new KeymappingSelectionScreen(
                     Component.translatable(this.vrTitle), this,
                     key -> {
                         this.selectedIndex = index;

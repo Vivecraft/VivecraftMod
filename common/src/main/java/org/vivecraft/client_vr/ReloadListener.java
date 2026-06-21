@@ -3,7 +3,7 @@ package org.vivecraft.client_vr;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.TextureFilteringMethod;
-import net.minecraft.client.gui.Hud;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -36,7 +36,7 @@ public class ReloadListener implements ResourceManagerReloadListener {
             if (OptifineHelper.isOptifineLoaded()) {
                 // with optifine this texture somehow fails to load, so manually reload it
                 try {
-                    Minecraft.getInstance().getTextureManager().getTexture(Hud.CROSSHAIR_SPRITE);
+                    Minecraft.getInstance().getTextureManager().getTexture(Gui.CROSSHAIR_SPRITE);
                 } catch (ReportedException e) {
                     // if there was an error, just reload everything
                     Minecraft.getInstance().reloadResourcePacks();
