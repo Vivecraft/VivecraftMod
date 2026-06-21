@@ -347,7 +347,7 @@ public abstract class VRRenderer {
         RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES);
         GpuBuffer indexBuffer = autoIndices.getBuffer(count);
         GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-            .writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1F), new Vector3f(), new Matrix4f());
+            .writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1F), new Vector3f(), new Matrix4f(), 1.0F);
 
         RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 

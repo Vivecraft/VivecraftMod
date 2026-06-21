@@ -65,6 +65,10 @@ public abstract class VulkanHelper implements GraphicsHelper {
         this.endCommandBuffer(blitCommandBuffer);
     }
 
+    // not sure how to do this for vulkan, since it'S per sampler and not texture
+    @Override
+    public abstract void enableAnisotropicFiltering(GpuTexture texture);
+
     /**
      * blits the source image/mip rectangle to the target image/mip rectangle, with linear interpolation
      *

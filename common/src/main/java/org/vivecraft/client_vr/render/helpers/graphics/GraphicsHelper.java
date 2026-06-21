@@ -34,6 +34,13 @@ public interface GraphicsHelper {
      */
     void genMipmaps(GpuTexture texture);
 
+    /**
+     * enabled anisotropic filtering for the given GpuTexture
+     *
+     * @param texture GpuTexture to enabled anisotropic filtering for
+     */
+    void enableAnisotropicFiltering(GpuTexture texture);
+
     String checkError(String errorSection);
 
     boolean isStencil();

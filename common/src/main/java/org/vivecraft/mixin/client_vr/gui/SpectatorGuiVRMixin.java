@@ -2,6 +2,7 @@ package org.vivecraft.mixin.client_vr.gui;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
@@ -9,9 +10,7 @@ import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.gui.spectator.SpectatorMenuListener;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,6 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.SpectatorGuiExtension;
+
+import javax.annotation.Nullable;
 
 @Mixin(SpectatorGui.class)
 public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
@@ -34,7 +35,7 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
 
     @Shadow
     @Final
-    private static Identifier HOTBAR_SELECTION_SPRITE;
+    private static ResourceLocation HOTBAR_SELECTION_SPRITE;
 
     @Shadow
     @Final

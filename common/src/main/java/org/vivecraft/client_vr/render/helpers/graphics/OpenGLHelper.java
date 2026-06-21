@@ -1,19 +1,29 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
+import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.opengl.GlTextureView;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
+import org.lwjgl.opengl.GL46C;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class OpenGLHelper implements GraphicsHelper {
+
+    private boolean checkedAnisotropy = false;
+    private boolean anisotropySupported = false;
+    private int anisotropyLevel = -1;
+    private static final int ANISOTROPY_PARAMETER = GL46C.GL_TEXTURE_MAX_ANISOTROPY;
+    private static final int MAX_ANISOTROPY_PARAMETER = GL46C.GL_MAX_TEXTURE_MAX_ANISOTROPY;
 
     @Override
     public long getTextureHandle(GpuTexture texture) {
@@ -48,6 +58,46 @@ public class OpenGLHelper implements GraphicsHelper {
         } else {
             throw new IllegalStateException("Vivecraft: only opengl textures are supported");
         }
+    }
+
+    /**
+     * enabled anisotropic filtering for the given GpuTexture
+     *
+     * @param texture GpuTexture to enable anisotropic filtering for
+     */
+    @Override
+    public void enableAnisotropicFiltering(GpuTexture texture) {
+        if (supportsAnisotropicFiltering()) {
+            if (texture instanceof GlTexture glTexture) {
+                int textureUnit = GlStateManager._getInteger(GL30C.GL_ACTIVE_TEXTURE);
+                int boundTexture = GlStateManager._getInteger(GL30C.GL_TEXTURE_BINDING_2D);
+
+                GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
+                GlStateManager._bindTexture(glTexture.glId());
+
+                GlStateManager._texParameter(GL30C.GL_TEXTURE_2D, ANISOTROPY_PARAMETER, this.anisotropyLevel);
+
+                GlStateManager._activeTexture(textureUnit);
+                GlStateManager._bindTexture(boundTexture);
+            } else {
+                throw new IllegalStateException("Vivecraft: only opengl textures are supported");
+            }
+        }
+    }
+
+    private boolean supportsAnisotropicFiltering() {
+        if (!this.checkedAnisotropy) {
+            if (RenderSystem.getDevice() instanceof GlDevice &&
+                GLFW.glfwExtensionSupported("GL_ARB_texture_filter_anisotropic") ||
+                GLFW.glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
+            {
+                this.anisotropySupported = true;
+                // both the EXT and the ARB use the same parameters
+                this.anisotropyLevel = Math.min(16, GlStateManager._getInteger(MAX_ANISOTROPY_PARAMETER));
+            }
+            this.checkedAnisotropy = true;
+        }
+        return this.anisotropySupported;
     }
 
     private final Map<String, Pair<Integer, Integer>> glErrors = new HashMap<>();
