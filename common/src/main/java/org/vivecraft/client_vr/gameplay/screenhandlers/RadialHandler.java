@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
@@ -32,6 +33,9 @@ public class RadialHandler {
     private static boolean LAST_PRESSED_SHIFT_L;
     private static boolean LAST_PRESSED_SHIFT_R;
 
+    private static long LAST_SHOW_TIME;
+    private static Vector2i LAST_PRESS = null;
+
     public static boolean setOverlayShowing(boolean showingState, ControllerType controller) {
         if (DH.kiosk) {
             return false;
@@ -45,6 +49,7 @@ public class RadialHandler {
                 SHOWING = true;
                 ACTIVE_CONTROLLER = controller != null ? controller : ControllerType.RIGHT;
                 orientOverlay(ACTIVE_CONTROLLER);
+                LAST_SHOW_TIME = System.currentTimeMillis();
             } else {
                 SHOWING = false;
                 ACTIVE_CONTROLLER = null;
@@ -136,35 +141,50 @@ public class RadialHandler {
             }
 
             if (!VivecraftVRMod.INSTANCE.keyRadialMenu.isDown()) {
-                if (ACTIVE_CONTROLLER == ControllerType.LEFT) {
-                    UI.mouseClicked(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                int activeX = ACTIVE_CONTROLLER == ControllerType.LEFT ? x1 : x2;
+                int activeY = ACTIVE_CONTROLLER == ControllerType.LEFT ? y1 : y2;
+
+                // if the radial key was just pressed, and the cursor is not over a button, repeate the last action
+                if (DH.vrSettings.radialRepeat && UI.getChildAt(activeX, activeY).isEmpty() && LAST_PRESS != null &&
+                    System.currentTimeMillis() < LAST_SHOW_TIME + 500L)
+                {
+                    click(LAST_PRESS.x, LAST_PRESS.y);
                 } else {
-                    UI.mouseClicked(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                    click(activeX, activeY);
                 }
 
                 setOverlayShowing(false, null);
             }
         } else {
             if (POINTED_L && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.LEFT)) {
-                UI.mouseClicked(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                click(x1, y1);
                 LAST_PRESSED_CLICK_L = true;
             }
 
             if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.LEFT) && LAST_PRESSED_CLICK_L) {
-                UI.mouseReleased(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                release(x1, y1);
                 LAST_PRESSED_CLICK_L = false;
             }
 
             if (POINTED_R && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.RIGHT)) {
-                UI.mouseClicked(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                click(x2, y2);
                 LAST_PRESSED_CLICK_R = true;
             }
 
             if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.RIGHT) && LAST_PRESSED_CLICK_R) {
-                UI.mouseReleased(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+                release(x2, y2);
                 LAST_PRESSED_CLICK_R = false;
             }
         }
+    }
+
+    private static void click(int x, int y) {
+        LAST_PRESS = new Vector2i(x, y);
+        UI.mouseClicked(new MouseButtonEvent(x, y, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)), false);
+    }
+
+    private static void release(int x, int y) {
+        UI.mouseReleased(new MouseButtonEvent(x, y, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
     }
 
     public static boolean isShowing() {

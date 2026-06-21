@@ -997,11 +997,7 @@ public abstract class MCVR {
 
         if (MOD.keyMenuButton.consumeClick()) {
             // handle menu directly
-            if (!gui) {
-                if (!this.dh.kiosk) {
-                    this.mc.pauseGame(false);
-                }
-            } else {
+            if (gui || !this.dh.kiosk) {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_ESCAPE);
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
             }
@@ -1428,23 +1424,6 @@ public abstract class MCVR {
         }
 
         return poses;
-    }
-
-    /**
-     * @return the x/y angular velocity of the main controller
-     */
-    public Vector2d getControllerVelocity() {
-        int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
-        Vector3f up = this.controllerUpHistory[mainController].averagePosition(0.1).normalize();
-        Vector3f cur = this.controllerForwardHistory[mainController].averagePosition(0.1).normalize();
-        Vector3f prev = this.controllerForwardHistory[mainController].averagePosition(0.3).normalize();
-
-        return new Vector2d(
-            // yaw
-            (Math.atan2(-prev.x, prev.z) - Math.atan2(-cur.x, cur.z)) * Mth.RAD_TO_DEG,
-            // pitch
-            (Math.asin(prev.y) - Math.asin(cur.y)) * (up.y < 0 ? -1 : 1) * Mth.RAD_TO_DEG
-        );
     }
 
     /**

@@ -25,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -141,8 +140,7 @@ public abstract class ItemInHandRendererVRMixin {
             MapItemSavedData mapData = MapItem.getSavedData(mapId, this.minecraft.level);
             VertexConsumer consumer = buffer.getBuffer(
                 mapData == null ? VIVECRAFT$MAP_BACKGROUND_NO_CULL : VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL);
-            Matrix4f matrix = poseStack.last().pose();
-            Vector3f normal = matrix.transformDirection(0F, 0F, 1F, new Vector3f());
+            Vector3f normal = poseStack.last().pose().transformDirection(0F, 0F, 1F, new Vector3f());
             consumer.addVertex(matrix, -7.0F, 135.0F, 0.0F)
                 .setColor(255, 255, 255, 255)
                 .setUv(0.0F, 1.0F)
