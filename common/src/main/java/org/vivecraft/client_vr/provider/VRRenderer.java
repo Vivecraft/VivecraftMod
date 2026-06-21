@@ -1,8 +1,9 @@
 package org.vivecraft.client_vr.provider;
 
 import com.mojang.blaze3d.ProjectionType;
+import com.mojang.blaze3d.buffers.BufferType;
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -16,7 +17,9 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.util.Mth;
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -42,7 +45,6 @@ import oshi.SystemInfo;
 import oshi.hardware.GraphicsCard;
 
 import java.io.IOException;
-import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
@@ -199,23 +201,19 @@ public abstract class VRRenderer {
         for (int i = 0; i < this.hiddenMeshVertices.length; ++i) {
             float[] vertices = this.hiddenMeshVertices[i];
             if (vertices == null) continue;
-            try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-                vertices.length / 2 * DefaultVertexFormat.POSITION_COLOR.getVertexSize()))
-            {
-                BufferBuilder builder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES,
-                    DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder builder = Tesselator.getInstance()
+                .begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
 
-                for (int v = 0; v < vertices.length; v += 2) {
-                    builder.addVertex(vertices[v], vertices[v + 1], 0.0F)
-                        .setColor(0, 0, 0, 255);
-                }
+            for (int v = 0; v < vertices.length; v += 2) {
+                builder.addVertex(vertices[v], vertices[v + 1], 0.0F)
+                    .setColor(0, 0, 0, 255);
+            }
 
-                try (MeshData meshData = builder.buildOrThrow()) {
-                    String eye = i == 0 ? "Left" : "Right";
-                    this.bakedHiddenMesh[i] = RenderSystem.getDevice()
-                        .createBuffer(() -> eye + " Stencil", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_VERTEX,
-                            meshData.vertexBuffer());
-                }
+            try (MeshData meshData = builder.buildOrThrow()) {
+                String eye = i == 0 ? "Left" : "Right";
+                this.bakedHiddenMesh[i] = RenderSystem.getDevice()
+                    .createBuffer(() -> eye + " Stencil", BufferType.VERTICES,
+                        BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
             }
         }
     }
@@ -266,8 +264,7 @@ public abstract class VRRenderer {
         RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
 
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(this.stencilProjectionMatrix.getBuffer(
-                new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F)),
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F),
             ProjectionType.ORTHOGRAPHIC);
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().identity();
@@ -346,22 +343,17 @@ public abstract class VRRenderer {
 
         RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES);
         GpuBuffer indexBuffer = autoIndices.getBuffer(count);
-        GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-            .writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1F), new Vector3f(), new Matrix4f(), 1.0F);
 
         RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 
         try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-            .createRenderPass(() -> "Stencil " + ClientDataHolderVR.getInstance().currentPass,
-                target.getColorTextureView(), OptionalInt.empty(),
-                target.getDepthTextureView(), OptionalDouble.empty()))
+            .createRenderPass(target.getColorTexture(), OptionalInt.empty(),
+                target.getDepthTexture(), OptionalDouble.empty()))
         {
             renderPass.setPipeline(VRShaders.TRIANGLES_ALWAYS);
-            RenderSystem.bindDefaultUniforms(renderPass);
-            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
             renderPass.setVertexBuffer(0, buffer);
             renderPass.setIndexBuffer(indexBuffer, autoIndices.type());
-            renderPass.drawIndexed(0, 0, count, 1);
+            renderPass.drawIndexed(0, count);
         }
     }
 

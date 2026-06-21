@@ -49,6 +49,7 @@ public class VRShaders {
     public static final String MIXED_REALITY_KEY_COLOR_UNIFORM = "keyColor";
     public static final String MIXED_REALITY_ALPHA_MODE_UNIFORM = "alphaMode";
     public static final String MIXED_REALITY_GUI_MASK_UNIFORM = "guiMask";
+    public static final String MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM = "flipFirstPersonPass";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
@@ -69,6 +70,7 @@ public class VRShaders {
         .withUniform(MIXED_REALITY_KEY_COLOR_UNIFORM, UniformType.VEC3)
         .withUniform(MIXED_REALITY_ALPHA_MODE_UNIFORM, UniformType.INT)
         .withUniform(MIXED_REALITY_GUI_MASK_UNIFORM, UniformType.INT)
+        .withUniform(MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM, UniformType.INT)
         .withSampler(MIXED_REALITY_FIRST_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_COLOR_SAMPLER)
         .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)

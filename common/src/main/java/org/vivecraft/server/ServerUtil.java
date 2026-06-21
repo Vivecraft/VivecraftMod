@@ -79,7 +79,7 @@ public class ServerUtil {
                         }
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
-                            serverPlayer.getServer().getPlayerList().broadcastSystemMessage(
+                            serverPlayer.server.getPlayerList().broadcastSystemMessage(
                                 Component.literal(formatMessage(message, serverPlayer.getName().getString())), false);
                         }
                     }

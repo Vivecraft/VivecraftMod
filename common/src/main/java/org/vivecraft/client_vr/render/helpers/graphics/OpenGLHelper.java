@@ -3,10 +3,8 @@ package org.vivecraft.client_vr.render.helpers.graphics;
 import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
-import com.mojang.blaze3d.opengl.GlTextureView;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11C;
@@ -33,10 +31,10 @@ public class OpenGLHelper implements GraphicsHelper {
         throw new IllegalArgumentException("Vivecraft: not an opengl texture in opengl context");
     }
 
-    public static void bindTexture(int slot, GpuTextureView texture) {
-        if (texture instanceof GlTextureView glTextureView) {
+    public static void bindTexture(int slot, GpuTexture texture) {
+        if (texture instanceof GlTexture glTexture) {
             GlStateManager._activeTexture(GL30C.GL_TEXTURE0 + slot);
-            GlStateManager._bindTexture(glTextureView.texture().glId());
+            GlStateManager._bindTexture(glTexture.glId());
         } else {
             throw new IllegalStateException("Vivecraft: only opengl textures are supported");
         }

@@ -9,7 +9,7 @@ import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.gui.spectator.SpectatorMenuListener;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,13 +74,13 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = graphics.guiWidth() / 2;
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HOTBAR_SELECTION_SPRITE,
+            graphics.blitSprite(RenderType::guiTextured, HOTBAR_SELECTION_SPRITE,
                 middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
                 graphics.guiHeight() - 22 - 1, 24, 23, 0xFF00FF00);
         }
     }
 
-    @ModifyExpressionValue(method = "renderAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/spectator/SpectatorMenu;getSelectedItem()Lnet/minecraft/client/gui/spectator/SpectatorMenuItem;"))
+    @ModifyExpressionValue(method = "renderTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/spectator/SpectatorMenu;getSelectedItem()Lnet/minecraft/client/gui/spectator/SpectatorMenuItem;"))
     private SpectatorMenuItem vivecraft$hotbarContextText(SpectatorMenuItem original) {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&

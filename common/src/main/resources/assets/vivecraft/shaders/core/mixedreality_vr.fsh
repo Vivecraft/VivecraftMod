@@ -21,7 +21,7 @@ uniform vec3 keyColor;
 uniform int alphaMode;
 uniform int firstPersonPass;
 uniform int guiMask;
-    int flipFirstPersonPass;
+uniform int flipFirstPersonPass;
 
 in vec2 texCoordinates;
 

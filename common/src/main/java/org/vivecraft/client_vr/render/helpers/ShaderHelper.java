@@ -64,7 +64,7 @@ public class ShaderHelper {
         @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
         @Nullable GpuTexture target)
     {
-        renderFullscreenQuad(name, instance, uniformSetter, target, false);
+        renderFullscreenQuad(instance, uniformSetter, target, false);
     }
 
     /**
@@ -75,10 +75,9 @@ public class ShaderHelper {
      * @param target        texture to write to, if {@code null} will write to the main target
      */
     public static void renderFullscreenQuad(
-        @NotNull Supplier<String> name,
         @NotNull RenderPipeline instance,
         @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
-        @Nullable GpuTextureView target,
+        @Nullable GpuTexture target,
         boolean flipVertically)
     {
         GpuBuffer quad = getFullscreenQuad(instance.getVertexFormat(), flipVertically);
@@ -105,62 +104,50 @@ public class ShaderHelper {
         if (format == DefaultVertexFormat.POSITION_TEX) {
             if (!flipVertically) {
                 if (SCREEN_UV_VBO == null) {
-                    try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-                        4 * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
-                    {
-                        BufferBuilder builder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
-                            DefaultVertexFormat.POSITION_TEX);
-                        builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
-                        builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
-                        builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
-                        builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
+                    BufferBuilder builder = Tesselator.getInstance()
+                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
+                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
+                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
+                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
 
-                        try (MeshData meshData = builder.buildOrThrow()) {
-                            SCREEN_UV_VBO = RenderSystem.getDevice()
-                                .createBuffer(() -> "fullscreen uv vr vertex buffer", GpuBuffer.USAGE_VERTEX,
-                                    meshData.vertexBuffer());
-                        }
+                    try (MeshData meshData = builder.buildOrThrow()) {
+                        SCREEN_UV_VBO = RenderSystem.getDevice()
+                            .createBuffer(() -> "fullscreen uv vr vertex buffer", BufferType.VERTICES,
+                                BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
                     }
                 }
                 return SCREEN_UV_VBO;
             } else {
                 if (SCREEN_UV_VBO_FLIPPED == null) {
-                    try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-                        4 * DefaultVertexFormat.POSITION_TEX.getVertexSize()))
-                    {
-                        BufferBuilder builder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
-                            DefaultVertexFormat.POSITION_TEX);
-                        builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 1.0F);
-                        builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 1.0F);
-                        builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 0.0F);
-                        builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 0.0F);
+                    BufferBuilder builder = Tesselator.getInstance()
+                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 1.0F);
+                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 1.0F);
+                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 0.0F);
+                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 0.0F);
 
-                        try (MeshData meshData = builder.buildOrThrow()) {
-                            SCREEN_UV_VBO_FLIPPED = RenderSystem.getDevice()
-                                .createBuffer(() -> "fullscreen uv flipped vr vertex buffer", GpuBuffer.USAGE_VERTEX,
-                                    meshData.vertexBuffer());
-                        }
+                    try (MeshData meshData = builder.buildOrThrow()) {
+                        SCREEN_UV_VBO_FLIPPED = RenderSystem.getDevice()
+                            .createBuffer(() -> "fullscreen uv flipped vr vertex buffer", BufferType.VERTICES,
+                                BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
                     }
                 }
                 return SCREEN_UV_VBO_FLIPPED;
             }
         } else if (format == DefaultVertexFormat.POSITION) {
             if (SCREEN_VBO == null) {
-                try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(
-                    4 * DefaultVertexFormat.POSITION.getVertexSize()))
-                {
-                    BufferBuilder builder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
-                        DefaultVertexFormat.POSITION);
-                    builder.addVertex(-1.0F, -1.0F, 0.0F);
-                    builder.addVertex(1.0F, -1.0F, 0.0F);
-                    builder.addVertex(1.0F, 1.0F, 0.0F);
-                    builder.addVertex(-1.0F, 1.0F, 0.0F);
+                BufferBuilder builder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+                builder.addVertex(-1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, 1.0F, 0.0F);
+                builder.addVertex(-1.0F, 1.0F, 0.0F);
 
-                    try (MeshData meshData = builder.buildOrThrow()) {
-                        SCREEN_VBO = RenderSystem.getDevice()
-                            .createBuffer(() -> "fullscreen vr vertex buffer", GpuBuffer.USAGE_VERTEX,
-                                meshData.vertexBuffer());
-                    }
+                try (MeshData meshData = builder.buildOrThrow()) {
+                    SCREEN_VBO = RenderSystem.getDevice()
+                        .createBuffer(() -> "fullscreen vr vertex buffer", BufferType.VERTICES,
+                            BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
                 }
             }
             return SCREEN_VBO;
@@ -326,7 +313,7 @@ public class ShaderHelper {
             renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM, PUMPKIN_EFFECT);
             renderPass.setUniform(VRShaders.POST_PROCESSING_OVERLAY_EYE_UNIFORM, eye == RenderPass.LEFT ? 1 : -1);
             renderPass.bindSampler(VRShaders.POST_PROCESSING_COLOR_SAMPLER, source.getColorTexture());
-        }, target.getColorTexture());
+        }, target.getColorTexture(), GraphicsHelper.INSTANCE.flipEyeVertically());
     }
 
     /**
@@ -499,6 +486,11 @@ public class ShaderHelper {
                 DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
             renderPass.setUniform(VRShaders.MIXED_REALITY_GUI_MASK_UNIFORM, guiMask);
 
+            renderPass.setUniform(VRShaders.MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM,
+                (GraphicsHelper.INSTANCE.flipEyeVertically() &&
+                    !DATA_HOLDER.vrSettings.mixedRealityUndistorted &&
+                    !(DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible())
+                ) ? 1 : 0);
 
             // bind textures
             renderPass.bindSampler(VRShaders.MIXED_REALITY_THIRD_COLOR_SAMPLER,

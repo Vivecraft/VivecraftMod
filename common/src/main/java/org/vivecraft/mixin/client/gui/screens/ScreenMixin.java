@@ -20,7 +20,7 @@ public abstract class ScreenMixin {
         if (style.getClickEvent() instanceof VivecraftClickEvent viveEvent) {
             VivecraftClickEvent.VivecraftAction action = viveEvent.getVivecraftAction();
             if (action == VivecraftClickEvent.VivecraftAction.OPEN_SCREEN) {
-                minecraft.setScreen((Screen) viveEvent.getVivecraftValue().get());
+                Minecraft.getInstance().setScreen((Screen) viveEvent.getVivecraftValue().get());
             }
             cir.setReturnValue(true);
         }
