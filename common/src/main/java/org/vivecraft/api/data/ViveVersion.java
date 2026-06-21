@@ -3,7 +3,7 @@ package org.vivecraft.api.data;
 /**
  * Holds the Vivecraft version a player joined the server with.
  *
- * @since 1.3.14
+ * @since 1.3.13
  */
 public interface ViveVersion {
 

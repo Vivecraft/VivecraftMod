@@ -32,7 +32,7 @@ public interface VRServerAPI {
      *
      * @param player The player to check if they connected with Vivecraft.
      * @return true if the player connected with Vivecraft.
-     * @since 1.3.14
+     * @since 1.3.13
      */
     boolean hasVivecraft(ServerPlayer player);
 
@@ -45,7 +45,7 @@ public interface VRServerAPI {
      *
      * @param player The player to get the Vivecraft version of.
      * @return The version the player joined with.
-     * @since 1.3.14
+     * @since 1.3.13
      */
     @Nullable
     ViveVersion getVivecraftVersion(ServerPlayer player);
