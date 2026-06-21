@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class ServerUtil {
 
@@ -52,7 +53,7 @@ public class ServerUtil {
      */
     public static void scheduleWelcomeMessageOrKick(ServerPlayer serverPlayer) {
         if (ServerConfig.MESSAGES_ENABLED.get() ||
-            (ServerConfig.VIVE_ONLY.get() || ServerConfig.VR_ONLY.get()))
+            (ServerConfig.VIVE_ONLY.get() || ServerConfig.VR_ONLY.get() || ServerConfig.MIN_VIVE_VERSION.isValid()))
         {
             SCHEDULER.schedule(() -> {
                 // only do stuff, if the player is still on the server
@@ -79,14 +80,8 @@ public class ServerUtil {
                         }
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
-                            try {
-                                serverPlayer.level().getServer().getPlayerList().broadcastSystemMessage(
-                                    Component.literal(message.formatted(serverPlayer.getName().getString())), false);
-                            } catch (IllegalFormatException e) {
-                                // catch errors users might put into the messages, to not crash other stuff
-                                ServerNetworking.LOGGER.error("Vivecraft: Welcome message '{}' has errors: ", message,
-                                    e);
-                            }
+                            serverPlayer.level().getServer().getPlayerList().broadcastSystemMessage(
+                                Component.literal(formatMessage(message, serverPlayer.getName().getString())), false);
                         }
                     }
                 }
@@ -98,7 +93,7 @@ public class ServerUtil {
      * kicks the given player if the server settings don't allow them
      *
      * @param player player to maybe kick
-     * @return if the player got kicked tou
+     * @return if the player got kicked
      */
     public static boolean kickIfNotAllowed(ServerPlayer player) {
         if (!player.hasDisconnected()) {
@@ -109,33 +104,72 @@ public class ServerUtil {
 
             // kick non VR players
             if (!isOpAndAllowed && ServerConfig.VR_ONLY.get() && (vivePlayer == null || !vivePlayer.isVR())) {
-                String kickMessage = ServerConfig.MESSAGES_KICK_VR_ONLY.get();
-                try {
-                    kickMessage = kickMessage.formatted(player.getName().getString());
-                } catch (IllegalFormatException e) {
-                    // catch errors users might put into the messages, to not crash other stuff
-                    ServerNetworking.LOGGER.error("Vivecraft: KickVROnly message '{}' has errors: ",
-                        kickMessage, e);
+                if (ServerConfig.DEBUG.get()) {
+                    ServerNetworking.LOGGER.info("{} got kicked for not using VR", player.getName());
                 }
-                player.connection.disconnect(Component.literal(kickMessage));
+                player.connection.disconnect(Component.literal(
+                    formatMessage(ServerConfig.MESSAGES_KICK_VR_ONLY.get(), player.getName().getString())));
                 return true;
             }
 
             // kick non vivecraft players
             if (!isOpAndAllowed && ServerConfig.VIVE_ONLY.get() && vivePlayer == null) {
-                String kickMessage = ServerConfig.MESSAGES_KICK_VIVE_ONLY.get();
-                try {
-                    kickMessage = kickMessage.formatted(player.getName().getString());
-                } catch (IllegalFormatException e) {
-                    // catch errors users might put into the messages, to not crash other stuff
-                    ServerNetworking.LOGGER.error("Vivecraft: KickViveOnly message '{}' has errors: ",
-                        kickMessage, e);
+                if (ServerConfig.DEBUG.get()) {
+                    ServerNetworking.LOGGER.info("{} got kicked for not using Vivecraft", player.getName().getString());
                 }
-                player.connection.disconnect(Component.literal(kickMessage));
+                player.connection.disconnect(Component.literal(
+                    formatMessage(ServerConfig.MESSAGES_KICK_VIVE_ONLY.get(), player.getName().getString())));
+                return true;
+            }
+
+            // kick vivecraft players with outdated vivecraft
+            if (!isOpAndAllowed && ServerConfig.MIN_VIVE_VERSION != null && vivePlayer != null &&
+                vivePlayer.version.compareTo(ServerConfig.MIN_VIVE_VERSION) > 0)
+            {
+                player.connection.disconnect(Component.literal(
+                    formatMessage(ServerConfig.MESSAGES_KICK_OUTDATED_VIVE_VERSION.get(),
+                        player.getName().getString(),
+                        "&minVersion", ServerConfig.MIN_VIVE_VERSION.versionString(),
+                        "&userVersion", vivePlayer.version.versionString())));
+                if (ServerConfig.DEBUG.get()) {
+                    ServerNetworking.LOGGER.info("{} got kicked for outdated Vivecraft. has: {}, needs: {}",
+                        player.getName(), vivePlayer.version, ServerConfig.MIN_VIVE_VERSION.versionString());
+                }
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * replaces the patterns in the original string and returns it
+     *
+     * @param message    original message to replace things in
+     * @param playerName name of the player that the message is sent to
+     * @param other      pair of other replacements, in the order of (placeholder, replacement)
+     * @return formatted String
+     */
+    public static String formatMessage(String message, String playerName, String... other) {
+        // old formatting with %s placeholders
+        try {
+            if (other != null && other.length == 2 && other[0].equals("&cause")) {
+                message = message.formatted(playerName, other[1]);
+            } else {
+                message = message.formatted(playerName);
+            }
+        } catch (IllegalFormatException e) {
+            // catch errors users might put into the messages, to not crash other stuff
+            ServerNetworking.LOGGER.error("Vivecraft: message '{}' has errors: ", message, e);
+        }
+
+        // new formatting with &name placeholders
+        message = message.replace("&player", playerName);
+        if (other != null && other.length > 0) {
+            for (int i = 0; i < other.length - 1; i += 2) {
+                message = message.replace(other[i], other[i + 1]);
+            }
+        }
+        return message;
     }
 
     /**
@@ -181,8 +215,10 @@ public class ServerUtil {
                         String pathString = String.join(".", path);
                         ServerConfig.getConfigValues().stream().filter(c -> c.getPath().equals(pathString)).findFirst()
                             .ifPresent(setting -> {
-                                setting.onUpdate(context.getSource().getServer());
-                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                setting.onUpdate(context.getSource().getServer(), notifier);
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
+                                    notifier);
                             });
                     });
                     return 1;
@@ -230,8 +266,10 @@ public class ServerUtil {
                                 context.getSource().sendSystemMessage(
                                     Component.literal(
                                         "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
-                                setting.onUpdate(context.getSource().getServer());
-                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                setting.onUpdate(context.getSource().getServer(), notifier);
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
+                                    notifier);
                                 return 1;
                             } else {
                                 throw new CommandSyntaxException(
@@ -260,8 +298,10 @@ public class ServerUtil {
                                 context.getSource().sendSystemMessage(
                                     Component.literal(
                                         "set §a[%s]§r to '%s'".formatted(setting.getPath(), newEnumValue)));
-                                setting.onUpdate(context.getSource().getServer());
-                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                setting.onUpdate(context.getSource().getServer(), notifier);
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
+                                    notifier);
                                 return 1;
                             } else {
                                 throw new CommandSyntaxException(
@@ -280,8 +320,9 @@ public class ServerUtil {
                             context.getSource().sendSystemMessage(
                                 Component.literal(
                                     "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
-                            setting.onUpdate(context.getSource().getServer());
-                            ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                            Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                            setting.onUpdate(context.getSource().getServer(), notifier);
+                            ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting, notifier);
                             return 1;
                         })
                     )
@@ -302,8 +343,10 @@ public class ServerUtil {
                                         "added '%s' to §a[%s]§r".formatted(newValue, setting.getPath())));
                                 context.getSource().sendSystemMessage(
                                     Component.literal("is now '%s'".formatted(setting.get())));
-                                setting.onUpdate(context.getSource().getServer());
-                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                setting.onUpdate(context.getSource().getServer(), notifier);
+                                ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
+                                    notifier);
                                 return 1;
                             } catch (Exception e) {
                                 ServerNetworking.LOGGER.error("Vivecraft: error adding block to list:", e);
@@ -332,8 +375,9 @@ public class ServerUtil {
                                     newValue, setting.getPath())));
                             context.getSource().sendSystemMessage(
                                 Component.literal("is now '%s'".formatted(setting.get())));
-                            setting.onUpdate(context.getSource().getServer());
-                            ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                            Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                            setting.onUpdate(context.getSource().getServer(), notifier);
+                            ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting, notifier);
                             return 1;
                         })
                     )
@@ -346,8 +390,9 @@ public class ServerUtil {
                     Object newValue = setting.reset();
                     context.getSource().sendSystemMessage(
                         Component.literal("reset §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
-                    setting.onUpdate(context.getSource().getServer());
-                    ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting);
+                    Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                    setting.onUpdate(context.getSource().getServer(), notifier);
+                    ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting, notifier);
                     return 1;
                 })
             );

@@ -5,10 +5,11 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 public interface RenderSetupExtension {
 
     RenderSetup vivecraft$setGpuTextures(Map<String, GpuTextureBinding> gpuTextures);
 
-    record GpuTextureBinding(GpuTextureView texture, GpuSampler sampler) {}
+    record GpuTextureBinding(GpuTextureView texture, Supplier<GpuSampler> sampler) {}
 }

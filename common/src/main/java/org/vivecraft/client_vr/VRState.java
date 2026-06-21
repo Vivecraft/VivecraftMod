@@ -76,6 +76,8 @@ public class VRState {
 
             dh.vrRenderer = dh.vr.createVRRenderer();
 
+            dh.vrRenderer.checkCapabilities();
+
             // everything related to VR is created now
             VR_INITIALIZED = true;
 

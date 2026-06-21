@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -21,27 +20,21 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11C;
-import org.lwjgl.opengl.GL30C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.VRShaders;
-import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
-import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class RenderHelper {
 
@@ -207,7 +200,7 @@ public class RenderHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps for Gui layer
-            OpenGLHelper.genMipmaps(MC.mainRenderTarget.getColorTexture());
+            GraphicsHelper.INSTANCE.genMipmaps(MC.mainRenderTarget.getColorTexture());
         }
     }
 
@@ -526,40 +519,19 @@ public class RenderHelper {
             .setColor(color.getX(), color.getY(), color.getZ(), alpha);
     }
 
-    private static final Map<String, Pair<Integer, Integer>> GL_ERRORS = new HashMap<>();
-
     /**
-     * checks if there were any opengl errors since this was last called
+     * adds the given CustomGeometryRenderer to render after Translucnets
      *
-     * @param errorSection name of the section that is checked, this gets logged if there are any errors
-     * @return error string if there was one
+     * @param output                 order to render at
+     * @param poseStack              PoseStack to use for the submit
+     * @param renderType             rendertype to submit as
+     * @param customGeometryRenderer renderer to add
      */
-    public static String checkGLError(String errorSection) {
-        int error = GlStateManager._getError();
-        int count = 0;
-        Pair<Integer, Integer> oldError = GL_ERRORS.get(errorSection);
-        if (error != 0 && oldError != null && oldError.getLeft() == error) {
-            count = oldError.getRight() + 1;
-        }
-        GL_ERRORS.put(errorSection, Pair.of(error, count));
-        if (error != 0 && count < 5) {
-            String errorString = switch (error) {
-                case GL11C.GL_INVALID_ENUM -> "invalid enum";
-                case GL11C.GL_INVALID_VALUE -> "invalid value";
-                case GL11C.GL_INVALID_OPERATION -> "invalid operation";
-                case GL11C.GL_STACK_OVERFLOW -> "stack overflow";
-                case GL11C.GL_STACK_UNDERFLOW -> "stack underflow";
-                case GL11C.GL_OUT_OF_MEMORY -> "out of memory";
-                case GL30C.GL_INVALID_FRAMEBUFFER_OPERATION -> "framebuffer is not complete";
-                default -> "unknown error";
-            };
-            VRSettings.LOGGER.error("Vivecraft: ########## GL ERROR ##########");
-            VRSettings.LOGGER.error("Vivecraft: @ {}", errorSection);
-            VRSettings.LOGGER.error("Vivecraft: {}: {}", error, errorString);
-            return errorString;
-        } else if (count == 5) {
-            VRSettings.LOGGER.error("Vivecraft: repeated gl errors for {}, not logging anymore", errorSection);
-        }
-        return "";
+    public static void submitLateCustomGeometry(
+        OrderedSubmitNodeCollector output, PoseStack poseStack, RenderType renderType,
+        SubmitNodeCollector.CustomGeometryRenderer customGeometryRenderer)
+    {
+        ((SubmitNodeCollectionExtension) output).vivecraft$submitLateCustomGeometry(poseStack, renderType,
+            customGeometryRenderer);
     }
 }

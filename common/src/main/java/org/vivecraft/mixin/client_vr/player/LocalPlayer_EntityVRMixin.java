@@ -36,9 +36,6 @@ public abstract class LocalPlayer_EntityVRMixin {
     public abstract @Nullable Entity getVehicle();
 
     @Shadow
-    public abstract void setOnGround(boolean onGround);
-
-    @Shadow
     protected abstract float getBlockJumpFactor();
 
     @Shadow

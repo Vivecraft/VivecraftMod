@@ -33,9 +33,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.*;
-import org.lwjgl.opengl.GL11C;
 import org.vivecraft.Xevents;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
@@ -58,6 +57,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -98,10 +98,10 @@ public class VREffectsHelper {
      *
      * @param pos  position to check
      * @param dist distance where it should still count as inside the block
-     * @return null if there is no block, else a triple containing 1.0F,
+     * @return null if there is no block, else a tuple containing
      * BlockState and BlockPos of the blocking block
      */
-    public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 pos, double dist) {
+    public static Pair<BlockState, BlockPos> getNearOpaqueBlock(Vec3 pos, double dist) {
         if (MC.level == null) {
             return null;
         } else {
@@ -109,7 +109,7 @@ public class VREffectsHelper {
             Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) ->
                 MC.level.getBlockState(bp).isSolidRender());
             Optional<BlockPos> optional = stream.findFirst();
-            return optional.map(blockPos -> Triple.of(1.0F, MC.level.getBlockState(blockPos), blockPos)).orElse(null);
+            return optional.map(blockPos -> Pair.of(MC.level.getBlockState(blockPos), blockPos)).orElse(null);
         }
     }
 
@@ -199,7 +199,7 @@ public class VREffectsHelper {
     public static void drawEyeStencil() {
         if (DATA_HOLDER.vrSettings.vrUseStencil) {
             if (StencilHelper.stencilBufferSupported()) {
-                WAS_STENCIL_ON = GL11C.glIsEnabled(GL11C.GL_STENCIL_TEST);
+                WAS_STENCIL_ON = GraphicsHelper.INSTANCE.isStencil();
                 if (WAS_STENCIL_ON && !DATA_HOLDER.showedStencilMessage &&
                     DATA_HOLDER.vrSettings.showChatMessageStencil)
                 {
@@ -211,7 +211,7 @@ public class VREffectsHelper {
                                 Component.translatable("vivecraft.options.screen.stereorendering"))
                             .withStyle(style -> style.withClickEvent(
                                     new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                        new GuiRenderOpticsSettings(null)))
+                                        () -> new GuiRenderOpticsSettings(null)))
                                 .withHoverEvent(new HoverEvent.ShowText(
                                     Component.translatable("vivecraft.messages.openSettings")))
                                 .withColor(ChatFormatting.GREEN)
@@ -222,7 +222,7 @@ public class VREffectsHelper {
                                 Component.translatable("vivecraft.options.screen.guiother"))
                             .withStyle(style -> style.withClickEvent(
                                     new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                        new GuiOtherHUDSettings(null)))
+                                        () -> new GuiOtherHUDSettings(null)))
                                 .withHoverEvent(new HoverEvent.ShowText(
                                     Component.translatable("vivecraft.messages.openSettings")))
                                 .withColor(ChatFormatting.GREEN)
@@ -247,7 +247,7 @@ public class VREffectsHelper {
     public static void disableStencilTest() {
         // if we did enable the stencil test, disable it
         if (StencilHelper.stencilBufferSupported() && !WAS_STENCIL_ON) {
-            GL11C.glDisable(GL11C.GL_STENCIL_TEST);
+            GraphicsHelper.INSTANCE.setStencil(false);
         }
     }
 

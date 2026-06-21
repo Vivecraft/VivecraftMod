@@ -31,7 +31,7 @@ public class VRRenderTypes {
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    VRShaders.getGuiSampler())))));
+                        VRShaders::getGuiSampler))))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_SOLID_NO_CARDINAL_LIGHT = Util.memoize(
         (gpuTexture, linear) -> RenderType.create("entity_solid_vr",
@@ -42,7 +42,8 @@ public class VRRenderTypes {
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    RenderSystem.getSamplerCache().getClampToEdge(linear ? FilterMode.LINEAR : FilterMode.NEAREST))))));
+                    () -> RenderSystem.getSamplerCache()
+                        .getClampToEdge(linear ? FilterMode.LINEAR : FilterMode.NEAREST))))));
 
     private static final BiFunction<GpuTextureView, Boolean, RenderType> ENTITY_CUTOUT_NO_CARDINAL_LIGHT_LINEAR = Util.memoize(
         (gpuTexture, depthAlways) -> RenderType.create("entity_cutout_vr",
@@ -55,7 +56,7 @@ public class VRRenderTypes {
                 .createRenderSetup()
             ).vivecraft$setGpuTextures(
                 Map.of(VRShaders.CORE_TEXTURE_SAMPLER, new RenderSetupExtension.GpuTextureBinding(gpuTexture,
-                    VRShaders.getGuiSampler())))));
+                    VRShaders::getGuiSampler)))));
 
     private static final Function<GpuTextureView, RenderType> GUI_TEXTURED_ALWAYS = Util.memoize(
         gpuTexture -> RenderType.create("gui_textured_always_vr",
@@ -121,7 +122,7 @@ public class VRRenderTypes {
             ).vivecraft$setGpuTextures(
                 Map.of(VRShaders.CORE_LIGHTMAP_SAMPLER, new RenderSetupExtension.GpuTextureBinding(
                     ClientDataHolderVR.getInstance().menuWorldRenderer.lightMapView,
-                    RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
+                    () -> RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))))));
 
     public static RenderType crosshairWorld(Identifier identifier, boolean depthAlways) {
         return CROSSHAIR_WORLD.apply(identifier, depthAlways);
@@ -161,6 +162,10 @@ public class VRRenderTypes {
 
     public static RenderType entityTranslucentNoCardinalLightLinear(GpuTextureView texture, boolean depthAlways) {
         return ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT_LINEAR.apply(texture, depthAlways);
+    }
+
+    public static RenderType entityTranslucentHand(Identifier texture) {
+        return ENTITY_TRANSLUCENT_HAND.apply(texture);
     }
 
     public static RenderType guiTextured(Identifier identifier) {

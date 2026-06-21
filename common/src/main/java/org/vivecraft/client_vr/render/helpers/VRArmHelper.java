@@ -21,7 +21,6 @@ import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.data.ViveItems;
-import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 public class VRArmHelper {
@@ -184,10 +183,6 @@ public class VRArmHelper {
             LevelRenderer.getLightColor(MC.player.level(),
                 BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
 
-        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-            // undo the thing we did before
-            OptifineHelper.endEntities();
-        }
     }
 
     /**
@@ -230,11 +225,6 @@ public class VRArmHelper {
                 poseStack, MC.gameRenderer.getSubmitNodeStorage(),
                 LevelRenderer.getLightColor(MC.player.level(),
                     BlockPos.containing(DATA_HOLDER.vrPlayer.getVRDataWorld().hmd.getPosition())));
-
-            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-                // undo the thing we did before
-                OptifineHelper.endEntities();
-            }
 
             // back to hmd rendering
             poseStack.popPose();

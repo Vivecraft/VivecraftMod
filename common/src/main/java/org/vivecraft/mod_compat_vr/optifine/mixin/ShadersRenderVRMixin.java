@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +21,7 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 public class ShadersRenderVRMixin {
 
     @Shadow(remap = false)
-    public static void updateActiveRenderInfo(Camera activeRenderInfo, Minecraft mc, float partialTick) {}
+    public static void updateActiveRenderInfo(Camera activeRenderInfo, DeltaTracker deltaTracker) {}
 
     @Inject(method = {"renderHandTranslucent", "renderHand0"}, at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$noTranslucentHandsInVR(CallbackInfo ci) {
@@ -39,13 +39,14 @@ public class ShadersRenderVRMixin {
 
     @Inject(method = "renderShadowMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;", remap = true), remap = false, cancellable = true)
     private static void vivecraft$shadowsOnlyOnce(
-        CallbackInfo ci, @Local(argsOnly = true) Camera activeRenderInfo, @Local(argsOnly = true) float partialTick)
+        CallbackInfo ci, @Local(argsOnly = true) Camera activeRenderInfo,
+        @Local(argsOnly = true) DeltaTracker deltaTracker, @Local(argsOnly = true) float partialTick)
     {
         if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().isFirstPass &&
             !ShadersHelper.isSlowMode())
         {
             RenderSystem.backupProjectionMatrix();
-            updateActiveRenderInfo(activeRenderInfo, Minecraft.getInstance(), partialTick);
+            updateActiveRenderInfo(activeRenderInfo, deltaTracker);
             OptifineHelper.setCameraShadow(new PoseStack(), activeRenderInfo, partialTick);
             RenderSystem.restoreProjectionMatrix();
             ci.cancel();

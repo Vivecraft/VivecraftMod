@@ -1753,6 +1753,7 @@ public class MenuWorldRenderer {
             float f = 0.25F + 0.75F * (float) this.menuWorldRenderer.renderDistanceChunks / 32.0F;
             f = 1.0F - (float) Math.pow(f, 0.25);
             int skyColor = this.menuWorldRenderer.getSkyColor();
+
             if (OptifineHelper.isOptifineLoaded()) {
                 if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.OVERWORLD) {
                     Vec3 eyePos = this.menuWorldRenderer.getEyePos();
@@ -1763,10 +1764,12 @@ public class MenuWorldRenderer {
                         OptifineHelper.getCustomSkyColorEnd(new Vec3(ARGB.vector3fFromRGB24(skyColor))));
                 }
             }
+
             float skyRed = ARGB.redFloat(skyColor);
             float skyGreen = ARGB.greenFloat(skyColor);
             float skyBlue = ARGB.blueFloat(skyColor);
             int fogColor = this.menuWorldRenderer.getFogColor();
+
             if (OptifineHelper.isOptifineLoaded()) {
                 Vec3 color = new Vec3(ARGB.vector3fFromRGB24(skyColor));
                 if (this.menuWorldRenderer.blockAccess.dimensionType().skybox() == DimensionType.Skybox.OVERWORLD) {
@@ -1780,6 +1783,7 @@ public class MenuWorldRenderer {
                     fogColor = ARGB.color(OptifineHelper.getCustomFogColorNether(color));
                 }
             }
+
             this.fogColor.x = ARGB.redFloat(fogColor);
             this.fogColor.y = ARGB.greenFloat(fogColor);
             this.fogColor.z = ARGB.blueFloat(fogColor);
