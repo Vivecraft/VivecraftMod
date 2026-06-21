@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.vivecraft.Xloader;
+import org.vivecraft.api.data.ViveVersion;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.server.ServerNetworking;
@@ -114,7 +115,7 @@ public class UpdateChecker {
             .lines().collect(Collectors.joining("\n"));
     }
 
-    public static class Version implements Comparable<Version> {
+    public static class Version implements Comparable<Version>, ViveVersion {
 
         public final static Version UNKNOWN = new Version();
 
@@ -167,6 +168,12 @@ public class UpdateChecker {
                 // couldn't parse the version, mark as unknown
                 ServerNetworking.LOGGER.warn("Vivecraft: coudln't parse version: {}, Error: ", version, e);
                 this.unknown = true;
+                this.major = 0;
+                this.minor = 0;
+                this.patch = 0;
+                this.alpha = 0;
+                this.beta = 0;
+                this.featureTest = false;
             }
         }
 
@@ -197,16 +204,30 @@ public class UpdateChecker {
             return !this.unknown;
         }
 
+        @Override
         public int getMajor() {
             return this.major;
         }
 
+        @Override
         public int getMinor() {
             return this.minor;
         }
 
+        @Override
         public int getPatch() {
             return this.patch;
+        }
+
+        @Override
+        public ReleaseType getReleaseType() {
+            if (this.alpha > 0) {
+                return ReleaseType.ALPHA;
+            } else if (this.beta > 0) {
+                return ReleaseType.BETA;
+            } else {
+                return ReleaseType.RELEASE;
+            }
         }
 
         /**
