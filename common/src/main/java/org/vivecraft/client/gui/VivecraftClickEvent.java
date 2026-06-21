@@ -2,15 +2,17 @@ package org.vivecraft.client.gui;
 
 import net.minecraft.network.chat.ClickEvent;
 
+import java.util.function.Supplier;
+
 /**
  * Custom ClickEvent to do stuff that vanilla doesn't have an option for
  */
 public class VivecraftClickEvent implements ClickEvent {
 
     private final VivecraftAction vivecraftAction;
-    private final Object value;
+    private final Supplier<?> value;
 
-    public VivecraftClickEvent(VivecraftAction action, Object value) {
+    public VivecraftClickEvent(VivecraftAction action, Supplier<?> value) {
         // dummy action, in case our check fails
         this.vivecraftAction = action;
         this.value = value;
@@ -20,7 +22,7 @@ public class VivecraftClickEvent implements ClickEvent {
         return this.vivecraftAction;
     }
 
-    public Object getVivecraftValue() {
+    public Supplier<?> getVivecraftValue() {
         return this.value;
     }
 

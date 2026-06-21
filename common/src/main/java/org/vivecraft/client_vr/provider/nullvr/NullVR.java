@@ -349,55 +349,57 @@ public class NullVR extends MCVR {
 
             if (action != GLFW.GLFW_RELEASE) {
                 if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT)) {
+                    float angle = Mth.PI / 18.0F;
                     // rotate current bodypart
                     if (key == GLFW.GLFW_KEY_KP_8) {
-                        rotateBody(-Mth.PI / 18.0F, MathUtils.RIGHT);
+                        rotateBody(-angle, MathUtils.RIGHT);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_2) {
-                        rotateBody(Mth.PI / 18.0F, MathUtils.RIGHT);
+                        rotateBody(angle, MathUtils.RIGHT);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_4) {
-                        rotateBody(Mth.PI / 18.0F, MathUtils.UP);
+                        rotateBody(angle, MathUtils.UP);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_6) {
-                        rotateBody(-Mth.PI / 18.0F, MathUtils.UP);
+                        rotateBody(-angle, MathUtils.UP);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_9) {
-                        rotateBody(Mth.PI / 18.0F, MathUtils.BACK);
+                        rotateBody(angle, MathUtils.BACK);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_7) {
-                        rotateBody(-Mth.PI / 18.0F, MathUtils.BACK);
+                        rotateBody(-angle, MathUtils.BACK);
                         triggered = true;
                     }
                 } else {
+                    float offset = 0.01F;
                     // move current bodypart
                     if (key == GLFW.GLFW_KEY_KP_8) {
-                        translateBody(0F, 0F, -0.01F);
+                        translateBody(0F, 0F, -offset);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_2) {
-                        translateBody(0F, 0F, 0.01F);
+                        translateBody(0F, 0F, offset);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_4) {
-                        translateBody(-0.01F, 0F, 0F);
+                        translateBody(-offset, 0F, 0F);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_6) {
-                        translateBody(0.01F, 0F, 0F);
+                        translateBody(offset, 0F, 0F);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_9) {
-                        translateBody(0F, 0.01F, 0F);
+                        translateBody(0F, offset, 0F);
                         triggered = true;
                     }
                     if (key == GLFW.GLFW_KEY_KP_3) {
-                        translateBody(0F, -0.01F, 0F);
+                        translateBody(0F, -offset, 0F);
                         triggered = true;
                     }
                 }

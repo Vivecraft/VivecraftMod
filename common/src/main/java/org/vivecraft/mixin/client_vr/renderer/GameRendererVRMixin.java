@@ -34,11 +34,10 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
-import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -60,6 +59,7 @@ import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
@@ -83,7 +83,7 @@ public abstract class GameRendererVRMixin
     @Unique
     private boolean vivecraft$inwater;
     @Unique
-    private float vivecraft$inBlock = 0.0F;
+    private boolean vivecraft$inBlock = false;
     @Unique
     private double vivecraft$rveX;
     @Unique
@@ -351,7 +351,7 @@ public abstract class GameRendererVRMixin
         }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
             Profiler.get().push("MainMenu");
-            GL11.glDisable(GL11.GL_STENCIL_TEST);
+            GraphicsHelper.INSTANCE.setStencil(false);
 
             VREffectsHelper.renderMenuRoom(deltaTracker.getGameTimeDeltaPartialTick(false));
             Profiler.get().pop();
@@ -631,23 +631,17 @@ public abstract class GameRendererVRMixin
 
     @Unique
     private void vivecraft$setupOverlayStatus() {
-        this.vivecraft$inBlock = 0.0F;
+        this.vivecraft$inBlock = false;
         this.vivecraft$inwater = false;
 
         if (!this.minecraft.player.isSpectator() && !MethodHolder.isInMenuRoom() && this.minecraft.player.isAlive()) {
             Vec3 cameraPos = vivecraft$DATA_HOLDER.vrPlayer.getVRDataWorld().getEye(vivecraft$DATA_HOLDER.currentPass)
                 .getPosition();
-            Triple<Float, BlockState, BlockPos> triple = VREffectsHelper.getNearOpaqueBlock(cameraPos,
+            Pair<BlockState, BlockPos> pair = VREffectsHelper.getNearOpaqueBlock(cameraPos,
                 vivecraft$MIN_CLIP_DISTANCE);
 
-            if (triple != null &&
-                !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(),
-                    triple.getRight()))
-            {
-                this.vivecraft$inBlock = triple.getLeft();
-            } else {
-                this.vivecraft$inBlock = 0.0F;
-            }
+            this.vivecraft$inBlock = pair != null &&
+                !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), pair.getLeft(), pair.getRight());
 
             this.vivecraft$inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER) &&
                 !Xevents.renderWaterOverlay(this.minecraft.player, new PoseStack());
@@ -662,7 +656,7 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public float vivecraft$isInBlock() {
+    public boolean vivecraft$isInBlock() {
         return this.vivecraft$inBlock;
     }
 

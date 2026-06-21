@@ -118,3 +118,8 @@ accessible field net/minecraft/client/renderer/RenderPipelines FOG_SNIPPET Lcom/
 accessible field net/minecraft/client/renderer/RenderPipelines GUI_TEXTURED_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
 accessible field net/minecraft/client/renderer/RenderPipelines MATRICES_PROJECTION_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
 accessible field net/minecraft/client/renderer/RenderPipelines TEXT_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
+
+# for optifine compatibility
+accessible class com/mojang/blaze3d/opengl/GlRenderPass
+accessible field com/mojang/blaze3d/opengl/GlRenderPass samplers Ljava/util/HashMap;
+accessible field com/mojang/blaze3d/opengl/GlRenderPass pipeline Lcom/mojang/blaze3d/opengl/GlRenderPipeline;

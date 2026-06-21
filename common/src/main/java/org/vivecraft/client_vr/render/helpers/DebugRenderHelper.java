@@ -30,7 +30,6 @@ import org.vivecraft.client_vr.provider.DeviceSource;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.common.utils.MathUtils;
-import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.lang.Math;
 import java.util.ArrayList;
@@ -479,8 +478,6 @@ public class DebugRenderHelper {
      * @param color    cube color
      */
     public static void renderCube(Vector3fc position, float size, Vector3fc color) {
-        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
-
         RenderType renderType = VRRenderTypes.quads(false);
         VertexConsumer consumer = MC.renderBuffers().bufferSource().getBuffer(renderType);
 

@@ -12,6 +12,13 @@ import org.vivecraft.common.utils.MathUtils;
 
 @Mixin(SoundEngine.class)
 public class SoundEngineVRMixin {
+
+    @ModifyExpressionValue(method = "updateSource", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;forwardVector()Lorg/joml/Vector3fc;"))
+    private Vector3fc vivecraft$useHeadForward(Vector3fc original) {
+        return VRState.VR_RUNNING ?
+            ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getDirection() :
+            original;
+    }
     @ModifyExpressionValue(method = "updateSource", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getUpVector()Lorg/joml/Vector3f;"))
     private Vector3f vivecraft$useHeadUp(Vector3f original) {
         return VRState.VR_RUNNING ? ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER)

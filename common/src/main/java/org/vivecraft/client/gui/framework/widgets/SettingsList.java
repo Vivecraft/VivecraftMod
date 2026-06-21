@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.apache.commons.lang3.tuple.Pair;
 import org.vivecraft.client.gui.framework.screens.KeymappingSelectionScreen;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.StringSimilarity;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -379,9 +380,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 () -> {
                     configValue.reset();
                     if (Minecraft.getInstance().hasSingleplayerServer()) {
-                        configValue.onUpdate(Minecraft.getInstance().getSingleplayerServer());
+                        configValue.onUpdate(Minecraft.getInstance().getSingleplayerServer(),
+                            ClientUtils::addChatMessage);
                         ServerNetworking.sendUpdatePacketToAll(Minecraft.getInstance().getSingleplayerServer(),
-                            configValue);
+                            configValue, ClientUtils::addChatMessage);
                     }
                     return configValue.getWidget(VALUE_BUTTON_WIDTH, 20).get();
                 });
