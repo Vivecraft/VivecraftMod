@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
+import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class VRShaders {
     public static final String LANCZOS_DEPTH_SAMPLER = "Sampler1";
 
     public static final RenderPipeline LANCZOS_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_lanczos")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_lanczos"))
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/lanczos_vr"))
         .withUniform(LANCZOS_TEXEL_WIDTH_OFFSET_UNIFORM, UniformType.FLOAT)
@@ -57,7 +58,7 @@ public class VRShaders {
     public static final int MIXED_REALITY_GUI_SEPARATE = 4;
 
     public static final RenderPipeline MIXED_REALITY_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_mixed_reality")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_mixed_reality"))
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/mixedreality_vr"))
         .withUniform(MIXED_REALITY_HMD_VIEW_POSITION_UNIFORM, UniformType.VEC3)
@@ -92,7 +93,7 @@ public class VRShaders {
     public static final String POST_PROCESSING_COLOR_SAMPLER = "Sampler0";
 
     public static final RenderPipeline POST_PROCESSING_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_post_processing")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_post_processing"))
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/postprocessing_vr"))
         .withUniform(POST_PROCESSING_FOV_REDUCTION_RADIUS_UNIFORM, UniformType.FLOAT)
@@ -116,7 +117,7 @@ public class VRShaders {
     public static final String BLIT_VR_COLOR_SAMPLER = "DiffuseSampler";
 
     public static final RenderPipeline BLIT_VR_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_blit")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_blit"))
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
@@ -127,7 +128,7 @@ public class VRShaders {
         .build();
 
     public static final RenderPipeline BLIT_VR_BLEND_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_blit")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_blit"))
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
@@ -138,7 +139,7 @@ public class VRShaders {
         .build();
 
     public static final RenderPipeline SOLID_ALPHA_PIPELINE = RenderPipeline.builder()
-        .withLocation("pipeline/vivecraft_solid_alpha")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_solid_alpha"))
         .withVertexShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withFragmentShader(ResourceLocation.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
@@ -154,16 +155,16 @@ public class VRShaders {
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS).buildSnippet();
 
     public static final RenderPipeline END_PORTAL_VR_PIPELINE = RenderPipeline.builder(END_PORTAL_SNIPPET)
-        .withLocation("pipeline/end_portal_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/end_portal_vr"))
         .withShaderDefine("PORTAL_LAYERS", 15).build();
     public static final RenderPipeline END_GATEWAY_VR_PIPELINE = RenderPipeline.builder(END_PORTAL_SNIPPET)
-        .withLocation("pipeline/end_gateway_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/end_gateway_vr"))
         .withShaderDefine("PORTAL_LAYERS", 16).build();
 
     // panorama with alpha color mask
     public static final RenderPipeline SOLID_PANORAMA = RenderPipeline.builder(
             RenderPipelines.MATRICES_COLOR_SNIPPET)
-        .withLocation("pipeline/panorama")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/panorama"))
         .withVertexShader("core/position_tex")
         .withFragmentShader("core/position_tex")
         .withSampler(CORE_TEXTURE_SAMPLER)
@@ -173,15 +174,16 @@ public class VRShaders {
 
     public static final RenderPipeline GUI_TEXTURED = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
-        .withLocation("pipeline/gui_textured_vr").build();
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/gui_textured_vr"))
+        .build();
 
     public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
-        .withLocation("pipeline/gui_textured_always_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/gui_textured_always_vr"))
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline CROSSHAIR_MENU = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
-        .withLocation("pipeline/crosshair_menu_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/crosshair_menu_vr"))
         .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
             SourceFactor.ONE, DestFactor.ONE))
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
@@ -191,7 +193,7 @@ public class VRShaders {
         .withCull(false).buildSnippet();
 
     public static final RenderPipeline CROSSHAIR_WORLD = RenderPipeline.builder(ENTITY_SNIPPET)
-        .withLocation("pipeline/crosshair_world_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/crosshair_world_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
@@ -200,7 +202,7 @@ public class VRShaders {
     // all those NO_DEPTH_TEST should be ALWAYS_DEPTH_TEST, to also be able to write depth
     // but 1.21.5 doesn't have that
     public static final RenderPipeline CROSSHAIR_WORLD_ALWAYS = RenderPipeline.builder(ENTITY_SNIPPET)
-        .withLocation("pipeline/crosshair_world_always_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/crosshair_world_always_vr"))
         .withBlend(new BlendFunction(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO,
             SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
@@ -208,50 +210,56 @@ public class VRShaders {
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline ENTITY_SOLID_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
-        .withLocation("pipeline/entity_solid_no_cardinal_light_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/entity_solid_no_cardinal_light_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING").build();
 
     public static final RenderPipeline ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
-        .withLocation("pipeline/entity_translucent_no_cardinal_light_vr")
+        .withLocation(
+            ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/entity_translucent_no_cardinal_light_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withBlend(BlendFunction.TRANSLUCENT).build();
 
     public static final RenderPipeline ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
             ENTITY_SNIPPET)
-        .withLocation("pipeline/entity_translucent_always_no_cardinal_light_vr")
+        .withLocation(
+            ResourceLocation.fromNamespaceAndPath("vivecraft",
+                "pipeline/entity_translucent_always_no_cardinal_light_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withBlend(BlendFunction.TRANSLUCENT)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
-        .withLocation("pipeline/entity_cutout_no_cull_no_cardinal_light_vr")
+        .withLocation(
+            ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/entity_cutout_no_cull_no_cardinal_light_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F).build();
 
     public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
             ENTITY_SNIPPET)
-        .withLocation("pipeline/entity_cutout_no_cull_always_no_cardinal_light_vr")
+        .withLocation(
+            ResourceLocation.fromNamespaceAndPath("vivecraft",
+                "pipeline/entity_cutout_no_cull_always_no_cardinal_light_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline QUADS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-        .withLocation("pipeline/quads_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/quads_vr"))
         .withCull(false)
         .withDepthWrite(true)
         .build();
 
     public static final RenderPipeline QUADS_ALWAYS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-        .withLocation("pipeline/quads_always_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/quads_always_vr"))
         .withCull(false)
         .withDepthWrite(true)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST).build();
 
     public static final RenderPipeline TRIANGLES_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
-        .withLocation("pipeline/debug_triangles_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/debug_triangles_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
         .withCull(false)
         .withDepthWrite(true)
@@ -259,7 +267,7 @@ public class VRShaders {
 
     public static final RenderPipeline TRIANGLE_FAN_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
-        .withLocation("pipeline/debug_triangle_fan_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/debug_triangle_fan_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_FAN)
         .withCull(false)
         .withDepthWrite(true)
@@ -267,7 +275,7 @@ public class VRShaders {
 
     public static final RenderPipeline TEXT_NO_CULL = RenderPipeline.builder(
             RenderPipelines.TEXT_SNIPPET, RenderPipelines.FOG_SNIPPET)
-        .withLocation("pipeline/text_no_cull_vr")
+        .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/text_no_cull_vr"))
         .withVertexShader("core/rendertype_text")
         .withFragmentShader("core/rendertype_text")
         .withSampler(CORE_TEXTURE_SAMPLER)
@@ -279,4 +287,11 @@ public class VRShaders {
             ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT, QUADS_ALWAYS, TRIANGLES_ALWAYS));
 
     private VRShaders() {}
+
+    public static void init() {
+    }
+
+    public static void close() {
+        ShaderHelper.close();
+    }
 }

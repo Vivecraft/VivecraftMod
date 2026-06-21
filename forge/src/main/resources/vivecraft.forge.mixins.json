@@ -6,7 +6,6 @@
   "client": [
     "ForgeGameRendererVRMixin",
     "ForgeMinecraftVRMixin",
-    "ForgeMouseHandlerVRMixin",
     "network.ForgeOpenContainerVRMixin"
   ],
   "minVersion": "0.8.4"

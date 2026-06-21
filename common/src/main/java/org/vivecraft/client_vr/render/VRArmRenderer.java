@@ -65,7 +65,7 @@ public class VRArmRenderer extends PlayerRenderer {
         playermodel.rightSleeve.visible = sleeve;
 
         // render hand
-        rendererArm.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(resourceLocation)), combinedLight,
-            OverlayTexture.NO_OVERLAY, ARGB.white(this.armAlpha));
+        rendererArm.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(resourceLocation)),
+            combinedLight, OverlayTexture.NO_OVERLAY, ARGB.white(this.armAlpha));
     }
 }

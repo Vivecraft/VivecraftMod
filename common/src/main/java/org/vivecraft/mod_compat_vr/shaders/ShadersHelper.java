@@ -1,20 +1,17 @@
 package org.vivecraft.mod_compat_vr.shaders;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Vector3f;
 import org.vivecraft.Xloader;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -61,19 +58,6 @@ public class ShadersHelper {
      */
     public static int ShaderLight() {
         return isShaderActive() ? 8 : 4;
-    }
-
-    /**
-     * binds the given texture to texture slot 0, only if shaders are active
-     *
-     * @param resourceLocation ResourceLocation of the texture to bind
-     */
-    public static void bindTexture(ResourceLocation resourceLocation) {
-        if (isShaderActive()) {
-            GpuTexture view = RenderHelper.getGpuTexture(resourceLocation);
-            RenderSystem.setShaderTexture(0, view);
-            OpenGLHelper.bindTexture(0, view);
-        }
     }
 
     /**
@@ -149,10 +133,10 @@ public class ShadersHelper {
     public static void addMacros(Consumer<String> createMacro, BiConsumer<String, Integer> createValueMacro) {
         if (Xloader.isModLoadedSuccess()) {
             createMacro.accept("VIVECRAFT");
-            String[] modVersion = Xloader.getModVersion().split("-", 3)[1].split("\\.");
-            int version = Integer.parseInt(modVersion[0]) * 10000 +
-                Integer.parseInt(modVersion[1]) * 100 +
-                Integer.parseInt(modVersion[2]);
+            UpdateChecker.Version modVersion = UpdateChecker.Version.fromClient(Xloader.getModVersion());
+            int version = modVersion.getMajor() * 10000 +
+                modVersion.getMinor() * 100 +
+                modVersion.getPatch();
             createValueMacro.accept("VIVECRAFT_VERSION", version);
             for (RenderPass pass : RenderPass.values()) {
                 createValueMacro.accept("VIVECRAFT_PASS_" + pass.toString(), pass.ordinal());

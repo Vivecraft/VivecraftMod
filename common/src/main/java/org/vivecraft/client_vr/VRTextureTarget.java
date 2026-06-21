@@ -13,7 +13,7 @@ import org.joml.Vector4fc;
 import org.vivecraft.Xplat;
 import org.vivecraft.client.extensions.GlDeviceExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
-import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 
 import javax.annotation.Nullable;
 
@@ -82,10 +82,10 @@ public class VRTextureTarget extends RenderTarget {
 
         if (((RenderTargetExtension) this).vivecraft$hasMipmaps()) {
             if (this.anisotropicFiltering) {
-                OpenGLHelper.enableAnisotropicFiltering(this.colorTexture);
+                GraphicsHelper.INSTANCE.enableAnisotropicFiltering(this.colorTexture);
             }
             // generate mipmaps so they are initialized
-            OpenGLHelper.genMipmaps(this.colorTexture);
+            GraphicsHelper.INSTANCE.genMipmaps(this.colorTexture);
         }
     }
 
