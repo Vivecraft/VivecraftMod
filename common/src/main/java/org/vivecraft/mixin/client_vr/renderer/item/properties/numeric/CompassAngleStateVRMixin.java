@@ -11,7 +11,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.ItemOwner;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,20 +26,20 @@ public class CompassAngleStateVRMixin {
     @Unique
     private ItemStack vivecraft$currentItem = null;
 
-    @WrapOperation(method = "calculate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getRotationTowardsCompassTarget(Lnet/minecraft/world/entity/ItemOwner;JLnet/minecraft/core/BlockPos;)F"))
+    @WrapOperation(method = "calculate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getRotationTowardsCompassTarget(Lnet/minecraft/world/entity/Entity;JLnet/minecraft/core/BlockPos;)F"))
     private float vivecraft$rememberItem(
-        CompassAngleState instance, ItemOwner owner, long gameTime, BlockPos compassTargetPos,
-        Operation<Float> original, @Local(argsOnly = true) ItemStack item)
+        CompassAngleState instance, Entity entity, long gameTime, BlockPos targetPos, Operation<Float> original,
+        @Local(argsOnly = true) ItemStack item)
     {
         this.vivecraft$currentItem = item;
-        float rotation = original.call(instance, owner, gameTime, compassTargetPos);
+        float rotation = original.call(instance, entity, gameTime, targetPos);
         this.vivecraft$currentItem = null;
         return rotation;
     }
 
-    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getAngleFromEntityToPos(Lnet/minecraft/world/entity/ItemOwner;Lnet/minecraft/core/BlockPos;)D"))
-    private double vivecraft$handPosition(ItemOwner owner, BlockPos target, Operation<Double> original) {
-        if (VRState.VR_RUNNING && owner.asLivingEntity() instanceof LocalPlayer player &&
+    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getAngleFromEntityToPos(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)D"))
+    private double vivecraft$handPosition(Entity entity, BlockPos target, Operation<Double> original) {
+        if (VRState.VR_RUNNING && entity instanceof LocalPlayer player &&
             player == Minecraft.getInstance().player)
         {
             // check if the current item is held in a hand
@@ -51,7 +51,7 @@ public class CompassAngleStateVRMixin {
                     ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().c1.getPosition(), target);
             }
         }
-        return original.call(owner, target);
+        return original.call(entity, target);
     }
 
     @Unique
@@ -60,11 +60,11 @@ public class CompassAngleStateVRMixin {
         return Math.atan2(target.z() - origin.z(), target.x() - origin.x()) / Mth.TWO_PI;
     }
 
-    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getWrappedVisualRotationY(Lnet/minecraft/world/entity/ItemOwner;)F"))
+    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getWrappedVisualRotationY(Lnet/minecraft/world/entity/Entity;)F"))
     private float vivecraft$handAngle(
-        ItemOwner owner, Operation<Float> original, @Share("bodyYaw") LocalFloatRef bodyYaw)
+        Entity entity, Operation<Float> original, @Share("bodyYaw") LocalFloatRef bodyYaw)
     {
-        if (VRState.VR_RUNNING && owner.asLivingEntity() instanceof LocalPlayer player &&
+        if (VRState.VR_RUNNING && entity instanceof LocalPlayer player &&
             player == Minecraft.getInstance().player)
         {
             // use body yaw for wobble
@@ -72,14 +72,14 @@ public class CompassAngleStateVRMixin {
                 ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyYawRad() / Mth.TWO_PI, 1.0F));
             return bodyYaw.get();
         }
-        return original.call(owner);
+        return original.call(entity);
     }
 
     @ModifyExpressionValue(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/NeedleDirectionHelper$Wobbler;rotation()F"))
     private float vivecraft$handRotationOffset(
-        float rotation, @Local(argsOnly = true) ItemOwner owner, @Share("bodyYaw") LocalFloatRef bodyYaw)
+        float rotation, @Local(argsOnly = true) Entity entity, @Share("bodyYaw") LocalFloatRef bodyYaw)
     {
-        if (VRState.VR_RUNNING && owner.asLivingEntity() instanceof LocalPlayer player &&
+        if (VRState.VR_RUNNING && entity instanceof LocalPlayer player &&
             player == Minecraft.getInstance().player)
         {
             // check if the current item is held in a hand

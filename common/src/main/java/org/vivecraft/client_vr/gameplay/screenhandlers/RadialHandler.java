@@ -180,11 +180,11 @@ public class RadialHandler {
 
     private static void click(int x, int y) {
         LAST_PRESS = new Vector2i(x, y);
-        UI.mouseClicked(new MouseButtonEvent(x, y, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)), false);
+        UI.mouseClicked(x, y, GLFW.GLFW_MOUSE_BUTTON_LEFT);
     }
 
     private static void release(int x, int y) {
-        UI.mouseReleased(new MouseButtonEvent(x, y, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
+        UI.mouseReleased(x, y, GLFW.GLFW_MOUSE_BUTTON_LEFT);
     }
 
     public static boolean isShowing() {

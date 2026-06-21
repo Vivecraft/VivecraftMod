@@ -144,7 +144,7 @@ public class VRShaders {
     public static final RenderPipeline GUI_TEXTURED = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "pipeline/gui_textured_vr"))
-        .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST).build();
+        .build();
 
     public static final RenderPipeline GUI_TEXTURED_ALWAYS = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
