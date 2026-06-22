@@ -168,10 +168,10 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
                 return true;
             }
         } else {
-            if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().getSelectedSlot() != this.hotbar &&
+            if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().selected != this.hotbar &&
                 hand == InteractionHand.MAIN_HAND)
             {
-                player.getInventory().setSelectedSlot(this.hotbar);
+                player.getInventory().selected = this.hotbar;
                 return true;
             } else if (this.hotbar == 9 && hand == InteractionHand.MAIN_HAND) {
                 player.connection.send(

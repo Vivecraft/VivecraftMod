@@ -1,45 +1,37 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
-import com.mojang.blaze3d.opengl.GlDevice;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 
 public interface GraphicsHelper {
 
     GraphicsHelper INSTANCE = getHelper();
 
     private static GraphicsHelper getHelper() {
-        if (RenderSystem.getDevice() instanceof GlDevice) {
-            return new OpenGLHelper();
-            //} else if (RenderSystem.getDevice().backend instanceof VulkanDevice) {
-            //    return new VulkanHelper();
-        } else {
-            throw new IllegalStateException(
-                "Vivecraft: Unsupported backend: " + RenderSystem.getDevice().getBackendName() +
-                    " with class: " + RenderSystem.getDevice().getClass().getName());
-        }
+        return new OpenGLHelper();
+        //} else if (RenderSystem.getDevice().backend instanceof VulkanDevice) {
+        //    return new VulkanHelper();
     }
 
     /**
-     * Generates api texture handle for the given GpuTexture
+     * Generates api texture handle for the given RenderTarget
      *
-     * @param texture GpuTexture to get the texture handle for
+     * @param texture RenderTarget to get the texture handle for
      */
-    long getTextureHandle(GpuTexture texture);
+    long getTextureHandle(RenderTarget texture);
 
     /**
-     * Generates mipmaps for the given GpuTexture
+     * Generates mipmaps for the given RenderTarget
      *
-     * @param texture GpuTexture to generate mipmaps for
+     * @param texture RenderTarget to generate mipmaps for
      */
-    void genMipmaps(GpuTexture texture);
+    void genMipmaps(RenderTarget texture);
 
     /**
-     * enabled anisotropic filtering for the given GpuTexture
+     * enabled anisotropic filtering for the given RenderTarget
      *
-     * @param texture GpuTexture to enabled anisotropic filtering for
+     * @param texture RenderTarget to enabled anisotropic filtering for
      */
-    void enableAnisotropicFiltering(GpuTexture texture);
+    void enableAnisotropicFiltering(RenderTarget texture);
 
     String checkError(String errorSection);
 

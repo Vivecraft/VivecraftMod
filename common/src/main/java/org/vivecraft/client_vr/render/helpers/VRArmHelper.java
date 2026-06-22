@@ -106,6 +106,8 @@ public class VRArmHelper {
         Matrix4f modelView = new Matrix4f();
         RenderHelper.setupRenderingAtController(c, modelView);
 
+        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
+
         if (depthAlways && c == 0) {
             RenderSystem.depthFunc(GL11C.GL_ALWAYS);
         } else {
@@ -375,6 +377,9 @@ public class VRArmHelper {
             RenderSystem.enableCull();
             // TODO SHADERS use a shader with lightmaps
             RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+
+            // to make shaders work
+            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
             BufferBuilder bufferBuilder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);

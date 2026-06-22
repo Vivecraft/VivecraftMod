@@ -111,8 +111,3 @@ accessible field net/minecraft/client/renderer/ShaderManager$CompilationCache pr
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 accessible field net/minecraft/client/renderer/RenderStateShard NO_DEPTH_TEST Lnet/minecraft/client/renderer/RenderStateShard$DepthTestStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard POSITION_TEXTURE_COLOR_SHADER Lnet/minecraft/client/renderer/RenderStateShard$ShaderStateShard;
-
-# for optifine compatibility
-accessible class com/mojang/blaze3d/opengl/GlRenderPass
-accessible field com/mojang/blaze3d/opengl/GlRenderPass samplers Ljava/util/HashMap;
-accessible field com/mojang/blaze3d/opengl/GlRenderPass pipeline Lcom/mojang/blaze3d/opengl/GlRenderPipeline;

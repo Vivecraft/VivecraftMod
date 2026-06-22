@@ -29,7 +29,9 @@ import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.utils.RGBAColor;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

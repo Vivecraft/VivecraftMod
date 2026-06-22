@@ -1,10 +1,8 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
-import com.mojang.blaze3d.opengl.GlDevice;
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.opengl.GlTexture;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11C;
@@ -24,69 +22,34 @@ public class OpenGLHelper implements GraphicsHelper {
     private static final int MAX_ANISOTROPY_PARAMETER = GL46C.GL_MAX_TEXTURE_MAX_ANISOTROPY;
 
     @Override
-    public long getTextureHandle(GpuTexture texture) {
-        if (texture instanceof GlTexture glTexture) {
-            return glTexture.glId();
-        }
-        throw new IllegalArgumentException("Vivecraft: not an opengl texture in opengl context");
-    }
-
-    public static void bindTexture(int slot, GpuTexture texture) {
-        if (texture instanceof GlTexture glTexture) {
-            GlStateManager._activeTexture(GL30C.GL_TEXTURE0 + slot);
-            GlStateManager._bindTexture(glTexture.glId());
-        } else {
-            throw new IllegalStateException("Vivecraft: only opengl textures are supported");
-        }
+    public long getTextureHandle(RenderTarget texture) {
+        return texture.getColorTextureId();
     }
 
     @Override
-    public void genMipmaps(GpuTexture texture) {
-        if (texture instanceof GlTexture glTexture) {
-            int textureUnit = GlStateManager._getActiveTexture();
-            int boundTexture = GlStateManager._getInteger(GL30C.GL_TEXTURE_BINDING_2D);
-
-            GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
-            GlStateManager._bindTexture(glTexture.glId());
-
-            GL30C.glGenerateMipmap(GL30C.GL_TEXTURE_2D);
-
-            GlStateManager._activeTexture(textureUnit);
-            GlStateManager._bindTexture(boundTexture);
-        } else {
-            throw new IllegalStateException("Vivecraft: only opengl textures are supported");
-        }
+    public void genMipmaps(RenderTarget texture) {
+        texture.bindRead();
+        GL30C.glGenerateMipmap(GL30C.GL_TEXTURE_2D);
+        texture.unbindRead();
     }
 
     /**
-     * enabled anisotropic filtering for the given GpuTexture
+     * enabled anisotropic filtering for the given RenderTarget
      *
-     * @param texture GpuTexture to enable anisotropic filtering for
+     * @param texture RenderTarget to enable anisotropic filtering for
      */
     @Override
-    public void enableAnisotropicFiltering(GpuTexture texture) {
+    public void enableAnisotropicFiltering(RenderTarget texture) {
         if (supportsAnisotropicFiltering()) {
-            if (texture instanceof GlTexture glTexture) {
-                int textureUnit = GlStateManager._getActiveTexture();
-                int boundTexture = GlStateManager._getInteger(GL30C.GL_TEXTURE_BINDING_2D);
-
-                GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
-                GlStateManager._bindTexture(glTexture.glId());
-
-                GlStateManager._texParameter(GL30C.GL_TEXTURE_2D, ANISOTROPY_PARAMETER, this.anisotropyLevel);
-
-                GlStateManager._activeTexture(textureUnit);
-                GlStateManager._bindTexture(boundTexture);
-            } else {
-                throw new IllegalStateException("Vivecraft: only opengl textures are supported");
-            }
+            texture.bindRead();
+            RenderSystem.texParameter(GL30C.GL_TEXTURE_2D, ANISOTROPY_PARAMETER, this.anisotropyLevel);
+            texture.unbindRead();
         }
     }
 
     private boolean supportsAnisotropicFiltering() {
         if (!this.checkedAnisotropy) {
-            if (RenderSystem.getDevice() instanceof GlDevice &&
-                GLFW.glfwExtensionSupported("GL_ARB_texture_filter_anisotropic") ||
+            if (GLFW.glfwExtensionSupported("GL_ARB_texture_filter_anisotropic") ||
                 GLFW.glfwExtensionSupported("GL_EXT_texture_filter_anisotropic"))
             {
                 this.anisotropySupported = true;

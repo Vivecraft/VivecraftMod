@@ -219,11 +219,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                     if (angle > 0.5) {
                         roomscaleBlocked.set(true);
                         this.vivecraft$roomscaleShieldItem = stack;
-                        if (ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get() > 0 &&
-                            damage >= ServerConfig.ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER.get())
-                        {
-                            this.getCooldowns().addCooldown(stack, ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get());
-                        }
                         this.vivecraft$roomscaleShieldHand = hand;
                         return stack;
                     }
@@ -244,6 +239,12 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             this.useItem = this.vivecraft$roomscaleShieldItem;
             original.call(damageAmount);
             this.useItem = backup;
+            if (ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get() > 0 &&
+                damageAmount >= ServerConfig.ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER.get())
+            {
+                this.getCooldowns()
+                    .addCooldown(this.vivecraft$roomscaleShieldItem, ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get());
+            }
         } else {
             original.call(damageAmount);
         }

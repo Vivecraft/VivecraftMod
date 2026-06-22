@@ -103,7 +103,7 @@ public abstract class LivingEntityMixin extends Entity {
      */
     @ModifyExpressionValue(method = "isDamageSourceBlocked", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getItemBlockingWith()Lnet/minecraft/world/item/ItemStack;"))
     protected ItemStack vivecraft$roomscaleShieldBlockingItem(
-        ItemStack original, @Local(argsOnly = true) DamageSource damageSource, @Local(argsOnly = true) float damage,
+        ItemStack original, @Local(argsOnly = true) DamageSource damageSource,
         @Share("roomscaleBlocked") LocalBooleanRef roomscaleBlocked)
     {
         return original;

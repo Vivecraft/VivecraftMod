@@ -1,8 +1,9 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -19,10 +20,10 @@ public abstract class VulkanHelper implements GraphicsHelper {
     protected abstract void endCommandBuffer(VkCommandBuffer commandBuffer);
 
     @Override
-    public abstract long getTextureHandle(GpuTexture texture);
+    public abstract long getTextureHandle(RenderTarget texture);
 
     @Override
-    public void genMipmaps(GpuTexture texture) {
+    public void genMipmaps(RenderTarget texture) {
         long vkImage = getTextureHandle(texture);
 
         VkCommandBuffer blitCommandBuffer = this.allocateAndBeginCommandBuffer();
@@ -34,7 +35,9 @@ public abstract class VulkanHelper implements GraphicsHelper {
             VK10.VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK10.VK_ACCESS_TRANSFER_READ_BIT,
             VK10.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK10.VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-        for (int i = 1; i < texture.getMipLevels(); i++) {
+        int mips = Math.max(Mth.log2(texture.width), Mth.log2(texture.height));
+
+        for (int i = 1; i < mips; i++) {
             // transition the target layer to dst optimal
             transitionImageLayoutTo(blitCommandBuffer, vkImage,
                 i, 1,
@@ -44,8 +47,8 @@ public abstract class VulkanHelper implements GraphicsHelper {
 
             // blit
             blitTexture(blitCommandBuffer,
-                vkImage, i - 1, 0, 0, texture.getWidth(i - 1), texture.getHeight(i - 1),
-                vkImage, i, 0, 0, texture.getWidth(i), texture.getHeight(i));
+                vkImage, i - 1, 0, 0, texture.width >> (i - 1), texture.height >> (i - 1),
+                vkImage, i, 0, 0, texture.width >> i, texture.height >> i);
 
             // transition the source layer to src optimal for next layer
             transitionImageLayoutTo(blitCommandBuffer, vkImage,
@@ -57,7 +60,7 @@ public abstract class VulkanHelper implements GraphicsHelper {
 
         // every mip is now in src optimal, transfer all mips at once back into the genreal layout
         transitionImageLayoutTo(blitCommandBuffer, vkImage,
-            0, texture.getMipLevels(),
+            0, mips,
             VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK10.VK_IMAGE_LAYOUT_GENERAL,
             VK10.VK_ACCESS_TRANSFER_READ_BIT, VK10.VK_ACCESS_SHADER_READ_BIT,
             VK10.VK_PIPELINE_STAGE_TRANSFER_BIT, VK10.VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
@@ -67,7 +70,7 @@ public abstract class VulkanHelper implements GraphicsHelper {
 
     // not sure how to do this for vulkan, since it'S per sampler and not texture
     @Override
-    public abstract void enableAnisotropicFiltering(GpuTexture texture);
+    public abstract void enableAnisotropicFiltering(RenderTarget texture);
 
     /**
      * blits the source image/mip rectangle to the target image/mip rectangle, with linear interpolation

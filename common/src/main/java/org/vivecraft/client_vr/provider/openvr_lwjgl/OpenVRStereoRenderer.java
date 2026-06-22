@@ -132,14 +132,14 @@ public class OpenVRStereoRenderer extends VRRenderer {
         for (int i = 0; i < 2; i++) {
             int prevTexture = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
             this.eyeTextureId[i] = GlStateManager._genTexture();
-            GlStateManager._bindTexture(this.eyeTextureId[i]);
-            GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-            GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+            RenderSystem.bindTexture(this.eyeTextureId[i]);
+            RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+            RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
             GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, width, height, 0, GL11.GL_RGBA,
                 GL11.GL_INT,
                 null);
 
-            GlStateManager._bindTexture(prevTexture);
+            RenderSystem.bindTexture(prevTexture);
             GraphicsHelper.INSTANCE.checkError((i == 0 ? "Left" : "Right") + " Eye framebuffer setup");
         }
 
@@ -178,7 +178,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
         if (GraphicsHelper.INSTANCE instanceof VulkanHelper vkHelper) {
             for (int i = 0; i < 2; i++) {
                 this.vkEyeData[i].m_nImage(
-                    GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[i].getColorTexture()));
+                    GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[i]));
                 this.vkEyeData[i].m_pDevice(vkHelper.getDevicePointer());
                 this.vkEyeData[i].m_pPhysicalDevice(vkHelper.getPhysicalDevicePointer());
                 this.vkEyeData[i].m_pInstance(vkHelper.getInstancePointer());
@@ -247,12 +247,12 @@ public class OpenVRStereoRenderer extends VRRenderer {
     protected void destroyBuffers() {
         super.destroyBuffers();
         if (this.eyeTextureId[0] > -1) {
-            TextureUtil.releaseTextureId(this.LeftEyeTextureId);
+            TextureUtil.releaseTextureId(this.eyeTextureId[0]);
             this.eyeTextureId[0] = -1;
         }
 
         if (this.eyeTextureId[1] > -1) {
-            TextureUtil.releaseTextureId(this.RightEyeTextureId);
+            TextureUtil.releaseTextureId(this.eyeTextureId[1]);
             this.eyeTextureId[1] = -1;
         }
     }

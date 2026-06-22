@@ -28,6 +28,7 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.DeviceSource;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.lang.Math;
 import java.util.ArrayList;

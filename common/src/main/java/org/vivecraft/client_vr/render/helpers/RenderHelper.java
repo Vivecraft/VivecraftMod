@@ -25,6 +25,7 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -229,7 +230,7 @@ public class RenderHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps for Gui layer
-            GraphicsHelper.INSTANCE.genMipmaps(MC.mainRenderTarget.getColorTexture());
+            GraphicsHelper.INSTANCE.genMipmaps(MC.mainRenderTarget);
         }
     }
 
@@ -454,6 +455,7 @@ public class RenderHelper {
 
         Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))
             .yRot(Mth.DEG_TO_RAD * -yaw);
+        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
         bufferBuilder.addVertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
             .setColor(r, g, b, a).setNormal(0.0F, 1.0F, 0.0F);

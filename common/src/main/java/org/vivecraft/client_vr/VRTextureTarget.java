@@ -51,10 +51,10 @@ public class VRTextureTarget extends RenderTarget {
 
         if (((RenderTargetExtension) this).vivecraft$hasMipmaps()) {
             if (this.anisotropicFiltering) {
-                GraphicsHelper.INSTANCE.enableAnisotropicFiltering(this.colorTexture);
+                GraphicsHelper.INSTANCE.enableAnisotropicFiltering(this);
             }
             // generate mipmaps so they are initialized
-            GraphicsHelper.INSTANCE.genMipmaps(this.colorTexture);
+            GraphicsHelper.INSTANCE.genMipmaps(this);
         }
     }
 

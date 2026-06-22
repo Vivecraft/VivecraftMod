@@ -183,10 +183,10 @@ public class OptifineHelper {
         RenderSystem.activeTexture(GL13C.GL_TEXTURE0);
         RenderSystem.bindTexture(renderTarget.getDepthTextureId());
 
-            GraphicsHelper.INSTANCE.checkError("pre copy depth");
+        GraphicsHelper.INSTANCE.checkError("pre copy depth");
         GlStateManager._glCopyTexSubImage2D(GL13C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, renderTarget.width,
             renderTarget.height);
-            GraphicsHelper.INSTANCE.checkError("post copy depth");
+        GraphicsHelper.INSTANCE.checkError("post copy depth");
 
         unbindShaderFramebuffer();
         // rebind the original buffer

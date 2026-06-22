@@ -74,11 +74,7 @@ public class VRPassHelper {
                 Profiler.get().pop();
             }
 
-            if (eye == RenderPass.LEFT) {
-                DATA_HOLDER.vrRenderer.framebufferEye0.bindWrite(true);
-            } else {
-                DATA_HOLDER.vrRenderer.framebufferEye1.bindWrite(true);
-            }
+            DATA_HOLDER.vrRenderer.framebufferEye[eye == RenderPass.LEFT ? 0 : 1].bindWrite(true);
 
             // do post-processing
             ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
@@ -162,7 +158,7 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps
-            GraphicsHelper.INSTANCE.genMipmaps(MC.mainRenderTarget.getColorTexture());
+            GraphicsHelper.INSTANCE.genMipmaps(MC.mainRenderTarget);
         }
 
         Profiler.get().popPush("2D Keyboard");

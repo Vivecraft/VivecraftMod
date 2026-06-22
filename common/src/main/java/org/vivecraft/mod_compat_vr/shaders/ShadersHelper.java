@@ -1,6 +1,8 @@
 package org.vivecraft.mod_compat_vr.shaders;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Vector3f;
@@ -56,6 +58,18 @@ public class ShadersHelper {
      */
     public static int ShaderLight() {
         return isShaderActive() ? 8 : 4;
+    }
+
+    /**
+     * binds the given texture to texture slot 0, only if shaders are active
+     *
+     * @param resourceLocation ResourceLocation of the texture to bind
+     */
+    public static void bindTexture(ResourceLocation resourceLocation) {
+        RenderSystem.setShaderTexture(0, resourceLocation);
+        if (isShaderActive()) {
+            RenderSystem.bindTexture(RenderSystem.getShaderTexture(0));
+        }
     }
 
     /**

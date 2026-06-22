@@ -1,9 +1,7 @@
 package org.vivecraft.client_vr.provider;
 
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.buffers.BufferType;
 import com.mojang.blaze3d.buffers.BufferUsage;
-import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -22,6 +20,7 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
+import org.lwjgl.opengl.GL11;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -36,8 +35,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRShaders;
-import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -49,8 +48,6 @@ import oshi.hardware.GraphicsCard;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 public abstract class VRRenderer {
@@ -74,7 +71,7 @@ public abstract class VRRenderer {
 
     // Stencil mesh buffer for each eye
     protected float[][] hiddenMeshVertices = new float[2][];
-    private final GpuBuffer[] bakedHiddenMesh = new GpuBuffer[2];
+    private final VertexBuffer[] bakedHiddenMesh = new VertexBuffer[2];
 
     // variables to check setting changes that need framebuffers reinits/resizes
     private GraphicsStatus previousGraphics = null;
@@ -177,7 +174,7 @@ public abstract class VRRenderer {
      * @param eye which eye the stencil should be for
      * @return the stencil for that eye, if available
      */
-    public GpuBuffer getBakedStencilMask(RenderPass eye) {
+    public VertexBuffer getBakedStencilMask(RenderPass eye) {
         if (eye == RenderPass.LEFT || eye == RenderPass.RIGHT) {
             if (this.bakedHiddenMesh[0] == null || this.bakedHiddenMesh[1] == null) {
                 this.bakeStencilMasks();
@@ -211,12 +208,10 @@ public abstract class VRRenderer {
                     .setColor(0, 0, 0, 255);
             }
 
-            try (MeshData meshData = builder.buildOrThrow()) {
-                String eye = i == 0 ? "Left" : "Right";
-                this.bakedHiddenMesh[i] = RenderSystem.getDevice()
-                    .createBuffer(() -> eye + " Stencil", BufferType.VERTICES,
-                        BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
-            }
+            this.bakedHiddenMesh[i] = new VertexBuffer(BufferUsage.STATIC_WRITE);
+            this.bakedHiddenMesh[i].bind();
+            this.bakedHiddenMesh[i].upload(builder.buildOrThrow());
+            VertexBuffer.unbind();
         }
     }
 
@@ -341,27 +336,17 @@ public abstract class VRRenderer {
         if (verts == null) {
             return;
         }
-        GpuBuffer buffer = getBakedStencilMask(ClientDataHolderVR.getInstance().currentPass);
+        VertexBuffer buffer = getBakedStencilMask(ClientDataHolderVR.getInstance().currentPass);
         if (buffer == null) {
             return;
         }
 
-        int count = verts.length / 2;
+        ShadersHelper.bindTexture(RenderHelper.BLACK_TEXTURE);
 
-        RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES);
-        GpuBuffer indexBuffer = autoIndices.getBuffer(count);
-
-        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
-
-        try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
-            .createRenderPass(target.getColorTexture(), OptionalInt.empty(),
-                target.getDepthTexture(), OptionalDouble.empty()))
-        {
-            renderPass.setPipeline(VRShaders.TRIANGLES_ALWAYS);
-            renderPass.setVertexBuffer(0, buffer);
-            renderPass.setIndexBuffer(indexBuffer, autoIndices.type());
-            renderPass.drawIndexed(0, count);
-        }
+        buffer.bind();
+        buffer.drawWithShader(RenderSystem.getModelViewStack(), RenderSystem.getProjectionMatrix(),
+            RenderSystem.setShader(CoreShaders.POSITION_COLOR));
+        VertexBuffer.unbind();
     }
 
     /**
@@ -963,7 +948,7 @@ public abstract class VRRenderer {
     private void checkIfSupportedGpu() throws RenderConfigException {
         // intel drivers have issues with interop on windows so throw an error
         if (Util.getPlatform() == Util.OS.WINDOWS &&
-            RenderSystem.getDevice().getRenderer().toLowerCase().contains("intel") &&
+            GlUtil.getRenderer().toLowerCase().contains("intel") &&
             ClientDataHolderVR.getInstance().vrSettings.blockIntelWindows)
         {
             StringBuilder gpus = new StringBuilder();
@@ -986,7 +971,7 @@ public abstract class VRRenderer {
             }
             Component message;
             message = Component.translatable("vivecraft.messages.intelgraphics1",
-                Component.literal(RenderSystem.getDevice().getRenderer())
+                Component.literal(GlUtil.getRenderer())
                     .withStyle(ChatFormatting.GOLD),
                 gpus.toString(),
                 onlyIntel ? Component.empty() :
@@ -994,9 +979,10 @@ public abstract class VRRenderer {
                         Component.literal("https://www.vivecraft.org/faq/#gpu")
                             .withStyle(style -> style.withUnderlined(true)
                                 .withColor(ChatFormatting.GREEN)
-                                .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
-                                .withClickEvent(new ClickEvent.OpenUrl(
-                                    ClientUtils.parseUri("https://www.vivecraft.org/faq/#gpu"))))));
+                                .withHoverEvent(
+                                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
+                                    "https://www.vivecraft.org/faq/#gpu")))));
 
             throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"), message);
         }
