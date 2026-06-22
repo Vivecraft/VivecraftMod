@@ -25,6 +25,7 @@ import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 
@@ -45,13 +46,40 @@ public class ShaderHelper {
     private static float BLUE;
     private static float TIME;
 
+    private static GpuBuffer SCREEN_UV_VBO;
+    private static GpuBuffer SCREEN_UV_VBO_FLIPPED;
+    private static GpuBuffer SCREEN_VBO;
+
     /**
      * renders a fullscreen quad with the given shader, and the given RenderTarget bound as "Sampler0"
      *
      * @param instance shader to use to render
      * @param source   RenderTarget to sample from
      */
-    public static void renderFullscreenQuad(@NotNull ShaderProgram instance, @NotNull RenderTarget source) {
+    public static void renderFullscreenQuad(
+        @NotNull RenderPipeline instance,
+        @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
+        @Nullable GpuTexture target)
+    {
+        renderFullscreenQuad(instance, uniformSetter, target, false);
+    }
+
+    /**
+     * renders a fullscreen quad with the given RenderPipeline, and the given RenderTarget bound as "Sampler0"
+     *
+     * @param instance      RenderPipeline to use to render
+     * @param uniformSetter consumer to set the uniforms
+     * @param target        texture to write to, if {@code null} will write to the main target
+     */
+    public static void renderFullscreenQuad(
+        @NotNull RenderPipeline instance,
+        @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
+        @Nullable GpuTexture target,
+        boolean flipVertically)
+    {
+        GpuBuffer quad = getFullscreenQuad(instance.getVertexFormat(), flipVertically);
+        RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+        GpuBuffer indexGpuBuffer = indexBuffer.getBuffer(6);
         RenderSystem.colorMask(true, true, true, false);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
@@ -75,28 +103,74 @@ public class ShaderHelper {
      *
      * @param format VertexFormat to use for rendering
      */
-    private static void drawFullscreenQuad(VertexFormat format) {
-        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, format);
-
+    private static GpuBuffer getFullscreenQuad(VertexFormat format, boolean flipVertically) {
         if (format == DefaultVertexFormat.POSITION_TEX) {
-            builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
-            builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
-            builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
-            builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
-        } else if (format == DefaultVertexFormat.POSITION_TEX_COLOR) {
-            builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F)
-                .setColor(255, 255, 255, 255);
-            builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F)
-                .setColor(255, 255, 255, 255);
-            builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F)
-                .setColor(255, 255, 255, 255);
-            builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F)
-                .setColor(255, 255, 255, 255);
-        } else {
-            throw new IllegalStateException("Unexpected vertex format " + format);
-        }
+            if (!flipVertically) {
+                if (SCREEN_UV_VBO == null) {
+                    BufferBuilder builder = Tesselator.getInstance()
+                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
+                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
+                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
+                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
 
-        BufferUploader.draw(builder.buildOrThrow());
+                    try (MeshData meshData = builder.buildOrThrow()) {
+                        SCREEN_UV_VBO = RenderSystem.getDevice()
+                            .createBuffer(() -> "fullscreen uv vr vertex buffer", BufferType.VERTICES,
+                                BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
+                    }
+                }
+                return SCREEN_UV_VBO;
+            } else {
+                if (SCREEN_UV_VBO_FLIPPED == null) {
+                    BufferBuilder builder = Tesselator.getInstance()
+                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 1.0F);
+                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 1.0F);
+                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 0.0F);
+                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 0.0F);
+
+                    try (MeshData meshData = builder.buildOrThrow()) {
+                        SCREEN_UV_VBO_FLIPPED = RenderSystem.getDevice()
+                            .createBuffer(() -> "fullscreen uv flipped vr vertex buffer", BufferType.VERTICES,
+                                BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
+                    }
+                }
+                return SCREEN_UV_VBO_FLIPPED;
+            }
+        } else if (format == DefaultVertexFormat.POSITION) {
+            if (SCREEN_VBO == null) {
+                BufferBuilder builder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+                builder.addVertex(-1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, 1.0F, 0.0F);
+                builder.addVertex(-1.0F, 1.0F, 0.0F);
+
+                try (MeshData meshData = builder.buildOrThrow()) {
+                    SCREEN_VBO = RenderSystem.getDevice()
+                        .createBuffer(() -> "fullscreen vr vertex buffer", BufferType.VERTICES,
+                            BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
+                }
+            }
+            return SCREEN_VBO;
+        }
+        throw new IllegalStateException("Unsupported Vertex format: " + format);
+    }
+
+    public static void close() {
+        if (SCREEN_VBO != null) {
+            SCREEN_VBO.close();
+            SCREEN_VBO = null;
+        }
+        if (SCREEN_UV_VBO != null) {
+            SCREEN_UV_VBO.close();
+            SCREEN_UV_VBO = null;
+        }
+        if (SCREEN_UV_VBO_FLIPPED != null) {
+            SCREEN_UV_VBO_FLIPPED.close();
+            SCREEN_UV_VBO_FLIPPED = null;
+        }
     }
 
     /**
@@ -253,9 +327,10 @@ public class ShaderHelper {
             int screenHeight = MC.mainRenderTarget.height / 2;
             for (int x = 0; x < 4; x++) {
                 for (int y = 0; y < 2; y++) {
-                    RenderTarget target = switch (RenderPass.values()[x + 4 * y]) {
-                        case LEFT -> DATA_HOLDER.vrRenderer.framebufferEye0;
-                        case RIGHT -> DATA_HOLDER.vrRenderer.framebufferEye1;
+                    RenderPass pass = RenderPass.values()[x + 4 * y];
+                    RenderTarget target = switch (pass) {
+                        case LEFT -> DATA_HOLDER.vrRenderer.framebufferEye[0];
+                        case RIGHT -> DATA_HOLDER.vrRenderer.framebufferEye[1];
                         case CENTER -> DATA_HOLDER.vrRenderer.framebufferUndistorted;
                         case THIRD -> DATA_HOLDER.vrRenderer.framebufferMR;
                         case GUI -> GuiHandler.GUI_FRAMEBUFFER;
@@ -266,7 +341,9 @@ public class ShaderHelper {
                     };
                     if (target != null) {
                         ShaderHelper.blitToScreen(target, screenWidth * x, screenWidth,
-                            screenHeight, screenHeight * y, 0.0F, 0.0F, false, false);
+                            screenHeight, screenHeight * y, 0.0F, 0.0F, false, false,
+                            GraphicsHelper.INSTANCE.flipEyeVertically() &&
+                                (pass == RenderPass.LEFT || pass == RenderPass.RIGHT));
                     }
                 }
             }
@@ -294,30 +371,29 @@ public class ShaderHelper {
             ))
         {
             // show both eyes side by side
-            RenderTarget leftEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.framebufferEye1 :
-                DATA_HOLDER.vrRenderer.framebufferEye0;
-            RenderTarget rightEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.framebufferEye0 :
-                DATA_HOLDER.vrRenderer.framebufferEye1;
+            RenderTarget leftEye = DATA_HOLDER.vrRenderer.framebufferEye[DATA_HOLDER.vrSettings.dualMirrorSwap ? 1 : 0];
+            RenderTarget rightEye = DATA_HOLDER.vrRenderer.framebufferEye[DATA_HOLDER.vrSettings.dualMirrorSwap ? 0 :
+                1];
 
             int screenWidth = MC.mainRenderTarget.width / 2;
             int screenHeight = MC.mainRenderTarget.height;
 
             if (leftEye != null) {
                 ShaderHelper.blitToScreen(leftEye, 0, screenWidth, screenHeight, 0, 0.0F, 0.0F,
-                    DATA_HOLDER.vrSettings.dualMirrorCrop, false);
+                    DATA_HOLDER.vrSettings.dualMirrorCrop, false, GraphicsHelper.INSTANCE.flipEyeVertically());
             }
 
             if (rightEye != null) {
                 ShaderHelper.blitToScreen(rightEye, screenWidth, screenWidth, screenHeight, 0, 0.0F, 0.0F,
-                    DATA_HOLDER.vrSettings.dualMirrorCrop,
-                    false);
+                    DATA_HOLDER.vrSettings.dualMirrorCrop, false, GraphicsHelper.INSTANCE.flipEyeVertically());
             }
         } else {
             // general single buffer case
             float xCrop = 0.0F;
             float yCrop = 0.0F;
             boolean keepAspect = false;
-            RenderTarget source = DATA_HOLDER.vrRenderer.framebufferEye0;
+            RenderTarget source = DATA_HOLDER.vrRenderer.framebufferEye[0];
+            boolean flip = false;
 
             if (DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera &&
                 DATA_HOLDER.cameraTracker.isVisible())
@@ -334,16 +410,18 @@ public class ShaderHelper {
                 DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF)
             {
                 if (!DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
-                    source = DATA_HOLDER.vrRenderer.framebufferEye1;
+                    source = DATA_HOLDER.vrRenderer.framebufferEye[1];
                 }
+                flip = GraphicsHelper.INSTANCE.flipEyeVertically();
             } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.CROPPED) {
                 if (!DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
-                    source = DATA_HOLDER.vrRenderer.framebufferEye1;
+                    source = DATA_HOLDER.vrRenderer.framebufferEye[1];
                 }
 
                 xCrop = DATA_HOLDER.vrSettings.mirrorCrop;
                 yCrop = DATA_HOLDER.vrSettings.mirrorCrop;
                 keepAspect = true;
+                flip = GraphicsHelper.INSTANCE.flipEyeVertically();
             }
             // Debug
             // source = DataHolder.getInstance().vrRenderer.telescopeFramebufferR;
@@ -352,7 +430,7 @@ public class ShaderHelper {
                 ShaderHelper.blitToScreen(source,
                     0, MC.mainRenderTarget.width,
                     MC.mainRenderTarget.height, 0,
-                    xCrop, yCrop, keepAspect, false);
+                    xCrop, yCrop, keepAspect, false, flip);
             }
             if (source != GuiHandler.GUI_FRAMEBUFFER) {
                 blitGui();
@@ -416,6 +494,11 @@ public class ShaderHelper {
         VRShaders.MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM.set(DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
         VRShaders.MIXED_REALITY_GUI_MASK_UNIFORM.set(guiMask);
 
+            renderPass.setUniform(VRShaders.MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM,
+                (GraphicsHelper.INSTANCE.flipEyeVertically() &&
+                    !DATA_HOLDER.vrSettings.mixedRealityUndistorted &&
+                    !(DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible())
+                ) ? 1 : 0);
         CompiledShaderProgram mixedRealityShader = Objects.requireNonNull(
             RenderSystem.setShader(VRShaders.MIXED_REALITY_SHADER), "mixed reality shader not loaded");
 
@@ -539,7 +622,7 @@ public class ShaderHelper {
         int width = (int) (xMax * MC.mainRenderTarget.width) - x;
         int height = (int) (yMax * MC.mainRenderTarget.height) - y;
 
-        blitToScreen(GuiHandler.GUI_FRAMEBUFFER, x, width, height, y, 0, 0, true, true);
+        blitToScreen(GuiHandler.GUI_FRAMEBUFFER, x, width, height, y, 0, 0, true, true, false);
     }
 
     /**
@@ -559,7 +642,7 @@ public class ShaderHelper {
      */
     public static void blitToScreen(
         RenderTarget source, int left, int width, int height, int top, float xCropFactor, float yCropFactor,
-        boolean keepAspect, boolean blend)
+        boolean keepAspect, boolean blend, boolean flipVertically)
     {
         RenderSystem.assertOnRenderThread();
         RenderSystem.colorMask(true, true, true, blend);
@@ -611,10 +694,10 @@ public class ShaderHelper {
         float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().viewWidth * 2F;
         float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().viewHeight * 2F;
 
-        bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, yMin);
-        bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, yMin);
-        bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, yMax);
-        bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, yMax);
+        bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, flipVertically ? yMax : yMin);
+        bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, flipVertically ? yMax : yMin);
+        bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, flipVertically ? yMin : yMax);
+        bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, flipVertically ? yMin : yMax);
 
         BufferUploader.draw(bufferBuilder.buildOrThrow());
         blitShader.clear();

@@ -53,6 +53,7 @@ public class VRShaders {
     public static final String MIXED_REALITY_KEY_COLOR = "keyColor";
     public static final String MIXED_REALITY_ALPHA_MODE = "alphaMode";
     public static final String MIXED_REALITY_GUI_MASK = "guiMask";
+    public static final String MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM = "flipFirstPersonPass";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
@@ -190,5 +191,12 @@ public class VRShaders {
         POST_PROCESSING_OVERLAY_EYE_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_EYE);
         POST_PROCESSING_OVERLAY_TIME_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_TIME);
         POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_BLACK_ALPHA);
+    }
+
+    public static void init() {
+    }
+
+    public static void close() {
+        ShaderHelper.close();
     }
 }

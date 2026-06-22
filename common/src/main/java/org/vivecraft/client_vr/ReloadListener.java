@@ -7,6 +7,7 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.server.config.ServerConfig;
@@ -53,5 +54,9 @@ public class ReloadListener implements ResourceManagerReloadListener {
         ServerConfig.init(null);
 
         VRShaders.reload();
+
+        // make sure these are always loaded
+        RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE);
+        RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE);
     }
 }

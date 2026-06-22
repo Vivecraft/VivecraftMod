@@ -13,6 +13,7 @@ import org.joml.Vector3fc;
 import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.extensions.SpectatorGuiExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
@@ -113,13 +114,13 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         int box = (int) Math.floor(pos);
 
         if (box > 8) {
-            if (this.dh.vrSettings.reverseHands && pos >= 9.5 && pos <= 10.5) {
+            if (!player.isSpectator() && this.dh.vrSettings.reverseHands && pos >= 9.5 && pos <= 10.5) {
                 box = 9;
             } else {
                 return false;
             }
         } else if (box < 0) {
-            if (!this.dh.vrSettings.reverseHands && pos <= -0.5 && pos >= -1.5) {
+            if (!player.isSpectator() && !this.dh.vrSettings.reverseHands && pos <= -0.5 && pos >= -1.5) {
                 box = 9;
             } else {
                 return false;
@@ -130,6 +131,11 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
         this.hotbar = box;
         if (this.previousHotbar != this.hotbar) {
             this.dh.vr.triggerHapticPulse(0, 750);
+        }
+
+        if (player.isSpectator() && this.hotbar >= 0 && this.hotbar < 9) {
+            // show the command bar
+            ((SpectatorGuiExtension) this.mc.gui.getSpectatorGui()).vivecraft$showMenu();
         }
 
         // active if any slot is selected
@@ -155,16 +161,24 @@ public class InteractiveHotbarModule implements DebugRenderModule, InteractModul
 
     @Override
     public boolean onPress(LocalPlayer player, InteractionHand hand) {
-        if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().selected != this.hotbar &&
-            hand == InteractionHand.MAIN_HAND)
-        {
-            player.getInventory().selected = this.hotbar;
-            return true;
-        } else if (this.hotbar == 9 && hand == InteractionHand.MAIN_HAND) {
-            player.connection.send(
-                new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND,
-                    BlockPos.ZERO, Direction.DOWN));
-            return true;
+        if (player.isSpectator()) {
+            if (this.hotbar >= 0 && this.hotbar < 9) {
+                ((SpectatorGuiExtension) this.mc.gui.getSpectatorGui()).vivecraft$selectAndActivateSlot(
+                    this.hotbar);
+                return true;
+            }
+        } else {
+            if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().getSelectedSlot() != this.hotbar &&
+                hand == InteractionHand.MAIN_HAND)
+            {
+                player.getInventory().setSelectedSlot(this.hotbar);
+                return true;
+            } else if (this.hotbar == 9 && hand == InteractionHand.MAIN_HAND) {
+                player.connection.send(
+                    new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND,
+                        BlockPos.ZERO, Direction.DOWN));
+                return true;
+            }
         }
         return false;
     }
