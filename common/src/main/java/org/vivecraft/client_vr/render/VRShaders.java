@@ -10,7 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.ShaderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.Objects;
@@ -45,6 +46,7 @@ public class VRShaders {
     public static AbstractUniform MIXED_REALITY_KEY_COLOR_UNIFORM;
     public static AbstractUniform MIXED_REALITY_ALPHA_MODE_UNIFORM;
     public static AbstractUniform MIXED_REALITY_GUI_MASK_UNIFORM;
+    public static AbstractUniform MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM;
     public static final String MIXED_REALITY_HMD_VIEW_POSITION = "hmdViewPosition";
     public static final String MIXED_REALITY_HMD_PLANE_NORMAL = "hmdPlaneNormal";
     public static final String MIXED_REALITY_PROJECTION_MATRIX = "projectionMatrix";
@@ -53,6 +55,7 @@ public class VRShaders {
     public static final String MIXED_REALITY_KEY_COLOR = "keyColor";
     public static final String MIXED_REALITY_ALPHA_MODE = "alphaMode";
     public static final String MIXED_REALITY_GUI_MASK = "guiMask";
+    public static final String MIXED_REALITY_FLIP_FIRST_PERSON = "flipFirstPersonPass";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
@@ -142,11 +145,11 @@ public class VRShaders {
         READY = false;
         try {
             setupDepthMask();
-            RenderHelper.checkGLError("init depth shader");
+            GraphicsHelper.INSTANCE.checkError("init depth shader");
             setupFOVReduction();
-            RenderHelper.checkGLError("init FOV shader");
+            GraphicsHelper.INSTANCE.checkError("init FOV shader");
             setupFSAA();
-            RenderHelper.checkGLError("init fsaa shader");
+            GraphicsHelper.INSTANCE.checkError("init fsaa shader");
             READY = true;
         } catch (NullPointerException e) {
             VRSettings.LOGGER.error("Vivecraft: Shader creation failed:", e);
@@ -164,6 +167,7 @@ public class VRShaders {
         MIXED_REALITY_KEY_COLOR_UNIFORM = program.safeGetUniform(MIXED_REALITY_KEY_COLOR);
         MIXED_REALITY_ALPHA_MODE_UNIFORM = program.safeGetUniform(MIXED_REALITY_ALPHA_MODE);
         MIXED_REALITY_GUI_MASK_UNIFORM = program.safeGetUniform(MIXED_REALITY_GUI_MASK);
+        MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM = program.safeGetUniform(MIXED_REALITY_FLIP_FIRST_PERSON);
     }
 
     private static void setupFSAA() throws NullPointerException {
@@ -190,5 +194,12 @@ public class VRShaders {
         POST_PROCESSING_OVERLAY_EYE_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_EYE);
         POST_PROCESSING_OVERLAY_TIME_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_TIME);
         POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM = program.safeGetUniform(POST_PROCESSING_OVERLAY_BLACK_ALPHA);
+    }
+
+    public static void init() {
+    }
+
+    public static void close() {
+        ShaderHelper.close();
     }
 }

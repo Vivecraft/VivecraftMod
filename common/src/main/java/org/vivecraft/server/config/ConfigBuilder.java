@@ -4,6 +4,7 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.EnumGetMethod;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
@@ -12,10 +13,7 @@ import org.vivecraft.server.ServerVivePlayer;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public class ConfigBuilder {
 
@@ -269,7 +267,7 @@ public class ConfigBuilder {
         /**
          * Consumer that takes a MinecraftServer on setting change to send updates
          */
-        private Consumer<MinecraftServer> updateConsumer = null;
+        private BiConsumer<MinecraftServer, Consumer<Component>> updateConsumer = null;
 
         public ConfigValue(CommentedConfig config, List<String> path, T defaultValue) {
             this.config = config;
@@ -316,14 +314,14 @@ public class ConfigBuilder {
         }
 
         @SuppressWarnings("unchecked")
-        public <V extends ConfigValue<T>> V setOnUpdate(Consumer<MinecraftServer> consumer) {
+        public <V extends ConfigValue<T>> V setOnUpdate(BiConsumer<MinecraftServer, Consumer<Component>> consumer) {
             this.updateConsumer = consumer;
             return (V) this;
         }
 
-        public void onUpdate(MinecraftServer server) {
+        public void onUpdate(@Nullable MinecraftServer server, @Nullable Consumer<Component> notifier) {
             if (this.updateConsumer != null) {
-                this.updateConsumer.accept(server);
+                this.updateConsumer.accept(server, notifier);
             }
         }
 

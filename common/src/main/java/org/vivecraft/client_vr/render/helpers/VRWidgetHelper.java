@@ -223,6 +223,7 @@ public class VRWidgetHelper {
                     .setLight(LightTexture.FULL_BRIGHT)
                     .setNormal(0.0F, 1.0F, 0.0F);
             }
+            poseStack.popPose();
         }
         BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 

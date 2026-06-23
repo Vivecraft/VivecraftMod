@@ -45,6 +45,7 @@
     "client_vr.blaze3d.systems.RenderSystemVRMixin",
     "client_vr.gui.EditBoxVRMixin",
     "client_vr.gui.GuiVRMixin",
+    "client_vr.gui.SpectatorGuiVRMixin",
     "client_vr.gui.TutorialToastVRMixin",
     "client_vr.gui.screens.OptionsScreenVRMixin",
     "client_vr.gui.screens.PauseScreenVRMixin",
@@ -81,6 +82,8 @@
     "client_vr.renderer.entity.GuardianRendererVRMixin",
     "client_vr.renderer.entity.layers.CustomHeadLayerMixin",
     "client_vr.renderer.entity.layers.HumanoidArmorLayerMixin",
+    "client_vr.renderer.item.properties.numeric.CompassAngleStateVRMixin",
+    "client_vr.renderer.item.properties.numeric.UseDurationVRMixin",
     "client_vr.sounds.SoundEngineVRMixin",
     "client_vr.tutorial.MovementTutorialStepInstanceVRMixin",
     "client_vr.tutorial.OpenInventoryTutorialStepVRMixin",
@@ -122,6 +125,7 @@
     "world.entity.projectile.ThrownTridentMixin",
     "world.item.CrossbowItemMixin",
     "world.item.ItemMixin",
-    "world.level.block.FenceGateBlockServerMixin"
+    "world.level.block.FenceGateBlockServerMixin",
+    "world.level.savedata.maps.MapItemSavedDataMixin"
   ]
 }

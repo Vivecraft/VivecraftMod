@@ -16,7 +16,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.helpers.opengl.OpenGLHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -49,7 +49,7 @@ public class VRPassHelper {
         // THIS IS WHERE EVERYTHING IS RENDERED
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
-        RenderHelper.checkGLError("post game render " + eye);
+        GraphicsHelper.INSTANCE.checkError("post game render " + eye);
 
         if (ShadersHelper.isShaderActive()) {
             // some shaders don't write an alpha value to the final image
@@ -70,20 +70,16 @@ public class VRPassHelper {
                     DATA_HOLDER.vrRenderer.fsaaFirstPassResultFBO,
                     DATA_HOLDER.vrRenderer.fsaaLastPassResultFBO);
                 rendertarget = DATA_HOLDER.vrRenderer.fsaaLastPassResultFBO;
-                RenderHelper.checkGLError("fsaa " + eye);
+                GraphicsHelper.INSTANCE.checkError("fsaa " + eye);
                 Profiler.get().pop();
             }
 
-            if (eye == RenderPass.LEFT) {
-                DATA_HOLDER.vrRenderer.framebufferEye0.bindWrite(true);
-            } else {
-                DATA_HOLDER.vrRenderer.framebufferEye1.bindWrite(true);
-            }
+            DATA_HOLDER.vrRenderer.framebufferEye[eye == RenderPass.LEFT ? 0 : 1].bindWrite(true);
 
             // do post-processing
             ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
 
-            RenderHelper.checkGLError("post overlay" + eye);
+            GraphicsHelper.INSTANCE.checkError("post overlay" + eye);
             Profiler.get().pop();
         }
 
@@ -162,7 +158,7 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps
-            OpenGLHelper.genMipmaps(MC.mainRenderTarget);
+            GraphicsHelper.INSTANCE.genMipmaps(MC.mainRenderTarget);
         }
 
         Profiler.get().popPush("2D Keyboard");
@@ -181,7 +177,7 @@ public class VRPassHelper {
             RenderHelper.drawScreen(guiGraphics, deltaTracker, RadialHandler.UI, true);
         }
         Profiler.get().pop();
-        RenderHelper.checkGLError("post 2d ");
+        GraphicsHelper.INSTANCE.checkError("post 2d ");
 
         // done with guis
         Profiler.get().pop();
@@ -259,6 +255,6 @@ public class VRPassHelper {
             VRSettings.LOGGER.error("Vivecraft: error ending frame: {}", exception.error.getString());
         }
         Profiler.get().pop();
-        RenderHelper.checkGLError("post submit");
+        GraphicsHelper.INSTANCE.checkError("post submit");
     }
 }

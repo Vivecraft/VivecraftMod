@@ -13,6 +13,7 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.FOV_REDUCTION,
         VRSettings.VrOptions.INERTIA_FACTOR,
         VRSettings.VrOptions.MOVEMENT_MULTIPLIER,
+        VRSettings.VrOptions.SPRINT_MOVEMENT_MULTIPLIER,
         VRSettings.VrOptions.AUTO_SPRINT,
         VRSettings.VrOptions.AUTO_SPRINT_THRESHOLD,
         VRSettings.VrOptions.ANALOG_MOVEMENT,

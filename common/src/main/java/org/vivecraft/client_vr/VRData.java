@@ -9,7 +9,6 @@ import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
-import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -22,54 +21,63 @@ import java.lang.Math;
 
 public class VRData {
     // headset center
-    public VRDevicePose hmd;
+    public final VRDevicePose hmd;
     // smoothed headset center
-    public VRDevicePose center;
+    public final VRDevicePose center;
 
     // left eye
-    public VRDevicePose eye0;
+    public final VRDevicePose eye0;
     // right eye
-    public VRDevicePose eye1;
+    public final VRDevicePose eye1;
     // main controller aim
-    public VRDevicePose c0;
+    public final VRDevicePose c0;
     // offhand controller aim
-    public VRDevicePose c1;
+    public final VRDevicePose c1;
     // third person camera
-    public VRDevicePose c2;
+    public final VRDevicePose c2;
 
     // main controller hand
-    public VRDevicePose h0;
+    public final VRDevicePose h0;
     // offhand controller hand
-    public VRDevicePose h1;
+    public final VRDevicePose h1;
 
     // main controller telescope
-    public VRDevicePose t0;
+    public final VRDevicePose t0;
     // offhand controller telescope
-    public VRDevicePose t1;
+    public final VRDevicePose t1;
 
     // screenshot camera
-    public VRDevicePose cam;
+    public final VRDevicePose cam;
 
     // fbt trackers
-    public VRDevicePose waist;
-    public VRDevicePose foot_left;
-    public VRDevicePose foot_right;
-    public VRDevicePose knee_left;
-    public VRDevicePose knee_right;
-    public VRDevicePose elbow_left;
-    public VRDevicePose elbow_right;
+    @Nullable
+    public final VRDevicePose waist;
+    @Nullable
+    public final VRDevicePose foot_left;
+    @Nullable
+    public final VRDevicePose foot_right;
+    @Nullable
+    public final VRDevicePose knee_left;
+    @Nullable
+    public final VRDevicePose knee_right;
+    @Nullable
+    public final VRDevicePose elbow_left;
+    @Nullable
+    public final VRDevicePose elbow_right;
 
-    public FBTMode fbtMode = FBTMode.ARMS_ONLY;
+    public final FBTMode fbtMode;
 
     // room origin, all VRDevicePose are relative to that
     public Vec3 origin;
     // room rotation rotated around the origin
-    public float rotation_radians;
+    public final float rotation_radians;
     // pose positions get scaled by that
-    public float worldScale;
+    public final float worldScale;
 
     // API pose object representing the data of this object
     private VRPose vrPose;
+
+    private float bodyYaw = Float.MAX_VALUE;
 
     public VRData(Vec3 origin, float walkMul, float worldScale, float rotation) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
@@ -183,7 +191,6 @@ public class VRData {
         if (mcVR.hasFBT() && dataHolder.vrSettings.fbtCalibrated &&
             !(Minecraft.getInstance().screen instanceof FBTCalibrationScreen))
         {
-            this.fbtMode = FBTMode.ARMS_LEGS;
             this.waist = new VRDevicePose(this,
                 mcVR.getAimRotation(MCVR.WAIST_TRACKER),
                 mcVR.getAimSource(MCVR.WAIST_TRACKER).add(scaleOffset, new Vector3f()),
@@ -214,7 +221,22 @@ public class VRData {
                     mcVR.getAimRotation(MCVR.RIGHT_ELBOW_TRACKER),
                     mcVR.getAimSource(MCVR.RIGHT_ELBOW_TRACKER).add(scaleOffset, new Vector3f()),
                     mcVR.getAimVector(MCVR.RIGHT_ELBOW_TRACKER));
+            } else {
+                this.fbtMode = FBTMode.ARMS_LEGS;
+                this.knee_left = null;
+                this.knee_right = null;
+                this.elbow_left = null;
+                this.elbow_right = null;
             }
+        } else {
+            this.fbtMode = FBTMode.ARMS_ONLY;
+            this.waist = null;
+            this.foot_left = null;
+            this.foot_right = null;
+            this.knee_left = null;
+            this.knee_right = null;
+            this.elbow_left = null;
+            this.elbow_right = null;
         }
     }
 
@@ -310,33 +332,28 @@ public class VRData {
     }
 
     /**
-     * IMPORTANT!!! when changing this, also change {@link ClientVRPlayers.RotInfo#getBodyYawRad()}
-     *
      * @return the yaw direction the player body is facing, in radians
      */
     public float getBodyYawRad() {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
-            // in seated use the head direction
-            return this.hmd.getYawRad();
-        } else if (this.fbtMode != FBTMode.ARMS_ONLY) {
-            // use average of head and waist
-            Vector3f dir = this.waist.getDirection().lerp(this.hmd.getDirection(), 0.5F);
-            return (float) Math.atan2(-dir.x, dir.z);
-        } else {
-            if (!ClientDataHolderVR.getInstance().vr.isControllerTracking(0) ||
-                !ClientDataHolderVR.getInstance().vr.isControllerTracking(1))
+        // cache it, don't need to calculate this multiple times per frame
+        // only room origin is not final, and that doesn't affect the direction
+        if (this.bodyYaw == Float.MAX_VALUE) {
+            Vector3fc mainHandPos = null;
+            Vector3fc offHandPos = null;
+            // if they do not track they are invalid
+            if (ClientDataHolderVR.getInstance().vr.isControllerTracking(0) &&
+                ClientDataHolderVR.getInstance().vr.isControllerTracking(1))
             {
-                return this.hmd.getYawRad();
+                Vec3 headPos = this.hmd.getPosition();
+                offHandPos = MathUtils.subtractToVector3f(this.c1.getPosition(), headPos);
+                mainHandPos = MathUtils.subtractToVector3f(this.c0.getPosition(), headPos);
             }
 
-            Vec3 headPos = this.hmd.getPosition();
-
-            Vector3f c1Pos = MathUtils.subtractToVector3f(this.c1.getPosition(), headPos);
-            Vector3f c0Pos = MathUtils.subtractToVector3f(this.c0.getPosition(), headPos);
-            Vector3f head = this.hmd.getDirection();
-
-            return MathUtils.bodyYawRad(c0Pos, c1Pos, head);
+            this.bodyYaw = MathUtils.estimateBodyYawRad(ClientDataHolderVR.getInstance().vrSettings.seated,
+                ClientDataHolderVR.getInstance().vrSettings.reverseHands, this.fbtMode, this.hmd.getDirection(),
+                mainHandPos, offHandPos, () -> this.waist.getDirection());
         }
+        return this.bodyYaw;
     }
 
     /**
