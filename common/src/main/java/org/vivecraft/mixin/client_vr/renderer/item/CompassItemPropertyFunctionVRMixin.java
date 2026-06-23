@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client_vr.renderer.item.properties.numeric;
+package org.vivecraft.mixin.client_vr.renderer.item;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -8,7 +8,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
+import net.minecraft.client.renderer.item.CompassItemPropertyFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -20,16 +20,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 
-@Mixin(CompassAngleState.class)
-public class CompassAngleStateVRMixin {
+@Mixin(CompassItemPropertyFunction.class)
+public class CompassItemPropertyFunctionVRMixin {
 
     @Unique
     private ItemStack vivecraft$currentItem = null;
 
-    @WrapOperation(method = "calculate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getRotationTowardsCompassTarget(Lnet/minecraft/world/entity/Entity;JLnet/minecraft/core/BlockPos;)F"))
+    @WrapOperation(method = "getCompassRotation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/CompassItemPropertyFunction;getRotationTowardsCompassTarget(Lnet/minecraft/world/entity/Entity;JLnet/minecraft/core/BlockPos;)F"))
     private float vivecraft$rememberItem(
-        CompassAngleState instance, Entity entity, long gameTime, BlockPos targetPos, Operation<Float> original,
-        @Local(argsOnly = true) ItemStack item)
+        CompassItemPropertyFunction instance, Entity entity, long gameTime, BlockPos targetPos,
+        Operation<Float> original, @Local(argsOnly = true) ItemStack item)
     {
         this.vivecraft$currentItem = item;
         float rotation = original.call(instance, entity, gameTime, targetPos);
@@ -37,8 +37,10 @@ public class CompassAngleStateVRMixin {
         return rotation;
     }
 
-    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getAngleFromEntityToPos(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)D"))
-    private double vivecraft$handPosition(Entity entity, BlockPos target, Operation<Double> original) {
+    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/CompassItemPropertyFunction;getAngleFromEntityToPos(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)D"))
+    private double vivecraft$handPosition(
+        CompassItemPropertyFunction instance, Entity entity, BlockPos target, Operation<Double> original)
+    {
         if (VRState.VR_RUNNING && entity instanceof LocalPlayer player &&
             player == Minecraft.getInstance().player)
         {
@@ -51,7 +53,7 @@ public class CompassAngleStateVRMixin {
                     ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().c1.getPosition(), target);
             }
         }
-        return original.call(entity, target);
+        return original.call(instance, entity, target);
     }
 
     @Unique
@@ -60,9 +62,10 @@ public class CompassAngleStateVRMixin {
         return Math.atan2(target.z() - origin.z(), target.x() - origin.x()) / Mth.TWO_PI;
     }
 
-    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getWrappedVisualRotationY(Lnet/minecraft/world/entity/Entity;)F"))
-    private float vivecraft$handAngle(
-        Entity entity, Operation<Float> original, @Share("bodyYaw") LocalFloatRef bodyYaw)
+    @WrapOperation(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/CompassItemPropertyFunction;getWrappedVisualRotationY(Lnet/minecraft/world/entity/Entity;)D"))
+    private double vivecraft$handAngle(
+        CompassItemPropertyFunction instance, Entity entity, Operation<Double> original,
+        @Share("bodyYaw") LocalFloatRef bodyYaw)
     {
         if (VRState.VR_RUNNING && entity instanceof LocalPlayer player &&
             player == Minecraft.getInstance().player)
@@ -72,12 +75,12 @@ public class CompassAngleStateVRMixin {
                 ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getBodyYawRad() / Mth.TWO_PI, 1.0F));
             return bodyYaw.get();
         }
-        return original.call(entity);
+        return original.call(instance, entity);
     }
 
-    @ModifyExpressionValue(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/NeedleDirectionHelper$Wobbler;rotation()F"))
-    private float vivecraft$handRotationOffset(
-        float rotation, @Local(argsOnly = true) Entity entity, @Share("bodyYaw") LocalFloatRef bodyYaw)
+    @ModifyExpressionValue(method = "getRotationTowardsCompassTarget", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/item/CompassItemPropertyFunction$CompassWobble;rotation:D"))
+    private double vivecraft$handRotationOffset(
+        double rotation, @Local(argsOnly = true) Entity entity, @Share("bodyYaw") LocalFloatRef bodyYaw)
     {
         if (VRState.VR_RUNNING && entity instanceof LocalPlayer player &&
             player == Minecraft.getInstance().player)

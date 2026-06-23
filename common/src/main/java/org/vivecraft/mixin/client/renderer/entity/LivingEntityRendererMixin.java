@@ -41,7 +41,11 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     @Inject(method = "addLayer", at = @At("HEAD"))
     protected void vivecraft$onAddLayer(RenderLayer<S, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {}
 
-    @ModifyExpressionValue(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getMainArm()Lnet/minecraft/world/entity/HumanoidArm;"))
+    @ModifyExpressionValue(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = {
+        @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getMainArm()Lnet/minecraft/world/entity/HumanoidArm;"),
+        @At(value = "FIELD", target = "Lnet/minecraft/world/entity/HumanoidArm;RIGHT:Lnet/minecraft/world/entity/HumanoidArm;"),
+        @At(value = "FIELD", target = "Lnet/minecraft/world/entity/HumanoidArm;LEFT:Lnet/minecraft/world/entity/HumanoidArm;")
+    })
     private HumanoidArm vivecraft$leftHanded(HumanoidArm original, @Local(argsOnly = true) LivingEntity entity) {
         if (ClientVRPlayers.getInstance().isVRAndLeftHanded(entity.getUUID())) {
             return original.getOpposite();
