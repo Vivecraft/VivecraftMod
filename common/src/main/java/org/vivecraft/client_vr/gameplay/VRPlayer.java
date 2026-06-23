@@ -322,7 +322,8 @@ public class VRPlayer {
             }
         }
 
-        this.dh.menuHandOff = MethodHolder.isInMenuRoom() || this.mc.screen != null || KeyboardHandler.SHOWING;
+        this.dh.menuHandOff = MethodHolder.isInMenuRoom() || this.mc.screen != null || KeyboardHandler.SHOWING ||
+            (this.mc.player != null && this.mc.player.isSpectator());
         this.dh.menuHandMain = this.dh.menuHandOff ||
             (this.dh.hotbarModule.hotbar >= 0 && this.dh.vrSettings.vrTouchHotbar);
     }
@@ -791,8 +792,7 @@ public class VRPlayer {
 
                 if (ClientDataHolderVR.getInstance().katVr) {
                     jkatvr.query();
-                    horizontalInput =
-                        jkatvr.getSpeed() * jkatvr.walkDirection() * this.dh.vrSettings.movementSpeedMultiplier;
+                    horizontalInput = jkatvr.getSpeed() * jkatvr.walkDirection();
                     direction = new Vec3(0.0D, 0.0D, horizontalInput);
 
                     if (isFlyingOrSwimming) {
@@ -803,8 +803,7 @@ public class VRPlayer {
                         -jkatvr.getYaw() * Mth.DEG_TO_RAD + this.vrdata_world_pre.rotation_radians);
                 } else if (ClientDataHolderVR.getInstance().infinadeck) {
                     jinfinadeck.query();
-                    horizontalInput = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() *
-                        this.dh.vrSettings.movementSpeedMultiplier;
+                    horizontalInput = jinfinadeck.getSpeed() * jinfinadeck.walkDirection();
                     direction = new Vec3(0.0D, 0.0D, horizontalInput);
 
                     if (isFlyingOrSwimming) {
@@ -851,6 +850,12 @@ public class VRPlayer {
                             default -> direction;
                         };
                     }
+                }
+
+                if (player.isSprinting() && this.dh.vrSettings.sprintMovementSpeedMultiplier > 0.145F) {
+                    direction = direction.scale(this.dh.vrSettings.sprintMovementSpeedMultiplier);
+                } else {
+                    direction = direction.scale(this.dh.vrSettings.movementSpeedMultiplier);
                 }
 
                 mX = direction.x;

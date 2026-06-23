@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "org.vivecraft.mod_compat_vr.modefite.mixin",
+  "plugin": "org.vivecraft.MixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "UseDurationFloatVRMixin",
+    "UsingItemBoolVRMixin"
+  ],
+  "minVersion": "0.8.4"
+}

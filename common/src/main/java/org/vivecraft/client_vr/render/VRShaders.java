@@ -4,7 +4,8 @@ import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.ShaderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class VRShaders {
     public static AbstractUniform MIXED_REALITY_KEY_COLOR_UNIFORM;
     public static AbstractUniform MIXED_REALITY_ALPHA_MODE_UNIFORM;
     public static AbstractUniform MIXED_REALITY_GUI_MASK_UNIFORM;
+    public static AbstractUniform MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM;
     public static final String MIXED_REALITY_HMD_VIEW_POSITION = "hmdViewPosition";
     public static final String MIXED_REALITY_HMD_PLANE_NORMAL = "hmdPlaneNormal";
     public static final String MIXED_REALITY_PROJECTION_MATRIX = "projectionMatrix";
@@ -42,6 +44,7 @@ public class VRShaders {
     public static final String MIXED_REALITY_KEY_COLOR = "keyColor";
     public static final String MIXED_REALITY_ALPHA_MODE = "alphaMode";
     public static final String MIXED_REALITY_GUI_MASK = "guiMask";
+    public static final String MIXED_REALITY_FLIP_FIRST_PERSON = "flipFirstPersonPass";
     public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
@@ -104,11 +107,11 @@ public class VRShaders {
         close();
         try {
             setupDepthMask(resourceManager);
-            RenderHelper.checkGLError("init depth shader");
+            GraphicsHelper.INSTANCE.checkError("init depth shader");
             setupFOVReduction(resourceManager);
-            RenderHelper.checkGLError("init FOV shader");
+            GraphicsHelper.INSTANCE.checkError("init FOV shader");
             setupFSAA(resourceManager);
-            RenderHelper.checkGLError("FBO init fsaa shader");
+            GraphicsHelper.INSTANCE.checkError("init fsaa shader");
             setupBlitAspect(resourceManager);
             RenderHelper.checkGLError("init blit shader");
             setupPortalShaders(resourceManager);
@@ -146,6 +149,7 @@ public class VRShaders {
             RENDERTYPE_END_PORTAL_VR_SHADER = null;
         }
         READY = false;
+        MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM = program.safeGetUniform(MIXED_REALITY_FLIP_FIRST_PERSON);
     }
 
     private static void setupDepthMask(ResourceManager resourceManager) throws IOException {
@@ -203,5 +207,12 @@ public class VRShaders {
             DefaultVertexFormat.POSITION);
         RENDERTYPE_END_GATEWAY_VR_SHADER = new ShaderInstance(resourceManager, "rendertype_end_gateway_vr",
             DefaultVertexFormat.POSITION);
+    }
+
+    public static void init() {
+    }
+
+    public static void close() {
+        ShaderHelper.close();
     }
 }
