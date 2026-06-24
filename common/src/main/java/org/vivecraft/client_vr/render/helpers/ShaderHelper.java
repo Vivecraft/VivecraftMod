@@ -103,47 +103,47 @@ public class ShaderHelper {
         if (format == DefaultVertexFormat.POSITION_TEX) {
             if (!flipVertically) {
                 if (SCREEN_UV_VBO == null) {
-                    BufferBuilder builder = Tesselator.getInstance()
-                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
-                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
-                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
-                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
+                    BufferBuilder builder = Tesselator.getInstance().getBuilder();
+                    builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.vertex(-1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
+                    builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
+                    builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
+                    builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
 
                     SCREEN_UV_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
                     SCREEN_UV_VBO.bind();
-                    SCREEN_UV_VBO.upload(builder.buildOrThrow());
+                    SCREEN_UV_VBO.upload(builder.end());
                     VertexBuffer.unbind();
                 }
                 return SCREEN_UV_VBO;
             } else {
                 if (SCREEN_UV_VBO_FLIPPED == null) {
-                    BufferBuilder builder = Tesselator.getInstance()
-                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 1.0F);
-                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 1.0F);
-                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 0.0F);
-                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 0.0F);
+                    BufferBuilder builder = Tesselator.getInstance().getBuilder();
+                    builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.vertex(-1.0F, -1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
+                    builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
+                    builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
+                    builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
 
                     SCREEN_UV_VBO_FLIPPED = new VertexBuffer(VertexBuffer.Usage.STATIC);
                     SCREEN_UV_VBO_FLIPPED.bind();
-                    SCREEN_UV_VBO_FLIPPED.upload(builder.buildOrThrow());
+                    SCREEN_UV_VBO_FLIPPED.upload(builder.end());
                     VertexBuffer.unbind();
                 }
                 return SCREEN_UV_VBO_FLIPPED;
             }
         } else if (format == DefaultVertexFormat.POSITION) {
             if (SCREEN_VBO == null) {
-                BufferBuilder builder = Tesselator.getInstance()
-                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-                builder.addVertex(-1.0F, -1.0F, 0.0F);
-                builder.addVertex(1.0F, -1.0F, 0.0F);
-                builder.addVertex(1.0F, 1.0F, 0.0F);
-                builder.addVertex(-1.0F, 1.0F, 0.0F);
+                BufferBuilder builder = Tesselator.getInstance().getBuilder();
+                builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+                builder.vertex(-1.0F, -1.0F, 0.0F).endVertex();
+                builder.vertex(1.0F, -1.0F, 0.0F).endVertex();
+                builder.vertex(1.0F, 1.0F, 0.0F).endVertex();
+                builder.vertex(-1.0F, 1.0F, 0.0F).endVertex();
 
                 SCREEN_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
                 SCREEN_VBO.bind();
-                SCREEN_VBO.upload(builder.buildOrThrow());
+                SCREEN_VBO.upload(builder.end());
                 VertexBuffer.unbind();
             }
             return SCREEN_VBO;
@@ -681,10 +681,10 @@ public class ShaderHelper {
         float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().viewWidth * 2F;
         float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().viewHeight * 2F;
 
-        bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, flipVertically ? yMax : yMin);
-        bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, flipVertically ? yMax : yMin);
-        bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, flipVertically ? yMin : yMax);
-        bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, flipVertically ? yMin : yMax);
+        bufferBuilder.vertex(xMinPos, yMinPos, 0.0F).uv(xMin, flipVertically ? yMax : yMin).endVertex();
+        bufferBuilder.vertex(xMaxPos, yMinPos, 0.0F).uv(xMax, flipVertically ? yMax : yMin).endVertex();
+        bufferBuilder.vertex(xMaxPos, yMaxPos, 0.0F).uv(xMax, flipVertically ? yMin : yMax).endVertex();
+        bufferBuilder.vertex(xMinPos, yMaxPos, 0.0F).uv(xMin, flipVertically ? yMin : yMax).endVertex();
 
         BufferUploader.draw(bufferBuilder.end());
         VRShaders.BLIT_VR_SHADER.clear();

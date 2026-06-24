@@ -199,17 +199,18 @@ public abstract class VRRenderer {
         for (int i = 0; i < this.hiddenMeshVertices.length; ++i) {
             float[] vertices = this.hiddenMeshVertices[i];
             if (vertices == null) continue;
-            BufferBuilder builder = Tesselator.getInstance()
-                .begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder builder = Tesselator.getInstance().getBuilder();
+            builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
 
             for (int v = 0; v < vertices.length; v += 2) {
-                builder.addVertex(vertices[v], vertices[v + 1], 0.0F)
-                    .setColor(0, 0, 0, 255);
+                builder.vertex(vertices[v], vertices[v + 1], 0.0F)
+                    .color(0, 0, 0, 255)
+                    .endVertex();
             }
 
             this.bakedHiddenMesh[i] = new VertexBuffer(VertexBuffer.Usage.STATIC);
             this.bakedHiddenMesh[i].bind();
-            this.bakedHiddenMesh[i].upload(builder.buildOrThrow());
+            this.bakedHiddenMesh[i].upload(builder.end());
             VertexBuffer.unbind();
         }
     }
