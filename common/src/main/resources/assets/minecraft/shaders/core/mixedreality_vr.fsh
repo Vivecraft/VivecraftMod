@@ -21,6 +21,7 @@ uniform vec3 keyColor;
 uniform int alphaMode;
 uniform int firstPersonPass;
 uniform int guiMask;
+uniform int flipFirstPersonPass;
 
 in vec2 texCoordinates;
 
@@ -56,6 +57,16 @@ vec4 sampleTexture(sampler2D colorSampler, vec2 coord, int gui) {
     return color;
 }
 
+vec4 sampleTextureFlipped(sampler2D colorSampler, vec2 coord, int gui) {
+    vec4 color = vec4(texture(colorSampler, vec2(coord.x, 1.0 - coord.y)).rgb, 0.0);
+    if ((guiMask & gui) != 0) {
+        vec4 guiColor = texture(guiColor, coord);
+        color.rgb = mix(color.rgb, guiColor.rgb, guiColor.a);
+        color.a = guiColor.a;
+    }
+    return color;
+}
+
 void main(void) {
 
     out_Color = vec4(keyColor.rgb, 1.0);
@@ -64,7 +75,11 @@ void main(void) {
         vec2 sampleTexCoord = fract(texCoordinates * 2.0);
         if (texCoordinates.x >= 0.5 && texCoordinates.y < 0.5) {
             // first person
-            out_Color.rgb = sampleTexture(firstPersonColor, sampleTexCoord, GUI_FIRST).rgb;
+            if (flipFirstPersonPass == 1) {
+                out_Color.rgb = sampleTextureFlipped(firstPersonColor, sampleTexCoord, GUI_FIRST).rgb;
+            } else {
+                out_Color.rgb = sampleTexture(firstPersonColor, sampleTexCoord, GUI_FIRST).rgb;
+            }
         } else {
             vec4 thirdColor = sampleTexture(thirdPersonColor, sampleTexCoord, GUI_THIRD);
             if (texCoordinates.x < 0.5 && texCoordinates.y < 0.5) {

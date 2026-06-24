@@ -7,7 +7,6 @@
     "NeoForgeGameRendererVRMixin",
     "NeoForgeIngameGuiVRMixin",
     "NeoForgeMinecraftVRMixin",
-    "NeoForgeMouseHandlerVRMixin",
     "network.NeoForgeOpenContainerVRMixin"
   ],
   "minVersion": "0.8.4"

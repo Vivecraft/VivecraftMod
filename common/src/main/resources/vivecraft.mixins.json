@@ -43,6 +43,7 @@
     "client_vr.gui.EditBoxVRMixin",
     "client_vr.gui.GuiGraphicsVRMixin",
     "client_vr.gui.GuiVRMixin",
+    "client_vr.gui.SpectatorGuiVRMixin",
     "client_vr.gui.TutorialToastVRMixin",
     "client_vr.gui.screens.OptionsScreenVRMixin",
     "client_vr.gui.screens.PauseScreenVRMixin",
@@ -76,6 +77,7 @@
     "client_vr.renderer.entity.GuardianRendererVRMixin",
     "client_vr.renderer.entity.layers.CustomHeadLayerMixin",
     "client_vr.renderer.entity.layers.HumanoidArmorLayerMixin",
+    "client_vr.renderer.item.CompassItemPropertyFunctionVRMixin",
     "client_vr.sounds.SoundEngineVRMixin",
     "client_vr.tutorial.MovementTutorialStepInstanceVRMixin",
     "client_vr.tutorial.OpenInventoryTutorialStepVRMixin",
@@ -120,5 +122,6 @@
     "world.item.CrossbowItemMixin",
     "world.item.crafting.ShapedRecipeMixin",
     "world.level.block.FenceGateBlockServerMixin"
+    "world.level.savedata.maps.MapItemSavedDataMixin"
   ]
 }

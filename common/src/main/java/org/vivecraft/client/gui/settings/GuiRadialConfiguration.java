@@ -19,7 +19,8 @@ import java.util.Optional;
 
 public class GuiRadialConfiguration extends GuiVROptionsBase {
     private static final VROptionLayout[] OPTIONS = new VROptionLayout[]{
-        new VROptionLayout(VRSettings.VrOptions.RADIAL_MODE_HOLD, VROptionLayout.Position.POS_LEFT, 0.0F, true, "")
+        new VROptionLayout(GuiRadialSettings.class, VROptionLayout.Position.POS_LEFT, 0.0F, true,
+            "vivecraft.options.screen.radialsettings.button")
     };
     private String[] arr;
     private boolean isShift = false;
