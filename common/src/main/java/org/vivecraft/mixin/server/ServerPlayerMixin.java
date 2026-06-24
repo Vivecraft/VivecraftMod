@@ -45,12 +45,10 @@ import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
 import org.vivecraft.data.ViveItems;
 import org.vivecraft.mixin.world.entity.PlayerMixin;
-import org.vivecraft.server.ServerNetworking;
+import org.vivecraft.server.ServerUtil;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
-
-import java.util.IllegalFormatException;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends PlayerMixin {
@@ -249,6 +247,12 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             this.useItem = this.vivecraft$roomscaleShieldItem;
             original.call(damageAmount);
             this.useItem = backup;
+            if (ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get() > 0 &&
+                damageAmount >= ServerConfig.ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER.get())
+            {
+                this.getCooldowns().addCooldown(this.vivecraft$roomscaleShieldItem.getItem(),
+                    ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get());
+            }
         } else {
             original.call(damageAmount);
         }
@@ -430,14 +434,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
 
             // actually send the message, if there is one set
             if (!message.isEmpty()) {
-                try {
-                    this.server.getPlayerList()
-                        .broadcastSystemMessage(Component.literal(message.formatted(getName().getString(), entity)),
-                            false);
-                } catch (IllegalFormatException e) {
-                    // catch errors users might put into the messages, to not crash other stuff
-                    ServerNetworking.LOGGER.error("Vivecraft: Death message '{}' has errors:", message, e);
-                }
+                this.server.getPlayerList().broadcastSystemMessage(
+                    Component.literal(ServerUtil.formatMessage(message,
+                        getName().getString(),
+                        "&cause", entity)),
+                    false);
             }
         }
     }

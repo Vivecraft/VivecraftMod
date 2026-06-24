@@ -25,6 +25,7 @@ import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 
@@ -43,13 +44,34 @@ public class ShaderHelper {
     private static float BLUE;
     private static float TIME;
 
+    private static VertexBuffer SCREEN_UV_VBO;
+    private static VertexBuffer SCREEN_UV_VBO_FLIPPED;
+    private static VertexBuffer SCREEN_VBO;
+
     /**
      * renders a fullscreen quad with the given shader, and the given RenderTarget bound as "Sampler0"
      *
      * @param instance shader to use to render
      * @param source   RenderTarget to sample from
      */
-    public static void renderFullscreenQuad(@NotNull ShaderInstance instance, @NotNull RenderTarget source) {
+    public static void renderFullscreenQuad(
+        @NotNull ShaderInstance instance,
+        @NotNull RenderTarget source)
+    {
+        renderFullscreenQuad(instance, source, false);
+    }
+
+    /**
+     * renders a fullscreen quad with the given shader, and the given RenderTarget bound as "Sampler0"
+     *
+     * @param instance shader to use to render
+     * @param source   RenderTarget to sample from
+     */
+    public static void renderFullscreenQuad(
+        @NotNull ShaderInstance instance,
+        @NotNull RenderTarget source,
+        boolean flipVertically)
+    {
         RenderSystem.colorMask(true, true, true, false);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
@@ -58,11 +80,18 @@ public class ShaderHelper {
         instance.setSampler("Sampler0", source.getColorTextureId());
         instance.apply();
 
-        drawFullscreenQuad(instance.getVertexFormat());
+        drawFullscreenQuad(instance.getVertexFormat(), flipVertically);
 
         instance.clear();
         RenderSystem.depthMask(true);
         RenderSystem.colorMask(true, true, true, true);
+    }
+
+    private static void drawFullscreenQuad(VertexFormat format, boolean flipVertically) {
+        VertexBuffer quad = getFullscreenQuad(format, flipVertically);
+        quad.bind();
+        quad.draw();
+        VertexBuffer.unbind();
     }
 
     /**
@@ -70,29 +99,71 @@ public class ShaderHelper {
      *
      * @param format VertexFormat to use for rendering
      */
-    private static void drawFullscreenQuad(VertexFormat format) {
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.QUADS, format);
-
+    private static VertexBuffer getFullscreenQuad(VertexFormat format, boolean flipVertically) {
         if (format == DefaultVertexFormat.POSITION_TEX) {
-            builder.vertex(-1.0, -1.0, 0.0).uv(0.0F, 0.0F).endVertex();
-            builder.vertex(1.0, -1.0, 0.0).uv(1.0F, 0.0F).endVertex();
-            builder.vertex(1.0, 1.0, 0.0).uv(1.0F, 1.0F).endVertex();
-            builder.vertex(-1.0, 1.0, 0.0).uv(0.0F, 1.0F).endVertex();
-        } else if (format == DefaultVertexFormat.POSITION_TEX_COLOR) {
-            builder.vertex(-1.0, -1.0, 0.0).uv(0.0F, 0.0F)
-                .color(255, 255, 255, 255).endVertex();
-            builder.vertex(1.0, -1.0, 0.0).uv(1.0F, 0.0F)
-                .color(255, 255, 255, 255).endVertex();
-            builder.vertex(1.0, 1.0, 0.0).uv(1.0F, 1.0F)
-                .color(255, 255, 255, 255).endVertex();
-            builder.vertex(-1.0, 1.0, 0.0).uv(0.0F, 1.0F)
-                .color(255, 255, 255, 255).endVertex();
-        } else {
-            throw new IllegalStateException("Unexpected vertex format " + format);
-        }
+            if (!flipVertically) {
+                if (SCREEN_UV_VBO == null) {
+                    BufferBuilder builder = Tesselator.getInstance()
+                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
+                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
+                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
+                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
 
-        BufferUploader.draw(builder.end());
+                    SCREEN_UV_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
+                    SCREEN_UV_VBO.bind();
+                    SCREEN_UV_VBO.upload(builder.buildOrThrow());
+                    VertexBuffer.unbind();
+                }
+                return SCREEN_UV_VBO;
+            } else {
+                if (SCREEN_UV_VBO_FLIPPED == null) {
+                    BufferBuilder builder = Tesselator.getInstance()
+                        .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                    builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 1.0F);
+                    builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 1.0F);
+                    builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 0.0F);
+                    builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 0.0F);
+
+                    SCREEN_UV_VBO_FLIPPED = new VertexBuffer(VertexBuffer.Usage.STATIC);
+                    SCREEN_UV_VBO_FLIPPED.bind();
+                    SCREEN_UV_VBO_FLIPPED.upload(builder.buildOrThrow());
+                    VertexBuffer.unbind();
+                }
+                return SCREEN_UV_VBO_FLIPPED;
+            }
+        } else if (format == DefaultVertexFormat.POSITION) {
+            if (SCREEN_VBO == null) {
+                BufferBuilder builder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+                builder.addVertex(-1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, -1.0F, 0.0F);
+                builder.addVertex(1.0F, 1.0F, 0.0F);
+                builder.addVertex(-1.0F, 1.0F, 0.0F);
+
+                SCREEN_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
+                SCREEN_VBO.bind();
+                SCREEN_VBO.upload(builder.buildOrThrow());
+                VertexBuffer.unbind();
+            }
+            return SCREEN_VBO;
+        }
+        throw new IllegalStateException("Unsupported Vertex format: " + format);
+    }
+
+    public static void close() {
+        if (SCREEN_VBO != null) {
+            SCREEN_VBO.close();
+            SCREEN_VBO = null;
+        }
+        if (SCREEN_UV_VBO != null) {
+            SCREEN_UV_VBO.close();
+            SCREEN_UV_VBO = null;
+        }
+        if (SCREEN_UV_VBO_FLIPPED != null) {
+            SCREEN_UV_VBO_FLIPPED.close();
+            SCREEN_UV_VBO_FLIPPED = null;
+        }
     }
 
     /**
@@ -249,9 +320,10 @@ public class ShaderHelper {
             int screenHeight = MC.mainRenderTarget.height / 2;
             for (int x = 0; x < 4; x++) {
                 for (int y = 0; y < 2; y++) {
-                    RenderTarget target = switch (RenderPass.values()[x + 4 * y]) {
-                        case LEFT -> DATA_HOLDER.vrRenderer.framebufferEye0;
-                        case RIGHT -> DATA_HOLDER.vrRenderer.framebufferEye1;
+                    RenderPass pass = RenderPass.values()[x + 4 * y];
+                    RenderTarget target = switch (pass) {
+                        case LEFT -> DATA_HOLDER.vrRenderer.framebufferEye[0];
+                        case RIGHT -> DATA_HOLDER.vrRenderer.framebufferEye[1];
                         case CENTER -> DATA_HOLDER.vrRenderer.framebufferUndistorted;
                         case THIRD -> DATA_HOLDER.vrRenderer.framebufferMR;
                         case GUI -> GuiHandler.GUI_FRAMEBUFFER;
@@ -262,7 +334,9 @@ public class ShaderHelper {
                     };
                     if (target != null) {
                         ShaderHelper.blitToScreen(target, screenWidth * x, screenWidth,
-                            screenHeight, screenHeight * y, 0.0F, 0.0F, false, false);
+                            screenHeight, screenHeight * y, 0.0F, 0.0F, false, false,
+                            GraphicsHelper.INSTANCE.flipEyeVertically() &&
+                                (pass == RenderPass.LEFT || pass == RenderPass.RIGHT));
                     }
                 }
             }
@@ -290,30 +364,29 @@ public class ShaderHelper {
             ))
         {
             // show both eyes side by side
-            RenderTarget leftEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.framebufferEye1 :
-                DATA_HOLDER.vrRenderer.framebufferEye0;
-            RenderTarget rightEye = DATA_HOLDER.vrSettings.dualMirrorSwap ? DATA_HOLDER.vrRenderer.framebufferEye0 :
-                DATA_HOLDER.vrRenderer.framebufferEye1;
+            RenderTarget leftEye = DATA_HOLDER.vrRenderer.framebufferEye[DATA_HOLDER.vrSettings.dualMirrorSwap ? 1 : 0];
+            RenderTarget rightEye = DATA_HOLDER.vrRenderer.framebufferEye[DATA_HOLDER.vrSettings.dualMirrorSwap ? 0 :
+                1];
 
             int screenWidth = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth() / 2;
             int screenHeight = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight();
 
             if (leftEye != null) {
                 ShaderHelper.blitToScreen(leftEye, 0, screenWidth, screenHeight, 0, 0.0F, 0.0F,
-                    DATA_HOLDER.vrSettings.dualMirrorCrop, false);
+                    DATA_HOLDER.vrSettings.dualMirrorCrop, false, GraphicsHelper.INSTANCE.flipEyeVertically());
             }
 
             if (rightEye != null) {
                 ShaderHelper.blitToScreen(rightEye, screenWidth, screenWidth, screenHeight, 0, 0.0F, 0.0F,
-                    DATA_HOLDER.vrSettings.dualMirrorCrop,
-                    false);
+                    DATA_HOLDER.vrSettings.dualMirrorCrop, false, GraphicsHelper.INSTANCE.flipEyeVertically());
             }
         } else {
             // general single buffer case
             float xCrop = 0.0F;
             float yCrop = 0.0F;
             boolean keepAspect = false;
-            RenderTarget source = DATA_HOLDER.vrRenderer.framebufferEye0;
+            RenderTarget source = DATA_HOLDER.vrRenderer.framebufferEye[0];
+            boolean flip = false;
 
             if (DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera &&
                 DATA_HOLDER.cameraTracker.isVisible())
@@ -330,16 +403,18 @@ public class ShaderHelper {
                 DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF)
             {
                 if (!DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
-                    source = DATA_HOLDER.vrRenderer.framebufferEye1;
+                    source = DATA_HOLDER.vrRenderer.framebufferEye[1];
                 }
+                flip = GraphicsHelper.INSTANCE.flipEyeVertically();
             } else if (DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.CROPPED) {
                 if (!DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
-                    source = DATA_HOLDER.vrRenderer.framebufferEye1;
+                    source = DATA_HOLDER.vrRenderer.framebufferEye[1];
                 }
 
                 xCrop = DATA_HOLDER.vrSettings.mirrorCrop;
                 yCrop = DATA_HOLDER.vrSettings.mirrorCrop;
                 keepAspect = true;
+                flip = GraphicsHelper.INSTANCE.flipEyeVertically();
             }
             // Debug
             // source = DataHolder.getInstance().vrRenderer.telescopeFramebufferR;
@@ -348,7 +423,7 @@ public class ShaderHelper {
                 ShaderHelper.blitToScreen(source,
                     0, ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth(),
                     ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight(), 0,
-                    xCrop, yCrop, keepAspect, false);
+                    xCrop, yCrop, keepAspect, false, flip);
             }
             if (source != GuiHandler.GUI_FRAMEBUFFER) {
                 blitGui();
@@ -412,6 +487,12 @@ public class ShaderHelper {
         VRShaders.MIXED_REALITY_FIRST_PERSON_PASS_UNIFORM.set(DATA_HOLDER.vrSettings.mixedRealityUnityLike ? 1 : 0);
         VRShaders.MIXED_REALITY_GUI_MASK_UNIFORM.set(guiMask);
 
+        VRShaders.MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM.set(
+            (GraphicsHelper.INSTANCE.flipEyeVertically() &&
+                !DATA_HOLDER.vrSettings.mixedRealityUndistorted &&
+                !(DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible())
+            ) ? 1 : 0);
+
         // bind textures
         VRShaders.MIXED_REALITY_SHADER.setSampler(VRShaders.MIXED_REALITY_THIRD_COLOR_SAMPLER,
             DATA_HOLDER.vrRenderer.framebufferMR.getColorTextureId());
@@ -429,9 +510,9 @@ public class ShaderHelper {
                 source = DATA_HOLDER.vrRenderer.framebufferUndistorted;
             } else {
                 if (DATA_HOLDER.vrSettings.displayMirrorLeftEye) {
-                    source = DATA_HOLDER.vrRenderer.framebufferEye0;
+                    source = DATA_HOLDER.vrRenderer.framebufferEye[0];
                 } else {
-                    source = DATA_HOLDER.vrRenderer.framebufferEye1;
+                    source = DATA_HOLDER.vrRenderer.framebufferEye[1];
                 }
             }
             VRShaders.MIXED_REALITY_SHADER.setSampler(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER,
@@ -440,7 +521,7 @@ public class ShaderHelper {
 
         VRShaders.MIXED_REALITY_SHADER.apply();
 
-        drawFullscreenQuad(VRShaders.MIXED_REALITY_SHADER.getVertexFormat());
+        drawFullscreenQuad(VRShaders.MIXED_REALITY_SHADER.getVertexFormat(), false);
 
         VRShaders.MIXED_REALITY_SHADER.clear();
     }
@@ -470,7 +551,7 @@ public class ShaderHelper {
             VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(0.0F);
             VRShaders.LANCZOS_SHADER.apply();
 
-            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.getVertexFormat());
+            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.getVertexFormat(), false);
 
             // second pass, vertical
             secondPass.bindWrite(true);
@@ -481,7 +562,7 @@ public class ShaderHelper {
             VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(1.0F / (3.0F * (float) secondPass.viewHeight));
             VRShaders.LANCZOS_SHADER.apply();
 
-            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.getVertexFormat());
+            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.getVertexFormat(), false);
 
             // Clean up time
             VRShaders.LANCZOS_SHADER.clear();
@@ -530,7 +611,7 @@ public class ShaderHelper {
         int width = (int) (xMax * MC.mainRenderTarget.width) - x;
         int height = (int) (yMax * MC.mainRenderTarget.height) - y;
 
-        blitToScreen(GuiHandler.GUI_FRAMEBUFFER, x, width, height, y, 0, 0, true, true);
+        blitToScreen(GuiHandler.GUI_FRAMEBUFFER, x, width, height, y, 0, 0, true, true, false);
     }
 
     /**
@@ -550,7 +631,7 @@ public class ShaderHelper {
      */
     public static void blitToScreen(
         RenderTarget source, int left, int width, int height, int top, float xCropFactor, float yCropFactor,
-        boolean keepAspect, boolean blend)
+        boolean keepAspect, boolean blend, boolean flipVertically)
     {
         RenderSystem.assertOnRenderThread();
         RenderSystem.colorMask(true, true, true, blend);
@@ -600,10 +681,10 @@ public class ShaderHelper {
         float xMaxPos = xMinPos + (float) width / MC.getMainRenderTarget().viewWidth * 2F;
         float yMaxPos = yMinPos + (float) height / MC.getMainRenderTarget().viewHeight * 2F;
 
-        bufferBuilder.vertex(xMinPos, yMinPos, 0.0F).uv(xMin, yMin).endVertex();
-        bufferBuilder.vertex(xMaxPos, yMinPos, 0.0F).uv(xMax, yMin).endVertex();
-        bufferBuilder.vertex(xMaxPos, yMaxPos, 0.0F).uv(xMax, yMax).endVertex();
-        bufferBuilder.vertex(xMinPos, yMaxPos, 0.0F).uv(xMin, yMax).endVertex();
+        bufferBuilder.addVertex(xMinPos, yMinPos, 0.0F).setUv(xMin, flipVertically ? yMax : yMin);
+        bufferBuilder.addVertex(xMaxPos, yMinPos, 0.0F).setUv(xMax, flipVertically ? yMax : yMin);
+        bufferBuilder.addVertex(xMaxPos, yMaxPos, 0.0F).setUv(xMax, flipVertically ? yMin : yMax);
+        bufferBuilder.addVertex(xMinPos, yMaxPos, 0.0F).setUv(xMin, flipVertically ? yMin : yMax);
 
         BufferUploader.draw(bufferBuilder.end());
         VRShaders.BLIT_VR_SHADER.clear();
@@ -635,7 +716,7 @@ public class ShaderHelper {
         VRShaders.BLIT_VR_SHADER.setSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureId());
 
         VRShaders.BLIT_VR_SHADER.apply();
-        drawFullscreenQuad(VRShaders.BLIT_VR_SHADER.getVertexFormat());
+        drawFullscreenQuad(VRShaders.BLIT_VR_SHADER.getVertexFormat(), false);
         VRShaders.BLIT_VR_SHADER.clear();
 
         RenderSystem.depthMask(true);

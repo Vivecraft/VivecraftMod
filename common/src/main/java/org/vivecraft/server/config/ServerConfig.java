@@ -6,10 +6,12 @@ import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.vivecraft.Xloader;
+import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.common.network.packet.s2c.AttackWhileBlockingPayloadS2C;
 import org.vivecraft.common.network.packet.s2c.CrawlPayloadS2C;
 import org.vivecraft.common.network.packet.s2c.DualWieldingPayloadS2C;
@@ -32,10 +34,13 @@ public class ServerConfig {
     public static ConfigBuilder.InListValue<String> CHECK_FOR_UPDATE_TYPE;
     public static ConfigBuilder.BooleanValue VR_ONLY;
     public static ConfigBuilder.BooleanValue VIVE_ONLY;
+    public static ConfigBuilder.StringValue MIN_VIVE_VERSION_STRING;
+    public static UpdateChecker.Version MIN_VIVE_VERSION = UpdateChecker.Version.UNKNOWN;
     public static ConfigBuilder.BooleanValue ALLOW_OP;
     public static ConfigBuilder.DoubleValue MESSAGE_KICK_DELAY;
     public static ConfigBuilder.BooleanValue VR_FUN;
     public static ConfigBuilder.BooleanValue SEND_DATA_TO_OWNER;
+    public static ConfigBuilder.BooleanValue KICK_PLAYERS_ON_SETTING_UPDATE;
 
     // messages
     public static ConfigBuilder.BooleanValue MESSAGES_ENABLED;
@@ -54,6 +59,7 @@ public class ServerConfig {
     public static ConfigBuilder.StringValue MESSAGES_LEAVE_MESSAGE;
     public static ConfigBuilder.StringValue MESSAGES_KICK_VIVE_ONLY;
     public static ConfigBuilder.StringValue MESSAGES_KICK_VR_ONLY;
+    public static ConfigBuilder.StringValue MESSAGES_KICK_OUTDATED_VIVE_VERSION;
 
     // vrChanges
     public static ConfigBuilder.BooleanValue DUAL_WIELDING;
@@ -63,6 +69,8 @@ public class ServerConfig {
     public static ConfigBuilder.DoubleValue PROJECTILE_INACCURACY_MULTIPLIER;
     public static ConfigBuilder.BooleanValue ALLOW_FASTER_BLOCK_BREAKING;
     public static ConfigBuilder.BooleanValue ALLOW_ROOMSCALE_SHIELD_BLOCKING;
+    public static ConfigBuilder.IntValue ROOMSCALE_SHIELD_COOLDOWN;
+    public static ConfigBuilder.DoubleValue ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER;
     public static ConfigBuilder.BooleanValue ALLOW_ATTACKS_WHILE_BLOCKING;
     // bow
     public static ConfigBuilder.DoubleValue BOW_STANDING_MULTIPLIER;
@@ -169,6 +177,22 @@ public class ServerConfig {
             .push("vive_only")
             .define(false)
             .setOnUpdate(ServerNetworking::updateViveVROnly);
+        MIN_VIVE_VERSION_STRING = BUILDER
+            .push("minViveVersion")
+            .define("")
+            .setOnUpdate((server, notifier) -> {
+                MIN_VIVE_VERSION = MIN_VIVE_VERSION_STRING.get().isEmpty() ? UpdateChecker.Version.UNKNOWN :
+                    UpdateChecker.Version.fromClient(MIN_VIVE_VERSION_STRING.get());
+                if (!MIN_VIVE_VERSION_STRING.get().isEmpty() && !MIN_VIVE_VERSION.isValid()) {
+                    if (notifier != null) {
+                        notifier.accept(Component.literal(
+                            "Invalid minViveVersion version number: '" + MIN_VIVE_VERSION_STRING.get() +
+                                "'. Version numbers need to be of the format X.X.X"));
+                    }
+                    return;
+                }
+                ServerNetworking.updateViveVROnly(server, notifier);
+            });
         ALLOW_OP = BUILDER
             .push("allow_op")
             .define(true)
@@ -182,6 +206,9 @@ public class ServerConfig {
         SEND_DATA_TO_OWNER = BUILDER
             .push("sendDataToOwner")
             .define(false);
+        KICK_PLAYERS_ON_SETTING_UPDATE = BUILDER
+            .push("kickPlayersOnSettingUpdate")
+            .define(false);
         // end general
         BUILDER.pop();
 
@@ -194,48 +221,48 @@ public class ServerConfig {
         // welcome messages
         MESSAGES_WELCOME_VR = BUILDER
             .push("welcomeVR")
-            .define("%s has joined with standing VR!");
+            .define("&player has joined with standing VR!");
         MESSAGES_WELCOME_NONVR = BUILDER
             .push("welcomeNonVR")
-            .define("%s has joined with Non-VR companion!");
+            .define("&player has joined with Non-VR companion!");
         MESSAGES_WELCOME_SEATED = BUILDER
             .push("welcomeSeated")
-            .define("%s has joined with seated VR!");
+            .define("&player has joined with seated VR!");
         MESSAGES_WELCOME_VANILLA = BUILDER
             .push("welcomeVanilla")
-            .define("%s has joined as a Muggle!");
+            .define("&player has joined as a Muggle!");
 
         MESSAGES_LEAVE_MESSAGE = BUILDER
             .push("leaveMessage")
-            .define("%s has disconnected from the server!");
+            .define("&player has disconnected from the server!");
 
         // general death messages
         MESSAGES_DEATH_VR = BUILDER
             .push("deathVR")
-            .define("%s died in standing VR!");
+            .define("&player died in standing VR!");
         MESSAGES_DEATH_NONVR = BUILDER
             .push("deathNonVR")
-            .define("%s died in Non-VR companion!");
+            .define("&player died in Non-VR companion!");
         MESSAGES_DEATH_SEATED = BUILDER
             .push("deathSeated")
-            .define("%s died in seated VR!");
+            .define("&player died in seated VR!");
         MESSAGES_DEATH_VANILLA = BUILDER
             .push("deathVanilla")
-            .define("%s died as a Muggle!");
+            .define("&player died as a Muggle!");
 
         // death messages by mobs
         MESSAGES_DEATH_BY_MOB_VR = BUILDER
             .push("deathByMobVR")
-            .define("%1$s was slain by %2$s in standing VR!");
+            .define("&player was slain by &cause in standing VR!");
         MESSAGES_DEATH_BY_MOB_NONVR = BUILDER
             .push("deathByMobNonVR")
-            .define("%1$s was slain by %2$s in Non-VR companion!");
+            .define("&player was slain by &cause in Non-VR companion!");
         MESSAGES_DEATH_BY_MOB_SEATED = BUILDER
             .push("deathByMobSeated")
-            .define("%1$s was slain by %2$s in seated VR!");
+            .define("&player was slain by &cause in seated VR!");
         MESSAGES_DEATH_BY_MOB_VANILLA = BUILDER
             .push("deathByMobVanilla")
-            .define("%1$s was slain by %2$s as a Muggle!");
+            .define("&player was slain by &cause as a Muggle!");
 
         // kick messages
         MESSAGES_KICK_VIVE_ONLY = BUILDER
@@ -244,6 +271,10 @@ public class ServerConfig {
         MESSAGES_KICK_VR_ONLY = BUILDER
             .push("KickVROnly")
             .define("This server is configured for VR players only.");
+        MESSAGES_KICK_OUTDATED_VIVE_VERSION = BUILDER
+            .push("KickOutdatedViveVersion")
+            .define(
+                "This server is configured to only allow Vivecraft '&minVersion' and newer. You are using Vivecraft '&userVersion'");
         // end messages
         BUILDER.pop();
 
@@ -271,6 +302,12 @@ public class ServerConfig {
         ALLOW_ROOMSCALE_SHIELD_BLOCKING = BUILDER
             .push("allowRoomscaleShieldBlocking")
             .define(true);
+        ROOMSCALE_SHIELD_COOLDOWN = BUILDER
+            .push("roomscaleShieldCooldown")
+            .defineInRange(0, 0, 1000);
+        ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER = BUILDER
+            .push("roomscaleShieldCooldownDamageTrigger")
+            .defineInRange(3.0, 0.0, 100.0);
         ALLOW_ATTACKS_WHILE_BLOCKING = BUILDER
             .push("allowAttacksWhileBlocking")
             .define(true)
@@ -457,5 +494,9 @@ public class ServerConfig {
 
         // if the config is outdated, or is missing keys, re add them
         BUILDER.correct(listener);
+
+        // init the minVersion
+        MIN_VIVE_VERSION = MIN_VIVE_VERSION_STRING.get().isEmpty() ? UpdateChecker.Version.UNKNOWN :
+            UpdateChecker.Version.fromClient(MIN_VIVE_VERSION_STRING.get());
     }
 }

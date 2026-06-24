@@ -70,7 +70,7 @@ public class VRArmHelper {
             DATA_HOLDER.isMainHand = true;
 
             if (menuHandMain) {
-                renderMainMenuHand(0, false);
+                renderMenuHand(0, false);
             } else {
                 renderVRHand_Main(partialTick);
             }
@@ -80,7 +80,7 @@ public class VRArmHelper {
 
         if (renderOff) {
             if (menuHandOff) {
-                renderMainMenuHand(1, false);
+                renderMenuHand(1, false);
             } else {
                 renderVRHand_Offhand(partialTick, true);
             }
@@ -98,16 +98,14 @@ public class VRArmHelper {
      * @param c           controller to render the hand for
      * @param depthAlways if depth testing should be disabled for rendering
      */
-    public static void renderMainMenuHand(int c, boolean depthAlways) {
+    public static void renderMenuHand(int c, boolean depthAlways) {
         RenderSystem.enableDepthTest();
         RenderSystem.defaultBlendFunc();
 
         Matrix4f modelView = new Matrix4f();
         RenderHelper.setupRenderingAtController(c, modelView);
 
-        if (MC.getOverlay() == null) {
-            ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
-        }
+        ShadersHelper.bindTexture(RenderHelper.WHITE_TEXTURE);
 
         if (depthAlways && c == 0) {
             RenderSystem.depthFunc(GL11C.GL_ALWAYS);

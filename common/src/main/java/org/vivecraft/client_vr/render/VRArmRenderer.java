@@ -76,8 +76,8 @@ public class VRArmRenderer extends PlayerRenderer {
         ResourceLocation playerSkin = this.getTextureLocation(player);
 
         // render hand
-        rendererArm.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(playerSkin)), combinedLight,
-            OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, alpha);
+        rendererArm.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(playerSkin)),
+            combinedLight, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, 1.0F, 1.0F, 1.0F));
 
         // render armor
         rendererArmwear.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(playerSkin)), combinedLight,
