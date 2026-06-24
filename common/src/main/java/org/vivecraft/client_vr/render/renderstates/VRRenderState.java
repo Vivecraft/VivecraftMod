@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.BlockPos;
@@ -30,7 +31,6 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
-import org.vivecraft.client_vr.render.DummySubmitStorage;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.render.helpers.VRArmHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
@@ -216,12 +216,11 @@ public class VRRenderState {
                 ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) entityState).vivecraft$getRotInfo();
                 if (rotInfo != null && ((EntityRenderStateExtension) entityState).vivecraft$isFirstPersonPlayer()) {
                     // this is the main player
-                    mc.getEntityRenderDispatcher().submit(avatarState,
-                        mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState,
-                        avatarState.x - mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState.pos.x,
-                        avatarState.y - mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState.pos.y,
-                        avatarState.z - mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState.pos.z,
-                        new PoseStack(), DummySubmitStorage.INSTANCE);
+                    if (mc.getEntityRenderDispatcher()
+                        .getRenderer(avatarState) instanceof LivingEntityRenderer livingRenderer)
+                    {
+                        livingRenderer.getModel().setupAnim(avatarState);
+                    }
                 }
             }
         }
