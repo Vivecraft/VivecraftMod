@@ -65,7 +65,7 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         }
     }
 
-    @Inject(method = "renderPage", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V"))
+    @Inject(method = "renderPage", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V", remap = false))
     private void vivecraft$hotbarContextIndicator(
         CallbackInfo ci, @Local(argsOnly = true) GuiGraphics graphics)
     {

@@ -71,7 +71,7 @@ public class VRArmHelper {
             DATA_HOLDER.isMainHand = true;
 
             if (menuHandMain) {
-                renderMenuHand(0, false);
+                renderMenuHand(0, false, poseStack);
             } else {
                 renderVRHand_Main(poseStack, partialTick);
             }
@@ -81,7 +81,7 @@ public class VRArmHelper {
 
         if (renderOff) {
             if (menuHandOff) {
-                renderMenuHand(1, false);
+                renderMenuHand(1, false, poseStack);
             } else {
                 renderVRHand_Offhand(poseStack, partialTick, true);
             }
@@ -100,7 +100,7 @@ public class VRArmHelper {
      * @param depthAlways if depth testing should be disabled for rendering
      * @param poseStack   PoseStack for positioning
      */
-    public static void renderMenuHand(int c, boolean depthAlways) {
+    public static void renderMenuHand(int c, boolean depthAlways, PoseStack poseStack) {
         RenderSystem.enableDepthTest();
         RenderSystem.defaultBlendFunc();
 

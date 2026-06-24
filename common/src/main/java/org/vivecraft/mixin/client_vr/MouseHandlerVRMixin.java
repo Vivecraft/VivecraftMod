@@ -42,7 +42,7 @@ public class MouseHandlerVRMixin {
     @Unique
     private Vector3f vivecraft$lastAim;
 
-    @Inject(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;isMouseGrabbed()Z"))
+    @Inject(method = "turnPlayer", at = @At("HEAD"))
     private void vivecraft$modifyMouseTravel(CallbackInfo ci) {
         if (VRState.VR_RUNNING && this.minecraft.screen == null) {
             VRData.VRDevicePose aim = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getAim();
@@ -54,7 +54,7 @@ public class MouseHandlerVRMixin {
                 // no 0 or those angles are invalid
                 if (this.vivecraft$lastAim.x != 0 && this.vivecraft$lastAim.z != 0 && dir.x != 0 && dir.z != 0) {
                     yaw = Math.atan2(-this.vivecraft$lastAim.x, this.vivecraft$lastAim.z) - Math.atan2(-dir.x, dir.z);
-                    yaw = yaw > Math.PI ? yaw - Math.TAU : (yaw < -Math.PI ? yaw + Math.TAU : yaw);
+                    yaw = yaw > Math.PI ? yaw - Math.PI * 2.0 : (yaw < -Math.PI ? yaw + Math.PI * 2.0 : yaw);
                 }
                 this.accumulatedDX = -yaw * Mth.RAD_TO_DEG * 5F;
 

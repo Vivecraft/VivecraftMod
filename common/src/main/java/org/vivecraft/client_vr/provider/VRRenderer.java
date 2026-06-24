@@ -343,7 +343,7 @@ public abstract class VRRenderer {
         ShadersHelper.bindTexture(RenderHelper.BLACK_TEXTURE);
 
         buffer.bind();
-        buffer.drawWithShader(RenderSystem.getModelViewStack(), RenderSystem.getProjectionMatrix(),
+        buffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(),
             GameRenderer.getPositionColorShader());
         VertexBuffer.unbind();
     }
