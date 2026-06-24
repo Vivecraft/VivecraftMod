@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.BlockPos;
@@ -212,13 +213,11 @@ public class VRRenderState {
                 ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) entityState).vivecraft$getRotInfo();
                 if (rotInfo != null && ((EntityRenderStateExtension) entityState).vivecraft$isFirstPersonPlayer()) {
                     // this is the main player
-                    mc.getEntityRenderDispatcher().submit(avatarState,
-                        mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState,
-                        avatarState.x - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.x,
-                        avatarState.y - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.y,
-                        avatarState.z - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.z,
-                        new PoseStack(), mc.gameRenderer.getSubmitNodeStorage());
-                    mc.gameRenderer.getSubmitNodeStorage().clear();
+                    if (mc.getEntityRenderDispatcher()
+                        .getRenderer(avatarState) instanceof LivingEntityRenderer livingRenderer)
+                    {
+                        livingRenderer.getModel().setupAnim(avatarState);
+                    }
                 }
             }
         }
