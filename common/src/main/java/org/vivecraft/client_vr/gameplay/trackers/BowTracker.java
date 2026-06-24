@@ -164,7 +164,9 @@ public class BowTracker implements ItemInUseTracker, DebugRenderTracker {
         Vector3f arrowAim = vrData.getController(arrowHand).getCustomVector(MathUtils.BACK);
         Vector3f bowAim = vrData.getHand(bowHand).getCustomVector(MathUtils.DOWN);
 
-        double controllersDot = Math.toDegrees(Math.acos(bowAim.dot(arrowAim)));
+        float controllersDotRad = bowAim.dot(arrowAim);
+        // when the controllers are perfectly alligend this would be near 1 and cause a NaN
+        double controllersDot = controllersDotRad > 0.999 ? 0 : Math.toDegrees(Math.acos(controllersDotRad));
 
         float notchDistThreshold = 0.15F * vrData.worldScale;
         boolean main = isHoldingBow(player, InteractionHand.MAIN_HAND);

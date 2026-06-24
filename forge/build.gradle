@@ -18,6 +18,7 @@ def mixins = [
     "vivecraft.epicfight.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.mca.mixins.json",
+    "vivecraft.modefite.mixins.json",
     "vivecraft.optifine.mixins.json",
     "vivecraft.rei.mixins.json",
     "vivecraft.resolutioncontrol.mixins.json",
