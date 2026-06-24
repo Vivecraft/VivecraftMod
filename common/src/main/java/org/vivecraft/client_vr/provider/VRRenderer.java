@@ -314,8 +314,7 @@ public abstract class VRRenderer {
         float radius = width / 2.0F;
 
         // put middle vertex
-        builder.addVertex(radius, radius, 0.0F)
-            .setColor(0, 0, 0, 255);
+        builder.addVertex(radius, radius, 0.0F);
 
         // put outer vertices
         for (int i = 0; i < edges + 1; i++) {
