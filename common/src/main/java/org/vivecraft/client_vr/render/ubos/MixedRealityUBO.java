@@ -11,7 +11,7 @@ import org.joml.Vector3fc;
 public class MixedRealityUBO {
     public static final String UBO_NAME = "MixedRealityUbo";
     private static final int MIXED_REALITY_UBO_SIZE = new Std140SizeCalculator()
-        .putMat4f().putMat4f().putVec4().putVec4().putVec4().putInt().putInt().putInt().putInt().get();
+        .putMat4f().putMat4f().putVec4().putVec4().putVec4().putInt().putInt().putInt().putInt().putInt().get();
     private final MappableRingBuffer mixedRealityBuffer;
 
     public MixedRealityUBO() {
@@ -36,7 +36,8 @@ public class MixedRealityUBO {
                 .putInt(alphaMode ? 1 : 0)
                 .putInt(firstPersonPass ? 1 : 0)
                 .putInt(guiMask)
-                .putInt(flipFirstPersonPass ? 1 : 0);
+                .putInt(flipFirstPersonPass ? 1 : 0)
+                .putInt(RenderSystem.getDevice().getDeviceInfo().isZZeroToOne() ? 1 : 0);
         }
     }
 
