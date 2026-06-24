@@ -176,7 +176,7 @@ public class VRState {
 
         Haptics.disconnect();
 
-        VRShaders.close();
+        VRShaders.closeBuffers();
 
         VR_ENABLED = false;
         VR_INITIALIZED = false;

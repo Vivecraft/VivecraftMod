@@ -250,8 +250,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             if (ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get() > 0 &&
                 damageAmount >= ServerConfig.ROOMSCALE_SHIELD_COOLDOWN_DAMAGE_TRIGGER.get())
             {
-                this.getCooldowns()
-                    .addCooldown(this.vivecraft$roomscaleShieldItem, ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get());
+                this.getCooldowns().addCooldown(this.vivecraft$roomscaleShieldItem.getItem(),
+                    ServerConfig.ROOMSCALE_SHIELD_COOLDOWN.get());
             }
         } else {
             original.call(damageAmount);

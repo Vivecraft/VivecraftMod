@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -56,7 +55,7 @@ public class ShaderHelper {
      * @param source   RenderTarget to sample from
      */
     public static void renderFullscreenQuad(
-        @NotNull ShaderProgram instance,
+        @NotNull ShaderInstance instance,
         @NotNull RenderTarget source)
     {
         renderFullscreenQuad(instance, source, false);
@@ -69,7 +68,7 @@ public class ShaderHelper {
      * @param source   RenderTarget to sample from
      */
     public static void renderFullscreenQuad(
-        @NotNull ShaderProgram instance,
+        @NotNull ShaderInstance instance,
         @NotNull RenderTarget source,
         boolean flipVertically)
     {
@@ -81,7 +80,7 @@ public class ShaderHelper {
         instance.setSampler("Sampler0", source.getColorTextureId());
         instance.apply();
 
-        drawFullscreenQuad(instance.getVertexFormat());
+        drawFullscreenQuad(instance.getVertexFormat(), flipVertically);
 
         instance.clear();
         RenderSystem.depthMask(true);
@@ -111,7 +110,7 @@ public class ShaderHelper {
                     builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
                     builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
 
-                    SCREEN_UV_VBO = new VertexBuffer(BufferUsage.STATIC_WRITE);
+                    SCREEN_UV_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
                     SCREEN_UV_VBO.bind();
                     SCREEN_UV_VBO.upload(builder.buildOrThrow());
                     VertexBuffer.unbind();
@@ -126,7 +125,7 @@ public class ShaderHelper {
                     builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 0.0F);
                     builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 0.0F);
 
-                    SCREEN_UV_VBO_FLIPPED = new VertexBuffer(BufferUsage.STATIC_WRITE);
+                    SCREEN_UV_VBO_FLIPPED = new VertexBuffer(VertexBuffer.Usage.STATIC);
                     SCREEN_UV_VBO_FLIPPED.bind();
                     SCREEN_UV_VBO_FLIPPED.upload(builder.buildOrThrow());
                     VertexBuffer.unbind();
@@ -142,7 +141,7 @@ public class ShaderHelper {
                 builder.addVertex(1.0F, 1.0F, 0.0F);
                 builder.addVertex(-1.0F, 1.0F, 0.0F);
 
-                SCREEN_VBO = new VertexBuffer(BufferUsage.STATIC_WRITE);
+                SCREEN_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
                 SCREEN_VBO.bind();
                 SCREEN_VBO.upload(builder.buildOrThrow());
                 VertexBuffer.unbind();
@@ -522,7 +521,7 @@ public class ShaderHelper {
 
         VRShaders.MIXED_REALITY_SHADER.apply();
 
-        drawFullscreenQuad(VRShaders.MIXED_REALITY_SHADER.vertexFormat(), false);
+        drawFullscreenQuad(VRShaders.MIXED_REALITY_SHADER.getVertexFormat(), false);
 
         VRShaders.MIXED_REALITY_SHADER.clear();
     }
@@ -552,7 +551,7 @@ public class ShaderHelper {
             VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(0.0F);
             VRShaders.LANCZOS_SHADER.apply();
 
-            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.vertexFormat(), false);
+            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.getVertexFormat(), false);
 
             // second pass, vertical
             secondPass.bindWrite(true);
@@ -563,7 +562,7 @@ public class ShaderHelper {
             VRShaders.LANCZOS_TEXEL_HEIGHT_OFFSET_UNIFORM.set(1.0F / (3.0F * (float) secondPass.viewHeight));
             VRShaders.LANCZOS_SHADER.apply();
 
-            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.vertexFormat(), false);
+            drawFullscreenQuad(VRShaders.LANCZOS_SHADER.getVertexFormat(), false);
 
             // Clean up time
             VRShaders.LANCZOS_SHADER.clear();
@@ -717,7 +716,7 @@ public class ShaderHelper {
         VRShaders.BLIT_VR_SHADER.setSampler(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureId());
 
         VRShaders.BLIT_VR_SHADER.apply();
-        drawFullscreenQuad(VRShaders.BLIT_VR_SHADER.vertexFormat(), false);
+        drawFullscreenQuad(VRShaders.BLIT_VR_SHADER.getVertexFormat(), false);
         VRShaders.BLIT_VR_SHADER.clear();
 
         RenderSystem.depthMask(true);

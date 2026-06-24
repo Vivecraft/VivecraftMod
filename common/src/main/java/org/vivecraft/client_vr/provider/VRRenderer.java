@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.provider;
 
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlUtil;
@@ -208,7 +207,7 @@ public abstract class VRRenderer {
                     .setColor(0, 0, 0, 255);
             }
 
-            this.bakedHiddenMesh[i] = new VertexBuffer(BufferUsage.STATIC_WRITE);
+            this.bakedHiddenMesh[i] = new VertexBuffer(VertexBuffer.Usage.STATIC);
             this.bakedHiddenMesh[i].bind();
             this.bakedHiddenMesh[i].upload(builder.buildOrThrow());
             VertexBuffer.unbind();
@@ -345,7 +344,7 @@ public abstract class VRRenderer {
 
         buffer.bind();
         buffer.drawWithShader(RenderSystem.getModelViewStack(), RenderSystem.getProjectionMatrix(),
-            RenderSystem.setShader(CoreShaders.POSITION_COLOR));
+            GameRenderer.getPositionColorShader());
         VertexBuffer.unbind();
     }
 
@@ -629,7 +628,7 @@ public abstract class VRRenderer {
             WorldRenderPass.RIGHT_TELESCOPE.resize(telescopeSize.x, telescopeSize.y);
 
             // camera
-            this.cameraFramebuffer.resize(cameraSize.x, cameraSize.y);
+            this.cameraFramebuffer.resize(cameraSize.x, cameraSize.y, Minecraft.ON_OSX);
             if (ShadersHelper.needsSameSizeBuffers()) {
                 WorldRenderPass.CAMERA.resize(eyeFBWidth, eyeFBHeight);
             } else {

@@ -2,6 +2,7 @@ package org.vivecraft.mixin.client_vr.gui;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,7 +10,6 @@ import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.gui.spectator.SpectatorMenuListener;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,7 +65,7 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         }
     }
 
-    @Inject(method = "renderPage", at = @At(value = "TAIL"))
+    @Inject(method = "renderPage", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V"))
     private void vivecraft$hotbarContextIndicator(
         CallbackInfo ci, @Local(argsOnly = true) GuiGraphics graphics)
     {
@@ -74,9 +74,11 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
             int middle = graphics.guiWidth() / 2;
-            graphics.blitSprite(RenderType::guiTextured, HOTBAR_SELECTION_SPRITE,
+            RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
+            graphics.blitSprite(HOTBAR_SELECTION_SPRITE,
                 middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
-                graphics.guiHeight() - 22 - 1, 24, 23, 0xFF00FF00);
+                graphics.guiHeight() - 22 - 1, 24, 23);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 

@@ -113,9 +113,9 @@ public class VRShaders {
             setupFSAA(resourceManager);
             GraphicsHelper.INSTANCE.checkError("init fsaa shader");
             setupBlitAspect(resourceManager);
-            RenderHelper.checkGLError("init blit shader");
+            GraphicsHelper.INSTANCE.checkError("init blit shader");
             setupPortalShaders(resourceManager);
-            RenderHelper.checkGLError("init portal shader");
+            GraphicsHelper.INSTANCE.checkError("init portal shader");
             READY = true;
         } catch (IOException e) {
             VRSettings.LOGGER.error("error loading VR shaders", e);
@@ -149,7 +149,6 @@ public class VRShaders {
             RENDERTYPE_END_PORTAL_VR_SHADER = null;
         }
         READY = false;
-        MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM = program.safeGetUniform(MIXED_REALITY_FLIP_FIRST_PERSON);
     }
 
     private static void setupDepthMask(ResourceManager resourceManager) throws IOException {
@@ -163,6 +162,7 @@ public class VRShaders {
         MIXED_REALITY_KEY_COLOR_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_KEY_COLOR);
         MIXED_REALITY_ALPHA_MODE_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_ALPHA_MODE);
         MIXED_REALITY_GUI_MASK_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_GUI_MASK);
+        MIXED_REALITY_FLIP_FIRST_PERSON_UNIFORM = MIXED_REALITY_SHADER.safeGetUniform(MIXED_REALITY_FLIP_FIRST_PERSON);
     }
 
     private static void setupFSAA(ResourceManager resourceManager) throws IOException {
@@ -212,7 +212,7 @@ public class VRShaders {
     public static void init() {
     }
 
-    public static void close() {
+    public static void closeBuffers() {
         ShaderHelper.close();
     }
 }
