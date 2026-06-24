@@ -188,7 +188,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         } catch (Exception ignored) {}
     }
 
-    @Inject(method = "renderFrame", at = @At("HEAD"))
+    @Inject(method = "runTick", at = @At("HEAD"))
     private void vivecraft$toggleVRState(CallbackInfo callback) {
         if (ClientDataHolderVR.getInstance().completelyDisabled) {
             VRState.VR_ENABLED = false;
