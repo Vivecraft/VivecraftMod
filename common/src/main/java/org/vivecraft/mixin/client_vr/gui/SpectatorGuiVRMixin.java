@@ -35,14 +35,14 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
 
     @Shadow
     @Final
-    private static ResourceLocation HOTBAR_SELECTION_SPRITE;
-
-    @Shadow
-    @Final
     private Minecraft minecraft;
 
     @Shadow
     public abstract void onHotbarSelected(int slot);
+
+    @Shadow
+    @Final
+    private static ResourceLocation WIDGETS_LOCATION;
 
     @Override
     @Unique
@@ -75,9 +75,9 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         {
             int middle = graphics.guiWidth() / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
-            graphics.blitSprite(HOTBAR_SELECTION_SPRITE,
+            graphics.blit(WIDGETS_LOCATION,
                 middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
-                graphics.guiHeight() - 22 - 1, 24, 23);
+                graphics.guiHeight() - 22 - 1, 0, 22, 24, 22);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
