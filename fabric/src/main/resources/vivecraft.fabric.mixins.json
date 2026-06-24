@@ -6,7 +6,6 @@
   "client": [
     "FabricGameRendererVRMixin",
     "FabricMinecraftVRMixin",
-    "FabricMouseHandlerVRMixin",
     "client.resources.model.FabricModelBakeryMixin",
     "screenhandler.client.FabricClientNetworkingVRMixin",
     "world.level.biome.BiomeAccessor"

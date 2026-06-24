@@ -14,7 +14,7 @@ public interface GameRendererExtension {
     /**
      * @return if the camera in a block
      */
-    float vivecraft$isInBlock();
+    boolean vivecraft$isInBlock();
 
     /**
      * set the player position/rotation to the current VR pass location
