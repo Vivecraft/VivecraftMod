@@ -37,7 +37,7 @@ public class MixedRealityUBO {
                 .putInt(firstPersonPass ? 1 : 0)
                 .putInt(guiMask)
                 .putInt(flipFirstPersonPass ? 1 : 0)
-                .putInt(RenderSystem.getDevice().getDeviceInfo().isZZeroToOne() ? 1 : 0);
+                .putInt(RenderSystem.getDevice().isZZeroToOne() ? 1 : 0);
         }
     }
 
