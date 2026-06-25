@@ -24,7 +24,6 @@ layout(std140) uniform MixedRealityUbo {
     int firstPersonPass;
     int guiMask;
     int flipFirstPersonPass;
-    int depthZeroToOne;
 };
 
 in vec2 texCoordinates;
@@ -33,11 +32,7 @@ out vec4 out_Color;
 
 vec3 getFragmentPosition(in vec2 coord) {
     vec4 posScreen = vec4(coord, texture(thirdPersonDepth, coord).x, 1);
-    if (depthZeroToOne == 0) {
-        posScreen.xyz = posScreen.xyz * 2.0 - 1.0;
-    } else {
-        posScreen.xy = posScreen.xy * 2.0 - 1.0;
-    }
+    posScreen.xyz = posScreen.xyz * 2.0 - 1.0;
     vec4 posView = inverse(projectionMatrix * viewMatrix) * posScreen;
     return posView.xyz / posView.w;
 }
