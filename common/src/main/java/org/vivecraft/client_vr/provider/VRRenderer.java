@@ -207,7 +207,7 @@ public abstract class VRRenderer {
                     .endVertex();
             }
 
-            this.bakedHiddenMesh[i] = new VertexBuffer(VertexBuffer.Usage.STATIC);
+            this.bakedHiddenMesh[i] = new VertexBuffer();
             this.bakedHiddenMesh[i].bind();
             this.bakedHiddenMesh[i].upload(builder.end());
             VertexBuffer.unbind();
@@ -263,8 +263,7 @@ public abstract class VRRenderer {
         RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
 
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F),
-            VertexSorting.ORTHOGRAPHIC_Z);
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F));
         RenderSystem.getModelViewStack().pushPose();
         RenderSystem.getModelViewStack().setIdentity();
         if (inverse) {
@@ -971,8 +970,8 @@ public abstract class VRRenderer {
                         Component.literal("https://www.vivecraft.org/faq/#gpu")
                             .withStyle(style -> style.withUnderlined(true)
                                 .withColor(ChatFormatting.GREEN)
-                                .withHoverEvent(
-                                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                    Component.translatable("chat.link.open")))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
                                     "https://www.vivecraft.org/faq/#gpu")))));
 

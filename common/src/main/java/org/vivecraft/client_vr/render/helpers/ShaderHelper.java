@@ -109,7 +109,7 @@ public class ShaderHelper {
                     builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
                     builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
 
-                    SCREEN_UV_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
+                    SCREEN_UV_VBO = new VertexBuffer();
                     SCREEN_UV_VBO.bind();
                     SCREEN_UV_VBO.upload(builder.end());
                     VertexBuffer.unbind();
@@ -124,7 +124,7 @@ public class ShaderHelper {
                     builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
                     builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
 
-                    SCREEN_UV_VBO_FLIPPED = new VertexBuffer(VertexBuffer.Usage.STATIC);
+                    SCREEN_UV_VBO_FLIPPED = new VertexBuffer();
                     SCREEN_UV_VBO_FLIPPED.bind();
                     SCREEN_UV_VBO_FLIPPED.upload(builder.end());
                     VertexBuffer.unbind();
@@ -140,7 +140,7 @@ public class ShaderHelper {
                 builder.vertex(1.0F, 1.0F, 0.0F).endVertex();
                 builder.vertex(-1.0F, 1.0F, 0.0F).endVertex();
 
-                SCREEN_VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
+                SCREEN_VBO = new VertexBuffer();
                 SCREEN_VBO.bind();
                 SCREEN_VBO.upload(builder.end());
                 VertexBuffer.unbind();

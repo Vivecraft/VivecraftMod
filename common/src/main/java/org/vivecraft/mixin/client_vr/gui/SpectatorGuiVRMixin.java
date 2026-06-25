@@ -3,9 +3,10 @@ package org.vivecraft.mixin.client_vr.gui;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
@@ -65,19 +66,19 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         }
     }
 
-    @Inject(method = "renderPage", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V", remap = false))
+    @Inject(method = "renderPage", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V", ordinal = 1))
     private void vivecraft$hotbarContextIndicator(
-        CallbackInfo ci, @Local(argsOnly = true) GuiGraphics graphics)
+        CallbackInfo ci, @Local(argsOnly = true) PoseStack poseStack)
     {
         if (VRState.VR_RUNNING && ClientDataHolderVR.getInstance().hotbarModule.hotbar >= 0 &&
             ClientDataHolderVR.getInstance().hotbarModule.hotbar < 9 &&
             ClientDataHolderVR.getInstance().interactTracker.isActive(this.minecraft.player))
         {
-            int middle = graphics.guiWidth() / 2;
+            int middle = this.minecraft.getWindow().getGuiScaledWidth() / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
-            graphics.blit(WIDGETS_LOCATION,
+            GuiComponent.blit(poseStack,
                 middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
-                graphics.guiHeight() - 22 - 1, 0, 22, 24, 22);
+                this.minecraft.getWindow().getGuiScaledHeight() - 22 - 1, 0, 22, 24, 22);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
