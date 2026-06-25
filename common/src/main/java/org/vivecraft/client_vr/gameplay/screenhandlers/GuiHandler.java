@@ -529,11 +529,13 @@ public class GuiHandler {
         Vector3f guilocal = new Vector3f();
         float scale = GUI_SCALE;
 
-        if (GUI_POS_ROOM == null) {
+        boolean forceGuiToHUD = DH.vrSettings.forceGuiToHUD && MC.level != null && !MethodHolder.isInMenuRoom();
+
+        if (GUI_POS_ROOM == null || forceGuiToHUD) {
             guirot = null;
             scale = 1.0F;
 
-            if (MC.level != null && (MC.screen == null || !DH.vrSettings.floatInventory)) {
+            if (MC.level != null && (MC.screen == null || forceGuiToHUD || !DH.vrSettings.floatInventory)) {
                 // HUD view - attach to head or controller
                 int side = 1;
 
@@ -565,7 +567,8 @@ public class GuiHandler {
                     scale = DH.vrSettings.hudScale;
                 } else {
                     // attach to controller
-                    boolean modelArms = GUI_POS_PLAYER_MODEL != Vec3.ZERO && DH.vrSettings.shouldRenderSelf &&
+                    boolean modelArms = !MC.player.isSpectator() && GUI_POS_PLAYER_MODEL != Vec3.ZERO &&
+                        DH.vrSettings.shouldRenderSelf &&
                         DH.vrSettings.modelArmsMode == VRSettings.ModelArmsMode.COMPLETE;
                     if (modelArms) {
                         guirot = new Matrix4f().set3x3(GUI_ROTATION_PLAYER_MODEL);
@@ -622,6 +625,15 @@ public class GuiHandler {
                         guirot.rotateZ(Mth.HALF_PI * side);
                         guirot.rotateY(Mth.HALF_PI * side);
                     }
+                }
+                if (forceGuiToHUD) {
+                    // convert previously calculated coords to world coords
+                    GUI_POS_ROOM = VRPlayer.worldToRoomPos(
+                        guipos.add(MathUtils.toMcVec3(guirot.transformDirection(guilocal, new Vector3f()))),
+                        DH.vrPlayer.vrdata_world_render);
+                    GUI_ROTATION_ROOM = new Matrix4f().rotationY(-DH.vrPlayer.vrdata_world_render.rotation_radians)
+                        .mul(guirot);
+                    GUI_SCALE = scale;
                 }
             }
         } else {

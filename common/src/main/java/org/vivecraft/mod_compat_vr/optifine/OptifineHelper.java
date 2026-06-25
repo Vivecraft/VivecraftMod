@@ -18,7 +18,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL13C;
 import org.lwjgl.system.MemoryUtil;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
@@ -183,10 +183,10 @@ public class OptifineHelper {
         RenderSystem.activeTexture(GL13C.GL_TEXTURE0);
         RenderSystem.bindTexture(renderTarget.getDepthTextureId());
 
-        RenderHelper.checkGLError("pre copy depth");
+        GraphicsHelper.INSTANCE.checkError("pre copy depth");
         GlStateManager._glCopyTexSubImage2D(GL13C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, renderTarget.width,
             renderTarget.height);
-        RenderHelper.checkGLError("post copy depth");
+        GraphicsHelper.INSTANCE.checkError("post copy depth");
 
         unbindShaderFramebuffer();
         // rebind the original buffer

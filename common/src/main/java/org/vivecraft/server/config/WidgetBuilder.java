@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.screens.GuiStringListEditorScreen;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.server.ServerNetworking;
 
 import java.util.Collection;
@@ -64,6 +65,7 @@ public class WidgetBuilder {
                 public boolean charTyped(char character, int modifiers) {
                     boolean ret = super.charTyped(character, modifiers);
                     stringValue.set(this.getValue());
+                    updateSettingsSinglePlayer(stringValue);
                     return ret;
                 }
 
@@ -71,6 +73,7 @@ public class WidgetBuilder {
                 public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
                     boolean ret = super.keyPressed(keyCode, scanCode, modifiers);
                     stringValue.set(this.getValue());
+                    updateSettingsSinglePlayer(stringValue);
                     return ret;
                 }
             };
@@ -162,10 +165,11 @@ public class WidgetBuilder {
     }
 
     private static void updateSettingsSinglePlayer(ConfigBuilder.ConfigValue<?> configValue) {
+        configValue.onUpdate(Minecraft.getInstance().getSingleplayerServer(), ClientUtils::addChatMessage);
         // send update to players if we are hosting a singleplayer server
         if (Minecraft.getInstance().hasSingleplayerServer()) {
-            configValue.onUpdate(Minecraft.getInstance().getSingleplayerServer());
-            ServerNetworking.sendUpdatePacketToAll(Minecraft.getInstance().getSingleplayerServer(), configValue);
+            ServerNetworking.sendUpdatePacketToAll(Minecraft.getInstance().getSingleplayerServer(), configValue,
+                ClientUtils::addChatMessage);
         }
     }
 }

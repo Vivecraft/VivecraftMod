@@ -359,6 +359,8 @@ public class VRSettings {
     public boolean allowBreakingClimbable = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
+    @SettingField(VrOptions.SPRINT_MOVEMENT_MULTIPLIER)
+    public float sprintMovementSpeedMultiplier = 0f;   // values under 0.15 will use the same as regular movement multiplieer
     @SettingField(VrOptions.FREEMOVE_MODE)
     public FreeMove vrFreeMoveMode = FreeMove.CONTROLLER;
     @SettingField(VrOptions.FREEMOVE_FLY_MODE)
@@ -595,6 +597,8 @@ public class VRSettings {
     public HUDLock vrHudLockMode = HUDLock.WRIST;
     @SettingField(VrOptions.HUD_WRIST_OFFSET)
     public float vrHudWristOffset = 1F;
+    @SettingField(VrOptions.FORCE_GUI_TO_HUD)
+    public boolean forceGuiToHUD = false;
     @SettingField(VrOptions.HUD_OCCLUSION)
     public boolean hudOcclusion = true;
     @SettingField(VrOptions.CROSSHAIR_SCALE)
@@ -623,6 +627,8 @@ public class VRSettings {
     public int forceHardwareDetection = 0; // 0 = off, 1 = vive, 2 = oculus
     @SettingField(VrOptions.RADIAL_MODE_HOLD)
     public boolean radialModeHold = true;
+    @SettingField(VrOptions.RADIAL_REPEAT)
+    public boolean radialRepeat = true;
     @SettingField(VrOptions.RADIAL_NUMBER)
     public int vrRadialButtons = 8;
     @SettingField(VrOptions.PHYSICAL_KEYBOARD)
@@ -704,6 +710,13 @@ public class VRSettings {
     @SettingField
     // when set attaches the 3rd person camera tracker to the right controller
     public boolean debugCameraTracker;
+
+    // required vulkan stuff for vr, requested by the runtime
+    @SettingField
+    public String requiredVulkanInstanceExtensions = "";
+
+    @SettingField
+    public String requiredVulkanDeviceExtensions = "";
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
@@ -1564,6 +1577,7 @@ public class VRSettings {
                 }
             }
         },
+        FORCE_GUI_TO_HUD(OptionType.BOOLEAN), // puts any screen to the HUD Lock position, instead of fixed in the room
         HUD_WRIST_OFFSET(0.0f, 4.0f, 0.25f, -1), // HUD Offset to the arm
         HUD_OPACITY(0.15f, 1.0f, 0.05f, -1) { // HUD Opacity
 
@@ -1685,6 +1699,7 @@ public class VRSettings {
         AUTO_OPEN_KEYBOARD, // Always Open Keyboard
         AUTO_CLOSE_KEYBOARD(OptionType.BOOLEAN), // Close Keyboard on Screenchange
         RADIAL_MODE_HOLD("vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
+        RADIAL_REPEAT(OptionType.BOOLEAN), // repeat last radial action
         RADIAL_NUMBER(4, 14, 2, 0), // number of radial buttons
         PHYSICAL_KEYBOARD("vivecraft.options.keyboard.physical",
             "vivecraft.options.keyboard.pointer") { // Keyboard Type
@@ -1928,6 +1943,17 @@ public class VRSettings {
         WALK_UP_BLOCKS(OptionType.BOOLEAN), // Walk up blocks
         // Movement/aiming controls
         MOVEMENT_MULTIPLIER(0.15f, 1.3f, 0.01f, 2), // Move. Speed Multiplier
+        SPRINT_MOVEMENT_MULTIPLIER(0.14f, 1.3f, 0.01f, 2) { // sprint Move. Speed Multiplier
+
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                if ((float) value > 0.145F) {
+                    return super.getDisplayString(prefix, value);
+                } else {
+                    return prefix + I18n.get("vivecraft.options.sprintmovementmultiplier.same");
+                }
+            }
+        },
         INERTIA_FACTOR { // Player Inertia
 
             @Override
@@ -2173,7 +2199,7 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 if (VRState.VR_INITIALIZED) {
-                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
+                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye[0];
                     return prefix + Math.round((float) value * 100) + "% (" +
                         (int) Math.ceil(eye0.viewWidth * Math.sqrt((float) value)) + "x" +
                         (int) Math.ceil(eye0.viewHeight * Math.sqrt((float) value)) + ")";

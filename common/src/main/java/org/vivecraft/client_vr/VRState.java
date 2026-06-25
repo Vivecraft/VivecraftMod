@@ -15,6 +15,7 @@ import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -77,6 +78,8 @@ public class VRState {
 
             dh.vrRenderer = dh.vr.createVRRenderer();
 
+            dh.vrRenderer.checkCapabilities();
+
             // everything related to VR is created now
             VR_INITIALIZED = true;
 
@@ -95,6 +98,8 @@ public class VRState {
             dh.menuWorldRenderer = new MenuWorldRenderer();
 
             dh.menuWorldRenderer.init();
+
+            VRShaders.init();
 
             try {
                 String garbageCollector = StringUtils.getCommonPrefix(
@@ -171,6 +176,8 @@ public class VRState {
         }
 
         Haptics.disconnect();
+
+        VRShaders.closeBuffers();
 
         VR_ENABLED = false;
         VR_INITIALIZED = false;
