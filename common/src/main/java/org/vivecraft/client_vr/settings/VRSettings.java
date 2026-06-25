@@ -1583,7 +1583,7 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 GuiHandler.GUI_SCALE = 1F;
-                GuiHandler.onScreenChanged(null, Minecraft.getInstance().gui.screen(), false);
+                GuiHandler.onScreenChanged(null, Minecraft.getInstance().screen, false);
             }
         },
         HUD_WRIST_OFFSET(0.0f, 4.0f, 0.25f, -1), // HUD Offset to the arm
