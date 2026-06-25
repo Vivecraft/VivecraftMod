@@ -26,7 +26,7 @@ import org.vivecraft.client_vr.extensions.SpectatorGuiExtension;
 import javax.annotation.Nullable;
 
 @Mixin(SpectatorGui.class)
-public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
+public abstract class SpectatorGuiVRMixin extends GuiComponent implements SpectatorGuiExtension {
     @Shadow
     private long lastSelectionTime;
 
@@ -66,7 +66,7 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         }
     }
 
-    @Inject(method = "renderPage", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V", ordinal = 1))
+    @Inject(method = "renderPage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/spectator/SpectatorGui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 0, shift = At.Shift.AFTER))
     private void vivecraft$hotbarContextIndicator(
         CallbackInfo ci, @Local(argsOnly = true) PoseStack poseStack)
     {
@@ -76,7 +76,7 @@ public abstract class SpectatorGuiVRMixin implements SpectatorGuiExtension {
         {
             int middle = this.minecraft.getWindow().getGuiScaledWidth() / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
-            GuiComponent.blit(poseStack,
+            blit(poseStack,
                 middle - 91 - 1 + ClientDataHolderVR.getInstance().hotbarModule.hotbar * 20,
                 this.minecraft.getWindow().getGuiScaledHeight() - 22 - 1, 0, 22, 24, 22);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

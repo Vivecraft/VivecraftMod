@@ -265,7 +265,7 @@ public abstract class VRRenderer {
         RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
 
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F));
+        RenderSystem.setProjectionMatrix(com.mojang.math.Matrix4f.orthographic(0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 20.0F));
         RenderSystem.getModelViewStack().pushPose();
         RenderSystem.getModelViewStack().setIdentity();
         if (inverse) {

@@ -629,7 +629,7 @@ public class GuiHandler {
                 if (forceGuiToHUD) {
                     // convert previously calculated coords to world coords
                     GUI_POS_ROOM = VRPlayer.worldToRoomPos(
-                        guipos.add(new Vec3(guirot.transformDirection(guilocal, new Vector3f()))),
+                        guipos.add(MathUtils.toMcVec3(guirot.transformDirection(guilocal, new Vector3f()))),
                         DH.vrPlayer.vrdata_world_render);
                     GUI_ROTATION_ROOM = new Matrix4f().rotationY(-DH.vrPlayer.vrdata_world_render.rotation_radians)
                         .mul(guirot);
