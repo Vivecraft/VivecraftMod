@@ -15,8 +15,9 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.Xplat;
@@ -33,6 +34,7 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -53,10 +55,8 @@ public abstract class VRRenderer {
     protected float lastFarClip = 0F;
 
     // render buffers
-    public RenderTarget framebufferEye0;
-    public RenderTarget framebufferEye1;
-    protected int LeftEyeTextureId = -1;
-    protected int RightEyeTextureId = -1;
+    public final VRTextureTarget[] framebufferEye = new VRTextureTarget[2];
+    public final int[] eyeTextureId = {-1, -1};
     public RenderTarget framebufferMR;
     public RenderTarget framebufferUndistorted;
     public RenderTarget framebufferVrRender;
@@ -70,6 +70,7 @@ public abstract class VRRenderer {
 
     // Stencil mesh buffer for each eye
     protected float[][] hiddenMeshVertices = new float[2][];
+    private final VertexBuffer[] bakedHiddenMesh = new VertexBuffer[2];
 
     // variables to check setting changes that need framebuffers reinits/resizes
     private GraphicsStatus previousGraphics = null;
@@ -82,7 +83,7 @@ public abstract class VRRenderer {
     public float renderScale;
 
     // render resolution set by the VR runtime, includes the supersampling factor
-    protected Tuple<Integer, Integer> resolution;
+    protected Vector2ic resolution;
 
     // supersampling set by the vr runtime
     public float ss = -1.0F;
@@ -93,6 +94,13 @@ public abstract class VRRenderer {
 
     public VRRenderer(MCVR vr) {
         this.vr = vr;
+    }
+
+    /**
+     * @throws RenderConfigException if the current graphics setup is unsupported
+     */
+    public void checkCapabilities() throws RenderConfigException {
+        this.checkIfSupportedGpu();
     }
 
     /**
@@ -160,6 +168,54 @@ public abstract class VRRenderer {
     }
 
     /**
+     * gets a baked GpuBuffer of the stencil mesh, if there is one provided by this renderer
+     *
+     * @param eye which eye the stencil should be for
+     * @return the stencil for that eye, if available
+     */
+    public VertexBuffer getBakedStencilMask(RenderPass eye) {
+        if (eye == RenderPass.LEFT || eye == RenderPass.RIGHT) {
+            if (this.bakedHiddenMesh[0] == null || this.bakedHiddenMesh[1] == null) {
+                this.bakeStencilMasks();
+            }
+            return eye == RenderPass.LEFT ? this.bakedHiddenMesh[0] : this.bakedHiddenMesh[1];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * bakes the stencil mesh for both eyes, if they are available
+     */
+    public void bakeStencilMasks() {
+        if (this.bakedHiddenMesh[0] != null) {
+            this.bakedHiddenMesh[0].close();
+            this.bakedHiddenMesh[0] = null;
+        }
+        if (this.bakedHiddenMesh[1] != null) {
+            this.bakedHiddenMesh[1].close();
+            this.bakedHiddenMesh[1] = null;
+        }
+        for (int i = 0; i < this.hiddenMeshVertices.length; ++i) {
+            float[] vertices = this.hiddenMeshVertices[i];
+            if (vertices == null) continue;
+            BufferBuilder builder = Tesselator.getInstance().getBuilder();
+            builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+
+            for (int v = 0; v < vertices.length; v += 2) {
+                builder.vertex(vertices[v], vertices[v + 1], 0.0F)
+                    .color(0, 0, 0, 255)
+                    .endVertex();
+            }
+
+            this.bakedHiddenMesh[i] = new VertexBuffer();
+            this.bakedHiddenMesh[i].bind();
+            this.bakedHiddenMesh[i].upload(builder.end());
+            VertexBuffer.unbind();
+        }
+    }
+
+    /**
      * sets up the stencil rendering, and draws the stencil
      *
      * @param inverse if the stencil covered part, or the inverse of it should be drawn
@@ -208,10 +264,8 @@ public abstract class VRRenderer {
 
         RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
 
-        RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(
-            com.mojang.math.Matrix4f.orthographic(0.0F, fb.viewWidth, fb.viewHeight, 0.0F, 0.0F, 20.0F));
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, 1.0F, 0.0F, 1.0F, 0.0F, 20.0F));
         RenderSystem.getModelViewStack().pushPose();
         RenderSystem.getModelViewStack().setIdentity();
         if (inverse) {
@@ -222,7 +276,7 @@ public abstract class VRRenderer {
         int program = GlStateManager._getInteger(GL43.GL_CURRENT_PROGRAM);
 
         if (dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER) {
-            drawCircle(fb.viewWidth, fb.viewHeight);
+            drawCircle(1.0F, 1.0F);
         } else if (providesStencilMask() &&
             (dataholder.currentPass == RenderPass.LEFT || dataholder.currentPass == RenderPass.RIGHT))
         {
@@ -282,21 +336,17 @@ public abstract class VRRenderer {
         if (verts == null) {
             return;
         }
-
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
+        VertexBuffer buffer = getBakedStencilMask(ClientDataHolderVR.getInstance().currentPass);
+        if (buffer == null) {
+            return;
+        }
 
         ShadersHelper.bindTexture(RenderHelper.BLACK_TEXTURE);
 
-        for (int i = 0; i < verts.length; i += 2) {
-            builder.vertex(
-                verts[i] * this.renderScale + 0.5F,
-                verts[i + 1] * this.renderScale + 0.5F,
-                0.0F).endVertex();
-        }
-
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        BufferUploader.drawWithShader(builder.end());
+        buffer.bind();
+        buffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(),
+            GameRenderer.getPositionColorShader());
+        VertexBuffer.unbind();
     }
 
     /**
@@ -372,7 +422,7 @@ public abstract class VRRenderer {
     /**
      * @return resolution of the headset view
      */
-    public abstract Tuple<Integer, Integer> getRenderTextureSizes();
+    public abstract Vector2ic getRenderTextureSizes();
 
     /**
      * calculates the resolution of first/third person mirror view
@@ -382,7 +432,7 @@ public abstract class VRRenderer {
      * @param resolutionScale render scale from 3rd party mods
      * @return resolution of the desktop view mirror
      */
-    public Tuple<Integer, Integer> getMirrorTextureSize(int eyeFBWidth, int eyeFBHeight, float resolutionScale) {
+    public Vector2i getMirrorTextureSize(int eyeFBWidth, int eyeFBHeight, float resolutionScale) {
         this.mirrorFBWidth = (int) Math.ceil(
             ((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenWidth() *
                 resolutionScale);
@@ -402,7 +452,7 @@ public abstract class VRRenderer {
             this.mirrorFBWidth = eyeFBWidth;
             this.mirrorFBHeight = eyeFBHeight;
         }
-        return new Tuple<>(this.mirrorFBWidth, this.mirrorFBHeight);
+        return new Vector2i(this.mirrorFBWidth, this.mirrorFBHeight);
     }
 
     /**
@@ -412,7 +462,7 @@ public abstract class VRRenderer {
      * @param eyeFBHeight headset view height
      * @return resolution of the telescope view
      */
-    public Tuple<Integer, Integer> getTelescopeTextureSize(int eyeFBWidth, int eyeFBHeight) {
+    public Vector2i getTelescopeTextureSize(int eyeFBWidth, int eyeFBHeight) {
         int telescopeFBwidth = 720;
         int telescopeFBheight = 720;
 
@@ -420,7 +470,7 @@ public abstract class VRRenderer {
             telescopeFBwidth = eyeFBWidth;
             telescopeFBheight = eyeFBHeight;
         }
-        return new Tuple<>(telescopeFBwidth, telescopeFBheight);
+        return new Vector2i(telescopeFBwidth, telescopeFBheight);
     }
 
     /**
@@ -430,7 +480,7 @@ public abstract class VRRenderer {
      * @param eyeFBHeight headset view height
      * @return resolution of the screenshot camera view
      */
-    public Tuple<Integer, Integer> getCameraTextureSize(int eyeFBWidth, int eyeFBHeight) {
+    public Vector2i getCameraTextureSize(int eyeFBWidth, int eyeFBHeight) {
         int cameraFBwidth = Math.round(1920.0F * ClientDataHolderVR.getInstance().vrSettings.handCameraResScale);
         int cameraFBheight = Math.round(1080.0F * ClientDataHolderVR.getInstance().vrSettings.handCameraResScale);
 
@@ -445,7 +495,7 @@ public abstract class VRRenderer {
                 cameraFBheight = eyeFBHeight;
             }
         }
-        return new Tuple<>(cameraFBwidth, cameraFBheight);
+        return new Vector2i(cameraFBwidth, cameraFBheight);
     }
 
     /**
@@ -533,9 +583,9 @@ public abstract class VRRenderer {
         }
 
         if (this.resizeFrameBuffers && !this.reinitFrameBuffers) {
-            Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
-            int eyew = tuple.getA();
-            int eyeh = tuple.getB();
+            Vector2ic size = this.getRenderTextureSizes();
+            int eyew = size.x();
+            int eyeh = size.y();
 
             float resolutionScale =
                 ResolutionControlHelper.isLoaded() ? ResolutionControlHelper.getCurrentScaleFactor() : 1.0F;
@@ -544,9 +594,9 @@ public abstract class VRRenderer {
             int eyeFBWidth = (int) Math.ceil(eyew * this.renderScale);
             int eyeFBHeight = (int) Math.ceil(eyeh * this.renderScale);
 
-            Tuple<Integer, Integer> mirrorSize = getMirrorTextureSize(eyeFBWidth, eyeFBHeight, resolutionScale);
-            Tuple<Integer, Integer> telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
-            Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
+            Vector2i mirrorSize = getMirrorTextureSize(eyeFBWidth, eyeFBHeight, resolutionScale);
+            Vector2i telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
+            Vector2i cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
 
             // main render target
             if (dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported()) {
@@ -561,12 +611,12 @@ public abstract class VRRenderer {
             }
 
             // mirror
-            if (mirrorSize.getA() > 0 && mirrorSize.getB() > 0) {
+            if (mirrorSize.x > 0 && mirrorSize.y > 0) {
                 if (WorldRenderPass.CENTER != null) {
-                    WorldRenderPass.CENTER.resize(mirrorSize.getA(), mirrorSize.getB());
+                    WorldRenderPass.CENTER.resize(mirrorSize.x, mirrorSize.y);
                 }
                 if (WorldRenderPass.MIXED_REALITY != null) {
-                    WorldRenderPass.MIXED_REALITY.resize(mirrorSize.getA(), mirrorSize.getB());
+                    WorldRenderPass.MIXED_REALITY.resize(mirrorSize.x, mirrorSize.y);
                 }
                 this.mirrorFramebuffer.resize(
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
@@ -575,15 +625,15 @@ public abstract class VRRenderer {
             }
 
             // telescopes
-            WorldRenderPass.LEFT_TELESCOPE.resize(telescopeSize.getA(), telescopeSize.getB());
-            WorldRenderPass.RIGHT_TELESCOPE.resize(telescopeSize.getA(), telescopeSize.getB());
+            WorldRenderPass.LEFT_TELESCOPE.resize(telescopeSize.x, telescopeSize.y);
+            WorldRenderPass.RIGHT_TELESCOPE.resize(telescopeSize.x, telescopeSize.y);
 
             // camera
-            this.cameraFramebuffer.resize(cameraSize.getA(), cameraSize.getB(), Minecraft.ON_OSX);
+            this.cameraFramebuffer.resize(cameraSize.x, cameraSize.y, Minecraft.ON_OSX);
             if (ShadersHelper.needsSameSizeBuffers()) {
                 WorldRenderPass.CAMERA.resize(eyeFBWidth, eyeFBHeight);
             } else {
-                WorldRenderPass.CAMERA.resize(cameraSize.getA(), cameraSize.getB());
+                WorldRenderPass.CAMERA.resize(cameraSize.x, cameraSize.y);
             }
 
             // resize gui, if changed
@@ -617,40 +667,7 @@ public abstract class VRRenderer {
         }
 
         if (this.reinitFrameBuffers) {
-            RenderHelper.checkGLError("Start Init");
-
-            // intel drivers have issues with opengl interop on windows so throw an error
-            if (Util.getPlatform() == Util.OS.WINDOWS && GlUtil.getRenderer().toLowerCase().contains("intel") &&
-                dataholder.vrSettings.blockIntelWindows)
-            {
-                StringBuilder gpus = new StringBuilder();
-                boolean onlyIntel = true;
-                for (GraphicsCard gpu : (new SystemInfo()).getHardware().getGraphicsCards()) {
-                    gpus.append("\n");
-                    if (gpu.getVendor().toLowerCase().contains("intel") ||
-                        gpu.getName().toLowerCase().contains("intel"))
-                    {
-                        gpus.append("§c❌§r ");
-                    } else {
-                        onlyIntel = false;
-                        gpus.append("§a✔§r ");
-                    }
-                    gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
-                }
-                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"),
-                    Component.translatable("vivecraft.messages.intelgraphics1",
-                        Component.literal(GlUtil.getRenderer()).withStyle(ChatFormatting.GOLD),
-                        gpus.toString(),
-                        onlyIntel ? Component.empty() :
-                            Component.translatable("vivecraft.messages.intelgraphics2",
-                                Component.literal("https://www.vivecraft.org/faq/#gpu")
-                                    .withStyle(style -> style.withUnderlined(true)
-                                        .withColor(ChatFormatting.GREEN)
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                            Component.translatable("chat.link.open")))
-                                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
-                                            "https://www.vivecraft.org/faq/#gpu"))))));
-            }
+            GraphicsHelper.INSTANCE.checkError("Start Init");
 
             if (!this.isInitialized()) {
                 throw new RenderConfigException(
@@ -658,46 +675,46 @@ public abstract class VRRenderer {
                     Component.literal(this.getInitError()));
             }
 
-            Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
-            int eyew = tuple.getA();
-            int eyeh = tuple.getB();
+            Vector2ic size = this.getRenderTextureSizes();
+            int eyew = size.x();
+            int eyeh = size.y();
 
             destroyBuffers();
 
-            if (this.LeftEyeTextureId == -1) {
+            if (this.eyeTextureId[0] == -1) {
                 this.createRenderTexture(eyew, eyeh);
 
-                if (this.LeftEyeTextureId == -1) {
+                if (this.eyeTextureId[0] == -1) {
                     throw new RenderConfigException(
                         Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
                         Component.literal(this.getLastError()));
                 }
 
                 VRSettings.LOGGER.info("Vivecraft: VR Provider supplied render texture IDs: {}, {}",
-                    this.LeftEyeTextureId, this.RightEyeTextureId);
+                    this.eyeTextureId[0], this.eyeTextureId[1]);
                 VRSettings.LOGGER.info("Vivecraft: VR Provider supplied texture resolution: {} x {}", eyew, eyeh);
             }
 
-            RenderHelper.checkGLError("Render Texture setup");
+            GraphicsHelper.INSTANCE.checkError("Render Texture setup");
 
-            if (this.framebufferEye0 == null) {
-                this.framebufferEye0 = VRTextureTarget.builder("L Eye")
+            if (this.framebufferEye[0] == null) {
+                this.framebufferEye[0] = VRTextureTarget.builder("L Eye")
                     .withSize(eyew, eyeh)
-                    .withTexId(this.LeftEyeTextureId)
+                    .withTexId(this.eyeTextureId[0])
                     .withLinearFilter()
                     .build();
-                VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye0);
-                RenderHelper.checkGLError("Left Eye framebuffer setup");
+                VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[0]);
+                GraphicsHelper.INSTANCE.checkError("Left Eye framebuffer setup");
             }
 
-            if (this.framebufferEye1 == null) {
-                this.framebufferEye1 = VRTextureTarget.builder("R Eye")
+            if (this.framebufferEye[1] == null) {
+                this.framebufferEye[1] = VRTextureTarget.builder("R Eye")
                     .withSize(eyew, eyeh)
-                    .withTexId(this.RightEyeTextureId)
+                    .withTexId(this.eyeTextureId[1])
                     .withLinearFilter()
                     .build();
-                VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye1);
-                RenderHelper.checkGLError("Right Eye framebuffer setup");
+                VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[1]);
+                GraphicsHelper.INSTANCE.checkError("Right Eye framebuffer setup");
             }
 
             float resolutionScale =
@@ -715,7 +732,7 @@ public abstract class VRRenderer {
                 .build();
             WorldRenderPass.STEREO_XR = new WorldRenderPass(this.framebufferVrRender);
             VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferVrRender);
-            RenderHelper.checkGLError("3D framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("3D framebuffer setup");
 
             getMirrorTextureSize(eyeFBWidth, eyeFBHeight, resolutionScale);
 
@@ -733,7 +750,7 @@ public abstract class VRRenderer {
                     .build();
                 WorldRenderPass.MIXED_REALITY = new WorldRenderPass(this.framebufferMR);
                 VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferMR);
-                RenderHelper.checkGLError("Mixed reality framebuffer setup");
+                GraphicsHelper.INSTANCE.checkError("Mixed reality framebuffer setup");
             }
 
             if (list.contains(RenderPass.CENTER) || this.allFramebuffersInitialized()) {
@@ -744,7 +761,7 @@ public abstract class VRRenderer {
                     .build();
                 WorldRenderPass.CENTER = new WorldRenderPass(this.framebufferUndistorted);
                 VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferUndistorted);
-                RenderHelper.checkGLError("Undistorted view framebuffer setup");
+                GraphicsHelper.INSTANCE.checkError("Undistorted view framebuffer setup");
             }
             this.mirrorFramebuffer = VRTextureTarget.builder("Mirror")
                 .withSize(
@@ -764,7 +781,7 @@ public abstract class VRRenderer {
                 .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", GuiHandler.GUI_FRAMEBUFFER);
-            RenderHelper.checkGLError("GUI framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("GUI framebuffer setup");
 
             KeyboardHandler.FRAMEBUFFER = VRTextureTarget.builder("Keyboard")
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
@@ -774,7 +791,7 @@ public abstract class VRRenderer {
                 .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", KeyboardHandler.FRAMEBUFFER);
-            RenderHelper.checkGLError("Keyboard framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("Keyboard framebuffer setup");
 
             RadialHandler.FRAMEBUFFER = VRTextureTarget.builder("Radial Menu")
                 .withSize(GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT)
@@ -784,32 +801,32 @@ public abstract class VRRenderer {
                 .withAnisotropicFiltering(dataholder.vrSettings.guiAnisotropicFiltering)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", RadialHandler.FRAMEBUFFER);
-            RenderHelper.checkGLError("Radial framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("Radial framebuffer setup");
 
 
-            Tuple<Integer, Integer> telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
+            Vector2i telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
 
             this.telescopeFramebufferR = VRTextureTarget.builder("TelescopeR")
-                .withSize(telescopeSize.getA(), telescopeSize.getB())
+                .withSize(telescopeSize.x, telescopeSize.y)
                 .withDepth()
                 .withClearColor(0F, 0F, 0F, 1F)
                 .build();
             WorldRenderPass.RIGHT_TELESCOPE = new WorldRenderPass(this.telescopeFramebufferR);
             VRSettings.LOGGER.info("Vivecraft: {}", this.telescopeFramebufferR);
-            RenderHelper.checkGLError("TelescopeR framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("TelescopeR framebuffer setup");
 
             this.telescopeFramebufferL = VRTextureTarget.builder("TelescopeL")
-                .withSize(telescopeSize.getA(), telescopeSize.getB())
+                .withSize(telescopeSize.x, telescopeSize.y)
                 .withDepth()
                 .withClearColor(0F, 0F, 0F, 1F)
                 .build();
             WorldRenderPass.LEFT_TELESCOPE = new WorldRenderPass(this.telescopeFramebufferL);
             VRSettings.LOGGER.info("Vivecraft: {}", this.telescopeFramebufferL);
-            RenderHelper.checkGLError("TelescopeL framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("TelescopeL framebuffer setup");
 
-            Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
-            int cameraRenderFBwidth = cameraSize.getA();
-            int cameraRenderFBheight = cameraSize.getB();
+            Vector2i cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
+            int cameraRenderFBwidth = cameraSize.x;
+            int cameraRenderFBheight = cameraSize.y;
 
             if (ShadersHelper.needsSameSizeBuffers()) {
                 cameraRenderFBwidth = eyeFBWidth;
@@ -817,12 +834,12 @@ public abstract class VRRenderer {
             }
 
             this.cameraFramebuffer = VRTextureTarget.builder("Handheld Camera")
-                .withSize(cameraSize.getA(), cameraSize.getB())
+                .withSize(cameraSize.x, cameraSize.y)
                 .withDepth()
                 .withClearColor(0F, 0F, 0F, 1F)
                 .build();
             VRSettings.LOGGER.info("Vivecraft: {}", this.cameraFramebuffer);
-            RenderHelper.checkGLError("Camera framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("Camera framebuffer setup");
 
             this.cameraRenderFramebuffer = VRTextureTarget.builder("Handheld Camera Render")
                 .withSize(cameraRenderFBwidth, cameraRenderFBheight)
@@ -831,11 +848,11 @@ public abstract class VRRenderer {
                 .build();
             WorldRenderPass.CAMERA = new WorldRenderPass(this.cameraRenderFramebuffer);
             VRSettings.LOGGER.info("Vivecraft: {}", this.cameraRenderFramebuffer);
-            RenderHelper.checkGLError("Camera render framebuffer setup");
+            GraphicsHelper.INSTANCE.checkError("Camera render framebuffer setup");
 
             if (dataholder.vrSettings.useFsaa) {
                 try {
-                    RenderHelper.checkGLError("pre FSAA FBO creation");
+                    GraphicsHelper.INSTANCE.checkError("pre FSAA FBO creation");
                     this.fsaaFirstPassResultFBO = VRTextureTarget.builder("FSAA Pass1 FBO")
                         .withSize(eyew, eyeFBHeight)
                         .withDepth()
@@ -847,7 +864,7 @@ public abstract class VRRenderer {
 
                     VRSettings.LOGGER.info("Vivecraft: {}", this.fsaaFirstPassResultFBO);
                     VRSettings.LOGGER.info("Vivecraft: {}", this.fsaaLastPassResultFBO);
-                    RenderHelper.checkGLError("FSAA FBO creation");
+                    GraphicsHelper.INSTANCE.checkError("FSAA FBO creation");
                 } catch (Exception exception) {
                     // FSAA failed to initialize so don't use it
                     dataholder.vrSettings.useFsaa = false;
@@ -919,6 +936,49 @@ public abstract class VRRenderer {
 
             this.reinitFrameBuffers = false;
             this.resizeFrameBuffers = false;
+        }
+    }
+
+    private void checkIfSupportedGpu() throws RenderConfigException {
+        // intel drivers have issues with interop on windows so throw an error
+        if (Util.getPlatform() == Util.OS.WINDOWS &&
+            GlUtil.getRenderer().toLowerCase().contains("intel") &&
+            ClientDataHolderVR.getInstance().vrSettings.blockIntelWindows)
+        {
+            StringBuilder gpus = new StringBuilder();
+            boolean onlyIntel = true;
+            for (GraphicsCard gpu : (new SystemInfo()).getHardware().getGraphicsCards()) {
+                gpus.append("\n");
+                if (gpu.getVendor().toLowerCase().contains("intel") ||
+                    gpu.getName().toLowerCase().contains("intel"))
+                {
+                    gpus.append("§c❌§r ");
+                } else if (gpu.getVendor().toLowerCase().contains("amd") ||
+                    gpu.getName().toLowerCase().contains("amd") ||
+                    gpu.getVendor().toLowerCase().contains("nvidia") ||
+                    gpu.getName().toLowerCase().contains("nvidia"))
+                {
+                    onlyIntel = false;
+                    gpus.append("§a✔§r ");
+                }
+                gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
+            }
+            Component message;
+            message = Component.translatable("vivecraft.messages.intelgraphics1",
+                Component.literal(GlUtil.getRenderer())
+                    .withStyle(ChatFormatting.GOLD),
+                gpus.toString(),
+                onlyIntel ? Component.empty() :
+                    Component.translatable("vivecraft.messages.intelgraphics2",
+                        Component.literal("https://www.vivecraft.org/faq/#gpu")
+                            .withStyle(style -> style.withUnderlined(true)
+                                .withColor(ChatFormatting.GREEN)
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                    Component.translatable("chat.link.open")))
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
+                                    "https://www.vivecraft.org/faq/#gpu")))));
+
+            throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"), message);
         }
     }
 
@@ -998,16 +1058,12 @@ public abstract class VRRenderer {
             this.fsaaLastPassResultFBO = null;
         }
 
-        if (this.framebufferEye0 != null) {
-            this.framebufferEye0.destroyBuffers();
-            this.framebufferEye0 = null;
-            this.LeftEyeTextureId = -1;
-        }
-
-        if (this.framebufferEye1 != null) {
-            this.framebufferEye1.destroyBuffers();
-            this.framebufferEye1 = null;
-            this.RightEyeTextureId = -1;
+        for (int i = 0; i < 2; i++) {
+            if (this.framebufferEye[i] != null) {
+                this.framebufferEye[i].destroyBuffers();
+                this.framebufferEye[i] = null;
+                this.eyeTextureId[i] = -1;
+            }
         }
 
         if (this.mirrorFramebuffer != null) {
@@ -1021,5 +1077,13 @@ public abstract class VRRenderer {
      */
     public void destroy() {
         destroyBuffers();
+        if (this.bakedHiddenMesh[0] != null) {
+            this.bakedHiddenMesh[0].close();
+            this.bakedHiddenMesh[0] = null;
+        }
+        if (this.bakedHiddenMesh[1] != null) {
+            this.bakedHiddenMesh[1].close();
+            this.bakedHiddenMesh[1] = null;
+        }
     }
 }

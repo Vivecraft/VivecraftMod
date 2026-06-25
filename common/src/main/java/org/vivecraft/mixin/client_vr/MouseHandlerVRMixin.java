@@ -6,18 +6,23 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
+import org.vivecraft.common.utils.MathUtils;
 
 @Mixin(MouseHandler.class)
 public class MouseHandlerVRMixin {
@@ -27,6 +32,42 @@ public class MouseHandlerVRMixin {
     @Final
     @Shadow
     private Minecraft minecraft;
+
+    @Shadow
+    private double accumulatedDX;
+
+    @Shadow
+    private double accumulatedDY;
+
+    @Unique
+    private Vector3f vivecraft$lastAim;
+
+    @Inject(method = "turnPlayer", at = @At("HEAD"))
+    private void vivecraft$modifyMouseTravel(CallbackInfo ci) {
+        if (VRState.VR_RUNNING && this.minecraft.screen == null) {
+            VRData.VRDevicePose aim = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getAim();
+            Vector3f dir = aim.getDirection()
+                .normalize();
+            if (this.vivecraft$lastAim != null) {
+                // yaw
+                double yaw = 0;
+                // no 0 or those angles are invalid
+                if (this.vivecraft$lastAim.x != 0 && this.vivecraft$lastAim.z != 0 && dir.x != 0 && dir.z != 0) {
+                    yaw = Math.atan2(-this.vivecraft$lastAim.x, this.vivecraft$lastAim.z) - Math.atan2(-dir.x, dir.z);
+                    yaw = yaw > Math.PI ? yaw - Math.PI * 2.0 : (yaw < -Math.PI ? yaw + Math.PI * 2.0 : yaw);
+                }
+                this.accumulatedDX = -yaw * Mth.RAD_TO_DEG * 5F;
+
+                // pitch
+                Vector3f up = aim.getCustomVector(MathUtils.UP);
+                double pitch = (Math.asin(this.vivecraft$lastAim.y) - Math.asin(dir.y)) * (up.y < 0 ? -1 : 1);
+                this.accumulatedDY = pitch * Mth.RAD_TO_DEG * 5F;
+            }
+            this.vivecraft$lastAim = dir;
+        } else {
+            this.vivecraft$lastAim = null;
+        }
+    }
 
     @WrapOperation(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
     private boolean vivecraft$checkNull(LocalPlayer instance, Operation<Boolean> original) {

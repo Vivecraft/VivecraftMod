@@ -8,6 +8,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
+import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.NetworkVersion;
@@ -20,6 +21,8 @@ public class ServerVivePlayer {
     // player movement state
     @Nullable
     private VrPlayerState vrPlayerState;
+    // last calculated body yaw, gets cleard when a new vr state is set
+    private float bodyYaw = Float.MAX_VALUE;
     private VRPose vrPlayerStateAsPose;
     // how much the player is drawing the roomscale bow
     public float draw;
@@ -46,6 +49,8 @@ public class ServerVivePlayer {
     // network protocol this player is communicating with
     public NetworkVersion networkVersion = NetworkVersion.fromProtocolVersion(
         CommonNetworkHelper.MAX_SUPPORTED_NETWORK_PROTOCOL);
+    // version the player sent on join
+    public UpdateChecker.Version version = UpdateChecker.Version.UNKNOWN;
     // if the client requested damage direction data
     public boolean wantsDamageDirection = false;
 
@@ -199,6 +204,31 @@ public class ServerVivePlayer {
     }
 
     /**
+     * @return the yaw direction the player body is facing, in radians
+     */
+    public float getBodyYawRad() {
+        if (this.bodyYaw == Float.MAX_VALUE) {
+            if (this.vrPlayerState == null) {
+                return this.player.getYRot();
+            }
+            Vector3fc mainHandPos = null;
+            Vector3fc offHandPos = null;
+            // if they do not track they are invalid
+            if (this.vrPlayerState.mainHand().position().distanceSquared(this.vrPlayerState.offHand().position()) !=
+                0.0F)
+            {
+                offHandPos = this.vrPlayerState.offHand().position();
+                mainHandPos = this.vrPlayerState.mainHand().position();
+            }
+            this.bodyYaw = MathUtils.estimateBodyYawRad(this.vrPlayerState.seated(), this.vrPlayerState.leftHanded(),
+                this.vrPlayerState.fbtMode(),
+                this.vrPlayerState.hmd().orientation().transform(MathUtils.BACK, new Vector3f()), mainHandPos,
+                offHandPos, () -> this.vrPlayerState.waist().orientation().transform(MathUtils.BACK, new Vector3f()));
+        }
+        return this.bodyYaw;
+    }
+
+    /**
      * @return if the player has VR active
      */
     public boolean isVR() {
@@ -233,6 +263,7 @@ public class ServerVivePlayer {
 
     public void setVrPlayerState(VrPlayerState vrPlayerState) {
         this.vrPlayerState = vrPlayerState;
+        this.bodyYaw = Float.MAX_VALUE;
         this.vrPlayerStateAsPose = null;
         VRAPIImpl.INSTANCE.addPoseToHistory(this.player.getUUID(), vrPlayerState.asVRPose(this.player.position()),
             this.player.position(), false);

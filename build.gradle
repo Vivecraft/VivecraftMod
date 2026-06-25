@@ -42,6 +42,9 @@ subprojects {
         // bHaptics Integration
         implementation("com.github.bhaptics:tact-java:0.1.4")
 
+        // for potential vulkan support
+        compileOnly("org.lwjgl:lwjgl-vulkan:${rootProject.lwjgl_version}") { transitive = false }
+
         // for running testing
         testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")

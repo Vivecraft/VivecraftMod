@@ -1827,6 +1827,7 @@ public class MenuWorldRenderer {
             f = 1.0F - (float) Math.pow(f, 0.25);
             Vec3 eyePos = this.menuWorldRenderer.getEyePos();
             Vec3 skyColor = this.menuWorldRenderer.getSkyColor(eyePos);
+
             if (OptifineHelper.isOptifineLoaded()) {
                 if (this.menuWorldRenderer.blockAccess.dimensionType().effectsLocation()
                     .equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS))
@@ -1839,10 +1840,12 @@ public class MenuWorldRenderer {
                     skyColor = OptifineHelper.getCustomSkyColorEnd(skyColor);
                 }
             }
+
             float skyRed = (float) skyColor.x;
             float skyGreen = (float) skyColor.y;
             float skyBlue = (float) skyColor.z;
             Vec3 fogColor = this.menuWorldRenderer.getFogColor(eyePos);
+
             if (OptifineHelper.isOptifineLoaded()) {
                 if (this.menuWorldRenderer.blockAccess.dimensionType().effectsLocation()
                     .equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS))
@@ -1859,6 +1862,7 @@ public class MenuWorldRenderer {
                     fogColor = OptifineHelper.getCustomFogColorNether(fogColor);
                 }
             }
+
             this.fogRed = (float) fogColor.x;
             this.fogGreen = (float) fogColor.y;
             this.fogBlue = (float) fogColor.z;
