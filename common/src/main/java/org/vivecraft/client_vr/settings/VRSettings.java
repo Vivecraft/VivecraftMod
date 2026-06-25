@@ -1584,6 +1584,7 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
+                GuiHandler.GUI_SCALE = 1F;
                 GuiHandler.onScreenChanged(null, Minecraft.getInstance().gui.screen(), false);
             }
         },
