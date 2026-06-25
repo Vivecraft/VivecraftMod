@@ -89,9 +89,11 @@ public class ShaderHelper {
 
     private static void drawFullscreenQuad(VertexFormat format, boolean flipVertically) {
         VertexBuffer quad = getFullscreenQuad(format, flipVertically);
-        quad.bind();
-        quad.draw();
+        // somehow there is no simple draw that sets up the state correctly and clears it up again
+        quad.drawChunkLayer();
+        format.clearBufferState();
         VertexBuffer.unbind();
+        VertexBuffer.unbindVertexArray();
     }
 
     /**
@@ -109,10 +111,11 @@ public class ShaderHelper {
                     builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
                     builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
                     builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
+                    builder.end();
 
                     SCREEN_UV_VBO = new VertexBuffer();
                     SCREEN_UV_VBO.bind();
-                    SCREEN_UV_VBO.upload(builder.end());
+                    SCREEN_UV_VBO.upload(builder);
                     VertexBuffer.unbind();
                 }
                 return SCREEN_UV_VBO;
@@ -124,10 +127,11 @@ public class ShaderHelper {
                     builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
                     builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
                     builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
+                    builder.end();
 
                     SCREEN_UV_VBO_FLIPPED = new VertexBuffer();
                     SCREEN_UV_VBO_FLIPPED.bind();
-                    SCREEN_UV_VBO_FLIPPED.upload(builder.end());
+                    SCREEN_UV_VBO_FLIPPED.upload(builder);
                     VertexBuffer.unbind();
                 }
                 return SCREEN_UV_VBO_FLIPPED;
@@ -140,10 +144,11 @@ public class ShaderHelper {
                 builder.vertex(1.0F, -1.0F, 0.0F).endVertex();
                 builder.vertex(1.0F, 1.0F, 0.0F).endVertex();
                 builder.vertex(-1.0F, 1.0F, 0.0F).endVertex();
+                builder.end();
 
                 SCREEN_VBO = new VertexBuffer();
                 SCREEN_VBO.bind();
-                SCREEN_VBO.upload(builder.end());
+                SCREEN_VBO.upload(builder);
                 VertexBuffer.unbind();
             }
             return SCREEN_VBO;

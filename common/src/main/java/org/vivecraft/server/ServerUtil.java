@@ -13,6 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,8 +80,9 @@ public class ServerUtil {
                         }
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
-                            serverPlayer.server.getPlayerList().broadcastSystemMessage(
-                                Component.literal(formatMessage(message, serverPlayer.getName().getString())), false);
+                            serverPlayer.server.getPlayerList().broadcastMessage(
+                                new TextComponent(formatMessage(message, serverPlayer.getName().getString())),
+                                ChatType.SYSTEM, Util.NIL_UUID);
                         }
                     }
                 }
@@ -106,7 +108,7 @@ public class ServerUtil {
                 if (ServerConfig.DEBUG.get()) {
                     ServerNetworking.LOGGER.info("{} got kicked for not using VR", player.getName());
                 }
-                player.connection.disconnect(Component.literal(
+                player.connection.disconnect(new TextComponent(
                     formatMessage(ServerConfig.MESSAGES_KICK_VR_ONLY.get(), player.getName().getString())));
                 return true;
             }
@@ -116,7 +118,7 @@ public class ServerUtil {
                 if (ServerConfig.DEBUG.get()) {
                     ServerNetworking.LOGGER.info("{} got kicked for not using Vivecraft", player.getName().getString());
                 }
-                player.connection.disconnect(Component.literal(
+                player.connection.disconnect(new TextComponent(
                     formatMessage(ServerConfig.MESSAGES_KICK_VIVE_ONLY.get(), player.getName().getString())));
                 return true;
             }
@@ -125,7 +127,7 @@ public class ServerUtil {
             if (!isOpAndAllowed && ServerConfig.MIN_VIVE_VERSION != null && vivePlayer != null &&
                 vivePlayer.version.compareTo(ServerConfig.MIN_VIVE_VERSION) > 0)
             {
-                player.connection.disconnect(Component.literal(
+                player.connection.disconnect(new TextComponent(
                     formatMessage(ServerConfig.MESSAGES_KICK_OUTDATED_VIVE_VERSION.get(),
                         player.getName().getString(),
                         "&minVersion", ServerConfig.MIN_VIVE_VERSION.versionString(),
@@ -215,7 +217,7 @@ public class ServerUtil {
                         String pathString = String.join(".", path);
                         ServerConfig.getConfigValues().stream().filter(c -> c.getPath().equals(pathString)).findFirst()
                             .ifPresent(setting -> {
-                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                Consumer<Component> notifier = c -> context.getSource().sendSuccess(c, true);
                                 setting.onUpdate(context.getSource().getServer(), notifier);
                                 ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
                                     notifier);
@@ -266,7 +268,7 @@ public class ServerUtil {
                                 context.getSource().sendSuccess(
                                     new TextComponent(
                                         "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)), true);
-                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                Consumer<Component> notifier = c -> context.getSource().sendSuccess(c, true);
                                 setting.onUpdate(context.getSource().getServer(), notifier);
                                 ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
                                     notifier);
@@ -298,7 +300,7 @@ public class ServerUtil {
                                 context.getSource().sendSuccess(
                                     new TextComponent(
                                         "set §a[%s]§r to '%s'".formatted(setting.getPath(), newEnumValue)), true);
-                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                Consumer<Component> notifier = c -> context.getSource().sendSuccess(c, true);
                                 setting.onUpdate(context.getSource().getServer(), notifier);
                                 ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
                                     notifier);
@@ -320,7 +322,7 @@ public class ServerUtil {
                             context.getSource().sendSuccess(
                                 new TextComponent(
                                     "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)), true);
-                            Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                            Consumer<Component> notifier = c -> context.getSource().sendSuccess(c, true);
                             setting.onUpdate(context.getSource().getServer(), notifier);
                             ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting, notifier);
                             return 1;
@@ -343,7 +345,7 @@ public class ServerUtil {
                                         "added '%s' to §a[%s]§r".formatted(newValue, setting.getPath())), true);
                                 context.getSource().sendSuccess(
                                     new TextComponent("is now '%s'".formatted(setting.get())), true);
-                                Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                                Consumer<Component> notifier = c -> context.getSource().sendSuccess(c, true);
                                 setting.onUpdate(context.getSource().getServer(), notifier);
                                 ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting,
                                     notifier);
@@ -375,7 +377,7 @@ public class ServerUtil {
                                     newValue, setting.getPath())), true);
                             context.getSource().sendSuccess(
                                 new TextComponent("is now '%s'".formatted(setting.get())), true);
-                            Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                            Consumer<Component> notifier = c -> context.getSource().sendSuccess(c, true);
                             setting.onUpdate(context.getSource().getServer(), notifier);
                             ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting, notifier);
                             return 1;
@@ -390,7 +392,7 @@ public class ServerUtil {
                     Object newValue = setting.reset();
                     context.getSource().sendSuccess(
                         new TextComponent("reset §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)), true);
-                    Consumer<Component> notifier = context.getSource()::sendSystemMessage;
+                    Consumer<Component> notifier = c -> context.getSource().sendSuccess(c, true);
                     setting.onUpdate(context.getSource().getServer(), notifier);
                     ServerNetworking.sendUpdatePacketToAll(context.getSource().getServer(), setting, notifier);
                     return 1;

@@ -430,11 +430,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
 
             // actually send the message, if there is one set
             if (!message.isEmpty()) {
-                this.server.getPlayerList().broadcastSystemMessage(
-                    Component.literal(ServerUtil.formatMessage(message,
+                this.server.getPlayerList().broadcastMessage(
+                    new TextComponent(ServerUtil.formatMessage(message,
                         getName().getString(),
                         "&cause", entity)),
-                    false);
+                    ChatType.SYSTEM, Util.NIL_UUID);
             }
         }
     }

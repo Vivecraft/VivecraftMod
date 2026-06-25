@@ -11,10 +11,7 @@ import net.minecraft.Util;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
@@ -208,10 +205,11 @@ public abstract class VRRenderer {
                     .color(0, 0, 0, 255)
                     .endVertex();
             }
+            builder.end();
 
             this.bakedHiddenMesh[i] = new VertexBuffer();
             this.bakedHiddenMesh[i].bind();
-            this.bakedHiddenMesh[i].upload(builder.end());
+            this.bakedHiddenMesh[i].upload(builder);
             VertexBuffer.unbind();
         }
     }
@@ -966,21 +964,21 @@ public abstract class VRRenderer {
                 gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
             }
             Component message;
-            message = Component.translatable("vivecraft.messages.intelgraphics1",
-                Component.literal(GlUtil.getRenderer())
+            message = new TranslatableComponent("vivecraft.messages.intelgraphics1",
+                new TextComponent(GlUtil.getRenderer())
                     .withStyle(ChatFormatting.GOLD),
                 gpus.toString(),
-                onlyIntel ? Component.empty() :
-                    Component.translatable("vivecraft.messages.intelgraphics2",
-                        Component.literal("https://www.vivecraft.org/faq/#gpu")
+                onlyIntel ? TextComponent.EMPTY :
+                    new TranslatableComponent("vivecraft.messages.intelgraphics2",
+                        new TextComponent("https://www.vivecraft.org/faq/#gpu")
                             .withStyle(style -> style.withUnderlined(true)
                                 .withColor(ChatFormatting.GREEN)
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                    Component.translatable("chat.link.open")))
+                                    new TranslatableComponent("chat.link.open")))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
                                     "https://www.vivecraft.org/faq/#gpu")))));
 
-            throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"), message);
+            throw new RenderConfigException(new TranslatableComponent("vivecraft.messages.incompatiblegpu"), message);
         }
     }
 

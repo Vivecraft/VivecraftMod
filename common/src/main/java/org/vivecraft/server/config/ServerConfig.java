@@ -6,7 +6,7 @@ import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -185,7 +185,7 @@ public class ServerConfig {
                     UpdateChecker.Version.fromClient(MIN_VIVE_VERSION_STRING.get());
                 if (!MIN_VIVE_VERSION_STRING.get().isEmpty() && !MIN_VIVE_VERSION.isValid()) {
                     if (notifier != null) {
-                        notifier.accept(Component.literal(
+                        notifier.accept(new TextComponent(
                             "Invalid minViveVersion version number: '" + MIN_VIVE_VERSION_STRING.get() +
                                 "'. Version numbers need to be of the format X.X.X"));
                     }

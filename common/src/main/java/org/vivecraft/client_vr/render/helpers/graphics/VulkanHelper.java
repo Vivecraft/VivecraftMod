@@ -1,8 +1,9 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -95,7 +96,7 @@ public abstract class VulkanHelper implements GraphicsHelper {
         long targetImage, int targetMip, int targetX, int targetY, int targetWidth, int targetHeight)
     {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            VkOffset3D.Buffer srcOffsets = VkOffset3D.calloc(2, stack);
+            VkOffset3D.Buffer srcOffsets = VkOffset3D.callocStack(2, stack);
             srcOffsets.x(sourceX)
                 .y(sourceY)
                 .z(0);
@@ -105,7 +106,7 @@ public abstract class VulkanHelper implements GraphicsHelper {
                 .z(1);
             srcOffsets.position(0);
 
-            VkOffset3D.Buffer dstOffsets = VkOffset3D.calloc(2, stack);
+            VkOffset3D.Buffer dstOffsets = VkOffset3D.callocStack(2, stack);
             dstOffsets.x(targetX)
                 .y(targetY)
                 .z(0);
@@ -115,25 +116,25 @@ public abstract class VulkanHelper implements GraphicsHelper {
                 .z(1);
             dstOffsets.position(0);
 
-            VkImageSubresourceLayers srcSubresource = VkImageSubresourceLayers.calloc(stack);
+            VkImageSubresourceLayers srcSubresource = VkImageSubresourceLayers.callocStack(stack);
             srcSubresource.aspectMask(VK10.VK_IMAGE_ASPECT_COLOR_BIT);
             srcSubresource.mipLevel(sourceMip);
             srcSubresource.baseArrayLayer(0);
             srcSubresource.layerCount(1);
 
-            VkImageSubresourceLayers dstSubresource = VkImageSubresourceLayers.calloc(stack);
+            VkImageSubresourceLayers dstSubresource = VkImageSubresourceLayers.callocStack(stack);
             dstSubresource.aspectMask(VK10.VK_IMAGE_ASPECT_COLOR_BIT);
             dstSubresource.mipLevel(targetMip);
             dstSubresource.baseArrayLayer(0);
             dstSubresource.layerCount(1);
 
-            VkImageBlit.Buffer blitRegion = VkImageBlit.calloc(1, stack);
+            VkImageBlit.Buffer blitRegion = VkImageBlit.callocStack(1, stack);
             blitRegion.srcSubresource(srcSubresource);
             blitRegion.srcOffsets(srcOffsets);
             blitRegion.dstSubresource(dstSubresource);
             blitRegion.dstOffsets(dstOffsets);
 
-            VK12.vkCmdBlitImage(commandBuffer,
+            VK10.vkCmdBlitImage(commandBuffer,
                 sourceImage, VK10.VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                 targetImage, VK10.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 blitRegion, VK10.VK_FILTER_LINEAR);
@@ -159,7 +160,8 @@ public abstract class VulkanHelper implements GraphicsHelper {
         int srcAccessMask, int dstAccessMask, int srcStageMask, int dstStageMask)
     {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            VkImageMemoryBarrier.Buffer barrier = VkImageMemoryBarrier.calloc(1, stack).sType$Default();
+            VkImageMemoryBarrier.Buffer barrier = VkImageMemoryBarrier.callocStack(1, stack)
+                .sType(VK10.VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER);
             barrier.oldLayout(oldLayout);
             barrier.newLayout(newLayout);
             barrier.srcAccessMask(srcAccessMask);
@@ -174,7 +176,7 @@ public abstract class VulkanHelper implements GraphicsHelper {
             subresourceRange.baseArrayLayer(0);
             subresourceRange.layerCount(1);
 
-            VK12.vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, 0, null, null, barrier);
+            VK10.vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, 0, null, null, barrier);
         }
     }
 
@@ -231,12 +233,12 @@ public abstract class VulkanHelper implements GraphicsHelper {
 
         if (!missingExtensions.isEmpty()) {
             //  unsupported extensions, abort with unsupported
-            MutableComponent error = Component.translatable("vivecraft.messages.vulkanunsupported");
+            MutableComponent error = new TranslatableComponent("vivecraft.messages.vulkanunsupported");
 
             for (String ext : missingExtensions) {
-                error.append(Component.literal("\n" + ext));
+                error.append(new TextComponent("\n" + ext));
             }
-            throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"), error);
+            throw new RenderConfigException(new TranslatableComponent("vivecraft.messages.incompatiblegpu"), error);
         }
         // all extensions supported, check if they are already enabled
         Set<String> enabledExtensions = this.getEnabledExtensions();
@@ -255,8 +257,8 @@ public abstract class VulkanHelper implements GraphicsHelper {
             VRSettings.LOGGER.info(
                 "Vivecraft: Not all needed Vulkan Extensions are enabled, game restart required. Not enabled Extensions:\n{}",
                 String.join("\n", missingExtensions));
-            throw new RenderConfigException(Component.translatable("vivecraft.messages.vulkanrestarttitle"),
-                Component.translatable("vivecraft.messages.vulkanrestart"));
+            throw new RenderConfigException(new TranslatableComponent("vivecraft.messages.vulkanrestarttitle"),
+                new TranslatableComponent("vivecraft.messages.vulkanrestart"));
         }
     }
 

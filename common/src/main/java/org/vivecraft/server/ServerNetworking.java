@@ -3,6 +3,7 @@ package org.vivecraft.server;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -432,7 +433,7 @@ public class ServerNetworking {
                 {
                     if (ServerConfig.KICK_PLAYERS_ON_SETTING_UPDATE.get()) {
                         vivePlayer.player.connection.disconnect(
-                            Component.literal("A server setting changed that needs you to rejoin the server."));
+                            new TextComponent("A server setting changed that needs you to rejoin the server."));
                     } else {
                         unsupported = true;
                     }
@@ -441,7 +442,7 @@ public class ServerNetworking {
                 vivePlayer.player.connection.send(Xplat.getS2CPacket(payload));
             }
             if (unsupported && notifier != null) {
-                notifier.accept(Component.literal(
+                notifier.accept(new TextComponent(
                     "§6Some clients don't support to toggle this setting and need to rejoin the server for it to update. If you would like to automatically kick them on such setting changes, enable '§a" +
                         ServerConfig.KICK_PLAYERS_ON_SETTING_UPDATE.getPath() + "§6'."));
             }
