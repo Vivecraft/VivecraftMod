@@ -1578,7 +1578,13 @@ public class VRSettings {
                 }
             }
         },
-        FORCE_GUI_TO_HUD(OptionType.BOOLEAN), // puts any screen to the HUD Lock position, instead of fixed in the room
+        FORCE_GUI_TO_HUD(OptionType.BOOLEAN) { // puts any screen to the HUD Lock position, instead of fixed in the room
+
+            @Override
+            void onOptionChange() {
+                GuiHandler.onScreenChanged(null, Minecraft.getInstance().gui.screen(), false);
+            }
+        },
         HUD_WRIST_OFFSET(0.0f, 4.0f, 0.25f, -1), // HUD Offset to the arm
         HUD_OPACITY(0.15f, 1.0f, 0.05f, -1) { // HUD Opacity
 
