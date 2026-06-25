@@ -241,7 +241,6 @@ public class VRWidgetHelper {
                 }
             }
             BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-            poseStack.popPose();
         }
 
         MC.gameRenderer.lightTexture().turnOffLightLayer();
