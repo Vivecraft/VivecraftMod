@@ -227,7 +227,6 @@ public class VRWidgetHelper {
                 }
             }
             MC.renderBuffers().bufferSource().endBatch(renderType);
-            poseStack.popPose();
         }
     }
 
