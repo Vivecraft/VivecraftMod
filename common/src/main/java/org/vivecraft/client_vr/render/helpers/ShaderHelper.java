@@ -256,7 +256,7 @@ public class ShaderHelper {
                 } else if (DATA_HOLDER.vrSettings.lowHealthIndicator) { // red due to low health
                     RED = healthPercent * Mth.abs(Mth.sin((2.5F * TIME) / (1.0F - healthPercent + 0.1F)));
 
-                    if (MC.player.isCreative()) {
+                    if (MC.player.isCreative() || MC.player.isSpectator()) {
                         RED = 0.0F;
                     }
                 }
