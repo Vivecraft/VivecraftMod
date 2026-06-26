@@ -25,6 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -188,6 +189,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                 ItemStack stack = this.getItemBySlot(hand.asEquipmentSlot());
                 // check for shield and do not bypass item cooldowns
                 if (stack != null && stack.get(DataComponents.BLOCKS_ATTACKS) != null &&
+                    !stack.get(DataComponents.BLOCKS_ATTACKS).bypassedBy()
+                        .map(t -> t.contains(damageSource.typeHolder())).orElse(false) &&
                     !this.getCooldowns().isOnCooldown(stack))
                 {
                     // check if it blocks
