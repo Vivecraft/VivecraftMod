@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.gizmos.Gizmos;
 import net.minecraft.util.profiling.Profiler;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.LevelRenderStateExtension;
@@ -43,16 +44,20 @@ public class VRPassHelper {
 
         // THIS IS WHERE EVERYTHING IS RENDERED
         // reextract world state for the new pass
-        Profiler.get().push("update");
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$cacheRVEPos(MC.getCameraEntity());
-        ((GameRendererExtension) MC.gameRenderer).vivecraft$setupRVE();
-        MC.gameRenderer.update(deltaTracker);
-        Profiler.get().popPush("extract");
-        MC.gameRenderer.extract(deltaTracker, renderLevel);
-        Profiler.get().pop();
+        try (Gizmos.TemporaryCollection ignored = MC.levelExtractor.collectPerFrameMainThreadGizmos()) {
+            Profiler.get().push("update");
+            ((GameRendererExtension) MC.gameRenderer).vivecraft$cacheRVEPos(MC.getCameraEntity());
+            ((GameRendererExtension) MC.gameRenderer).vivecraft$setupRVE();
+            MC.gameRenderer.update(deltaTracker);
+            Profiler.get().popPush("extract");
+            MC.gameRenderer.extract(deltaTracker, renderLevel);
+            Profiler.get().pop();
+        }
 
-        // actually render
-        MC.gameRenderer.render(deltaTracker, renderLevel);
+        try (Gizmos.TemporaryCollection ignored = MC.levelRenderer.collectPerFrameRenderThreadGizmos()) {
+            // actually render
+            MC.gameRenderer.render(deltaTracker, renderLevel);
+        }
 
         // restore player
         ((GameRendererExtension) MC.gameRenderer).vivecraft$restoreRVEPos(MC.getCameraEntity());

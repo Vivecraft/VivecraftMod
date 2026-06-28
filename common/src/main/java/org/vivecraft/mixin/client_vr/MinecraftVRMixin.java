@@ -80,6 +80,7 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.ShaderHelper;
+import org.vivecraft.client_vr.render.helpers.VRPassHelper;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -334,6 +335,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             return false;
         } else {
             return renderLevel;
+        }
+    }
+
+    @Inject(method = "renderFrame", at = @At(value = "CONSTANT", args = "stringValue=present"))
+    private void vivecraft$renderVRPassesFabric(
+        boolean renderLevel, CallbackInfo ci)
+    {
+        if (VRState.VR_RUNNING) {
+            VRPassHelper.renderAndSubmit(renderLevel, this.deltaTracker);
         }
     }
 
