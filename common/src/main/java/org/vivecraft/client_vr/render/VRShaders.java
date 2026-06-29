@@ -70,7 +70,6 @@ public class VRShaders {
         .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)
         .withSampler(MIXED_REALITY_GUI_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // vr post shader and its uniforms
@@ -84,7 +83,6 @@ public class VRShaders {
         .withUniform(PostProcessUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
         .withSampler(POST_PROCESSING_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .build();
 
     // blit shader
@@ -96,7 +94,6 @@ public class VRShaders {
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(Optional.empty(), ColorTargetState.WRITE_COLOR))
         .build();
 
@@ -106,7 +103,6 @@ public class VRShaders {
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/blit_vr"))
         .withSampler(BLIT_VR_COLOR_SAMPLER)
         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .build();
 
@@ -115,7 +111,6 @@ public class VRShaders {
         .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
-        .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
         .withColorTargetState(new ColorTargetState(Optional.empty(), ColorTargetState.WRITE_ALPHA))
         .build();
 
