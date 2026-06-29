@@ -91,6 +91,8 @@ import org.vivecraft.mod_compat_vr.ReplayHelper;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
+import java.util.Map;
+
 // inject late, to let other mods disable the hud rendering
 @Mixin(value = Minecraft.class, priority = 1100)
 public abstract class MinecraftVRMixin implements MinecraftExtension {
@@ -614,10 +616,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 if (!ClientNetworking.DISPLAYED_VR_CHANGES && ClientNetworking.SERVER_VR_CHANGES_LIST != null &&
                     dataHolder.vrSettings.showServerVrChangesMessage.getAsBoolean())
                 {
+                    Map<String, String> changes = ClientNetworking.SERVER_VR_CHANGES_LIST;
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
                         Component.translatable("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                () -> new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
+                                () -> new ServerVrChangesScreen(changes)))
                             .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
                     ClientNetworking.SERVER_VR_CHANGES_LIST = null;
