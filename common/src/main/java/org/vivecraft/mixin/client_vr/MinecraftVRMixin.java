@@ -104,6 +104,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Unique
     private CameraType vivecraft$lastCameraType;
 
+    // keep track if we polled already for this frame
+    @Unique
+    private boolean vivecraft$polled;
+
     @Shadow
     @Final
     public Options options;
@@ -221,11 +225,19 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             {
                 this.gameRenderer.mainCamera().update(this.deltaTracker);
             }
+            // do the intended polling
+            this.vivecraft$poll();
+        }
+    }
 
+    @Unique
+    private void vivecraft$poll() {
+        if (!this.vivecraft$polled) {
             Profiler.get().push("VR Poll/VSync");
             ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
             Profiler.get().pop();
             ClientDataHolderVR.getInstance().vrPlayer.postPoll();
+            this.vivecraft$polled = true;
         }
     }
 
@@ -250,6 +262,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     private void vivecraft$postTickTasks(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             ClientDataHolderVR.getInstance().vrPlayer.postTick();
+        }
+    }
+
+    @Inject(method = "renderFrame", at = @At("HEAD"))
+    private void vivecraft$backupPoll(CallbackInfo ci) {
+        if (VRState.VR_RUNNING) {
+            // do a backup polling, in case the frame is not rendered through runTick
+            this.vivecraft$poll();
         }
     }
 
@@ -367,6 +387,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
             original.call(instance, commandEncoder, textureView);
         }
+    }
+
+    @Inject(method = "renderFrame", at = @At("TAIL"))
+    private void vivecraft$resetPoll(CallbackInfo ci) {
+        this.vivecraft$polled = false;
     }
 
     @WrapMethod(method = "pick(F)V")
