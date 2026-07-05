@@ -43,8 +43,8 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 import javax.annotation.Nullable;
 import java.util.Set;
 
-// priority 990 to inject before iris, for the vrFast rendering
-@Mixin(value = LevelRenderer.class, priority = 990)
+// priority 1010 to inject after iris, for the VrStuffFinal rendering
+@Mixin(value = LevelRenderer.class, priority = 1010)
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
 
     @Unique

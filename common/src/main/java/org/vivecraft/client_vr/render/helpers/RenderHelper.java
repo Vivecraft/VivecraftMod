@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.screens.Screen;
@@ -565,5 +566,20 @@ public class RenderHelper {
     {
         ((SubmitNodeCollectionExtension) output).vivecraft$submitLateCustomGeometry(poseStack, renderType,
             customGeometryRenderer);
+    }
+
+    /**
+     * adds the given Text to render after Translucnets
+     *
+     * @param output    order to render at
+     * @param poseStack PoseStack to use for the submit
+     */
+    public static void submitLateText(
+        OrderedSubmitNodeCollector output, PoseStack poseStack, float x, float y, FormattedCharSequence string,
+        boolean dropShadow, Font.DisplayMode displayMode, int lightCoords, int color, int backgroundColor,
+        int outlineColor)
+    {
+        ((SubmitNodeCollectionExtension) output).vivecraft$submitLateText(poseStack, x, y, string, dropShadow,
+            displayMode, lightCoords, color, backgroundColor, outlineColor);
     }
 }

@@ -362,7 +362,7 @@ public class PhysicalKeyboard {
             poseStack.scale(textScale, textScale, 1.0F);
 
             // label second
-            output.order(order + 1).submitText(poseStack,
+            RenderHelper.submitLateText(output.order(order + 1), poseStack,
                 -this.mc.font.width(key.label) / 2F,
                 -this.mc.font.lineHeight / 2F,
                 key.label.getVisualOrderText(),
