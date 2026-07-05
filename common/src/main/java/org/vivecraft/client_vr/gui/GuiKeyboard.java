@@ -29,10 +29,10 @@ public class GuiKeyboard extends TwoHandedScreen {
         }
 
         for (KeyboardKeys.Key key : KeyboardKeys.getSpecialKeys(() -> this.setShift(!this.isShift))) {
-            if (key.width() == 1) {
+            if (key.width() == 1 && key.icon() == null) {
                 // the arrow keys are on a different spot in the gui keyboard
                 key = new KeyboardKeys.Key(key.id(), key.x() - 2, key.y() + layout.rows() - KeyboardKeys.ROWS,
-                    key.width(), key.height(), key.label(), key.onPress(), key.onRelease());
+                    key.width(), key.height(), key.label(), null, key.onPress(), key.onRelease());
             }
             int y = key.y() < 0 ? layout.rows() - key.y() : key.y();
             int xPos = (key.x() > 0 ? offset : 0) + key.x() * (buttonWidth + spacing);
