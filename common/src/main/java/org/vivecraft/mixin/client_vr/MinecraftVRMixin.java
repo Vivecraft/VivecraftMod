@@ -273,12 +273,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @ModifyExpressionValue(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;"), allow = 1)
-    private Object vivecraft$noVsyncInVR(Object original) {
-        return VRState.VR_RUNNING ? false : original;
-    }
-
-    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;update(Lnet/minecraft/client/DeltaTracker;)V"))
+    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;update(Lnet/minecraft/client/DeltaTracker;Z)V"))
     private void vivecraft$preRender(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             Profiler.get().push("preRender");
@@ -369,10 +364,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @WrapOperation(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuSurface;blitFromTexture(Lcom/mojang/blaze3d/systems/CommandEncoder;Lcom/mojang/blaze3d/textures/GpuTextureView;)V"))
-    private void vivecraft$blitMirror(
-        GpuSurface instance, CommandEncoder commandEncoder, GpuTextureView textureView, Operation<Void> original)
-    {
+    @WrapOperation(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
+    private void vivecraft$blitMirror(RenderTarget instance, Operation<Void> original) {
         if (VRState.VR_RUNNING) {
             Profiler.get().popPush("vrMirror");
             RenderPassManager.setMirrorRenderPass();

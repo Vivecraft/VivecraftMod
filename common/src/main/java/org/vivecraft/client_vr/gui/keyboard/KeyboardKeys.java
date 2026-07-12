@@ -72,8 +72,8 @@ public class KeyboardKeys {
             () -> {
                 Minecraft mc = Minecraft.getInstance();
                 // don't open it multiple times
-                if (!(mc.gui.screen() instanceof GuiActiveKeyboardLayoutSelector)) {
-                    mc.gui.setScreen(new GuiActiveKeyboardLayoutSelector(mc.gui.screen()));
+                if (!(mc.screen instanceof GuiActiveKeyboardLayoutSelector)) {
+                    mc.setScreen(new GuiActiveKeyboardLayoutSelector(mc.screen));
                 }
             }));
     }

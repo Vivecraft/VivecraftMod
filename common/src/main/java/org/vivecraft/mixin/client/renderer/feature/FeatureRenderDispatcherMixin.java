@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.feature.CustomFeatureRenderer;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.feature.TextFeatureRenderer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.extensions.CustomFeatureRendererExtension;
 import org.vivecraft.client.extensions.FeatureRenderDispatcherExtension;
+import org.vivecraft.client.extensions.TextFeatureRenderExtension;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(FeatureRenderDispatcher.class)
@@ -31,10 +33,18 @@ public class FeatureRenderDispatcherMixin implements FeatureRenderDispatcherExte
     @Final
     private SubmitNodeStorage submitNodeStorage;
 
+    @Shadow
+    @Final
+    private TextFeatureRenderer textFeatureRenderer;
+
     @Unique
     @Override
     public void vivecraft$renderLate() {
         for (SubmitNodeCollection collection : this.submitNodeStorage.getSubmitsPerOrder().values()) {
+            ((TextFeatureRenderExtension) this.textFeatureRenderer).vivecraft$setRenderLateText(true);
+            this.textFeatureRenderer.renderTranslucent(collection, this.bufferSource);
+            ((TextFeatureRenderExtension) this.textFeatureRenderer).vivecraft$setRenderLateText(false);
+
             ((CustomFeatureRendererExtension) this.customFeatureRenderer).vivecraft$renderLate(collection,
                 this.bufferSource);
         }
