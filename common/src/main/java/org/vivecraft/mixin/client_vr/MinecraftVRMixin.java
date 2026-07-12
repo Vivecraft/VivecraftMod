@@ -81,6 +81,7 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.ShaderHelper;
+import org.vivecraft.client_vr.render.helpers.VRPassHelper;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -90,6 +91,8 @@ import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
+
+import java.util.Map;
 
 // inject late, to let other mods disable the hud rendering
 @Mixin(value = Minecraft.class, priority = 1100)
@@ -101,6 +104,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Unique
     private CameraType vivecraft$lastCameraType;
+
+    // keep track if we polled already for this frame
+    @Unique
+    private boolean vivecraft$polled;
 
     @Shadow
     @Final
@@ -218,11 +225,19 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             {
                 this.gameRenderer.getMainCamera().update(this.deltaTracker);
             }
+            // do the intended polling
+            this.vivecraft$poll();
+        }
+    }
 
+    @Unique
+    private void vivecraft$poll() {
+        if (!this.vivecraft$polled) {
             Profiler.get().push("VR Poll/VSync");
             ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
             Profiler.get().pop();
             ClientDataHolderVR.getInstance().vrPlayer.postPoll();
+            this.vivecraft$polled = true;
         }
     }
 
@@ -250,7 +265,20 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;update(Lnet/minecraft/client/DeltaTracker;Z)V"))
+    @Inject(method = "renderFrame", at = @At("HEAD"))
+    private void vivecraft$backupPoll(CallbackInfo ci) {
+        if (VRState.VR_RUNNING) {
+            // do a backup polling, in case the frame is not rendered through runTick
+            this.vivecraft$poll();
+        }
+    }
+
+    @ModifyExpressionValue(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;"), allow = 1)
+    private Object vivecraft$noVsyncInVR(Object original) {
+        return VRState.VR_RUNNING ? false : original;
+    }
+
+    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;update(Lnet/minecraft/client/DeltaTracker;)V"))
     private void vivecraft$preRender(CallbackInfo ci) {
         if (VRState.VR_RUNNING) {
             Profiler.get().push("preRender");
@@ -332,8 +360,19 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @WrapOperation(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
-    private void vivecraft$blitMirror(RenderTarget instance, Operation<Void> original) {
+    @Inject(method = "renderFrame", at = @At(value = "CONSTANT", args = "stringValue=present"))
+    private void vivecraft$renderVRPassesFabric(
+        boolean renderLevel, CallbackInfo ci)
+    {
+        if (VRState.VR_RUNNING) {
+            VRPassHelper.renderAndSubmit(renderLevel, this.deltaTracker);
+        }
+    }
+
+    @WrapOperation(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuSurface;blitFromTexture(Lcom/mojang/blaze3d/systems/CommandEncoder;Lcom/mojang/blaze3d/textures/GpuTextureView;)V"))
+    private void vivecraft$blitMirror(
+        GpuSurface instance, CommandEncoder commandEncoder, GpuTextureView textureView, Operation<Void> original)
+    {
         if (VRState.VR_RUNNING) {
             Profiler.get().popPush("vrMirror");
             RenderPassManager.setMirrorRenderPass();
@@ -348,6 +387,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
             original.call(instance);
         }
+    }
+
+    @Inject(method = "renderFrame", at = @At("TAIL"))
+    private void vivecraft$resetPoll(CallbackInfo ci) {
+        this.vivecraft$polled = false;
     }
 
     @WrapMethod(method = "pick(F)V")
@@ -597,10 +641,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 if (!ClientNetworking.DISPLAYED_VR_CHANGES && ClientNetworking.SERVER_VR_CHANGES_LIST != null &&
                     dataHolder.vrSettings.showServerVrChangesMessage.getAsBoolean())
                 {
+                    Map<String, String> changes = ClientNetworking.SERVER_VR_CHANGES_LIST;
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
                         Component.translatable("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                () -> new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
+                                () -> new ServerVrChangesScreen(changes)))
                             .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
                     ClientNetworking.SERVER_VR_CHANGES_LIST = null;

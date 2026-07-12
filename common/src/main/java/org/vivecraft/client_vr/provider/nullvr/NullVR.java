@@ -33,6 +33,8 @@ public class NullVR extends MCVR {
 
     protected static final int HEAD_TRACKER = CAMERA_TRACKER;
 
+    protected boolean polled;
+
     private BodyPart currentBodyPart = BodyPart.HEAD;
     private FBTMode fbtMode = FBTMode.ARMS_ONLY;
     // when on, moves arms/legs on both sides, when off, moves only the right one
@@ -189,6 +191,7 @@ public class NullVR extends MCVR {
             this.hmdSampling();
 
             Profiler.get().pop();
+            this.polled = true;
         }
 
         ((NullVRHapticScheduler) this.hapticScheduler).tick();
