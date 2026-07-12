@@ -298,7 +298,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                 }
 
                 // Check EntityCollisions first
-                boolean entityAct = this.canAct[i];
+                boolean entityAct = this.canAct[i] && this.dh.vrSettings.entityCollision;
 
                 // no hitting around corners, to not trigger anticheat
                 if (entityAct) {
@@ -375,8 +375,8 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                             }
                             this.dh.vr.triggerHapticPulse(c, 1000);
                             this.lastWeaponSolid[i] = true;
+                            inAnEntity = true;
                         }
-                        inAnEntity = true;
                     }
                 }
 
@@ -424,7 +424,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                     this.dh.vrPlayer.vrdata_world_pre.getHand(c).getMatrix());
 
                 // don't need to check, if we can't hit anything anyway
-                if (this.canAct[i]) {
+                if (this.canAct[i] && this.dh.vrSettings.blockCollision) {
                     this.miningPoints[i] = new ArrayList<>();
 
                     // only interpolate if the last point was valid

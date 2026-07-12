@@ -33,6 +33,7 @@
     "client.renderer.entity.layers.WingsLayerMixin",
     "client.renderer.entity.state.ArmedEntityRenderStateMixin",
     "client.renderer.entity.state.EntityRenderStateMixin",
+    "client.renderer.feature.TextFeatureRendererMixin",
     "client.renderer.item.ItemModelResolverMixin",
     "client.renderer.state.LevelRenderStateMixin",
     "client_vr.ClientBrandRetrieverVRMixin",

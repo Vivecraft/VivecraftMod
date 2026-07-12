@@ -5,8 +5,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
@@ -25,6 +28,7 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.utils.RGBAColor;
 
+import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,6 +113,7 @@ public class PhysicalKeyboard {
             this.shiftPressTime = ClientUtils.milliTime();
         });
         for (KeyboardKeys.Key key : specialKeys) {
+            if (!this.dh.vrSettings.keyboardShowLayoutSelect && key == KeyboardKeys.LAYOUT_SELECT) continue;
             int y = key.y() < 0 ? this.rows - key.y() : key.y();
             this.addKey(new KeyButton(
                 key.x() * (this.keyWidth + this.spacing),
@@ -360,9 +365,43 @@ public class PhysicalKeyboard {
             poseStack.pushMatrix();
             poseStack.translate(label.getB().x, label.getB().y, label.getB().z);
             poseStack.scale(textScale, textScale, 1.0F);
-            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack,
-                this.mc.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
-            poseStack.popMatrix();
+
+            // label second
+            if (key.icon != null) {
+                TextureAtlasSprite iconSprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
+                    .getSprite(key.icon);
+                float iconHalfWidth = iconSprite.contents().width() / 2F;
+                float iconHalfHeight = iconSprite.contents().width() / 2F;
+
+                RenderHelper.submitLateCustomGeometry(output.order(order + 1), poseStack,
+                    VRRenderTypes.guiTextured(iconSprite.atlasLocation(), true),
+                    (pose, consumer) -> {
+                        consumer.addVertex(pose, iconHalfWidth, -iconHalfHeight, 0)
+                            .setUv(iconSprite.getU0(), iconSprite.getV0())
+                            .setColor(0xFFFFFFFF);
+                        consumer.addVertex(pose, -iconHalfWidth, -iconHalfHeight, 0)
+                            .setUv(iconSprite.getU1(), iconSprite.getV0())
+                            .setColor(0xFFFFFFFF);
+                        consumer.addVertex(pose, -iconHalfWidth, iconHalfHeight, 0)
+                            .setUv(iconSprite.getU1(), iconSprite.getV1())
+                            .setColor(0xFFFFFFFF);
+                        consumer.addVertex(pose, iconHalfWidth, iconHalfHeight, 0)
+                            .setUv(iconSprite.getU0(), iconSprite.getV1())
+                            .setColor(0xFFFFFFFF);
+                    });
+            } else {
+                RenderHelper.submitLateText(output.order(order + 1), poseStack,
+                    -this.mc.font.width(key.label) / 2F,
+                    -this.mc.font.lineHeight / 2F,
+                    key.label.getVisualOrderText(),
+                    false,
+                    Font.DisplayMode.POLYGON_OFFSET,
+                    LightCoordsUtil.FULL_BRIGHT,
+                    0xFFFFFFFF,
+                    0x00000000,
+                    0);
+            }
+            poseStack.popPose();
         }
 
         // Draw all the labels

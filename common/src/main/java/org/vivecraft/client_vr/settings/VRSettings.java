@@ -346,8 +346,12 @@ public class VRSettings {
     public boolean simulateFalling = true;  // VIVE if HMD is over empty space, fall
     @SettingField(value = VrOptions.WEAPON_COLLISION, config = "weaponCollisionNew")
     public WeaponCollision weaponCollision = WeaponCollision.AUTO;  // VIVE weapon hand collides with blocks/enemies
-    @SettingField(value = VrOptions.FEET_COLLISION)
+    @SettingField(VrOptions.FEET_COLLISION)
     public boolean feetCollision = true;  // VIVE weapon feet collides with blocks/enemies
+    @SettingField(VrOptions.BLOCK_COLLISION)
+    public boolean blockCollision = true;
+    @SettingField(VrOptions.ENTITY_COLLISION)
+    public boolean entityCollision = true;
     @SettingField(VrOptions.SWORD_BLOCK_COLLISION)
     public boolean swordBlockCollision = true;
     @SettingField(VrOptions.ONLY_SWORD_COLLISION)
@@ -640,6 +644,8 @@ public class VRSettings {
     public KeyboardTheme physicalKeyboardTheme = KeyboardTheme.DEFAULT;
     @SettingField(VrOptions.KEYBOARD_PRESS_BINDS)
     public boolean keyboardPressBinds = false;
+    @SettingField(VrOptions.KEYBOARD_SHOW_LAYOUT_SELECT)
+    public boolean keyboardShowLayoutSelect = true;
     @SettingField(VrOptions.ALLOW_ADVANCED_BINDINGS)
     public boolean allowAdvancedBindings = false;
     @SettingField(VrOptions.CHAT_NOTIFICATIONS)
@@ -1737,6 +1743,14 @@ public class VRSettings {
                 KeyboardHandler.reinitKeyboard();
             }
         },
+        KEYBOARD_SHOW_LAYOUT_SELECT(OptionType.BOOLEAN) {
+            // show a shortcut to the language selection screen on the keyboard
+
+            @Override
+            void onOptionChange() {
+                KeyboardHandler.reinitKeyboard();
+            }
+        },
         KEYBOARD_PRESS_BINDS(OptionType.BOOLEAN), // Keyboard Presses Bindings
         GUI_APPEAR_OVER_BLOCK(OptionType.BOOLEAN), // Appear Over Block
         SHADER_GUI_RENDER(OptionType.OTHER), // Shaders GUI
@@ -1990,6 +2004,8 @@ public class VRSettings {
             }
         },
         FEET_COLLISION(OptionType.BOOLEAN),
+        BLOCK_COLLISION(OptionType.BOOLEAN), // physically swing at blocks
+        ENTITY_COLLISION(OptionType.BOOLEAN), // physically swing at entities
         SWORD_BLOCK_COLLISION(OptionType.BOOLEAN), // lets swords hit blocks that can be mined or instabroken
         ONLY_SWORD_COLLISION(OptionType.BOOLEAN), // only let swords hit stuff
         REDUCED_PLAYER_REACH(OptionType.BOOLEAN), // reduces roomscale reach to hit players
