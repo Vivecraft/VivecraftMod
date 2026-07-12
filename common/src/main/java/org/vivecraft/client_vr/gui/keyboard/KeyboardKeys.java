@@ -28,6 +28,8 @@ public class KeyboardKeys {
     public static final Key SHIFT_1;
     public static final Key SHIFT_2;
 
+    public static final Key LAYOUT_SELECT;
+
     static {
         SHIFT_1 = addSpecial(Key.wide(SPECIAL_INDEX++, 0, 4, "shift", () -> {}));
         SHIFT_2 = addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 4, "shift", () -> {}));
@@ -65,7 +67,7 @@ public class KeyboardKeys {
         }));
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 4, 0, "switch",
             () -> ClientDataHolderVR.getInstance().vrSettings.nextKeyboardLayout()));
-        addSpecial(Key.singleIcon(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 5, 0,
+        LAYOUT_SELECT = addSpecial(Key.singleIcon(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 5, 0,
             "options.language", Identifier.withDefaultNamespace("icon/language"),
             () -> {
                 Minecraft mc = Minecraft.getInstance();

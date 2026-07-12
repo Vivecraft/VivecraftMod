@@ -29,6 +29,7 @@ public class GuiKeyboard extends TwoHandedScreen {
         }
 
         for (KeyboardKeys.Key key : KeyboardKeys.getSpecialKeys(() -> this.setShift(!this.isShift))) {
+            if (!this.dh.vrSettings.keyboardShowLayoutSelect && key == KeyboardKeys.LAYOUT_SELECT) continue;
             if (key.width() == 1 && key.icon() == null) {
                 // the arrow keys are on a different spot in the gui keyboard
                 key = new KeyboardKeys.Key(key.id(), key.x() - 2, key.y() + layout.rows() - KeyboardKeys.ROWS,

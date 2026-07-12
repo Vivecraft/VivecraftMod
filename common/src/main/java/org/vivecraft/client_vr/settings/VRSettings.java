@@ -644,6 +644,8 @@ public class VRSettings {
     public KeyboardTheme physicalKeyboardTheme = KeyboardTheme.DEFAULT;
     @SettingField(VrOptions.KEYBOARD_PRESS_BINDS)
     public boolean keyboardPressBinds = false;
+    @SettingField(VrOptions.KEYBOARD_SHOW_LAYOUT_SELECT)
+    public boolean keyboardShowLayoutSelect = true;
     @SettingField(VrOptions.ALLOW_ADVANCED_BINDINGS)
     public boolean allowAdvancedBindings = false;
     @SettingField(VrOptions.CHAT_NOTIFICATIONS)
@@ -1750,6 +1752,14 @@ public class VRSettings {
             }
         },
         PHYSICAL_KEYBOARD_THEME(OptionType.OTHER) { // Keyboard Theme
+
+            @Override
+            void onOptionChange() {
+                KeyboardHandler.reinitKeyboard();
+            }
+        },
+        KEYBOARD_SHOW_LAYOUT_SELECT(OptionType.BOOLEAN) {
+            // show a shortcut to the language selection screen on the keyboard
 
             @Override
             void onOptionChange() {

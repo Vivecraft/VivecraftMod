@@ -114,6 +114,7 @@ public class PhysicalKeyboard {
             this.shiftPressTime = ClientUtils.milliTime();
         });
         for (KeyboardKeys.Key key : specialKeys) {
+            if (!this.dh.vrSettings.keyboardShowLayoutSelect && key == KeyboardKeys.LAYOUT_SELECT) continue;
             int y = key.y() < 0 ? this.rows - key.y() : key.y();
             this.addKey(new KeyButton(
                 key.x() * (this.keyWidth + this.spacing),
