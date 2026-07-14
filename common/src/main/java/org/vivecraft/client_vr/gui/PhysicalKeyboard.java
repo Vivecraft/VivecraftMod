@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -40,6 +39,8 @@ public class PhysicalKeyboard {
     private static final float KEY_WIDTH = 0.04F;
     private static final float KEY_HEIGHT = 0.04F;
     private static final float KEY_WIDTH_SPECIAL = KEY_WIDTH * 2 + SPACING;
+
+    private static final ResourceLocation GUI_ATLAS = ResourceLocation.withDefaultNamespace("textures/atlas/gui.png");
 
     private final Minecraft mc = Minecraft.getInstance();
     private final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
@@ -366,10 +367,9 @@ public class PhysicalKeyboard {
 
         if (!icons.isEmpty()) {
             VertexConsumer iconBuf = this.mc.renderBuffers().bufferSource().getBuffer(VRRenderTypes.guiTextured(
-                Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI).location(), true));
+                GUI_ATLAS, true));
             for (Tuple<ResourceLocation, Vector3f> icon : icons) {
-                TextureAtlasSprite iconSprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
-                    .getSprite(icon.getA());
+                TextureAtlasSprite iconSprite = Minecraft.getInstance().getGuiSprites().getSprite(icon.getA());
                 float iconHalfWidth = iconSprite.contents().width() / 2F;
                 float iconHalfHeight = iconSprite.contents().width() / 2F;
 

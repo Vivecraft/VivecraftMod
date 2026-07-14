@@ -101,6 +101,8 @@ public class VRPassHelper {
      */
     public static void renderAndSubmit(boolean renderLevel, DeltaTracker.Timer deltaTracker) {
         // still rendering
+        Profiler.get().push("gameRenderer");
+
         Profiler.get().push("VR guis");
 
         Profiler.get().push("gui cursor");
@@ -224,7 +226,8 @@ public class VRPassHelper {
         } catch (RenderConfigException exception) {
             VRSettings.LOGGER.error("Vivecraft: error ending frame: {}", exception.error.getString());
         }
-        // no profile pop, the caller assumes something to be there to pop
+
         GraphicsHelper.INSTANCE.checkError("post submit");
+        Profiler.get().pop();
     }
 }
