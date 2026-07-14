@@ -5,8 +5,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
@@ -109,6 +112,7 @@ public class PhysicalKeyboard {
             this.shiftPressTime = ClientUtils.milliTime();
         });
         for (KeyboardKeys.Key key : specialKeys) {
+            if (!this.dh.vrSettings.keyboardShowLayoutSelect && key == KeyboardKeys.LAYOUT_SELECT) continue;
             int y = key.y() < 0 ? this.rows - key.y() : key.y();
             this.addKey(new KeyButton(
                 key.x() * (this.keyWidth + this.spacing),
@@ -327,6 +331,7 @@ public class PhysicalKeyboard {
         // Stuff for drawing labels
         Font font = this.mc.font;
         ArrayList<Tuple<Component, Vector3f>> labels = new ArrayList<>();
+        ArrayList<Tuple<Identifier, Vector3f>> icons = new ArrayList<>();
         float textScale = 0.002F * this.scale;
 
         // Start building vertices for key boxes
@@ -341,18 +346,52 @@ public class PhysicalKeyboard {
             this.drawBox(buf, box, color, poseStack);
 
             // Calculate text position
-            float stringWidth = (float) font.width(key.key.label()) * textScale;
-            float stringHeight = font.lineHeight * textScale;
-            float textX = (float) box.minX + ((float) box.maxX - (float) box.minX) / 2.0F - stringWidth / 2.0F;
-            float textY = (float) box.minY + ((float) box.maxY - (float) box.minY) / 2.0F - stringHeight / 2.0F;
+            float textX = (float) box.minX + ((float) box.maxX - (float) box.minX) / 2.0F;
+            float textY = (float) box.minY + ((float) box.maxY - (float) box.minY) / 2.0F;
             float textZ = (float) box.minZ + ((float) box.maxZ - (float) box.minZ) / 2.0F;
 
             // Put label in the list
-            labels.add(new Tuple<>(key.key.label(), new Vector3f(textX, textY, textZ)));
+            if (key.key.icon() == null) {
+                float stringWidth = (float) font.width(key.key.label()) * textScale;
+                float stringHeight = font.lineHeight * textScale;
+                labels.add(new Tuple<>(key.key.label(),
+                    new Vector3f(textX - stringWidth / 2F, textY - stringHeight / 2F, textZ)));
+            } else {
+                icons.add(new Tuple<>(key.key.icon(), new Vector3f(textX, textY, textZ)));
+            }
         }
 
         // Draw all the key boxes
         this.mc.renderBuffers().bufferSource().endBatch(renderType);
+
+        if (!icons.isEmpty()) {
+            VertexConsumer iconBuf = this.mc.renderBuffers().bufferSource().getBuffer(VRRenderTypes.guiTextured(
+                Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI).location(), true));
+            for (Tuple<Identifier, Vector3f> icon : icons) {
+                TextureAtlasSprite iconSprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
+                    .getSprite(icon.getA());
+                float iconHalfWidth = iconSprite.contents().width() / 2F;
+                float iconHalfHeight = iconSprite.contents().width() / 2F;
+
+                poseStack.pushMatrix();
+                poseStack.translate(icon.getB().x, icon.getB().y, icon.getB().z);
+                poseStack.scale(textScale, textScale, 1.0F);
+
+                iconBuf.addVertex(poseStack, iconHalfWidth, -iconHalfHeight, 0)
+                    .setUv(iconSprite.getU0(), iconSprite.getV0())
+                    .setColor(0xFFFFFFFF);
+                iconBuf.addVertex(poseStack, -iconHalfWidth, -iconHalfHeight, 0)
+                    .setUv(iconSprite.getU1(), iconSprite.getV0())
+                    .setColor(0xFFFFFFFF);
+                iconBuf.addVertex(poseStack, -iconHalfWidth, iconHalfHeight, 0)
+                    .setUv(iconSprite.getU1(), iconSprite.getV1())
+                    .setColor(0xFFFFFFFF);
+                iconBuf.addVertex(poseStack, iconHalfWidth, iconHalfHeight, 0)
+                    .setUv(iconSprite.getU0(), iconSprite.getV1())
+                    .setColor(0xFFFFFFFF);
+                poseStack.popMatrix();
+            }
+        }
 
         // Build all the text
         // TODO 1.21.5 no cull text
@@ -360,7 +399,8 @@ public class PhysicalKeyboard {
             poseStack.pushMatrix();
             poseStack.translate(label.getB().x, label.getB().y, label.getB().z);
             poseStack.scale(textScale, textScale, 1.0F);
-            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack,
+
+            font.drawInBatch(label.getA(), 0, 0, 0xFFFFFFFF, false, poseStack,
                 this.mc.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             poseStack.popMatrix();
         }
