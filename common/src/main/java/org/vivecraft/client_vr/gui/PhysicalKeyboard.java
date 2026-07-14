@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
@@ -331,7 +331,7 @@ public class PhysicalKeyboard {
         // Stuff for drawing labels
         Font font = this.mc.font;
         ArrayList<Tuple<Component, Vector3f>> labels = new ArrayList<>();
-        ArrayList<Tuple<Identifier, Vector3f>> icons = new ArrayList<>();
+        ArrayList<Tuple<ResourceLocation, Vector3f>> icons = new ArrayList<>();
         float textScale = 0.002F * this.scale;
 
         // Start building vertices for key boxes
@@ -367,7 +367,7 @@ public class PhysicalKeyboard {
         if (!icons.isEmpty()) {
             VertexConsumer iconBuf = this.mc.renderBuffers().bufferSource().getBuffer(VRRenderTypes.guiTextured(
                 Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI).location(), true));
-            for (Tuple<Identifier, Vector3f> icon : icons) {
+            for (Tuple<ResourceLocation, Vector3f> icon : icons) {
                 TextureAtlasSprite iconSprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
                     .getSprite(icon.getA());
                 float iconHalfWidth = iconSprite.contents().width() / 2F;

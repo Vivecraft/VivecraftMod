@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gui.keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -68,7 +68,7 @@ public class KeyboardKeys {
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 4, 0, "switch",
             () -> ClientDataHolderVR.getInstance().vrSettings.nextKeyboardLayout()));
         LAYOUT_SELECT = addSpecial(Key.singleIcon(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 5, 0,
-            "options.language", Identifier.withDefaultNamespace("icon/language"),
+            "options.language", ResourceLocation.withDefaultNamespace("icon/language"),
             () -> {
                 Minecraft mc = Minecraft.getInstance();
                 // don't open it multiple times
@@ -157,7 +157,7 @@ public class KeyboardKeys {
      * @param onPress   action to do when the key is pressed
      * @param onRelease action to do when the key is released
      */
-    public record Key(int id, int x, int y, int width, int height, Component label, @Nullable Identifier icon,
+    public record Key(int id, int x, int y, int width, int height, Component label, @Nullable ResourceLocation icon,
                       Runnable onPress, Runnable onRelease)
     {
 
@@ -210,7 +210,9 @@ public class KeyboardKeys {
         /**
          * 1x1 key that does an action with an icon
          */
-        private static Key singleIcon(int id, int x, int y, String tooltipKey, Identifier icon, Runnable onPress) {
+        private static Key singleIcon(
+            int id, int x, int y, String tooltipKey, ResourceLocation icon, Runnable onPress)
+        {
             return new Key(id, x, y, 1, 1, Component.translatable(tooltipKey), icon, onPress, () -> {});
         }
 
