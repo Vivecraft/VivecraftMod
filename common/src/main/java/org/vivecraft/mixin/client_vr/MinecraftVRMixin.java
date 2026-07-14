@@ -24,7 +24,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -98,10 +97,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Unique
     private CameraType vivecraft$lastCameraType;
 
-    // keep track if we polled already for this frame
-    @Unique
-    private boolean vivecraft$polled;
-
     @Shadow
     @Final
     public Options options;
@@ -138,12 +133,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public abstract Entity getCameraEntity();
 
     @Shadow
-    public abstract boolean isLocalServer();
-
-    @Shadow
-    public abstract IntegratedServer getSingleplayerServer();
-
-    @Shadow
     public abstract void resizeDisplay();
 
     @Shadow
@@ -158,6 +147,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     public HitResult hitResult;
+
+    @Shadow
+    public boolean noRender;
 
     @WrapOperation(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/server/packs/resources/ReloadableResourceManager"))
     private ReloadableResourceManager vivecraft$initVivecraft(
@@ -236,13 +228,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Unique
     private void vivecraft$poll() {
-        if (!this.vivecraft$polled) {
-            Profiler.get().push("VR Poll/VSync");
-            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
-            Profiler.get().pop();
-            ClientDataHolderVR.getInstance().vrPlayer.postPoll();
-            this.vivecraft$polled = true;
-        }
+        Profiler.get().push("VR Poll/VSync");
+        ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
+        Profiler.get().pop();
+        ClientDataHolderVR.getInstance().vrPlayer.postPoll();
     }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
@@ -320,11 +309,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(method = "renderFrame", at = @At(value = "CONSTANT", args = "stringValue=present"))
+    @Inject(method = "runTick", at = @At(value = "CONSTANT", args = "stringValue=blit"))
     private void vivecraft$renderVRPassesFabric(
         boolean renderLevel, CallbackInfo ci)
     {
-        if (VRState.VR_RUNNING) {
+        if (VRState.VR_RUNNING && !this.noRender) {
             VRPassHelper.renderAndSubmit(renderLevel, this.deltaTracker);
         }
     }

@@ -120,6 +120,7 @@ public class VRShaders {
         .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))
         .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withColorWrite(false, true)
         .build();
 

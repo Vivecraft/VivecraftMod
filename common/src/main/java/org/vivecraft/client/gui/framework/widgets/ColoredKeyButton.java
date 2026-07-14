@@ -55,7 +55,7 @@ public class ColoredKeyButton extends ColoredButton {
         if (this.key.icon() != null) {
             TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
                 .getSprite(this.key.icon());
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.key.icon(),
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.key.icon(),
                 this.getX() + this.getWidth() / 2 - sprite.contents().width() / 2,
                 this.getY() + this.getHeight() / 2 - sprite.contents().height() / 2,
                 sprite.contents().width(), sprite.contents().height(),
