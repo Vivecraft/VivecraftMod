@@ -25,7 +25,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -77,6 +76,7 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.ShaderHelper;
+import org.vivecraft.client_vr.render.helpers.VRPassHelper;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -84,6 +84,8 @@ import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
+
+import java.util.Map;
 
 // inject late, to let other mods disable the hud rendering
 @Mixin(value = Minecraft.class, priority = 1100)
@@ -132,12 +134,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public abstract Entity getCameraEntity();
 
     @Shadow
-    public abstract boolean isLocalServer();
-
-    @Shadow
-    public abstract IntegratedServer getSingleplayerServer();
-
-    @Shadow
     public abstract void resizeDisplay();
 
     @Shadow
@@ -152,6 +148,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     public HitResult hitResult;
+
+    @Shadow
+    public boolean noRender;
 
     @WrapOperation(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/server/packs/resources/ReloadableResourceManager"))
     private ReloadableResourceManager vivecraft$initVivecraft(
@@ -224,12 +223,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     this.level.tickRateManager().isEntityFrozen(this.getCameraEntity()) ? 1.0f :
                         this.deltaTracker.getGameTimeDeltaPartialTick(true));
             }
-
-            Profiler.get().push("VR Poll/VSync");
-            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
-            Profiler.get().pop();
-            ClientDataHolderVR.getInstance().vrPlayer.postPoll();
+            // do the intended polling
+            this.vivecraft$poll();
         }
+    }
+
+    @Unique
+    private void vivecraft$poll() {
+        Profiler.get().push("VR Poll/VSync");
+        ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
+        Profiler.get().pop();
+        ClientDataHolderVR.getInstance().vrPlayer.postPoll();
     }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
@@ -304,6 +308,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             return false;
         } else {
             return renderLevel;
+        }
+    }
+
+    @Inject(method = "runTick", at = @At(value = "CONSTANT", args = "stringValue=blit"))
+    private void vivecraft$renderVRPassesFabric(
+        boolean renderLevel, CallbackInfo ci)
+    {
+        if (VRState.VR_RUNNING && !this.noRender) {
+            VRPassHelper.renderAndSubmit(renderLevel, this.deltaTracker);
         }
     }
 
@@ -539,10 +552,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 if (!ClientNetworking.DISPLAYED_VR_CHANGES && ClientNetworking.SERVER_VR_CHANGES_LIST != null &&
                     dataHolder.vrSettings.showServerVrChangesMessage.getAsBoolean())
                 {
+                    Map<String, String> changes = ClientNetworking.SERVER_VR_CHANGES_LIST;
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
                         Component.translatable("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                () -> new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
+                                () -> new ServerVrChangesScreen(changes)))
                             .withHoverEvent(new HoverEvent.ShowText(Component.translatable("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
                     ClientNetworking.SERVER_VR_CHANGES_LIST = null;

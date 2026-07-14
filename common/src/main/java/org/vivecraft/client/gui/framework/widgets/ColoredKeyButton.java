@@ -1,6 +1,11 @@
 package org.vivecraft.client.gui.framework.widgets;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
@@ -22,7 +27,7 @@ public class ColoredKeyButton extends ColoredButton {
     public ColoredKeyButton(
         KeyboardKeys.Key key, int x, int y, int width, int height, OnPress onPress, KeyboardTheme keyboardTheme)
     {
-        super(key.label(), x, y, width, height, onPress);
+        super(key.icon() != null ? Component.empty() : key.label(), x, y, width, height, onPress);
         this.key = key;
         this.dh = ClientDataHolderVR.getInstance();
         this.keyboardTheme = keyboardTheme;
@@ -45,5 +50,15 @@ public class ColoredKeyButton extends ColoredButton {
         theme.theme.updateColor(this.getColor(), this.key.id(), this.key.x(),
             this.key.y());
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+
+        if (this.key.icon() != null) {
+            TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
+                .getSprite(this.key.icon());
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.key.icon(),
+                this.getX() + this.getWidth() / 2 - sprite.contents().width() / 2,
+                this.getY() + this.getHeight() / 2 - sprite.contents().height() / 2,
+                sprite.contents().width(), sprite.contents().height(),
+                this.alpha);
+        }
     }
 }
