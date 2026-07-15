@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "NeoForgeGameRendererVRMixin",
-    "NeoForgeMinecraftVRMixin",
     "network.NeoForgeOpenContainerVRMixin"
   ],
   "minVersion": "0.8.4"

@@ -622,7 +622,7 @@ public class VREffectsHelper {
                 renderPhysicalKeyboard(partialTick);
             } else {
                 render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
-                    KeyboardHandler.ROTATION_ROOM, DATA_HOLDER.vrSettings.menuAlwaysFollowFace);
+                    KeyboardHandler.ROTATION_ROOM, true);
             }
         }
 
