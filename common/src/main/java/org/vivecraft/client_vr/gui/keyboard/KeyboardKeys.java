@@ -2,8 +2,11 @@ package org.vivecraft.client_vr.gui.keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.client.gui.settings.GuiActiveKeyboardLayoutSelector;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -24,6 +27,8 @@ public class KeyboardKeys {
 
     public static final Key SHIFT_1;
     public static final Key SHIFT_2;
+
+    public static final Key LAYOUT_SELECT;
 
     static {
         SHIFT_1 = addSpecial(Key.wide(SPECIAL_INDEX++, 0, 4, "shift", () -> {}));
@@ -62,6 +67,15 @@ public class KeyboardKeys {
         }));
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 4, 0, "switch",
             () -> ClientDataHolderVR.getInstance().vrSettings.nextKeyboardLayout()));
+        LAYOUT_SELECT = addSpecial(Key.singleIcon(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 5, 0,
+            "options.language", ResourceLocation.withDefaultNamespace("icon/language"),
+            () -> {
+                Minecraft mc = Minecraft.getInstance();
+                // don't open it multiple times
+                if (!(mc.screen instanceof GuiActiveKeyboardLayoutSelector)) {
+                    mc.setScreen(new GuiActiveKeyboardLayoutSelector(mc.screen));
+                }
+            }));
     }
 
     private static Key addSpecial(Key key) {
@@ -73,7 +87,8 @@ public class KeyboardKeys {
         List<Key> keys = new ArrayList<>(SPECIAL_KEYS.size());
         for (Key key : SPECIAL_KEYS) {
             if (key.isShift()) {
-                keys.add(new Key(key.id, key.x, key.y, key.width, key.height, key.label, shiftTask, () -> {}));
+                keys.add(
+                    new Key(key.id, key.x, key.y, key.width, key.height, key.label, key.icon, shiftTask, () -> {}));
             } else {
                 keys.add(key);
             }
@@ -138,11 +153,12 @@ public class KeyboardKeys {
      * @param x         X position of the key
      * @param y         Y position of the key, if negative it is below the keyboard
      * @param label     label of the key
+     * @param icon      if set will show the icon instead of the label
      * @param onPress   action to do when the key is pressed
      * @param onRelease action to do when the key is released
      */
-    public record Key(int id, int x, int y, int width, int height, Component label, Runnable onPress,
-                      Runnable onRelease)
+    public record Key(int id, int x, int y, int width, int height, Component label, @Nullable ResourceLocation icon,
+                      Runnable onPress, Runnable onRelease)
     {
 
         /**
@@ -160,7 +176,7 @@ public class KeyboardKeys {
         private Key(
             int id, int x, int y, int width, int height, String label, int keyCode, char keyChar, Runnable afterPress)
         {
-            this(id, x, y, width, height, Component.literal(label), () -> {
+            this(id, x, y, width, height, Component.literal(label), null, () -> {
                 InputSimulator.pressKeyForBind(keyCode);
                 if (keyChar != '\u0000') {
                     InputSimulator.typeChar(keyChar);
@@ -187,8 +203,17 @@ public class KeyboardKeys {
          * 1x1 key that always presses a key
          */
         private static Key single(int id, int x, int y, String label, int keyCode) {
-            return new Key(id, x, y, 1, 1, Component.literal(label), () -> InputSimulator.pressKey(keyCode),
+            return new Key(id, x, y, 1, 1, Component.literal(label), null, () -> InputSimulator.pressKey(keyCode),
                 () -> InputSimulator.releaseKey(keyCode));
+        }
+
+        /**
+         * 1x1 key that does an action with an icon
+         */
+        private static Key singleIcon(
+            int id, int x, int y, String tooltipKey, ResourceLocation icon, Runnable onPress)
+        {
+            return new Key(id, x, y, 1, 1, Component.translatable(tooltipKey), icon, onPress, () -> {});
         }
 
         /**
@@ -196,7 +221,7 @@ public class KeyboardKeys {
          */
         private static Key wide(int id, int x, int y, String langKey, int keyCode) {
             return new Key(id, x, y, 2, 1, Component.translatable("vivecraft.keyboard.key." + langKey),
-                () -> InputSimulator.pressKey(keyCode), () -> InputSimulator.releaseKey(keyCode));
+                null, () -> InputSimulator.pressKey(keyCode), () -> InputSimulator.releaseKey(keyCode));
         }
 
         /**
@@ -204,7 +229,7 @@ public class KeyboardKeys {
          */
         private static Key wide(int id, int x, int y, String langKey, Runnable onPress) {
             return new Key(id, x, y, 2, 1, Component.translatable("vivecraft.keyboard.key." + langKey),
-                onPress, () -> {});
+                null, onPress, () -> {});
         }
 
         public boolean isShift() {
