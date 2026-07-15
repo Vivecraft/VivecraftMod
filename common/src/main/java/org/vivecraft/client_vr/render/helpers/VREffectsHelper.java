@@ -616,7 +616,8 @@ public class VREffectsHelper {
             if (DATA_HOLDER.vrSettings.physicalKeyboard) {
                 renderPhysicalKeyboard(partialTick);
             } else {
-                render2D(KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM, KeyboardHandler.ROTATION_ROOM, true);
+                render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
+                    KeyboardHandler.ROTATION_ROOM, true);
             }
         }
 
