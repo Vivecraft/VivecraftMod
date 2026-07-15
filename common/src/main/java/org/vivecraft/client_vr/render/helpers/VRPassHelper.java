@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL13C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.MinecraftExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -150,10 +149,6 @@ public class VRPassHelper {
             RenderSystem.applyModelViewMatrix();
         }
 
-        MC.getProfiler().popPush("fps pie");
-        // draw debug pie
-        ((MinecraftExtension) MC).vivecraft$drawProfiler();
-
         // pop pose that we pushed before the gui
         // when using quickplay, the inject that does the push somehow gets skipped so need to catch if the stack is empty
         try {
@@ -263,6 +258,6 @@ public class VRPassHelper {
         }
 
         GraphicsHelper.INSTANCE.checkError("post submit");
-        Profiler.get().pop();
+        MC.getProfiler().pop();
     }
 }

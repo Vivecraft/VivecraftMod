@@ -1,6 +1,5 @@
 package org.vivecraft.fabric.mixin;
 
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -13,10 +12,6 @@ import org.vivecraft.client_vr.ReloadListener;
 
 @Mixin(Minecraft.class)
 public class FabricMinecraftVRMixin {
-
-    @Shadow
-    @Final
-    private DeltaTracker.Timer timer;
 
     @Shadow
     @Final

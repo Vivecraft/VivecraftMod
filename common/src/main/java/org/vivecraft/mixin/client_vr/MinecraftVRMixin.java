@@ -15,7 +15,6 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
@@ -30,7 +29,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -124,9 +122,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     public LocalPlayer player;
-
-    @Shadow
-    private ProfileResults fpsPieResults;
 
     @Shadow
     @Final
@@ -237,9 +232,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Unique
     private void vivecraft$poll() {
-        Profiler.get().push("VR Poll/VSync");
+        this.profiler.push("VR Poll/VSync");
         ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
-        Profiler.get().pop();
+        this.profiler.pop();
         ClientDataHolderVR.getInstance().vrPlayer.postPoll();
     }
 
@@ -332,13 +327,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         boolean renderLevel, CallbackInfo ci)
     {
         if (VRState.VR_RUNNING && !this.noRender) {
-            VRPassHelper.renderAndSubmit(renderLevel, this.deltaTracker);
+            VRPassHelper.renderAndSubmit(renderLevel, this.timer);
         }
-    }
-
-    @ModifyExpressionValue(method = "runTick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fpsPieResults:Lnet/minecraft/util/profiling/ProfileResults;", ordinal = 0))
-    private ProfileResults vivecraft$cancelRegularFpsPie(ProfileResults original) {
-        return VRState.VR_RUNNING ? null : original;
     }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;unbindWrite()V"))
@@ -863,21 +853,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         // always resize, since that also rebuild the screen
         resizeDisplay();
         this.window.updateVsync(this.options.enableVsync().get());
-    }
-
-    /**
-     * method to draw the profiler pie separately
-     */
-    @Unique
-    @Override
-    public void vivecraft$drawProfiler() {
-        if (this.fpsPieResults != null) {
-            this.profiler.push("fpsPie");
-            GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, this.renderBuffers.bufferSource());
-            this.renderFpsMeter(guiGraphics, this.fpsPieResults);
-            guiGraphics.flush();
-            this.profiler.pop();
-        }
     }
 
     /**
