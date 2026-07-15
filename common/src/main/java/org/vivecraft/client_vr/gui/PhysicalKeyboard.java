@@ -387,8 +387,8 @@ public class PhysicalKeyboard {
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
 
         if (!icons.isEmpty()) {
-            VertexConsumer iconBuf = this.mc.renderBuffers().bufferSource().getBuffer(VRRenderTypes.guiTextured(
-                GUI_ATLAS, true));
+            BufferBuilder iconBuf = tesselator.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            ShadersHelper.bindTexture(GUI_ATLAS);
             for (Tuple<ResourceLocation, Vector3f> icon : icons) {
                 TextureAtlasSprite iconSprite = Minecraft.getInstance().getGuiSprites().getSprite(icon.getA());
                 float iconHalfWidth = iconSprite.contents().width() / 2F;
@@ -412,6 +412,7 @@ public class PhysicalKeyboard {
                     .setColor(0xFFFFFFFF);
                 poseStack.popMatrix();
             }
+            BufferUploader.drawWithShader(iconBuf.buildOrThrow());
         }
 
         // Build all the text

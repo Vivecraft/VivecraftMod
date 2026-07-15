@@ -192,7 +192,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                 ItemStack stack = this.getItemBySlot(LivingEntity.getSlotForHand(hand));
                 // check for shield and do not bypass item cooldowns
                 if (stack != null && stack.getItem().getUseAnimation(stack) == ItemUseAnimation.BLOCK &&
-                    !stack.get(DataComponents.BLOCKS_ATTACKS).bypassedBy().map(damageSource::is).orElse(false) &&
                     !this.getCooldowns().isOnCooldown(stack))
                 {
                     // check if it blocks
