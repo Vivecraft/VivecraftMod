@@ -614,8 +614,7 @@ public class VREffectsHelper {
             if (DATA_HOLDER.vrSettings.physicalKeyboard) {
                 renderPhysicalKeyboard();
             } else {
-                render2D(KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
-                    KeyboardHandler.ROTATION_ROOM, DATA_HOLDER.vrSettings.menuAlwaysFollowFace);
+                render2D(KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM, KeyboardHandler.ROTATION_ROOM, true);
             }
         }
 
