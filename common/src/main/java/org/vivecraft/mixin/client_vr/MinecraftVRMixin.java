@@ -336,10 +336,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Inject(method = "runTick", at = @At(value = "CONSTANT", args = "stringValue=blit"))
     private void vivecraft$renderVRPassesFabric(
-        boolean renderLevel, CallbackInfo ci)
+        boolean renderLevel, CallbackInfo ci, @Local(ordinal = 0) long nanoTime)
     {
         if (VRState.VR_RUNNING && !this.noRender) {
-            VRPassHelper.renderAndSubmit(renderLevel, this.timer);
+            VRPassHelper.renderAndSubmit(renderLevel, nanoTime,
+                this.pause ? this.pausePartialTick : this.timer.partialTick);
         }
     }
 

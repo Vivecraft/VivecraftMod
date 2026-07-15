@@ -49,7 +49,7 @@ public class PhysicalKeyboard {
     private static final float KEY_HEIGHT = 0.04F;
     private static final float KEY_WIDTH_SPECIAL = KEY_WIDTH * 2 + SPACING;
 
-    private static final ResourceLocation GUI_ATLAS = ResourceLocation.withDefaultNamespace("textures/atlas/gui.png");
+    private static final ResourceLocation GUI_ATLAS = new ResourceLocation("textures/atlas/gui.png");
 
     private final Minecraft mc = Minecraft.getInstance();
     private final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
@@ -412,7 +412,7 @@ public class PhysicalKeyboard {
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
 
         if (!icons.isEmpty()) {
-            BufferBuilder iconBuf = tesselator.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            buf.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             ShadersHelper.bindTexture(GUI_ATLAS);
             for (Tuple<ResourceLocation, Vector3f> icon : icons) {
                 TextureAtlasSprite iconSprite = Minecraft.getInstance().getGuiSprites().getSprite(icon.getA());
@@ -423,21 +423,25 @@ public class PhysicalKeyboard {
                 poseStack.translate(icon.getB().x, icon.getB().y, icon.getB().z);
                 poseStack.scale(textScale, textScale, 1.0F);
 
-                iconBuf.addVertex(poseStack, iconHalfWidth, -iconHalfHeight, 0)
-                    .setUv(iconSprite.getU0(), iconSprite.getV0())
-                    .setColor(0xFFFFFFFF);
-                iconBuf.addVertex(poseStack, -iconHalfWidth, -iconHalfHeight, 0)
-                    .setUv(iconSprite.getU1(), iconSprite.getV0())
-                    .setColor(0xFFFFFFFF);
-                iconBuf.addVertex(poseStack, -iconHalfWidth, iconHalfHeight, 0)
-                    .setUv(iconSprite.getU1(), iconSprite.getV1())
-                    .setColor(0xFFFFFFFF);
-                iconBuf.addVertex(poseStack, iconHalfWidth, iconHalfHeight, 0)
-                    .setUv(iconSprite.getU0(), iconSprite.getV1())
-                    .setColor(0xFFFFFFFF);
+                buf.vertex(poseStack, iconHalfWidth, -iconHalfHeight, 0)
+                    .uv(iconSprite.getU0(), iconSprite.getV0())
+                    .color(0xFFFFFFFF)
+                    .endVertex();
+                buf.vertex(poseStack, -iconHalfWidth, -iconHalfHeight, 0)
+                    .uv(iconSprite.getU1(), iconSprite.getV0())
+                    .color(0xFFFFFFFF)
+                    .endVertex();
+                buf.vertex(poseStack, -iconHalfWidth, iconHalfHeight, 0)
+                    .uv(iconSprite.getU1(), iconSprite.getV1())
+                    .color(0xFFFFFFFF)
+                    .endVertex();
+                buf.vertex(poseStack, iconHalfWidth, iconHalfHeight, 0)
+                    .uv(iconSprite.getU0(), iconSprite.getV1())
+                    .color(0xFFFFFFFF)
+                    .endVertex();
                 poseStack.popMatrix();
             }
-            BufferUploader.drawWithShader(iconBuf.buildOrThrow());
+            BufferUploader.drawWithShader(buf.end());
         }
 
         // Start building vertices for text
@@ -450,7 +454,7 @@ public class PhysicalKeyboard {
             poseStack.scale(textScale, textScale, 1.0F);
 
             font.drawInBatch(label.getA(), 0, 0, 0xFFFFFFFF, false, poseStack,
-                this.mc.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+                bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             poseStack.popMatrix();
         }
 

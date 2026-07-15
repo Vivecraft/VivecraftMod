@@ -68,7 +68,7 @@ public class KeyboardKeys {
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 4, 0, "switch",
             () -> ClientDataHolderVR.getInstance().vrSettings.nextKeyboardLayout()));
         LAYOUT_SELECT = addSpecial(Key.singleIcon(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 5, 0,
-            "options.language", ResourceLocation.withDefaultNamespace("icon/language"),
+            "options.language", new ResourceLocation("icon/language"),
             () -> {
                 Minecraft mc = Minecraft.getInstance();
                 // don't open it multiple times
