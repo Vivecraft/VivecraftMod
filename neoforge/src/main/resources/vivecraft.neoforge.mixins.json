@@ -6,7 +6,6 @@
   "client": [
     "NeoForgeGameRendererVRMixin",
     "NeoForgeIngameGuiVRMixin",
-    "NeoForgeMinecraftVRMixin",
     "network.NeoForgeOpenContainerVRMixin"
   ],
   "minVersion": "0.8.4"
