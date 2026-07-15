@@ -261,7 +261,8 @@ public class VRPassHelper {
         } catch (RenderConfigException exception) {
             VRSettings.LOGGER.error("Vivecraft: error ending frame: {}", exception.error.getString());
         }
-        MC.getProfiler().pop();
+
         GraphicsHelper.INSTANCE.checkError("post submit");
+        Profiler.get().pop();
     }
 }
