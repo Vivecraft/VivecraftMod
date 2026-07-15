@@ -617,7 +617,7 @@ public class VREffectsHelper {
                 renderPhysicalKeyboard(partialTick, poseStack);
             } else {
                 render2D(partialTick, KeyboardHandler.FRAMEBUFFER, KeyboardHandler.POS_ROOM,
-                    KeyboardHandler.ROTATION_ROOM, true);
+                    KeyboardHandler.ROTATION_ROOM, true, poseStack);
             }
         }
 

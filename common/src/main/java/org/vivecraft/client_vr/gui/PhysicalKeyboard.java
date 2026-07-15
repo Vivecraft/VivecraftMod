@@ -416,27 +416,27 @@ public class PhysicalKeyboard {
                 float iconHalfWidth = iconSprite.contents().width() / 2F;
                 float iconHalfHeight = iconSprite.contents().width() / 2F;
 
-                poseStack.pushMatrix();
+                poseStack.pushPose();
                 poseStack.translate(icon.getB().x, icon.getB().y, icon.getB().z);
                 poseStack.scale(textScale, textScale, 1.0F);
 
-                buf.vertex(poseStack, iconHalfWidth, -iconHalfHeight, 0)
+                buf.vertex(poseStack.last().pose(), iconHalfWidth, -iconHalfHeight, 0)
                     .uv(iconSprite.getU0(), iconSprite.getV0())
                     .color(0xFFFFFFFF)
                     .endVertex();
-                buf.vertex(poseStack, -iconHalfWidth, -iconHalfHeight, 0)
+                buf.vertex(poseStack.last().pose(), -iconHalfWidth, -iconHalfHeight, 0)
                     .uv(iconSprite.getU1(), iconSprite.getV0())
                     .color(0xFFFFFFFF)
                     .endVertex();
-                buf.vertex(poseStack, -iconHalfWidth, iconHalfHeight, 0)
+                buf.vertex(poseStack.last().pose(), -iconHalfWidth, iconHalfHeight, 0)
                     .uv(iconSprite.getU1(), iconSprite.getV1())
                     .color(0xFFFFFFFF)
                     .endVertex();
-                buf.vertex(poseStack, iconHalfWidth, iconHalfHeight, 0)
+                buf.vertex(poseStack.last().pose(), iconHalfWidth, iconHalfHeight, 0)
                     .uv(iconSprite.getU0(), iconSprite.getV1())
                     .color(0xFFFFFFFF)
                     .endVertex();
-                poseStack.popMatrix();
+                poseStack.popPose();
             }
             BufferUploader.drawWithShader(buf.end());
         }
@@ -450,7 +450,7 @@ public class PhysicalKeyboard {
             poseStack.translate(label.getB().x, label.getB().y, label.getB().z);
             poseStack.scale(textScale, textScale, 1.0F);
 
-            font.drawInBatch(label.getA(), 0, 0, 0xFFFFFFFF, false, poseStack,
+            font.drawInBatch(label.getA(), 0, 0, 0xFFFFFFFF, false, poseStack.last().pose(),
                 bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             poseStack.popPose();
         }
