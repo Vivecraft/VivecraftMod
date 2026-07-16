@@ -1,37 +1,16 @@
-- add option to place the Gui in the HUD position
-- add setting to repeat last radial menu action on a short press (defaults to on)
-- add server setting to kick players with a too low vivecraft version (affects VR and NONVR players)
-- add server setting to allow to nerf roomscale shield blocking, by setting shields on cooldown
-- add server api to check vivecraft version of clients
-- add separate speed multiplier for sprinting, defaults to use the same value as the regular speed multiplier
-- fix movement speed multiplier not being hooked up
-- fix horizontal movement with create aeronautics wheel
-- fix movement of create aeroworks joystick, and closing of the joystick menu
-- fix potential startup crash on some iris version
-- fix first roomscale bow step not showing the arrow with some resourcepacks
-- fix roomscale bow not working if the controllers are perfectly aligned
-- fix vr player orientation on maps using aim instead of body yaw
-- fix compasses not respecting held hand orientation
-- fix stencil with some shaders
-- fix spectator hotbar navigation not working
-- fix spectator gui lagging behind when player model is shown
-- fix no hands in spectator mode
-- fix low health effect being applied in spectator mode
-- fix possible sound misalignment
-
-26.2:
-- fix missing haptics for hotbar in spectator mode
-- fix mixed reality in front mask
+- fix changed server settings info screen not showing when clicking the chat message
+- add keyboard button to get to the keyboard layout selection (can be disabled in the keyboard settings)
+- add option to disable block/entity collisions separately
+- fix some German translation mistakes
+- fix the debug pie chart having 2 nested gamerenderer entries on some versions
 
 26.1+:
-- fix hud position with the split arms model when first person model is shown, with essential
-- fix audio distortion with third person mirror or screenshot camera out
+- fix VR view not updating when loading/exiting a world
+- fix physical keyboard text rendering
 
-26.1:
-- fix crosshair occlusion not working
-- fix hand items rendered twice on third person mirror
-- fix sky writing over the stencil
-- fix missing hands with optifine shaders
+1.21.5+:
+- fix roomscale shield blocking not respecting shield bypasses
+- fix some post process shaders falsely requesting a depth texture, causing some log spam with some mods
 
-1.21.3+:
-- fix reversed hands not swapping items on player models
+1.18-1.21.4:
+- fix pointer keyboard being obstructed in the main menu
