@@ -460,7 +460,7 @@ public class PhysicalKeyboard {
             poseStack.scale(textScale, textScale, 1.0F);
 
             font.drawInBatch(label.getA(), 0, 0, 0xFFFFFFFF, false, poseStack.last().pose(),
-                bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+                bufferSource, false, 0, LightTexture.FULL_BRIGHT);
             poseStack.popPose();
         }
 

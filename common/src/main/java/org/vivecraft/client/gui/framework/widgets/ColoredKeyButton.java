@@ -51,8 +51,8 @@ public class ColoredKeyButton extends ColoredButton {
         if (this.key.icon() != null) {
             RenderSystem.setShaderTexture(0, this.key.icon().location());
             blit(poseStack,
-                this.getX() + this.getWidth() / 2 - this.key.icon().width() / 2,
-                this.getY() + this.getHeight() / 2 - this.key.icon().height() / 2,
+                this.x + this.getWidth() / 2 - this.key.icon().width() / 2,
+                this.y + this.getHeight() / 2 - this.key.icon().height() / 2,
                 this.key.icon().u(), this.key.icon().v(),
                 this.key.icon().width(), this.key.icon().height(),
                 this.key.icon().texWidth(), this.key.icon().texHeight());
