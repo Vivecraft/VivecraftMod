@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client.gui.settings.GuiActiveKeyboardLayoutSelector;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.InputSimulator;
@@ -68,7 +69,7 @@ public class KeyboardKeys {
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 4, 0, "switch",
             () -> ClientDataHolderVR.getInstance().vrSettings.nextKeyboardLayout()));
         LAYOUT_SELECT = addSpecial(Key.singleIcon(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 5, 0,
-            "options.language", new ResourceLocation("icon/language"),
+            "options.language", new GuiIcon(GuiVROptionsBase.VIVE_WIDGETS_LOCATION, 64, 64, 20, 0, 13, 13),
             () -> {
                 Minecraft mc = Minecraft.getInstance();
                 // don't open it multiple times
@@ -157,7 +158,7 @@ public class KeyboardKeys {
      * @param onPress   action to do when the key is pressed
      * @param onRelease action to do when the key is released
      */
-    public record Key(int id, int x, int y, int width, int height, Component label, @Nullable ResourceLocation icon,
+    public record Key(int id, int x, int y, int width, int height, Component label, @Nullable GuiIcon icon,
                       Runnable onPress, Runnable onRelease)
     {
 
@@ -211,7 +212,7 @@ public class KeyboardKeys {
          * 1x1 key that does an action with an icon
          */
         private static Key singleIcon(
-            int id, int x, int y, String tooltipKey, ResourceLocation icon, Runnable onPress)
+            int id, int x, int y, String tooltipKey, GuiIcon icon, Runnable onPress)
         {
             return new Key(id, x, y, 1, 1, Component.translatable(tooltipKey), icon, onPress, () -> {});
         }
@@ -239,5 +240,6 @@ public class KeyboardKeys {
 
     public record Layout(List<Key> keys, int columns, int rows) {}
 
-    ;
+    public record GuiIcon(ResourceLocation location, int texWidth, int texHeight, int u, int v, int width,
+                          int height) {}
 }

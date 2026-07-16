@@ -1,8 +1,6 @@
 package org.vivecraft.client.gui.framework.widgets;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
@@ -50,11 +48,12 @@ public class ColoredKeyButton extends ColoredButton {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
 
         if (this.key.icon() != null) {
-            TextureAtlasSprite sprite = Minecraft.getInstance().getGuiSprites().getSprite(this.key.icon());
-            guiGraphics.blitSprite(this.key.icon(),
-                this.getX() + this.getWidth() / 2 - sprite.contents().width() / 2,
-                this.getY() + this.getHeight() / 2 - sprite.contents().height() / 2,
-                sprite.contents().width(), sprite.contents().height());
+            guiGraphics.blit(this.key.icon().location(),
+                this.getX() + this.getWidth() / 2 - this.key.icon().width() / 2,
+                this.getY() + this.getHeight() / 2 - this.key.icon().height() / 2,
+                this.key.icon().u(), this.key.icon().v(),
+                this.key.icon().width(), this.key.icon().height(),
+                this.key.icon().texWidth(), this.key.icon().texHeight());
         }
     }
 }

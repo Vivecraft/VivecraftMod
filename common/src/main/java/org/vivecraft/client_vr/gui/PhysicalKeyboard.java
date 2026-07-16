@@ -9,7 +9,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -33,10 +32,7 @@ import org.vivecraft.client_vr.utils.RGBAColor;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class PhysicalKeyboard {
@@ -44,8 +40,6 @@ public class PhysicalKeyboard {
     private static final float KEY_WIDTH = 0.04F;
     private static final float KEY_HEIGHT = 0.04F;
     private static final float KEY_WIDTH_SPECIAL = KEY_WIDTH * 2 + SPACING;
-
-    private static final ResourceLocation GUI_ATLAS = new ResourceLocation("textures/atlas/gui.png");
 
     private final Minecraft mc = Minecraft.getInstance();
     private final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
@@ -369,7 +363,7 @@ public class PhysicalKeyboard {
         // Stuff for drawing labels
         Font font = this.mc.font;
         ArrayList<Tuple<Component, Vector3f>> labels = new ArrayList<>();
-        ArrayList<Tuple<ResourceLocation, Vector3f>> icons = new ArrayList<>();
+        ArrayList<Tuple<KeyboardKeys.GuiIcon, Vector3f>> icons = new ArrayList<>();
         float textScale = 0.002F * this.scale;
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -409,31 +403,44 @@ public class PhysicalKeyboard {
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
 
         if (!icons.isEmpty()) {
-            buf.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            ShadersHelper.bindTexture(GUI_ATLAS);
-            for (Tuple<ResourceLocation, Vector3f> icon : icons) {
-                TextureAtlasSprite iconSprite = Minecraft.getInstance().getGuiSprites().getSprite(icon.getA());
-                float iconHalfWidth = iconSprite.contents().width() / 2F;
-                float iconHalfHeight = iconSprite.contents().width() / 2F;
+            icons.sort(Comparator.comparing(a -> a.getA().location()));
+            ResourceLocation current = null;
+            for (Tuple<KeyboardKeys.GuiIcon, Vector3f> icon : icons) {
+                KeyboardKeys.GuiIcon iconSprite = icon.getA();
+                if (iconSprite.location() != current) {
+                    if (current != null) {
+                        BufferUploader.drawWithShader(buf.end());
+                    }
+                    current = iconSprite.location();
+                    buf.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                    ShadersHelper.bindTexture(current);
+                }
+                float iconHalfWidth = iconSprite.width() / 2F;
+                float iconHalfHeight = iconSprite.height() / 2F;
+
+                float minU = iconSprite.u() / (float) iconSprite.texWidth();
+                float minV = iconSprite.v() / (float) iconSprite.texHeight();
+                float maxU = (iconSprite.u() + iconSprite.width()) / (float) iconSprite.texWidth();
+                float maxV = (iconSprite.v() + iconSprite.height()) / (float) iconSprite.texHeight();
 
                 poseStack.pushPose();
                 poseStack.translate(icon.getB().x, icon.getB().y, icon.getB().z);
                 poseStack.scale(textScale, textScale, 1.0F);
 
                 buf.vertex(poseStack.last().pose(), iconHalfWidth, -iconHalfHeight, 0)
-                    .uv(iconSprite.getU0(), iconSprite.getV0())
+                    .uv(minU, minV)
                     .color(0xFFFFFFFF)
                     .endVertex();
                 buf.vertex(poseStack.last().pose(), -iconHalfWidth, -iconHalfHeight, 0)
-                    .uv(iconSprite.getU1(), iconSprite.getV0())
+                    .uv(maxU, minV)
                     .color(0xFFFFFFFF)
                     .endVertex();
                 buf.vertex(poseStack.last().pose(), -iconHalfWidth, iconHalfHeight, 0)
-                    .uv(iconSprite.getU1(), iconSprite.getV1())
+                    .uv(maxU, maxV)
                     .color(0xFFFFFFFF)
                     .endVertex();
                 buf.vertex(poseStack.last().pose(), iconHalfWidth, iconHalfHeight, 0)
-                    .uv(iconSprite.getU0(), iconSprite.getV1())
+                    .uv(minU, maxV)
                     .color(0xFFFFFFFF)
                     .endVertex();
                 poseStack.popPose();
