@@ -1,5 +1,6 @@
 package org.vivecraft.client.gui.framework.widgets;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -48,7 +49,8 @@ public class ColoredKeyButton extends ColoredButton {
         super.renderWidget(poseStack, mouseX, mouseY, partialTick);
 
         if (this.key.icon() != null) {
-            guiGraphics.blit(this.key.icon().location(),
+            RenderSystem.setShaderTexture(0, this.key.icon().location());
+            blit(poseStack,
                 this.getX() + this.getWidth() / 2 - this.key.icon().width() / 2,
                 this.getY() + this.getHeight() / 2 - this.key.icon().height() / 2,
                 this.key.icon().u(), this.key.icon().v(),
