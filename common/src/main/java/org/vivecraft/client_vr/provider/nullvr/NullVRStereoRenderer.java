@@ -76,7 +76,13 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public void endFrame() {}
+    public void endFrame() {
+        if (!((NullVR) this.vr).polled) {
+            VRSettings.LOGGER.warn("Vivecraft: frame ended without polling new data first!");
+        }
+
+        ((NullVR) this.vr).polled = false;
+    }
 
     @Override
     public boolean providesStencilMask() {

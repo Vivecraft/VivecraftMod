@@ -1,6 +1,8 @@
 package org.vivecraft.client.gui.framework.widgets;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
@@ -22,7 +24,7 @@ public class ColoredKeyButton extends ColoredButton {
     public ColoredKeyButton(
         KeyboardKeys.Key key, int x, int y, int width, int height, OnPress onPress, KeyboardTheme keyboardTheme)
     {
-        super(key.label(), x, y, width, height, onPress);
+        super(key.icon() != null ? Component.empty() : key.label(), x, y, width, height, onPress);
         this.key = key;
         this.dh = ClientDataHolderVR.getInstance();
         this.keyboardTheme = keyboardTheme;
@@ -45,5 +47,15 @@ public class ColoredKeyButton extends ColoredButton {
         theme.theme.updateColor(this.getColor(), this.key.id(), this.key.x(),
             this.key.y());
         super.renderButton(poseStack, mouseX, mouseY, partialTick);
+
+        if (this.key.icon() != null) {
+            RenderSystem.setShaderTexture(0, this.key.icon().location());
+            blit(poseStack,
+                this.getX() + this.getWidth() / 2 - this.key.icon().width() / 2,
+                this.getY() + this.getHeight() / 2 - this.key.icon().height() / 2,
+                this.key.icon().u(), this.key.icon().v(),
+                this.key.icon().width(), this.key.icon().height(),
+                this.key.icon().texWidth(), this.key.icon().texHeight());
+        }
     }
 }

@@ -13,7 +13,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.screens.ConnectScreen;
@@ -28,11 +27,9 @@ import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -80,12 +77,15 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.ShaderHelper;
+import org.vivecraft.client_vr.render.helpers.VRPassHelper;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
+
+import java.util.Map;
 
 // inject late, to let other mods disable the hud rendering
 @Mixin(value = Minecraft.class, priority = 1100)
@@ -136,9 +136,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public LocalPlayer player;
 
     @Shadow
-    private ProfileResults fpsPieResults;
-
-    @Shadow
     @Final
     private EntityRenderDispatcher entityRenderDispatcher;
 
@@ -148,15 +145,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     public abstract Entity getCameraEntity();
-
-    @Shadow
-    protected abstract void renderFpsMeter(PoseStack poseStack, ProfileResults profileResults);
-
-    @Shadow
-    public abstract boolean isLocalServer();
-
-    @Shadow
-    public abstract IntegratedServer getSingleplayerServer();
 
     @Shadow
     public abstract void resizeDisplay();
@@ -175,6 +163,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     public HitResult hitResult;
+
+    @Shadow
+    public boolean noRender;
 
     @Shadow
     @Final
@@ -265,12 +256,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false,
                     this.pause ? this.pausePartialTick : this.timer.partialTick);
             }
-
-            this.profiler.push("VR Poll/VSync");
-            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
-            this.profiler.pop();
-            ClientDataHolderVR.getInstance().vrPlayer.postPoll();
+            // do the intended polling
+            this.vivecraft$poll();
         }
+    }
+
+    @Unique
+    private void vivecraft$poll() {
+        this.profiler.push("VR Poll/VSync");
+        ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
+        this.profiler.pop();
+        ClientDataHolderVR.getInstance().vrPlayer.postPoll();
     }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
@@ -358,9 +354,14 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @ModifyExpressionValue(method = "runTick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fpsPieResults:Lnet/minecraft/util/profiling/ProfileResults;", ordinal = 0))
-    private ProfileResults vivecraft$cancelRegularFpsPie(ProfileResults original) {
-        return VRState.VR_RUNNING ? null : original;
+    @Inject(method = "runTick", at = @At(value = "CONSTANT", args = "stringValue=blit"))
+    private void vivecraft$renderVRPassesFabric(
+        boolean renderLevel, CallbackInfo ci, @Local(ordinal = 0) long nanoTime)
+    {
+        if (VRState.VR_RUNNING && !this.noRender) {
+            VRPassHelper.renderAndSubmit(renderLevel, nanoTime,
+                this.pause ? this.pausePartialTick : this.timer.partialTick);
+        }
     }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;unbindWrite()V"))
@@ -592,10 +593,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 if (!ClientNetworking.DISPLAYED_VR_CHANGES && ClientNetworking.SERVER_VR_CHANGES_LIST != null &&
                     dataHolder.vrSettings.showServerVrChangesMessage.getAsBoolean())
                 {
+                    Map<String, String> changes = ClientNetworking.SERVER_VR_CHANGES_LIST;
                     ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
                         Component.translatable("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
-                                () -> new ServerVrChangesScreen(ClientNetworking.SERVER_VR_CHANGES_LIST)))
+                                () -> new ServerVrChangesScreen(changes)))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                 Component.translatable("vivecraft.messages.click")))
                             .withColor(ChatFormatting.GREEN))));
@@ -888,19 +890,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         // always resize, since that also rebuild the screen
         resizeDisplay();
         this.window.updateVsync(this.options.enableVsync().get());
-    }
-
-    /**
-     * method to draw the profiler pie separately
-     */
-    @Unique
-    @Override
-    public void vivecraft$drawProfiler() {
-        if (this.fpsPieResults != null) {
-            this.profiler.push("fpsPie");
-            this.renderFpsMeter(new PoseStack(), this.fpsPieResults);
-            this.profiler.pop();
-        }
     }
 
     /**
