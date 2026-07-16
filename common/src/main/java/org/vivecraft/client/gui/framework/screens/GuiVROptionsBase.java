@@ -22,7 +22,7 @@ import org.vivecraft.common.utils.TooltipUtil;
 import java.util.ArrayList;
 
 public abstract class GuiVROptionsBase extends Screen {
-    private static final ResourceLocation VIVE_WIDGETS_LOCATION = new ResourceLocation("vivecraft",
+    public static final ResourceLocation VIVE_WIDGETS_LOCATION = new ResourceLocation("vivecraft",
         "textures/gui/widgets.png");
 
     protected ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
