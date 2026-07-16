@@ -192,13 +192,9 @@ subprojects {
             finalizedBy copyJarToMain
         }
 
-        tasks.register('buildApi', Copy) {
+        tasks.register('buildApi', Task) {
             dependsOn tasks.named('apiJar')
             dependsOn tasks.named('apiSourcesJar')
-
-            from(tasks.named('apiJar'))
-            from(tasks.named('apiSourcesJar'))
-            into rootProject.layout.buildDirectory.dir("libs")
         }
     }
 

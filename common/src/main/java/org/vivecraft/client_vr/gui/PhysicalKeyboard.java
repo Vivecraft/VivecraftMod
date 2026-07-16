@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
@@ -31,10 +32,7 @@ import org.vivecraft.client_vr.utils.RGBAColor;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class PhysicalKeyboard {
@@ -114,6 +112,7 @@ public class PhysicalKeyboard {
             this.shiftPressTime = ClientUtils.milliTime();
         });
         for (KeyboardKeys.Key key : specialKeys) {
+            if (!this.dh.vrSettings.keyboardShowLayoutSelect && key == KeyboardKeys.LAYOUT_SELECT) continue;
             int y = key.y() < 0 ? this.rows - key.y() : key.y();
             this.addKey(new KeyButton(
                 key.x() * (this.keyWidth + this.spacing),
@@ -365,6 +364,7 @@ public class PhysicalKeyboard {
         // Stuff for drawing labels
         Font font = this.mc.font;
         ArrayList<Tuple<Component, Vector3f>> labels = new ArrayList<>();
+        ArrayList<Tuple<KeyboardKeys.GuiIcon, Vector3f>> icons = new ArrayList<>();
         float textScale = 0.002F * this.scale;
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -383,14 +383,19 @@ public class PhysicalKeyboard {
             this.drawBox(buf, box, color, poseStack);
 
             // Calculate text position
-            float stringWidth = (float) font.width(key.key.label()) * textScale;
-            float stringHeight = font.lineHeight * textScale;
-            float textX = (float) box.minX + ((float) box.maxX - (float) box.minX) / 2.0F - stringWidth / 2.0F;
-            float textY = (float) box.minY + ((float) box.maxY - (float) box.minY) / 2.0F - stringHeight / 2.0F;
+            float textX = (float) box.minX + ((float) box.maxX - (float) box.minX) / 2.0F;
+            float textY = (float) box.minY + ((float) box.maxY - (float) box.minY) / 2.0F;
             float textZ = (float) box.minZ + ((float) box.maxZ - (float) box.minZ) / 2.0F;
 
             // Put label in the list
-            labels.add(new Tuple<>(key.key.label(), new Vector3f(textX, textY, textZ)));
+            if (key.key.icon() == null) {
+                float stringWidth = (float) font.width(key.key.label()) * textScale;
+                float stringHeight = font.lineHeight * textScale;
+                labels.add(new Tuple<>(key.key.label(),
+                    new Vector3f(textX - stringWidth / 2F, textY - stringHeight / 2F, textZ)));
+            } else {
+                icons.add(new Tuple<>(key.key.icon(), new Vector3f(textX, textY, textZ)));
+            }
         }
 
         // Draw all the key boxes
@@ -400,6 +405,52 @@ public class PhysicalKeyboard {
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
         RenderSystem.enableTexture();
 
+        if (!icons.isEmpty()) {
+            icons.sort(Comparator.comparing(a -> a.getA().location()));
+            ResourceLocation current = null;
+            for (Tuple<KeyboardKeys.GuiIcon, Vector3f> icon : icons) {
+                KeyboardKeys.GuiIcon iconSprite = icon.getA();
+                if (iconSprite.location() != current) {
+                    if (current != null) {
+                        BufferUploader.drawWithShader(buf.end());
+                    }
+                    current = iconSprite.location();
+                    buf.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                    ShadersHelper.bindTexture(current);
+                }
+                float iconHalfWidth = iconSprite.width() / 2F;
+                float iconHalfHeight = iconSprite.height() / 2F;
+
+                float minU = iconSprite.u() / (float) iconSprite.texWidth();
+                float minV = iconSprite.v() / (float) iconSprite.texHeight();
+                float maxU = (iconSprite.u() + iconSprite.width()) / (float) iconSprite.texWidth();
+                float maxV = (iconSprite.v() + iconSprite.height()) / (float) iconSprite.texHeight();
+
+                poseStack.pushPose();
+                poseStack.translate(icon.getB().x, icon.getB().y, icon.getB().z);
+                poseStack.scale(textScale, textScale, 1.0F);
+
+                buf.vertex(poseStack.last().pose(), iconHalfWidth, -iconHalfHeight, 0)
+                    .uv(minU, minV)
+                    .color(0xFFFFFFFF)
+                    .endVertex();
+                buf.vertex(poseStack.last().pose(), -iconHalfWidth, -iconHalfHeight, 0)
+                    .uv(maxU, minV)
+                    .color(0xFFFFFFFF)
+                    .endVertex();
+                buf.vertex(poseStack.last().pose(), -iconHalfWidth, iconHalfHeight, 0)
+                    .uv(maxU, maxV)
+                    .color(0xFFFFFFFF)
+                    .endVertex();
+                buf.vertex(poseStack.last().pose(), iconHalfWidth, iconHalfHeight, 0)
+                    .uv(minU, maxV)
+                    .color(0xFFFFFFFF)
+                    .endVertex();
+                poseStack.popPose();
+            }
+            BufferUploader.drawWithShader(buf.end());
+        }
+
         // Start building vertices for text
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(buf);
 
@@ -408,8 +459,9 @@ public class PhysicalKeyboard {
             poseStack.pushPose();
             poseStack.translate(label.getB().x, label.getB().y, label.getB().z);
             poseStack.scale(textScale, textScale, 1.0F);
-            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack.last().pose(), bufferSource,
-                false, 0, LightTexture.FULL_BRIGHT);
+
+            font.drawInBatch(label.getA(), 0, 0, 0xFFFFFFFF, false, poseStack.last().pose(),
+                bufferSource, false, 0, LightTexture.FULL_BRIGHT);
             poseStack.popPose();
         }
 
