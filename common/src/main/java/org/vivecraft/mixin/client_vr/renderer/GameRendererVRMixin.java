@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
@@ -248,7 +249,13 @@ public abstract class GameRendererVRMixin
             fovy = switch (vivecraft$DATA_HOLDER.currentPass) {
                 case THIRD -> Mth.DEG_TO_RAD * vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov;
                 case CAMERA -> Mth.DEG_TO_RAD * vivecraft$DATA_HOLDER.vrSettings.handCameraFov;
-                case SCOPEL, SCOPER -> Mth.DEG_TO_RAD * (70F / 8F);
+                case SCOPEL, SCOPER -> {
+                    float fov = Mth.DEG_TO_RAD * 87.5F;
+                    if (this.minecraft.getCameraEntity() instanceof AbstractClientPlayer player && player.isScoping()) {
+                        fov *= player.getFieldOfViewModifier(true, 1.0F);
+                    }
+                    yield fov;
+                }
                 default -> fovy;
             };
         }
