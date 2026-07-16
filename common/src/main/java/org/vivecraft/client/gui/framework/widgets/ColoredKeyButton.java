@@ -2,7 +2,7 @@ package org.vivecraft.client.gui.framework.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardKeys;
 import org.vivecraft.client_vr.gui.keyboard.KeyboardTheme;
@@ -24,7 +24,7 @@ public class ColoredKeyButton extends ColoredButton {
     public ColoredKeyButton(
         KeyboardKeys.Key key, int x, int y, int width, int height, OnPress onPress, KeyboardTheme keyboardTheme)
     {
-        super(key.icon() != null ? Component.empty() : key.label(), x, y, width, height, onPress);
+        super(key.icon() != null ? TextComponent.EMPTY : key.label(), x, y, width, height, onPress);
         this.key = key;
         this.dh = ClientDataHolderVR.getInstance();
         this.keyboardTheme = keyboardTheme;

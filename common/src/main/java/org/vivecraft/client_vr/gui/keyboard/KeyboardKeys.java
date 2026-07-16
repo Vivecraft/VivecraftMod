@@ -2,9 +2,9 @@ package org.vivecraft.client_vr.gui.keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -179,7 +179,7 @@ public class KeyboardKeys {
         private Key(
             int id, int x, int y, int width, int height, String label, int keyCode, char keyChar, Runnable afterPress)
         {
-            this(id, x, y, width, height, Component.literal(label), null, () -> {
+            this(id, x, y, width, height, new TextComponent(label), null, () -> {
                 InputSimulator.pressKeyForBind(keyCode);
                 if (keyChar != '\u0000') {
                     InputSimulator.typeChar(keyChar);
@@ -206,7 +206,7 @@ public class KeyboardKeys {
          * 1x1 key that always presses a key
          */
         private static Key single(int id, int x, int y, String label, int keyCode) {
-            return new Key(id, x, y, 1, 1, Component.literal(label), null, () -> InputSimulator.pressKey(keyCode),
+            return new Key(id, x, y, 1, 1, new TextComponent(label), null, () -> InputSimulator.pressKey(keyCode),
                 () -> InputSimulator.releaseKey(keyCode));
         }
 
@@ -216,7 +216,7 @@ public class KeyboardKeys {
         private static Key singleIcon(
             int id, int x, int y, String tooltipKey, GuiIcon icon, Runnable onPress)
         {
-            return new Key(id, x, y, 1, 1, Component.translatable(tooltipKey), icon, onPress, () -> {});
+            return new Key(id, x, y, 1, 1, new TranslatableComponent(tooltipKey), icon, onPress, () -> {});
         }
 
         /**

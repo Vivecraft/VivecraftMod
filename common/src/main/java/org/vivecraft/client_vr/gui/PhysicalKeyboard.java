@@ -412,7 +412,8 @@ public class PhysicalKeyboard {
                 KeyboardKeys.GuiIcon iconSprite = icon.getA();
                 if (iconSprite.location() != current) {
                     if (current != null) {
-                        BufferUploader.drawWithShader(buf.end());
+                        buf.end();
+                        BufferUploader.end(buf);
                     }
                     current = iconSprite.location();
                     buf.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -448,7 +449,8 @@ public class PhysicalKeyboard {
                     .endVertex();
                 poseStack.popPose();
             }
-            BufferUploader.drawWithShader(buf.end());
+            buf.end();
+            BufferUploader.end(buf);
         }
 
         // Start building vertices for text

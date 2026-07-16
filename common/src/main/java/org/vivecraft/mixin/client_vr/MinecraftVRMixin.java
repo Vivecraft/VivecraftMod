@@ -600,8 +600,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     dataHolder.vrSettings.showServerVrChangesMessage.getAsBoolean())
                 {
                     Map<String, String> changes = ClientNetworking.SERVER_VR_CHANGES_LIST;
-                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.nondefaultvrchanges",
-                        Component.translatable("vivecraft.messages.click").withStyle(style -> style
+                    ClientUtils.addChatMessage(new TranslatableComponent("vivecraft.messages.nondefaultvrchanges",
+                        new TranslatableComponent("vivecraft.messages.click").withStyle(style -> style
                             .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN,
                                 () -> new ServerVrChangesScreen(changes)))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
