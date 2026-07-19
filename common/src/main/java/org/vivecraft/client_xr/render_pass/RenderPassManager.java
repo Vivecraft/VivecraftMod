@@ -1,6 +1,7 @@
 package org.vivecraft.client_xr.render_pass;
 
 import com.mojang.blaze3d.pipeline.MainTarget;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -28,7 +29,7 @@ public class RenderPassManager {
     public static void setWorldRenderPass(WorldRenderPass wrp) {
         RenderPassManager.WRP = wrp;
         RENDER_PASS_TYPE = RenderPassType.WORLD_ONLY;
-        MC.mainRenderTarget = wrp.target;
+        setRenderTarget(wrp.target);
     }
 
     /**
@@ -38,7 +39,7 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.GUI_ONLY;
-        MC.mainRenderTarget = GuiHandler.GUI_FRAMEBUFFER;
+        setRenderTarget(GuiHandler.GUI_FRAMEBUFFER);
     }
 
     /**
@@ -48,7 +49,7 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.MIRROR;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.GUI_ONLY;
-        MC.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.mirrorFramebuffer;
+        setRenderTarget(ClientDataHolderVR.getInstance().vrRenderer.mirrorFramebuffer);
     }
 
     /**
@@ -58,6 +59,13 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.VANILLA;
         RenderPassManager.WRP = null;
         RENDER_PASS_TYPE = RenderPassType.VANILLA;
-        MC.mainRenderTarget = INSTANCE.vanillaRenderTarget;
+        setRenderTarget(INSTANCE.vanillaRenderTarget);
+    }
+
+    private static void setRenderTarget(RenderTarget target) {
+        MC.gameRenderer.mainRenderTarget = target;
+        if (MC.levelRenderer.skyRenderer() != null) {
+            MC.levelRenderer.skyRenderer().renderTarget = target;
+        }
     }
 }

@@ -48,9 +48,9 @@ public class DebugRenderHelper {
             renderPlayerAxes(partialTick);
         }
 
-        if (DATA_HOLDER.vrSettings.renderTrackerPositions || MC.screen instanceof FBTCalibrationScreen) {
+        if (DATA_HOLDER.vrSettings.renderTrackerPositions || MC.gui.screen() instanceof FBTCalibrationScreen) {
             boolean showNames = true;
-            if (MC.screen instanceof FBTCalibrationScreen fbtScreen) {
+            if (MC.gui.screen() instanceof FBTCalibrationScreen fbtScreen) {
                 showNames = fbtScreen.isCalibrated();
             }
             renderTackerPositions(showNames);
@@ -156,8 +156,6 @@ public class DebugRenderHelper {
         }
 
         list.forEach(DebugRenderHelper::addAxes);
-
-        MC.renderBuffers().bufferSource().endBatch();
     }
 
     /**
@@ -200,7 +198,6 @@ public class DebugRenderHelper {
                 renderCube(trackerPos, 0.05F, MathUtils.DARK_GRAY_INT);
             }
         }
-        MC.renderBuffers().bufferSource().endLastBatch();
     }
 
     /**

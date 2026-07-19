@@ -19,7 +19,8 @@ import java.util.Optional;
 
 public class GuiRadialConfiguration extends GuiVROptionsBase {
     private static final VROptionLayout[] OPTIONS = new VROptionLayout[]{
-        new VROptionLayout(VRSettings.VrOptions.RADIAL_MODE_HOLD, VROptionLayout.Position.POS_LEFT, 0.0F, true, "")
+        new VROptionLayout(GuiRadialSettings.class, VROptionLayout.Position.POS_LEFT, 0.0F, true,
+            "vivecraft.options.screen.radialsettings.button")
     };
     private String[] arr;
     private boolean isShift = false;
@@ -88,7 +89,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
 
             String label = keyMapping.map(mapping -> I18n.get(mapping.getName())).orElse("");
             this.addRenderableWidget(GuiRadial.createButton(label, (p) -> {
-                this.minecraft.setScreen(new KeymappingSelectionScreen(
+                this.minecraft.gui.setScreen(new KeymappingSelectionScreen(
                     Component.translatable(this.vrTitle), this,
                     key -> {
                         this.selectedIndex = index;

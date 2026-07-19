@@ -754,7 +754,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
         activeSets.add(VRInputActionSet.MIXED_REALITY);
         activeSets.add(VRInputActionSet.TECHNICAL);
 
-        if (this.mc.screen == null) {
+        if (this.mc.gui.screen() == null) {
             activeSets.add(VRInputActionSet.INGAME);
             activeSets.add(VRInputActionSet.CONTEXTUAL);
         } else {
@@ -762,7 +762,7 @@ public class MCOpenVR extends MCVR<VRInputAction> {
             if (ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui) {
                 activeSets.add(VRInputActionSet.INGAME);
             }
-            if (this.mc.screen instanceof FBTCalibrationScreen) {
+            if (this.mc.gui.screen() instanceof FBTCalibrationScreen) {
                 activeSets.add(VRInputActionSet.CONTEXTUAL);
             }
         }

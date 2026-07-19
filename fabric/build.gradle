@@ -27,10 +27,10 @@ dependencies {
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 
     // for sodium compat
-    compileOnly "maven.modrinth:sodium:mc26.1.1-0.8.9-fabric"
+    compileOnly "maven.modrinth:sodium:mc26.2-0.9.0-fabric"
 
     // for iris compat
-    compileOnly "maven.modrinth:iris:1.10.9+26.1-fabric"
+    compileOnly "maven.modrinth:iris:1.11.1+26.2-fabric"
     compileOnly 'org.anarres:jcpp:1.4.14' //temp iris
     compileOnly 'io.github.douira:glsl-transformer:3.0.0-pre3' //temp iris
 
@@ -46,8 +46,8 @@ dependencies {
     // compileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
 
     //mod menu
-    //compileOnly("com.terraformersmc:modmenu:18.0.0-alpha.8") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
-    compileOnly "maven.modrinth:modmenu:18.0.0-alpha.8"
+    //compileOnly("com.terraformersmc:modmenu:19.0.0-alpha.1") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    compileOnly "maven.modrinth:modmenu:19.0.0-alpha.1"
 
     // for immersive portals compat
     compileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }

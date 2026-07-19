@@ -26,7 +26,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -120,7 +119,7 @@ public abstract class ItemInHandRendererVRMixin {
         }
     }
 
-    @Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
     private void vivecraft$overrideArmItem(
         AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand, float swingProgress,
         ItemStack itemStack, float equippedProgress, PoseStack poseStack, SubmitNodeCollector collector,
@@ -144,25 +143,24 @@ public abstract class ItemInHandRendererVRMixin {
             MapItemSavedData mapData = MapItem.getSavedData(mapId, this.minecraft.level);
             RenderType renderType =
                 mapData == null ? VIVECRAFT$MAP_BACKGROUND_NO_CULL : VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL;
-            Matrix4f matrix = poseStack.last().pose();
-            Vector3f normal = matrix.transformDirection(0F, 0F, 1F, new Vector3f());
+            Vector3f normal = poseStack.last().pose().transformDirection(0F, 0F, 1F, new Vector3f());
             collector.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
-                consumer.addVertex(matrix, -7.0F, 135.0F, 0.0F)
+                consumer.addVertex(pose, -7.0F, 135.0F, 0.0F)
                     .setColor(255, 255, 255, 255)
                     .setUv(0.0F, 1.0F)
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
                     .setNormal(normal.x, normal.y, normal.z);
-                consumer.addVertex(matrix, 135.0F, 135.0F, 0.0F)
+                consumer.addVertex(pose, 135.0F, 135.0F, 0.0F)
                     .setColor(255, 255, 255, 255)
                     .setUv(1.0F, 1.0F)
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
                     .setNormal(normal.x, normal.y, normal.z);
-                consumer.addVertex(matrix, 135.0F, -7.0F, 0.0F)
+                consumer.addVertex(pose, 135.0F, -7.0F, 0.0F)
                     .setColor(255, 255, 255, 255)
                     .setUv(1.0F, 0.0F)
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
                     .setNormal(normal.x, normal.y, normal.z);
-                consumer.addVertex(matrix, -7.0F, -7.0F, 0.0F)
+                consumer.addVertex(pose, -7.0F, -7.0F, 0.0F)
                     .setColor(255, 255, 255, 255)
                     .setUv(0.0F, 0.0F)
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)

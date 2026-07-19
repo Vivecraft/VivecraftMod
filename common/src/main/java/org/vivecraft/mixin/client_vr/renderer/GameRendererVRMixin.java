@@ -13,7 +13,7 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.GameRenderState;
@@ -24,7 +24,6 @@ import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,6 +44,7 @@ import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -107,13 +107,13 @@ public abstract class GameRendererVRMixin
 
     @Shadow
     @Final
-    private SubmitNodeStorage submitNodeStorage;
+    private FeatureRenderDispatcher featureRenderDispatcher;
 
     @Shadow
     @Final
-    private FeatureRenderDispatcher featureRenderDispatcher;
+    private SubmitNodeStorage handAndScreenSubmitNodeStorage;
 
-    @Inject(method = "resize", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"))
+    @Inject(method = "resize", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;resize(II)V"))
     private void vivecraft$restoreVanillaState(CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
             if (VRState.VR_RUNNING) {
@@ -145,6 +145,11 @@ public abstract class GameRendererVRMixin
         }
     }
 
+    @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resize(II)V"))
+    private boolean vivecraft$noResizeInVR(GameRenderer instance, int width, int height) {
+        return RenderPassType.isVanilla();
+    }
+
     @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V"))
     private void vivecraft$renderFaceOverlay(
         GameRenderer instance, DeltaTracker deltaTracker, Operation<Void> original)
@@ -154,7 +159,7 @@ public abstract class GameRendererVRMixin
         if (!RenderPassType.isVanilla() && vrState.currentPass != RenderPass.THIRD &&
             vrState.currentPass != RenderPass.CAMERA)
         {
-            VREffectsHelper.renderFaceOverlay(this.submitNodeStorage, this.featureRenderDispatcher,
+            VREffectsHelper.renderFaceOverlay(this.handAndScreenSubmitNodeStorage, this.featureRenderDispatcher,
                 this.gameRenderState.levelRenderState.cameraRenderState, vrState);
         }
     }
@@ -192,8 +197,8 @@ public abstract class GameRendererVRMixin
         }
         if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
             Profiler.get().push("MainMenu");
-            GL11.glDisable(GL11.GL_STENCIL_TEST);
-            VREffectsHelper.renderMenuRoom(this.featureRenderDispatcher, this.submitNodeStorage,
+            GraphicsHelper.INSTANCE.setStencil(false);
+            VREffectsHelper.renderMenuRoom(this.featureRenderDispatcher, this.handAndScreenSubmitNodeStorage,
                 this.gameRenderState.levelRenderState);
             Profiler.get().pop();
         }
@@ -202,7 +207,7 @@ public abstract class GameRendererVRMixin
         ci.cancel();
     }
 
-    @ModifyArg(method = "extract", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;extractGui(Lnet/minecraft/client/DeltaTracker;ZZ)V"), index = 1)
+    @ModifyArg(method = "extract", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractRenderState(Lnet/minecraft/client/DeltaTracker;ZZ)V"), index = 1)
     private boolean vivecraft$renderGui(boolean shouldRenderLevel) {
         if (RenderPassType.isVanilla()) {
             return shouldRenderLevel;
@@ -215,9 +220,9 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @WrapWithCondition(method = "extract", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;extractGui(Lnet/minecraft/client/DeltaTracker;ZZ)V"))
+    @WrapWithCondition(method = "extract", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractRenderState(Lnet/minecraft/client/DeltaTracker;ZZ)V"))
     private boolean vivecraft$noGUIWithViewOnly(
-        GameRenderer instance, DeltaTracker deltaTracker, boolean shouldRenderLevel, boolean resourcesLoaded)
+        Gui instance, DeltaTracker deltaTracker, boolean shouldRenderLevel, boolean resourcesLoaded)
     {
         return RenderPassType.isVanilla() || (!vivecraft$DATA_HOLDER.viewOnly && this.vivecraft$shouldDrawScreen);
     }
@@ -225,7 +230,8 @@ public abstract class GameRendererVRMixin
     @Inject(method = "extract", at = @At("TAIL"))
     private void vivecraft$extractVRState(CallbackInfo ci, @Local(ordinal = 0) float partialTick) {
         if (VRState.VR_RUNNING) {
-            vivecraft$getVRRenderState().extract(this.minecraft.player, partialTick);
+            vivecraft$getVRRenderState().extract(this.minecraft.player, partialTick,
+                this.handAndScreenSubmitNodeStorage);
         }
     }
 
@@ -282,7 +288,7 @@ public abstract class GameRendererVRMixin
     }
 
 
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ScreenEffectRenderer;renderScreenEffect(ZZFLnet/minecraft/client/renderer/SubmitNodeCollector;Z)V"))
+    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ScreenEffectRenderer;submit(ZZFLnet/minecraft/client/renderer/SubmitNodeCollector;Z)V"))
     private boolean vivecraft$noScreenEffectsInVR(
         ScreenEffectRenderer instance, boolean isFirstPerson, boolean isSleeping, float partialTicks,
         SubmitNodeCollector submitNodeCollector, boolean hideGui)
@@ -290,9 +296,9 @@ public abstract class GameRendererVRMixin
         return RenderPassType.isVanilla();
     }
 
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/DebugScreenOverlay;render3dCrosshair(Lnet/minecraft/client/renderer/state/level/CameraRenderState;I)V"))
+    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DebugCrosshairRenderer;render(Lnet/minecraft/client/renderer/state/level/CameraRenderState;I)V"))
     private boolean vivecraft$noDebugCrosshairInVR(
-        DebugScreenOverlay instance, CameraRenderState cameraState, int guiScale)
+        DebugCrosshairRenderer instance, CameraRenderState cameraState, int guiScale)
     {
         return RenderPassType.isVanilla();
     }

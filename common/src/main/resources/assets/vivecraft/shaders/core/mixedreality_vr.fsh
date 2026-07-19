@@ -21,6 +21,8 @@ layout(std140) uniform MixedRealityUbo {
     int alphaMode;
     int firstPersonPass;
     int guiMask;
+    int flipFirstPersonPass;
+    int depthZeroToOne;
 };
 
 in vec2 texCoordinates;
@@ -28,7 +30,12 @@ in vec2 texCoordinates;
 out vec4 out_Color;
 
 vec3 getFragmentPosition(in vec2 coord) {
-    vec4 posScreen = vec4(coord * 2.0 - 1.0, texture(thirdPersonDepth, coord).x * 2.0 - 1.0, 1);
+    vec4 posScreen = vec4(coord, texture(thirdPersonDepth, coord).x, 1);
+    if (depthZeroToOne == 0) {
+        posScreen.xyz = posScreen.xyz * 2.0 - 1.0;
+    } else {
+        posScreen.xy = posScreen.xy * 2.0 - 1.0;
+    }
     vec4 posView = inverse(projectionMatrix * viewMatrix) * posScreen;
     return posView.xyz / posView.w;
 }
@@ -57,6 +64,16 @@ vec4 sampleTexture(sampler2D colorSampler, vec2 coord, int gui) {
     return color;
 }
 
+vec4 sampleTextureFlipped(sampler2D colorSampler, vec2 coord, int gui) {
+    vec4 color = vec4(texture(colorSampler, vec2(coord.x, 1.0 - coord.y)).rgb, 0.0);
+    if ((guiMask & gui) != 0) {
+        vec4 guiColor = texture(guiColor, coord);
+        color.rgb = mix(color.rgb, guiColor.rgb, guiColor.a);
+        color.a = guiColor.a;
+    }
+    return color;
+}
+
 void main(void) {
 
     out_Color = vec4(keyColor.rgb, 1.0);
@@ -65,10 +82,10 @@ void main(void) {
         vec2 sampleTexCoord = fract(texCoordinates * 2.0);
         if (texCoordinates.x >= 0.5 && texCoordinates.y < 0.5) {
             // first person
-            if ((GUI_FIRST & guiMask) != 0) {
-                out_Color = texture(guiColor, sampleTexCoord);
+            if (flipFirstPersonPass == 1) {
+                out_Color.rgb = sampleTextureFlipped(firstPersonColor, sampleTexCoord, GUI_FIRST).rgb;
             } else {
-                out_Color = vec4(0);
+                out_Color.rgb = sampleTexture(firstPersonColor, sampleTexCoord, GUI_FIRST).rgb;
             }
         } else {
             vec4 thirdColor = sampleTexture(thirdPersonColor, sampleTexCoord, GUI_THIRD);

@@ -509,7 +509,7 @@ public abstract class MCVR<T extends InputAction> {
             (!this.dh.climbTracker.isGrabbingLadder() || !ViveItems.isClimbingClaws(this.mc.player.getMainHandItem())
             ))
         {
-            if (this.mc.screen == null) {
+            if (this.mc.gui.screen() == null) {
                 InputSimulator.scrollMouse(0.0D, dir * 4);
             } else {
                 this.mc.player.getInventory().setSelectedSlot(
@@ -640,7 +640,7 @@ public abstract class MCVR<T extends InputAction> {
             this.controllerRotation[c].set3x3(controllerPoseTip);
 
             // special case for seated main controller
-            if (c == MAIN_CONTROLLER && this.dh.vrSettings.seated && this.mc.screen == null &&
+            if (c == MAIN_CONTROLLER && this.dh.vrSettings.seated && this.mc.gui.screen() == null &&
                 this.mc.mouseHandler.isMouseGrabbed())
             {
                 Matrix4f temp = new Matrix4f();
@@ -774,7 +774,7 @@ public abstract class MCVR<T extends InputAction> {
         // if (this.inputActions.isEmpty()) return;
 
         boolean sleeping = this.mc.level != null && this.mc.player != null && this.mc.player.isSleeping();
-        boolean gui = this.mc.screen != null;
+        boolean gui = this.mc.gui.screen() != null;
         boolean toggleMovementPressed = MOD.keyToggleMovement.consumeClick();
 
         // allow movement switching with long pressing pick block
@@ -924,7 +924,7 @@ public abstract class MCVR<T extends InputAction> {
         }
 
         // quick torch, checks for a torch in the hotbar, and places it
-        if (MOD.keyQuickTorch.consumeClick() && this.mc.player != null && this.mc.screen == null) {
+        if (MOD.keyQuickTorch.consumeClick() && this.mc.player != null && this.mc.gui.screen() == null) {
             for (int slot = 0; slot < 9; slot++) {
                 ItemStack itemstack = this.mc.player.getInventory().getItem(slot);
 
@@ -941,22 +941,22 @@ public abstract class MCVR<T extends InputAction> {
         }
 
         // if you start moving, close any UI
-        if (gui && !sleeping && this.mc.options.keyUp.isDown() && !(this.mc.screen instanceof WinScreen) &&
+        if (gui && !sleeping && this.mc.options.keyUp.isDown() && !(this.mc.gui.screen() instanceof WinScreen) &&
             this.mc.player != null)
         {
             this.mc.player.closeContainer();
         }
 
         // containers only listens directly to the keyboard to close.
-        if (this.mc.screen instanceof AbstractContainerScreen && this.mc.options.keyInventory.consumeClick() &&
+        if (this.mc.gui.screen() instanceof AbstractContainerScreen && this.mc.options.keyInventory.consumeClick() &&
             this.mc.player != null)
         {
             this.mc.player.closeContainer();
         }
 
         // allow toggling chat window with chat keybind
-        if (this.mc.screen instanceof ChatScreen && this.mc.options.keyChat.consumeClick()) {
-            this.mc.setScreen(null);
+        if (this.mc.gui.screen() instanceof ChatScreen && this.mc.options.keyChat.consumeClick()) {
+            this.mc.gui.setScreen(null);
         }
 
         // swap slow mirror between Third and First Person
@@ -999,7 +999,7 @@ public abstract class MCVR<T extends InputAction> {
         }
 
         // close keyboard with ESC
-        if (KeyboardHandler.SHOWING && this.mc.screen == null && MOD.keyMenuButton.consumeClick()) {
+        if (KeyboardHandler.SHOWING && this.mc.gui.screen() == null && MOD.keyMenuButton.consumeClick()) {
             KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
         }
 
@@ -1016,11 +1016,7 @@ public abstract class MCVR<T extends InputAction> {
 
         if (MOD.keyMenuButton.consumeClick()) {
             // handle menu directly
-            if (!gui) {
-                if (!this.dh.kiosk) {
-                    this.mc.pauseGame(false);
-                }
-            } else {
+            if (gui || !this.dh.kiosk) {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_ESCAPE);
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
             }
@@ -1083,7 +1079,7 @@ public abstract class MCVR<T extends InputAction> {
             boolean climbing = !this.mc.player.isInWater() && this.dh.climbTracker.isClimbeyClimb() &&
                 this.dh.climbTracker.isGrabbingLadder();
             float forward = 0F;
-            if (!this.dh.vrSettings.seated && this.mc.screen == null && !KeyboardHandler.SHOWING && !climbing) {
+            if (!this.dh.vrSettings.seated && this.mc.gui.screen() == null && !KeyboardHandler.SHOWING && !climbing) {
                 // override everything
                 Vector2fc moveStrafe = this.getInputAction(VivecraftVRMod.INSTANCE.keyFreeMoveStrafe)
                     .getAxis2DUseTracked();
@@ -1453,23 +1449,6 @@ public abstract class MCVR<T extends InputAction> {
         }
 
         return poses;
-    }
-
-    /**
-     * @return the x/y angular velocity of the main controller
-     */
-    public Vector2d getControllerVelocity() {
-        int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
-        Vector3f up = this.controllerUpHistory[mainController].averagePosition(0.1).normalize();
-        Vector3f cur = this.controllerForwardHistory[mainController].averagePosition(0.1).normalize();
-        Vector3f prev = this.controllerForwardHistory[mainController].averagePosition(0.3).normalize();
-
-        return new Vector2d(
-            // yaw
-            (Math.atan2(-prev.x, prev.z) - Math.atan2(-cur.x, cur.z)) * Mth.RAD_TO_DEG,
-            // pitch
-            (Math.asin(prev.y) - Math.asin(cur.y)) * (up.y < 0 ? -1 : 1) * Mth.RAD_TO_DEG
-        );
     }
 
     /**

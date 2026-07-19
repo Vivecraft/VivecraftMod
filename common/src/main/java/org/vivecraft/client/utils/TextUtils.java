@@ -9,12 +9,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class TextUtils {
     private static final char[] ILLEGAL_CHARS = new char[]{'"', '<', '>', '|', '\u0000', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\b', '\t', '\n', '\u000b', '\f', '\r', '\u000e', '\u000f', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017', '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f', ':', '*', '?', '\\', '/'};
@@ -133,7 +131,11 @@ public class TextUtils {
             ArrayList<ChatFormatting> arraylist = new ArrayList<>();
 
             if (style.getColor() != null) {
-                arraylist.add(ChatFormatting.getByName(style.getColor().serialize()));
+                try {
+                    arraylist.add(ChatFormatting.valueOf(style.getColor().serialize().toUpperCase(Locale.ENGLISH)));
+                } catch (Exception e) {
+                    VRSettings.LOGGER.error("Could not convert Style to ChatFormatting: {}", style.getColor());
+                }
             }
 
             if (style.isBold()) {

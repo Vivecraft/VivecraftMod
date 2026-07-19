@@ -4,15 +4,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.LightCoordsUtil;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector2f;
 import org.vivecraft.Xevents;
 import org.vivecraft.api.client.data.RenderPass;
@@ -30,6 +32,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
+import org.vivecraft.client_vr.render.helpers.VRArmHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.render.helpers.VRWidgetHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -93,7 +96,7 @@ public class VRRenderState {
 
     public final PostProcessRenderState postProcessState = new PostProcessRenderState();
 
-    public void extract(@Nullable LocalPlayer player, float partialTick) {
+    public void extract(@Nullable LocalPlayer player, float partialTick, SubmitNodeStorage submitNodeStorage) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
         VRData worldData = dataHolder.vrPlayer.getVRDataWorld();
@@ -104,6 +107,7 @@ public class VRRenderState {
 
         // depends on render pass
         this.occludeGui = VREffectsHelper.shouldOccludeGui();
+        this.armsState.renderHands = VRArmHelper.shouldRenderHands();
 
         // overlay status
         this.inBlock = false;
@@ -111,17 +115,19 @@ public class VRRenderState {
 
         if (!this.inMenuRoom && player != null && !player.isSpectator() && player.isAlive()) {
             Vec3 cameraPos = worldData.getEye(this.currentPass).getPosition();
-            Tuple<BlockState, BlockPos> block = VREffectsHelper.getNearOpaqueBlock(cameraPos, 0.02);
+            Pair<BlockState, BlockPos> block = VREffectsHelper.getNearOpaqueBlock(cameraPos, 0.02);
 
             this.inBlock = block != null &&
-                !Xevents.INSTANCE.renderBlockOverlay(player, new PoseStack(), block.getA(), block.getB());
+                !Xevents.INSTANCE.renderBlockOverlay(player, new PoseStack(), block.getLeft(), block.getRight(),
+                    submitNodeStorage);
             this.inWater =
-                player.isEyeInFluid(FluidTags.WATER) && !Xevents.INSTANCE.renderWaterOverlay(player, new PoseStack());
+                player.isEyeInFluid(FluidTags.WATER) &&
+                    !Xevents.INSTANCE.renderWaterOverlay(player, new PoseStack(), submitNodeStorage);
         }
 
         DebugRenderHelper.extractDebug(partialTick);
 
-        // everything after tzhis just needs to be done once per frame
+        // everything after this just needs to be done once per frame
         if (!dataHolder.isFirstPass) return;
 
         this.partialTick = partialTick;
@@ -132,7 +138,7 @@ public class VRRenderState {
 
         // first person effects
         this.firstPersonFire = player != null && !player.isSpectator() && player.isOnFire() &&
-            !Xevents.INSTANCE.renderFireOverlay(player, new PoseStack());
+            !Xevents.INSTANCE.renderFireOverlay(player, new PoseStack(), submitNodeStorage);
         this.fireHeight = (float) (worldData.getHeadPivot().y -
             ((GameRendererExtension) mc.gameRenderer).vivecraft$getRveY()
         );
@@ -194,29 +200,27 @@ public class VRRenderState {
         this.uiHeight = mc.getWindow().getGuiScaledHeight();
 
         if (!this.inMenuRoom) {
-            if (mc.screen == null) {
+            if (mc.gui.screen() == null) {
                 this.uiOpacity = dataHolder.vrSettings.hudOpacity;
             }
             if (player != null && player.isShiftKeyDown()) {
                 this.uiOpacity *= 0.75F;
             }
         }
-        this.noHudFog = !this.inMenuRoom && mc.screen != null;
+        this.noHudFog = !this.inMenuRoom && mc.gui.screen() != null;
 
         // check if the main player renders, we need the arm position for the gui if it exists
         // this is a stupid workaround to get the position before the player actually renders
-        for (EntityRenderState entityState : mc.gameRenderer.getGameRenderState().levelRenderState.entityRenderStates) {
+        for (EntityRenderState entityState : mc.gameRenderer.gameRenderState().levelRenderState.entityRenderStates) {
             if (entityState instanceof AvatarRenderState avatarState) {
                 ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) entityState).vivecraft$getRotInfo();
                 if (rotInfo != null && ((EntityRenderStateExtension) entityState).vivecraft$isFirstPersonPlayer()) {
                     // this is the main player
-                    mc.getEntityRenderDispatcher().submit(avatarState,
-                        mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState,
-                        avatarState.x - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.x,
-                        avatarState.y - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.y,
-                        avatarState.z - mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.pos.z,
-                        new PoseStack(), mc.gameRenderer.getSubmitNodeStorage());
-                    mc.gameRenderer.getSubmitNodeStorage().clear();
+                    if (mc.getEntityRenderDispatcher()
+                        .getRenderer(avatarState) instanceof LivingEntityRenderer livingRenderer)
+                    {
+                        livingRenderer.getModel().setupAnim(avatarState);
+                    }
                 }
             }
         }
@@ -250,9 +254,9 @@ public class VRRenderState {
         }
 
         // if the gui should even render
-        this.renderGui = (mc.screen != null || this.keyboardType == Keyboard.NONE) &&
+        this.renderGui = (mc.gui.screen() != null || this.keyboardType == Keyboard.NONE) &&
             !dataHolder.bowTracker.isDrawing() &&
-            (mc.screen != null || !mc.options.hideGui) &&
+            (mc.gui.screen() != null || !mc.gui.hud.isHidden()) &&
             !this.radialShowing;
 
         // ui lights in world

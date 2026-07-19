@@ -79,6 +79,8 @@ public class VRState {
 
             dh.vrRenderer = dh.vr.createVRRenderer();
 
+            dh.vrRenderer.checkCapabilities();
+
             // everything related to VR is created now
             VR_INITIALIZED = true;
 
@@ -126,7 +128,7 @@ public class VRState {
                     if (os.getTotalMemorySize() >= 1073741824L * 12L - 1048576L * 256L &&
                         Runtime.getRuntime().availableProcessors() >= 6)
                     {
-                        if (!(Minecraft.getInstance().screen instanceof GarbageCollectorScreen)) {
+                        if (!(Minecraft.getInstance().gui.screen() instanceof GarbageCollectorScreen)) {
                             setScreenAndCache(new GarbageCollectorScreen(garbageCollector));
                         }
                     }
@@ -152,7 +154,7 @@ public class VRState {
      * @param screen Screen to set and cache
      */
     private static void setScreenAndCache(Screen screen) {
-        Minecraft.getInstance().setScreen(screen);
+        Minecraft.getInstance().gui.setScreen(screen);
         ClientDataHolderVR.getInstance().cachedScreen = screen;
     }
 
@@ -194,11 +196,11 @@ public class VRState {
             if (ClientDataHolderVR.getInstance().vrSettings.fullReloadOnInit) {
                 // do a full reload
                 Minecraft.getInstance().reloadResourcePacks();
-            } else {
-                // regenerates the outline target
-                Minecraft.getInstance().levelRenderer.onResourceManagerReload(
-                    Minecraft.getInstance().getResourceManager());
             }
+
+            // regenerates the outline target
+            Minecraft.getInstance().levelRenderer.resize(Minecraft.getInstance().getWindow().getWidth(),
+                Minecraft.getInstance().getWindow().getHeight());
         }
         VRClientAPIImpl.INSTANCE.clearPoseHistory();
     }

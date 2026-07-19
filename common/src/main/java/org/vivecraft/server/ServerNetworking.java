@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRBodyPart;
+import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.NetworkVersion;
@@ -37,6 +38,7 @@ import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.config.enums.ClimbeyBlockmode;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -81,9 +83,11 @@ public class ServerNetworking {
 
                 VersionPayloadC2S payload = (VersionPayloadC2S) c2sPayload;
 
+                vivePlayer.version = UpdateChecker.Version.fromClient(payload.version());
+
                 if (ServerConfig.DEBUG.get()) {
                     LOGGER.info("Vivecraft: player '{}' joined with {}", player.getName().getString(),
-                        payload.version());
+                        vivePlayer.version);
                 }
 
                 if (!payload.legacy()) {
@@ -420,12 +424,16 @@ public class ServerNetworking {
     /**
      * Sends an update packet for the given {@code config} to all ServerVivePlayer on the {@code server}
      *
-     * @param server server to get the vive players from
-     * @param config ConfigValue to send an update for
+     * @param server   server to get the vive players from
+     * @param config   ConfigValue to send an update for
+     * @param notifier string consumer to notify the caller about errors
      */
-    public static void sendUpdatePacketToAll(MinecraftServer server, ConfigBuilder.ConfigValue<?> config) {
+    public static void sendUpdatePacketToAll(
+        MinecraftServer server, ConfigBuilder.ConfigValue<?> config, @Nullable Consumer<Component> notifier)
+    {
         Function<ServerVivePlayer, VivecraftPayloadS2C> function = config.getPacketFunction();
         if (function != null) {
+            boolean unsupported = false;
             for (ServerVivePlayer vivePlayer : ServerVRPlayers.getPlayersWithVivecraft(server).values()) {
                 VivecraftPayloadS2C payload = function.apply(vivePlayer);
                 // old clients cannot clear server overrides, crawl or tp
@@ -435,9 +443,20 @@ public class ServerNetworking {
                         (payload instanceof TeleportPayloadS2C tp && !tp.allowed())
                     ))
                 {
+                    if (ServerConfig.KICK_PLAYERS_ON_SETTING_UPDATE.get()) {
+                        vivePlayer.player.connection.disconnect(
+                            Component.literal("A server setting changed that needs you to rejoin the server."));
+                    } else {
+                        unsupported = true;
+                    }
                     continue;
                 }
                 vivePlayer.player.connection.send(Xplat.INSTANCE.getS2CPacket(payload));
+            }
+            if (unsupported && notifier != null) {
+                notifier.accept(Component.literal(
+                    "§6Some clients don't support to toggle this setting and need to rejoin the server for it to update. If you would like to automatically kick them on such setting changes, enable '§a" +
+                        ServerConfig.KICK_PLAYERS_ON_SETTING_UPDATE.getPath() + "§6'."));
             }
         }
     }
@@ -445,9 +464,11 @@ public class ServerNetworking {
     /**
      * kicks any players that are not allowed based on the current vive/vr only settings, and sends if vr switching is allowed
      *
-     * @param server server to get the vive players from
+     * @param server   server to get the vive players from
+     * @param notifier string consumer to notify the caller about errors
      */
-    public static void updateViveVROnly(MinecraftServer server) {
+    public static void updateViveVROnly(@Nullable MinecraftServer server, @Nullable Consumer<Component> notifier) {
+        if (server == null) return;
         // get all players
         // need to make a copy, since kicking a player causes a concurrent modification exception
         for (ServerPlayer player : new ArrayList<>(server.getPlayerList().getPlayers())) {
@@ -465,9 +486,10 @@ public class ServerNetworking {
     /**
      * removes the crawl state from every vive player, if crawling is disabled
      *
-     * @param server server to get the vive players from
+     * @param server   server to get the vive players from
+     * @param notifier string consumer to notify the caller about errors
      */
-    public static void updateCrawling(MinecraftServer server) {
+    public static void updateCrawling(MinecraftServer server, @Nullable Consumer<Component> notifier) {
         if (!ServerConfig.CRAWLING_ENABLED.get()) {
             // remove the current crawl state from every player
             for (ServerVivePlayer vivePlayer : ServerVRPlayers.getPlayersWithVivecraft(server).values()) {

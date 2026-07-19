@@ -1,15 +1,14 @@
 package org.vivecraft.mixin.client_vr.renderer.rendertype;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderPass;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.minecraft.client.renderer.rendertype.PreparedRenderType;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client.extensions.PreparedRenderTypeExtension;
 import org.vivecraft.client.extensions.RenderSetupExtension;
 
 @Mixin(RenderType.class)
@@ -18,8 +17,16 @@ public class RenderTypeVRMixin {
     @Final
     private RenderSetup state;
 
-    @Inject(method = "draw", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;bindDefaultUniforms(Lcom/mojang/blaze3d/systems/RenderPass;)V", shift = At.Shift.AFTER))
-    private void vivecraft$uniformOverrides(CallbackInfo ci, @Local RenderPass renderPass) {
-        ((RenderSetupExtension) (Object) this.state).vivecraft$applyUniformOverrides(renderPass);
+    @ModifyReturnValue(method = "prepare", at = @At("RETURN"))
+    private PreparedRenderType vivecraft$uniformOverrides(PreparedRenderType original) {
+        RenderSetupExtension extendedState = (RenderSetupExtension) (Object) this.state;
+        if (extendedState.vivecraft$getUndistorted()) {
+            ((PreparedRenderTypeExtension) (Object) original).vivecraft$setUndistorted();
+        }
+        if (extendedState.vivecraft$getFogOverride() != null) {
+            ((PreparedRenderTypeExtension) (Object) original).vivecraft$setFogOverride(
+                extendedState.vivecraft$getFogOverride());
+        }
+        return original;
     }
 }

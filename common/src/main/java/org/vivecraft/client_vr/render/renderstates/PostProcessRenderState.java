@@ -91,7 +91,7 @@ public class PostProcessRenderState {
             } else if (dataHolder.vrSettings.lowHealthIndicator) { // red due to low health
                 this.red = healthPercent * Mth.abs(Mth.sin((2.5F * this.time) / (1.0F - healthPercent + 0.1F)));
 
-                if (mc.player.isCreative()) {
+                if (mc.player.isCreative() || mc.player.isSpectator()) {
                     this.red = 0.0F;
                 }
             }

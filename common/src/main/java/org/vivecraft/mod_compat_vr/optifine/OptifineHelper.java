@@ -18,7 +18,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryUtil;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
@@ -181,12 +181,13 @@ public class OptifineHelper {
                 return;
             }
 
+            // TODO 26.2 optifine
             GlStateManager._activeTexture(GL30C.GL_TEXTURE0);
             GlStateManager._bindTexture(glTexture.glId());
 
-            RenderHelper.checkGLError("pre copy depth");
+            GraphicsHelper.INSTANCE.checkError("pre copy depth");
             GL30C.glCopyTexSubImage2D(GL30C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, renderTarget.width, renderTarget.height);
-            RenderHelper.checkGLError("post copy depth");
+            GraphicsHelper.INSTANCE.checkError("post copy depth");
 
             unbindShaderFramebuffer();
             GlStateManager._bindTexture(0);

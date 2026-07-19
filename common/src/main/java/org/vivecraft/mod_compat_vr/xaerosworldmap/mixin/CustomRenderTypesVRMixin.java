@@ -3,8 +3,7 @@ package org.vivecraft.mod_compat_vr.xaerosworldmap.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.platform.DestFactor;
-import com.mojang.blaze3d.platform.SourceFactor;
+import com.mojang.blaze3d.platform.BlendFactor;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,6 +25,6 @@ public class CustomRenderTypesVRMixin {
     private static void vivecraft$fixMapBlend(BlendFunction value, Operation<Void> original) {
         // refetch main target when not an improved buffer, to get the new gui buffer
         original.call(
-            new BlendFunction(SourceFactor.ONE, DestFactor.ZERO, SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA));
+            new BlendFunction(BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE, BlendFactor.ONE_MINUS_SRC_ALPHA));
     }
 }

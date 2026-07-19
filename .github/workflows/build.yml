@@ -183,6 +183,16 @@ jobs:
             echo "$row"
             echo "$row" >> "$GITHUB_OUTPUT"
           done
+      - name: github release
+        if: inputs.github_publish
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            ./*.jar
+          body_path: "changelog.md"
+          target_commitish: ${{ matrix.branch }}
+          name: ${{ steps.meta.outputs.mod_name }}
+          tag_name: ${{ steps.meta.outputs.mod_version}}
       - name: publish fabric
         if: steps.meta.outputs.fabric_file != '' && inputs.publish
         uses: Kir-Antipov/mc-publish@v3.3
@@ -266,16 +276,6 @@ jobs:
 
           loaders: "${{ steps.meta.outputs.quilt_loaders}}"
           fail-mode: warn
-      - name: github release
-        if: inputs.github_publish
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            ./*.jar
-          body_path: "changelog.md"
-          target_commitish: ${{ matrix.branch }}
-          name: ${{ steps.meta.outputs.mod_name }}
-          tag_name: ${{ steps.meta.outputs.mod_version}}
       - name: checkout repo forge-versions
         if: steps.meta.outputs.forge_file != '' || steps.meta.outputs.neoforge_file != ''
         uses: actions/checkout@v6

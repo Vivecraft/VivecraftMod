@@ -347,8 +347,12 @@ public class VRSettings {
     public boolean simulateFalling = true;  // VIVE if HMD is over empty space, fall
     @SettingField(value = VrOptions.WEAPON_COLLISION, config = "weaponCollisionNew")
     public WeaponCollision weaponCollision = WeaponCollision.AUTO;  // VIVE weapon hand collides with blocks/enemies
-    @SettingField(value = VrOptions.FEET_COLLISION)
+    @SettingField(VrOptions.FEET_COLLISION)
     public boolean feetCollision = true;  // VIVE weapon feet collides with blocks/enemies
+    @SettingField(VrOptions.BLOCK_COLLISION)
+    public boolean blockCollision = true;
+    @SettingField(VrOptions.ENTITY_COLLISION)
+    public boolean entityCollision = true;
     @SettingField(VrOptions.SWORD_BLOCK_COLLISION)
     public boolean swordBlockCollision = true;
     @SettingField(VrOptions.ONLY_SWORD_COLLISION)
@@ -361,6 +365,8 @@ public class VRSettings {
     public boolean roomscaleSpearLunge = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
+    @SettingField(VrOptions.SPRINT_MOVEMENT_MULTIPLIER)
+    public float sprintMovementSpeedMultiplier = 0f;   // values under 0.15 will use the same as regular movement multiplieer
     @SettingField(VrOptions.FREEMOVE_MODE)
     public FreeMove vrFreeMoveMode = FreeMove.CONTROLLER;
     @SettingField(VrOptions.FREEMOVE_FLY_MODE)
@@ -597,6 +603,8 @@ public class VRSettings {
     public HUDLock vrHudLockMode = HUDLock.WRIST;
     @SettingField(VrOptions.HUD_WRIST_OFFSET)
     public float vrHudWristOffset = 1F;
+    @SettingField(VrOptions.FORCE_GUI_TO_HUD)
+    public boolean forceGuiToHUD = false;
     @SettingField(VrOptions.HUD_OCCLUSION)
     public boolean hudOcclusion = true;
     @SettingField(VrOptions.CROSSHAIR_SCALE)
@@ -625,6 +633,8 @@ public class VRSettings {
     public int forceHardwareDetection = 0; // 0 = off, 1 = vive, 2 = oculus
     @SettingField(VrOptions.RADIAL_MODE_HOLD)
     public boolean radialModeHold = true;
+    @SettingField(VrOptions.RADIAL_REPEAT)
+    public boolean radialRepeat = true;
     @SettingField(VrOptions.RADIAL_NUMBER)
     public int vrRadialButtons = 8;
     @SettingField(VrOptions.PHYSICAL_KEYBOARD)
@@ -635,6 +645,8 @@ public class VRSettings {
     public KeyboardTheme physicalKeyboardTheme = KeyboardTheme.DEFAULT;
     @SettingField(VrOptions.KEYBOARD_PRESS_BINDS)
     public boolean keyboardPressBinds = false;
+    @SettingField(VrOptions.KEYBOARD_SHOW_LAYOUT_SELECT)
+    public boolean keyboardShowLayoutSelect = true;
     @SettingField(VrOptions.ALLOW_ADVANCED_BINDINGS)
     public boolean allowAdvancedBindings = false;
     @SettingField(VrOptions.CHAT_NOTIFICATIONS)
@@ -689,6 +701,8 @@ public class VRSettings {
     public boolean vrSettingsButtonEnabled = true;
     @SettingField(VrOptions.VR_SETTINGS_BUTTON_POSITION)
     public boolean vrSettingsButtonPositionLeft = true;
+    @SettingField(VrOptions.COMMANDS_BUTTON_ICON)
+    public boolean commandsButtonIcon = true;
     @SettingField(VrOptions.MODIFY_PAUSE_MENU)
     public boolean modifyPauseMenu = true;
     @SettingField(VrOptions.FULL_RELOAD_ON_INIT)
@@ -706,6 +720,13 @@ public class VRSettings {
     @SettingField
     // when set attaches the 3rd person camera tracker to the right controller
     public boolean debugCameraTracker;
+
+    // required vulkan stuff for vr, requested by the runtime
+    @SettingField
+    public String requiredVulkanInstanceExtensions = "";
+
+    @SettingField
+    public String requiredVulkanDeviceExtensions = "";
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
@@ -1566,6 +1587,14 @@ public class VRSettings {
                 }
             }
         },
+        FORCE_GUI_TO_HUD(OptionType.BOOLEAN) { // puts any screen to the HUD Lock position, instead of fixed in the room
+
+            @Override
+            void onOptionChange() {
+                GuiHandler.GUI_SCALE = 1F;
+                GuiHandler.onScreenChanged(null, Minecraft.getInstance().gui.screen(), false);
+            }
+        },
         HUD_WRIST_OFFSET(0.0f, 4.0f, 0.25f, -1), // HUD Offset to the arm
         HUD_OPACITY(0.15f, 1.0f, 0.05f, -1) { // HUD Opacity
 
@@ -1581,25 +1610,37 @@ public class VRSettings {
 
             @Override
             Object loadOption(String value) {
-                Minecraft.getInstance().options.hideGui = value.equals("true");
-                return false;
+                boolean hidden = value.equals("true");
+                // is null during first init
+                if (Minecraft.getInstance().gui != null) {
+                    if (hidden != Minecraft.getInstance().gui.hud.isHidden()) {
+                        Minecraft.getInstance().gui.hud.toggle();
+                    }
+                }
+                return hidden;
             }
 
             @Override
             String saveOption(Object value) {
-                return Boolean.toString(Minecraft.getInstance().options.hideGui);
+                return Boolean.toString(isHiddenWithFallback((boolean) value));
             }
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                return Minecraft.getInstance().options.hideGui ? prefix + LangHelper.getYes() :
+                return isHiddenWithFallback((boolean) value) ? prefix + LangHelper.getYes() :
                     prefix + LangHelper.getNo();
             }
 
             @Override
             Object setOptionValue(Object value) {
-                Minecraft.getInstance().options.hideGui = !Minecraft.getInstance().options.hideGui;
-                return false;
+                if (Minecraft.getInstance().gui != null) {
+                    Minecraft.getInstance().gui.hud.toggle();
+                }
+                return isHiddenWithFallback((boolean) value);
+            }
+
+            private boolean isHiddenWithFallback(boolean fallback) {
+                return Minecraft.getInstance().gui != null ? Minecraft.getInstance().gui.hud.isHidden() : fallback;
             }
         },
         RENDER_MENU_BACKGROUND(OptionType.BOOLEAN), // HUD/GUI Background
@@ -1610,7 +1651,8 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 // update screen pos
-                GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
+                GuiHandler.onScreenChanged(Minecraft.getInstance().gui.screen(), Minecraft.getInstance().gui.screen(),
+                    false);
             }
         },
         CROSSHAIR_OCCLUSION(OptionType.BOOLEAN), // Crosshair Occlusion
@@ -1688,6 +1730,7 @@ public class VRSettings {
         AUTO_OPEN_KEYBOARD, // Always Open Keyboard
         AUTO_CLOSE_KEYBOARD(OptionType.BOOLEAN), // Close Keyboard on Screenchange
         RADIAL_MODE_HOLD("vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
+        RADIAL_REPEAT(OptionType.BOOLEAN), // repeat last radial action
         RADIAL_NUMBER(4, 14, 2, 0), // number of radial buttons
         PHYSICAL_KEYBOARD("vivecraft.options.keyboard.physical",
             "vivecraft.options.keyboard.pointer") { // Keyboard Type
@@ -1710,6 +1753,14 @@ public class VRSettings {
             }
         },
         PHYSICAL_KEYBOARD_THEME(OptionType.OTHER) { // Keyboard Theme
+
+            @Override
+            void onOptionChange() {
+                KeyboardHandler.reinitKeyboard();
+            }
+        },
+        KEYBOARD_SHOW_LAYOUT_SELECT(OptionType.BOOLEAN) {
+            // show a shortcut to the language selection screen on the keyboard
 
             @Override
             void onOptionChange() {
@@ -1784,6 +1835,7 @@ public class VRSettings {
         VR_SETTINGS_BUTTON_VISIBLE(OptionType.BOOLEAN), // setting button in options
         VR_SETTINGS_BUTTON_POSITION("vivecraft.options.left",
             "vivecraft.options.right"), // setting button position
+        COMMANDS_BUTTON_ICON(OptionType.BOOLEAN), // shows a command block icon for the commands button
         MODIFY_PAUSE_MENU(OptionType.BOOLEAN), // if the pause menu should be altered
         FULL_RELOAD_ON_INIT(OptionType.BOOLEAN) { // causes a full resource reload on reinit
 
@@ -1929,6 +1981,17 @@ public class VRSettings {
         WALK_UP_BLOCKS(OptionType.BOOLEAN), // Walk up blocks
         // Movement/aiming controls
         MOVEMENT_MULTIPLIER(0.15f, 1.3f, 0.01f, 2), // Move. Speed Multiplier
+        SPRINT_MOVEMENT_MULTIPLIER(0.14f, 1.3f, 0.01f, 2) { // sprint Move. Speed Multiplier
+
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                if ((float) value > 0.145F) {
+                    return super.getDisplayString(prefix, value);
+                } else {
+                    return prefix + I18n.get("vivecraft.options.sprintmovementmultiplier.same");
+                }
+            }
+        },
         INERTIA_FACTOR { // Player Inertia
 
             @Override
@@ -1958,6 +2021,8 @@ public class VRSettings {
             }
         },
         FEET_COLLISION(OptionType.BOOLEAN),
+        BLOCK_COLLISION(OptionType.BOOLEAN), // physically swing at blocks
+        ENTITY_COLLISION(OptionType.BOOLEAN), // physically swing at entities
         SWORD_BLOCK_COLLISION(OptionType.BOOLEAN), // lets swords hit blocks that can be mined or instabroken
         ONLY_SWORD_COLLISION(OptionType.BOOLEAN), // only let swords hit stuff
         REDUCED_PLAYER_REACH(OptionType.BOOLEAN), // reduces roomscale reach to hit players
@@ -2175,7 +2240,7 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 if (VRState.VR_INITIALIZED) {
-                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.getLeftEyeTarget();
+                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye[0];
                     return prefix + Math.round((float) value * 100) + "% (" +
                         (int) Math.ceil(eye0.width * Math.sqrt((float) value)) + "x" +
                         (int) Math.ceil(eye0.height * Math.sqrt((float) value)) + ")";
@@ -2291,7 +2356,7 @@ public class VRSettings {
             void onOptionChange() {
                 if (VRState.VR_RUNNING) {
                     MCVR.get().resetPosition();
-                    Minecraft.getInstance().setScreen(null);
+                    Minecraft.getInstance().gui.setScreen(null);
                 }
             }
         },

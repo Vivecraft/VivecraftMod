@@ -1,24 +1,32 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vulkan.VulkanConst;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11C;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.lwjgl.openvr.HiddenAreaMesh;
 import org.lwjgl.openvr.VR;
+import org.lwjgl.openvr.VRCompositor;
+import org.lwjgl.openvr.VRVulkanTextureData;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
+import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.OpenGLHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.VulkanHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_PostPresentHandoff;
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_Submit;
@@ -32,6 +40,8 @@ public class OpenVRStereoRenderer extends VRRenderer {
     public RenderTarget framebufferEyeLeft;
     public RenderTarget framebufferEyeRight;
 
+    private final VRVulkanTextureData[] vkEyeData = new VRVulkanTextureData[2];
+
     public OpenVRStereoRenderer(MCOpenVR vr) {
         super(vr);
         this.openvr = vr;
@@ -39,10 +49,43 @@ public class OpenVRStereoRenderer extends VRRenderer {
         // allocate meshes, they are freed in destroy()
         this.hiddenMeshes[0] = HiddenAreaMesh.calloc();
         this.hiddenMeshes[1] = HiddenAreaMesh.calloc();
+
+        if (GraphicsHelper.INSTANCE instanceof VulkanHelper) {
+            this.vkEyeData[0] = VRVulkanTextureData.calloc();
+            this.vkEyeData[1] = VRVulkanTextureData.calloc();
+        }
     }
 
     @Override
-    public Tuple<Integer, Integer> getRenderTextureSizes() {
+    public void checkCapabilities() throws RenderConfigException {
+        super.checkCapabilities();
+        if (GraphicsHelper.INSTANCE instanceof VulkanHelper vulkanHelper) {
+            // check that the needed extensions are loaded, and remember them for the next start
+            int length = VRCompositor.VRCompositor_GetVulkanInstanceExtensionsRequired(null);
+            String instanceExtensions = "";
+            if (length > 0) {
+                instanceExtensions = VRCompositor.VRCompositor_GetVulkanInstanceExtensionsRequired(length);
+            }
+
+            length = VRCompositor.VRCompositor_GetVulkanDeviceExtensionsRequired(
+                vulkanHelper.getPhysicalDevicePointer(), null);
+            String deviceExtensions = "";
+            if (length > 0) {
+                deviceExtensions = VRCompositor.VRCompositor_GetVulkanDeviceExtensionsRequired(
+                    vulkanHelper.getPhysicalDevicePointer(), length);
+            }
+            // remember the extensions for the next launch
+            ClientDataHolderVR.getInstance().vrSettings.requiredVulkanInstanceExtensions = instanceExtensions;
+            ClientDataHolderVR.getInstance().vrSettings.requiredVulkanDeviceExtensions = deviceExtensions;
+
+            // check that all extensions are supported and loaded
+            vulkanHelper.checkExtensionSupport(Arrays.stream(instanceExtensions.split(" ")).toList(),
+                Arrays.stream(deviceExtensions.split(" ")).toList());
+        }
+    }
+
+    @Override
+    public Vector2ic getRenderTextureSizes() {
         if (this.resolution == null) {
             // get texture size
             try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -50,9 +93,8 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 var renderSizeY = stack.callocInt(1);
                 VRSystem_GetRecommendedRenderTargetSize(renderSizeX, renderSizeY);
 
-                this.resolution = new Tuple<>(renderSizeX.get(0), renderSizeY.get(0));
-                VRSettings.LOGGER.info("Vivecraft: OpenVR Render Res {}x{}", this.resolution.getA(),
-                    this.resolution.getB());
+                this.resolution = new Vector2i(renderSizeX.get(0), renderSizeY.get(0));
+                VRSettings.LOGGER.info("Vivecraft: OpenVR Render Res {}x{}", this.resolution.x(), this.resolution.y());
 
                 this.ss = this.openvr.getSuperSampling();
                 VRSettings.LOGGER.info("Vivecraft: OpenVR Supersampling: {}", this.ss);
@@ -70,11 +112,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
                     this.hiddenMeshVertices[eye] = new float[count * 3 * 2];
                     MemoryUtil.memFloatBuffer(MemoryUtil.memAddress(this.hiddenMeshes[eye].pVertexData()),
                         this.hiddenMeshVertices[eye].length).get(this.hiddenMeshVertices[eye]);
-
-                    for (int vertex = 0; vertex < this.hiddenMeshVertices[eye].length; vertex += 2) {
-                        this.hiddenMeshVertices[eye][vertex] *= (float) this.resolution.getA();
-                        this.hiddenMeshVertices[eye][vertex + 1] *= (float) this.resolution.getB();
-                    }
 
                     VRSettings.LOGGER.info("Vivecraft: Stencil mesh loaded for eye '{}'", eye);
                 }
@@ -95,64 +132,79 @@ public class OpenVRStereoRenderer extends VRRenderer {
             return new Matrix4f().frustum(
                 left.get() * nearClip, right.get() * nearClip,
                 top.get() * nearClip, bottom.get() * nearClip,
-                nearClip, farClip, RenderSystem.getDevice().isZZeroToOne());
+                nearClip, farClip, RenderSystem.getDevice().getDeviceInfo().isZZeroToOne());
         }
     }
 
     @Override
     public void createRenderTexture(int width, int height) {
-        int boundTextureId = GlStateManager._getInteger(GL11C.GL_TEXTURE_BINDING_2D);
+        // generate eye textures
+        for (int i = 0; i < 2; i++) {
+            this.framebufferEye[i] = VRTextureTarget.builder((i == 0 ? "L" : "R") + " Eye")
+                .withSize(width, height)
+                .withFormat(GpuFormat.RGBA8_UNORM)
+                .build();
+            VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[i]);
+            GraphicsHelper.INSTANCE.checkError((i == 0 ? "Left" : "Right") + " Eye framebuffer setup");
+        }
 
-        // generate left eye texture
-        this.leftEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.leftEyeTextureId);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, width, height, 0, GL11C.GL_RGBA,
-            GL11C.GL_INT, null);
-        this.openvr.texType0.handle(this.leftEyeTextureId);
+        if (GraphicsHelper.INSTANCE instanceof OpenGLHelper) {
+            this.setupOpenGL();
+        } else if (GraphicsHelper.INSTANCE instanceof VulkanHelper) {
+            this.setupVulkan();
+        } else {
+            throw new IllegalStateException(
+                "Vivecraft: Unexpected device type: " + GraphicsHelper.INSTANCE.getClass().getName());
+        }
+
+        this.lastError = GraphicsHelper.INSTANCE.checkError("create VR textures");
+    }
+
+    private void setupOpenGL() {
+        this.openvr.texType0.handle(GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[0].getColorTexture()));
         this.openvr.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.openvr.texType0.eType(VR.ETextureType_TextureType_OpenGL);
 
-        // generate right eye texture
-        this.rightEyeTextureId = GlStateManager._genTexture();
-        GlStateManager._bindTexture(this.rightEyeTextureId);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
-        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, width, height, 0, GL11C.GL_RGBA,
-            GL11C.GL_INT, null);
-        this.openvr.texType1.handle(this.rightEyeTextureId);
+        this.openvr.texType1.handle(GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[1].getColorTexture()));
         this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
-
-        VRSettings.LOGGER.info("Vivecraft: VR Provider supplied render texture IDs: {}, {}", this.leftEyeTextureId,
-            this.rightEyeTextureId);
-
-        this.lastError = RenderHelper.checkGLError("create VR textures");
-
-        this.framebufferEyeLeft = VRTextureTarget.builder("L Eye")
-            .withSize(width, height)
-            .withTexId(this.leftEyeTextureId)
-            .build();
-        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEyeLeft);
-        String leftError = RenderHelper.checkGLError("Left Eye framebuffer setup");
-
-        this.framebufferEyeRight = VRTextureTarget.builder("R Eye")
-            .withSize(width, height)
-            .withTexId(this.rightEyeTextureId)
-            .build();
-        VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEyeRight);
-        String rightError = RenderHelper.checkGLError("Right Eye framebuffer setup");
-
-        if (this.lastError.isEmpty()) {
-            this.lastError = !leftError.isEmpty() ? leftError : rightError;
-        }
-
-        GlStateManager._bindTexture(boundTextureId);
     }
+
+    private void setupVulkan() {
+        this.openvr.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        this.openvr.texType0.eType(VR.ETextureType_TextureType_Vulkan);
+        this.openvr.texType0.handle(this.vkEyeData[0].address());
+
+        this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        this.openvr.texType1.eType(VR.ETextureType_TextureType_Vulkan);
+        this.openvr.texType1.handle(this.vkEyeData[1].address());
+
+        // populate vk objects
+        if (GraphicsHelper.INSTANCE instanceof VulkanHelper vkHelper) {
+            for (int i = 0; i < 2; i++) {
+                this.vkEyeData[i].m_nImage(
+                    GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[i].getColorTexture()));
+                this.vkEyeData[i].m_pDevice(vkHelper.getDevicePointer());
+                this.vkEyeData[i].m_pPhysicalDevice(vkHelper.getPhysicalDevicePointer());
+                this.vkEyeData[i].m_pInstance(vkHelper.getInstancePointer());
+                this.vkEyeData[i].m_pQueue(vkHelper.getQueuePointer());
+                this.vkEyeData[i].m_nQueueFamilyIndex(vkHelper.getQueueFamilyIndex());
+                this.vkEyeData[i].m_nWidth(this.framebufferEye[i].width);
+                this.vkEyeData[i].m_nHeight(this.framebufferEye[i].height);
+                this.vkEyeData[i].m_nFormat(VulkanConst.toVk(this.framebufferEye[i].gpuFormat));
+                // hardcoded, maybe mixin to store per target?
+                this.vkEyeData[i].m_nSampleCount(1);
+            }
+        } else {
+            throw new IllegalStateException("Vivecraft: Vulkan on non vulkan device");
+        }
+    }
+
 
     @Override
     public void endFrame() throws RenderConfigException {
+        // technically we are supposed to transition Vulkan images to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+        // vanilla has them in VK_IMAGE_LAYOUT_GENERAL by default which should also work though
         int leftError = VRCompositor_Submit(VR.EVREye_Eye_Left, this.openvr.texType0, null,
             VR.EVRSubmitFlags_Submit_Default);
         int rightError = VRCompositor_Submit(VR.EVREye_Eye_Right, this.openvr.texType1, null,
@@ -167,7 +219,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
         }
 
         // flush, recommended by the openvr docs
-        GL11C.glFlush();
+        GraphicsHelper.INSTANCE.flush();
     }
 
     public static String getCompositorError(int code) {
@@ -223,23 +275,11 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.hiddenMeshes[0].free();
         this.hiddenMeshes[1].free();
 
-        if (this.framebufferEyeLeft != null) {
-            this.framebufferEyeLeft.destroyBuffers();
-            this.framebufferEyeLeft = null;
-        }
-
-        if (this.framebufferEyeRight != null) {
-            this.framebufferEyeRight.destroyBuffers();
-            this.framebufferEyeRight = null;
-        }
-        if (this.leftEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.leftEyeTextureId);
-            this.leftEyeTextureId = -1;
-        }
-
-        if (this.rightEyeTextureId > -1) {
-            GlStateManager._deleteTexture(this.rightEyeTextureId);
-            this.rightEyeTextureId = -1;
+        for (int i = 0; i < 2; i++) {
+            if (this.vkEyeData[i] != null) {
+                this.vkEyeData[i].free();
+                this.vkEyeData[i] = null;
+            }
         }
     }
 }

@@ -211,10 +211,9 @@ public abstract class LocalPlayerVRMixin extends LocalPlayer_PlayerVRMixin imple
                     this.getY() + this.vivecraft$getRoomYOffsetFromPose(),
                     VRPlayer.get().roomOrigin.z,
                     false);
-            } else {
-                // do not move player, VRPlayer.doPlayerMoveInRoom will move him around.
-                this.setOnGround(true);
             }
+            // else
+            // do not move player, VRPlayer.doPlayerMoveInRoom will move him around.
         }
         ci.cancel();
     }

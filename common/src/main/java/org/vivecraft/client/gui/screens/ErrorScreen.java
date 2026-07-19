@@ -16,7 +16,7 @@ public class ErrorScreen extends Screen implements ChangeableParentScreen {
 
     public ErrorScreen(Component title, Component error) {
         super(title);
-        this.lastScreen = Minecraft.getInstance().screen;
+        this.lastScreen = Minecraft.getInstance().gui.screen();
         this.error = error;
     }
 
@@ -53,6 +53,6 @@ public class ErrorScreen extends Screen implements ChangeableParentScreen {
     @Override
     public void onClose() {
         ClientDataHolderVR.getInstance().cachedScreen = null;
-        this.minecraft.setScreen(this.lastScreen);
+        this.minecraft.gui.setScreen(this.lastScreen);
     }
 }

@@ -19,7 +19,7 @@ public abstract class MethodHolder {
     }
 
     public static boolean isInMenuRoom() {
-        return willBeInMenuRoom(Minecraft.getInstance().screen);
+        return willBeInMenuRoom(Minecraft.getInstance().gui.screen());
     }
 
     public static boolean willBeInMenuRoom(Screen newScreen) {
@@ -28,6 +28,6 @@ public abstract class MethodHolder {
             newScreen instanceof LevelLoadingScreen ||
             newScreen instanceof ProgressScreen ||
             newScreen instanceof GenericMessageScreen ||
-            Minecraft.getInstance().getOverlay() != null;
+            Minecraft.getInstance().gui.overlay() != null;
     }
 }

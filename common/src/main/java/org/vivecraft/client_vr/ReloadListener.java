@@ -3,10 +3,11 @@ package org.vivecraft.client_vr;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.TextureFilteringMethod;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.server.config.ServerConfig;
@@ -35,7 +36,7 @@ public class ReloadListener implements ResourceManagerReloadListener {
             if (OptifineHelper.isOptifineLoaded()) {
                 // with optifine this texture somehow fails to load, so manually reload it
                 try {
-                    Minecraft.getInstance().getTextureManager().getTexture(Gui.CROSSHAIR_SPRITE);
+                    Minecraft.getInstance().getTextureManager().getTexture(Hud.CROSSHAIR_SPRITE);
                 } catch (ReportedException e) {
                     // if there was an error, just reload everything
                     Minecraft.getInstance().reloadResourcePacks();
@@ -62,5 +63,9 @@ public class ReloadListener implements ResourceManagerReloadListener {
         this.lastTextureFiltering = Minecraft.getInstance().options.textureFiltering().get();
         this.lastMipmaps = Minecraft.getInstance().options.mipmapLevels().get();
         this.lastAnisotropy = Minecraft.getInstance().options.maxAnisotropyBit().get();
+
+        // make sure these are always loaded
+        RenderHelper.getGpuTexture(RenderHelper.WHITE_TEXTURE);
+        RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE);
     }
 }

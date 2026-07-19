@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.render.ubos;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,7 +12,7 @@ import org.joml.Vector3fc;
 public class MixedRealityUBO {
     public static final String UBO_NAME = "MixedRealityUbo";
     private static final int MIXED_REALITY_UBO_SIZE = new Std140SizeCalculator()
-        .putMat4f().putMat4f().putVec4().putVec4().putVec4().putInt().putInt().putInt().get();
+        .putMat4f().putMat4f().putVec4().putVec4().putVec4().putInt().putInt().putInt().putInt().putInt().get();
     private final MappableRingBuffer mixedRealityBuffer;
 
     public MixedRealityUBO() {
@@ -21,11 +22,10 @@ public class MixedRealityUBO {
 
     public void updateBuffer(
         Matrix4fc thirdProjectionMat, Matrix4fc thirdViewMat, Vector3fc hmdViewPosition,
-        Vector3fc hmdPlaneNormal, boolean firstPersonPass, Vector3fc keyColor, boolean alphaMode, int guiMask)
+        Vector3fc hmdPlaneNormal, boolean firstPersonPass, Vector3fc keyColor, boolean alphaMode, int guiMask,
+        boolean flipFirstPersonPass)
     {
-        try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
-            .mapBuffer(this.mixedRealityBuffer.currentBuffer(), false, true))
-        {
+        try (GpuBufferSlice.MappedView mappedView = this.mixedRealityBuffer.currentBuffer().map(false, true)) {
             Std140Builder.intoBuffer(mappedView.data())
                 .putMat4f(thirdProjectionMat)
                 .putMat4f(thirdViewMat)
@@ -34,7 +34,9 @@ public class MixedRealityUBO {
                 .putVec4(hmdPlaneNormal.x(), hmdPlaneNormal.y(), hmdPlaneNormal.z(), 0)
                 .putInt(alphaMode ? 1 : 0)
                 .putInt(firstPersonPass ? 1 : 0)
-                .putInt(guiMask);
+                .putInt(guiMask)
+                .putInt(flipFirstPersonPass ? 1 : 0)
+                .putInt(RenderSystem.getDevice().getDeviceInfo().isZZeroToOne() ? 1 : 0);
         }
     }
 
