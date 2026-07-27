@@ -728,6 +728,12 @@ public class VRSettings {
     @SettingField
     public String requiredVulkanDeviceExtensions = "";
 
+    @SettingField
+    public String requiredVulkanMinAPIVersion = "";
+
+    @SettingField
+    public String requiredVulkanDeviceUUID = "";
+
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
      */
@@ -2571,10 +2577,26 @@ public class VRSettings {
                 }
             }
         },
-        NULLVR_HAPTICS(OptionType.BOOLEAN),
-        NULLVR_IPD(0.05F, 0.2F, 0.001F, 3),
-        NULLVR_EYE_ANGLE(0F, 25F, 0.5F, 1),
-        NULLVR_FOV(50F, 120F, 1F, 0);
+        NULLVR_HAPTICS(OptionType.BOOLEAN), // plays a sound and particles for haptics with nullvr
+        NULLVR_IPD(0.05F, 0.2F, 0.001F, 3), // eye distance for nullvr
+        NULLVR_EYE_ANGLE(0F, 25F, 0.5F, 1) { // eye projection angle for nullvr
+
+            @Override
+            void onOptionChange() {
+                if (VRState.VR_INITIALIZED) {
+                    ClientDataHolderVR.getInstance().vrRenderer.invalidateProjectionMatrix();
+                }
+            }
+        },
+        NULLVR_FOV(50F, 120F, 1F, 0) { // eye fov for nullvr
+
+            @Override
+            void onOptionChange() {
+                if (VRState.VR_INITIALIZED) {
+                    ClientDataHolderVR.getInstance().vrRenderer.invalidateProjectionMatrix();
+                }
+            }
+        };
         private final OptionType type;
         private final float valueStep;
         private final float valueMin;

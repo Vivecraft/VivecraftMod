@@ -1,10 +1,10 @@
 package org.vivecraft.client_vr.provider.openxr.control;
 
-import org.jetbrains.annotations.Nullable;
 import org.vivecraft.client_vr.provider.control.ActionType;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 
 public record XRBinding(@Nullable VRInputActionSet actionSet, String key, String controller, ActionType actionType) {

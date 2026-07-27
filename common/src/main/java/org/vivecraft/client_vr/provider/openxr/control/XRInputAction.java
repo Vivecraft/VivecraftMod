@@ -1,7 +1,6 @@
 package org.vivecraft.client_vr.provider.openxr.control;
 
 import net.minecraft.client.KeyMapping;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.vivecraft.client_vr.provider.control.ActionType;
@@ -9,6 +8,7 @@ import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.provider.control.InputAction;
 import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -14,7 +14,6 @@ import net.minecraft.client.resources.language.I18n;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11C;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -373,6 +372,8 @@ public class ShaderHelper {
                 !(DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera && DATA_HOLDER.cameraTracker.isVisible())
         );
 
+        GpuTextureView black = RenderHelper.getGpuTexture(RenderHelper.BLACK_TEXTURE);
+
         renderFullscreenQuad(() -> "Vive mixed reality", VRShaders.MIXED_REALITY_PIPELINE, renderPass -> {
             // set uniforms
             renderPass.setUniform(MixedRealityUBO.UBO_NAME, VRShaders.MIXED_REALITY_UBO.getBuffer());
@@ -582,10 +583,19 @@ public class ShaderHelper {
     }
 
     /**
+     * blits the given {@code source} RenderTarget to the given {@code target} RenderTarget buffer
      *
      * @param source RenderTarget to copy
      * @param target RenderTarget to draw to
+     * @param blend  if alpha blending should be used
      */
+    public static void blit(RenderTarget source, RenderTarget target, boolean blend) {
+        RenderSystem.assertOnRenderThread();
 
+        renderFullscreenQuad(() -> "Vive Blit",
+            blend ? VRShaders.BLIT_VR_BLEND_PIPELINE : VRShaders.BLIT_VR_PIPELINE,
+            pass -> pass.bindTexture(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView(),
+                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)),
+            target.getColorTextureView());
     }
 }

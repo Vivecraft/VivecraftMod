@@ -1,31 +1,22 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vulkan.VulkanConst;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
-import org.lwjgl.openvr.HiddenAreaMesh;
-import org.lwjgl.openvr.VR;
-import org.lwjgl.openvr.VRCompositor;
-import org.lwjgl.openvr.VRVulkanTextureData;
+import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.vivecraft.api.client.data.RenderPass;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRTextureTarget;
-import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
-import org.vivecraft.client_vr.render.helpers.graphics.OpenGLHelper;
-import org.vivecraft.client_vr.render.helpers.graphics.VulkanHelper;
+import org.vivecraft.client_vr.render.helpers.graphics.vulkan.VulkanHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.nio.FloatBuffer;
+import java.nio.LongBuffer;
 import java.util.Arrays;
 
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_PostPresentHandoff;
@@ -35,10 +26,6 @@ import static org.lwjgl.openvr.VRSystem.*;
 public class OpenVRStereoRenderer extends VRRenderer {
     private final HiddenAreaMesh[] hiddenMeshes = new HiddenAreaMesh[2];
     private final MCOpenVR openvr;
-    protected int leftEyeTextureId = -1;
-    protected int rightEyeTextureId = -1;
-    public RenderTarget framebufferEyeLeft;
-    public RenderTarget framebufferEyeRight;
 
     private final VRVulkanTextureData[] vkEyeData = new VRVulkanTextureData[2];
 
@@ -50,7 +37,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.hiddenMeshes[0] = HiddenAreaMesh.calloc();
         this.hiddenMeshes[1] = HiddenAreaMesh.calloc();
 
-        if (GraphicsHelper.INSTANCE instanceof VulkanHelper) {
+        if (GraphicsHelper.INSTANCE.getType() == GraphicsHelper.Type.VULKAN) {
             this.vkEyeData[0] = VRVulkanTextureData.calloc();
             this.vkEyeData[1] = VRVulkanTextureData.calloc();
         }
@@ -68,19 +55,25 @@ public class OpenVRStereoRenderer extends VRRenderer {
             }
 
             length = VRCompositor.VRCompositor_GetVulkanDeviceExtensionsRequired(
-                vulkanHelper.getPhysicalDevicePointer(), null);
+                vulkanHelper.getPhysicalDevice().address(), null);
             String deviceExtensions = "";
             if (length > 0) {
                 deviceExtensions = VRCompositor.VRCompositor_GetVulkanDeviceExtensionsRequired(
-                    vulkanHelper.getPhysicalDevicePointer(), length);
+                    vulkanHelper.getPhysicalDevice().address(), length);
             }
-            // remember the extensions for the next launch
-            ClientDataHolderVR.getInstance().vrSettings.requiredVulkanInstanceExtensions = instanceExtensions;
-            ClientDataHolderVR.getInstance().vrSettings.requiredVulkanDeviceExtensions = deviceExtensions;
 
-            // check that all extensions are supported and loaded
-            vulkanHelper.checkExtensionSupport(Arrays.stream(instanceExtensions.split(" ")).toList(),
-                Arrays.stream(deviceExtensions.split(" ")).toList());
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                LongBuffer deviceHandle = stack.callocLong(1);
+                VRSystem.VRSystem_GetOutputDevice(deviceHandle, VR.ETextureType_TextureType_Vulkan,
+                    vulkanHelper.getInstance().address());
+
+                // check that all extensions are supported and loaded
+                vulkanHelper.checkCompatibility(
+                    Arrays.stream(instanceExtensions.split(" ")).toList(),
+                    Arrays.stream(deviceExtensions.split(" ")).toList(),
+                    null,
+                    deviceHandle.get(0));
+            }
         }
     }
 
@@ -138,26 +131,14 @@ public class OpenVRStereoRenderer extends VRRenderer {
 
     @Override
     public void createRenderTexture(int width, int height) {
-        // generate eye textures
-        for (int i = 0; i < 2; i++) {
-            this.framebufferEye[i] = VRTextureTarget.builder((i == 0 ? "L" : "R") + " Eye")
-                .withSize(width, height)
-                .withFormat(GpuFormat.RGBA8_UNORM)
-                .build();
-            VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[i]);
-            GraphicsHelper.INSTANCE.checkError((i == 0 ? "Left" : "Right") + " Eye framebuffer setup");
-        }
+        super.createRenderTexture(width, height);
 
-        if (GraphicsHelper.INSTANCE instanceof OpenGLHelper) {
-            this.setupOpenGL();
-        } else if (GraphicsHelper.INSTANCE instanceof VulkanHelper) {
-            this.setupVulkan();
-        } else {
-            throw new IllegalStateException(
-                "Vivecraft: Unexpected device type: " + GraphicsHelper.INSTANCE.getClass().getName());
-        }
+        if (!this.lastError.isEmpty()) return;
 
-        this.lastError = GraphicsHelper.INSTANCE.checkError("create VR textures");
+        switch (GraphicsHelper.INSTANCE.getType()) {
+            case OPENGL -> this.setupOpenGL();
+            case VULKAN -> this.setupVulkan();
+        }
     }
 
     private void setupOpenGL() {
@@ -184,9 +165,9 @@ public class OpenVRStereoRenderer extends VRRenderer {
             for (int i = 0; i < 2; i++) {
                 this.vkEyeData[i].m_nImage(
                     GraphicsHelper.INSTANCE.getTextureHandle(this.framebufferEye[i].getColorTexture()));
-                this.vkEyeData[i].m_pDevice(vkHelper.getDevicePointer());
-                this.vkEyeData[i].m_pPhysicalDevice(vkHelper.getPhysicalDevicePointer());
-                this.vkEyeData[i].m_pInstance(vkHelper.getInstancePointer());
+                this.vkEyeData[i].m_pDevice(vkHelper.getDevice().address());
+                this.vkEyeData[i].m_pPhysicalDevice(vkHelper.getPhysicalDevice().address());
+                this.vkEyeData[i].m_pInstance(vkHelper.getInstance().address());
                 this.vkEyeData[i].m_pQueue(vkHelper.getQueuePointer());
                 this.vkEyeData[i].m_nQueueFamilyIndex(vkHelper.getQueueFamilyIndex());
                 this.vkEyeData[i].m_nWidth(this.framebufferEye[i].width);
@@ -213,9 +194,13 @@ public class OpenVRStereoRenderer extends VRRenderer {
         VRCompositor_PostPresentHandoff();
 
         if (leftError + rightError > VR.EVRCompositorError_VRCompositorError_None) {
-            throw new RenderConfigException(Component.literal("Compositor Error"),
-                Component.literal("Texture submission error: Left/Right " +
-                    getCompositorError(leftError) + "/" + getCompositorError(rightError)));
+            if (leftError == rightError && leftError == VR.EVRCompositorError_VRCompositorError_AlreadySubmitted) {
+                VRSettings.LOGGER.error("Vivecraft: error ending frame: AlreadySubmitted");
+            } else {
+                throw new RenderConfigException(Component.literal("Compositor Error"),
+                    Component.literal("Texture submission error: Left/Right " +
+                        getCompositorError(leftError) + "/" + getCompositorError(rightError)));
+            }
         }
 
         // flush, recommended by the openvr docs
@@ -224,19 +209,20 @@ public class OpenVRStereoRenderer extends VRRenderer {
 
     public static String getCompositorError(int code) {
         return switch (code) {
-            case 0 -> "None";
-            case 1 -> "RequestFailed";
-            case 100 -> "IncompatibleVersion";
-            case 101 -> "DoesNotHaveFocus";
-            case 102 -> "InvalidTexture";
-            case 103 -> "IsNotSceneApplication";
-            case 104 -> "TextureIsOnWrongDevice";
-            case 105 -> "TextureUsesUnsupportedFormat:";
-            case 106 -> "SharedTexturesNotSupported";
-            case 107 -> "IndexOutOfRange";
-            case 108 -> "AlreadySubmitted";
-            case 109 -> "InvalidBounds";
-            case 110 -> "AlreadySet";
+            case VR.EVRCompositorError_VRCompositorError_None -> "None";
+            case VR.EVRCompositorError_VRCompositorError_RequestFailed -> "RequestFailed";
+            case VR.EVRCompositorError_VRCompositorError_IncompatibleVersion -> "IncompatibleVersion";
+            case VR.EVRCompositorError_VRCompositorError_DoNotHaveFocus -> "DoesNotHaveFocus";
+            case VR.EVRCompositorError_VRCompositorError_InvalidTexture -> "InvalidTexture";
+            case VR.EVRCompositorError_VRCompositorError_IsNotSceneApplication -> "IsNotSceneApplication";
+            case VR.EVRCompositorError_VRCompositorError_TextureIsOnWrongDevice -> "TextureIsOnWrongDevice";
+            case VR.EVRCompositorError_VRCompositorError_TextureUsesUnsupportedFormat ->
+                "TextureUsesUnsupportedFormat:";
+            case VR.EVRCompositorError_VRCompositorError_SharedTexturesNotSupported -> "SharedTexturesNotSupported";
+            case VR.EVRCompositorError_VRCompositorError_IndexOutOfRange -> "IndexOutOfRange";
+            case VR.EVRCompositorError_VRCompositorError_AlreadySubmitted -> "AlreadySubmitted";
+            case VR.EVRCompositorError_VRCompositorError_InvalidBounds -> "InvalidBounds";
+            case VR.EVRCompositorError_VRCompositorError_AlreadySet -> "AlreadySet";
             default -> "Unknown";
         };
     }
@@ -244,24 +230,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
     @Override
     public boolean providesStencilMask() {
         return true;
-    }
-
-    @Override
-    public RenderTarget getLeftEyeTarget() {
-        return this.framebufferEyeLeft;
-    }
-
-    @Override
-    public RenderTarget getRightEyeTarget() {
-        return this.framebufferEyeRight;
-    }
-
-    public float[] getStencilMask(RenderPass eye) {
-        if (this.hiddenMeshVertices != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT)) {
-            return eye == RenderPass.LEFT ? this.hiddenMeshVertices[0] : this.hiddenMeshVertices[1];
-        } else {
-            return null;
-        }
     }
 
     public String getName() {

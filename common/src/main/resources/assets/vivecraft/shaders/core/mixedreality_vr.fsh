@@ -4,6 +4,8 @@
 #define GUI_THIRD 2
 #define GUI_SEPARATE 4
 
+uniform sampler2D firstPersonColor;
+
 uniform sampler2D thirdPersonColor;
 uniform sampler2D thirdPersonDepth;
 

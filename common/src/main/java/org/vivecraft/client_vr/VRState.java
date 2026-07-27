@@ -160,15 +160,15 @@ public class VRState {
 
     public static void destroyVR(boolean disableVRSetting) {
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-        if (dh.vr != null) {
-            dh.vr.destroy();
-        }
-        dh.vr = null;
-        dh.vrPlayer = null;
         if (dh.vrRenderer != null) {
             dh.vrRenderer.destroy();
             dh.vrRenderer = null;
         }
+        if (dh.vr != null) {
+            dh.vr.destroy();
+            dh.vr = null;
+        }
+        dh.vrPlayer = null;
         // there are no other renderpasses anymore
         RenderPassManager.setVanillaRenderPass();
         if (dh.menuWorldRenderer != null) {

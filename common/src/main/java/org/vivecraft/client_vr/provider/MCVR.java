@@ -1502,7 +1502,7 @@ public abstract class MCVR<T extends InputAction> {
             (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui ||
                 !(action.actionSet == VRInputActionSet.INGAME &&
                     action.keyBinding.key == InputConstants.Type.MOUSE.getOrCreate(GLFW.GLFW_MOUSE_BUTTON_LEFT) &&
-                    this.mc.screen != null
+                    this.mc.gui.screen() != null
                 )
             ))
         {

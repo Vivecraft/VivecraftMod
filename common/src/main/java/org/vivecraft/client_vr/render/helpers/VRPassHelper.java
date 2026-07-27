@@ -8,8 +8,10 @@ import net.minecraft.gizmos.Gizmos;
 import net.minecraft.util.profiling.Profiler;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.LevelRenderStateExtension;
+import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -100,8 +102,8 @@ public class VRPassHelper {
 
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
-            ShaderHelper.blitFramebuffer(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer,
-                DATA_HOLDER.vrRenderer.cameraFramebuffer);
+            ShaderHelper.blit(DATA_HOLDER.vrRenderer.cameraRenderFramebuffer, DATA_HOLDER.vrRenderer.cameraFramebuffer,
+                false);
             Profiler.get().pop();
         }
 
@@ -247,18 +249,14 @@ public class VRPassHelper {
 
         DATA_HOLDER.vrPlayer.postRender(deltaTracker.getGameTimeDeltaPartialTick(true));
 
-        Profiler.get().push("vrMirror");
-        // use the vanilla target for the mirror
-        RenderPassManager.setMirrorRenderPass();
-        ShaderHelper.drawMirror();
-        RenderHelper.checkGLError("post-mirror");
-
         Profiler.get().popPush("Display/Reproject");
 
         try {
             DATA_HOLDER.vrRenderer.endFrame();
         } catch (RenderConfigException exception) {
-            VRSettings.LOGGER.error("Vivecraft: error ending frame: {}", exception.error.getString());
+            // something went wrong, disable VR
+            VRState.VR_ENABLED = false;
+            MC.gui.setScreen(new ErrorScreen(exception.title, exception.error));
         }
         Profiler.get().pop();
         GraphicsHelper.INSTANCE.checkError("post submit");

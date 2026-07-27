@@ -79,6 +79,7 @@ import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 import org.vivecraft.client_vr.render.helpers.VRPassHelper;
 import org.vivecraft.client_vr.render.helpers.graphics.GraphicsHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;

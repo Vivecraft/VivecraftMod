@@ -56,6 +56,7 @@ public class VRShaders {
 
     // mixed reality shader and its uniforms
     public static MixedRealityUBO MIXED_REALITY_UBO;
+    public static final String MIXED_REALITY_FIRST_COLOR_SAMPLER = "firstPersonColor";
     public static final String MIXED_REALITY_THIRD_COLOR_SAMPLER = "thirdPersonColor";
     public static final String MIXED_REALITY_THIRD_DEPTH_SAMPLER = "thirdPersonDepth";
     public static final String MIXED_REALITY_GUI_COLOR_SAMPLER = "guiColor";
@@ -118,6 +119,17 @@ public class VRShaders {
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+        .build();
+
+    public static final RenderPipeline GAMMA_CORRECTION_PIPELINE = RenderPipeline.builder()
+        .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_gamma"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/gamma"))
+        .withBindGroupLayout(BLIT_VR_BIND_GROUP)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(
+            new ColorTargetState(Optional.empty(), GpuFormat.RGBA16_UNORM, ColorTargetState.WRITE_COLOR))
         .build();
 
     public static final RenderPipeline SOLID_ALPHA_PIPELINE = RenderPipeline.builder()
