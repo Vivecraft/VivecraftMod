@@ -137,7 +137,7 @@ public abstract class CameraVRMixin {
             this.setupPerspective(vivecraft$MIN_CLIP_DISTANCE, this.depthFar,
                 this.minecraft.options.fov().get(), this.minecraft.getWindow().getWidth(),
                 this.minecraft.getWindow().getHeight());
-            this.alignWithEntity(deltaTracker.getGameTimeDeltaPartialTick(true));
+            this.vivecraft$setupVRCamera();
         }
     }
 
@@ -189,23 +189,28 @@ public abstract class CameraVRMixin {
     @Inject(method = "alignWithEntity", at = @At("HEAD"), cancellable = true)
     private void vivecraft$setOrientation(float partialTicks, CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-            RenderPass renderpass = dataholder.currentPass;
-
-            VRData.VRDevicePose eye = dataholder.vrPlayer.getVRDataWorld().getEye(renderpass);
-            this.setPosition(eye.getPosition());
-            // we cannot set the rotation to the full matrix, because particles would rotate with the head
-            // instead of being world up oriented
-            this.setRotation(eye.getYaw(), -eye.getPitch());
-
-            if (ClientDataHolderVR.getInstance().isFirstPass || ShadersHelper.isSlowMode()) {
-                ShadersHelper.SHADOW_CAMERA_POSITION = this.position;
-            }
-
-            // no detaching in VR please
-            this.detached = false;
+            this.vivecraft$setupVRCamera();
             ci.cancel();
         }
+    }
+
+    @Unique
+    private void vivecraft$setupVRCamera() {
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        RenderPass renderpass = dataholder.currentPass;
+
+        VRData.VRDevicePose eye = dataholder.vrPlayer.getVRDataWorld().getEye(renderpass);
+        this.setPosition(eye.getPosition());
+        // we cannot set the rotation to the full matrix, because particles would rotate with the head
+        // instead of being world up oriented
+        this.setRotation(eye.getYaw(), -eye.getPitch());
+
+        if (ClientDataHolderVR.getInstance().isFirstPass || ShadersHelper.isSlowMode()) {
+            ShadersHelper.SHADOW_CAMERA_POSITION = this.position;
+        }
+
+        // no detaching in VR please
+        this.detached = false;
     }
 
     @Inject(method = "getViewRotationMatrix", at = @At("HEAD"), cancellable = true)
