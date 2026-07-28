@@ -26,7 +26,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.QuaternionfHistory;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.Vector3fHistory;
-import org.vivecraft.client_vr.extensions.GuiExtension;
+import org.vivecraft.client_vr.extensions.HudExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -1007,8 +1007,8 @@ public abstract class MCVR {
 
         // player list
         if (MOD.keyTogglePlayerList.consumeClick()) {
-            ((GuiExtension) this.mc.gui).vivecraft$setShowPlayerList(
-                !((GuiExtension) this.mc.gui).vivecraft$getShowPlayerList());
+            ((HudExtension) this.mc.gui.hud).vivecraft$setShowPlayerList(
+                !((HudExtension) this.mc.gui.hud).vivecraft$getShowPlayerList());
         }
 
         // screenshot cam

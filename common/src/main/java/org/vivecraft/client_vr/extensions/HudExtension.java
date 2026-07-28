@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.extensions;
 
-public interface GuiExtension {
+public interface HudExtension {
 
     /**
      * @return if the player list should always be shown

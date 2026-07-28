@@ -26,11 +26,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.GuiExtension;
+import org.vivecraft.client_vr.extensions.HudExtension;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(Hud.class)
-public abstract class HudVRMixin implements GuiExtension {
+public abstract class HudVRMixin implements HudExtension {
 
     @Unique
     public boolean vivecraft$showPlayerList;
