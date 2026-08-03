@@ -216,7 +216,7 @@ public abstract class GameRendererVRMixin
                 // we still need the camera setup outside a level
                 this.mainCamera.extractRenderState(this.gameRenderState.levelRenderState.cameraRenderState, 0);
             }
-            return shouldRenderLevel && this.vivecraft$shouldDrawGui;
+            return this.vivecraft$shouldDrawGui && this.minecraft.isGameLoadFinished() && this.minecraft.level != null;
         }
     }
 
