@@ -771,6 +771,8 @@ public abstract class VRRenderer {
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
                     Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()))
                 .withClearColor(0F, 0F, 0F, 1F)
+                // we don't need the depth, but some mods expect it
+                .withDepth()
                 .build();
 
             GuiHandler.updateResolution();
