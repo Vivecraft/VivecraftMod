@@ -10,8 +10,8 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 
 public abstract class TwoHandedScreen extends Screen {

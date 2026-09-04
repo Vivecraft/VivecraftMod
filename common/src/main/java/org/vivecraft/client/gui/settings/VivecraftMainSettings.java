@@ -44,6 +44,8 @@ public class VivecraftMainSettings extends GuiListScreen {
 
         entries.add(new SettingsList.ScreenEntry("vivecraft.options.screen.debug", GuiDebugSettings::new));
 
+        entries.add(new SettingsList.ScreenEntry("vivecraft.options.screen.bindings", GuiBindings::new));
+
         return entries;
     }
 }

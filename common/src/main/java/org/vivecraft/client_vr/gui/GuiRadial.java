@@ -9,7 +9,7 @@ import org.vivecraft.client.gui.framework.screens.TwoHandedScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
+import org.vivecraft.client_vr.provider.control.InputAction;
 
 import java.util.Arrays;
 
@@ -40,7 +40,7 @@ public class GuiRadial extends TwoHandedScreen {
                 .filter(keymapping -> keymapping.getName().equalsIgnoreCase(current))
                 .findFirst()
                 .ifPresent(keymapping -> {
-                    VRInputAction vrinputaction = MCVR.get().getInputAction(this.arr[index]);
+                    InputAction vrinputaction = MCVR.get().getInputAction(this.arr[index]);
                     String label = I18n.get(keymapping.getName());
                     if (vrinputaction != null &&
                         (vrinputaction.keyBinding.isDown() || MethodHolder.isKeyDown(vrinputaction.keyBinding.key)))

@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.provider;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -52,13 +53,18 @@ import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 public abstract class VRRenderer {
+
     // projection matrices
     public Matrix4f[] eyeProj = new Matrix4f[2];
     public Matrix4f[] eyeReverseProj = new Matrix4f[2];
     protected float lastFarClip = 0F;
     protected float lastReverseFarClip = 0F;
+    protected boolean projectionInvalid = true;
+    protected boolean reverseProjectionInvalid = true;
 
     // render buffers
+    protected boolean eyeFramebuffersCreated = false;
+
     public final VRTextureTarget[] framebufferEye = new VRTextureTarget[2];
     public RenderTarget framebufferMR;
     public RenderTarget framebufferUndistorted;
@@ -114,7 +120,20 @@ public abstract class VRRenderer {
      * @param width  width of the texture
      * @param height height of the texture
      */
-    public abstract void createRenderTexture(int width, int height);
+    public void createRenderTexture(int width, int height) {
+        String error = "";
+        // generate eye textures
+        for (int i = 0; i < 2; i++) {
+            this.framebufferEye[i] = VRTextureTarget.builder((i == 0 ? "L" : "R") + " Eye")
+                .withSize(width, height)
+                .withFormat(GpuFormat.RGBA8_UNORM)
+                .build();
+            VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferEye[i]);
+            error += GraphicsHelper.INSTANCE.checkError((i == 0 ? "Left" : "Right") + " Eye framebuffer setup");
+        }
+
+        this.lastError = error;
+    }
 
     /**
      * gets the cached projection matrix if the farClip distance matches with the last, else gets a new one from the VR runtime
@@ -125,8 +144,9 @@ public abstract class VRRenderer {
      * @return the projection matrix
      */
     public Matrix4f getCachedProjectionMatrix(int eyeType, float nearClip, float farClip) {
-        if (farClip != this.lastFarClip) {
+        if (farClip != this.lastFarClip || this.projectionInvalid) {
             this.lastFarClip = farClip;
+            this.projectionInvalid = false;
             // fetch both at the same time to make sure they use the same clip planes
             this.eyeProj[0] = this.getProjectionMatrix(0, nearClip, farClip);
             this.eyeProj[1] = this.getProjectionMatrix(1, nearClip, farClip);
@@ -144,8 +164,9 @@ public abstract class VRRenderer {
      * @return the reversed projection matrix
      */
     public Matrix4f getCachedReverseProjectionMatrix(int eyeType, float nearClip, float farClip) {
-        if (farClip != this.lastReverseFarClip) {
+        if (farClip != this.lastReverseFarClip || this.reverseProjectionInvalid) {
             this.lastReverseFarClip = farClip;
+            this.reverseProjectionInvalid = false;
             // fetch both at the same time to make sure they use the same clip planes
             this.eyeReverseProj[0] = this.getProjectionMatrix(0, farClip, nearClip);
             this.eyeReverseProj[1] = this.getProjectionMatrix(1, farClip, nearClip);
@@ -163,6 +184,14 @@ public abstract class VRRenderer {
      * @return the projection matrix
      */
     protected abstract Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip);
+
+    /**
+     * invalidates the cached projection matrices, so that they are recreated on the next fetch
+     */
+    public void invalidateProjectionMatrix() {
+        this.projectionInvalid = true;
+        this.reverseProjectionInvalid = true;
+    }
 
     /**
      * this is the last thing to call after all passes are rendered.
@@ -595,7 +624,7 @@ public abstract class VRRenderer {
      * @throws RenderConfigException in case something failed to initialize or the gpu vendor is unsupported
      * @throws IOException           can be thrown by the WorldRenderPass init when trying to load the shaders
      */
-    public void setupRenderConfiguration() throws RenderConfigException, IOException {
+    public void setupRenderConfiguration(boolean render) throws RenderConfigException, IOException {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
@@ -711,17 +740,19 @@ public abstract class VRRenderer {
 
             destroyBuffers();
 
-            this.createRenderTexture(eyew, eyeh);
+            if (!this.eyeFramebuffersCreated) {
+                VRSettings.LOGGER.info("Vivecraft: VR Provider supplied texture resolution: {} x {}", eyew, eyeh);
+                this.createRenderTexture(eyew, eyeh);
 
-            if (this.framebufferEye[0] == null || this.framebufferEye[1] == null) {
-                throw new RenderConfigException(
-                    Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
-                    Component.literal(this.getLastError()));
+                if (!this.getLastError().isEmpty()) {
+                    throw new RenderConfigException(
+                        Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
+                        Component.literal(this.getLastError()));
+                }
+                this.eyeFramebuffersCreated = true;
+
+                GraphicsHelper.INSTANCE.checkError("Render Texture setup");
             }
-
-            VRSettings.LOGGER.info("Vivecraft: VR Provider supplied texture resolution: {} x {}", eyew, eyeh);
-
-            GraphicsHelper.INSTANCE.checkError("Render Texture setup");
 
             float resolutionScale =
                 ResolutionControlHelper.isLoaded() ? ResolutionControlHelper.getCurrentScaleFactor() : 1.0F;
@@ -1046,13 +1077,6 @@ public abstract class VRRenderer {
             this.fsaaLastPassResultFBO = null;
         }
 
-        for (int i = 0; i < 2; i++) {
-            if (this.framebufferEye[i] != null) {
-                this.framebufferEye[i].destroyBuffers();
-                this.framebufferEye[i] = null;
-            }
-        }
-
         if (this.mirrorFramebuffer != null) {
             this.mirrorFramebuffer.destroyBuffers();
             this.mirrorFramebuffer = null;
@@ -1065,13 +1089,19 @@ public abstract class VRRenderer {
     public void destroy() {
         destroyBuffers();
         this.stencilProjectionMatrix.close();
-        if (this.bakedHiddenMesh[0] != null) {
-            this.bakedHiddenMesh[0].close();
-            this.bakedHiddenMesh[0] = null;
+
+        for (int i = 0; i < 2; i++) {
+            if (this.bakedHiddenMesh[i] != null) {
+                this.bakedHiddenMesh[i].close();
+                this.bakedHiddenMesh[i] = null;
+            }
         }
-        if (this.bakedHiddenMesh[1] != null) {
-            this.bakedHiddenMesh[1].close();
-            this.bakedHiddenMesh[1] = null;
+
+        for (int i = 0; i < 2; i++) {
+            if (this.framebufferEye[i] != null) {
+                this.framebufferEye[i].destroyBuffers();
+                this.framebufferEye[i] = null;
+            }
         }
     }
 }

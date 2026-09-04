@@ -22,7 +22,7 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.packet.c2s.ClimbingPayloadC2S;
 import org.vivecraft.common.network.packet.c2s.JumpingPayloadC2S;

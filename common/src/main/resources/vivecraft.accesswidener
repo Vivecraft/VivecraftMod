@@ -48,10 +48,12 @@ accessible method net/minecraft/client/KeyMapping release ()V
 accessible method net/minecraft/client/ToggleKeyMapping release ()V
 accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
 
-# to create custom GL textures
-accessible method com/mojang/blaze3d/opengl/GlTexture <init> (ILjava/lang/String;Lcom/mojang/blaze3d/GpuFormat;IIIIILcom/mojang/blaze3d/opengl/FrameBufferCache;)V
+# to identify graphics api
 accessible class com/mojang/blaze3d/opengl/GlDevice
 accessible field com/mojang/blaze3d/systems/GpuDevice backend Lcom/mojang/blaze3d/systems/GpuDeviceBackend;
+
+# to create vulkan images
+accessible method com/mojang/blaze3d/vulkan/VulkanCommandEncoder textureInitCommandBuffer ()Lorg/lwjgl/vulkan/VkCommandBuffer;
 
 # to render vr hands
 accessible method net/minecraft/client/renderer/ItemInHandRenderer submitArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
