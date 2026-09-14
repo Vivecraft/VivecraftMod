@@ -35,10 +35,10 @@ subprojects {
         implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
 
         // for OSC tracker support
-        implementation("com.illposed.osc:javaosc-core:0.9")
+        implementation("com.illposed.osc:javaosc-core:0.9") { transitive = false }
 
         // bHaptics Integration
-        implementation("com.github.bhaptics:tact-java:0.1.4")
+        implementation("com.github.bhaptics:tact-java:0.1.4") { transitive = false }
 
         // for potential vulkan support
         compileOnly("org.lwjgl:lwjgl-vulkan:${rootProject.lwjgl_version}") { transitive = false }
