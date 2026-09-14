@@ -150,6 +150,7 @@ public class VRShaders {
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/panorama"))
         .withVertexShader("core/panorama")
         .withFragmentShader("core/panorama")
+        .withBindGroupLayout(BindGroupLayouts.GLOBALS)
         .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
         .withBindGroupLayout(CORE_TEXTURE_LAYOUT)
         .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
