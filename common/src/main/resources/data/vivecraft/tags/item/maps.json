@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
+    {
+      "id": "alexscaves:cave_map",
+      "required": false
+    },
     "minecraft:filled_map"
   ]
 }

@@ -50,6 +50,7 @@ import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.data.ViveItems;
+import org.vivecraft.mod_compat_vr.alexcaves.AlexCavesHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
@@ -281,7 +282,11 @@ public abstract class ItemInHandRendererVRMixin {
             }
 
             if (transformType == VivecraftItemRendering.VivecraftItemTransformType.MAP) {
-                this.renderMap(poseStack, collector, combinedLight, itemStack);
+                if (AlexCavesHelper.isLoaded() && AlexCavesHelper.isCaveMap(itemStack)) {
+                    AlexCavesHelper.renderCaveMap(poseStack, collector, combinedLight, itemStack);
+                } else {
+                    this.renderMap(poseStack, collector, combinedLight, itemStack);
+                }
             } else if (transformType == VivecraftItemRendering.VivecraftItemTransformType.TELESCOPE) {
                 if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
                     poseStack.pushPose();

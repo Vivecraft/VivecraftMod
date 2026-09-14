@@ -5,6 +5,14 @@
       "id": "#pokecube:pokecubes",
       "required": false
     },
+    {
+      "id": "alexscaves:ortholance",
+      "required": false
+    },
+    {
+      "id": "alexscaves:magic_conch",
+      "required": false
+    },
 
     "#vivecraft:moditems/irons_spellbooks",
     "#vivecraft:moditems/mna_spells",
