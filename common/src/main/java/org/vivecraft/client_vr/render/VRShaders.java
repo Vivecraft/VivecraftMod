@@ -184,8 +184,6 @@ public class VRShaders {
         .withColorTargetState(new ColorTargetState(new BlendFunction(BlendFactor.ONE_MINUS_DST_COLOR, BlendFactor.ZERO,
             BlendFactor.ONE, BlendFactor.ONE_MINUS_SRC_ALPHA))).build();
 
-    // all those NO_DEPTH_TEST should be ALWAYS_DEPTH_TEST, to also be able to write depth
-    // but 1.21.5 doesn't have that
     public static final RenderPipeline CROSSHAIR_WORLD_ALWAYS = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/crosshair_world_always_vr"))
         .withColorTargetState(new ColorTargetState(new BlendFunction(BlendFactor.ONE_MINUS_DST_COLOR, BlendFactor.ZERO,
