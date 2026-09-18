@@ -13,7 +13,7 @@ import org.vivecraft.server.ServerVRPlayers;
 
 import javax.annotation.Nullable;
 
-@Mixin(targets = "net.minecraft.world.entity.monster.EnderMan$EndermanFreezeWhenLookedAt")
+@Mixin(targets = "net.minecraft.world.entity.monster.Enderman$EndermanFreezeWhenLookedAt")
 public class EndermanFreezeWhenLookedAtMixin {
 
     @Shadow

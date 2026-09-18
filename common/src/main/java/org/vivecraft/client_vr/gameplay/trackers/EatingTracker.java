@@ -118,8 +118,7 @@ public class EatingTracker implements ItemInUseTracker, DebugRenderTracker {
                     if (this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND)
                         .consumesAction())
                     {
-                        this.mc.gameRenderer.itemInHandRenderer.itemUsed(
-                            c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+                        player.itemUsed(c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                         this.eating[c] = true;
                         this.eatStart = Util.getMillis();
                     }

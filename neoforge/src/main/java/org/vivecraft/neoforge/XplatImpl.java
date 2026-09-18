@@ -12,7 +12,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLKeycode;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.Xplat;
 import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
 import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
@@ -60,9 +61,9 @@ public class XplatImpl implements Xplat {
     @Override
     public int getKeyModifier(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
-            case SHIFT -> GLFW.GLFW_MOD_SHIFT;
-            case ALT -> GLFW.GLFW_MOD_ALT;
-            case CONTROL -> GLFW.GLFW_MOD_CONTROL;
+            case SHIFT -> SDLKeycode.SDL_KMOD_LSHIFT;
+            case ALT -> SDLKeycode.SDL_KMOD_RALT;
+            case CONTROL -> SDLKeycode.SDL_KMOD_LCTRL;
             default -> 0;
         };
     }
@@ -70,9 +71,9 @@ public class XplatImpl implements Xplat {
     @Override
     public int getKeyModifierKey(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
-            case SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT;
-            case ALT -> GLFW.GLFW_KEY_RIGHT_ALT;
-            case CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL;
+            case SHIFT -> SDLScancode.SDL_SCANCODE_LSHIFT;
+            case ALT -> SDLScancode.SDL_SCANCODE_RALT;
+            case CONTROL -> SDLScancode.SDL_SCANCODE_LCTRL;
             default -> -1;
         };
     }

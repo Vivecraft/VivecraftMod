@@ -7,6 +7,7 @@ import net.minecraft.client.model.effects.SpearAnimations;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
@@ -16,17 +17,18 @@ import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.KineticWeapon;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.BaseTorchBlock;
 import net.minecraft.world.level.block.Block;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.client.extensions.FirstPersonHandsAndItemsStateExtension;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.BlockModelWrapperExtension;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_vr.render.renderstates.FirstPersonHandsAdditions;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ViveItemTags;
 import org.vivecraft.data.ViveItems;
@@ -118,7 +120,7 @@ public class VivecraftItemRendering {
      * @param poseStack         PoseStack to modify
      * @param itemTransformType itemTransformType of the item
      * @param mainHand          if the item is in the main hand or not
-     * @param player            Player holding the item
+     * @param playerState       state of the Player holding the item
      * @param equippedProgress  equip progress of the item
      * @param partialTick       current partial tick
      * @param itemStack         ItemStack the player is holding
@@ -126,7 +128,7 @@ public class VivecraftItemRendering {
      */
     public static void applyThirdPersonItemTransforms(
         PoseStack poseStack, VivecraftItemTransformType itemTransformType, boolean mainHand,
-        AbstractClientPlayer player, float equippedProgress, float partialTick, ItemStack itemStack,
+        PlayerRenderState playerState, float equippedProgress, float partialTick, ItemStack itemStack,
         InteractionHand hand)
     {
         // TODO make this work with stuff by default
@@ -155,7 +157,7 @@ public class VivecraftItemRendering {
      * @param poseStack         PoseStack to modify
      * @param itemTransformType itemTransformType of the item
      * @param mainHand          if the item is in the main hand or not
-     * @param player            Player holding the item
+     * @param playerState       state of the Player holding the item
      * @param equippedProgress  equip progress of the item
      * @param partialTick       current partial tick
      * @param itemStack         ItemStack the player is holding
@@ -163,10 +165,11 @@ public class VivecraftItemRendering {
      */
     public static void applyFirstPersonItemTransforms(
         PoseStack poseStack, VivecraftItemTransformType itemTransformType, boolean mainHand,
-        AbstractClientPlayer player, float equippedProgress, float partialTick, ItemStack itemStack,
+        PlayerRenderState playerState, float equippedProgress, float partialTick, ItemStack itemStack,
         InteractionHand hand)
     {
 
+        FirstPersonHandsAdditions playerAdditions = ((FirstPersonHandsAndItemsStateExtension) playerState.firstPersonHandsAndItems).vivecraft$getAdditions();
         float gunAngle = DH.vr.getGunAngle();
 
         // defaults
@@ -253,7 +256,7 @@ public class VivecraftItemRendering {
                 rotation.mul(Axis.XP.rotationDegrees(-135.0F));
                 translateX += 0.08F;
                 // eating jitter
-                translateZ += 0.02F + 0.006F * Mth.sin(player.getUseItemRemainingTicks());
+                translateZ += 0.02F + 0.006F * Mth.sin(playerAdditions.useItemRemainingTicks);
                 scale = 0.4F;
             }
             case ITEM, BLOCK_ITEM -> {
@@ -306,7 +309,9 @@ public class VivecraftItemRendering {
 
                 translateZ += 0.1F;
 
-                if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
+                if (playerState.avatarRenderState.isUsingItem && playerAdditions.useItemRemainingTicks > 0 &&
+                    playerState.avatarRenderState.useItemHand == hand)
+                {
                     rotation.mul(Axis.XP.rotationDegrees(side * 5F));
                     rotation.mul(Axis.ZP.rotationDegrees(-5F));
 
@@ -321,14 +326,14 @@ public class VivecraftItemRendering {
                     }
 
                     // use shield animation
-                    if (player.isBlocking()) {
+                    if (((FirstPersonHandsAndItemsStateExtension) playerState.firstPersonHandsAndItems).vivecraft$getAdditions().isBlocking) {
                         rotation.mul(Axis.YP.rotationDegrees(side * 90.0F));
                     } else {
                         rotation.mul(Axis.YP.rotationDegrees((1.0F - equippedProgress) * side * 90.0F));
                     }
                 }
                 rotation.mul(Axis.YP.rotationDegrees(side * -90.0F));
-                if (player.getCooldowns().isOnCooldown(itemStack)) {
+                if (playerAdditions.isCooldown(mainHand)) {
                     rotation.mul(Axis.ZP.rotationDegrees(side * 10.0F));
                     translateY -= 0.0055F;
                     translateZ -= 0.035F;
@@ -344,21 +349,24 @@ public class VivecraftItemRendering {
                 boolean charging = false;
                 float riptideLevel = 0;
 
-                if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
+                if (playerState.avatarRenderState.isUsingItem && playerAdditions.useItemRemainingTicks > 0 &&
+                    playerState.avatarRenderState.useItemHand == hand)
+                {
                     charging = true;
-                    riptideLevel = EnchantmentHelper.getTridentSpinAttackStrength(itemStack, player);
+                    riptideLevel = playerAdditions.getRiptideLevel(mainHand);
 
-                    if (riptideLevel <= 0 || player.isInWaterOrRain()) {
+                    if (riptideLevel <= 0 || playerAdditions.isInWaterOrRain) {
                         progress =
-                            itemStack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTick + 1.0F);
+                            playerAdditions.getItemUseDuration(mainHand) -
+                                (playerAdditions.useItemRemainingTicks - partialTick + 1.0F);
 
                         if (progress > TridentItem.THROW_THRESHOLD_TIME) {
                             float rotationProgress = progress - TridentItem.THROW_THRESHOLD_TIME;
                             progress = TridentItem.THROW_THRESHOLD_TIME;
 
-                            if (riptideLevel > 0 && player.isInWaterOrRain()) {
+                            if (riptideLevel > 0 && playerAdditions.isInWaterOrRain) {
                                 // rotation when charged, use item use, to start at 0
-                                poseStack.mulPose(Axis.ZP.rotationDegrees(-rotationProgress * 10.0F * riptideLevel));
+                                poseStack.rotate(Axis.ZP.rotationDegrees(-rotationProgress * 10.0F * riptideLevel));
                             }
 
                             // every 4 frames at 90fps equals every 44ms
@@ -374,10 +382,10 @@ public class VivecraftItemRendering {
                     }
                 }
 
-                if (player.isAutoSpinAttack()) {
+                if (playerState.avatarRenderState.isAutoSpinAttack) {
                     riptideLevel = 5;
                     translateZ -= 0.15F;
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(
+                    poseStack.rotate(Axis.ZP.rotationDegrees(
                         (-DH.tickCounter * 10 * riptideLevel) % 360 - partialTick * 10.0F * riptideLevel));
                     charging = true;
                 }
@@ -433,8 +441,9 @@ public class VivecraftItemRendering {
 
                     // copied from SpearAnimations.firstPersonUse, without  the sway translation and adjusted for the gun angle
                     float timeHeld =
-                        itemStack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTick + 1.0F);
-                    float tickSinceLastHit = player.getTicksSinceLastKineticHitFeedback(partialTick);
+                        playerAdditions.getItemUseDuration(mainHand) -
+                            (playerAdditions.useItemRemainingTicks - partialTick + 1.0F);
+                    float tickSinceLastHit = playerAdditions.ticksSinceLastKineticHitFeedback;
 
                     SpearAnimations.UseParams params = SpearAnimations.UseParams.fromKineticWeapon(kineticWeapon,
                         timeHeld);
@@ -456,7 +465,7 @@ public class VivecraftItemRendering {
                         0.15F, 0.0F, 0.0F);
 
                     // cancel item rotation
-                    poseStack.mulPose(Axis.XP.rotationDegrees(10));
+                    poseStack.rotate(Axis.XP.rotationDegrees(10));
 
                     // move back when hitting
                     poseStack.translate(0.0F, -SpearAnimations.hitFeedbackAmount(tickSinceLastHit) * 0.2F, 0.0F);
@@ -469,9 +478,9 @@ public class VivecraftItemRendering {
             default -> {}
         }
 
-        poseStack.mulPose(preRotation);
+        poseStack.rotate(preRotation);
         poseStack.translate(translateX, translateY, translateZ);
-        poseStack.mulPose(rotation);
+        poseStack.rotate(rotation);
         poseStack.scale(scale, scale, scale);
     }
 

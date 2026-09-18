@@ -11,7 +11,6 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -78,7 +77,7 @@ public class GuiStringListEditorScreen extends GuiListEditorScreen<String> {
         @Override
         public boolean keyPressed(KeyEvent keyEvent) {
             // allow to navigate off the edit box
-            if (this.getFocused() == this.editBox && keyEvent.key() == GLFW.GLFW_KEY_RIGHT &&
+            if (this.getFocused() == this.editBox && keyEvent.isRight() &&
                 this.editBox.getValue().length() == this.editBox.getCursorPosition())
             {
                 return false;

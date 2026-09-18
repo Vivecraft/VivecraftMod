@@ -1,9 +1,9 @@
 package org.vivecraft;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.Camera;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface Xevents {
@@ -13,31 +13,44 @@ public interface Xevents {
     /**
      * checks if someone wants to cancel the in block overlay
      *
-     * @param player     Player to check for
-     * @param poseStack  PoseStack used for rendering
-     * @param blockState blockState of the block the camera is in
-     * @param blockPos   position of the block the camera is in
+     * @param player            Player to check for
+     * @param playerRenderState PlayerRenderState of the player
+     * @param blockState        blockState of the block the camera is in
+     * @param blockPos          position of the block the camera is in
+     * @param camera            Camera object
+     * @param worldPartialTick  partial tick of the world
+     * @param playerPartialTick partial tick of the player, in case it is frozen
      * @return true if the rendering was canceled
      */
-    boolean renderBlockOverlay(
-        Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos,
-        SubmitNodeCollector submitNodeCollector);
+    boolean extractBlockOverlay(
+        LocalPlayer player, PlayerRenderState playerRenderState, BlockState blockState, BlockPos blockPos,
+        Camera camera, float worldPartialTick, float playerPartialTick);
 
     /**
      * checks if someone wants to cancel the water overlay
      *
-     * @param player    Player to check for
-     * @param poseStack PoseStack used for rendering
+     * @param player            Player to check for
+     * @param playerRenderState PlayerRenderState of the player
+     * @param camera            Camera object
+     * @param worldPartialTick  partial tick of the world
+     * @param playerPartialTick partial tick of the player, in case it is frozen
      * @return true if the rendering was canceled
      */
-    boolean renderWaterOverlay(Player player, PoseStack poseStack, SubmitNodeCollector submitNodeCollector);
+    boolean extractWaterOverlay(
+        LocalPlayer player, PlayerRenderState playerRenderState, Camera camera, float worldPartialTick,
+        float playerPartialTick);
 
     /**
      * checks if someone wants to cancel the fire overlay
      *
-     * @param player    Player to check for
-     * @param poseStack PoseStack used for rendering
+     * @param player            Player to check for
+     * @param playerRenderState PlayerRenderState of the player
+     * @param camera            Camera object
+     * @param worldPartialTick  partial tick of the world
+     * @param playerPartialTick partial tick of the player, in case it is frozen
      * @return true if the rendering was canceled
      */
-    boolean renderFireOverlay(Player player, PoseStack poseStack, SubmitNodeCollector submitNodeCollector);
+    boolean extractFireOverlay(
+        LocalPlayer player, PlayerRenderState playerRenderState, Camera camera, float worldPartialTick,
+        float playerPartialTick);
 }

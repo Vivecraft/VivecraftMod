@@ -157,6 +157,13 @@ public abstract class CameraVRMixin {
         }
     }
 
+    @Inject(method = "getCameraEntityPartialTicks", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$mainMenuPartialTicks(DeltaTracker deltaTracker, CallbackInfoReturnable<Float> cir) {
+        if (this.level == null) {
+            cir.setReturnValue(deltaTracker.getGameTimeDeltaPartialTick(true));
+        }
+    }
+
     @WrapOperation(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
     private boolean vivecraft$nullcheck(LocalPlayer instance, Operation<Boolean> original) {
         return instance != null && original.call(instance);
@@ -176,7 +183,7 @@ public abstract class CameraVRMixin {
             }
             return dest;
         } else {
-            if (IrisHelper.isLoaded() && IrisHelper.isShaderActive()) {
+            if (IrisHelper.isLoaded() && IrisHelper.isShaderActive() && IrisHelper.isRegularDepth()) {
                 return dest.set(dataHolder.vrRenderer.getCachedProjectionMatrix(dataHolder.currentPass.ordinal(),
                     this.projection.zNear(), this.projection.zFar()));
             } else {

@@ -1,10 +1,10 @@
 package org.vivecraft.client_vr;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -34,14 +34,16 @@ public class MultiPassTextureTarget extends TextureTarget {
 
     private final TextureTarget vanilla;
 
-    public MultiPassTextureTarget(String name, int width, int height, boolean useDepth, GpuFormat format) {
-        super(name, width, height, useDepth, format);
+    public MultiPassTextureTarget(
+        String name, int width, int height, GpuFormat format, @Nullable GpuFormat depthFormat)
+    {
+        super(name, width, height, format, depthFormat);
         super.destroyBuffers();
 
         this.vrTargets = new EnumMap<>(RenderPass.class);
 
         this.isVanilla = true;
-        this.vanilla = new TextureTarget(name, width, height, useDepth, format);
+        this.vanilla = new TextureTarget(name, width, height, format, depthFormat);
         this.isVanilla = false;
 
         for (RenderPass pass : RenderPass.values()) {
@@ -50,7 +52,7 @@ public class MultiPassTextureTarget extends TextureTarget {
             // we always need all targets, use the vanilla size if the worldpass doesn't exists
             RenderTarget original = worldPass == null ? this.vanilla : worldPass.target;
             this.vrTargets.put(pass,
-                new TextureTarget(name + " " + pass, original.width, original.height, useDepth, format));
+                new TextureTarget(name + " " + pass, original.width, original.height, format, depthFormat));
         }
         // set vanilla as default
         setLast(this.vanilla);
@@ -144,6 +146,23 @@ public class MultiPassTextureTarget extends TextureTarget {
             return super.getDepthTextureView();
         }
         return callOnTargetRet(RenderTarget::getDepthTextureView);
+    }
+
+    @Override
+    public void copyColorFrom(RenderTarget source) {
+        if (this.vrTargets == null) {
+            super.copyColorFrom(source);
+            return;
+        }
+        callOnTarget(r -> r.copyColorFrom(source));
+    }
+
+    @Override
+    public boolean hasDepth() {
+        if (this.vrTargets == null) {
+            return super.hasDepth();
+        }
+        return callOnTargetRet(RenderTarget::hasDepth);
     }
 
     private void callOnAllTargets(Consumer<TextureTarget> consumer) {

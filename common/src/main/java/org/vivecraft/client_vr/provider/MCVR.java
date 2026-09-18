@@ -14,7 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.TorchBlock;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.api.data.VRBodyPart;
@@ -678,7 +679,7 @@ public abstract class MCVR {
                     );
 
                 InputSimulator.setMousePos(screenX, screenY);
-                GLFW.glfwSetCursorPos(this.mc.getWindow().handle(), screenX, screenY);
+                SDLMouse.SDL_WarpMouseInWindow(this.mc.getWindow().handle(), (float) screenX, (float) screenY);
 
                 if (this.dh.vrSettings.aimDevice == VRSettings.AimDevice.CONTROLLER) {
                     temp.rotationY(Mth.DEG_TO_RAD * (-180.0F - hPos - this.hmdForwardYaw));
@@ -998,8 +999,8 @@ public abstract class MCVR {
         if (MOD.keyMenuButton.consumeClick()) {
             // handle menu directly
             if (gui || !this.dh.kiosk) {
-                InputSimulator.pressKey(GLFW.GLFW_KEY_ESCAPE);
-                InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
+                InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_ESCAPE);
+                InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_ESCAPE);
             }
 
             KeyboardHandler.hideOverlay(CloseKeyboardContext.FORCE);
@@ -1286,13 +1287,13 @@ public abstract class MCVR {
     /**
      * handles any keyboard inputs that are specific to this MCVR implementation
      *
-     * @param key       GLFW key that is handled
-     * @param scanCode  scanCode of the handled key
+     * @param key       SDL scancode that is handled
+     * @param keyCode   SDL KeyCode of the handled key
      * @param action    if the key was pressed, released or repeated
      * @param modifiers key modifiers that are active
      * @return true if a key was handled
      */
-    public boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
+    public boolean handleKeyboardInputs(int key, int keyCode, int action, int modifiers) {
         return false;
     }
 

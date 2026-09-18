@@ -1,19 +1,20 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 
-in vec2 centerTextureCoordinate;
-in vec2 oneStepLeftTextureCoordinate;
-in vec2 twoStepsLeftTextureCoordinate;
-in vec2 threeStepsLeftTextureCoordinate;
-in vec2 fourStepsLeftTextureCoordinate;
-in vec2 oneStepRightTextureCoordinate;
-in vec2 twoStepsRightTextureCoordinate;
-in vec2 threeStepsRightTextureCoordinate;
-in vec2 fourStepsRightTextureCoordinate;
+layout(location = 0) in vec2 centerTextureCoordinate;
+layout(location = 1) in vec2 oneStepLeftTextureCoordinate;
+layout(location = 2) in vec2 twoStepsLeftTextureCoordinate;
+layout(location = 3) in vec2 threeStepsLeftTextureCoordinate;
+layout(location = 4) in vec2 fourStepsLeftTextureCoordinate;
+layout(location = 5) in vec2 oneStepRightTextureCoordinate;
+layout(location = 6) in vec2 twoStepsRightTextureCoordinate;
+layout(location = 7) in vec2 threeStepsRightTextureCoordinate;
+layout(location = 8) in vec2 fourStepsRightTextureCoordinate;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 // sinc(x) * sinc(x/a) = (a * sin(pi * x) * sin(pi * x / a)) / (pi^2 * x^2)
 // Assuming a Lanczos constant of 2.0, and scaling values to max out at x = +/- 1.5

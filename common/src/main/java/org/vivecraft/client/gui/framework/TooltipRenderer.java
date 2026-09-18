@@ -45,12 +45,12 @@ public class TooltipRenderer {
             {
                 graphics.tooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
                         .map(ClientTooltipComponent::create).toList(), tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
-                    widgetY + widgetHeight + 14, DefaultTooltipPositioner.INSTANCE, null);
+                    widgetY + widgetHeight + 14, DefaultTooltipPositioner.INSTANCE, null, false);
             } else {
                 graphics.tooltip(mc.font, mc.font.split(Component.literal(tooltip), TOOLTIP_WIDTH).stream()
                         .map(ClientTooltipComponent::create).toList(), tooltipCenter - TOOLTIP_HALF_WIDTH - 12,
                     widgetY - formattedText.size() * (mc.font.lineHeight + 1) + 9, DefaultTooltipPositioner.INSTANCE,
-                    null);
+                    null, false);
             }
         }
     }

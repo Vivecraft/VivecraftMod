@@ -9,6 +9,8 @@ import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.UpdateChecker;
 
+import java.net.URI;
+
 
 public class UpdateScreen extends Screen {
 
@@ -27,14 +29,15 @@ public class UpdateScreen extends Screen {
 
         this.addRenderableWidget(
             new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("Modrinth")),
-                ConfirmLinkScreen.confirmLink(this, "https://modrinth.com/mod/vivecraft"))
+                ConfirmLinkScreen.confirmLink(this, URI.create("https://modrinth.com/mod/vivecraft")))
                 .pos(this.width / 2 - 155, this.height - 56)
                 .size(150, 20)
                 .build());
 
         this.addRenderableWidget(
             new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("CurseForge")),
-                ConfirmLinkScreen.confirmLink(this, "https://www.curseforge.com/minecraft/mc-mods/vivecraft"))
+                ConfirmLinkScreen.confirmLink(this,
+                    URI.create("https://www.curseforge.com/minecraft/mc-mods/vivecraft")))
                 .pos(this.width / 2 + 5, this.height - 56)
                 .size(150, 20)
                 .build());

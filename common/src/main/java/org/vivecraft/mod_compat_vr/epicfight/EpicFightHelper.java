@@ -45,7 +45,7 @@ public class EpicFightHelper {
                             InputSimulator.pressMouse(key.getValue());
                             InputSimulator.releaseMouse(key.getValue());
                         }
-                        case KEYSYM -> {
+                        case KEYBOARD -> {
                             InputSimulator.pressKey(key.getValue());
                             InputSimulator.releaseKey(key.getValue());
                         }

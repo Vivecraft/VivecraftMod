@@ -2,6 +2,7 @@ package org.vivecraft.mixin.world.item;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -29,12 +30,14 @@ public class ItemMixin {
     }
 
     @WrapOperation(method = "getPlayerPOVHitResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;calculateViewVector(FF)Lnet/minecraft/world/phys/Vec3;"))
-    private static Vec3 vivecraft$modifyAimDir(Player player, float xRot, float yRot, Operation<Vec3> original) {
+    private static Vec3 vivecraft$modifyAimDir(
+        float xRot, float yRot, Operation<Vec3> original, @Local(argsOnly = true) Player player)
+    {
         if (player instanceof ServerPlayer serverPlayer && ServerVRPlayers.isVRPlayer(serverPlayer)) {
             return ServerVRPlayers.getVivePlayer(serverPlayer).getAimDir(false);
         } else if (player.isLocalPlayer() && VRState.VR_RUNNING) {
             return new Vec3(ClientNetworking.getActiveAimDir());
         }
-        return original.call(player, xRot, yRot);
+        return original.call(xRot, yRot);
     }
 }

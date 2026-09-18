@@ -30,7 +30,7 @@ public class GuiFBTPlayerRenderer extends PictureInPictureRenderer<GuiFBTPlayerS
         poseStack.pushPose();
         poseStack.translate(-0.5, -32, 0);
         poseStack.scale(4, -4, 4);
-        poseStack.mulPose(Axis.YP.rotation(Mth.PI + fbtState.yRot()));
+        poseStack.rotate(Axis.YP.rotation(Mth.PI + fbtState.yRot()));
 
         // body overlay
         Vec3i color = fbtState.leftReady() && fbtState.rightReady() ? COLOR_ACTIVE : COLOR_INACTIVE;

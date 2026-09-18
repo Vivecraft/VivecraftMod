@@ -3,13 +3,13 @@ package org.vivecraft.mixin.world.entity.monster;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.vivecraft.server.ServerVRPlayers;
 
-@Mixin(EnderMan.class)
+@Mixin(Enderman.class)
 public abstract class EndermanMixin {
 
     @ModifyExpressionValue(method = "isBeingStaredBy", at = @At(value = "CONSTANT", args = "doubleValue=0.025"))

@@ -97,14 +97,14 @@ public class MouseHandlerVRMixin {
     }
 
     // we change the screen size different from window size, so need to modify the mouse position on grab/release
-    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(Lcom/mojang/blaze3d/platform/Window;IDD)V"), index = 2)
+    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabMouse(Lcom/mojang/blaze3d/platform/Window;DD)V"), index = 1)
     private double vivecraft$modifyXCenter(double x) {
         return VRState.VR_RUNNING
             ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenWidth() / 2
             : x;
     }
 
-    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(Lcom/mojang/blaze3d/platform/Window;IDD)V"), index = 3)
+    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;releaseMouse(Lcom/mojang/blaze3d/platform/Window;DD)V"), index = 2)
     private double vivecraft$modifyYCenter(double y) {
         return VRState.VR_RUNNING
             ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenHeight() / 2

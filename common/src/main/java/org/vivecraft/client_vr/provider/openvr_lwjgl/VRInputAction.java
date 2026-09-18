@@ -471,7 +471,7 @@ public class VRInputAction {
         if (key.getValue() != -1 &&
             (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.INSTANCE.hasKeyModifier(this.keyBinding)))
         {
-            if (key.getType() == InputConstants.Type.KEYSYM) {
+            if (key.getType() == InputConstants.Type.KEYBOARD) {
                 if (Xplat.INSTANCE.hasKeyModifier(this.keyBinding)) {
                     InputSimulator.pressModifier(Xplat.INSTANCE.getKeyModifierKey(this.keyBinding));
                 }
@@ -498,7 +498,7 @@ public class VRInputAction {
         if (key.getValue() != -1 &&
             (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.INSTANCE.hasKeyModifier(this.keyBinding)))
         {
-            if (key.getType() == InputConstants.Type.KEYSYM) {
+            if (key.getType() == InputConstants.Type.KEYBOARD) {
                 InputSimulator.releaseKey(key.getValue());
                 if (Xplat.INSTANCE.hasKeyModifier(this.keyBinding)) {
                     InputSimulator.releaseModifier(Xplat.INSTANCE.getKeyModifierKey(this.keyBinding));

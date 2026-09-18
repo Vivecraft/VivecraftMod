@@ -73,8 +73,8 @@ public abstract class WingsLayerMixin<S extends HumanoidRenderState, M extends E
             original.call(instance, this.vivecraft$tempV.x, -this.vivecraft$tempV.y, -this.vivecraft$tempV.z);
 
             // rotate elytra
-            instance.mulPose(Axis.XP.rotation(xRotation));
-            instance.mulPose(Axis.YP.rotation(yRotation));
+            instance.rotate(Axis.XP.rotation(xRotation));
+            instance.rotate(Axis.YP.rotation(yRotation));
         } else {
             original.call(instance, x, y, z);
         }

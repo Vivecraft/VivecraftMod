@@ -28,7 +28,7 @@ public class WeatherEffectRendererVRMixin {
         }
     }
 
-    @Inject(method = "renderInstances", at = @At("HEAD"))
+    @Inject(method = "prepareInstances", at = @At("HEAD"))
     private void vivecraft$centerPos(CallbackInfo ci, @Share("centerPos") LocalRef<Vec3> centerPos) {
         if (!RenderPassType.isVanilla() && (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT ||
             ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT
@@ -38,12 +38,12 @@ public class WeatherEffectRendererVRMixin {
         }
     }
 
-    @ModifyArg(method = "renderInstances", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0))
+    @ModifyArg(method = "prepareInstances", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0))
     private double vivecraft$centerPosZ(double z, @Share("centerPos") LocalRef<Vec3> centerPos) {
         return centerPos.get() != null ? centerPos.get().z : z;
     }
 
-    @ModifyArg(method = "renderInstances", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1))
+    @ModifyArg(method = "prepareInstances", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1))
     private double vivecraft$centerPosX(double x, @Share("centerPos") LocalRef<Vec3> centerPos) {
         return centerPos.get() != null ? centerPos.get().x : x;
     }

@@ -1,23 +1,25 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
+import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.state.GameRenderState;
+import net.minecraft.client.renderer.state.OptionsRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
@@ -113,6 +115,10 @@ public abstract class GameRendererVRMixin
     @Final
     private SubmitNodeStorage handAndScreenSubmitNodeStorage;
 
+    @Shadow
+    @Final
+    private FogRenderer fogRenderer;
+
     @Inject(method = "resize", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;resize(II)V"))
     private void vivecraft$restoreVanillaState(CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
@@ -150,23 +156,24 @@ public abstract class GameRendererVRMixin
         return RenderPassType.isVanilla();
     }
 
-    @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V"))
+    @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel()V"))
     private void vivecraft$renderFaceOverlay(
-        GameRenderer instance, DeltaTracker deltaTracker, Operation<Void> original)
+        GameRenderer instance, Operation<Void> original)
     {
-        original.call(instance, deltaTracker);
+        original.call(instance);
         VRRenderState vrState = this.vivecraft$getVRRenderState();
         if (!RenderPassType.isVanilla() && vrState.currentPass != RenderPass.THIRD &&
             vrState.currentPass != RenderPass.CAMERA)
         {
             VREffectsHelper.renderFaceOverlay(this.handAndScreenSubmitNodeStorage, this.featureRenderDispatcher,
-                this.gameRenderState.levelRenderState.cameraRenderState, vrState);
+                this.gameRenderState.levelRenderState.cameraRenderState,
+                this.gameRenderState.levelRenderState.playerRenderState, vrState);
         }
     }
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;effectActive:Z"))
-    private boolean vivecraft$noEffectInThird(boolean effectActive) {
-        return effectActive && this.vivecraft$getVRRenderState().currentPass != RenderPass.THIRD;
+    @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;applyPostEffects()V"))
+    private boolean vivecraft$noEffectInThird(GameRenderer instance) {
+        return this.vivecraft$getVRRenderState().currentPass != RenderPass.THIRD;
     }
 
     @Unique
@@ -186,16 +193,18 @@ public abstract class GameRendererVRMixin
         this.vivecraft$shouldDrawGui = shouldDrawGui;
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearDepthTexture(Lcom/mojang/blaze3d/textures/GpuTexture;D)V"), cancellable = true)
-    private void vivecraft$mainMenu(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/commands/CommandEncoder;clearDepthTexture(Lcom/mojang/renderpearl/api/textures/GpuTexture;D)V"), cancellable = true)
+    private void vivecraft$mainMenu(CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
         }
 
-        if (!renderLevel && this.vivecraft$shouldDrawScreen) {
+        if (!this.gameRenderState.shouldRenderLevel && this.vivecraft$shouldDrawScreen) {
+            // setup the fog for gui, since we skipped level rendering where this would happen
+            RenderSystem.setShaderFog(this.fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
             return;
         }
-        if (!renderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
+        if (!this.gameRenderState.shouldRenderLevel || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
             Profiler.get().push("MainMenu");
             GraphicsHelper.INSTANCE.setStencil(false);
             VREffectsHelper.renderMenuRoom(this.featureRenderDispatcher, this.handAndScreenSubmitNodeStorage,
@@ -208,13 +217,14 @@ public abstract class GameRendererVRMixin
     }
 
     @ModifyArg(method = "extract", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractRenderState(Lnet/minecraft/client/DeltaTracker;ZZ)V"), index = 1)
-    private boolean vivecraft$renderGui(boolean shouldRenderLevel) {
+    private boolean vivecraft$renderGui(boolean shouldRenderLevel, @Local(argsOnly = true) DeltaTracker deltaTracker) {
         if (RenderPassType.isVanilla()) {
             return shouldRenderLevel;
         } else {
             if (!shouldRenderLevel) {
                 // we still need the camera setup outside a level
-                this.mainCamera.extractRenderState(this.gameRenderState.levelRenderState.cameraRenderState, 0);
+                this.mainCamera.extractRenderState(this.gameRenderState.levelRenderState.cameraRenderState,
+                    deltaTracker);
             }
             return this.vivecraft$shouldDrawGui && this.minecraft.isGameLoadFinished() && this.minecraft.level != null;
         }
@@ -231,7 +241,7 @@ public abstract class GameRendererVRMixin
     private void vivecraft$extractVRState(CallbackInfo ci, @Local(ordinal = 0) float partialTick) {
         if (VRState.VR_RUNNING) {
             vivecraft$getVRRenderState().extract(this.minecraft.player, partialTick,
-                this.handAndScreenSubmitNodeStorage);
+                this.gameRenderState.levelRenderState.playerRenderState, this.mainCamera);
         }
     }
 
@@ -275,32 +285,25 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setProjectionMatrix(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/ProjectionType;)V"))
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setProjectionMatrix(Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/ProjectionType;)V"))
     private void vivecraft$undistortedProj(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             VRShaders.setUndistortedProj(this.gameRenderState.levelRenderState.cameraRenderState.projectionMatrix);
         }
     }
 
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearDepthTexture(Lcom/mojang/blaze3d/textures/GpuTexture;D)V"))
-    private boolean vivecraft$noDepthClearInVR(CommandEncoder instance, GpuTexture gpuTexture, double clearDepth) {
-        return RenderPassType.isVanilla();
-    }
-
-
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ScreenEffectRenderer;submit(ZZFLnet/minecraft/client/renderer/SubmitNodeCollector;Z)V"))
-    private boolean vivecraft$noScreenEffectsInVR(
-        ScreenEffectRenderer instance, boolean isFirstPerson, boolean isSleeping, float partialTicks,
-        SubmitNodeCollector submitNodeCollector, boolean hideGui)
+    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render3dHud(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/state/level/PlayerRenderState;Lnet/minecraft/client/renderer/state/OptionsRenderState;Z)V"))
+    private boolean vivecraft$noDepthClearInVR(
+        GameRenderer instance, CameraRenderState cameraState, PlayerRenderState playerState,
+        OptionsRenderState optionsState, boolean consistentDepthRequired)
     {
-        return RenderPassType.isVanilla();
-    }
-
-    @WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DebugCrosshairRenderer;render(Lnet/minecraft/client/renderer/state/level/CameraRenderState;I)V"))
-    private boolean vivecraft$noDebugCrosshairInVR(
-        DebugCrosshairRenderer instance, CameraRenderState cameraState, int guiScale)
-    {
-        return RenderPassType.isVanilla();
+        if (RenderPassType.isVanilla()) {
+            return true;
+        } else {
+            // setup the fog for post, since that would happen inside this
+            RenderSystem.setShaderFog(this.fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+            return false;
+        }
     }
 
     @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)

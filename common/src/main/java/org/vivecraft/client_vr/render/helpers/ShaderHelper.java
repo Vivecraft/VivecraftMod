@@ -1,14 +1,18 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.IndexType;
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTextureView;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.pipeline.IndexType;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +57,7 @@ public class ShaderHelper {
     public static void renderFullscreenQuad(
         @NotNull Supplier<String> name,
         @NotNull RenderPipeline instance,
-        @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
+        @NotNull Consumer<com.mojang.renderpearl.api.commands.RenderPass> uniformSetter,
         @Nullable GpuTextureView target)
     {
         renderFullscreenQuad(name, instance, uniformSetter, target, false);
@@ -69,7 +73,7 @@ public class ShaderHelper {
     public static void renderFullscreenQuad(
         @NotNull Supplier<String> name,
         @NotNull RenderPipeline instance,
-        @NotNull Consumer<com.mojang.blaze3d.systems.RenderPass> uniformSetter,
+        @NotNull Consumer<com.mojang.renderpearl.api.commands.RenderPass> uniformSetter,
         @Nullable GpuTextureView target,
         boolean flipVertically)
     {
@@ -77,11 +81,11 @@ public class ShaderHelper {
         RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
         GpuBuffer indexGpuBuffer = indexBuffer.getBuffer(6);
 
-        try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
+        try (com.mojang.renderpearl.api.commands.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
             .createRenderPass(name, target != null ? target : MC.gameRenderer.mainRenderTarget().getColorTextureView(),
                 Optional.empty()))
         {
-            renderPass.setPipeline(instance);
+            renderPass.setPipeline(RenderSystem.getCompiledPipeline(instance));
             renderPass.setVertexBuffer(0, quad.slice());
             uniformSetter.accept(renderPass);
 
@@ -207,7 +211,7 @@ public class ShaderHelper {
 
         renderFullscreenQuad(() -> "Vive postprocessing", VRShaders.POST_PROCESSING_PIPELINE, renderPass -> {
             renderPass.setUniform(PostProcessUBO.UBO_NAME, VRShaders.POST_PROCESS_UBO.getBuffer());
-            renderPass.bindTexture(VRShaders.POST_PROCESSING_COLOR_SAMPLER, source.getColorTextureView(),
+            renderPass.setUniform(VRShaders.POST_PROCESSING_COLOR_SAMPLER, source.getColorTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
         }, target.getColorTextureView(), GraphicsHelper.INSTANCE.flipEyeVertically());
         VRShaders.POST_PROCESS_UBO.endFrame();
@@ -379,14 +383,14 @@ public class ShaderHelper {
             renderPass.setUniform(MixedRealityUBO.UBO_NAME, VRShaders.MIXED_REALITY_UBO.getBuffer());
 
             // bind textures
-            renderPass.bindTexture(VRShaders.MIXED_REALITY_THIRD_COLOR_SAMPLER,
+            renderPass.setUniform(VRShaders.MIXED_REALITY_THIRD_COLOR_SAMPLER,
                 DATA_HOLDER.vrRenderer.framebufferMR.getColorTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-            renderPass.bindTexture(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
+            renderPass.setUniform(VRShaders.MIXED_REALITY_THIRD_DEPTH_SAMPLER,
                 DATA_HOLDER.vrRenderer.framebufferMR.getDepthTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
 
-            renderPass.bindTexture(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
+            renderPass.setUniform(VRShaders.MIXED_REALITY_GUI_COLOR_SAMPLER,
                 GuiHandler.GUI_FRAMEBUFFER.getColorTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 
@@ -403,10 +407,10 @@ public class ShaderHelper {
                         source = DATA_HOLDER.vrRenderer.framebufferEye[1];
                     }
                 }
-                renderPass.bindTexture(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, source.getColorTextureView(),
+                renderPass.setUniform(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, source.getColorTextureView(),
                     RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
             } else {
-                renderPass.bindTexture(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, black,
+                renderPass.setUniform(VRShaders.MIXED_REALITY_FIRST_COLOR_SAMPLER, black,
                     RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
             }
         }, null);
@@ -428,9 +432,9 @@ public class ShaderHelper {
             VRShaders.LANCZOS_UBO.updateBuffer(1.0F / (3.0F * (float) firstPass.width), 0F);
 
             renderFullscreenQuad(() -> "Vive Lanczos 1", VRShaders.LANCZOS_PIPELINE, renderPass -> {
-                renderPass.bindTexture(VRShaders.LANCZOS_COLOR_SAMPLER, source.getColorTextureView(),
+                renderPass.setUniform(VRShaders.LANCZOS_COLOR_SAMPLER, source.getColorTextureView(),
                     RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-                renderPass.bindTexture(VRShaders.LANCZOS_DEPTH_SAMPLER, source.getDepthTextureView(),
+                renderPass.setUniform(VRShaders.LANCZOS_DEPTH_SAMPLER, source.getDepthTextureView(),
                     RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
                 renderPass.setUniform(LanczosUBO.UBO_NAME, VRShaders.LANCZOS_UBO.getBuffer());
             }, firstPass.getColorTextureView());
@@ -439,9 +443,9 @@ public class ShaderHelper {
             VRShaders.LANCZOS_UBO.updateBuffer(0F, 1.0F / (3.0F * (float) secondPass.height));
             // second pass, vertical
             renderFullscreenQuad(() -> "Vive Lanczos 2", VRShaders.LANCZOS_PIPELINE, renderPass -> {
-                renderPass.bindTexture(VRShaders.LANCZOS_COLOR_SAMPLER, firstPass.getColorTextureView(),
+                renderPass.setUniform(VRShaders.LANCZOS_COLOR_SAMPLER, firstPass.getColorTextureView(),
                     RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-                renderPass.bindTexture(VRShaders.LANCZOS_DEPTH_SAMPLER, firstPass.getDepthTextureView(),
+                renderPass.setUniform(VRShaders.LANCZOS_DEPTH_SAMPLER, firstPass.getDepthTextureView(),
                     RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
                 renderPass.setUniform(LanczosUBO.UBO_NAME, VRShaders.LANCZOS_UBO.getBuffer());
             }, secondPass.getColorTextureView());
@@ -563,18 +567,18 @@ public class ShaderHelper {
         GpuBuffer indexBuffer = autoStorageIndexBuffer.getBuffer(6);
         IndexType indexType = autoStorageIndexBuffer.type();
 
-        try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
+        try (com.mojang.renderpearl.api.commands.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
             .createRenderPass(() -> "Vive Blit", MC.gameRenderer.mainRenderTarget().getColorTextureView(),
                 Optional.empty()))
         {
             if (blend) {
-                renderPass.setPipeline(VRShaders.BLIT_VR_BLEND_PIPELINE);
+                renderPass.setPipeline(RenderSystem.getCompiledPipeline(VRShaders.BLIT_VR_BLEND_PIPELINE));
             } else {
-                renderPass.setPipeline(VRShaders.BLIT_VR_PIPELINE);
+                renderPass.setPipeline(RenderSystem.getCompiledPipeline(VRShaders.BLIT_VR_PIPELINE));
             }
             renderPass.setVertexBuffer(0, VRShaders.BLIT_QUAD_BUFFER.slice());
 
-            renderPass.bindTexture(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView(),
+            renderPass.setUniform(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 
             renderPass.setIndexBuffer(indexBuffer, indexType);
@@ -594,7 +598,7 @@ public class ShaderHelper {
 
         renderFullscreenQuad(() -> "Vive Blit",
             blend ? VRShaders.BLIT_VR_BLEND_PIPELINE : VRShaders.BLIT_VR_PIPELINE,
-            pass -> pass.bindTexture(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView(),
+            pass -> pass.setUniform(VRShaders.BLIT_VR_COLOR_SAMPLER, source.getColorTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)),
             target.getColorTextureView());
     }

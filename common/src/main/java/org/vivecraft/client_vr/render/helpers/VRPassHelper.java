@@ -56,7 +56,7 @@ public class VRPassHelper {
 
         try (Gizmos.TemporaryCollection ignored = MC.levelRenderer.collectPerFrameRenderThreadGizmos()) {
             // actually render
-            MC.gameRenderer.render(deltaTracker, renderLevel);
+            MC.gameRenderer.render();
         }
 
         // restore player

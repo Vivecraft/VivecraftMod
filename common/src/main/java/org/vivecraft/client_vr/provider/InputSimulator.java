@@ -1,12 +1,14 @@
 package org.vivecraft.client_vr.provider;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.InputQuirks;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLKeycode;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -17,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Simulates GLFW inputs and keeps track of them
+ * Simulates SDL inputs and keeps track of them
  */
 public class InputSimulator {
     private static final Set<Integer> PRESSED_KEYS = new HashSet<>();
@@ -34,7 +36,7 @@ public class InputSimulator {
 
     public static void pressKey(int key, int modifiers) {
         PRESSED_KEYS.add(key);
-        handleKeyAction(key, modifiers, GLFW.GLFW_PRESS);
+        handleKeyAction(key, modifiers, InputConstants.PRESS);
     }
 
     public static void pressKey(int key) {
@@ -43,7 +45,7 @@ public class InputSimulator {
 
     public static void releaseKey(int key, int modifiers) {
         PRESSED_KEYS.remove(key);
-        handleKeyAction(key, modifiers, GLFW.GLFW_RELEASE);
+        handleKeyAction(key, modifiers, InputConstants.RELEASE);
     }
 
     public static void releaseKey(int key) {
@@ -52,7 +54,7 @@ public class InputSimulator {
 
     public static void pressModifier(int key, int modifiers) {
         PRESSED_MODIFIERS.merge(key, 1, Integer::sum);
-        handleKeyAction(key, modifiers, GLFW.GLFW_PRESS);
+        handleKeyAction(key, modifiers, InputConstants.PRESS);
     }
 
     public static void pressModifier(int key) {
@@ -61,7 +63,7 @@ public class InputSimulator {
 
     public static void releaseModifier(int key, int modifiers) {
         PRESSED_MODIFIERS.merge(key, -1, Integer::sum);
-        handleKeyAction(key, modifiers, GLFW.GLFW_RELEASE);
+        handleKeyAction(key, modifiers, InputConstants.RELEASE);
     }
 
     public static void releaseModifier(int key) {
@@ -79,7 +81,7 @@ public class InputSimulator {
 
     public static void pressMouse(int button, int modifiers) {
         Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(),
-            new MouseButtonInfo(button, modifiers), GLFW.GLFW_PRESS);
+            new MouseButtonInfo(button, modifiers), InputConstants.PRESS);
     }
 
     public static void pressMouse(int button) {
@@ -88,7 +90,7 @@ public class InputSimulator {
 
     public static void releaseMouse(int button, int modifiers) {
         Minecraft.getInstance().mouseHandler.onButton(Minecraft.getInstance().getWindow().handle(),
-            new MouseButtonInfo(button, modifiers), GLFW.GLFW_RELEASE);
+            new MouseButtonInfo(button, modifiers), InputConstants.RELEASE);
     }
 
     public static void releaseMouse(int button) {
@@ -96,7 +98,7 @@ public class InputSimulator {
     }
 
     public static void setMousePos(double x, double y) {
-        Minecraft.getInstance().mouseHandler.onMove(Minecraft.getInstance().getWindow().handle(), x, y);
+        Minecraft.getInstance().mouseHandler.onMove(Minecraft.getInstance().getWindow().handle(), x, y, 0, 0);
     }
 
     public static void scrollMouse(double xOffset, double yOffset) {
@@ -117,7 +119,7 @@ public class InputSimulator {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
         if (dataHolder.vrSettings.keyboardPressBinds) {
-            if (code != GLFW.GLFW_KEY_UNKNOWN) {
+            if (code != SDLScancode.SDL_SCANCODE_UNKNOWN) {
                 pressKey(code);
             }
         } else if (minecraft.gui.screen() == null && ClientUtils.milliTime() - AIR_TYPING_WARNING_TIME >= 30000) {
@@ -130,27 +132,22 @@ public class InputSimulator {
     public static void releaseKeyForBind(int code) {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
-        if (dataHolder.vrSettings.keyboardPressBinds && code != GLFW.GLFW_KEY_UNKNOWN) {
+        if (dataHolder.vrSettings.keyboardPressBinds && code != SDLScancode.SDL_SCANCODE_UNKNOWN) {
             releaseKey(code);
         }
     }
 
+    public static final int LEFT_CTRL_QUIRK =
+        InputQuirks.REPLACE_CTRL_KEY_WITH_CMD_KEY ? SDLKeycode.SDL_KMOD_LGUI : SDLKeycode.SDL_KMOD_LCTRL;
+    public static final int RIGHT_CTRL_QUIRK =
+        InputQuirks.REPLACE_CTRL_KEY_WITH_CMD_KEY ? SDLKeycode.SDL_KMOD_RGUI : SDLKeycode.SDL_KMOD_RCTRL;
+
     private static int getActiveModifier() {
-        return (shiftDown() ? GLFW.GLFW_MOD_SHIFT : 0) |
-            (controlDown() ? InputQuirks.EDIT_SHORTCUT_KEY_MODIFIER : 0) |
-            (altDown() ? GLFW.GLFW_MOD_ALT : 0);
-    }
-
-    private static boolean shiftDown() {
-        return MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT_SHIFT) || MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT);
-    }
-
-    private static boolean controlDown() {
-        return MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT_CONTROL) ||
-            MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL);
-    }
-
-    private static boolean altDown() {
-        return MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) || MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT);
+        return (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_LSHIFT) ? SDLKeycode.SDL_KMOD_LSHIFT : 0) |
+            (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RSHIFT) ? SDLKeycode.SDL_KMOD_RSHIFT : 0) |
+            (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_LCTRL) ? LEFT_CTRL_QUIRK : 0) |
+            (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RCTRL) ? RIGHT_CTRL_QUIRK : 0) |
+            (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_LALT) ? SDLKeycode.SDL_KMOD_LALT : 0) |
+            (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RALT) ? SDLKeycode.SDL_KMOD_RALT : 0);
     }
 }

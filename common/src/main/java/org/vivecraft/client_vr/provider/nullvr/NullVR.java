@@ -1,12 +1,13 @@
 package org.vivecraft.client_vr.provider.nullvr;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.ClientUtils;
@@ -293,29 +294,29 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
+    public boolean handleKeyboardInputs(int key, int keyCode, int action, int modifiers) {
         boolean triggered = false;
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && action == GLFW.GLFW_PRESS &&
-            key == GLFW.GLFW_KEY_KP_ADD)
+        if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RCTRL) && action == InputConstants.PRESS &&
+            key == SDLScancode.SDL_SCANCODE_KP_PLUS)
         {
             MOD.keyVRInteract.pressKey(ControllerType.LEFT);
             MOD.keyVRInteract.pressKey(ControllerType.RIGHT);
-        } else if (!MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) ||
-            !MethodHolder.isKeyDown(GLFW.GLFW_KEY_KP_ADD))
+        } else if (!MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RCTRL) ||
+            !MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_KP_PLUS))
         {
             MOD.keyVRInteract.unpressKey(ControllerType.LEFT);
             MOD.keyVRInteract.unpressKey(ControllerType.RIGHT);
         }
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-            if (action == GLFW.GLFW_PRESS) {
-                if (key == GLFW.GLFW_KEY_F6) {
+        if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RCTRL)) {
+            if (action == InputConstants.PRESS) {
+                if (key == SDLScancode.SDL_SCANCODE_F6) {
                     this.vrActive = !this.vrActive;
                     return true;
                 }
 
-                int offset = MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT) ? -1 : 1;
+                int offset = MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RALT) ? -1 : 1;
 
-                if (key == GLFW.GLFW_KEY_F9) {
+                if (key == SDLScancode.SDL_SCANCODE_F9) {
                     this.controllerType = ClientUtils.getNextEnum(this.controllerType, offset);
                     if (this.controllerType == ControllerTransform.AUTO) {
                         this.controllerType = ClientUtils.getNextEnum(this.controllerType, offset);
@@ -327,22 +328,22 @@ public class NullVR extends MCVR {
                     this.gunStyle = this.gunAngle > 10.0F;
                     MirrorNotification.notify("Changed to controller: " + this.controllerType, false, 1000);
                     triggered = true;
-                } else if (key == GLFW.GLFW_KEY_KP_5) {
+                } else if (key == SDLScancode.SDL_SCANCODE_KP_5) {
                     // toggle body part
                     this.currentBodyPart = ClientUtils.getNextEnum(this.currentBodyPart, offset);
                     MirrorNotification.notify("Changed selected body part to: " + this.currentBodyPart, false, 1000);
                     triggered = true;
-                } else if (key == GLFW.GLFW_KEY_KP_1) {
+                } else if (key == SDLScancode.SDL_SCANCODE_KP_1) {
                     // toggle fbt mode
                     this.fbtMode = ClientUtils.getNextEnum(this.fbtMode, offset);
                     MirrorNotification.notify("Changed fbt mode to: " + this.fbtMode, false, 1000);
                     triggered = true;
-                } else if (key == GLFW.GLFW_KEY_KP_MULTIPLY) {
+                } else if (key == SDLScancode.SDL_SCANCODE_KP_MULTIPLY) {
                     // toggle body sync
                     this.syncBodyparts = !this.syncBodyparts;
                     MirrorNotification.notify("toggled body part sync to : " + this.syncBodyparts, false, 1000);
                     triggered = true;
-                } else if (key == GLFW.GLFW_KEY_KP_DIVIDE) {
+                } else if (key == SDLScancode.SDL_SCANCODE_KP_DIVIDE) {
                     // toggle movement space
                     this.moveRoom = !this.moveRoom;
                     MirrorNotification.notify("toggled body part room relative to : " + this.moveRoom, false, 1000);
@@ -350,58 +351,58 @@ public class NullVR extends MCVR {
                 }
             }
 
-            if (action != GLFW.GLFW_RELEASE) {
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_ALT)) {
+            if (action != InputConstants.RELEASE) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RALT)) {
                     float angle = Mth.PI / 18.0F;
                     // rotate current bodypart
-                    if (key == GLFW.GLFW_KEY_KP_8) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_8) {
                         rotateBody(-angle, MathUtils.RIGHT);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_2) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_2) {
                         rotateBody(angle, MathUtils.RIGHT);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_4) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_4) {
                         rotateBody(angle, MathUtils.UP);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_6) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_6) {
                         rotateBody(-angle, MathUtils.UP);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_9) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_9) {
                         rotateBody(angle, MathUtils.BACK);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_7) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_7) {
                         rotateBody(-angle, MathUtils.BACK);
                         triggered = true;
                     }
                 } else {
                     float offset = 0.01F;
                     // move current bodypart
-                    if (key == GLFW.GLFW_KEY_KP_8) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_8) {
                         translateBody(0F, 0F, -offset);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_2) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_2) {
                         translateBody(0F, 0F, offset);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_4) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_4) {
                         translateBody(-offset, 0F, 0F);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_6) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_6) {
                         translateBody(offset, 0F, 0F);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_9) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_9) {
                         translateBody(0F, offset, 0F);
                         triggered = true;
                     }
-                    if (key == GLFW.GLFW_KEY_KP_3) {
+                    if (key == SDLScancode.SDL_SCANCODE_KP_3) {
                         translateBody(0F, -offset, 0F);
                         triggered = true;
                     }

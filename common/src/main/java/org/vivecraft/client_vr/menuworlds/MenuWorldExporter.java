@@ -46,6 +46,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.timeline.Timeline;
 import net.minecraft.world.timeline.Timelines;
+import org.joml.Vector4f;
 import org.vivecraft.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -135,7 +136,7 @@ public class MenuWorldExporter {
         dos.writeInt(level.dimensionType().minY());
         dos.writeFloat(level.dimensionType().ambientLight());
         boolean cloudPresent =
-            ARGB.alpha(level.environmentAttributes().getValue(EnvironmentAttributes.CLOUD_COLOR, Vec3.ZERO)) > 0;
+            level.environmentAttributes().getValue(EnvironmentAttributes.CLOUD_COLOR, Vec3.ZERO).w() > 0;
         dos.writeBoolean(cloudPresent);
         if (cloudPresent) {
             // offset by 0.33f to be at the old block level again
@@ -322,48 +323,52 @@ public class MenuWorldExporter {
         // TODO 1.21.11 store those?
         EnvironmentAttributeMap.Builder attributes = EnvironmentAttributeMap.builder();
         if (cloudHeight.isPresent()) {
-            attributes.set(EnvironmentAttributes.CLOUD_COLOR, ARGB.white(0.8f));
+            attributes.set(EnvironmentAttributes.CLOUD_COLOR, new Vector4f(1F, 1F, 1F, 0.8f));
             attributes.set(EnvironmentAttributes.CLOUD_HEIGHT, cloudHeight.get() + 0.33F);
         }
 
-        HolderGetter<Timeline> timelines = VanillaRegistries.createLookup().lookup(Registries.TIMELINE).orElse(null);
+        HolderGetter<Timeline> timelines = VanillaRegistries.createWorldLookup().lookup(Registries.TIMELINE)
+            .orElse(null);
         HolderSet<Timeline> timeline = HolderSet.empty();
 
         switch (skybox) {
             case NONE -> {
                 attributes.set(EnvironmentAttributes.FOG_START_DISTANCE, 10.0f);
                 attributes.set(EnvironmentAttributes.FOG_END_DISTANCE, 96.0f);
-                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, Timelines.NIGHT_SKY_LIGHT_COLOR);
+                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR,
+                    ARGB.vector3fFromRGB24(Timelines.NIGHT_SKY_LIGHT_COLOR));
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_LEVEL, 4.0f);
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f);
-                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -13621215);
+                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ARGB.vector3fFromRGB24(-13621215));
             }
             case OVERWORLD -> {
-                attributes.set(EnvironmentAttributes.FOG_COLOR, -4138753);
-                attributes.set(EnvironmentAttributes.SKY_COLOR, OverworldBiomes.calculateSkyColor(0.8f));
-                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -16119286);
+                attributes.set(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(-4138753));
+                attributes.set(EnvironmentAttributes.SKY_COLOR,
+                    ARGB.vector3fFromRGB24(OverworldBiomes.calculateSkyColor(0.8f)));
+                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ARGB.vector3fFromRGB24(-16119286));
                 timeline = timelines != null ?
                     HolderSet.direct(timelines.getOrThrow(Timelines.OVERWORLD_DAY),
                         timelines.getOrThrow(Timelines.MOON)) :
                     HolderSet.empty();
             }
             case END -> {
-                attributes.set(EnvironmentAttributes.FOG_COLOR, -15199464);
-                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, -5480243);
-                attributes.set(EnvironmentAttributes.SKY_COLOR, -16777216);
+                attributes.set(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(-15199464));
+                attributes.set(EnvironmentAttributes.SKY_LIGHT_COLOR, ARGB.vector3fFromRGB24(-5480243));
+                attributes.set(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(-16777216));
                 attributes.set(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f);
-                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, -12630209);
+                attributes.set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ARGB.vector3fFromRGB24(-12630209));
             }
         }
 
         // TODO 26.1 should also be stored probably
-        attributes.set(EnvironmentAttributes.BLOCK_LIGHT_TINT, DimensionDefaults.BLOCK_LIGHT_TINT);
+        attributes.set(EnvironmentAttributes.BLOCK_LIGHT_TINT,
+            ARGB.vector3fFromRGB24(DimensionDefaults.BLOCK_LIGHT_TINT));
 
         if (dataVersion < 4554 && BuiltinDimensionTypes.END.identifier().equals(dimName)) {
             dimAmbientLight = 0.25f; // pre-1.21.9 end worlds are too dark
         }
 
-        HolderGetter<Block> blockHolder = VanillaRegistries.createLookup().lookup(Registries.BLOCK).orElse(null);
+        HolderGetter<Block> blockHolder = VanillaRegistries.createWorldLookup().lookup(Registries.BLOCK).orElse(null);
 
         DimensionType dimensionType = new DimensionType(dimFixedTime.isPresent(), dimHasSkyLight, dimHasCeiling, false,
             1.0,
@@ -418,7 +423,7 @@ public class MenuWorldExporter {
                 for (int z = 0; z < zSize; z++) {
                     for (int y = ySize - 1; y >= 0; y--) {
                         int index = (y * zSize + z) * xSize + x;
-                        if (blocks[index].blocksMotion() || !blocks[index].getFluidState().isEmpty()) {
+                        if (blocks[index].is(BlockTags.BLOCKS_FLUID_FLOW) || !blocks[index].getFluidState().isEmpty()) {
                             heightmap[x][z] = (short) (y + 1);
                             break;
                         }
@@ -586,13 +591,13 @@ public class MenuWorldExporter {
                 BiomeSpecialEffects.Builder effectsBuilder = new BiomeSpecialEffects.Builder();
                 int fogColor = dis.readInt();
                 if (fogColor != 10518688 || !isEndBiome(biomeId)) {
-                    builder.setAttribute(EnvironmentAttributes.FOG_COLOR, fogColor);
+                    builder.setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(fogColor));
                 }
                 effectsBuilder.waterColor(dis.readInt());
-                builder.setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, dis.readInt());
+                builder.setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(dis.readInt()));
                 int skyColor = dis.readInt();
                 if (skyColor != 7254527 || !isNetherBiome(biomeId)) {
-                    builder.setAttribute(EnvironmentAttributes.SKY_COLOR, skyColor);
+                    builder.setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(skyColor));
                 }
 
                 if (dis.readBoolean()) {
@@ -643,10 +648,13 @@ public class MenuWorldExporter {
 
                 BiomeSpecialEffects specialEffects = Xplat.INSTANCE.getBiomeEffects(biome);
 
-                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.FOG_COLOR, dimensionType));
+                dos.writeInt(
+                    ARGB.colorFromVector3f(getAttributeValue(biome, EnvironmentAttributes.FOG_COLOR, dimensionType)));
                 dos.writeInt(specialEffects.waterColor());
-                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.WATER_FOG_COLOR, dimensionType));
-                dos.writeInt(getAttributeValue(biome, EnvironmentAttributes.SKY_COLOR, dimensionType));
+                dos.writeInt(ARGB.colorFromVector3f(
+                    getAttributeValue(biome, EnvironmentAttributes.WATER_FOG_COLOR, dimensionType)));
+                dos.writeInt(
+                    ARGB.colorFromVector3f(getAttributeValue(biome, EnvironmentAttributes.SKY_COLOR, dimensionType)));
 
                 dos.writeBoolean(specialEffects.foliageColorOverride().isPresent());
                 if (specialEffects.foliageColorOverride().isPresent()) {
@@ -708,247 +716,247 @@ public class MenuWorldExporter {
         static {
             // big hard-coded map of biomes from 1.16
             // the commented line here is just a builder reference
-            // map.put(0, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(1).temperatureAdjustment(Biome.TemperatureModifier.NONE).downfall(1).specialEffects(new BiomeSpecialEffects.Builder().waterColor(1).foliageColorOverride(1).grassColorOverride(1).grassColorModifier(BiomeSpecialEffects.GrassColorModifier.NONE).ambientParticle(new AmbientParticleSettings((ParticleOptions)BuiltInRegistries.PARTICLE_TYPE.get(new Identifier("")), 0)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).setAttribute(EnvironmentAttributes.FOG_COLOR, 1).setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 1).setAttribute(EnvironmentAttributes.SKY_COLOR, 1).build());
+            // map.put(0, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(1).temperatureAdjustment(Biome.TemperatureModifier.NONE).downfall(1).specialEffects(new BiomeSpecialEffects.Builder().waterColor(1).foliageColorOverride(1).grassColorOverride(1).grassColorModifier(BiomeSpecialEffects.GrassColorModifier.NONE).ambientParticle(new AmbientParticleSettings((ParticleOptions)BuiltInRegistries.PARTICLE_TYPE.get(new Identifier("")), 0)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(1)).setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(1)).setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(1)).build());
 
             // plains
             MAP.put(1, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.800000f).downfall(0.400000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7907327).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7907327)).build());
             // the_void
             MAP.put(127, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // ocean
             MAP.put(0, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // desert
             MAP.put(2, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // mountains
             MAP.put(3, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.200000f).downfall(0.300000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233727).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233727)).build());
             // forest
             MAP.put(4, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.700000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7972607).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7972607)).build());
             // taiga
             MAP.put(5, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.250000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233983).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233983)).build());
             // swamp
             MAP.put(6, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.800000f).downfall(0.900000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(6388580).foliageColorOverride(6975545)
                         .grassColorModifier(BiomeSpecialEffects.GrassColorModifier.SWAMP).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 2302743)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7907327).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(2302743))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7907327)).build());
             // river
             MAP.put(7, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // nether_wastes
             MAP.put(8, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 3344392)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(3344392))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011)).build());
             // the_end
             MAP.put(9, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(0)).build());
             // frozen_ocean
             MAP.put(10, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.000000f).downfall(0.500000f)
                 .temperatureAdjustment(Biome.TemperatureModifier.FROZEN).specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(3750089).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8364543).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8364543)).build());
             // frozen_river
             MAP.put(11, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.000000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(3750089).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8364543).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8364543)).build());
             // snowy_tundra
             MAP.put(12, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.000000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8364543).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8364543)).build());
             // snowy_mountains
             MAP.put(13, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.000000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8364543).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8364543)).build());
             // mushroom_fields
             MAP.put(14, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.900000f).downfall(1.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // mushroom_field_shore
             MAP.put(15, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.900000f).downfall(1.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // beach
             MAP.put(16, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.800000f).downfall(0.400000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7907327).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7907327)).build());
             // desert_hills
             MAP.put(17, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // wooded_hills
             MAP.put(18, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.700000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7972607).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7972607)).build());
             // taiga_hills
             MAP.put(19, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.250000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233983).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233983)).build());
             // mountain_edge
             MAP.put(20, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.200000f).downfall(0.300000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233727).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233727)).build());
             // jungle
             MAP.put(21, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.900000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // jungle_hills
             MAP.put(22, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.900000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // jungle_edge
             MAP.put(23, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // deep_ocean
             MAP.put(24, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // stone_shore
             MAP.put(25, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.200000f).downfall(0.300000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233727).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233727)).build());
             // snowy_beach
             MAP.put(26, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.050000f).downfall(0.300000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4020182).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8364543).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8364543)).build());
             // birch_forest
             MAP.put(27, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.600000f).downfall(0.600000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8037887).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8037887)).build());
             // birch_forest_hills
             MAP.put(28, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.600000f).downfall(0.600000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8037887).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8037887)).build());
             // dark_forest
             MAP.put(29, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.700000f).downfall(0.800000f)
                 .specialEffects(
@@ -956,65 +964,65 @@ public class MenuWorldExporter {
                         .grassColorModifier(BiomeSpecialEffects.GrassColorModifier.DARK_FOREST)
                         .build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7972607).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7972607)).build());
             // snowy_taiga
             MAP.put(30, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(-0.500000f).downfall(0.400000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4020182).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8625919).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8625919)).build());
             // snowy_taiga_hills
             MAP.put(31, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(-0.500000f).downfall(0.400000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4020182).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8625919).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8625919)).build());
             // giant_tree_taiga
             MAP.put(32, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.300000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8168447).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8168447)).build());
             // giant_tree_taiga_hills
             MAP.put(33, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.300000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8168447).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8168447)).build());
             // wooded_mountains
             MAP.put(34, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.200000f).downfall(0.300000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233727).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233727)).build());
             // savanna
             MAP.put(35, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(1.200000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7711487).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7711487)).build());
             // savanna_plateau
             MAP.put(36, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(1.000000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7776511).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7776511)).build());
             // badlands
             MAP.put(37, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
@@ -1022,9 +1030,9 @@ public class MenuWorldExporter {
                         .grassColorOverride(9470285).build())
                 .generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // wooded_badlands_plateau
             MAP.put(38, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
@@ -1032,9 +1040,9 @@ public class MenuWorldExporter {
                         .grassColorOverride(9470285).build())
                 .generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // badlands_plateau
             MAP.put(39, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
@@ -1042,182 +1050,182 @@ public class MenuWorldExporter {
                         .grassColorOverride(9470285).build())
                 .generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // small_end_islands
             MAP.put(40, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(0)).build());
             // end_midlands
             MAP.put(41, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(0)).build());
             // end_highlands
             MAP.put(42, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(0)).build());
             // end_barrens
             MAP.put(43, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 0).build());
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(0)).build());
             // warm_ocean
             MAP.put(44, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4445678).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 270131)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(270131))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // lukewarm_ocean
             MAP.put(45, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4566514).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 267827)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(267827))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // cold_ocean
             MAP.put(46, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4020182).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // deep_warm_ocean
             MAP.put(47, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4445678).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 270131)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(270131))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // deep_lukewarm_ocean
             MAP.put(48, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4566514).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 267827)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(267827))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // deep_cold_ocean
             MAP.put(49, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4020182).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // deep_frozen_ocean
             MAP.put(50, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.500000f).downfall(0.500000f)
                 .temperatureAdjustment(Biome.TemperatureModifier.FROZEN).specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(3750089).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8103167).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8103167)).build());
             // sunflower_plains
             MAP.put(129, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.800000f).downfall(0.400000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7907327).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7907327)).build());
             // desert_lakes
             MAP.put(130, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // gravelly_mountains
             MAP.put(131, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.200000f).downfall(0.300000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233727).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233727)).build());
             // flower_forest
             MAP.put(132, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.700000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7972607).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7972607)).build());
             // taiga_mountains
             MAP.put(133, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.250000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233983).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233983)).build());
             // swamp_hills
             MAP.put(134, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.800000f).downfall(0.900000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(6388580).foliageColorOverride(6975545)
                         .grassColorModifier(BiomeSpecialEffects.GrassColorModifier.SWAMP).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 2302743)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7907327).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(2302743))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7907327)).build());
             // ice_spikes
             MAP.put(140, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.000000f).downfall(0.500000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8364543).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8364543)).build());
             // modified_jungle
             MAP.put(149, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.900000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // modified_jungle_edge
             MAP.put(151, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // tall_birch_forest
             MAP.put(155, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.600000f).downfall(0.600000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8037887).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8037887)).build());
             // tall_birch_hills
             MAP.put(156, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.600000f).downfall(0.600000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8037887).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8037887)).build());
             // dark_forest_hills
             MAP.put(157, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.700000f).downfall(0.800000f)
                 .specialEffects(
@@ -1225,57 +1233,57 @@ public class MenuWorldExporter {
                         .grassColorModifier(BiomeSpecialEffects.GrassColorModifier.DARK_FOREST)
                         .build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7972607).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7972607)).build());
             // snowy_taiga_mountains
             MAP.put(158, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(-0.500000f).downfall(0.400000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4020182).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8625919).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8625919)).build());
             // giant_spruce_taiga
             MAP.put(160, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.250000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233983).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233983)).build());
             // giant_spruce_taiga_hills
             MAP.put(161, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.250000f).downfall(0.800000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233983).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233983)).build());
             // modified_gravelly_mountains
             MAP.put(162, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.200000f).downfall(0.300000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 8233727).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(8233727)).build());
             // shattered_savanna
             MAP.put(163, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(1.100000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7776767).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7776767)).build());
             // shattered_savanna_plateau
             MAP.put(164, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(1.000000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7776511).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7776511)).build());
             // eroded_badlands
             MAP.put(165, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
@@ -1283,9 +1291,9 @@ public class MenuWorldExporter {
                         .grassColorOverride(9470285).build())
                 .generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // modified_wooded_badlands_plateau
             MAP.put(166, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
@@ -1293,9 +1301,9 @@ public class MenuWorldExporter {
                         .grassColorOverride(9470285).build())
                 .generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // modified_badlands_plateau
             MAP.put(167, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
@@ -1303,32 +1311,32 @@ public class MenuWorldExporter {
                         .grassColorOverride(9470285).build())
                 .generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7254527).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7254527)).build());
             // bamboo_jungle
             MAP.put(168, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.900000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // bamboo_jungle_hills
             MAP.put(169, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.900000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 12638463)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 7842047).build());
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+                .setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7842047)).build());
             // soul_sand_valley
             MAP.put(170, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f)
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 1787717)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(1787717))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES, AmbientParticle.of(
                     (ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(Identifier.parse("minecraft:ash"))
                         .orElseThrow().value(),
@@ -1338,8 +1346,8 @@ public class MenuWorldExporter {
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 3343107)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(3343107))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES,
                     AmbientParticle.of((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(
                         Identifier.parse("minecraft:crimson_spore")).orElseThrow().value(), 0.025000f)).build());
@@ -1348,8 +1356,8 @@ public class MenuWorldExporter {
                 .specialEffects(
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build()).generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 1705242)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 329011)
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(1705242))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES,
                     AmbientParticle.of((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(
                         Identifier.parse("minecraft:warped_spore")).orElseThrow().value(), 0.014280f)).build());
@@ -1359,8 +1367,8 @@ public class MenuWorldExporter {
                     new BiomeSpecialEffects.Builder().waterColor(4159204).build())
                 .generationSettings(
                     DUMMY_GENERATION_SETTINGS).mobSpawnSettings(DUMMY_MOB_SPAWN_SETTINGS)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 6840176)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 4341314)
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(6840176))
+                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(4341314))
                 .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES,
                     AmbientParticle.of((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(
                         Identifier.parse("minecraft:white_ash")).orElseThrow().value(), 0.118093f)).build());

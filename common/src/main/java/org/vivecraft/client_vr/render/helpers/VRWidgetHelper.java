@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -215,7 +215,7 @@ public class VRWidgetHelper {
 
         // render camera display
         if (!widgetState.displayModelState.isEmpty() &&
-            !widgetState.displayModelState.layers[0].prepareQuadList().isEmpty())
+            !widgetState.displayModelState.layers[0].quads.all().isEmpty())
         {
             poseStack.pushPose();
             poseStack.translate(-0.5F, -0.5F, -0.5F);
@@ -223,7 +223,7 @@ public class VRWidgetHelper {
                 VRRenderTypes.entitySolidNoCardinalLight(displaySupFunc.get(), true),
                 (pose, consumer) -> {
                     // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen
-                    for (BakedQuad bakedquad : widgetState.displayModelState.layers[0].prepareQuadList()) {
+                    for (BakedQuad bakedquad : widgetState.displayModelState.layers[0].quads.all()) {
                         if (displayFaceFunc.apply(bakedquad.direction()) != DisplayFace.NONE &&
                             bakedquad.materialInfo().sprite().contents().name().equals(TRANSPARENT_TEXTURE))
                         {

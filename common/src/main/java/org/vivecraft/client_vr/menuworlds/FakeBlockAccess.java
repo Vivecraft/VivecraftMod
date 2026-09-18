@@ -6,6 +6,7 @@ import net.minecraft.core.*;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.attribute.*;
+import net.minecraft.world.clock.ClockInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.CardinalLighting;
@@ -26,6 +27,8 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.joml.Vector3f;
+import org.vivecraft.client.utils.ClientUtils;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -125,10 +128,32 @@ public class FakeBlockAccess implements LevelReader, BlockAndTintGetter {
             });
         }
 
-        this.dimensionType.timelines()
-            .forEach((timeline) -> builder.addTimelineLayer(timeline, (definition) -> renderer.time));
+        ClockInstance instance = new ClockInstance() {
+            @Override
+            public long totalTicks() {
+                return renderer.time;
+            }
 
-        int flashColor = ARGB.color(204, 204, 255);
+            @Override
+            public float partialTick() {
+                return ClientUtils.getCurrentPartialTick();
+            }
+
+            @Override
+            public float rate() {
+                return 0;
+            }
+
+            @Override
+            public boolean isPaused() {
+                return false;
+            }
+        };
+
+        this.dimensionType.timelines()
+            .forEach((timeline) -> builder.addTimelineLayer(timeline, (definition) -> instance));
+
+        Vector3f flashColor = new Vector3f(0.8F, 0.8F, 1.0F);
         builder.addTimeBasedLayer(EnvironmentAttributes.SKY_COLOR, (skyColor, cacheTickId) -> {
             if (renderer.getSkyFlashTime() <= 0) return skyColor;
             return ARGB.srgbLerp(0.22f, skyColor, flashColor);

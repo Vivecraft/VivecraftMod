@@ -261,10 +261,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
         return hurt;
     }
 
-    @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
-    private ItemEntity vivecraft$dropVive(ItemEntity item, @Local(argsOnly = true, ordinal = 0) boolean dropAround) {
+    @ModifyReturnValue(method = "drop(Lnet/minecraft/world/item/ItemStack;ZLnet/minecraft/util/Prediction;)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
+    private ItemEntity vivecraft$dropVive(ItemEntity item) {
         ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
-        if (item != null && !dropAround && serverVivePlayer != null && serverVivePlayer.isVR()) {
+        if (item != null && serverVivePlayer != null && serverVivePlayer.isVR()) {
             // spawn item from players hand
             Vec3 pos = serverVivePlayer.getAimPos(false);
             Vec3 aim = serverVivePlayer.getAimDir(false);

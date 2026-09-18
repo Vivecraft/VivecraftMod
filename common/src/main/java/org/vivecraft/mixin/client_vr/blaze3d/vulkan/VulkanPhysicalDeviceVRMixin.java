@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client_vr.blaze3d.vulkan;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.blaze3d.vulkan.VulkanPhysicalDevice;
+import com.mojang.renderpearl.backend.vulkan.VulkanPhysicalDevice;
 import org.lwjgl.vulkan.VkExtensionProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

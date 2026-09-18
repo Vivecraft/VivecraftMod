@@ -101,7 +101,7 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
             }
 
             // manual rotation
-            poseStack.mulPose(new Quaternionf()
+            poseStack.rotate(new Quaternionf()
                 //.rotateY(Mth.PI)
                 .rotateX((6.0f + lean / 2.0f + flap) * Mth.DEG_TO_RAD)
                 .rotateZ(renderState.capeLean2 / 2.0f * Mth.DEG_TO_RAD)

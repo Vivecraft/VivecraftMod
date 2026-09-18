@@ -17,8 +17,8 @@ import net.minecraft.util.profiling.Profiler;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.openvr.*;
+import org.lwjgl.sdl.SDLMouse;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client.VivecraftVRMod;
@@ -189,7 +189,7 @@ public class MCOpenVR extends MCVR {
         OME = this;
         // make sure the lwjgl version is the right one
         // check that the right lwjgl version is loaded that we ship the OpenVR part of, or stuff breaks
-        final String[] lwjglVersions = new String[]{"3.4.1"};
+        final String[] lwjglVersions = new String[]{"3.4.3"};
         if (Arrays.stream(lwjglVersions).noneMatch(v -> Version.getVersion().startsWith(v))) {
             String suppliedJar = "";
             try {
@@ -1244,7 +1244,7 @@ public class MCOpenVR extends MCVR {
             // try to prevent double left clicks
             (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui ||
                 !(action.actionSet == VRInputActionSet.INGAME &&
-                    action.keyBinding.key == InputConstants.Type.MOUSE.getOrCreate(GLFW.GLFW_MOUSE_BUTTON_LEFT) &&
+                    action.keyBinding.key == InputConstants.Type.MOUSE.getOrCreate(SDLMouse.SDL_BUTTON_LEFT) &&
                     this.mc.gui.screen() != null
                 )
             ))

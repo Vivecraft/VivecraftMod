@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.provider.nullvr;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.GpuFormat;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;

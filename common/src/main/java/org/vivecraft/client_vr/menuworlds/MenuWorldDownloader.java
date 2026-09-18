@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class MenuWorldDownloader {
     private static final String BASE_URL = "https://cache.techjargaming.com/vivecraft/115/";
-    public static final String CUSTOM_WORLD_FOLDER = "menuworlds/custom_262";
+    public static final String CUSTOM_WORLD_FOLDER = "menuworlds/custom_263";
 
     private static String LAST_WORLD = "";
     private static boolean INIT;

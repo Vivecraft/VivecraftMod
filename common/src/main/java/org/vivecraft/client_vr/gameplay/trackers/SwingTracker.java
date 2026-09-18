@@ -140,10 +140,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     private static boolean isToolItem(Item item) {
-        return item instanceof ShovelItem ||
-            item instanceof HoeItem ||
-            item instanceof AxeItem ||
-            item instanceof ArrowItem ||
+        return item instanceof ArrowItem ||
             item instanceof FishingRodItem ||
             item instanceof FoodOnAStickItem ||
             item instanceof ShearsItem ||
@@ -395,7 +392,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         MathUtils.subtractToVector3f(averageTargetPosition.scale(1F / targetCount), handPos)
                             .normalize() :
                         deviceDirection.rotateY(this.dh.vrPlayer.vrdata_world_pre.rotation_radians, new Vector3f()));
-                    this.mc.gameMode.piercingAttack(piercingWeapon);
+                    this.mc.gameMode.piercingAttack(itemstack.getAttackAnimation(), piercingWeapon);
                     ClientNetworking.resetAim(0);
                     continue;
                 }
@@ -523,7 +520,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         // the useItem is already in the if check, so nothing to do here
                     }
                     // roomscale hoe interaction
-                    else if (isHand && (item instanceof HoeItem || itemstack.is(ViveItemTags.VIVECRAFT_HOES) ||
+                    else if (isHand && (itemstack.is(ItemTags.HOES) || itemstack.is(ViveItemTags.VIVECRAFT_HOES) ||
                         itemstack.is(ViveItemTags.VIVECRAFT_SCYTHES)
                     ) && (blockstate.getBlock() instanceof CropBlock ||
                         blockstate.getBlock() instanceof StemBlock ||
@@ -533,7 +530,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         (item.useOn(new UseOnContext(player,
                             c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND,
                             blockHit)) instanceof InteractionResult.Success success &&
-                            success.swingSource() == InteractionResult.SwingSource.CLIENT
+                            success.swingSource() == InteractionResult.SwingSource.PREDICTED
                         )
                     ))
                     {
@@ -542,7 +539,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         boolean useSuccessful = this.mc.gameMode.useItemOn(player,
                             i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND,
                             blockHit) instanceof InteractionResult.Success success &&
-                            success.swingSource() == InteractionResult.SwingSource.CLIENT;
+                            success.swingSource() == InteractionResult.SwingSource.PREDICTED;
                         if (itemstack.is(ViveItemTags.VIVECRAFT_SCYTHES) && !useSuccessful) {
                             // some scythes just need to be used
                             this.mc.gameMode.useItem(player,
@@ -606,8 +603,8 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                                 if (this.mc.gameMode.continueDestroyBlock(blockHit.getBlockPos(),
                                     blockHit.getDirection()))
                                 {
-                                    this.mc.level.addBreakingBlockEffect(blockHit.getBlockPos(),
-                                        blockHit.getDirection());
+                                    this.mc.level.addDestroyBlockEffect(blockHit.getBlockPos(),
+                                        this.mc.level.getBlockState(blockHit.getBlockPos()));
                                 }
 
                                 this.clearBlockHitDelay();

@@ -1,10 +1,11 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.vulkan.VulkanDevice;
-import com.mojang.blaze3d.vulkan.VulkanGpuTexture;
-import com.mojang.blaze3d.vulkan.VulkanUtils;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice;
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuTexture;
+import com.mojang.renderpearl.backend.vulkan.VulkanUtils;
+import com.mojang.renderpearl.frontend.FrontendGpuDevice;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.lwjgl.system.MemoryStack;
@@ -21,7 +22,9 @@ import java.util.Set;
 public class VulkanHelper implements GraphicsHelper {
 
     private VulkanDevice getVulkanDevice() {
-        if (RenderSystem.getDevice().backend instanceof VulkanDevice vulkanDevice) {
+        if (RenderSystem.getDevice() instanceof FrontendGpuDevice gpuDevice &&
+            gpuDevice.backend instanceof VulkanDevice vulkanDevice)
+        {
             return vulkanDevice;
         } else {
             throw new IllegalArgumentException("Vivecraft: not a vulkan device in vulkan context");

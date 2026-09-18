@@ -1,13 +1,13 @@
 package org.vivecraft.client_vr.render.renderstates;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.LightCoordsUtil;
@@ -96,7 +96,9 @@ public class VRRenderState {
 
     public final PostProcessRenderState postProcessState = new PostProcessRenderState();
 
-    public void extract(@Nullable LocalPlayer player, float partialTick, SubmitNodeStorage submitNodeStorage) {
+    public void extract(
+        @Nullable LocalPlayer player, float worldPartialTick, PlayerRenderState playerRenderState, Camera camera)
+    {
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
         VRData worldData = dataHolder.vrPlayer.getVRDataWorld();
@@ -113,24 +115,29 @@ public class VRRenderState {
         this.inBlock = false;
         this.inWater = false;
 
+        float playerPartialTick =
+            player != null && mc.level != null && mc.level.tickRateManager().isEntityFrozen(player) ? 1F :
+                worldPartialTick;
+
         if (!this.inMenuRoom && player != null && !player.isSpectator() && player.isAlive()) {
             Vec3 cameraPos = worldData.getEye(this.currentPass).getPosition();
             Pair<BlockState, BlockPos> block = VREffectsHelper.getNearOpaqueBlock(cameraPos, 0.02);
 
             this.inBlock = block != null &&
-                !Xevents.INSTANCE.renderBlockOverlay(player, new PoseStack(), block.getLeft(), block.getRight(),
-                    submitNodeStorage);
+                !Xevents.INSTANCE.extractBlockOverlay(player, playerRenderState, block.getLeft(), block.getRight(),
+                    camera, worldPartialTick, playerPartialTick);
             this.inWater =
                 player.isEyeInFluid(FluidTags.WATER) &&
-                    !Xevents.INSTANCE.renderWaterOverlay(player, new PoseStack(), submitNodeStorage);
+                    !Xevents.INSTANCE.extractWaterOverlay(player, playerRenderState, camera, worldPartialTick,
+                        playerPartialTick);
         }
 
-        DebugRenderHelper.extractDebug(partialTick);
+        DebugRenderHelper.extractDebug(worldPartialTick);
 
         // everything after this just needs to be done once per frame
         if (!dataHolder.isFirstPass) return;
 
-        this.partialTick = partialTick;
+        this.partialTick = worldPartialTick;
         this.worldScale = worldData.worldScale;
         this.headPos = worldData.hmd.getPosition();
 
@@ -138,7 +145,8 @@ public class VRRenderState {
 
         // first person effects
         this.firstPersonFire = player != null && !player.isSpectator() && player.isOnFire() &&
-            !Xevents.INSTANCE.renderFireOverlay(player, new PoseStack(), submitNodeStorage);
+            !Xevents.INSTANCE.extractFireOverlay(player, playerRenderState, camera, worldPartialTick,
+                playerPartialTick);
         this.fireHeight = (float) (worldData.getHeadPivot().y -
             ((GameRendererExtension) mc.gameRenderer).vivecraft$getRveY()
         );
@@ -153,7 +161,7 @@ public class VRRenderState {
         {
             this.shadowPos = null;
         } else {
-            this.shadowPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTick)
+            this.shadowPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(worldPartialTick)
                 .add(0.0D, 0.005D, 0.0D);
             AABB aabb = player.getBoundingBox();
             this.shadowSize.set((float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ));
@@ -285,7 +293,7 @@ public class VRRenderState {
         VREffectsHelper.extractCrosshairState(this.crosshairState, player);
         VRWidgetHelper.extractVRThirdPersonCamWidget(this.thirdCamWidgetState, player);
         VRWidgetHelper.extractVRHandheldCameraWidget(this.screenCamWidgetState, player);
-        DebugRenderHelper.extractDebug(partialTick);
+        DebugRenderHelper.extractDebug(worldPartialTick);
     }
 
     public enum Keyboard {

@@ -1,35 +1,40 @@
 package org.vivecraft.neoforge;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.Camera;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.ClientHooks;
-import net.neoforged.neoforge.client.event.RenderBlockScreenEffectEvent;
+import net.neoforged.neoforge.client.CustomBlockScreenEffectRenderer;
 import org.vivecraft.Xevents;
 
 public class XeventsImpl implements Xevents {
 
     @Override
-    public boolean renderBlockOverlay(
-        Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos,
-        SubmitNodeCollector submitNodeCollector)
+    public boolean extractBlockOverlay(
+        LocalPlayer player, PlayerRenderState playerRenderState, BlockState blockState, BlockPos blockPos,
+        Camera camera, float worldPartialTick, float playerPartialTick)
     {
-        return ClientHooks.renderBlockOverlay(player, poseStack, RenderBlockScreenEffectEvent.OverlayType.BLOCK,
-            blockState, blockPos, Minecraft.getInstance().getAtlasManager(), submitNodeCollector);
+        return ClientHooks.extractBlockScreenEffect(player, playerRenderState, blockPos,
+            blockState, camera, worldPartialTick, playerPartialTick);
     }
 
     @Override
-    public boolean renderWaterOverlay(Player player, PoseStack poseStack, SubmitNodeCollector submitNodeCollector) {
-        return ClientHooks.renderWaterOverlay(player, poseStack, Minecraft.getInstance().getAtlasManager(),
-            submitNodeCollector);
+    public boolean extractWaterOverlay(
+        LocalPlayer player, PlayerRenderState playerRenderState, Camera camera, float worldPartialTick,
+        float playerPartialTick)
+    {
+        return ClientHooks.extractWaterScreenEffect(player, playerRenderState, camera, worldPartialTick,
+            playerPartialTick);
     }
 
     @Override
-    public boolean renderFireOverlay(Player player, PoseStack poseStack, SubmitNodeCollector submitNodeCollector) {
-        return ClientHooks.renderFireOverlay(player, poseStack, Minecraft.getInstance().getAtlasManager(),
-            submitNodeCollector);
+    public boolean extractFireOverlay(
+        LocalPlayer player, PlayerRenderState playerRenderState, Camera camera, float worldPartialTick,
+        float playerPartialTick)
+    {
+        ClientHooks.extractFireScreenEffect(player, playerRenderState, camera, worldPartialTick, playerPartialTick);
+        return playerRenderState.customFireOverlayRenderer == CustomBlockScreenEffectRenderer.NO_OP;
     }
 }

@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -21,7 +21,7 @@ public class MultiPassRenderTarget extends RenderTarget {
     public MultiPassRenderTarget(
         String name, RenderTarget mainTarget, Function<RenderPass, RenderTarget> vrTargets, GpuFormat format)
     {
-        super(name, mainTarget.useDepth, format);
+        super(name, format, mainTarget.depthFormat);
         this.mainTarget = mainTarget;
         this.vrTargets = vrTargets;
 
@@ -75,6 +75,16 @@ public class MultiPassRenderTarget extends RenderTarget {
     @Override
     public GpuTextureView getDepthTextureView() {
         return callOnTargetRet(RenderTarget::getDepthTextureView);
+    }
+
+    @Override
+    public void copyColorFrom(RenderTarget source) {
+        callOnTarget(r -> r.copyColorFrom(source));
+    }
+
+    @Override
+    public boolean hasDepth() {
+        return callOnTargetRet(RenderTarget::hasDepth);
     }
 
     private void callOnTarget(Consumer<RenderTarget> consumer) {

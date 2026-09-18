@@ -2,8 +2,8 @@ package org.vivecraft.mixin.client_vr.renderer.rendertype;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.commands.RenderPass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.rendertype.PreparedRenderType;
@@ -36,7 +36,7 @@ public class PreparedRenderTypeVRMixin implements PreparedRenderTypeExtension {
         this.vivecraft$undistorted = true;
     }
 
-    @Inject(method = "drawFromBuffer(Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/IndexType;III)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;setUniform(Ljava/lang/String;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V"))
+    @Inject(method = "draw(Lnet/minecraft/client/renderer/StagedVertexBuffer$ExecuteInfo;Lcom/mojang/renderpearl/api/commands/RenderPass;Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/commands/RenderPass;setUniform(Ljava/lang/String;Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;)V"))
     public void vivecraft$applyUniformOverrides(CallbackInfo ci, @Local RenderPass renderPass) {
         if (this.vivecraft$fogOverride != null) {
             renderPass.setUniform("Fog", ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).getFogRenderer()

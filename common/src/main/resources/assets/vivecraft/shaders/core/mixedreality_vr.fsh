@@ -1,4 +1,5 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 #define GUI_FIRST 1
 #define GUI_THIRD 2
@@ -27,9 +28,9 @@ layout(std140) uniform MixedRealityUbo {
     int depthZeroToOne;
 };
 
-in vec2 texCoordinates;
+layout(location = 0) in vec2 texCoordinates;
 
-out vec4 out_Color;
+layout(location = 0) out vec4 out_Color;
 
 vec3 getFragmentPosition(in vec2 coord) {
     vec4 posScreen = vec4(coord, texture(thirdPersonDepth, coord).x, 1);

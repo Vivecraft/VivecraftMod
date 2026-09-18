@@ -3,29 +3,21 @@ package org.vivecraft.mixin.client_vr.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MapRenderer;
+import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.MapRenderState;
+import net.minecraft.client.renderer.state.level.FirstPersonHandsAndItemsRenderState;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.saveddata.maps.MapId;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,24 +29,26 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.Xloader;
 import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.ClientVRPlayers;
+import org.vivecraft.client.extensions.EntityRenderStateExtension;
+import org.vivecraft.client.extensions.FirstPersonHandsAndItemsStateExtension;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
-import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.client_vr.render.renderstates.FirstPersonHandsAdditions;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.data.ViveItems;
 import org.vivecraft.mod_compat_vr.alexcaves.AlexCavesHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
-@Mixin(value = ItemInHandRenderer.class, priority = 999)
+@Mixin(value = FirstPersonHandsAndItemsRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin {
 
     @Unique
@@ -74,76 +68,56 @@ public abstract class ItemInHandRendererVRMixin {
     @Final
     @Shadow
     private Minecraft minecraft;
-    @Final
-    @Shadow
-    private EntityRenderDispatcher entityRenderDispatcher;
-    @Shadow
-    private float oMainHandHeight;
-    @Shadow
-    private float mainHandHeight;
-    @Shadow
-    private float oOffHandHeight;
-    @Shadow
-    private float offHandHeight;
-
-    @Shadow
-    @Final
-    private MapRenderState mapRenderState;
-
-    @Shadow
-    public abstract void renderItem(
-        LivingEntity entity, ItemStack itemStack, ItemDisplayContext displayContext,
-        PoseStack poseStack, SubmitNodeCollector collector, int seed);
-
-    @Shadow
-    protected abstract void renderMap(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, ItemStack stack);
-
-    @Shadow
-    protected abstract void renderPlayerArm(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float equippedProgress,
-        float swingProgress,
-        HumanoidArm side);
 
     @Shadow
     @Final
     private static RenderType MAP_BACKGROUND;
 
+    @Shadow
+    protected abstract void renderPlayerArm(
+        PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
+        int lightCoords, float inverseArmHeight, float attackValue, HumanoidArm arm, PlayerRenderState playerState);
+
+    @Shadow
+    protected abstract void renderMap(
+        PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords,
+        ItemStack itemStack, boolean mainHand, FirstPersonHandsAndItemsRenderState state);
+
     @Inject(method = "renderPlayerArm", at = @At("HEAD"), cancellable = true)
     private void vivecraft$overrideArm(
         PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float equippedProgress,
-        float swingProgress, HumanoidArm side, CallbackInfo ci)
+        float swingProgress, HumanoidArm side, PlayerRenderState playerState, CallbackInfo ci)
     {
         if (VRState.VR_RUNNING) {
-            vivecraft$vrPlayerArm(poseStack, collector, combinedLight, swingProgress, side);
+            vivecraft$vrPlayerArm(poseStack, collector, combinedLight, swingProgress, side, playerState);
             ci.cancel();
         }
     }
 
     @Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
     private void vivecraft$overrideArmItem(
-        AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand, float swingProgress,
-        ItemStack itemStack, float equippedProgress, PoseStack poseStack, SubmitNodeCollector collector,
-        int combinedLight, CallbackInfo ci)
+        PlayerRenderState playerState, FirstPersonHandsAndItemsRenderState state, float partialTick, float pitch,
+        InteractionHand hand, float swingProgress, ItemStack itemStack, float equippedProgress, PoseStack poseStack,
+        SubmitNodeCollector collector, int combinedLight, CallbackInfo ci)
     {
         if (VRState.VR_RUNNING) {
-            this.vivecraft$vrRenderArmWithItem(player, partialTick, hand, swingProgress, itemStack, poseStack,
-                collector,
-                combinedLight);
+            this.vivecraft$vrRenderArmWithItem(playerState, state, partialTick, hand, swingProgress, itemStack,
+                equippedProgress, poseStack, collector, combinedLight);
             ci.cancel();
         }
     }
 
-    @Inject(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"), cancellable = true)
+    @Inject(method = "renderMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V"), cancellable = true)
     private void vivecraft$overrideMapShaders(
-        PoseStack poseStack, SubmitNodeCollector collector, int packedLight, ItemStack stack, CallbackInfo ci)
+        PoseStack poseStack, SubmitNodeCollector collector, int packedLight, ItemStack stack,
+        boolean mainHand, FirstPersonHandsAndItemsRenderState state, CallbackInfo ci)
     {
         // with shaders, at least iris, we can't provide a custom text pipeline so need to use entity
         if (VRState.VR_RUNNING && ShadersHelper.isShaderActive()) {
-            MapId mapId = stack.get(DataComponents.MAP_ID);
-            MapItemSavedData mapData = MapItem.getSavedData(mapId, this.minecraft.level);
+            boolean hasMapData = mainHand ? state.hasMainHandMapData : state.hasOffHandMapData;
+            MapRenderState mapRenderState = mainHand ? state.mainHandMapRenderState : state.offHandMapRenderState;
             RenderType renderType =
-                mapData == null ? VIVECRAFT$MAP_BACKGROUND_NO_CULL : VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL;
+                hasMapData ? VIVECRAFT$MAP_BACKGROUND_NO_CULL : VIVECRAFT$MAP_BACKGROUND_CHECKERBOARD_NO_CULL;
             Vector3f normal = poseStack.last().pose().transformDirection(0F, 0F, 1F, new Vector3f());
             collector.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
                 consumer.addVertex(pose, -7.0F, 135.0F, 0.0F)
@@ -167,10 +141,9 @@ public abstract class ItemInHandRendererVRMixin {
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight)
                     .setNormal(normal.x, normal.y, normal.z);
             });
-            if (mapData != null) {
-                MapRenderer mapRenderer = this.minecraft.getMapRenderer();
-                mapRenderer.extractRenderState(mapId, mapData, this.mapRenderState);
-                mapRenderer.render(this.mapRenderState, poseStack, collector, false, packedLight);
+
+            if (hasMapData) {
+                this.minecraft.getMapRenderer().render(mapRenderState, poseStack, collector, false, packedLight);
             }
             ci.cancel();
         }
@@ -188,110 +161,87 @@ public abstract class ItemInHandRendererVRMixin {
 
     @Unique
     private void vivecraft$vrRenderArmWithItem(
-        AbstractClientPlayer player, float partialTick, InteractionHand hand, float swingProgress, ItemStack itemStack,
+        PlayerRenderState playerState, FirstPersonHandsAndItemsRenderState state, float partialTick,
+        InteractionHand hand, float swingProgress, ItemStack itemStack, float equippedProgress,
         PoseStack poseStack, SubmitNodeCollector collector, int combinedLight)
     {
-        // TODO 26.1 extract arm state
-        ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+        if (playerState.avatarRenderState == null) return;
+        ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) playerState.avatarRenderState).vivecraft$getRotInfo();
+        if (rotInfo == null) return;
 
         boolean mainHand = hand == InteractionHand.MAIN_HAND;
-        HumanoidArm side = mainHand ? player.getMainArm() : player.getMainArm().getOpposite();
-        if (dh.vrSettings.reverseHands) {
+        HumanoidArm side =
+            mainHand ? playerState.avatarRenderState.mainArm : playerState.avatarRenderState.mainArm.getOpposite();
+        if (rotInfo.leftHanded) {
             side = side.getOpposite();
         }
-        // we need to get this here, because the supplied value is invalid when we call it
-        float equippedProgress = this.vivecraft$getEquipProgress(hand, partialTick);
 
         poseStack.pushPose();
 
-        boolean renderArm = dh.currentPass != RenderPass.THIRD || dh.vrSettings.mixedRealityRenderHands;
+        FirstPersonHandsAdditions additions = ((FirstPersonHandsAndItemsStateExtension) state).vivecraft$getAdditions();
 
-        if (RenderPass.isFirstPerson(dh.currentPass)) {
-            renderArm &= dh.vrSettings.showPlayerHands;
+        boolean renderArm = additions.currentPass != RenderPass.THIRD || additions.handsVisibleInThirdPerson;
+
+        if (RenderPass.isFirstPerson(additions.currentPass)) {
+            renderArm &= additions.handsVisibleInFirstPerson;
         }
 
-        if (dh.currentPass == RenderPass.CAMERA) {
+        if (additions.currentPass == RenderPass.CAMERA) {
             renderArm = false;
         }
-        if (BowTracker.isBow(itemStack) && dh.bowTracker.isActive((LocalPlayer) player)) {
+        if (BowTracker.isBow(itemStack) && additions.bowActive) {
             renderArm = false;
         }
         if (TelescopeTracker.isTelescope(itemStack) &&
-            (hand == InteractionHand.OFF_HAND && dh.currentPass == RenderPass.SCOPEL ||
-                hand == InteractionHand.MAIN_HAND && dh.currentPass == RenderPass.SCOPER
+            (hand == InteractionHand.OFF_HAND && additions.currentPass == RenderPass.SCOPEL ||
+                hand == InteractionHand.MAIN_HAND && additions.currentPass == RenderPass.SCOPER
             ))
         {
             renderArm = false;
         }
 
-        if (RenderPass.isFirstPerson(dh.currentPass) &&
-            ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf &&
-            ClientDataHolderVR.getInstance().vrSettings.modelArmsMode == VRSettings.ModelArmsMode.COMPLETE)
-        {
-            renderArm = false;
-        }
-
-        if (renderArm && !player.isInvisible()) {
-            this.renderPlayerArm(poseStack, collector, combinedLight, equippedProgress, swingProgress, side);
+        if (renderArm && !playerState.avatarRenderState.isInvisible) {
+            this.renderPlayerArm(poseStack, collector, combinedLight, equippedProgress, swingProgress, side,
+                playerState);
         }
 
         if (!itemStack.isEmpty()) {
             poseStack.pushPose();
 
-            if (player.swingingArm == hand) {
+            if (playerState.avatarRenderState.currentSwing != null &&
+                playerState.avatarRenderState.currentSwing.hand() == hand)
+            {
                 this.vivecraft$transformFirstPersonVR(poseStack, side, swingProgress);
             }
 
-            VivecraftItemRendering.VivecraftItemTransformType transformType = VivecraftItemRendering.getTransformType(
-                itemStack, player);
+            VivecraftItemRendering.VivecraftItemTransformType transformType =
+                mainHand ? additions.mainHandItemTransformType : additions.offHandItemTransformType;
 
-            boolean useLeftHandModelinLeftHand = false;
+            ItemDisplayContext itemDisplayContext =
+                mainHand ? additions.mainHandItemDisplayContext : additions.offHandItemDisplayContext;
 
-            ItemDisplayContext itemDisplayContext;
-
-            // third person transforms for custom model data items/item model overrides, but not spear, shield and crossbow
-            boolean hasItemOverride = itemStack.getComponents() instanceof PatchedDataComponentMap patched &&
-                patched.hasNonDefault(DataComponents.ITEM_MODEL);
-            boolean hasCMD = (hasItemOverride || itemStack.has(DataComponents.CUSTOM_MODEL_DATA)) &&
-                transformType != VivecraftItemRendering.VivecraftItemTransformType.CROSSBOW &&
-                transformType != VivecraftItemRendering.VivecraftItemTransformType.SPEAR &&
-                transformType != VivecraftItemRendering.VivecraftItemTransformType.SHIELD;
-
-            boolean isBow = BowTracker.isBow(itemStack) && dh.bowTracker.isActive((LocalPlayer) player);
-
-            if (ViveItems.isClimbingClaws(itemStack) || (!isBow &&
-                (ClientNetworking.isThirdPersonItems() || (hasCMD && ClientNetworking.isThirdPersonItemsCustom()))
-            ))
-            {
-                // swap hand, since it's backwards else wise
-                if (dh.vrSettings.reverseHands) {
-                    mainHand = !mainHand;
-                }
-                useLeftHandModelinLeftHand = true; // test
-                VivecraftItemRendering.applyThirdPersonItemTransforms(poseStack, transformType, mainHand, player,
+            if (!itemDisplayContext.firstPerson()) {
+                VivecraftItemRendering.applyThirdPersonItemTransforms(poseStack, transformType, mainHand, playerState,
                     equippedProgress, partialTick, itemStack, hand);
-
-                itemDisplayContext = mainHand || !useLeftHandModelinLeftHand ?
-                    ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
             } else {
-                VivecraftItemRendering.applyFirstPersonItemTransforms(poseStack, transformType, mainHand, player,
+                VivecraftItemRendering.applyFirstPersonItemTransforms(poseStack, transformType, mainHand, playerState,
                     equippedProgress, partialTick, itemStack, hand);
-
-                itemDisplayContext = mainHand || !useLeftHandModelinLeftHand ?
-                    ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
             }
 
             if (transformType == VivecraftItemRendering.VivecraftItemTransformType.MAP) {
                 if (AlexCavesHelper.isLoaded() && AlexCavesHelper.isCaveMap(itemStack)) {
                     AlexCavesHelper.renderCaveMap(poseStack, collector, combinedLight, itemStack);
                 } else {
-                    this.renderMap(poseStack, collector, combinedLight, itemStack);
+                    this.renderMap(poseStack, collector, combinedLight, itemStack, mainHand, state);
                 }
             } else if (transformType == VivecraftItemRendering.VivecraftItemTransformType.TELESCOPE) {
-                if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
+                if (additions.currentPass != RenderPass.SCOPEL && additions.currentPass != RenderPass.SCOPER) {
                     poseStack.pushPose();
 
-                    renderItem(player, itemStack, itemDisplayContext, poseStack, collector, combinedLight);
+                    (mainHand ? state.mainHandRenderState : state.offHandRenderState)
+                        .submit(poseStack, collector, combinedLight, OverlayTexture.NO_OVERLAY, 0);
+                    (mainHand ? state.mainHandRenderState : state.offHandRenderState)
+                        .submit(poseStack, collector, combinedLight, OverlayTexture.NO_OVERLAY, 0);
 
                     if (ClientNetworking.isThirdPersonItems()) {
                         // account for the -2/16 offset of the third person spyglass transform
@@ -300,7 +250,7 @@ public abstract class ItemInHandRendererVRMixin {
                         poseStack.translate(0.0F, 0.344F, 0.0F);
                     }
 
-                    poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+                    poseStack.rotate(Axis.XP.rotationDegrees(-90.0F));
                     if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
                         // this messes stuff up when rendering the quads
                         OptifineHelper.endEntities();
@@ -315,7 +265,8 @@ public abstract class ItemInHandRendererVRMixin {
                     poseStack.popPose();
                 }
             } else {
-                this.renderItem(player, itemStack, itemDisplayContext, poseStack, collector, combinedLight);
+                (mainHand ? state.mainHandRenderState : state.offHandRenderState)
+                    .submit(poseStack, collector, combinedLight, OverlayTexture.NO_OVERLAY, 0);
             }
 
             poseStack.popPose();
@@ -325,27 +276,21 @@ public abstract class ItemInHandRendererVRMixin {
     }
 
     @Unique
-    private float vivecraft$getEquipProgress(InteractionHand hand, float partialTick) {
-        return hand == InteractionHand.MAIN_HAND ?
-            1.0F - Mth.lerp(partialTick, this.oMainHandHeight, this.mainHandHeight) :
-            1.0F - Mth.lerp(partialTick, this.oOffHandHeight, this.offHandHeight);
-    }
-
-    @Unique
     private boolean vivecraft$didLogModelError = false;
 
     @Unique
     private void vivecraft$vrPlayerArm(
-        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float swingProgress, HumanoidArm side)
+        PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float swingProgress, HumanoidArm side,
+        PlayerRenderState playerState)
     {
-        LocalPlayer player = this.minecraft.player;
+        if (playerState.avatarRenderState == null) return;
         boolean rightHand = side == HumanoidArm.RIGHT;
         boolean mainHand =
             side == (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
         float offsetDirection = rightHand ? 1.0F : -1.0F;
 
-        VRArmRenderer vrArmRenderer = ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getArmSkinMap()
-            .get(player.getSkin().model());
+        VRArmRenderer vrArmRenderer = ((EntityRenderDispatcherVRExtension) this.minecraft.getEntityRenderDispatcher()).vivecraft$getArmSkinMap()
+            .get(playerState.avatarRenderState.skin.model());
 
         if (vrArmRenderer == null) {
             if (!this.vivecraft$didLogModelError) {
@@ -359,16 +304,18 @@ public abstract class ItemInHandRendererVRMixin {
 
         poseStack.pushPose();
 
-        if (player.swingingArm == InteractionHand.MAIN_HAND && mainHand) {
-            this.vivecraft$transformFirstPersonVR(poseStack, side, swingProgress);
-        }
+        if (playerState.avatarRenderState.currentSwing != null) {
+            if (playerState.avatarRenderState.currentSwing.hand() == InteractionHand.MAIN_HAND && mainHand) {
+                this.vivecraft$transformFirstPersonVR(poseStack, side, swingProgress);
+            }
 
-        if (player.swingingArm == InteractionHand.OFF_HAND && !mainHand) {
-            this.vivecraft$transformFirstPersonVR(poseStack, side, swingProgress);
+            if (playerState.avatarRenderState.currentSwing.hand() == InteractionHand.OFF_HAND && !mainHand) {
+                this.vivecraft$transformFirstPersonVR(poseStack, side, swingProgress);
+            }
         }
 
         poseStack.scale(0.4f, 0.4F, 0.4F);
-        boolean slim = player.getSkin().model() == PlayerModelType.SLIM;
+        boolean slim = playerState.avatarRenderState.skin.model() == PlayerModelType.SLIM;
 
             /*
              x offset: (arm x origin + arm x offset + arm x dimension * 0.5) / 16
@@ -381,11 +328,12 @@ public abstract class ItemInHandRendererVRMixin {
             */
 
         poseStack.translate((slim ? -0.34375F : -0.375F) * offsetDirection, 0.0F, 0.75F);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
-        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+        poseStack.rotate(Axis.XP.rotationDegrees(-90));
+        poseStack.rotate(Axis.YP.rotationDegrees(180));
 
-        vrArmRenderer.armAlpha = SwingTracker.getItemFade(player, ItemStack.EMPTY, mainHand);
-        Identifier skin = player.getSkin().body().texturePath();
+        vrArmRenderer.armAlpha = ((FirstPersonHandsAndItemsStateExtension) playerState.firstPersonHandsAndItems).vivecraft$getAdditions()
+            .getHandFade(mainHand);
+        Identifier skin = playerState.avatarRenderState.skin.body().texturePath();
 
         if (rightHand) {
             vrArmRenderer.renderRightHand(poseStack, collector, combinedLight, skin, true);
@@ -409,7 +357,7 @@ public abstract class ItemInHandRendererVRMixin {
                 }
 
                 poseStack.translate(0.0F, 0.0F, 0.2F);
-                poseStack.mulPose(Axis.XP.rotationDegrees(forwardRotation * 30.0F));
+                poseStack.rotate(Axis.XP.rotationDegrees(forwardRotation * 30.0F));
                 poseStack.translate(0.0F, 0.0F, -0.2F);
             }
             case INTERACT -> {
@@ -420,7 +368,7 @@ public abstract class ItemInHandRendererVRMixin {
                     sideRotation = Mth.sin((swingProgress * 3.0F) * Mth.PI);
                 }
 
-                poseStack.mulPose(
+                poseStack.rotate(
                     Axis.ZP.rotationDegrees((side == HumanoidArm.RIGHT ? -1F : 1F) * sideRotation * 45.0F));
             }
             case USE -> {

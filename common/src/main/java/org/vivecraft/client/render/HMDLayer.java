@@ -49,7 +49,7 @@ public class HMDLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
                 this.getParentModel().translateToHead(poseStack);
                 submitNodeCollector.order(0)
                     .submitModelPart(this.model.head, poseStack, RenderTypes.entitySolid(hmd), packedLight,
-                        OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF, null);
+                        OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
             }
         }
     }

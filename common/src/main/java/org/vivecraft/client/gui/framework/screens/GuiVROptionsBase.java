@@ -10,7 +10,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec2;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 import org.vivecraft.client.gui.framework.TooltipRenderer;
 import org.vivecraft.client.gui.framework.VROptionEntry;
 import org.vivecraft.client.gui.framework.VROptionLayout;
@@ -282,9 +282,9 @@ public abstract class GuiVROptionsBase extends Screen {
         boolean success = super.mouseClicked(mouseEvent, doubleClick);
 
         if (success && getFocused() instanceof AbstractWidget widget) {
-            if (mouseEvent.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (mouseEvent.button() == SDLMouse.SDL_BUTTON_LEFT) {
                 this.actionPerformed(widget);
-            } else if (mouseEvent.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            } else if (mouseEvent.button() == SDLMouse.SDL_BUTTON_RIGHT) {
                 this.actionPerformedRightClick(widget);
             }
         } else if (this.visibleList != null) {
@@ -317,7 +317,7 @@ public abstract class GuiVROptionsBase extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent keyEvent) {
-        if (keyEvent.key() == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyEvent.isEscape()) {
             if (!this.onDoneClicked()) {
                 this.dataHolder.vrSettings.saveOptions();
                 this.minecraft.gui.setScreen(this.lastScreen);

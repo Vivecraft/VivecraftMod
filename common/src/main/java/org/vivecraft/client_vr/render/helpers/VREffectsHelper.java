@@ -3,9 +3,9 @@ package org.vivecraft.client_vr.render.helpers;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Hud;
@@ -14,11 +14,11 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
-import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -74,6 +74,7 @@ import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 import javax.annotation.Nullable;
 import java.util.Calendar;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.stream.Stream;
 
 public class VREffectsHelper {
@@ -637,9 +638,18 @@ public class VREffectsHelper {
         if (vrState.currentPass != RenderPass.CAMERA &&
             (vrState.currentPass != RenderPass.THIRD || DATA_HOLDER.vrSettings.mixedRealityRenderHands))
         {
-            order = VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true, order);
+            order = VRArmHelper.renderVRHands(output, vrState, cameraState, levelState.playerRenderState, poseStack,
+                true, true, true, true, order);
         }
-        featureRenderer.renderAllFeatures(output);
+        try (FeatureRenderDispatcher.PreparedFrame featureFrame = featureRenderer.prepareFrame(output)) {
+            try (com.mojang.renderpearl.api.commands.RenderPass renderPass = RenderSystem.getDevice()
+                .createCommandEncoder().createRenderPass(() -> "Vivecraft Menu Room",
+                    MC.gameRenderer.mainRenderTarget.getColorTextureView(), Optional.empty(),
+                    MC.gameRenderer.mainRenderTarget.getDepthTextureView(), OptionalDouble.empty()))
+            {
+                FeatureRenderDispatcher.renderAllFeatures(renderPass, featureFrame);
+            }
+        }
 
         ((LevelRendererExtension) MC.levelRenderer).vivecraft$renderGizmos(cameraState, output, featureRenderer);
 
@@ -668,7 +678,7 @@ public class VREffectsHelper {
             (float) (DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
 
         // remove world rotation or the room doesn't align with the screen
-        poseStack.mulPose(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+        poseStack.rotate(Axis.YN.rotation(-DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
 
         if (DATA_HOLDER.menuWorldRenderer.isReady()) {
             try {
@@ -690,14 +700,13 @@ public class VREffectsHelper {
     }
 
     /**
-     * renders the vivecraft stuff into separate buffers for the fabulous settings
-     * this includes hands, vr shadow, gui, camera widgets and other stuff
+     * renders the vivecraft stuff in one go, since OIT handles the ordering
      *
      * @param output     SubmitNodeStorage to output to
-     * @param levelState LevelRenderState to getthe vr renderstate and camera state from
+     * @param levelState LevelRenderState to get the vr renderstate and camera state from
      * @param poseStack  PoseStack to use for positioning
      */
-    public static void renderVRFabulous(
+    public static void renderVROIT(
         SubmitNodeStorage output, LevelRenderState levelState, PoseStack poseStack)
     {
         VRRenderState vrState = ((LevelRenderStateExtension) levelState).vivecraft$getVRRenderState();
@@ -709,46 +718,22 @@ public class VREffectsHelper {
         Profiler.get().push("VR");
         renderCrosshairAtDepth(output, vrState.crosshairState, levelState.cameraRenderState, poseStack, 0);
 
-        // switch to VR Occluded buffer, and copy main depth for occlusion
-        VRRenderTypes.VR_OUTPUT_TARGET = VRRenderTypes.OCCLUDED_TARGET;
-
         int order = 0;
-        if (vrState.occludeGui) {
-            order = renderGuiAndShadow(output, vrState, levelState.cameraRenderState, poseStack, false, false, order);
-            order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
-                vrState.armsState.renderHands && vrState.armsState.menuHandMain,
-                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true, order);
-        }
+        order = renderGuiAndShadow(output, vrState, levelState.cameraRenderState, poseStack, !vrState.occludeGui, false,
+            order);
 
-        // switch to VR UnOccluded buffer
-        VRRenderTypes.VR_OUTPUT_TARGET = VRRenderTypes.UNOCCLUDED_TARGET;
+        order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState,
+            levelState.playerRenderState, poseStack,
+            vrState.armsState.renderHands, vrState.armsState.renderHands,
+            vrState.armsState.menuHandMain, vrState.armsState.menuHandOff, order);
 
-        order = 0;
-        if (!vrState.occludeGui) {
-            order = renderGuiAndShadow(output, vrState, levelState.cameraRenderState, poseStack, false, false, order);
-        }
-
-        order = renderVRSelfEffects(output, vrState, levelState.cameraRenderState, poseStack, order);
+        order = renderVRSelfEffects(output, vrState, levelState.cameraRenderState, levelState.playerRenderState,
+            poseStack, order);
         VRWidgetHelper.renderVRThirdPersonCamWidget(output, levelState.cameraRenderState, vrState.thirdCamWidgetState,
             poseStack);
         VRWidgetHelper.renderVRHandheldCameraWidget(output, levelState.cameraRenderState, vrState.screenCamWidgetState,
             poseStack);
 
-        if (!vrState.occludeGui) {
-            order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
-                vrState.armsState.renderHands && vrState.armsState.menuHandMain,
-                vrState.armsState.renderHands && vrState.armsState.menuHandOff, true, true, order);
-        }
-
-        // switch to VR hands buffer
-        VRRenderTypes.VR_OUTPUT_TARGET = VRRenderTypes.HANDS_TARGET;
-
-        order = 0;
-        order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
-            vrState.armsState.renderHands && !vrState.armsState.menuHandMain,
-            vrState.armsState.renderHands && !vrState.armsState.menuHandOff, false, false, order);
-
-        VRRenderTypes.VR_OUTPUT_TARGET = OutputTarget.MAIN_TARGET;
         Profiler.get().pop();
     }
 
@@ -784,12 +769,14 @@ public class VREffectsHelper {
                 vrState.screenCamWidgetState, poseStack);
 
             if (!vrState.armsState.handsSecond) {
-                order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
-                    vrState.armsState.renderHands, vrState.armsState.renderHands, vrState.armsState.menuHandMain,
-                    vrState.armsState.menuHandOff, order);
+                order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState,
+                    levelState.playerRenderState, poseStack, vrState.armsState.renderHands,
+                    vrState.armsState.renderHands, vrState.armsState.menuHandMain, vrState.armsState.menuHandOff,
+                    order);
             }
 
-            order = renderVRSelfEffects(output, vrState, levelState.cameraRenderState, poseStack, order);
+            order = renderVRSelfEffects(output, vrState, levelState.cameraRenderState, levelState.playerRenderState,
+                poseStack, order);
         }
 
         if (secondPassOnly || !vrState.uiAfterWorld) {
@@ -798,9 +785,10 @@ public class VREffectsHelper {
                 order);
 
             if (vrState.armsState.handsSecond) {
-                order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState, poseStack,
-                    vrState.armsState.renderHands, vrState.armsState.renderHands, vrState.armsState.menuHandMain,
-                    vrState.armsState.menuHandOff, order);
+                order = VRArmHelper.renderVRHands(output, vrState, levelState.cameraRenderState,
+                    levelState.playerRenderState, poseStack, vrState.armsState.renderHands,
+                    vrState.armsState.renderHands, vrState.armsState.menuHandMain, vrState.armsState.menuHandOff,
+                    order);
             }
         }
         Profiler.get().pop();
@@ -900,13 +888,14 @@ public class VREffectsHelper {
      * @param output      SubmitNodeCollector to output to
      * @param vrState     VR render state
      * @param cameraState camera render state for the position
+     * @param playerState player render state for the item activation
      * @param poseStack   PoseStack to use for positioning
      * @param order       order to render at
      * @return order to render the next thing at
      */
     private static int renderVRSelfEffects(
-        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
-        int order)
+        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PlayerRenderState playerState,
+        PoseStack poseStack, int order)
     {
         // only render the fire in first person, other views have the burning entity
         if (vrState.firstPersonFire && vrState.currentPass != RenderPass.THIRD &&
@@ -918,7 +907,7 @@ public class VREffectsHelper {
         // totem of undying
         // can't be ordered
         ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
-            .renderItemActivationAnimation(poseStack, vrState.partialTick, output);
+            .renderItemActivationAnimation(playerState, poseStack, vrState.partialTick, output);
         return order;
     }
 
@@ -965,7 +954,7 @@ public class VREffectsHelper {
 
         for (int i = 0; i < 4; i++) {
             poseStack.pushPose();
-            poseStack.mulPose(Axis.YP.rotationDegrees(i * 90.0F - vrState.fireYaw));
+            poseStack.rotate(Axis.YP.rotationDegrees(i * 90.0F - vrState.fireYaw));
             poseStack.translate(0.0D, -vrState.fireHeight, 0.0D);
 
             RenderHelper.submitLateCustomGeometry(output.order(order), poseStack, renderType,
@@ -1107,7 +1096,7 @@ public class VREffectsHelper {
      */
     public static void renderFaceOverlay(
         SubmitNodeStorage output, FeatureRenderDispatcher featureRenderDispatcher, CameraRenderState cameraState,
-        VRRenderState vrState)
+        PlayerRenderState playerState, VRRenderState vrState)
     {
         if (vrState.inBlock) {
             PoseStack poseStack = new PoseStack();
@@ -1120,8 +1109,18 @@ public class VREffectsHelper {
 
             order = renderGuiAndShadow(output, vrState, cameraState, poseStack, true, true, order);
 
-            order = VRArmHelper.renderVRHands(output, vrState, cameraState, poseStack, true, true, true, true, order);
-            featureRenderDispatcher.renderAllFeatures(output);
+            order = VRArmHelper.renderVRHands(output, vrState, cameraState, playerState, poseStack, true, true, true,
+                true, order);
+
+            try (FeatureRenderDispatcher.PreparedFrame featureFrame = featureRenderDispatcher.prepareFrame(output)) {
+                try (com.mojang.renderpearl.api.commands.RenderPass renderPass = RenderSystem.getDevice()
+                    .createCommandEncoder().createRenderPass(() -> "Vivecraft face overlay",
+                        MC.gameRenderer.mainRenderTarget.getColorTextureView(), Optional.empty(),
+                        MC.gameRenderer.mainRenderTarget.getDepthTextureView(), OptionalDouble.empty()))
+                {
+                    FeatureRenderDispatcher.renderAllFeatures(renderPass, featureFrame);
+                }
+            }
             RenderSystem.restoreProjectionMatrix();
         }
     }

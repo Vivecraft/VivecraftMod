@@ -15,6 +15,8 @@ import org.vivecraft.client.gui.framework.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
+import java.net.URI;
+
 
 public class GarbageCollectorScreen extends Screen implements ChangeableParentScreen {
 
@@ -67,7 +69,7 @@ public class GarbageCollectorScreen extends Screen implements ChangeableParentSc
             .build());
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.openguide"),
-            ConfirmLinkScreen.confirmLink(this, GUIDE_URL))
+            ConfirmLinkScreen.confirmLink(this, URI.create(GUIDE_URL)))
             .pos(this.width / 2 - 75, this.height - 32)
             .size(150, 20)
             .build());

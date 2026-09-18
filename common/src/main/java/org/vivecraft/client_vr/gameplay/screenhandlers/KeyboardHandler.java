@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.api.client.data.OpenKeyboardContext;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -186,22 +186,22 @@ public class KeyboardHandler {
         int y2 = (int) (Math.min(Math.max((int) UI.cursorY2, 0), GuiHandler.GUI_HEIGHT) * uiScaleY);
 
         if (POINTED_L && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.LEFT)) {
-            UI.mouseClicked(new MouseButtonEvent(x1, y1, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)), false);
+            UI.mouseClicked(new MouseButtonEvent(x1, y1, new MouseButtonInfo(SDLMouse.SDL_BUTTON_LEFT, 0)), false);
             LAST_PRESSED_CLICK_L = true;
         }
 
         if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.LEFT) && LAST_PRESSED_CLICK_L) {
-            UI.mouseReleased(new MouseButtonEvent(x1, y1, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
+            UI.mouseReleased(new MouseButtonEvent(x1, y1, new MouseButtonInfo(SDLMouse.SDL_BUTTON_LEFT, 0)));
             LAST_PRESSED_CLICK_L = false;
         }
 
         if (POINTED_R && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.RIGHT)) {
-            UI.mouseClicked(new MouseButtonEvent(x2, y2, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)), false);
+            UI.mouseClicked(new MouseButtonEvent(x2, y2, new MouseButtonInfo(SDLMouse.SDL_BUTTON_LEFT, 0)), false);
             LAST_PRESSED_CLICK_R = true;
         }
 
         if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.RIGHT) && LAST_PRESSED_CLICK_R) {
-            UI.mouseReleased(new MouseButtonEvent(x2, y2, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
+            UI.mouseReleased(new MouseButtonEvent(x2, y2, new MouseButtonInfo(SDLMouse.SDL_BUTTON_LEFT, 0)));
             LAST_PRESSED_CLICK_R = false;
         }
 

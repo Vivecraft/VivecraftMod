@@ -1,4 +1,5 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 /*
 MIT License
@@ -31,9 +32,9 @@ SOFTWARE.
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 
-in vec3 pos;
-in float sphericalVertexDistance;
-in float cylindricalVertexDistance;
+layout(location = 0) in vec3 pos;
+layout(location = 1) in float sphericalVertexDistance;
+layout(location = 2) in float cylindricalVertexDistance;
 
 const float PI = 3.14159265359;
 
@@ -83,7 +84,7 @@ vec3 proj_3d_to_2d(vec3 dir) {
     return dir;
 }
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 void main() {
     vec4 outColor = vec4(1.0);

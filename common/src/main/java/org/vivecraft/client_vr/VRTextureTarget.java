@@ -1,8 +1,8 @@
 package org.vivecraft.client_vr;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.GpuFormat;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import org.vivecraft.Xplat;
@@ -22,10 +22,10 @@ public class VRTextureTarget extends RenderTarget {
     public final GpuFormat gpuFormat;
 
     private VRTextureTarget(
-        String name, int width, int height, boolean useDepth, boolean mipmaps, boolean useStencil,
-        @Nullable Vector4fc clearColor, GpuFormat format)
+        String name, int width, int height, boolean mipmaps, boolean useStencil,
+        @Nullable Vector4fc clearColor, GpuFormat format, @Nullable GpuFormat depthFormat)
     {
-        super(name, useDepth, format);
+        super(name, format, depthFormat);
         this.gpuFormat = format;
         RenderSystem.assertOnRenderThread();
         ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
@@ -47,7 +47,7 @@ public class VRTextureTarget extends RenderTarget {
         super.createBuffers(width, height);
 
         if (this.clearColor != null) {
-            if (this.useDepth) {
+            if (this.depthFormat != null) {
                 RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
                     this.colorTexture, this.clearColor,
                     this.depthTexture, 0.0);
@@ -85,8 +85,6 @@ public class VRTextureTarget extends RenderTarget {
         private int width;
         private int height;
 
-        private boolean useDepth;
-
         private boolean mipmaps;
 
         private boolean stencil;
@@ -94,6 +92,8 @@ public class VRTextureTarget extends RenderTarget {
         private Vector4f clearColor;
 
         private GpuFormat format = GpuFormat.RGBA8_UNORM;
+
+        private GpuFormat deptFormat = null;
 
         private Builder(String name) {
             this.name = name;
@@ -106,7 +106,7 @@ public class VRTextureTarget extends RenderTarget {
         }
 
         public Builder withDepth() {
-            this.useDepth = true;
+            this.deptFormat = GpuFormat.D32_FLOAT;
             return this;
         }
 
@@ -137,11 +137,11 @@ public class VRTextureTarget extends RenderTarget {
             return new VRTextureTarget(
                 this.name,
                 this.width, this.height,
-                this.useDepth,
                 this.mipmaps,
                 this.stencil,
                 this.clearColor,
-                this.format);
+                this.format,
+                this.deptFormat);
         }
     }
 }

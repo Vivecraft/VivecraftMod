@@ -88,7 +88,7 @@ public abstract class TitleScreenMixin extends Screen {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
             graphics.tooltip(this.font,
                 this.font.split(hotswitchMessage, 280).stream().map(ClientTooltipComponent::create).toList(),
-                this.width / 2 - 140 - 12, 17, DefaultTooltipPositioner.INSTANCE, null);
+                this.width / 2 - 140 - 12, 17, DefaultTooltipPositioner.INSTANCE, null, false);
         }
     }
 }

@@ -1,21 +1,18 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.*;
-import com.mojang.blaze3d.platform.BlendFactor;
-import com.mojang.blaze3d.platform.CompareOp;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.AddressMode;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.pipeline.*;
+import com.mojang.renderpearl.api.textures.AddressMode;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.GpuSampler;
 import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.oit.OitPipelineSet;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -42,8 +39,8 @@ public class VRShaders {
     public static final String LANCZOS_DEPTH_SAMPLER = "Sampler1";
     public static final BindGroupLayout LANCZOS_BIND_GROUP = BindGroupLayout.builder()
         .withUniform(LanczosUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
-        .withSampler(LANCZOS_COLOR_SAMPLER)
-        .withSampler(LANCZOS_DEPTH_SAMPLER).build();
+        .withUniform(LANCZOS_COLOR_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER)
+        .withUniform(LANCZOS_DEPTH_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER).build();
 
     public static final RenderPipeline LANCZOS_PIPELINE = RenderPipeline.builder()
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_lanczos"))
@@ -52,6 +49,7 @@ public class VRShaders {
         .withBindGroupLayout(LANCZOS_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState.DEFAULT)
         .build();
 
     // mixed reality shader and its uniforms
@@ -65,10 +63,10 @@ public class VRShaders {
     public static final int MIXED_REALITY_GUI_SEPARATE = 4;
     public static final BindGroupLayout MIXED_REALITY_BIND_GROUP = BindGroupLayout.builder()
         .withUniform(MixedRealityUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
-        .withSampler(MIXED_REALITY_FIRST_COLOR_SAMPLER)
-        .withSampler(MIXED_REALITY_THIRD_COLOR_SAMPLER)
-        .withSampler(MIXED_REALITY_THIRD_DEPTH_SAMPLER)
-        .withSampler(MIXED_REALITY_GUI_COLOR_SAMPLER).build();
+        .withUniform(MIXED_REALITY_FIRST_COLOR_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER)
+        .withUniform(MIXED_REALITY_THIRD_COLOR_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER)
+        .withUniform(MIXED_REALITY_THIRD_DEPTH_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER)
+        .withUniform(MIXED_REALITY_GUI_COLOR_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER).build();
 
     public static final RenderPipeline MIXED_REALITY_PIPELINE = RenderPipeline.builder()
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_mixed_reality"))
@@ -77,6 +75,7 @@ public class VRShaders {
         .withBindGroupLayout(MIXED_REALITY_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState.DEFAULT)
         .build();
 
     // vr post shader and its uniforms
@@ -84,7 +83,7 @@ public class VRShaders {
     public static final String POST_PROCESSING_COLOR_SAMPLER = "Sampler0";
     public static final BindGroupLayout POST_PROCESS_BIND_GROUP = BindGroupLayout.builder()
         .withUniform(PostProcessUBO.UBO_NAME, UniformType.UNIFORM_BUFFER)
-        .withSampler(POST_PROCESSING_COLOR_SAMPLER).build();
+        .withUniform(POST_PROCESSING_COLOR_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER).build();
 
     public static final RenderPipeline POST_PROCESSING_PIPELINE = RenderPipeline.builder()
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_post_processing"))
@@ -93,12 +92,13 @@ public class VRShaders {
         .withBindGroupLayout(POST_PROCESS_BIND_GROUP)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState.DEFAULT)
         .build();
 
     // blit shader
     public static final String BLIT_VR_COLOR_SAMPLER = "DiffuseSampler";
     public static final BindGroupLayout BLIT_VR_BIND_GROUP = BindGroupLayout.builder()
-        .withSampler(BLIT_VR_COLOR_SAMPLER).build();
+        .withUniform(BLIT_VR_COLOR_SAMPLER, UniformType.COMBINED_IMAGE_SAMPLER).build();
 
     public static final RenderPipeline BLIT_VR_PIPELINE = RenderPipeline.builder()
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_blit"))
@@ -145,18 +145,6 @@ public class VRShaders {
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/end_gateway_vr"))
         .withShaderDefine("PORTAL_LAYERS", 16).build();
 
-    // panorama with alpha color mask
-    public static final RenderPipeline SOLID_PANORAMA = RenderPipeline.builder()
-        .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/panorama"))
-        .withVertexShader("core/panorama")
-        .withFragmentShader("core/panorama")
-        .withBindGroupLayout(BindGroupLayouts.GLOBALS)
-        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
-        .withBindGroupLayout(CORE_TEXTURE_LAYOUT)
-        .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
-        .withVertexBinding(0, DefaultVertexFormat.POSITION)
-        .withPrimitiveTopology(PrimitiveTopology.QUADS).build();
-
     public static final RenderPipeline GUI_TEXTURED = RenderPipeline.builder(
             RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/gui_textured_vr"))
@@ -177,6 +165,10 @@ public class VRShaders {
         .withBindGroupLayout(CORE_OVERLAY_LAYOUT)
         .withCull(false).buildSnippet();
 
+    private static final RenderPipeline.Snippet OIT_ENTITY_SNIPPET = RenderPipeline.builder(
+            RenderPipelines.OIT_ENTITY_SNIPPET)
+        .withCull(false).buildSnippet();
+
     public static final RenderPipeline CROSSHAIR_WORLD = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/crosshair_world_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
@@ -192,9 +184,32 @@ public class VRShaders {
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
+    public static final OitPipelineSet OIT_CROSSHAIR_WORLD = OitPipelineSet.builder("crosshair_world_vr",
+            RenderPipeline.builder(OIT_ENTITY_SNIPPET)
+                .withShaderDefine("NO_CARDINAL_LIGHTING"))
+        .withAccumulateModifier(accumulate -> accumulate
+            .withBindGroupLayout(CORE_OVERLAY_LAYOUT)
+            .withBindGroupLayout(CORE_LIGHTMAP_LAYOUT)
+        )
+        .build();
+
+    public static final OitPipelineSet OIT_CROSSHAIR_WORLD_ALWAYS = OitPipelineSet.builder("crosshair_world_always_vr",
+            RenderPipeline.builder(OIT_ENTITY_SNIPPET)
+                .withShaderDefine("NO_CARDINAL_LIGHTING"))
+        .withAccumulateModifier(accumulate -> accumulate
+            .withBindGroupLayout(CORE_OVERLAY_LAYOUT)
+            .withBindGroupLayout(CORE_LIGHTMAP_LAYOUT)
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .withDepthBoundsModifier(bounds -> bounds
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .withTransmittanceModifier(trans -> trans
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .build();
+
     public static final RenderPipeline ENTITY_SOLID_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/entity_solid_no_cardinal_light_vr"))
-        .withShaderDefine("NO_CARDINAL_LIGHTING").build();
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withColorTargetState(ColorTargetState.DEFAULT).build();
 
     public static final RenderPipeline ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/entity_translucent_no_cardinal_light_vr"))
@@ -211,11 +226,33 @@ public class VRShaders {
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
+    public static final OitPipelineSet OIT_ENTITY_TRANSLUCENT_NO_CARDINAL_LIGHT = OitPipelineSet.builder(
+            "entity_translucent_no_cardinal_light_vr", RenderPipeline.builder(OIT_ENTITY_SNIPPET)
+                .withShaderDefine("NO_CARDINAL_LIGHTING"))
+        .withAccumulateModifier(accumulate -> accumulate
+            .withBindGroupLayout(CORE_OVERLAY_LAYOUT)
+            .withBindGroupLayout(CORE_LIGHTMAP_LAYOUT))
+        .build();
+
+    public static final OitPipelineSet OIT_ENTITY_TRANSLUCENT_ALWAYS_NO_CARDINAL_LIGHT = OitPipelineSet.builder(
+            "entity_translucent_always_no_cardinal_light_vr", RenderPipeline.builder(OIT_ENTITY_SNIPPET)
+                .withShaderDefine("NO_CARDINAL_LIGHTING"))
+        .withAccumulateModifier(accumulate -> accumulate
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
+            .withBindGroupLayout(CORE_OVERLAY_LAYOUT)
+            .withBindGroupLayout(CORE_LIGHTMAP_LAYOUT))
+        .withDepthBoundsModifier(bounds -> bounds
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .withTransmittanceModifier(trans -> trans
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .build();
+
     public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_NO_CARDINAL_LIGHT = RenderPipeline.builder(ENTITY_SNIPPET)
         .withLocation(
             Identifier.fromNamespaceAndPath("vivecraft", "pipeline/entity_cutout_no_cull_no_cardinal_light_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
-        .withShaderDefine("ALPHA_CUTOUT", 0.1F).build();
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withColorTargetState(ColorTargetState.DEFAULT).build();
 
     public static final RenderPipeline ENTITY_CUTOUT_NO_CULL_ALWAYS_NO_CARDINAL_LIGHT = RenderPipeline.builder(
             ENTITY_SNIPPET)
@@ -223,7 +260,8 @@ public class VRShaders {
             Identifier.fromNamespaceAndPath("vivecraft", "pipeline/entity_cutout_no_cull_always_no_cardinal_light_vr"))
         .withShaderDefine("NO_CARDINAL_LIGHTING")
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
+        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))
+        .withColorTargetState(ColorTargetState.DEFAULT).build();
 
     public static final RenderPipeline LINE_STRIP = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/debug_line_strip_vr"))
@@ -233,16 +271,40 @@ public class VRShaders {
         .withDepthStencilState(DepthStencilState.DEFAULT)
         .build();
 
+    public static final OitPipelineSet OIT_LINE_STRIP = OitPipelineSet.builder("debug_line_strip_vr",
+            RenderPipeline.builder(RenderPipelines.OIT_DEBUG_FILLED_SNIPPET)
+                .withBindGroupLayout(BindGroupLayouts.GLOBALS)
+                .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
+                .withPrimitiveTopology(PrimitiveTopology.DEBUG_LINE_STRIP)
+                .withCull(false))
+        .build();
+
     public static final RenderPipeline QUADS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/quads_vr"))
         .withCull(false)
         .withDepthStencilState(DepthStencilState.DEFAULT)
         .build();
 
+    public static final OitPipelineSet OIT_QUADS = OitPipelineSet.builder("quads_vr",
+            RenderPipeline.builder(RenderPipelines.OIT_DEBUG_FILLED_SNIPPET)
+                .withCull(false))
+        .build();
+
     public static final RenderPipeline QUADS_ALWAYS = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/quads_always_vr"))
         .withCull(false)
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
+
+    public static final OitPipelineSet OIT_QUADS_ALWAYS = OitPipelineSet.builder("quads_always_vr",
+            RenderPipeline.builder(RenderPipelines.OIT_DEBUG_FILLED_SNIPPET)
+                .withCull(false))
+        .withAccumulateModifier(accumulate -> accumulate
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .withDepthBoundsModifier(bounds -> bounds
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .withTransmittanceModifier(trans -> trans
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .build();
 
     public static final RenderPipeline TRIANGLES_ALWAYS = RenderPipeline.builder(
             RenderPipelines.DEBUG_FILLED_SNIPPET)
@@ -262,9 +324,13 @@ public class VRShaders {
 
     public static final RenderPipeline TEXT_NO_CULL = RenderPipeline.builder(RenderPipelines.WORLD_TEXT_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/text_no_cull_vr"))
-        .withVertexShader("core/text")
-        .withFragmentShader("core/text")
+        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false).build();
+
+    public static final OitPipelineSet OIT_TEXT_NO_CULL = OitPipelineSet.builder("text_no_cull_vr",
+            RenderPipeline.builder(RenderPipelines.WORLD_TEXT_SNIPPET)
+                .withCull(false))
+        .build();
 
     private static GpuSampler GUI_SAMPLER;
     private static GpuSampler GUI_SAMPLER_AF;

@@ -2,7 +2,7 @@ package org.vivecraft.mixin.client_vr.blaze3d.vulkan;
 
 import com.google.common.collect.ImmutableSet;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.vulkan.VulkanInstance;
+import com.mojang.renderpearl.backend.vulkan.VulkanInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +21,7 @@ public class VulkanInstanceVRMixin implements VulkanInstanceExtension {
     @Unique
     private Set<String> vivecraft$availableExtensions;
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vulkan/VulkanDebug;create(IZLjava/util/Set;Ljava/util/Set;)Lcom/mojang/blaze3d/vulkan/VulkanDebug;"), index = 3)
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/backend/vulkan/VulkanDebug;create(IZLjava/util/Set;Ljava/util/Set;)Lcom/mojang/renderpearl/backend/vulkan/VulkanDebug;"), index = 3)
     private Set<String> vivecraft$vrInstanceExtensions(
         Set<String> enabledExtensions, @Local Set<String> availableExtensions)
     {

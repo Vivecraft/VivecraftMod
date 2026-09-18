@@ -19,7 +19,8 @@ import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLKeyboard;
+import org.lwjgl.sdl.SDLScancode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vivecraft.Xloader;
@@ -2806,7 +2807,7 @@ public class VRSettings {
     private String getSystemKeys(Function<String, String> mapper, String fallback) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.keyboardCodes.length; i++) {
-            String k = GLFW.glfwGetKeyName(this.keyboardCodes[i], -1);
+            String k = SDLKeyboard.SDL_GetScancodeName(this.keyboardCodes[i]);
             sb.append(k != null ? mapper.apply(k).charAt(0) : fallback.charAt(i));
         }
         return sb.toString();
@@ -2815,58 +2816,58 @@ public class VRSettings {
     public int[] getKeyboardCodesDefault() {
         // Some keys in the in-game keyboard don't have assignable key codes
         int[] out = new int[]{
-            GLFW.GLFW_KEY_GRAVE_ACCENT,
-            GLFW.GLFW_KEY_1,
-            GLFW.GLFW_KEY_2,
-            GLFW.GLFW_KEY_3,
-            GLFW.GLFW_KEY_4,
-            GLFW.GLFW_KEY_5,
-            GLFW.GLFW_KEY_6,
-            GLFW.GLFW_KEY_7,
-            GLFW.GLFW_KEY_8,
-            GLFW.GLFW_KEY_9,
-            GLFW.GLFW_KEY_0,
-            GLFW.GLFW_KEY_MINUS,
-            GLFW.GLFW_KEY_EQUAL,
-            GLFW.GLFW_KEY_Q,
-            GLFW.GLFW_KEY_W,
-            GLFW.GLFW_KEY_E,
-            GLFW.GLFW_KEY_R,
-            GLFW.GLFW_KEY_T,
-            GLFW.GLFW_KEY_Y,
-            GLFW.GLFW_KEY_U,
-            GLFW.GLFW_KEY_I,
-            GLFW.GLFW_KEY_O,
-            GLFW.GLFW_KEY_P,
-            GLFW.GLFW_KEY_LEFT_BRACKET,
-            GLFW.GLFW_KEY_RIGHT_BRACKET,
-            GLFW.GLFW_KEY_BACKSLASH,
-            GLFW.GLFW_KEY_A,
-            GLFW.GLFW_KEY_S,
-            GLFW.GLFW_KEY_D,
-            GLFW.GLFW_KEY_F,
-            GLFW.GLFW_KEY_G,
-            GLFW.GLFW_KEY_H,
-            GLFW.GLFW_KEY_J,
-            GLFW.GLFW_KEY_K,
-            GLFW.GLFW_KEY_L,
-            GLFW.GLFW_KEY_SEMICOLON,
-            GLFW.GLFW_KEY_APOSTROPHE,
-            GLFW.GLFW_KEY_UNKNOWN, // colon
-            GLFW.GLFW_KEY_UNKNOWN, // quote
-            GLFW.GLFW_KEY_Z,
-            GLFW.GLFW_KEY_X,
-            GLFW.GLFW_KEY_C,
-            GLFW.GLFW_KEY_V,
-            GLFW.GLFW_KEY_B,
-            GLFW.GLFW_KEY_N,
-            GLFW.GLFW_KEY_M,
-            GLFW.GLFW_KEY_COMMA,
-            GLFW.GLFW_KEY_PERIOD,
-            GLFW.GLFW_KEY_SLASH,
-            GLFW.GLFW_KEY_UNKNOWN, // question mark
-            GLFW.GLFW_KEY_UNKNOWN, // less than
-            GLFW.GLFW_KEY_UNKNOWN // greater than
+            SDLScancode.SDL_SCANCODE_GRAVE,
+            SDLScancode.SDL_SCANCODE_1,
+            SDLScancode.SDL_SCANCODE_2,
+            SDLScancode.SDL_SCANCODE_3,
+            SDLScancode.SDL_SCANCODE_4,
+            SDLScancode.SDL_SCANCODE_5,
+            SDLScancode.SDL_SCANCODE_6,
+            SDLScancode.SDL_SCANCODE_7,
+            SDLScancode.SDL_SCANCODE_8,
+            SDLScancode.SDL_SCANCODE_9,
+            SDLScancode.SDL_SCANCODE_0,
+            SDLScancode.SDL_SCANCODE_MINUS,
+            SDLScancode.SDL_SCANCODE_EQUALS,
+            SDLScancode.SDL_SCANCODE_Q,
+            SDLScancode.SDL_SCANCODE_W,
+            SDLScancode.SDL_SCANCODE_E,
+            SDLScancode.SDL_SCANCODE_R,
+            SDLScancode.SDL_SCANCODE_T,
+            SDLScancode.SDL_SCANCODE_Y,
+            SDLScancode.SDL_SCANCODE_U,
+            SDLScancode.SDL_SCANCODE_I,
+            SDLScancode.SDL_SCANCODE_O,
+            SDLScancode.SDL_SCANCODE_P,
+            SDLScancode.SDL_SCANCODE_LEFTBRACKET,
+            SDLScancode.SDL_SCANCODE_RIGHTBRACKET,
+            SDLScancode.SDL_SCANCODE_BACKSLASH,
+            SDLScancode.SDL_SCANCODE_A,
+            SDLScancode.SDL_SCANCODE_S,
+            SDLScancode.SDL_SCANCODE_D,
+            SDLScancode.SDL_SCANCODE_F,
+            SDLScancode.SDL_SCANCODE_G,
+            SDLScancode.SDL_SCANCODE_H,
+            SDLScancode.SDL_SCANCODE_J,
+            SDLScancode.SDL_SCANCODE_K,
+            SDLScancode.SDL_SCANCODE_L,
+            SDLScancode.SDL_SCANCODE_SEMICOLON,
+            SDLScancode.SDL_SCANCODE_APOSTROPHE,
+            SDLScancode.SDL_SCANCODE_UNKNOWN, // colon
+            SDLScancode.SDL_SCANCODE_UNKNOWN, // quote
+            SDLScancode.SDL_SCANCODE_Z,
+            SDLScancode.SDL_SCANCODE_X,
+            SDLScancode.SDL_SCANCODE_C,
+            SDLScancode.SDL_SCANCODE_V,
+            SDLScancode.SDL_SCANCODE_B,
+            SDLScancode.SDL_SCANCODE_N,
+            SDLScancode.SDL_SCANCODE_M,
+            SDLScancode.SDL_SCANCODE_COMMA,
+            SDLScancode.SDL_SCANCODE_PERIOD,
+            SDLScancode.SDL_SCANCODE_SLASH,
+            SDLScancode.SDL_SCANCODE_UNKNOWN, // question mark
+            SDLScancode.SDL_SCANCODE_UNKNOWN, // less than
+            SDLScancode.SDL_SCANCODE_UNKNOWN // greater than
         };
 
         return out;

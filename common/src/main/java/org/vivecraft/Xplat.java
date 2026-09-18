@@ -61,6 +61,7 @@ public interface Xplat {
     Packet<?> getS2CPacket(VivecraftPayloadS2C payload);
 
     /**
+     * TODO 26.3
      * checks if the given KeyMapping uses a key modifier to trigger
      *
      * @param keyMapping KeyMapping to check
@@ -69,6 +70,7 @@ public interface Xplat {
     boolean hasKeyModifier(KeyMapping keyMapping);
 
     /**
+     * TODO 26.3
      * gets the key modifier for the given KeyMapping
      *
      * @param keyMapping KeyMapping to check
@@ -77,6 +79,7 @@ public interface Xplat {
     int getKeyModifier(KeyMapping keyMapping);
 
     /**
+     * TODO 26.3
      * gets the key that corresponds to the key modifier for the given KeyMapping
      *
      * @param keyMapping KeyMapping to check

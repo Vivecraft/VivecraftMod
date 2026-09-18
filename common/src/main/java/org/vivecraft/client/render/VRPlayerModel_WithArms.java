@@ -291,7 +291,7 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
         ModelUtils.toModelDir(data.bodyYaw(), lowerRot, this.tempM);
 
         if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && arm != null && data.attackArm() == arm) {
-            ModelUtils.swingAnimation(lower, arm, -3F, renderState.attackTime, data.isMainPlayer(), this.tempM,
+            ModelUtils.swingAnimation(lower, arm, -3F, renderState.swingAnimation, data.isMainPlayer(), this.tempM,
                 this.tempV, this.tempV2);
         }
 
@@ -374,7 +374,7 @@ public class VRPlayerModel_WithArms extends VRPlayerModel implements HandModel {
         ModelUtils.pointAtModel(this.tempV, this.tempV2, this.tempM);
 
         if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && arm != null && data.attackArm() == arm) {
-            ModelUtils.swingAnimation(lower, arm, -armLength * 0.5F, renderState.attackTime, data.isMainPlayer(),
+            ModelUtils.swingAnimation(lower, arm, -armLength * 0.5F, renderState.swingAnimation, data.isMainPlayer(),
                 this.tempM,
                 this.tempV, this.tempV2);
         }

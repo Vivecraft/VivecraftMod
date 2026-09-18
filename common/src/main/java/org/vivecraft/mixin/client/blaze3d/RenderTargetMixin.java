@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client.blaze3d;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.renderpearl.api.GpuFormat;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,7 +48,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         return this.vivecraft$mipmaps;
     }
 
-    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createTexture(Ljava/util/function/Supplier;ILcom/mojang/blaze3d/GpuFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;"), index = 6)
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/device/GpuDevice;createTexture(Ljava/util/function/Supplier;ILcom/mojang/renderpearl/api/GpuFormat;IIII)Lcom/mojang/renderpearl/api/textures/GpuTexture;", ordinal = 1), index = 6)
     private int vivecraft$mipLevels(
         Supplier<String> labelSupplier, int usageFlags, GpuFormat textureFormat, int width, int height,
         int depthLayers, int mipLevels)

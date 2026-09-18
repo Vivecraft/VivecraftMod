@@ -11,7 +11,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -171,8 +170,8 @@ public class TextScrollWidget extends AbstractWidget {
 
     @Override
     public boolean keyPressed(KeyEvent keyEvent) {
-        if (keyEvent.key() == GLFW.GLFW_KEY_UP || keyEvent.key() == GLFW.GLFW_KEY_DOWN) {
-            if (mouseScrolled(0, 0, 0, keyEvent.key() == GLFW.GLFW_KEY_UP ? 1 : -1)) {
+        if (keyEvent.isUp() || keyEvent.isDown()) {
+            if (mouseScrolled(0, 0, 0, keyEvent.isUp() ? 1 : -1)) {
                 return true;
             }
         }

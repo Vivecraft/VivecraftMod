@@ -68,6 +68,6 @@ public class VRArmRenderer extends AvatarRenderer<AbstractClientPlayer> {
 
         // render hand
         collector.submitModelPart(rendererArm, poseStack, VRRenderTypes.entityTranslucentHand(identifier),
-            combinedLight, OverlayTexture.NO_OVERLAY, null, ARGB.white(this.armAlpha), null);
+            combinedLight, OverlayTexture.NO_OVERLAY, null, ARGB.white(this.armAlpha));
     }
 }

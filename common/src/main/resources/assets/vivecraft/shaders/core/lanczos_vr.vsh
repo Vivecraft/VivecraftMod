@@ -1,22 +1,23 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 layout(std140) uniform LanczosUbo {
     float texelWidthOffset;
     float texelHeightOffset;
 };
 
-in vec3 Position;
-in vec2 UV0;
+layout(location = 0) in vec3 Position;
+layout(location = 1) in vec2 UV0;
 
-out vec2 centerTextureCoordinate;
-out vec2 oneStepLeftTextureCoordinate;
-out vec2 twoStepsLeftTextureCoordinate;
-out vec2 threeStepsLeftTextureCoordinate;
-out vec2 fourStepsLeftTextureCoordinate;
-out vec2 oneStepRightTextureCoordinate;
-out vec2 twoStepsRightTextureCoordinate;
-out vec2 threeStepsRightTextureCoordinate;
-out vec2 fourStepsRightTextureCoordinate;
+layout(location = 0) out vec2 centerTextureCoordinate;
+layout(location = 1) out vec2 oneStepLeftTextureCoordinate;
+layout(location = 2) out vec2 twoStepsLeftTextureCoordinate;
+layout(location = 3) out vec2 threeStepsLeftTextureCoordinate;
+layout(location = 4) out vec2 fourStepsLeftTextureCoordinate;
+layout(location = 5) out vec2 oneStepRightTextureCoordinate;
+layout(location = 6) out vec2 twoStepsRightTextureCoordinate;
+layout(location = 7) out vec2 threeStepsRightTextureCoordinate;
+layout(location = 8) out vec2 fourStepsRightTextureCoordinate;
 
 void main()
 {

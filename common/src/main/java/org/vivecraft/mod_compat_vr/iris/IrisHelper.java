@@ -1,6 +1,6 @@
 package org.vivecraft.mod_compat_vr.iris;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.api.v0.IrisProgram;
 import org.joml.Matrix4f;
@@ -73,6 +73,13 @@ public class IrisHelper {
      */
     public static boolean isShaderActive() {
         return IrisApi.getInstance().isShaderPackInUse();
+    }
+
+    /**
+     * @return if iris uses regular depth
+     */
+    public static boolean isRegularDepth() {
+        return IrisApi.getInstance().getMinorApiRevision() >= 4 && !IrisApi.getInstance().isReverseZDuringShaders();
     }
 
     /**

@@ -7,7 +7,7 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -181,11 +181,11 @@ public class RadialHandler {
 
     private static void click(int x, int y) {
         LAST_PRESS = new Vector2i(x, y);
-        UI.mouseClicked(new MouseButtonEvent(x, y, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)), false);
+        UI.mouseClicked(new MouseButtonEvent(x, y, new MouseButtonInfo(SDLMouse.SDL_BUTTON_LEFT, 0)), false);
     }
 
     private static void release(int x, int y) {
-        UI.mouseReleased(new MouseButtonEvent(x, y, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, 0)));
+        UI.mouseReleased(new MouseButtonEvent(x, y, new MouseButtonInfo(SDLMouse.SDL_BUTTON_LEFT, 0)));
     }
 
     public static boolean isShowing() {

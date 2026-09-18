@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.client.gui.settings.GuiActiveKeyboardLayoutSelector;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.InputSimulator;
@@ -35,35 +35,42 @@ public class KeyboardKeys {
         SHIFT_2 = addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 4, "shift", () -> {}));
 
         addSpecial(
-            new Key(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + (COLUMNS - 5) / 2, -1, 5, 1, " ", GLFW.GLFW_KEY_SPACE, ' '));
-        addSpecial(Key.wide(SPECIAL_INDEX++, 0, 2, "tab", GLFW.GLFW_KEY_TAB));
-        addSpecial(Key.wide(SPECIAL_INDEX++, 0, 1, "esc", GLFW.GLFW_KEY_ESCAPE));
-        addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 1, "backspace", GLFW.GLFW_KEY_BACKSPACE));
-        addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 3, "enter", GLFW.GLFW_KEY_ENTER));
+            new Key(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + (COLUMNS - 5) / 2, -1, 5, 1, " ",
+                SDLScancode.SDL_SCANCODE_SPACE, ' '));
+        addSpecial(Key.wide(SPECIAL_INDEX++, 0, 2, "tab", SDLScancode.SDL_SCANCODE_TAB));
+        addSpecial(Key.wide(SPECIAL_INDEX++, 0, 1, "esc", SDLScancode.SDL_SCANCODE_ESCAPE));
+        addSpecial(
+            Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 1, "backspace", SDLScancode.SDL_SCANCODE_BACKSPACE));
+        addSpecial(
+            Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 3, "enter", SDLScancode.SDL_SCANCODE_RETURN));
 
         // Arrow keys
-        addSpecial(Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS + 1, 5, "↑", GLFW.GLFW_KEY_UP));
-        addSpecial(Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS + 1, 6, "↓", GLFW.GLFW_KEY_DOWN));
-        addSpecial(Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 6, "←", GLFW.GLFW_KEY_LEFT));
-        addSpecial(Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS + 2, 6, "→", GLFW.GLFW_KEY_RIGHT));
+        addSpecial(
+            Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS + 1, 5, "↑", SDLScancode.SDL_SCANCODE_UP));
+        addSpecial(
+            Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS + 1, 6, "↓", SDLScancode.SDL_SCANCODE_DOWN));
+        addSpecial(
+            Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS, 6, "←", SDLScancode.SDL_SCANCODE_LEFT));
+        addSpecial(
+            Key.single(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH + COLUMNS + 2, 6, "→", SDLScancode.SDL_SCANCODE_RIGHT));
 
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH, 0, "cut", () -> {
-            InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-            InputSimulator.pressKey(GLFW.GLFW_KEY_X);
-            InputSimulator.releaseKey(GLFW.GLFW_KEY_X);
-            InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
+            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_LCTRL);
+            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_X);
+            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_X);
+            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_LCTRL);
         }));
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 2, 0, "copy", () -> {
-            InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-            InputSimulator.pressKey(GLFW.GLFW_KEY_C);
-            InputSimulator.releaseKey(GLFW.GLFW_KEY_C);
-            InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
+            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_LCTRL);
+            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_C);
+            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_C);
+            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_LCTRL);
         }));
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 3, 0, "paste", () -> {
-            InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
-            InputSimulator.pressKey(GLFW.GLFW_KEY_V);
-            InputSimulator.releaseKey(GLFW.GLFW_KEY_V);
-            InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
+            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_LCTRL);
+            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_V);
+            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_V);
+            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_LCTRL);
         }));
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 4, 0, "switch",
             () -> ClientDataHolderVR.getInstance().vrSettings.nextKeyboardLayout()));
@@ -138,7 +145,8 @@ public class KeyboardKeys {
                 int index = row * COLUMNS + column;
                 char ch = index < chars.length() ? chars.charAt(index) : '\u0000';
                 final int code =
-                    index < vrSettings.keyboardCodes.length ? vrSettings.keyboardCodes[index] : GLFW.GLFW_KEY_UNKNOWN;
+                    index < vrSettings.keyboardCodes.length ? vrSettings.keyboardCodes[index] :
+                        SDLScancode.SDL_SCANCODE_UNKNOWN;
                 keys.add(
                     Key.single(shift ? index + 500 : index, column + KeyboardKeys.SPECIAL_KEY_WIDTH, 1 + row, code, ch,
                         afterPress));
@@ -184,8 +192,8 @@ public class KeyboardKeys {
 
                 if (keyChar == '/' && Minecraft.getInstance().gui.screen() == null) {
                     // this is dumb but whatever
-                    InputSimulator.pressKey(GLFW.GLFW_KEY_SLASH);
-                    InputSimulator.releaseKey(GLFW.GLFW_KEY_SLASH);
+                    InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_SLASH);
+                    InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_SLASH);
                 }
                 afterPress.run();
             }, () -> InputSimulator.releaseKeyForBind(keyCode));

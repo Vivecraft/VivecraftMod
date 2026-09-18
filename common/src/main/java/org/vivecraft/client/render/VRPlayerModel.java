@@ -381,7 +381,7 @@ public class VRPlayerModel extends PlayerModel {
         }
 
         if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && applyAttackAnim) {
-            ModelUtils.swingAnimation(data.attackArm(), renderState.attackTime, data.isMainPlayer(), tempM, tempV);
+            ModelUtils.swingAnimation(data.attackArm(), renderState.swingAnimation, data.isMainPlayer(), tempM, tempV);
             arm.x -= tempV.x;
             arm.y -= tempV.y;
             arm.z += tempV.z;
@@ -411,7 +411,7 @@ public class VRPlayerModel extends PlayerModel {
         arm.setPos(tempV.x, tempV.y, tempV.z);
 
         if (ClientDataHolderVR.getInstance().vrSettings.playerArmAnim && applyAttackAnim) {
-            ModelUtils.swingAnimation(arm, data.attackArm(), 2F * data.armScale(), renderState.attackTime,
+            ModelUtils.swingAnimation(arm, data.attackArm(), 2F * data.armScale(), renderState.swingAnimation,
                 data.isMainPlayer(), tempM, tempV, tempV2);
         }
 
@@ -499,13 +499,15 @@ public class VRPlayerModel extends PlayerModel {
     protected void doAttackAnim(AvatarRenderState avatarRenderState, HumanoidArm side, PoseStack poseStack) {
         ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) avatarRenderState).vivecraft$getRotInfo();
 
-        if (rotInfo != null && avatarRenderState.attackTime > 0F) {
+        if (rotInfo != null && avatarRenderState.swingAnimation > 0F && avatarRenderState.currentSwing != null) {
             // we ignore the vanilla main arm setting
-            if (side ==
-                (rotInfo.leftHanded ? avatarRenderState.attackArm.getOpposite() : avatarRenderState.attackArm))
-            {
+            HumanoidArm attackArm = avatarRenderState.currentSwing.hand().asArm(avatarRenderState.mainArm);
+            if (rotInfo.leftHanded) {
+                attackArm = attackArm.getOpposite();
+            }
+            if (side == attackArm) {
                 poseStack.translate(0.0F, 0.5F, 0.0F);
-                poseStack.mulPose(Axis.XP.rotation(Mth.sin(avatarRenderState.attackTime * Mth.PI)));
+                poseStack.rotate(Axis.XP.rotation(Mth.sin(avatarRenderState.swingAnimation * Mth.PI)));
                 poseStack.translate(0.0F, -0.5F, 0.0F);
             }
         }

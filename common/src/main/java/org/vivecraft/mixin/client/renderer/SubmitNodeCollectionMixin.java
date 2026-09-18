@@ -48,8 +48,9 @@ public abstract class SubmitNodeCollectionMixin implements SubmitNodeCollectionE
         PoseStack poseStack, float x, float y, FormattedCharSequence string, boolean dropShadow,
         Font.DisplayMode displayMode, int lightCoords, int color, int backgroundColor, int outlineColor)
     {
+        TextFeatureRenderer.Content content = new TextFeatureRenderer.Content.Text(x, y, string, dropShadow, color,
+            backgroundColor, outlineColor);
         this.afterTerrain.submit(
-            new TextFeatureRenderer.Submit(new Matrix4f(poseStack.last().pose()), x, y, string, dropShadow, displayMode,
-                lightCoords, color, backgroundColor, outlineColor));
+            new TextFeatureRenderer.Submit(new Matrix4f(poseStack.last().pose()), displayMode, lightCoords, content));
     }
 }

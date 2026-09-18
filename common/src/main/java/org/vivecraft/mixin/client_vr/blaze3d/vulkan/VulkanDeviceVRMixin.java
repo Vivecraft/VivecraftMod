@@ -1,8 +1,8 @@
 package org.vivecraft.mixin.client_vr.blaze3d.vulkan;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.vulkan.VulkanDevice;
-import com.mojang.blaze3d.vulkan.VulkanPhysicalDevice;
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice;
+import com.mojang.renderpearl.backend.vulkan.VulkanPhysicalDevice;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,7 +19,7 @@ public class VulkanDeviceVRMixin implements VulkanDeviceExtension {
     @Unique
     private Set<String> vivecraft$availableDeviceExtensions;
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vulkan/VulkanPhysicalDevice;close()V"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/backend/vulkan/VulkanPhysicalDevice;close()V"))
     private void vivecraft$storeAvailableExtensions(
         CallbackInfo ci, @Local(argsOnly = true) VulkanPhysicalDevice physicalDevice)
     {

@@ -39,7 +39,7 @@ public class Utils {
             entity instanceof AbstractIllager ||
             entity instanceof Blaze ||
             entity instanceof Creeper ||
-            entity instanceof EnderMan ||
+            entity instanceof Enderman ||
             entity instanceof AbstractVillager ||
             entity instanceof SnowGolem ||
             entity instanceof Vex ||

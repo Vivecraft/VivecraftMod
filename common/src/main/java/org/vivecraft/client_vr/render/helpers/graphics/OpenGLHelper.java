@@ -1,10 +1,10 @@
 package org.vivecraft.client_vr.render.helpers.graphics;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.opengl.GlTexture;
-import com.mojang.blaze3d.opengl.GlTextureView;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlTexture;
+import com.mojang.renderpearl.backend.opengl.GlTextureView;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;

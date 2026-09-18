@@ -6,7 +6,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -57,8 +59,9 @@ public class VRArmHelper {
      * @return order to render the next thing at
      */
     public static int renderVRHands(
-        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
-        boolean renderMain, boolean renderOff, boolean menuHandMain, boolean menuHandOff, int order)
+        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PlayerRenderState playerState,
+        PoseStack poseStack, boolean renderMain, boolean renderOff, boolean menuHandMain, boolean menuHandOff,
+        int order)
     {
         if (!renderMain && !renderOff) return order;
         Profiler.get().push("hands");
@@ -69,7 +72,7 @@ public class VRArmHelper {
                 order = renderMenuHand(output, vrState, cameraState, poseStack, 0, order);
             } else {
                 // hand submits can't be ordered
-                renderVRHand_Main(output, vrState, cameraState, poseStack);
+                renderVRHand_Main(output, vrState, cameraState, playerState, poseStack);
             }
         }
 
@@ -77,7 +80,7 @@ public class VRArmHelper {
             if (menuHandOff) {
                 order = renderMenuHand(output, vrState, cameraState, poseStack, 1, order);
             } else {
-                order = renderVRHand_Offhand(output, vrState, cameraState, poseStack, true, order);
+                order = renderVRHand_Offhand(output, vrState, cameraState, playerState, poseStack, true, order);
             }
         }
 
@@ -156,9 +159,10 @@ public class VRArmHelper {
      * @param poseStack   PoseStack to use for positioning
      */
     public static void renderVRHand_Main(
-        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack)
+        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PlayerRenderState playerState,
+        PoseStack poseStack)
     {
-        if (vrState.armsState.skipMainHandItemRendering) return;
+        if (vrState.armsState.skipMainHandItemRendering || playerState.avatarRenderState == null) return;
 
         poseStack.pushPose();
         poseStack.translate(
@@ -167,9 +171,18 @@ public class VRArmHelper {
             vrState.armsState.mainHandWorldPos.z - cameraState.pos.z);
         poseStack.mulPose(vrState.armsState.mainHandWorldRot);
 
-        MC.gameRenderer.itemInHandRenderer.submitArmWithItem(MC.player, vrState.partialTick, 0.0F,
-            InteractionHand.MAIN_HAND, MC.player.getAttackAnim(vrState.partialTick),
-            vrState.armsState.mainHandRenderItem, 0.0F, poseStack, output, vrState.armsState.rawHeadLightCoords);
+        float attackValue = playerState.avatarRenderState.swingAnimation;
+        float mainHandAttack =
+            playerState.firstPersonHandsAndItems.attackHand == InteractionHand.MAIN_HAND ? attackValue : 0.0F;
+        float equipProgress = playerState.firstPersonHandsAndItems.mainHandSwapScale * (1.0F -
+            Mth.lerp(vrState.partialTick, playerState.firstPersonHandsAndItems.oldMainHandHeight,
+                playerState.firstPersonHandsAndItems.mainHandHeight)
+        );
+
+        MC.gameRenderer.firstPersonHandsAndItemsRenderer.submitArmWithItem(playerState,
+            playerState.firstPersonHandsAndItems, vrState.partialTick, 0.0F, InteractionHand.MAIN_HAND,
+            mainHandAttack, playerState.firstPersonHandsAndItems.mainHandItem, equipProgress, poseStack, output,
+            vrState.armsState.rawHeadLightCoords);
 
         poseStack.popPose();
     }
@@ -186,8 +199,8 @@ public class VRArmHelper {
      * @return order to render the next thing at
      */
     public static int renderVRHand_Offhand(
-        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PoseStack poseStack,
-        boolean renderTeleport, int order)
+        SubmitNodeCollector output, VRRenderState vrState, CameraRenderState cameraState, PlayerRenderState playerState,
+        PoseStack poseStack, boolean renderTeleport, int order)
     {
         poseStack.pushPose();
         poseStack.translate(
@@ -196,12 +209,21 @@ public class VRArmHelper {
             vrState.armsState.offHandWorldPos.z - cameraState.pos.z);
         poseStack.mulPose(vrState.armsState.offHandWorldRot);
         // don't render claws with model arms
-        if (!vrState.armsState.skipOffHandItemRendering) {
+        if (!vrState.armsState.skipOffHandItemRendering && playerState.avatarRenderState != null) {
             poseStack.pushPose();
 
-            MC.gameRenderer.itemInHandRenderer.submitArmWithItem(MC.player, vrState.partialTick, 0.0F,
-                InteractionHand.OFF_HAND, MC.player.getAttackAnim(vrState.partialTick),
-                vrState.armsState.offHandRenderItem, 0.0F, poseStack, output, vrState.armsState.rawHeadLightCoords);
+            float attackValue = playerState.avatarRenderState.swingAnimation;
+            float offHandAttack =
+                playerState.firstPersonHandsAndItems.attackHand == InteractionHand.OFF_HAND ? attackValue : 0.0F;
+            float equipProgress = playerState.firstPersonHandsAndItems.offHandSwapScale * (1.0F -
+                Mth.lerp(vrState.partialTick, playerState.firstPersonHandsAndItems.oldOffHandHeight,
+                    playerState.firstPersonHandsAndItems.offHandHeight)
+            );
+
+            MC.gameRenderer.firstPersonHandsAndItemsRenderer.submitArmWithItem(playerState,
+                playerState.firstPersonHandsAndItems, vrState.partialTick, 0.0F, InteractionHand.OFF_HAND,
+                offHandAttack, playerState.firstPersonHandsAndItems.offHandItem, equipProgress, poseStack, output,
+                vrState.armsState.rawHeadLightCoords);
 
             // back to hmd rendering
             poseStack.popPose();

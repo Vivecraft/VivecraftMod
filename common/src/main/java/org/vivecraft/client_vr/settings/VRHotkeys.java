@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.settings;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
@@ -8,7 +9,7 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -36,32 +37,32 @@ public class VRHotkeys {
     /**
      * process debug keys
      *
-     * @param key       GLFW key that got pressed
-     * @param scanCode  GLFW scancode of the key
-     * @param action    GLFW key action (pressed/released)
-     * @param modifiers GLFW key modifier
+     * @param key       SDL scancode that got pressed
+     * @param keyCode   SDL keyCode of the key
+     * @param action    MC key action (pressed/released)
+     * @param modifiers SDL key modifier mask
      * @return if a key was processed
      */
-    public static boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
+    public static boolean handleKeyboardInputs(int key, int keyCode, int action, int modifiers) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
         // Capture Minecrift key events
         boolean gotKey = false;
 
-        if (action == GLFW.GLFW_PRESS) {
+        if (action == InputConstants.PRESS) {
             // control key combinations
-            if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+            if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RCTRL)) {
                 if (VRState.VR_INITIALIZED) {
                     // Debug aim
-                    if (key == GLFW.GLFW_KEY_RIGHT_SHIFT) {
+                    if (key == SDLScancode.SDL_SCANCODE_RSHIFT) {
                         dataHolder.vrSettings.storeDebugAim = true;
                         ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.showaim"));
                         gotKey = true;
                     }
 
                     // Player inertia
-                    if (key == GLFW.GLFW_KEY_I) {
+                    if (key == SDLScancode.SDL_SCANCODE_I) {
                         dataHolder.vrSettings.inertiaFactor = dataHolder.vrSettings.inertiaFactor.getNext();
                         ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.playerinertia",
                             Component.translatable(dataHolder.vrSettings.inertiaFactor.getLangKey())));
@@ -70,7 +71,7 @@ public class VRHotkeys {
                     }
 
                     // for testing restricted client mode
-                    if (key == GLFW.GLFW_KEY_R && ClientNetworking.SERVER_ALLOWS_DIRECT_TELEPORT) {
+                    if (key == SDLScancode.SDL_SCANCODE_R && ClientNetworking.SERVER_ALLOWS_DIRECT_TELEPORT) {
                         if (dataHolder.vrPlayer.isTeleportOverridden()) {
                             dataHolder.vrPlayer.setTeleportOverride(false);
                             ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
@@ -84,21 +85,21 @@ public class VRHotkeys {
                 }
 
                 // toggle VR with a keyboard shortcut
-                if (key == GLFW.GLFW_KEY_F7) {
+                if (key == SDLScancode.SDL_SCANCODE_F7) {
                     VRState.VR_ENABLED = !VRState.VR_ENABLED;
                     ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.VR_ENABLED;
                     gotKey = true;
                 }
             }
 
-            if (key == GLFW.GLFW_KEY_F12 && DEBUG) {
+            if (key == SDLScancode.SDL_SCANCODE_F12 && DEBUG) {
                 Screen current = minecraft.gui.screen();
                 minecraft.gui.setScreen(new WinScreen(false, () -> minecraft.gui.setScreen(current)));
                 gotKey = true;
             }
 
             // toggle mirror mode
-            if (key == GLFW.GLFW_KEY_F5 && (minecraft.level == null || minecraft.gui.screen() != null) &&
+            if (key == SDLScancode.SDL_SCANCODE_F5 && (minecraft.level == null || minecraft.gui.screen() != null) &&
                 VRState.VR_INITIALIZED)
             {
                 dataHolder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
@@ -109,7 +110,7 @@ public class VRHotkeys {
         }
 
         if (VRState.VR_INITIALIZED) {
-            gotKey |= dataHolder.vr.handleKeyboardInputs(key, scanCode, action, modifiers);
+            gotKey |= dataHolder.vr.handleKeyboardInputs(key, keyCode, action, modifiers);
 
             if (dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||
                 dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)
@@ -134,97 +135,97 @@ public class VRHotkeys {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         boolean gotKey = false;
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-            if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+        if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RCTRL)) {
+            if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RSHIFT)) {
                 // with shift do rotation
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_UP)) {
                     adjustCamRot(Axis.PITCH, 0.5F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_DOWN)) {
                     adjustCamRot(Axis.PITCH, -0.5F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_LEFT)) {
                     adjustCamRot(Axis.YAW, 0.5F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RIGHT)) {
                     adjustCamRot(Axis.YAW, -0.5F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_PAGEUP)) {
                     adjustCamRot(Axis.ROLL, 0.5F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_PAGEDOWN)) {
                     adjustCamRot(Axis.ROLL, -0.5F);
                     gotKey = true;
                 }
             } else {
                 // without shift do position
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_LEFT)) {
                     adjustCamPos(-0.01F, 0.0F, 0.0F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RIGHT)) {
                     adjustCamPos(0.01F, 0.0F, 0.0F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_UP)) {
                     adjustCamPos(0.0F, 0.0F, -0.01F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_DOWN)) {
                     adjustCamPos(0.0F, 0.0F, 0.01F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_PAGEUP)) {
                     adjustCamPos(0.0F, 0.01F, 0.0F);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_PAGEDOWN)) {
                     adjustCamPos(0.0F, -0.01F, 0.0F);
                     gotKey = true;
                 }
 
                 // snap third person cam
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_HOME)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_HOME)) {
                     snapMRCam(0);
                     gotKey = true;
                 }
             }
 
             // change fov
-            if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+            if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_RSHIFT)) {
                 // third person fov
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_INSERT)) {
                     dataHolder.vrSettings.mixedRealityFov++;
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_DELETE)) {
                     dataHolder.vrSettings.mixedRealityFov--;
                     gotKey = true;
                 }
             } else {
                 // first person fov
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_INSERT)) {
                     minecraft.options.fov().set(minecraft.options.fov().get() + 1);
                     gotKey = true;
                 }
 
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE)) {
+                if (MethodHolder.isKeyDown(SDLScancode.SDL_SCANCODE_DELETE)) {
                     minecraft.options.fov().set(minecraft.options.fov().get() - 1);
                     gotKey = true;
                 }

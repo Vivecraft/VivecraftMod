@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.HeldInteractModule;
 import org.vivecraft.api.client.InteractModule;
@@ -161,7 +162,7 @@ public class InteractTracker implements DebugRenderTracker {
                     if (this.activeModules[c].swingsArm()) {
                         // swing arm on success
                         this.dh.swingType = VRFirstPersonArmSwing.INTERACT;
-                        this.mc.player.swing(hand);
+                        this.mc.player.swing(hand, SwingAnimation.DEFAULT, false);
                     }
                     this.dh.vr.triggerHapticPulse(c, 750);
                 }

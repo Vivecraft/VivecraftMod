@@ -1,15 +1,15 @@
 package org.vivecraft.client_vr.provider;
 
-import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
@@ -372,11 +372,11 @@ public abstract class VRRenderer {
 
         RenderTarget target = Minecraft.getInstance().gameRenderer.mainRenderTarget();
 
-        try (com.mojang.blaze3d.systems.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
+        try (com.mojang.renderpearl.api.commands.RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder()
             .createRenderPass(() -> "Stencil " + ClientDataHolderVR.getInstance().currentPass,
                 target.getColorTextureView(), Optional.empty(), target.getDepthTextureView(), OptionalDouble.empty()))
         {
-            renderPass.setPipeline(VRShaders.TRIANGLES_ALWAYS);
+            renderPass.setPipeline(RenderSystem.getCompiledPipeline(VRShaders.TRIANGLES_ALWAYS));
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.setUniform("DynamicTransforms", dynamicTransforms);
             renderPass.setVertexBuffer(0, buffer.slice());

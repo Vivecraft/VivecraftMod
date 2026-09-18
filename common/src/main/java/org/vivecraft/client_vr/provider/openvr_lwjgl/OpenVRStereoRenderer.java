@@ -1,8 +1,8 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vulkan.VulkanConst;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.backend.vulkan.VulkanConst;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;

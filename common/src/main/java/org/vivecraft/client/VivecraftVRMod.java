@@ -4,6 +4,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 
@@ -37,98 +38,98 @@ public class VivecraftVRMod {
     public final KeyMapping.Category categoryKeyboard = KeyMapping.Category.register(
         Identifier.fromNamespaceAndPath("vivecraft", "key.category.keyboard"));
 
-    public final HandedKeyBinding keyClimbeyGrab = new HandedKeyBinding("vivecraft.key.climbeyGrab", -1,
-        this.categoryClimbey);
-    public final HandedKeyBinding keyClimbeyJump = new HandedKeyBinding("vivecraft.key.climbeyJump", -1,
-        this.categoryClimbey);
-    public final KeyMapping keyExportWorld = new KeyMapping("vivecraft.key.exportWorld", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyFreeMoveRotate = new KeyMapping("vivecraft.key.freeMoveRotate", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyFreeMoveStrafe = new KeyMapping("vivecraft.key.freeMoveStrafe", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyHotbarNext = new KeyMapping("vivecraft.key.hotbarNext", -1,
-        KeyMapping.Category.INVENTORY);
-    public final KeyMapping keyHotbarPrev = new KeyMapping("vivecraft.key.hotbarPrev", -1,
-        KeyMapping.Category.INVENTORY);
-    public final KeyMapping keyHotbarScroll = new KeyMapping("vivecraft.key.hotbarScroll", -1,
-        KeyMapping.Category.INVENTORY);
-    public final KeyMapping keyHotbarSwipeX = new KeyMapping("vivecraft.key.hotbarSwipeX", -1,
-        KeyMapping.Category.INVENTORY);
-    public final KeyMapping keyHotbarSwipeY = new KeyMapping("vivecraft.key.hotbarSwipeY", -1,
-        KeyMapping.Category.INVENTORY);
-    public final KeyMapping keyMenuButton = new KeyMapping("vivecraft.key.ingameMenuButton", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyMoveThirdPersonCam = new KeyMapping("vivecraft.key.moveThirdPersonCam", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickHandheldCam = new KeyMapping("vivecraft.key.quickHandheldCam", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand1 = new KeyMapping("vivecraft.key.quickcommand1", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand2 = new KeyMapping("vivecraft.key.quickcommand2", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand3 = new KeyMapping("vivecraft.key.quickcommand3", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand4 = new KeyMapping("vivecraft.key.quickcommand4", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand5 = new KeyMapping("vivecraft.key.quickcommand5", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand6 = new KeyMapping("vivecraft.key.quickcommand6", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand7 = new KeyMapping("vivecraft.key.quickcommand7", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand8 = new KeyMapping("vivecraft.key.quickcommand8", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand9 = new KeyMapping("vivecraft.key.quickcommand9", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand10 = new KeyMapping("vivecraft.key.quickcommand10", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand11 = new KeyMapping("vivecraft.key.quickcommand11", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyQuickCommand12 = new KeyMapping("vivecraft.key.quickcommand12", -1,
-        KeyMapping.Category.MISC);
+    public final HandedKeyBinding keyClimbeyGrab = new HandedKeyBinding("vivecraft.key.climbeyGrab",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, this.categoryClimbey);
+    public final HandedKeyBinding keyClimbeyJump = new HandedKeyBinding("vivecraft.key.climbeyJump",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, this.categoryClimbey);
+    public final KeyMapping keyExportWorld = new KeyMapping("vivecraft.key.exportWorld",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyFreeMoveRotate = new KeyMapping("vivecraft.key.freeMoveRotate",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyFreeMoveStrafe = new KeyMapping("vivecraft.key.freeMoveStrafe",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyHotbarNext = new KeyMapping("vivecraft.key.hotbarNext",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.INVENTORY);
+    public final KeyMapping keyHotbarPrev = new KeyMapping("vivecraft.key.hotbarPrev",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.INVENTORY);
+    public final KeyMapping keyHotbarScroll = new KeyMapping("vivecraft.key.hotbarScroll",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.INVENTORY);
+    public final KeyMapping keyHotbarSwipeX = new KeyMapping("vivecraft.key.hotbarSwipeX",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.INVENTORY);
+    public final KeyMapping keyHotbarSwipeY = new KeyMapping("vivecraft.key.hotbarSwipeY",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.INVENTORY);
+    public final KeyMapping keyMenuButton = new KeyMapping("vivecraft.key.ingameMenuButton",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyMoveThirdPersonCam = new KeyMapping("vivecraft.key.moveThirdPersonCam",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickHandheldCam = new KeyMapping("vivecraft.key.quickHandheldCam",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand1 = new KeyMapping("vivecraft.key.quickcommand1",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand2 = new KeyMapping("vivecraft.key.quickcommand2",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand3 = new KeyMapping("vivecraft.key.quickcommand3",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand4 = new KeyMapping("vivecraft.key.quickcommand4",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand5 = new KeyMapping("vivecraft.key.quickcommand5",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand6 = new KeyMapping("vivecraft.key.quickcommand6",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand7 = new KeyMapping("vivecraft.key.quickcommand7",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand8 = new KeyMapping("vivecraft.key.quickcommand8",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand9 = new KeyMapping("vivecraft.key.quickcommand9",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand10 = new KeyMapping("vivecraft.key.quickcommand10",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand11 = new KeyMapping("vivecraft.key.quickcommand11",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyQuickCommand12 = new KeyMapping("vivecraft.key.quickcommand12",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
     public final KeyMapping[] keyQuickCommands = new KeyMapping[]{
         this.keyQuickCommand1, this.keyQuickCommand2, this.keyQuickCommand3, this.keyQuickCommand4,
         this.keyQuickCommand5, this.keyQuickCommand6, this.keyQuickCommand7, this.keyQuickCommand8,
         this.keyQuickCommand9, this.keyQuickCommand10, this.keyQuickCommand11, this.keyQuickCommand12
     };
-    public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch", -1,
-        KeyMapping.Category.GAMEPLAY);
-    public final KeyMapping keyQuickSwap = new KeyMapping("vivecraft.key.quickSwap", -1,
-        KeyMapping.Category.INVENTORY);
-    public final KeyMapping keyRadialMenu = new KeyMapping("vivecraft.key.radialMenu", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyRotateAxis = new KeyMapping("vivecraft.key.rotateAxis", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyFlickStick = new KeyMapping("vivecraft.key.flickStick", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyRotateFree = new KeyMapping("vivecraft.key.rotateFree", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyRotateLeft = new KeyMapping("vivecraft.key.rotateLeft", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyRotateRight = new KeyMapping("vivecraft.key.rotateRight", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keySwapMirrorView = new KeyMapping("vivecraft.key.swapMirrorView", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyTeleport = new KeyMapping("vivecraft.key.teleport", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyTeleportFallback = new KeyMapping("vivecraft.key.teleportFallback", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyToggleHandheldCam = new KeyMapping("vivecraft.key.toggleHandheldCam", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyToggleKeyboard = new KeyMapping("vivecraft.key.toggleKeyboard", -1,
-        KeyMapping.Category.MISC);
-    public final KeyMapping keyToggleMovement = new KeyMapping("vivecraft.key.toggleMovement", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyToggleWalkUpBlocks = new KeyMapping("vivecraft.key.toggleWalkUp", -1,
-        KeyMapping.Category.MOVEMENT);
-    public final KeyMapping keyTogglePlayerList = new KeyMapping("vivecraft.key.togglePlayerList", -1,
-        KeyMapping.Category.MULTIPLAYER);
-    public final HandedKeyBinding keyTrackpadTouch = new HandedKeyBinding("vivecraft.key.trackpadTouch", -1,
-        KeyMapping.Category.MISC);
-    public final HandedKeyBinding keyVRInteract = new HandedKeyBinding("vivecraft.key.vrInteract", -1,
-        KeyMapping.Category.GAMEPLAY);
-    public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", -1,
+    public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.GAMEPLAY);
+    public final KeyMapping keyQuickSwap = new KeyMapping("vivecraft.key.quickSwap",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.INVENTORY);
+    public final KeyMapping keyRadialMenu = new KeyMapping("vivecraft.key.radialMenu",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyRotateAxis = new KeyMapping("vivecraft.key.rotateAxis",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyFlickStick = new KeyMapping("vivecraft.key.flickStick",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyRotateFree = new KeyMapping("vivecraft.key.rotateFree",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyRotateLeft = new KeyMapping("vivecraft.key.rotateLeft",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyRotateRight = new KeyMapping("vivecraft.key.rotateRight",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keySwapMirrorView = new KeyMapping("vivecraft.key.swapMirrorView",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyTeleport = new KeyMapping("vivecraft.key.teleport",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyTeleportFallback = new KeyMapping("vivecraft.key.teleportFallback",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyToggleHandheldCam = new KeyMapping("vivecraft.key.toggleHandheldCam",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyToggleKeyboard = new KeyMapping("vivecraft.key.toggleKeyboard",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final KeyMapping keyToggleMovement = new KeyMapping("vivecraft.key.toggleMovement",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyToggleWalkUpBlocks = new KeyMapping("vivecraft.key.toggleWalkUp",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyTogglePlayerList = new KeyMapping("vivecraft.key.togglePlayerList",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MULTIPLAYER);
+    public final HandedKeyBinding keyTrackpadTouch = new HandedKeyBinding("vivecraft.key.trackpadTouch",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
+    public final HandedKeyBinding keyVRInteract = new HandedKeyBinding("vivecraft.key.vrInteract",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.GAMEPLAY);
+    public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", SDLScancode.SDL_SCANCODE_UNKNOWN,
         KeyMapping.Category.MOVEMENT);
 
     /**

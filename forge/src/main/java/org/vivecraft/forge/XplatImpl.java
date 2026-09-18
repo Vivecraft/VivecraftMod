@@ -62,6 +62,7 @@ public class XplatImpl implements Xplat {
     @Override
     public int getKeyModifier(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
+            // TODO 26.3
             case SHIFT -> GLFW.GLFW_MOD_SHIFT;
             case ALT -> GLFW.GLFW_MOD_ALT;
             case CONTROL -> GLFW.GLFW_MOD_CONTROL;
@@ -72,6 +73,7 @@ public class XplatImpl implements Xplat {
     @Override
     public int getKeyModifierKey(KeyMapping keyMapping) {
         return switch (keyMapping.getKeyModifier()) {
+            // TODO 26.3
             case SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT;
             case ALT -> GLFW.GLFW_KEY_RIGHT_ALT;
             case CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL;

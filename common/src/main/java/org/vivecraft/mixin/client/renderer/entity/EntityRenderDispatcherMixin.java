@@ -7,6 +7,7 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.Entity;
@@ -78,9 +79,9 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
         }
     }
 
-    @Inject(method = "getRenderer(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;)Lnet/minecraft/client/renderer/entity/EntityRenderer;", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", ordinal = 0), cancellable = true)
+    @Inject(method = "getRenderer(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)Lnet/minecraft/client/renderer/entity/player/AvatarRenderer;", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", ordinal = 0), cancellable = true)
     private void vivecraft$getVRPlayerRenderer(
-        CallbackInfoReturnable<EntityRenderer> cir, @Local AvatarRenderState playerRenderState)
+        CallbackInfoReturnable<AvatarRenderer> cir, @Local AvatarRenderState playerRenderState)
     {
         // don't do any animations for dummy players
         if (((EntityRenderStateExtension) playerRenderState).vivecraft$getRotInfo() != null) {
