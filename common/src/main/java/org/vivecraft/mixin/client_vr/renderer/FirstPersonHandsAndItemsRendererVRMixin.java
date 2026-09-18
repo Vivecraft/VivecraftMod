@@ -49,7 +49,7 @@ import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 @Mixin(value = FirstPersonHandsAndItemsRenderer.class, priority = 999)
-public abstract class ItemInHandRendererVRMixin {
+public abstract class FirstPersonHandsAndItemsRendererVRMixin {
 
     @Unique
     private static final RenderType VIVECRAFT$MAP_BACKGROUND_NO_CULL = RenderTypes.entityCutout(
