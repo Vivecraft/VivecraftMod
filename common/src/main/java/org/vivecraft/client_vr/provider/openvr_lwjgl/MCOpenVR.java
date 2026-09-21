@@ -918,6 +918,12 @@ public class MCOpenVR extends MCVR {
             this.controllerComponentTransforms.put(component, new Matrix4f[2]);
 
             for (int c = 0; c < 2; c++) {
+                if (this.deviceSource[c].source != DeviceSource.Source.OPENVR ||
+                    this.deviceSource[c].deviceIndex == k_unTrackedDeviceIndexInvalid)
+                {
+                    failed = true;
+                    continue;
+                }
                 if (this.dh.vrSettings.controllerTransform != ControllerTransform.AUTO) {
                     VRSettings.LOGGER.info("Vivecraft: forcing {} controller transforms!",
                         this.dh.vrSettings.controllerTransform);
@@ -931,12 +937,6 @@ public class MCOpenVR extends MCVR {
                                 this.dh.vrSettings.controllerTransform.handGripL);
                     }
                 } else {
-                    if (this.deviceSource[c].source != DeviceSource.Source.OPENVR ||
-                        this.deviceSource[c].deviceIndex == k_unTrackedDeviceIndexInvalid)
-                    {
-                        failed = true;
-                        continue;
-                    }
                     try (MemoryStack stack = MemoryStack.stackPush()) {
                         String renderModelName = getStringDeviceProperty(this.deviceSource[c].deviceIndex,
                             VR.ETrackedDeviceProperty_Prop_RenderModelName_String);
