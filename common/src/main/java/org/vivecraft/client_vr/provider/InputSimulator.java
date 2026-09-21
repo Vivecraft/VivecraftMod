@@ -28,8 +28,15 @@ public class InputSimulator {
     }
 
     private static void handleKeyAction(int key, int modifiers, int action) {
+        int scancode = 0;
+        // try to get the scancode for the specified key
+        if (key != GLFW.GLFW_KEY_UNKNOWN) {
+            // -1 is returned for unsupported keys, so ignore it
+            scancode = Math.max(0, GLFW.glfwGetKeyScancode(key));
+        }
+
         Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().handle(), action,
-            new KeyEvent(key, 0, modifiers));
+            new KeyEvent(key, scancode, modifiers));
     }
 
     public static void pressKey(int key, int modifiers) {
