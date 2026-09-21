@@ -360,7 +360,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(method = "renderFrame", at = @At(value = "CONSTANT", args = "stringValue=present"))
+    @Inject(method = "renderFrame", at = @At(value = "CONSTANT", args = "stringValue=swapchainBlit"))
     private void vivecraft$renderVRPassesFabric(
         boolean renderLevel, CallbackInfo ci)
     {

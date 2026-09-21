@@ -5,6 +5,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.sdl.SDLKeyboard;
+import org.lwjgl.sdl.SDLKeycode;
 import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.client.gui.settings.GuiActiveKeyboardLayoutSelector;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -56,8 +58,8 @@ public class KeyboardKeys {
 
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH, 0, "cut", () -> {
             InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_LCTRL);
-            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_X);
-            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_X);
+            InputSimulator.pressKey(SDLScancode.SDL_SCANCODE_X, SDLKeycode.SDL_KMOD_LCTRL);
+            InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_X, SDLKeycode.SDL_KMOD_LCTRL);
             InputSimulator.releaseKey(SDLScancode.SDL_SCANCODE_LCTRL);
         }));
         addSpecial(Key.wide(SPECIAL_INDEX++, SPECIAL_KEY_WIDTH * 2, 0, "copy", () -> {

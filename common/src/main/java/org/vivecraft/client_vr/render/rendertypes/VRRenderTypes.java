@@ -103,6 +103,7 @@ public class VRRenderTypes {
     private static final BiFunction<Identifier, Boolean, RenderType> GUI_TEXTURED = Util.memoize(
         (identifier, depthAlways) -> RenderType.create("gui_textured_vr",
             RenderSetup.builder(depthAlways ? VRShaders.GUI_TEXTURED_ALWAYS : VRShaders.GUI_TEXTURED)
+                .setOitPipelines(depthAlways ? VRShaders.OIT_GUI_TEXTURED_ALWAYS : VRShaders.OIT_GUI_TEXTURED)
                 .withTexture(VRShaders.CORE_TEXTURE_SAMPLER, identifier)
                 .createRenderSetup()));
 

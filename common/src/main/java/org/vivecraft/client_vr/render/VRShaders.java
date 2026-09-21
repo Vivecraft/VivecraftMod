@@ -155,6 +155,32 @@ public class VRShaders {
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/gui_textured_always_vr"))
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).build();
 
+    private static final RenderPipeline.Snippet OIT_GUI_TEXTURED_SNIPPED = RenderPipeline.builder()
+        .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+        .withVertexShader("core/position_tex_color")
+        .withFragmentShader("core/position_tex_color")
+        .withBindGroupLayout(CORE_TEXTURE_LAYOUT)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .buildSnippet();
+
+    public static final OitPipelineSet OIT_GUI_TEXTURED = OitPipelineSet.builder("gui_textured_vr",
+            RenderPipeline.builder(OIT_GUI_TEXTURED_SNIPPED)
+                .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true)))
+        .build();
+
+    public static final OitPipelineSet OIT_GUI_TEXTURED_ALWAYS = OitPipelineSet.builder("gui_textured_always_vr",
+            RenderPipeline.builder(OIT_GUI_TEXTURED_SNIPPED))
+        .withAccumulateModifier(accumulate -> accumulate
+            .withBindGroupLayout(CORE_OVERLAY_LAYOUT)
+            .withBindGroupLayout(CORE_LIGHTMAP_LAYOUT)
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .withDepthBoundsModifier(bounds -> bounds
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .withTransmittanceModifier(trans -> trans
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)))
+        .build();
+
     public static final RenderPipeline CROSSHAIR_MENU = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/crosshair_menu_vr"))
         .withColorTargetState(new ColorTargetState(new BlendFunction(BlendFactor.ONE_MINUS_DST_COLOR, BlendFactor.ZERO,

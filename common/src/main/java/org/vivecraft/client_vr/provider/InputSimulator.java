@@ -7,6 +7,7 @@ import net.minecraft.client.input.InputQuirks;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.sdl.SDLKeyboard;
 import org.lwjgl.sdl.SDLKeycode;
 import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.client.utils.ClientUtils;
@@ -31,7 +32,7 @@ public class InputSimulator {
 
     private static void handleKeyAction(int key, int modifiers, int action) {
         Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().handle(), action,
-            new KeyEvent(key, 0, modifiers));
+            new KeyEvent(key, SDLKeyboard.SDL_GetKeyFromScancode(key, (short) modifiers, true), modifiers));
     }
 
     public static void pressKey(int key, int modifiers) {

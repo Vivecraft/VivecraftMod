@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client_vr.blaze3d.platform;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
@@ -94,6 +95,11 @@ public abstract class WindowVRMixin implements WindowExtension {
         if (VRState.VR_INITIALIZED) {
             ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Main Window Resized");
         }
+    }
+
+    @ModifyExpressionValue(method = "onResize", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;isMouseGrabbed()Z"))
+    private boolean vivecraft$dontGrabMouse(boolean mouseGrabbed) {
+        return mouseGrabbed && (!VRState.VR_RUNNING || ClientDataHolderVR.getInstance().vrSettings.seated);
     }
 
     @ModifyReturnValue(method = "isFocused", at = @At(value = "RETURN"))
