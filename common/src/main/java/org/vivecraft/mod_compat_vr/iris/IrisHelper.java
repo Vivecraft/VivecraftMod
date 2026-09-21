@@ -76,6 +76,13 @@ public class IrisHelper {
     }
 
     /**
+     * @return if iris uses regular depth
+     */
+    public static boolean isRegularDepth() {
+        return IrisApi.getInstance().getMinorApiRevision() < 4 || !IrisApi.getInstance().isReverseZDuringShaders();
+    }
+
+    /**
      * @return if shaders are currently rendering the shadow pass
      */
     public static boolean isRenderingShadows() {
