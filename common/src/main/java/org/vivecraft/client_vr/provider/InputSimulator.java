@@ -28,8 +28,15 @@ public class InputSimulator {
     }
 
     private static void handleKeyAction(int key, int modifiers, int action) {
+        // skip keys without a code
+        int scancode = key != -1 ? GLFW.glfwGetKeyScancode(key) : -1;
+        // -1 means the layout does not have the key. normalize to 0 (unknown scancode)
+        if (scancode == -1) {
+            scancode = 0;
+        }
+
         Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().handle(), action,
-            new KeyEvent(key, 0, modifiers));
+            new KeyEvent(key, scancode, modifiers));
     }
 
     public static void pressKey(int key, int modifiers) {
