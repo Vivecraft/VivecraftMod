@@ -18,6 +18,13 @@ public class VRSystemMixin {
         JNIUtils.callV("UPPPP_V", __functionAddress, eEye, pfLeft, pfRight, pfTop, pfBottom);
     }
 
+    @WrapOperation(method = "nVRSystem_ComputeDistortion", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPZ(IFFJJ)Z"))
+    private static boolean vivecraft$nVRSystem_ComputeDistortion(
+        int eEye, float fU, float fV, long pDistortionCoordinates, long __functionAddress, Operation<Boolean> original)
+    {
+        return JNIUtils.callZ("UFFP_Z", __functionAddress, eEye, fU, fV, pDistortionCoordinates);
+    }
+
     @WrapOperation(method = "nVRSystem_GetTimeSinceLastVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPPZ(JJJ)Z"))
     private static boolean vivecraft$nVRSystem_GetTimeSinceLastVsync(
         long pfSecondsSinceLastVsync, long pulFrameCounter, long __functionAddress, Operation<Boolean> original)
@@ -42,6 +49,20 @@ public class VRSystemMixin {
         int unDeviceIndex, int prop, long pError, long __functionAddress, Operation<Boolean> original)
     {
         return JNIUtils.callZ("UIP_Z", __functionAddress, unDeviceIndex, prop, pError);
+    }
+
+    @WrapOperation(method = "nVRSystem_GetFloatTrackedDeviceProperty", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPF(IIJJ)F"))
+    private static float vivecraft$nVRSystem_GetFloatTrackedDeviceProperty(
+        int unDeviceIndex, int prop, long pError, long __functionAddress, Operation<Boolean> original)
+    {
+        return JNIUtils.callF("UIP_F", __functionAddress, unDeviceIndex, prop, pError);
+    }
+
+    @WrapOperation(method = "nVRSystem_GetUint64TrackedDeviceProperty", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPJ(IIJJ)J"))
+    private static long vivecraft$nVRSystem_GetUint64TrackedDeviceProperty(
+        int unDeviceIndex, int prop, long pError, long __functionAddress, Operation<Boolean> original)
+    {
+        return JNIUtils.callJ("UIP_J", __functionAddress, unDeviceIndex, prop, pError);
     }
 
     @WrapOperation(method = "nVRSystem_GetStringTrackedDeviceProperty", at = @At(value = "INVOKE", target = "Lorg/lwjgl/system/JNI;callPPI(IIJIJJ)I"))
