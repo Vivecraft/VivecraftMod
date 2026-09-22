@@ -20,7 +20,7 @@ public class LevelEventHandlerVRMixin {
     private Minecraft minecraft;
 
     @Inject(at = @At("HEAD"), method = "levelEvent")
-    public void vivecraft$shakeOnSound(int type, BlockPos pos, int data, CallbackInfo ci) {
+    private void vivecraft$shakeOnSound(int type, BlockPos pos, int data, CallbackInfo ci) {
         boolean playerNearAndVR = VRState.VR_RUNNING && this.minecraft.player != null &&
             this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(pos) < 25.0D;
         if (playerNearAndVR) {
