@@ -22,7 +22,9 @@ public enum NetworkVersion {
     // adds packet to override the aim direction/position
     AIM_OVERRIDE,
     // adds a packet to indicate to the server that the client did a climbey jump
-    CLIMBEY_JUMP;
+    CLIMBEY_JUMP,
+    // adds a roomscale attack packet to distinguish button attacks to roomscale attacks on blocks
+    ROOMSCALE_ATTACK_PACKET;
 
     public static NetworkVersion fromProtocolVersion(int protocolVersion) {
         return values()[protocolVersion + 1];

@@ -1,8 +1,11 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelEventHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.LevelEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,8 +13,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.common.network.NetworkVersion;
 
 @Mixin(LevelEventHandler.class)
 public class LevelEventHandlerVRMixin {
@@ -46,5 +51,16 @@ public class LevelEventHandlerVRMixin {
                 }
             }
         }
+    }
+
+    @WrapWithCondition(method = "levelEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addBreakingBlockEffects(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Z)V"))
+    private boolean vivecraft$noEffectForRoomscale(
+        ClientLevel instance, BlockPos pos, Direction direction,
+        boolean playSound)
+    {
+        // block the event if it matches the roomscale hit and the server doesn't correctly handle it
+        return !VRState.VR_RUNNING ||
+            NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(ClientNetworking.USED_NETWORK_VERSION) ||
+            !ClientDataHolderVR.getInstance().swingTracker.matchesLastHit(pos, direction);
     }
 }

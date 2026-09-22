@@ -38,6 +38,10 @@ public class ServerVivePlayer {
     public ItemStack activeItemOverride = ItemStack.EMPTY;
     // when a player mines a block too fast, the destroy is delayed, need to keep track of the bodypart that actually destroyed it
     public VRBodyPart delayedDestroyBodyPart = null;
+    // any block break action that happens while this is true, is treated as a roomscale hit
+    public boolean isHitRoomscale = false;
+    // keeps track of ticks worth of attacks made in this roomscale hit streak
+    public int roomscaleHitCount = 0;
     public boolean useBodyPartForAim = false;
     public boolean crawling;
     // if the player has VR active

@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
@@ -44,6 +45,8 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.network.NetworkVersion;
+import org.vivecraft.common.network.packet.c2s.RoomscaleAttackPayloadC2S;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
 import org.vivecraft.data.ViveBlockTags;
@@ -84,6 +87,10 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
     private final Vec3[] lastBlockHit = new Vec3[4];
     private final int[] lastMiningPointHit = new int[4];
     private final List<Pair<Vec3, Integer>>[] previousMiningPoints = new List[]{new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>()};
+
+    // on vanilla servers, we block the particles for roomscale hits
+    private BlockPos lastHitEffectPos = null;
+    private Direction lastHitEffectDirection = null;
 
     private final Minecraft mc;
     private final ClientDataHolderVR dh;
@@ -592,6 +599,14 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         // send hitting hand
                         ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
 
+                        // send that this is a roomscale hit
+                        if (NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
+                            ClientNetworking.sendServerPacket(new RoomscaleAttackPayloadC2S(true, 0));
+                        }
+
+                        // if we are already destroying startDestroyBlock doesn't play the hit sound
+                        boolean playSound = this.mc.gameMode.isDestroying();
+
                         // this will either destroy the block if in creative or set it as the current block.
                         // does nothing in survival if you are already hitting this block.
                         this.mc.gameMode.startDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection());
@@ -603,8 +618,17 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                                 if (this.mc.gameMode.continueDestroyBlock(blockHit.getBlockPos(),
                                     blockHit.getDirection()))
                                 {
-                                    this.mc.level.addDestroyBlockEffect(blockHit.getBlockPos(),
-                                        this.mc.level.getBlockState(blockHit.getBlockPos()));
+                                    // only do clientside effects if the server doesn't send roomscale hit updates
+                                    if (!NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(
+                                        ClientNetworking.USED_NETWORK_VERSION))
+                                    {
+                                        this.mc.level.addBreakingBlockEffects(blockHit.getBlockPos(),
+                                            blockHit.getDirection(), playSound);
+                                        this.lastHitEffectPos = blockHit.getBlockPos();
+                                        this.lastHitEffectDirection = blockHit.getDirection();
+                                    }
+                                    // only play sound the first time
+                                    playSound = false;
                                 }
 
                                 this.clearBlockHitDelay();
@@ -620,6 +644,10 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
 
                         this.dh.vrPlayer.blockDust(blockHit.getLocation().x, blockHit.getLocation().y,
                             blockHit.getLocation().z, 3 * totalHits, blockHit.getBlockPos(), blockstate, 0.6F, 1.0F);
+                        // reset roomscale hit
+                        if (NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
+                            ClientNetworking.sendServerPacket(new RoomscaleAttackPayloadC2S(false, totalHits));
+                        }
                     }
 
                     this.dh.vr.triggerHapticPulse(c, 250 * totalHits);
@@ -698,6 +726,25 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
             return !open && direction.getAxis() == facing.getAxis();
         }
         return false;
+    }
+
+    /**
+     * Checks if the given block position and direction match the last roomscale block hit
+     *
+     * @param pos       block position ot check at
+     * @param direction direction to check
+     * @return if the give block+direction match the roomscale hit
+     */
+    public boolean matchesLastHit(BlockPos pos, Direction direction) {
+        return Objects.equals(this.lastHitEffectPos, pos) && this.lastHitEffectDirection == direction;
+    }
+
+    /**
+     * resets the stored roomscale hit
+     */
+    public void resetLastHit() {
+        this.lastHitEffectPos = null;
+        this.lastHitEffectDirection = null;
     }
 
     /**

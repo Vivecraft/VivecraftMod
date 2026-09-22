@@ -52,6 +52,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.VivecraftVRMod;
@@ -469,6 +470,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             ClientDataHolderVR.getInstance().swingType = VRFirstPersonArmSwing.ATTACK;
         }
         return original.call(instance, hand, animation, sendToSwingingEntity);
+    }
+
+    @Inject(method = "startAttack", at = @At("HEAD"))
+    private void vivecraft$resetSwingHit(CallbackInfoReturnable<Boolean> cir) {
+        ClientDataHolderVR.getInstance().swingTracker.resetLastHit();
     }
 
     @WrapWithCondition(method = "continueAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;stopDestroyBlock()V"))

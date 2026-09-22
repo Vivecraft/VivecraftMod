@@ -283,6 +283,13 @@ public class ServerNetworking {
                 .add(((AimPosOverridePayloadC2S) c2sPayload).position().x(),
                     ((AimPosOverridePayloadC2S) c2sPayload).position().y(),
                     ((AimPosOverridePayloadC2S) c2sPayload).position().z());
+            case ROOMSCALE_ATTACK -> {
+                RoomscaleAttackPayloadC2S roomscaleAttack = (RoomscaleAttackPayloadC2S) c2sPayload;
+                vivePlayer.isHitRoomscale = roomscaleAttack.isRoomscaleAttack();
+                if (!vivePlayer.isHitRoomscale) {
+                    vivePlayer.roomscaleHitCount += roomscaleAttack.hitsMade();
+                }
+            }
             // legacy support
             case CONTROLLER0DATA, CONTROLLER1DATA, HEADDATA -> {
                 Map<PayloadIdentifier, VivecraftPayloadC2S> playerData;

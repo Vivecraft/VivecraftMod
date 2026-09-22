@@ -28,5 +28,6 @@ public enum PayloadIdentifier {
     AIM_DIRECTION_OVERRIDE,
     AIM_OVERRIDE_RESET,
     AIM_POSITION_OVERRIDE,
-    JUMPING
+    JUMPING,
+    ROOMSCALE_ATTACK
 }

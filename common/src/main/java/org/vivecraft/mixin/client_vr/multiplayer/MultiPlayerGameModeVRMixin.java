@@ -3,9 +3,12 @@ package org.vivecraft.mixin.client_vr.multiplayer;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -13,9 +16,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3fc;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -28,7 +35,20 @@ import java.util.function.Supplier;
  * we override the players look direction so the server handles any interactions as if the player looked at the interacted block
  */
 @Mixin(MultiPlayerGameMode.class)
-public class MultiPlayerGameModeVRMixin {
+public abstract class MultiPlayerGameModeVRMixin {
+
+    @Shadow
+    private boolean isDestroying;
+
+    @Shadow
+    private Direction destroyDirection;
+
+    @Shadow
+    protected abstract boolean sameDestroyTarget(BlockPos pos);
+
+    @Shadow
+    @Final
+    private ClientPacketListener connection;
 
     @WrapMethod(method = "useItem")
     private InteractionResult vivecraft$useLookOverride(
@@ -75,6 +95,18 @@ public class MultiPlayerGameModeVRMixin {
             xRot = (float) Math.toDegrees(Math.asin(-dir.y() / dir.length()));
         }
         return original.call(hand, sequence, yRot, xRot);
+    }
+
+    @Inject(method = "startDestroyBlock", at = @At("HEAD"))
+    private void vivecraft$switchFromRoomsacaleToButon(
+        BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir)
+    {
+        if (this.isDestroying && this.sameDestroyTarget(pos) && this.destroyDirection == direction) {
+            // send a direction change packet to reset the server state
+            this.connection.send(
+                new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.CHANGE_DESTROY_DIRECTION, pos,
+                    direction));
+        }
     }
 
     @WrapMethod(method = "sameDestroyTarget")
