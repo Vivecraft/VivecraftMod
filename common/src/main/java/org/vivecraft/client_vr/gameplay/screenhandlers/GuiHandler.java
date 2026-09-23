@@ -18,10 +18,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2fc;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
 import org.vivecraft.client.VivecraftVRMod;
@@ -40,6 +37,8 @@ import org.vivecraft.client_vr.render.renderstates.ScreenRenderState;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+
+import java.lang.Math;
 
 public class GuiHandler {
     public static final Minecraft MC = Minecraft.getInstance();
@@ -188,11 +187,10 @@ public class GuiHandler {
         }
         if (oldWidth != GUI_WIDTH) {
             // move cursor to right position
+            Vector2ic windowSize = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualWindowSize();
             InputSimulator.setMousePos(
-                MC.mouseHandler.xpos() * ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth() /
-                    oldWidth,
-                MC.mouseHandler.ypos() * ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight() /
-                    oldHeight);
+                MC.mouseHandler.xpos() * windowSize.x() / oldWidth,
+                MC.mouseHandler.ypos() * windowSize.y() / oldHeight);
             CONTROLLER_MOUSE_X *= (double) GUI_WIDTH / oldWidth;
             CONTROLLER_MOUSE_Y *= (double) GUI_HEIGHT / oldHeight;
             return true;
@@ -236,13 +234,10 @@ public class GuiHandler {
 
         if (CONTROLLER_MOUSE_VALID) {
             // mouse on screen
+            Vector2ic windowSize = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualWindowSize();
             InputSimulator.setMousePos(
-                CONTROLLER_MOUSE_X * (((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth() /
-                    (double) MC.getWindow().getScreenWidth()
-                ),
-                CONTROLLER_MOUSE_Y * (((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight() /
-                    (double) MC.getWindow().getScreenHeight()
-                ));
+                CONTROLLER_MOUSE_X * (windowSize.x() / (double) MC.getWindow().getScreenWidth()),
+                CONTROLLER_MOUSE_Y * (windowSize.y() / (double) MC.getWindow().getScreenHeight()));
         }
     }
 
