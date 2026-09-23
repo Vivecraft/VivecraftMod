@@ -97,7 +97,7 @@ public abstract class WindowVRMixin implements WindowExtension {
         }
     }
 
-    @Inject(method = "onResize", at = @At("HEAD"))
+    @Inject(method = {"onResize", "onFramebufferResize"}, at = @At("HEAD"))
     private void vivecraft$resizeFrameBuffers(CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
             ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Main Window Resized");
