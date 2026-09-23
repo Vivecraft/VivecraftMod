@@ -172,9 +172,6 @@ public abstract class FirstPersonHandsAndItemsRendererVRMixin {
         boolean mainHand = hand == InteractionHand.MAIN_HAND;
         HumanoidArm side =
             mainHand ? playerState.avatarRenderState.mainArm : playerState.avatarRenderState.mainArm.getOpposite();
-        if (rotInfo.leftHanded) {
-            side = side.getOpposite();
-        }
 
         poseStack.pushPose();
 
@@ -285,8 +282,7 @@ public abstract class FirstPersonHandsAndItemsRendererVRMixin {
     {
         if (playerState.avatarRenderState == null) return;
         boolean rightHand = side == HumanoidArm.RIGHT;
-        boolean mainHand =
-            side == (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
+        boolean mainHand = side == playerState.avatarRenderState.mainArm;
         float offsetDirection = rightHand ? 1.0F : -1.0F;
 
         VRArmRenderer vrArmRenderer = ((EntityRenderDispatcherVRExtension) this.minecraft.getEntityRenderDispatcher()).vivecraft$getArmSkinMap()

@@ -502,9 +502,6 @@ public class VRPlayerModel extends PlayerModel {
         if (rotInfo != null && avatarRenderState.swingAnimation > 0F && avatarRenderState.currentSwing != null) {
             // we ignore the vanilla main arm setting
             HumanoidArm attackArm = avatarRenderState.currentSwing.hand().asArm(avatarRenderState.mainArm);
-            if (rotInfo.leftHanded) {
-                attackArm = attackArm.getOpposite();
-            }
             if (side == attackArm) {
                 poseStack.translate(0.0F, 0.5F, 0.0F);
                 poseStack.rotate(Axis.XP.rotation(Mth.sin(avatarRenderState.swingAnimation * Mth.PI)));
