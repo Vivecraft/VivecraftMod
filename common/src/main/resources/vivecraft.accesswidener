@@ -18,7 +18,8 @@ accessible field net/minecraft/client/renderer/entity/layers/RenderLayer rendere
 accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
 
 # for quicktorch
-accessible method net/minecraft/client/Minecraft startUseItem ()V
+# replacced with an invoker for now, because of a neoforge bug https://github.com/neoforged/FancyModLoader/issues/453
+#accessible method net/minecraft/client/Minecraft startUseItem ()V
 
 # to switch rendertargets for VR passes
 mutable field net/minecraft/client/renderer/GameRenderer mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
@@ -48,7 +49,9 @@ accessible field com/mojang/renderpearl/frontend/FrontendGpuDevice backend Lcom/
 # to render vr hands
 accessible method net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer submitArmWithItem (Lnet/minecraft/client/renderer/state/level/PlayerRenderState;Lnet/minecraft/client/renderer/state/level/FirstPersonHandsAndItemsRenderState;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V
 # to render item activation outside of gamerenderer
-accessible method net/minecraft/client/renderer/ScreenEffectRenderer renderItemActivationAnimation (Lnet/minecraft/client/renderer/state/level/PlayerRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/client/renderer/SubmitNodeCollector;)V# to disable destroy delay, on roomscale hitting
+# replacced with an invoker for now, because of a neoforge bug https://github.com/neoforged/FancyModLoader/issues/453
+#accessible method net/minecraft/client/renderer/ScreenEffectRenderer renderItemActivationAnimation (Lnet/minecraft/client/renderer/state/level/PlayerRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FLnet/minecraft/client/renderer/SubmitNodeCollector;)V
+# to disable destroy delay, on roomscale hitting
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
 # to accesss the spear progress interpolation
 accessible method net/minecraft/client/model/effects/SpearAnimations progress (FFF)F

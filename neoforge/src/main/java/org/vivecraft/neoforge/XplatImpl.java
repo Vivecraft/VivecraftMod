@@ -64,7 +64,7 @@ public class XplatImpl implements Xplat {
             case SHIFT -> SDLKeycode.SDL_KMOD_LSHIFT;
             case ALT -> SDLKeycode.SDL_KMOD_RALT;
             case CONTROL -> SDLKeycode.SDL_KMOD_LCTRL;
-            default -> 0;
+            default -> SDLKeycode.SDL_KMOD_NONE;
         };
     }
 
@@ -74,7 +74,7 @@ public class XplatImpl implements Xplat {
             case SHIFT -> SDLScancode.SDL_SCANCODE_LSHIFT;
             case ALT -> SDLScancode.SDL_SCANCODE_RALT;
             case CONTROL -> SDLScancode.SDL_SCANCODE_LCTRL;
-            default -> -1;
+            default -> SDLScancode.SDL_SCANCODE_UNKNOWN;
         };
     }
 

@@ -4,6 +4,7 @@
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "client.MinecraftAccessor",
     "client.OptionInstanceMixin",
     "client.ResourceLoadStateTrackerMixin",
     "client.blaze3d.BufferBuilderMixin",
@@ -19,6 +20,7 @@
     "client.particle.SparkParticleMixin",
     "client.player.AbstractClientPlayerMixin",
     "client.renderer.ItemBlockRenderTypesMixin",
+    "client.renderer.ScreenEffectRendererAccessor",
     "client.renderer.SubmitNodeCollectionMixin",
     "client.renderer.block.FluidRendererMixin",
     "client.renderer.entity.AvatarRendererMixin",

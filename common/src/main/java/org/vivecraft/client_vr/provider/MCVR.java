@@ -42,6 +42,7 @@ import org.vivecraft.client_vr.utils.osc_trackers.OSCTracker;
 import org.vivecraft.client_vr.utils.osc_trackers.OSCTrackerReceiver;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ViveItems;
+import org.vivecraft.mixin.client.MinecraftAccessor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -913,7 +914,7 @@ public abstract class MCVR {
                 if (itemstack.getItem() instanceof BlockItem item && item.getBlock() instanceof TorchBlock) {
                     this.quickTorchPreviousSlot = this.mc.player.getInventory().getSelectedSlot();
                     this.mc.player.getInventory().setSelectedSlot(slot);
-                    this.mc.startUseItem();
+                    ((MinecraftAccessor) this.mc).invokeStartUseItem();
                     // switch back immediately
                     this.mc.player.getInventory().setSelectedSlot(this.quickTorchPreviousSlot);
                     this.quickTorchPreviousSlot = -1;

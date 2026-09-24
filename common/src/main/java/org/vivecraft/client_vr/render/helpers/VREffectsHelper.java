@@ -66,6 +66,7 @@ import org.vivecraft.client_vr.render.renderstates.VRRenderState;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.mixin.client.renderer.ScreenEffectRendererAccessor;
 import org.vivecraft.mixin.client_vr.renderer.GameRendererAccessor;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -906,8 +907,8 @@ public class VREffectsHelper {
 
         // totem of undying
         // can't be ordered
-        ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer()
-            .renderItemActivationAnimation(playerState, poseStack, vrState.partialTick, output);
+        ((ScreenEffectRendererAccessor) ((GameRendererAccessor) MC.gameRenderer).getScreenEffectRenderer())
+            .invokeRenderItemActivationAnimation(playerState, poseStack, vrState.partialTick, output);
         return order;
     }
 
