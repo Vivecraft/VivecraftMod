@@ -79,7 +79,7 @@ public class IrisHelper {
      * @return if iris uses regular depth
      */
     public static boolean isRegularDepth() {
-        return IrisApi.getInstance().getMinorApiRevision() >= 4 && !IrisApi.getInstance().isReverseZDuringShaders();
+        return IrisApi.getInstance().getMinorApiRevision() < 4 || !IrisApi.getInstance().isReverseZDuringShaders();
     }
 
     /**

@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Vector2ic;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -106,9 +107,9 @@ public abstract class CameraVRMixin {
                     } else {
                         if (ShadersHelper.needsSameSizeBuffers()) {
                             // in this case the default aspect is wrong, since it has the aspect of the vr view
-                            WindowExtension window = (WindowExtension) (Object) this.minecraft.getWindow();
-                            width = window.vivecraft$getActualScreenWidth();
-                            height = window.vivecraft$getActualScreenHeight();
+                            Vector2ic windowFramebufferSize = ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualFramebufferSize();
+                            width = windowFramebufferSize.x();
+                            height = windowFramebufferSize.y();
                         }
                     }
                 }

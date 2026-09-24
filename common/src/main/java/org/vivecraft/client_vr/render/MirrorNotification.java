@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.state.WindowRenderState;
+import org.joml.Vector2ic;
 import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.render.helpers.GuiRenderHelper;
@@ -48,10 +49,13 @@ public class MirrorNotification {
             WindowRenderState windowState = MC.gameRenderer.gameRenderState().windowRenderState;
             int backupGuiScale = windowState.guiScale;
             windowState.guiScale = 1;
+
+            Vector2ic windowFramebufferSize = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualFramebufferSize();
+
             int backupWidth = windowState.width;
-            windowState.width = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenWidth();
+            windowState.width = windowFramebufferSize.x();
             int backupHeight = windowState.height;
-            windowState.height = ((WindowExtension) (Object) MC.getWindow()).vivecraft$getActualScreenHeight();
+            windowState.height = windowFramebufferSize.y();
 
             GuiGraphicsExtractor graphics = GuiRenderHelper.getGuiGraphics();
             graphics.pose().scale(3, 3);

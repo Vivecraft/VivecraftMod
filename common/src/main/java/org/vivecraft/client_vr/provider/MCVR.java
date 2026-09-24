@@ -670,14 +670,11 @@ public abstract class MCVR {
 
                 this.aimPitch = Mth.clamp(this.aimPitch + vPos * ySpeed, -89.9F, 89.9F);
 
-                double screenX = xPos *
-                    (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenWidth() /
-                        (double) screenWidth
-                    );
+                Vector2ic windowSize = ((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualWindowSize();
+
+                double screenX = xPos * (windowSize.x() / (double) screenWidth);
                 double screenY = (screenHeight * 0.5F) *
-                    (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenHeight() /
-                        (double) this.mc.getWindow().getScreenHeight()
-                    );
+                    (windowSize.y() / (double) this.mc.getWindow().getScreenHeight());
 
                 InputSimulator.setMousePos(screenX, screenY);
                 SDLMouse.SDL_WarpMouseInWindow(this.mc.getWindow().handle(), (float) screenX, (float) screenY);

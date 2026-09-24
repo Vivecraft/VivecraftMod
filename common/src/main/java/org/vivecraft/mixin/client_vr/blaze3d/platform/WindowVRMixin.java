@@ -5,6 +5,8 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import net.minecraft.client.Minecraft;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,6 +32,12 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Shadow
     @Final
     private WindowEventHandler eventHandler;
+
+    @Shadow
+    private int framebufferWidth;
+
+    @Shadow
+    private int framebufferHeight;
 
     @Inject(method = "getWidth", at = @At("HEAD"), cancellable = true)
     private void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
@@ -90,7 +98,7 @@ public abstract class WindowVRMixin implements WindowExtension {
         }
     }
 
-    @Inject(method = "onResize", at = @At("HEAD"))
+    @Inject(method = {"onResize", "onFramebufferResize"}, at = @At("HEAD"))
     private void vivecraft$resizeFrameBuffers(CallbackInfo ci) {
         if (VRState.VR_INITIALIZED) {
             ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Main Window Resized");
@@ -109,14 +117,14 @@ public abstract class WindowVRMixin implements WindowExtension {
 
     @Override
     @Unique
-    public int vivecraft$getActualScreenHeight() {
-        return this.height;
+    public Vector2ic vivecraft$getActualWindowSize() {
+        return new Vector2i(this.width, this.height);
     }
 
     @Override
     @Unique
-    public int vivecraft$getActualScreenWidth() {
-        return this.width;
+    public Vector2ic vivecraft$getActualFramebufferSize() {
+        return new Vector2i(this.framebufferWidth, this.framebufferHeight);
     }
 
     @Override

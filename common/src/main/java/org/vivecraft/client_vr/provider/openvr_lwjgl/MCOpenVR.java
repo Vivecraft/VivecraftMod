@@ -531,7 +531,7 @@ public class MCOpenVR extends MCVR {
 
                     property += switch (type) {
                         case "Float" -> VRSystem_GetFloatTrackedDeviceProperty(deviceIndex, prop, this.errorBuffer);
-                        case "String" -> VRSystem_GetStringTrackedDeviceProperty(deviceIndex, prop, this.errorBuffer);
+                        case "String" -> getStringDeviceProperty(deviceIndex, prop);
                         case "Bool" -> VRSystem_GetBoolTrackedDeviceProperty(deviceIndex, prop, this.errorBuffer);
                         case "Int32" -> VRSystem_GetInt32TrackedDeviceProperty(deviceIndex, prop, this.errorBuffer);
                         case "Uint64" -> VRSystem_GetUint64TrackedDeviceProperty(deviceIndex, prop, this.errorBuffer);
@@ -548,10 +548,8 @@ public class MCOpenVR extends MCVR {
         } else {
             // print only manufacturer and model
             VRSettings.LOGGER.info("Vivecraft: VR DEVICE: {}, Manufacturer: {}, Model: {}", deviceIndex,
-                VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
-                    ETrackedDeviceProperty_Prop_ManufacturerName_String, this.errorBuffer),
-                VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
-                    VR.ETrackedDeviceProperty_Prop_ModelNumber_String, this.errorBuffer));
+                getStringDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_ManufacturerName_String),
+                getStringDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_ModelNumber_String));
         }
     }
 
@@ -851,6 +849,29 @@ public class MCOpenVR extends MCVR {
     }
 
     /**
+     * gets the specified string property for the given device, catches any errors and empty strings
+     *
+     * @param deviceIndex device to get the property for
+     * @param property    property to get
+     * @return property content, error if one happened or "Unknown" if no property was returned
+     */
+    private String getStringDeviceProperty(int deviceIndex, int property) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            ByteBuffer stringBuffer = stack.calloc(k_unMaxPropertyStringSize);
+
+            int length = VRSystem_GetStringTrackedDeviceProperty(deviceIndex, property, stringBuffer, this.errorBuffer);
+
+            if (isError()) {
+                return VRSystem_GetPropErrorNameFromEnum(getError());
+            } else if (length <= 0) {
+                return "Unknown";
+            } else {
+                return MemoryUtil.memUTF8(MemoryUtil.memAddress(stringBuffer));
+            }
+        }
+    }
+
+    /**
      * @param buf ByteBuffer pointing to a String
      * @return String contained in the given buffer
      */
@@ -897,6 +918,12 @@ public class MCOpenVR extends MCVR {
             this.controllerComponentTransforms.put(component, new Matrix4f[2]);
 
             for (int c = 0; c < 2; c++) {
+                if (this.deviceSource[c].source != DeviceSource.Source.OPENVR ||
+                    this.deviceSource[c].deviceIndex == k_unTrackedDeviceIndexInvalid)
+                {
+                    failed = true;
+                    continue;
+                }
                 if (this.dh.vrSettings.controllerTransform != ControllerTransform.AUTO) {
                     VRSettings.LOGGER.info("Vivecraft: forcing {} controller transforms!",
                         this.dh.vrSettings.controllerTransform);
@@ -910,24 +937,13 @@ public class MCOpenVR extends MCVR {
                                 this.dh.vrSettings.controllerTransform.handGripL);
                     }
                 } else {
-                    if (this.deviceSource[c].source != DeviceSource.Source.OPENVR ||
-                        this.deviceSource[c].deviceIndex == k_unTrackedDeviceIndexInvalid)
-                    {
-                        failed = true;
-                        continue;
-                    }
                     try (MemoryStack stack = MemoryStack.stackPush()) {
-                        var stringBuffer = stack.calloc(k_unMaxPropertyStringSize);
+                        String renderModelName = getStringDeviceProperty(this.deviceSource[c].deviceIndex,
+                            VR.ETrackedDeviceProperty_Prop_RenderModelName_String);
 
-                        VRSystem_GetStringTrackedDeviceProperty(this.deviceSource[c].deviceIndex,
-                            VR.ETrackedDeviceProperty_Prop_RenderModelName_String, stringBuffer, this.errorBuffer);
+                        String inputProfilePath = getStringDeviceProperty(this.deviceSource[c].deviceIndex,
+                            VR.ETrackedDeviceProperty_Prop_InputProfilePath_String);
 
-                        String renderModelName = memUTF8NullTerminated(stringBuffer);
-
-                        VRSystem_GetStringTrackedDeviceProperty(this.deviceSource[c].deviceIndex,
-                            VR.ETrackedDeviceProperty_Prop_InputProfilePath_String, stringBuffer, this.errorBuffer);
-
-                        String inputProfilePath = memUTF8NullTerminated(stringBuffer);
                         boolean isWMR = inputProfilePath.contains("holographic");
                         boolean isRifts = inputProfilePath.contains("rifts");
 
@@ -1035,16 +1051,11 @@ public class MCOpenVR extends MCVR {
         };
         VRSettings.LOGGER.info("Vivecraft: TrackingSpace: {}", actualTrackingSpace);
 
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            ByteBuffer stringBuffer = stack.calloc(20);
+        String deviceName = getStringDeviceProperty(k_unTrackedDeviceIndex_Hmd,
+            ETrackedDeviceProperty_Prop_ManufacturerName_String);
 
-            VRSystem_GetStringTrackedDeviceProperty(k_unTrackedDeviceIndex_Hmd,
-                ETrackedDeviceProperty_Prop_ManufacturerName_String, stringBuffer, this.errorBuffer);
-
-            String deviceName = memUTF8NullTerminated(stringBuffer);
-            VRSettings.LOGGER.info("Vivecraft: Device manufacturer is: {}", deviceName);
-            this.detectedHardware = HardwareType.fromManufacturer(deviceName);
-        }
+        VRSettings.LOGGER.info("Vivecraft: Device manufacturer is: {}", deviceName);
+        this.detectedHardware = HardwareType.fromManufacturer(deviceName);
 
         // texture bounds, currently unused, since we use the full texture anyway
         this.texBounds.uMax(1.0F);

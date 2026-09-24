@@ -418,10 +418,8 @@ public abstract class VRRenderer {
         passes.add(RenderPass.RIGHT);
 
         // only do these, if the window is not minimized
-        WindowExtension window = (WindowExtension) (Object) minecraft.getWindow();
-        if (includeNonRendered ||
-            window.vivecraft$getActualScreenWidth() > 0 && window.vivecraft$getActualScreenHeight() > 0)
-        {
+        Vector2ic windowSize = ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualWindowSize();
+        if (includeNonRendered || (windowSize.x() > 0 && windowSize.y() > 0)) {
             if (dataholder.vrSettings.renderAllPasses) {
                 passes.add(RenderPass.CENTER);
                 passes.add(RenderPass.THIRD);
@@ -469,12 +467,10 @@ public abstract class VRRenderer {
      * @return resolution of the desktop view mirror
      */
     public Vector2i getMirrorTextureSize(int eyeFBWidth, int eyeFBHeight, float resolutionScale) {
-        this.mirrorFBWidth = (int) Math.ceil(
-            ((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenWidth() *
-                resolutionScale);
-        this.mirrorFBHeight = (int) Math.ceil(
-            ((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenHeight() *
-                resolutionScale);
+        Vector2ic windowFramebufferSize = ((WindowExtension) (Object) Minecraft.getInstance().getWindow()
+        ).vivecraft$getActualFramebufferSize();
+        this.mirrorFBWidth = (int) Math.ceil(windowFramebufferSize.x() * resolutionScale);
+        this.mirrorFBHeight = (int) Math.ceil(windowFramebufferSize.y() * resolutionScale);
 
         if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             this.mirrorFBWidth = this.mirrorFBWidth / 2;
@@ -654,9 +650,11 @@ public abstract class VRRenderer {
                 if (WorldRenderPass.MIXED_REALITY != null) {
                     WorldRenderPass.MIXED_REALITY.resize(mirrorSize.x, mirrorSize.y);
                 }
+                Vector2ic windowFramebufferSize = ((WindowExtension) (Object) Minecraft.getInstance().getWindow()
+                ).vivecraft$getActualFramebufferSize();
                 this.mirrorFramebuffer.resize(
-                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
-                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()));
+                    Math.max(1, windowFramebufferSize.x()),
+                    Math.max(1, windowFramebufferSize.y()));
             }
 
             // telescopes
@@ -766,10 +764,12 @@ public abstract class VRRenderer {
                 VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferUndistorted);
                 GraphicsHelper.INSTANCE.checkError("Undistorted view framebuffer setup");
             }
+            Vector2ic windowFramebufferSize = ((WindowExtension) (Object) Minecraft.getInstance().getWindow()
+            ).vivecraft$getActualFramebufferSize();
             this.mirrorFramebuffer = VRTextureTarget.builder("Mirror")
                 .withSize(
-                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth()),
-                    Math.max(1, ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight()))
+                    Math.max(1, windowFramebufferSize.x()),
+                    Math.max(1, windowFramebufferSize.y()))
                 .withClearColor(0F, 0F, 0F, 1F)
                 // we don't need the depth, but some mods expect it
                 .withDepth()
@@ -881,10 +881,7 @@ public abstract class VRRenderer {
                 int h = minecraft.getWindow().getGuiScaledHeight();
                 minecraft.gui.screen().init(w, h);
             }
-
-            long windowPixels =
-                (long) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() *
-                    ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
+            long windowPixels = (long) windowFramebufferSize.x() * windowFramebufferSize.y();
             long mirrorPixels = (long) this.mirrorFBWidth * (long) this.mirrorFBHeight;
 
             long vrPixels = (long) eyeFBWidth * (long) eyeFBHeight;
@@ -908,8 +905,8 @@ public abstract class VRRenderer {
                 eyew, eyeh, String.format("%.1f", (eyew * eyeh) / 1000000.0F),
                 eyeFBWidth, eyeFBHeight, dataholder.vrSettings.renderScaleFactor * 100.0F,
                 String.format("%.1f", vrPixels / 1000000.0F),
-                ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth(),
-                ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight(),
+                windowFramebufferSize.x(),
+                windowFramebufferSize.y(),
                 String.format("%.1f", windowPixels / 1000000.0F),
                 String.format("%.1f", pixelsPerFrame / 1000000.0F));
 
