@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.common.network.NetworkVersion;
 
 @Mixin(LevelEventHandler.class)
 public class LevelEventHandlerVRMixin {
@@ -60,7 +59,7 @@ public class LevelEventHandlerVRMixin {
     {
         // block the event if it matches the roomscale hit and the server doesn't correctly handle it
         return !VRState.VR_RUNNING ||
-            NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(ClientNetworking.USED_NETWORK_VERSION) ||
+            ClientNetworking.SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET ||
             !ClientDataHolderVR.getInstance().swingTracker.matchesLastHit(pos, direction);
     }
 }

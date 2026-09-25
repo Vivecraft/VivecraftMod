@@ -59,7 +59,8 @@ public abstract class ServerPlayerGameModeMixin {
             ticksSpentDestroying = vivePlayer.roomscaleHitCount;
             // make sure this doesn't go over 1, or the progress will disappear
             float prog = blockState.getDestroyProgress(this.player, this.player.level(), delayedDestroyPos);
-            ticksSpentDestroying = Math.clamp(ticksSpentDestroying, 1, (int) (1.0F / prog) - 1);
+            // -2, because incrementDestroyProgress checks +1
+            ticksSpentDestroying = Math.clamp(ticksSpentDestroying, 1, (int) (1.0F / prog) - 2);
         }
 
         return original.call(instance, blockState, delayedDestroyPos, ticksSpentDestroying);

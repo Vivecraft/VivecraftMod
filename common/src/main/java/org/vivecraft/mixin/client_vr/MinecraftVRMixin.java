@@ -98,10 +98,6 @@ import java.util.Map;
 @Mixin(value = Minecraft.class, priority = 1100)
 public abstract class MinecraftVRMixin implements MinecraftExtension {
 
-    // keeps track if an attack was initiated by pressing the attack key
-    @Unique
-    private boolean vivecraft$attackKeyDown;
-
     @Unique
     private CameraType vivecraft$lastCameraType;
 
@@ -480,10 +476,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @WrapWithCondition(method = "continueAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;stopDestroyBlock()V"))
     private boolean vivecraft$destroyReset(MultiPlayerGameMode instance) {
         // only stop destroying blocks when triggered with a button
-        boolean call =
-            !VRState.VR_RUNNING || ClientDataHolderVR.getInstance().vrSettings.seated || this.vivecraft$attackKeyDown;
-        this.vivecraft$attackKeyDown = false;
-        return call;
+        return !VRState.VR_RUNNING || ClientDataHolderVR.getInstance().vrSettings.seated ||
+            !ClientDataHolderVR.getInstance().swingTracker.hasHit();
     }
 
     @WrapWithCondition(method = "continueAttack", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;missTime:I", opcode = Opcodes.PUTFIELD))
@@ -759,12 +753,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (VRState.VR_RUNNING) {
             ClientNetworking.resetActiveBodyPart();
         }
-    }
-
-    @Inject(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startAttack()Z"))
-    private void vivecraft$markAttackKeyDown(CallbackInfo ci) {
-        // detect, if the attack button was used to destroy blocks
-        this.vivecraft$attackKeyDown = true;
     }
 
     @ModifyExpressionValue(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;isMouseGrabbed()Z"))

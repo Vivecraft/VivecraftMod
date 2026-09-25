@@ -189,6 +189,10 @@ public class ServerNetworking {
                         new AttackWhileBlockingPayloadS2C(ServerConfig.ALLOW_ATTACKS_WHILE_BLOCKING.get()));
                 }
 
+                if (NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(vivePlayer.networkVersion)) {
+                    packetConsumer.accept(new RoomscaleAttackPayloadS2C());
+                }
+
                 packetConsumer.accept(new NetworkVersionPayloadS2C(vivePlayer.networkVersion));
             }
             case IS_VR_ACTIVE -> {

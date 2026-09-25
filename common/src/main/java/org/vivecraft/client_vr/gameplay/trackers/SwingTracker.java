@@ -45,7 +45,6 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.helpers.DebugRenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.NetworkVersion;
 import org.vivecraft.common.network.packet.c2s.RoomscaleAttackPayloadC2S;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.common.utils.Utils;
@@ -176,6 +175,9 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
             this.miningPoints[i] = null;
             this.useHoldTicks[i] = 0;
         }
+        if (hasHit()) {
+            this.resetLastHit();
+        }
     }
 
     @Override
@@ -185,6 +187,14 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
 
     @Override
     public void activeProcess(LocalPlayer player) {
+        // if the player moved further than the interaction range away, plus 2 blocks margin, reset it
+        if (hasHit()) {
+            double dist = this.lastHitEffectPos.distToCenterSqr(player.position());
+            double interact = player.blockInteractionRange() + 2;
+            if (dist > interact * interact) {
+                this.resetLastHit();
+            }
+        }
         float speedTreshhold = SPEED_THRESH;
 
         if (player.isCreative()) {
@@ -600,7 +610,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
 
                         // send that this is a roomscale hit
-                        if (NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
+                        if (ClientNetworking.SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET) {
                             ClientNetworking.sendServerPacket(new RoomscaleAttackPayloadC2S(true, 0));
                         }
 
@@ -619,14 +629,12 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                                     blockHit.getDirection()))
                                 {
                                     // only do clientside effects if the server doesn't send roomscale hit updates
-                                    if (!NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(
-                                        ClientNetworking.USED_NETWORK_VERSION))
-                                    {
+                                    if (!ClientNetworking.SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET) {
                                         this.mc.level.addBreakingBlockEffects(blockHit.getBlockPos(),
                                             blockHit.getDirection(), playSound);
-                                        this.lastHitEffectPos = blockHit.getBlockPos();
-                                        this.lastHitEffectDirection = blockHit.getDirection();
                                     }
+                                    this.lastHitEffectPos = blockHit.getBlockPos();
+                                    this.lastHitEffectDirection = blockHit.getDirection();
                                     // only play sound the first time
                                     playSound = false;
                                 }
@@ -645,7 +653,7 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
                         this.dh.vrPlayer.blockDust(blockHit.getLocation().x, blockHit.getLocation().y,
                             blockHit.getLocation().z, 3 * totalHits, blockHit.getBlockPos(), blockstate, 0.6F, 1.0F);
                         // reset roomscale hit
-                        if (NetworkVersion.ROOMSCALE_ATTACK_PACKET.accepts(ClientNetworking.USED_NETWORK_VERSION)) {
+                        if (ClientNetworking.SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET) {
                             ClientNetworking.sendServerPacket(new RoomscaleAttackPayloadC2S(false, totalHits));
                         }
                     }
@@ -729,6 +737,13 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
     }
 
     /**
+     * @return if there was a roomscale hit
+     */
+    public boolean hasHit() {
+        return this.lastHitEffectPos != null && this.lastHitEffectDirection != null;
+    }
+
+    /**
      * Checks if the given block position and direction match the last roomscale block hit
      *
      * @param pos       block position ot check at
@@ -743,6 +758,9 @@ public class SwingTracker implements ItemInUseTracker, DebugRenderTracker {
      * resets the stored roomscale hit
      */
     public void resetLastHit() {
+        if (this.mc.gameMode != null) {
+            this.mc.gameMode.stopDestroyBlock();
+        }
         this.lastHitEffectPos = null;
         this.lastHitEffectDirection = null;
     }

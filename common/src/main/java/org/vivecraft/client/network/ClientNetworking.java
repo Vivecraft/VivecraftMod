@@ -62,6 +62,7 @@ public class ClientNetworking {
     public static boolean SERVER_ALLOWS_VR_SWITCHING = false;
     public static boolean SERVER_ALLOWS_DUAL_WIELDING = false;
     public static boolean SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING = false;
+    public static boolean SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET = false;
 
     public static Map<String, String> SERVER_VR_CHANGES_LIST;
 
@@ -95,6 +96,7 @@ public class ClientNetworking {
         SERVER_ALLOWS_VR_SWITCHING = false;
         SERVER_ALLOWS_DUAL_WIELDING = false;
         SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING = false;
+        SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET = false;
         USED_NETWORK_VERSION = NetworkVersion.LEGACY;
         LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
         BODY_PART_CLIENT_OVERRIDE = null;
@@ -543,6 +545,7 @@ public class ClientNetworking {
                 dataholder.hapticTracker.setLastHitDirection(((DamageDirectionPayloadS2C) s2cPayload).damageDir());
             case ATTACK_WHILE_BLOCKING ->
                 SERVER_ALLOWS_ATTACKING_WHILE_BLOCKING = ((AttackWhileBlockingPayloadS2C) s2cPayload).allowed();
+            case ROOMSCALE_ATTACK -> SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET = true;
         }
     }
 }
