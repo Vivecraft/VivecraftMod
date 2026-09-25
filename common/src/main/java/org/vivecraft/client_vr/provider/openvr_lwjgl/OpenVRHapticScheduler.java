@@ -2,8 +2,8 @@ package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
 import org.lwjgl.openvr.VR;
 import org.lwjgl.openvr.VRInput;
-import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HapticScheduler;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.concurrent.TimeUnit;

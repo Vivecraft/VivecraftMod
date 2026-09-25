@@ -1,5 +1,7 @@
 package org.vivecraft.client_vr.provider;
 
+import org.vivecraft.client_vr.provider.control.ControllerType;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 

@@ -12,7 +12,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gui.GuiRadial;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 
 public class RadialHandler {
     public static final ClientDataHolderVR DH = ClientDataHolderVR.getInstance();

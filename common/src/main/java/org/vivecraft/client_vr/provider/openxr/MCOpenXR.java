@@ -1,0 +1,1474 @@
+package org.vivecraft.client_vr.provider.openxr;
+
+import com.google.common.collect.HashBiMap;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.profiling.Profiler;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.openxr.*;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
+import org.vivecraft.api.client.data.RenderPass;
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.VRRenderer;
+import org.vivecraft.client_vr.provider.control.ActionType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
+import org.vivecraft.client_vr.provider.control.InputAction;
+import org.vivecraft.client_vr.provider.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.openxr.control.ControllerMapping;
+import org.vivecraft.client_vr.provider.openxr.control.XRBinding;
+import org.vivecraft.client_vr.provider.openxr.control.XRInputAction;
+import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.settings.VRSettings;
+
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.util.*;
+
+public class MCOpenXR extends MCVR<XRInputAction> {
+
+    private static MCOpenXR OME;
+    protected XrInstance instance;
+    public XrSession session;
+    protected XrSpace xrAppSpace;
+    protected XrSpace xrViewSpace;
+    protected final XrEventDataBuffer eventDataBuffer = XrEventDataBuffer.calloc();
+    protected long time;
+    private boolean tried;
+    protected long systemID;
+    protected int viewCount;
+    protected XrViewConfigurationView.Buffer viewConfigurationBuffer;
+    protected XrView.Buffer viewBuffer;
+    // TODO either move to MCVR, Or make special for OpenXR holding the instance itself.
+    private final Map<VRInputActionSet, Long> actionSetHandles = new EnumMap<>(VRInputActionSet.class);
+    // TODO Move to MCVR
+    private XrActiveActionSet.Buffer activeActionSetsBuffer;
+    private boolean isActive;
+    private final HashBiMap<String, Long> paths = HashBiMap.create();
+    private final long[] grip = new long[2];
+    private final long[] aim = new long[2];
+    private final XrSpace[] gripSpace = new XrSpace[2];
+    private final XrSpace[] aimSpace = new XrSpace[2];
+    private static final XrPosef POSE_IDENTITY = XrPosef.calloc().set(
+        XrQuaternionf.calloc().set(0, 0, 0, 1),
+        XrVector3f.calloc()
+    );
+    public boolean shouldRender = true;
+    public final long[] haptics = new long[2];
+    public String systemName;
+    private final String[] activeController = new String[2];
+
+    private static final List<String> SUPPORTED_EXTENSIONS = List.of(
+        BDControllerInteraction.XR_BD_CONTROLLER_INTERACTION_EXTENSION_NAME,
+        EXTHPMixedRealityController.XR_EXT_HP_MIXED_REALITY_CONTROLLER_EXTENSION_NAME,
+        HTCViveCosmosControllerInteraction.XR_HTC_VIVE_COSMOS_CONTROLLER_INTERACTION_EXTENSION_NAME,
+        FBDisplayRefreshRate.XR_FB_DISPLAY_REFRESH_RATE_EXTENSION_NAME
+    );
+
+    // if true attaches validation layers, they need to be set up
+    private static final boolean USE_VALIDATION = false;
+    private static final List<String> VALIDATION_EXTENSIONS = List.of(
+        EXTDebugUtils.XR_EXT_DEBUG_UTILS_EXTENSION_NAME
+    );
+    private static final List<String> VALIDATION_LAYERS = List.of(
+        "XR_APILAYER_LUNARG_core_validation",
+        "XR_APILAYER_KHRONOS_best_practices_validation"
+    );
+
+    private XrDebugUtilsMessengerEXT debugMessanger = null;
+
+    public record ActionBind(VRInputActionSet actionSet, String path) {}
+
+    public Map<ActionBind, Long> mappedBindings = new HashMap<>();
+
+    public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
+        super(mc, dh, VivecraftVRMod.INSTANCE);
+        OME = this;
+        this.hapticScheduler = new OpenXRHapticScheduler();
+    }
+
+    @Override
+    public String getName() {
+        return "OpenXR";
+    }
+
+    @Override
+    public void destroy() {
+        int error;
+        // Not sure if we need the action sets one here, as we are shutting down
+        for (Long inputActionSet : this.actionSetHandles.values()) {
+            error = XR10.xrDestroyActionSet(new XrActionSet(inputActionSet, this.instance));
+            logError(error, "xrDestroyActionSet", "");
+        }
+        if (this.debugMessanger != null) {
+            error = EXTDebugUtils.xrDestroyDebugUtilsMessengerEXT(this.debugMessanger);
+            logError(error, "xrDestroyDebugUtilsMessengerEXT", "");
+        }
+        if (this.viewBuffer != null) {
+            this.viewBuffer.close();
+        }
+        if (this.viewConfigurationBuffer != null) {
+            this.viewConfigurationBuffer.close();
+        }
+        if (this.xrAppSpace != null) {
+            error = XR10.xrDestroySpace(this.xrAppSpace);
+            logError(error, "xrDestroySpace", "xrAppSpace");
+        }
+        if (this.xrViewSpace != null) {
+            error = XR10.xrDestroySpace(this.xrViewSpace);
+            logError(error, "xrDestroySpace", "xrViewSpace");
+        }
+        if (this.session != null) {
+            error = XR10.xrDestroySession(this.session);
+            logError(error, "xrDestroySession", "");
+        }
+        if (this.instance != null) {
+            error = XR10.xrDestroyInstance(this.instance);
+            logError(error, "xrDestroyInstance", "");
+        }
+        this.eventDataBuffer.close();
+    }
+
+    @Override
+    public XRInputAction createAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+    {
+        return new XRInputAction(keyMapping, requirement, type, actionSetOverride);
+    }
+
+    //TODO fix, action origins don't work like that on openXR
+    @Override
+    protected ControllerType findActiveBindingControllerType(KeyMapping keyMapping) {
+        if (!this.inputInitialized) {
+            return null;
+        } else {
+            var action = this.getInputAction(keyMapping);
+            for (ControllerType controllerType : ControllerType.values()) {
+                var handedaction = action.getHandle(this.activeController[controllerType.ordinal()])
+                    .get(action.activeAction);
+                if (handedaction.hand() != controllerType) {
+                    continue;
+                }
+                return handedaction.hand();
+            }
+            return null;
+//            long path = this.getInputAction(keyMapping).getLastOrigin();
+//            String name = getString(path);
+//            if (name.contains("right")) {
+//                return ControllerType.RIGHT;
+//            }
+//            return ControllerType.LEFT;
+        }
+    }
+
+    @Override
+    public void handleEvents() {
+        Profiler.get().push("events");
+        this.pollVREvents();
+        Profiler.get().pop();
+    }
+
+    @Override
+    public void poll(long frameIndex) {
+        if (this.initialized) {
+
+            if (!this.dh.vrSettings.seated) {
+                Profiler.get().push("controllers");
+                Profiler.get().push("gui");
+
+                Profiler.get().pop();
+            }
+            Profiler.get().popPush("updatePose/Vsync");
+            this.updatePose();
+            Profiler.get().popPush("processInputs");
+            this.processInputs();
+            Profiler.get().popPush("hmdSampling");
+            this.hmdSampling();
+            Profiler.get().pop();
+        }
+    }
+
+    private void updatePose() {
+        if (this.mc == null) {
+            return;
+        }
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrFrameState frameState = XrFrameState.calloc(stack).type$Default();
+
+            int error = XR10.xrWaitFrame(
+                this.session,
+                XrFrameWaitInfo.calloc(stack).type$Default(),
+                frameState);
+            logError(error, "xrWaitFrame", "");
+
+            this.time = frameState.predictedDisplayTime();
+            this.shouldRender = frameState.shouldRender();
+
+            error = XR10.xrBeginFrame(
+                this.session,
+                XrFrameBeginInfo.calloc(stack).type$Default());
+            logError(error, "xrBeginFrame", "");
+
+
+            XrViewState viewState = XrViewState.calloc(stack).type$Default();
+            IntBuffer intBuf = stack.callocInt(1);
+
+            XrViewLocateInfo viewLocateInfo = XrViewLocateInfo.calloc(stack);
+            viewLocateInfo.set(XR10.XR_TYPE_VIEW_LOCATE_INFO,
+                0,
+                XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
+                frameState.predictedDisplayTime(),
+                this.xrAppSpace
+            );
+
+            error = XR10.xrLocateViews(this.session, viewLocateInfo, viewState, intBuf, this.viewBuffer);
+            logError(error, "xrLocateViews", "");
+
+            // the new views might have a different projection so reset the cache
+            this.dh.vrRenderer.invalidateProjectionMatrix();
+
+            XrSpaceLocation space_location = XrSpaceLocation.calloc(stack).type$Default();
+
+            // HMD pose
+            error = XR10.xrLocateSpace(this.xrViewSpace, this.xrAppSpace, this.time, space_location);
+            logError(error, "xrLocateSpace", "xrViewSpace");
+            if (error >= 0) {
+                OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.hmdPose);
+                this.headIsTracking = true;
+            } else {
+                this.headIsTracking = false;
+                this.hmdPose.identity();
+                this.hmdPose.m31(1.6F);
+            }
+
+            // Eye positions
+            OpenXRUtil.openXRPoseToMarix(this.viewBuffer.get(0).pose(), this.hmdPoseLeftEye);
+            OpenXRUtil.openXRPoseToMarix(this.viewBuffer.get(1).pose(), this.hmdPoseRightEye);
+
+            if (this.inputInitialized) {
+                Profiler.get().push("updateActionState");
+
+                if (this.updateActiveActionSets()) {
+                    XrActionsSyncInfo syncInfo = XrActionsSyncInfo.calloc(stack)
+                        .type$Default()
+                        .activeActionSets(this.activeActionSetsBuffer);
+                    error = XR10.xrSyncActions(this.session, syncInfo);
+                    logError(error, "xrSyncActions", "");
+                }
+
+                XrInteractionProfileState state = XrInteractionProfileState.calloc(stack);
+                state.type$Default();
+                error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/right"), state);
+                logError(error, "xrGetCurrentInteractionProfile", "right");
+                this.activeController[RIGHT_CONTROLLER] = getString(state.interactionProfile());
+                error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/left"), state);
+                logError(error, "xrGetCurrentInteractionProfile", "left");
+                this.activeController[LEFT_CONTROLLER] = getString(state.interactionProfile());
+
+                this.inputActions.values().forEach(this::readNewData);
+
+                //TODO Not needed it seems? Poses come from the action space
+                XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL),
+                    this.instance);
+                this.readPoseData(this.grip[RIGHT_CONTROLLER], actionSet);
+                this.readPoseData(this.grip[LEFT_CONTROLLER], actionSet);
+                this.readPoseData(this.aim[RIGHT_CONTROLLER], actionSet);
+                this.readPoseData(this.aim[LEFT_CONTROLLER], actionSet);
+
+                Profiler.get().pop();
+
+                // reverse
+                if (this.dh.vrSettings.reverseHands) {
+                    XrSpace temp = this.gripSpace[RIGHT_CONTROLLER];
+                    this.gripSpace[RIGHT_CONTROLLER] = this.gripSpace[LEFT_CONTROLLER];
+                    this.gripSpace[LEFT_CONTROLLER] = temp;
+                    temp = this.aimSpace[RIGHT_CONTROLLER];
+                    this.aimSpace[RIGHT_CONTROLLER] = this.aimSpace[LEFT_CONTROLLER];
+                    this.aimSpace[LEFT_CONTROLLER] = temp;
+                }
+
+                // Controller aim and grip poses
+                error = XR10.xrLocateSpace(this.gripSpace[RIGHT_CONTROLLER], this.xrAppSpace, this.time,
+                    space_location);
+                logError(error, "xrLocateSpace", "gripSpace[0]");
+                if (error >= 0) {
+                    OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(),
+                        this.handRotation[RIGHT_CONTROLLER]);
+                }
+
+                error = XR10.xrLocateSpace(this.gripSpace[LEFT_CONTROLLER], this.xrAppSpace, this.time, space_location);
+                logError(error, "xrLocateSpace", "gripSpace[1]");
+                if (error >= 0) {
+                    OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(),
+                        this.handRotation[LEFT_CONTROLLER]);
+                }
+
+                error = XR10.xrLocateSpace(this.aimSpace[RIGHT_CONTROLLER], this.xrAppSpace, this.time, space_location);
+                logError(error, "xrLocateSpace", "aimSpace[0]");
+                if (error >= 0) {
+                    OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[RIGHT_CONTROLLER]);
+                    OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(),
+                        this.controllerRotation[RIGHT_CONTROLLER]);
+                    this.controllerTracking[RIGHT_CONTROLLER] = true;
+                } else {
+                    this.controllerTracking[RIGHT_CONTROLLER] = false;
+                }
+
+                error = XR10.xrLocateSpace(this.aimSpace[LEFT_CONTROLLER], this.xrAppSpace, this.time, space_location);
+                logError(error, "xrLocateSpace", "aimSpace[1]");
+                if (error >= 0) {
+                    OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[LEFT_CONTROLLER]);
+                    OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(),
+                        this.controllerRotation[LEFT_CONTROLLER]);
+                    this.controllerTracking[LEFT_CONTROLLER] = true;
+                } else {
+                    this.controllerTracking[LEFT_CONTROLLER] = false;
+                }
+            }
+
+            this.updateAim();
+        }
+    }
+
+    public void readNewData(XRInputAction action) {
+        for (var controller : ControllerType.values()) {
+            for (int i = 0; i < action.getHandle(this.activeController[controller.ordinal()]).size(); i++) {
+                var handedAction = action.getHandle(this.activeController[controller.ordinal()]).get(i);
+                if (handedAction.handle() == 0L) {
+                    continue;
+                }
+                if (handedAction.hand() != controller) {
+                    continue;
+                }
+                switch (handedAction.action()) {
+                    case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE ->
+                        this.readBoolean(action, handedAction.hand(), i);
+
+                    case VEC1 -> this.readFloat(action, handedAction.hand(), i);
+
+                    case VEC2 -> this.readVecData(action, handedAction.hand(), i);
+                }
+            }
+        }
+    }
+
+    private void readBoolean(XRInputAction action, ControllerType hand, int index) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type$Default();
+            XRInputAction.HandedAction handedAction = action.getHandle(this.activeController[hand.ordinal()])
+                .get(index);
+            info.action(new XrAction(handedAction.handle(),
+                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(
+                hand == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+            XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type$Default();
+            int error = XR10.xrGetActionStateBoolean(this.session, info, state);
+            logError(error, "xrGetActionStateBoolean", action.name);
+
+            if (state.changedSinceLastSync()) {
+                if (state.currentState()) {
+                    action.digitalData.get(index).toggle = !action.digitalData.get(index).toggle;
+                    action.digitalData.get(index).doublePress =
+                        System.nanoTime() - action.digitalData.get(index).lastChange > 250_000_000L;
+                } else {
+                    action.digitalData.get(index).longPress =
+                        System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+                }
+                action.digitalData.get(index).lastChange = System.nanoTime();
+            } else if (state.currentState()) {
+                action.digitalData.get(index).hold =
+                    System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+            }
+
+            action.digitalData.get(index).state = state.currentState();
+            action.digitalData.get(index).isActive = state.isActive();
+            action.digitalData.get(index).isChanged = state.changedSinceLastSync();
+            action.digitalData.get(index).activeOrigin = getOrigins(handedAction, action).getFirst();
+            action.digitalData.get(index).type = handedAction.action();
+            action.digitalData.get(index).hand = handedAction.hand();
+
+            action.analogData.get(index).deltaX =
+                state.changedSinceLastSync() ? state.currentState() ? 1.0F : -1.0F : 0.0F;
+            action.analogData.get(index).x = state.currentState() ? 1.0f : 0.0f;
+            action.analogData.get(index).activeOrigin = getOrigins(handedAction, action).getFirst();
+            action.analogData.get(index).isActive = state.isActive();
+            action.analogData.get(index).isChanged = state.changedSinceLastSync();
+        }
+    }
+
+    private void readFloat(XRInputAction action, ControllerType hand, int index) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type$Default();
+            XRInputAction.HandedAction handedAction = action.getHandle(this.activeController[hand.ordinal()])
+                .get(index);
+            info.action(new XrAction(handedAction.handle(),
+                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(
+                hand == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+            XrActionStateFloat state = XrActionStateFloat.calloc(stack).type$Default();
+            int error = XR10.xrGetActionStateFloat(this.session, info, state);
+            logError(error, "xrGetActionStateFloat", action.name);
+
+            action.analogData.get(index).deltaX = state.currentState() - action.analogData.get(index).x;
+            action.analogData.get(index).x = state.currentState();
+            action.analogData.get(index).activeOrigin = getOrigins(action).getFirst();
+            action.analogData.get(index).isActive = state.isActive();
+            action.analogData.get(index).isChanged = state.changedSinceLastSync();
+
+            //Write digital data
+            boolean on = Math.abs(state.currentState()) > 0.5F;
+            boolean changed =
+                Math.abs(action.analogData.get(index).x - action.analogData.get(index).deltaX) > 0.5F != on;
+            if (changed) {
+                if (on) {
+                    action.digitalData.get(index).toggle = !action.digitalData.get(index).toggle;
+                    action.digitalData.get(index).doublePress =
+                        System.nanoTime() - action.digitalData.get(index).lastChange > 250_000_000L;
+                } else {
+                    action.digitalData.get(index).longPress =
+                        System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+                }
+                action.digitalData.get(index).lastChange = System.nanoTime();
+            } else if (on) {
+                action.digitalData.get(index).hold =
+                    System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+            }
+
+            action.digitalData.get(index).state = on;
+            action.digitalData.get(index).isActive = state.isActive();
+            action.digitalData.get(index).isChanged = changed;
+            action.digitalData.get(index).activeOrigin = getOrigins(action).getFirst();
+            action.digitalData.get(index).type = handedAction.action();
+            action.digitalData.get(index).hand = handedAction.hand();
+        }
+    }
+
+    private void readVecData(XRInputAction action, ControllerType hand, int index) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type$Default();
+            XRInputAction.HandedAction handedAction = action.getHandle(this.activeController[hand.ordinal()])
+                .get(index);
+            info.action(new XrAction(handedAction.handle(),
+                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            info.subactionPath(
+                hand == ControllerType.LEFT ? getPath(BOTH_HANDS[0]) : getPath(BOTH_HANDS[1]));
+            XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type$Default();
+            int error = XR10.xrGetActionStateVector2f(this.session, info, state);
+            logError(error, "xrGetActionStateVector2f", action.name);
+
+            action.analogData.get(index).deltaX = state.currentState().x() - action.analogData.get(index).x;
+            action.analogData.get(index).deltaY = state.currentState().y() - action.analogData.get(index).y;
+            action.analogData.get(index).x = state.currentState().x();
+            action.analogData.get(index).y = state.currentState().y();
+            action.analogData.get(index).activeOrigin = getOrigins(action).getFirst();
+            action.analogData.get(index).isActive = state.isActive();
+            action.analogData.get(index).isChanged = state.changedSinceLastSync();
+
+            //Write digital data
+            boolean on = Math.abs(state.currentState().x()) > 0.5F || Math.abs(state.currentState().y()) > 0.5F;
+            boolean changed = Math.abs(action.analogData.get(index).x - action.analogData.get(index).deltaX) > 0.5F !=
+                Math.abs(action.analogData.get(index).x) > 0.5F ||
+                Math.abs(action.analogData.get(index).y - action.analogData.get(index).deltaY) > 0.5F !=
+                    Math.abs(action.analogData.get(index).y) > 0.5F;
+            if (changed) {
+                if (on) {
+                    action.digitalData.get(index).toggle = !action.digitalData.get(index).toggle;
+                    action.digitalData.get(index).doublePress =
+                        System.nanoTime() - action.digitalData.get(index).lastChange > 250_000_000L;
+                } else {
+                    action.digitalData.get(index).longPress =
+                        System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+                }
+                action.digitalData.get(index).lastChange = System.nanoTime();
+            } else if (on) {
+                action.digitalData.get(index).hold =
+                    System.nanoTime() - action.digitalData.get(index).lastChange > 500_000_000L;
+            }
+
+            action.digitalData.get(index).state = on;
+            action.digitalData.get(index).isActive = state.isActive();
+            action.digitalData.get(index).isChanged = changed;
+            action.digitalData.get(index).activeOrigin = getOrigins(action).getFirst();
+            action.digitalData.get(index).type = handedAction.action();
+            action.digitalData.get(index).hand = handedAction.hand();
+        }
+    }
+
+    private void readPoseData(Long action, XrActionSet set) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type$Default();
+            info.action(new XrAction(action, set));
+            XrActionStatePose state = XrActionStatePose.calloc(stack).type$Default();
+            int error = XR10.xrGetActionStatePose(this.session, info, state);
+            logError(error, "xrGetActionStatePose", "");
+        }
+    }
+
+    private boolean updateActiveActionSets() {
+        ArrayList<VRInputActionSet> arraylist = new ArrayList<>();
+        arraylist.add(VRInputActionSet.GLOBAL);
+
+        // we are always modded
+        arraylist.add(VRInputActionSet.MOD);
+
+        arraylist.add(VRInputActionSet.MIXED_REALITY);
+        arraylist.add(VRInputActionSet.TECHNICAL);
+
+        if (this.mc.gui.screen() == null) {
+            arraylist.add(VRInputActionSet.INGAME);
+            arraylist.add(VRInputActionSet.CONTEXTUAL);
+        } else {
+            arraylist.add(VRInputActionSet.GUI);
+            if (ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui) {
+                arraylist.add(VRInputActionSet.INGAME);
+            }
+        }
+
+        if (KeyboardHandler.SHOWING || RadialHandler.isShowing()) {
+            arraylist.add(VRInputActionSet.KEYBOARD);
+        }
+
+        if (this.activeActionSetsBuffer == null) {
+            this.activeActionSetsBuffer = XrActiveActionSet.calloc(arraylist.size());
+        } else if (this.activeActionSetsBuffer.capacity() != arraylist.size()) {
+            this.activeActionSetsBuffer.close();
+            this.activeActionSetsBuffer = XrActiveActionSet.calloc(arraylist.size());
+        }
+
+        for (int i = 0; i < arraylist.size(); ++i) {
+            VRInputActionSet vrinputactionset = arraylist.get(i);
+            this.activeActionSetsBuffer.get(i)
+                .set(new XrActionSet(this.getActionSetHandle(vrinputactionset), this.instance), MemoryUtil.NULL);
+        }
+
+        return !arraylist.isEmpty();
+    }
+
+    long getActionSetHandle(VRInputActionSet actionSet) {
+        return this.actionSetHandles.get(actionSet);
+    }
+
+    private void pollVREvents() {
+        while (true) {
+            this.eventDataBuffer.clear();
+            this.eventDataBuffer.type$Default();
+            int error = XR10.xrPollEvent(this.instance, this.eventDataBuffer);
+            logError(error, "xrPollEvent", "");
+            if (error != XR10.XR_SUCCESS) {
+                break;
+            }
+            XrEventDataBaseHeader event = XrEventDataBaseHeader.create(this.eventDataBuffer.address());
+
+            switch (event.type()) {
+                case XR10.XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING -> {
+                    XrEventDataInstanceLossPending instanceLossPending = XrEventDataInstanceLossPending.create(
+                        event.address());
+                }
+                case XR10.XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED -> {
+                    this.sessionChanged(XrEventDataSessionStateChanged.create(event.address()));
+                }
+                case XR10.XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED -> {
+                }
+                case XR10.XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING -> {
+                }
+                default -> {
+                }
+            }
+        }
+    }
+
+    private void sessionChanged(XrEventDataSessionStateChanged xrEventDataSessionStateChanged) {
+        int state = xrEventDataSessionStateChanged.state();
+
+        switch (state) {
+            case XR10.XR_SESSION_STATE_READY: {
+                try (MemoryStack stack = MemoryStack.stackPush()) {
+                    XrSessionBeginInfo sessionBeginInfo = XrSessionBeginInfo.calloc(stack);
+                    sessionBeginInfo.type$Default();
+                    sessionBeginInfo.next(MemoryUtil.NULL);
+                    sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
+
+                    int error = XR10.xrBeginSession(this.session, sessionBeginInfo);
+                    logError(error, "xrBeginSession", "XR_SESSION_STATE_READY");
+                }
+                this.isActive = true;
+                break;
+            }
+            case XR10.XR_SESSION_STATE_STOPPING: {
+                this.isActive = false;
+                int error = XR10.xrEndSession(this.session);
+                logError(error, "xrEndSession", "XR_SESSION_STATE_STOPPING");
+
+                if (ClientDataHolderVR.getInstance().vrSettings.closeWithRuntime) {
+                    VRSettings.LOGGER.info("Vivecraft: OpenXR stopped, closing the game with it");
+                    this.mc.stop();
+                } else {
+                    VRSettings.LOGGER.info("Vivecraft: OpenXR stopped, disabling VR");
+                    VRState.VR_ENABLED = !VRState.VR_ENABLED;
+                    ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.VR_ENABLED;
+                    ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+                }
+            }
+            case XR10.XR_SESSION_STATE_VISIBLE, XR10.XR_SESSION_STATE_FOCUSED: {
+                this.isActive = true;
+                break;
+            }
+            case XR10.XR_SESSION_STATE_EXITING, XR10.XR_SESSION_STATE_IDLE, XR10.XR_SESSION_STATE_SYNCHRONIZED: {
+                this.isActive = false;
+                break;
+            }
+            case XR10.XR_SESSION_STATE_LOSS_PENDING: {
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    private int referenceSpaceBoundsErrorCount = 0;
+
+    @Override
+    public Vector2f getPlayAreaSize() {
+        // if this errored multiple times it prrobably means the runtime doesn't support it
+        if (this.referenceSpaceBoundsErrorCount >= 10) return null;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrExtent2Df vec = XrExtent2Df.calloc(stack);
+            int error = XR10.xrGetReferenceSpaceBoundsRect(this.session, XR10.XR_REFERENCE_SPACE_TYPE_STAGE, vec);
+            logError(error, "xrGetReferenceSpaceBoundsRect", "");
+            if (error != XR10.XR_SPACE_BOUNDS_UNAVAILABLE) {
+                return new Vector2f(vec.width(), vec.height());
+            } else {
+                this.referenceSpaceBoundsErrorCount++;
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public void refreshControllerTransforms() {
+        // TODO controller type overrides
+    }
+
+    @Override
+    public boolean init() throws RenderConfigException {
+        if (this.initialized) {
+            return true;
+        } else if (this.tried) {
+            return this.initialized;
+        } else {
+            this.tried = true;
+            this.mc = Minecraft.getInstance();
+            try {
+                this.initializeOpenXRInstance();
+                this.initializeOpenXRSession();
+                this.initializeOpenXRSpace();
+                this.initializeViews();
+                this.initInputAndApplication();
+            } catch (Exception e) {
+                if (e instanceof RenderConfigException) {
+                    // rethrow render config exceptions
+                    throw e;
+                }
+                VRSettings.LOGGER.error("Vivecraft: OpenXR init failed", e);
+                this.initSuccess = false;
+                this.initStatus = e.getLocalizedMessage();
+                return false;
+            }
+
+            // TODO Seated when no controllers
+
+            VRSettings.LOGGER.info("Vivecraft: OpenXR initialized & VR connected.");
+            this.deviceVelocity = new Vector3f[64];
+
+            for (int i = 0; i < this.poseMatrices.length; ++i) {
+                this.poseMatrices[i] = new Matrix4f();
+                this.deviceVelocity[i] = new Vector3f();
+            }
+
+            this.initialized = true;
+            return true;
+        }
+    }
+
+    private void initializeOpenXRInstance() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            this.device.initOpenXRLoader(stack);
+
+            // Check extensions
+            IntBuffer numExtensions = stack.callocInt(1);
+            int error = XR10.xrEnumerateInstanceExtensionProperties((ByteBuffer) null, numExtensions, null);
+            logError(error, "xrEnumerateInstanceExtensionProperties", "get count");
+
+            XrExtensionProperties.Buffer properties = new XrExtensionProperties.Buffer(
+                bufferStack(numExtensions.get(0), XrExtensionProperties.SIZEOF, XR10.XR_TYPE_EXTENSION_PROPERTIES)
+            );
+
+            // Load extensions
+            error = XR10.xrEnumerateInstanceExtensionProperties((ByteBuffer) null, numExtensions, properties);
+            logError(error, "xrEnumerateInstanceExtensionProperties", "get extensions");
+
+            // get needed extensions
+            String graphicsExtension = this.device.getGraphicsExtension();
+            boolean missingGraphics = true;
+            int foundValidationExtensions = 0;
+            PointerBuffer extensions = stack.callocPointer(
+                1 + SUPPORTED_EXTENSIONS.size() + (USE_VALIDATION ? VALIDATION_EXTENSIONS.size() : 0));
+            while (properties.hasRemaining()) {
+                XrExtensionProperties prop = properties.get();
+                String extensionName = prop.extensionNameString();
+                if (extensionName.equals(graphicsExtension)) {
+                    missingGraphics = false;
+                    extensions.put(MemoryUtil.memAddress(MemoryStack.stackUTF8(graphicsExtension)));
+                }
+                if (SUPPORTED_EXTENSIONS.contains(extensionName)) {
+                    extensions.put(MemoryUtil.memAddress(MemoryStack.stackUTF8(extensionName)));
+                }
+                if (USE_VALIDATION && VALIDATION_EXTENSIONS.contains(extensionName)) {
+                    extensions.put(MemoryUtil.memAddress(MemoryStack.stackUTF8(extensionName)));
+                    foundValidationExtensions++;
+                }
+            }
+
+            if (missingGraphics) {
+                throw new RuntimeException("OpenXR runtime is missing a supported graphics extension.");
+            }
+            if (USE_VALIDATION && foundValidationExtensions != VALIDATION_EXTENSIONS.size()) {
+                throw new RuntimeException("OpenXR Validation requested, but missing one of the needed extensions.");
+            }
+
+            PointerBuffer layers = null;
+            if (USE_VALIDATION) {
+                // api layers
+                IntBuffer numLayers = stack.callocInt(1);
+                error = XR10.xrEnumerateApiLayerProperties(numLayers, null);
+                logError(error, "xrEnumerateApiLayerProperties", "get count");
+
+                XrApiLayerProperties.Buffer apiProperties = new XrApiLayerProperties.Buffer(
+                    bufferStack(numLayers.get(0), XrApiLayerProperties.SIZEOF, XR10.XR_TYPE_API_LAYER_PROPERTIES)
+                );
+
+                // Load layers
+                error = XR10.xrEnumerateApiLayerProperties(numLayers, apiProperties);
+                logError(error, "xrEnumerateApiLayerProperties", "get layers");
+
+                // get needed layers
+                layers = stack.callocPointer(VALIDATION_LAYERS.size());
+                while (apiProperties.hasRemaining()) {
+                    XrApiLayerProperties prop = apiProperties.get();
+                    String layerName = prop.layerNameString();
+                    if (VALIDATION_LAYERS.contains(layerName)) {
+                        layers.put(MemoryUtil.memAddress(MemoryStack.stackUTF8(layerName)));
+                    }
+                }
+                if (layers.position() != VALIDATION_LAYERS.size()) {
+                    throw new RuntimeException(
+                        "Validation layer not available, is the 'XR_API_LAYER_PATH' environment variable pointing to the OpenXR SDK layers?");
+                }
+                layers.flip();
+            }
+
+            // Create APP info
+            XrApplicationInfo applicationInfo = XrApplicationInfo.calloc(stack);
+            applicationInfo.apiVersion(XR10.XR_MAKE_VERSION(1, 0, 40));
+            applicationInfo.applicationName(stack.UTF8("Vivecraft"));
+            applicationInfo.applicationVersion(1);
+
+            // Create instance info
+            XrInstanceCreateInfo createInfo = XrInstanceCreateInfo.calloc(stack);
+            createInfo.type$Default();
+            createInfo.next(this.device.getInstanceCreateAddition(stack));
+            createInfo.createFlags(0);
+            createInfo.applicationInfo(applicationInfo);
+
+            createInfo.enabledApiLayerNames(layers);
+            createInfo.enabledExtensionNames(extensions.flip());
+
+            // Create XR instance
+            PointerBuffer instancePtr = stack.callocPointer(1);
+            int xrResult = XR10.xrCreateInstance(createInfo, instancePtr);
+            if (xrResult == XR10.XR_ERROR_RUNTIME_FAILURE) {
+                throw new RuntimeException("Failed to create xrInstance, are you sure your headset is plugged in?");
+            } else if (xrResult == XR10.XR_ERROR_INSTANCE_LOST) {
+                throw new RuntimeException("Failed to create xrInstance due to runtime updating");
+            } else if (xrResult < 0) {
+                throw new RuntimeException("XR method returned: " + getResultName(xrResult));
+            }
+            this.instance = new XrInstance(instancePtr.get(0), createInfo);
+
+            if (USE_VALIDATION) {
+                registerDebugCallback(stack);
+            }
+
+            this.poseMatrices = new Matrix4f[64];
+
+            for (int i = 0; i < this.poseMatrices.length; ++i) {
+                this.poseMatrices[i] = new Matrix4f();
+            }
+
+            this.initSuccess = true;
+        }
+    }
+
+    private void registerDebugCallback(MemoryStack stack) {
+        // register debug callback
+        XrDebugUtilsMessengerCreateInfoEXT debugCreateInfo = XrDebugUtilsMessengerCreateInfoEXT.calloc(stack);
+        debugCreateInfo.type$Default();
+        debugCreateInfo.messageSeverities(
+            EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
+        debugCreateInfo.messageTypes(
+            EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
+                EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT);
+        debugCreateInfo.userCallback((messageSeverity, messageTypes, callbackData, userData) -> {
+            // no closing, since we do not own the content
+            String message = XrDebugUtilsMessengerCallbackDataEXT.create(callbackData).messageString();
+
+            List<String> types = new ArrayList<>();
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) != 0) {
+                types.add("General");
+            }
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) != 0) {
+                types.add("Validation");
+            }
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) != 0) {
+                types.add("Performance");
+            }
+            if ((messageTypes & EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT) != 0) {
+                types.add("Conformance");
+            }
+            if (types.isEmpty()) {
+                types.add("Unknown(" + messageTypes + ")");
+            }
+
+            if (messageSeverity == EXTDebugUtils.XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+                VRSettings.LOGGER.error("Vivecraft: OpenXR Validation: {}: {} ", String.join(",", types), message);
+            } else {
+                VRSettings.LOGGER.warn("Vivecraft: OpenXR Validation: {}: {} ", String.join(",", types), message);
+            }
+            return XR10.XR_FALSE;
+        });
+        PointerBuffer messanger = stack.callocPointer(1);
+        EXTDebugUtils.xrCreateDebugUtilsMessengerEXT(this.instance, debugCreateInfo, messanger);
+        this.debugMessanger = new XrDebugUtilsMessengerEXT(messanger.get(), this.instance);
+    }
+
+    public static MCOpenXR get() {
+        return OME;
+    }
+
+    private void initializeOpenXRSession() throws RenderConfigException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+
+            // Create system
+            XrSystemGetInfo system = XrSystemGetInfo.calloc(stack);
+            system.type$Default();
+            system.next(MemoryUtil.NULL);
+            system.formFactor(XR10.XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY);
+
+            LongBuffer longBuffer = stack.callocLong(1);
+            int error = XR10.xrGetSystem(this.instance, system, longBuffer);
+            logError(error, "xrGetSystem", "");
+            this.systemID = longBuffer.get(0);
+
+            if (this.systemID == 0) {
+                throw new RuntimeException("No compatible headset detected");
+            }
+
+            // check platform requirements
+            this.device.checkRequirements(stack, this.instance, this.systemID);
+
+            XrSystemProperties systemProperties = XrSystemProperties.calloc(stack).type$Default();
+            error = XR10.xrGetSystemProperties(this.instance, this.systemID, systemProperties);
+            logError(error, "xrGetSystemProperties", "");
+            XrSystemTrackingProperties trackingProperties = systemProperties.trackingProperties();
+            XrSystemGraphicsProperties graphicsProperties = systemProperties.graphicsProperties();
+
+            this.systemName = MemoryUtil.memUTF8(MemoryUtil.memAddress(systemProperties.systemName()));
+            int vendor = systemProperties.vendorId();
+            boolean orientationTracking = trackingProperties.orientationTracking();
+            boolean positionTracking = trackingProperties.positionTracking();
+            int maxWidth = graphicsProperties.maxSwapchainImageWidth();
+            int maxHeight = graphicsProperties.maxSwapchainImageHeight();
+            int maxLayerCount = graphicsProperties.maxLayerCount();
+
+            VRSettings.LOGGER.info("Found device with id:  {}", this.systemID);
+            VRSettings.LOGGER.info("Headset Name: {}, Vendor: {}", this.systemName, vendor);
+            VRSettings.LOGGER.info("Headset Orientation Tracking: {}, Position Tracking: {}", orientationTracking,
+                positionTracking);
+            VRSettings.LOGGER.info("Headset Max Width: {}, Max Height: {}, Max Layer Count: {}", maxWidth, maxHeight,
+                maxLayerCount);
+
+            // Create session
+            XrSessionCreateInfo info = XrSessionCreateInfo.calloc(stack);
+            info.type$Default();
+            info.next(this.device.getSessionCreateAddition(stack, this.instance, this.systemID));
+            info.createFlags(0);
+            info.systemId(this.systemID);
+
+            PointerBuffer sessionPtr = stack.callocPointer(1);
+            error = XR10.xrCreateSession(this.instance, info, sessionPtr);
+            logErrorAndThrow(error, "xrCreateSession", "Failed to create session: ", "");
+
+            this.session = new XrSession(sessionPtr.get(0), this.instance);
+
+            while (!this.isActive) {
+                VRSettings.LOGGER.info("Vivecraft: waiting for OpenXR session to start");
+                pollVREvents();
+            }
+        }
+    }
+
+    private void initializeOpenXRSpace() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrPosef identityPose = XrPosef.calloc(stack);
+            identityPose.set(
+                XrQuaternionf.calloc(stack).set(0, 0, 0, 1),
+                XrVector3f.calloc(stack)
+            );
+
+            XrReferenceSpaceCreateInfo referenceSpaceCreateInfo = XrReferenceSpaceCreateInfo.calloc(stack);
+            referenceSpaceCreateInfo.type$Default();
+            referenceSpaceCreateInfo.next(MemoryUtil.NULL);
+            referenceSpaceCreateInfo.referenceSpaceType(XR10.XR_REFERENCE_SPACE_TYPE_STAGE);
+            referenceSpaceCreateInfo.poseInReferenceSpace(identityPose);
+
+            PointerBuffer pp = stack.callocPointer(1);
+            int error = XR10.xrCreateReferenceSpace(this.session, referenceSpaceCreateInfo, pp);
+            this.xrAppSpace = new XrSpace(pp.get(0), this.session);
+            logError(error, "xrCreateReferenceSpace", "XR_REFERENCE_SPACE_TYPE_STAGE");
+
+            referenceSpaceCreateInfo.referenceSpaceType(XR10.XR_REFERENCE_SPACE_TYPE_VIEW);
+            error = XR10.xrCreateReferenceSpace(this.session, referenceSpaceCreateInfo, pp);
+            logError(error, "xrCreateReferenceSpace", "XR_REFERENCE_SPACE_TYPE_VIEW");
+            this.xrViewSpace = new XrSpace(pp.get(0), this.session);
+        }
+    }
+
+    private void initializeViews() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            // Check amount of views
+            IntBuffer intBuf = stack.callocInt(1);
+            int error = XR10.xrEnumerateViewConfigurationViews(this.instance, this.systemID,
+                XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, null);
+            logError(error, "xrEnumerateViewConfigurationViews", "get count");
+
+            // Get all views
+            this.viewConfigurationBuffer = new XrViewConfigurationView.Buffer(
+                bufferHeap(intBuf.get(0), XrViewConfigurationView.SIZEOF, XR10.XR_TYPE_VIEW_CONFIGURATION_VIEW));
+            error = XR10.xrEnumerateViewConfigurationViews(this.instance, this.systemID,
+                XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, this.viewConfigurationBuffer);
+            logError(error, "xrEnumerateViewConfigurationViews", "get views");
+
+            this.viewCount = intBuf.get(0);
+            this.viewBuffer = new XrView.Buffer(bufferHeap(this.viewCount, XrView.SIZEOF, XR10.XR_TYPE_VIEW));
+        }
+    }
+
+    private void initDisplayRefreshRate() {
+        if (this.session.getCapabilities().XR_FB_display_refresh_rate) {
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                IntBuffer refreshRateCount = stack.callocInt(1);
+                FBDisplayRefreshRate.xrEnumerateDisplayRefreshRatesFB(this.session, refreshRateCount, null);
+                FloatBuffer refreshRateBuffer = stack.callocFloat(refreshRateCount.get(0));
+                FBDisplayRefreshRate.xrEnumerateDisplayRefreshRatesFB(this.session, refreshRateCount,
+                    refreshRateBuffer);
+                refreshRateBuffer.rewind();
+                FBDisplayRefreshRate.xrRequestDisplayRefreshRateFB(this.session,
+                    refreshRateBuffer.get(refreshRateCount.get(0) - 1));
+            }
+        }
+    }
+
+    /**
+     * Creates an array of XrStructs with their types preset to {@code type}
+     */
+    static ByteBuffer bufferStack(int capacity, int sizeof, int type) {
+        ByteBuffer b = MemoryStack.stackCalloc(capacity * sizeof);
+
+        for (int i = 0; i < capacity; i++) {
+            b.position(i * sizeof);
+            b.putInt(type);
+        }
+        b.rewind();
+        return b;
+    }
+
+    private void initInputAndApplication() {
+        this.populateInputActions();
+
+        //this.generateActionManifest();
+        //this.loadActionManifest();
+        this.loadActionHandles();
+        this.loadDefaultBindings();
+        //this.installApplicationManifest(false);
+        this.inputInitialized = true;
+        this.initDisplayRefreshRate();
+    }
+
+    @Override
+    public Matrix4f getControllerComponentTransform(int controllerIndex, String componentName) {
+        return new Matrix4f();
+    }
+
+    @Override
+    public boolean hasCameraTracker() {
+        return false;
+    }
+
+    public List<Long> getOrigins(XRInputAction.HandedAction handedAction, XRInputAction action) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrBoundSourcesForActionEnumerateInfo info = XrBoundSourcesForActionEnumerateInfo.calloc(stack);
+            info.type$Default();
+            info.next(MemoryUtil.NULL);
+            info.action(new XrAction(handedAction.handle(),
+                new XrActionSet(this.actionSetHandles.get(action.actionSet), this.instance)));
+            IntBuffer buf = stack.callocInt(1);
+            int error = XR10.xrEnumerateBoundSourcesForAction(this.session, info, buf, null);
+            logError(error, "xrEnumerateBoundSourcesForAction", action.name);
+
+            int size = buf.get();
+            if (size <= 0) {
+                return List.of(0L);
+            }
+
+            buf = stack.callocInt(size);
+            LongBuffer longbuf = stack.callocLong(size);
+            error = XR10.xrEnumerateBoundSourcesForAction(this.session, info, buf, longbuf);
+            logError(error, "xrEnumerateBoundSourcesForAction", action.name);
+            longbuf.rewind();
+            long[] array = new long[longbuf.remaining()];
+            longbuf.get(array);
+            return Arrays.stream(array).boxed().toList();
+        }
+    }
+
+    @Override
+    public <I extends InputAction> List<Long> getOrigins(I action) {
+        if (action instanceof XRInputAction xrAction) {
+            var handedAction = xrAction.getActiveAction(this.activeController);
+            if (handedAction != null) {
+                return getOrigins(handedAction, xrAction);
+            }
+        }
+        return List.of(0L);
+    }
+
+    @Override
+    public String getOriginName(long origin) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrInputSourceLocalizedNameGetInfo info = XrInputSourceLocalizedNameGetInfo.calloc(stack);
+            info.type$Default();
+            info.next(0);
+            info.sourcePath(origin);
+            info.whichComponents(XR10.XR_INPUT_SOURCE_LOCALIZED_NAME_COMPONENT_BIT);
+
+            IntBuffer buf = stack.callocInt(1);
+            int error = XR10.xrGetInputSourceLocalizedName(this.session, info, buf, null);
+            logError(error, "xrGetInputSourceLocalizedName", "get length");
+
+            int size = buf.get();
+            if (size <= 0) {
+                return "";
+            }
+
+            buf = stack.callocInt(size);
+            ByteBuffer byteBuffer = stack.calloc(size);
+            error = XR10.xrGetInputSourceLocalizedName(this.session, info, buf, byteBuffer);
+            logError(error, "xrGetInputSourceLocalizedName", "get String");
+            return MemoryUtil.memUTF8(MemoryUtil.memAddress(buf));
+        }
+    }
+
+    @Override
+    public VRRenderer createVRRenderer() {
+        return new OpenXRStereoRenderer(this);
+    }
+
+    @Override
+    public boolean isActive() {
+        return this.isActive;
+    }
+
+    @Override
+    public ControllerType getOriginControllerType(long inputValueHandle) {
+        if (inputValueHandle == this.aim[RIGHT_CONTROLLER]) {
+            return ControllerType.RIGHT;
+        }
+        return ControllerType.LEFT;
+    }
+
+    @Override
+    public float getIPD() {
+        return this.getEyePosition(RenderPass.RIGHT).x - this.getEyePosition(RenderPass.LEFT).x;
+    }
+
+    @Override
+    public String getRuntimeName() {
+        return "OpenXR";
+    }
+
+    private static final String[] BOTH_HANDS = new String[]{"/user/hand/left", "/user/hand/right"};
+
+    //TODO Collect and register all actions
+    private void loadActionHandles() {
+        for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
+            long actionSet = makeActionSet(this.instance, vrinputactionset.name, vrinputactionset.localizedName, 0);
+            this.actionSetHandles.put(vrinputactionset, actionSet);
+
+            for (String headset : XRBinding.supportedHeadsets()) {
+                for (var binding : ControllerMapping.getMapping(headset).entrySet()) {
+                    long action = createAction(
+                        (binding.getKey() + "." + headset.replace("/interaction_profiles/", "")).replace("/", "."),
+                        binding.getKey(), binding.getValue(),
+                        new XrActionSet(actionSet, this.instance),
+                        binding.getKey().contains("left") ? BOTH_HANDS[0] : BOTH_HANDS[1]);
+                    this.mappedBindings.put(new ActionBind(vrinputactionset, binding.getKey()), action);
+                }
+            }
+        }
+
+        setupControllers();
+
+        XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
+        this.haptics[RIGHT_CONTROLLER] = createAction("righthaptic",
+            "/actions/global/out/righthaptic", ActionType.HAPTIC, actionSet, BOTH_HANDS[1]);
+        this.haptics[LEFT_CONTROLLER] = createAction("lefthaptic", "/actions/global/out/lefthaptic",
+            ActionType.HAPTIC, actionSet, BOTH_HANDS[0]);
+    }
+
+    private void setupControllers() {
+        XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
+        this.grip[RIGHT_CONTROLLER] = createAction("righthand", "/actions/global/in/righthand",
+            ActionType.POSE, actionSet, BOTH_HANDS[1]);
+        this.grip[LEFT_CONTROLLER] = createAction("lefthand", "/actions/global/in/lefthand", ActionType.POSE,
+            actionSet, BOTH_HANDS[0]);
+        this.aim[RIGHT_CONTROLLER] = createAction("righthandaim", "/actions/global/in/righthandaim",
+            ActionType.POSE, actionSet, BOTH_HANDS[1]);
+        this.aim[LEFT_CONTROLLER] = createAction("lefthandaim", "/actions/global/in/lefthandaim",
+            ActionType.POSE, actionSet, BOTH_HANDS[0]);
+    }
+
+    private void loadDefaultBindings() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            int error;
+            for (String headset : XRBinding.supportedHeadsets()) {
+                VRSettings.LOGGER.info("loading defaults for {}", headset);
+//                if (!"/interaction_profiles/oculus/touch_controller".equals(headset)) {
+//                    continue;
+//                }
+                XRBinding[] defaultBindings = XRBinding.getBinding(headset).toArray(new XRBinding[0]);
+                XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 6,
+                    stack); //TODO different way of adding controller poses
+
+                for (int i = 0; i < defaultBindings.length; i++) {
+                    XRBinding binding = defaultBindings[i];
+                    XRInputAction inputAction = this.getInputActionByName(binding.key());
+                    if (binding.actionSet() != null) {
+                        //inputAction.actionSet = binding.actionSet(); //TODO?
+                    }
+                    long handle = this.mappedBindings.get(new ActionBind(inputAction.actionSet, binding.controller()));
+                    ActionType type = ControllerMapping.getMapping(headset).get(binding.controller());
+                    inputAction.addHandle(headset, handle,
+                        binding.controller().contains("/left/") ? ControllerType.LEFT :
+                            ControllerType.RIGHT, type);
+                    inputAction.setType(binding.actionType());
+                    if (inputAction.getHandle(headset).isEmpty() || handle == 0L) {
+                        VRSettings.LOGGER.error("Handle for '{}'/'{}' is null", binding.key(), binding.controller());
+                        continue;
+                    }
+                    bindings.get(i).set(
+                        new XrAction(handle,
+                            new XrActionSet(this.actionSetHandles.get(inputAction.actionSet), this.instance)),
+                        getPath(binding.controller())
+                    );
+                }
+
+                //TODO make this also changeable?
+                XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL),
+                    this.instance);
+                bindings.get(defaultBindings.length).set(
+                    new XrAction(this.grip[RIGHT_CONTROLLER], actionSet),
+                    getPath("/user/hand/right/input/grip/pose")
+                );
+                bindings.get(defaultBindings.length + 1).set(
+                    new XrAction(this.grip[LEFT_CONTROLLER], actionSet),
+                    getPath("/user/hand/left/input/grip/pose")
+                );
+                bindings.get(defaultBindings.length + 2).set(
+                    new XrAction(this.aim[RIGHT_CONTROLLER], actionSet),
+                    getPath("/user/hand/right/input/aim/pose")
+                );
+                bindings.get(defaultBindings.length + 3).set(
+                    new XrAction(this.aim[LEFT_CONTROLLER], actionSet),
+                    getPath("/user/hand/left/input/aim/pose")
+                );
+
+                bindings.get(defaultBindings.length + 4).set(
+                    new XrAction(this.haptics[RIGHT_CONTROLLER], actionSet),
+                    getPath("/user/hand/right/output/haptic")
+                );
+
+                bindings.get(defaultBindings.length + 5).set(
+                    new XrAction(this.haptics[LEFT_CONTROLLER], actionSet),
+                    getPath("/user/hand/left/output/haptic")
+                );
+
+                XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(
+                    stack);
+                suggested_binds.type$Default();
+                suggested_binds.next(MemoryUtil.NULL);
+                suggested_binds.interactionProfile(getPath(headset));
+                suggested_binds.suggestedBindings(bindings);
+
+                error = XR10.xrSuggestInteractionProfileBindings(this.instance, suggested_binds);
+                logError(error, "xrSuggestInteractionProfileBindings", headset);
+            }
+
+
+            XrSessionActionSetsAttachInfo attach_info = XrSessionActionSetsAttachInfo.calloc(stack);
+            attach_info.type$Default();
+            attach_info.next(MemoryUtil.NULL);
+            attach_info.actionSets(
+                MemoryStack.stackPointers(this.actionSetHandles.values().stream().mapToLong(value -> value).toArray()));
+
+            error = XR10.xrAttachSessionActionSets(this.session, attach_info);
+            logError(error, "xrAttachSessionActionSets", "");
+
+
+            VRSettings.LOGGER.info("Using interaction profile: {}", getCurrentInteractionProfile());
+
+            XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), this.instance);
+            XrActionSpaceCreateInfo actionSpace = XrActionSpaceCreateInfo.calloc(stack);
+            actionSpace.type$Default();
+            actionSpace.next(MemoryUtil.NULL);
+            actionSpace.action(new XrAction(this.grip[RIGHT_CONTROLLER], actionSet));
+            actionSpace.subactionPath(getPath("/user/hand/right"));
+            actionSpace.poseInActionSpace(POSE_IDENTITY);
+            PointerBuffer pp = MemoryStack.stackCallocPointer(1);
+            error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
+            logError(error, "xrCreateActionSpace", "grip: /user/hand/right");
+            this.gripSpace[RIGHT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+
+            actionSpace.action(new XrAction(this.grip[LEFT_CONTROLLER], actionSet));
+            actionSpace.subactionPath(getPath("/user/hand/left"));
+            error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
+            logError(error, "xrCreateActionSpace", "grip: /user/hand/left");
+            this.gripSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+
+            actionSpace.action(new XrAction(this.aim[RIGHT_CONTROLLER], actionSet));
+            actionSpace.subactionPath(getPath("/user/hand/right"));
+            error = XR10.xrCreateActionSpace(session, actionSpace, pp);
+            logError(error, "xrCreateActionSpace", "aim: /user/hand/right");
+            this.aimSpace[RIGHT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+
+            actionSpace.action(new XrAction(this.aim[LEFT_CONTROLLER], actionSet));
+            actionSpace.subactionPath(getPath("/user/hand/left"));
+            error = XR10.xrCreateActionSpace(this.session, actionSpace, pp);
+            logError(error, "xrCreateActionSpace", "aim: /user/hand/left");
+            this.aimSpace[LEFT_CONTROLLER] = new XrSpace(pp.get(0), this.session);
+        }
+    }
+
+    public String getCurrentInteractionProfile() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrInteractionProfileState state = XrInteractionProfileState.calloc(stack);
+            state.type$Default();
+            int error = XR10.xrGetCurrentInteractionProfile(this.session, getPath("/user/hand/left"), state);
+            logError(error, "xrGetCurrentInteractionProfile", "left");
+            return getString(state.interactionProfile());
+        }
+    }
+
+    public long getPath(String pathString) {
+        return this.paths.computeIfAbsent(pathString, s -> {
+            try (MemoryStack ignored = MemoryStack.stackPush()) {
+                LongBuffer buf = MemoryStack.stackCallocLong(1);
+                int error = XR10.xrStringToPath(this.instance, pathString, buf);
+                logError(error, "getPath", pathString);
+                return buf.get();
+            }
+        });
+    }
+
+    public String getString(long path) {
+        if (path == 0L) { //Quest takes some time to loas what controller is used
+            return "";
+        }
+        return this.paths.inverse().computeIfAbsent(path, l -> {
+            try (MemoryStack ignored = MemoryStack.stackPush()) {
+                IntBuffer size = MemoryStack.stackCallocInt(1);
+                int error = XR10.xrPathToString(this.instance, l, size, null);
+                logError(error, "getString", l.toString());
+                int i = size.get(0);
+                size.put(0, i);
+                ByteBuffer string = MemoryStack.stackCalloc(i);
+                error = XR10.xrPathToString(this.instance, l, size, string);
+                logError(error, "getString", l.toString());
+                byte[] data = new byte[i];
+                string.get(data);
+                return new String(data).trim();
+            }
+        });
+    }
+
+    private long createAction(
+        String name, String localisedName, ActionType type, XrActionSet actionSet, String subactionPath)
+    {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            String s = name.replace(".user.hand.", "");
+            XrActionCreateInfo hands = XrActionCreateInfo.calloc(stack);
+            hands.type$Default();
+            hands.next(MemoryUtil.NULL);
+            hands.actionName(MemoryUtil.memUTF8(s));
+            switch (type) {
+                case BOOLEAN, DOUBLE_PRESS, LONG_PRESS, HOLD, TOGGLE ->
+                    hands.actionType(XR10.XR_ACTION_TYPE_BOOLEAN_INPUT);
+                case VEC1 -> hands.actionType(XR10.XR_ACTION_TYPE_FLOAT_INPUT);
+                case VEC2 -> hands.actionType(XR10.XR_ACTION_TYPE_VECTOR2F_INPUT);
+                case POSE -> hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);
+                case HAPTIC -> hands.actionType(XR10.XR_ACTION_TYPE_VIBRATION_OUTPUT);
+            }
+            LongBuffer lb = MemoryStack.stackCallocLong(1);
+            lb.put(getPath(subactionPath));
+            hands.countSubactionPaths(1);
+            hands.subactionPaths(lb.rewind());
+            hands.localizedActionName(MemoryUtil.memUTF8(s));
+            PointerBuffer buffer = MemoryStack.stackCallocPointer(1);
+
+            int error = XR10.xrCreateAction(actionSet, hands, buffer);
+            logError(error, "xrCreateAction", "name:", name, "type:", type.name());
+            return buffer.get(0);
+        }
+    }
+
+    private long makeActionSet(XrInstance instance, String name, String localisedName, int priority) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrActionSetCreateInfo info = XrActionSetCreateInfo.calloc(stack);
+            info.type$Default();
+            info.next(MemoryUtil.NULL);
+            info.actionSetName(MemoryUtil.memUTF8(localisedName.toLowerCase()));
+            info.localizedActionSetName(MemoryUtil.memUTF8(localisedName.toLowerCase()));
+            info.priority(priority);
+            PointerBuffer buffer = stack.callocPointer(1);
+
+            int error = XR10.xrCreateActionSet(instance, info, buffer);
+            logError(error, "makeActionSet", localisedName.toLowerCase());
+            return buffer.get(0);
+        }
+    }
+
+    static ByteBuffer bufferHeap(int capacity, int sizeof, int type) {
+        ByteBuffer b = MemoryUtil.memCalloc(capacity * sizeof);
+
+        for (int i = 0; i < capacity; i++) {
+            b.position(i * sizeof);
+            b.putInt(type);
+        }
+        b.rewind();
+        return b;
+    }
+
+    /**
+     * gets the String for the given xrResult
+     */
+    private static String getResultName(int xrResult) {
+        String resultString = null;
+        // ask the runtime for the xrResult name
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            ByteBuffer str = stack.calloc(XR10.XR_MAX_RESULT_STRING_SIZE);
+
+            if (OME != null && OME.instance != null &&
+                XR10.xrResultToString(OME.instance, xrResult, str) == XR10.XR_SUCCESS)
+            {
+                resultString = (MemoryUtil.memUTF8(MemoryUtil.memAddress(str)));
+            } else {
+                if (xrResult >= 0) {
+                    // success names do not have a pattern
+                    resultString = switch (xrResult) {
+                        case XR10.XR_SUCCESS -> "XR_SUCCESS";
+                        case XR10.XR_TIMEOUT_EXPIRED -> "XR_TIMEOUT_EXPIRED";
+                        case XR10.XR_SESSION_LOSS_PENDING -> "XR_SESSION_LOSS_PENDING";
+                        case XR10.XR_EVENT_UNAVAILABLE -> "XR_EVENT_UNAVAILABLE";
+                        case XR10.XR_SPACE_BOUNDS_UNAVAILABLE -> "XR_SPACE_BOUNDS_UNAVAILABLE";
+                        case XR10.XR_SESSION_NOT_FOCUSED -> "XR_SESSION_NOT_FOCUSED";
+                        case XR10.XR_FRAME_DISCARDED -> "XR_FRAME_DISCARDED";
+                        default -> null;
+                    };
+                } else {
+                    // try to get the error name from the XR10/XR11 field names
+                    Field error = Arrays.stream(XR10.class.getFields()).filter(field -> {
+                        try {
+                            return field.getName().startsWith("XR_ERROR_") && (int) field.get(null) == xrResult;
+                        } catch (IllegalAccessException e) {
+                            return false;
+                        }
+                    }).findFirst().orElse(null);
+                    if (error != null) {
+                        resultString = error.getName();
+                    }
+                }
+            }
+
+            if (resultString == null) {
+                resultString = "Unknown Error: " + xrResult;
+            }
+        }
+        return resultString;
+    }
+
+    /**
+     * logs only errors
+     *
+     * @param xrResult result to check
+     * @param caller   where the xrResult came from
+     * @param args     arguments may be helpful in locating the error
+     */
+    protected static void logError(int xrResult, String caller, String... args) {
+        if (xrResult < 0) {
+            VRSettings.LOGGER.error("{} for {} errored: {}", caller, String.join(" ", args), getResultName(xrResult));
+        }
+    }
+
+    /**
+     * logs only errors and throws an exception if it errored
+     *
+     * @param xrResult     result to check
+     * @param caller       where the xrResult came from
+     * @param errorMessage Message to show in the thrown exception
+     * @param args         arguments may be helpful in locating the error
+     * @throws RuntimeException if an error occurred
+     */
+    protected static void logErrorAndThrow(
+        int xrResult, String caller, String errorMessage, String... args) throws RuntimeException
+    {
+        if (xrResult < 0) {
+            logError(xrResult, caller, args);
+            throw new RuntimeException(errorMessage + " " + getResultName(xrResult));
+        }
+    }
+
+    //TODO remove/rework
+    public Map<String, XRInputAction> getBinds() {
+        return this.inputActions;
+    }
+}

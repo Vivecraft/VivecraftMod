@@ -21,6 +21,9 @@ public class VulkanInstanceVRMixin implements VulkanInstanceExtension {
     @Unique
     private Set<String> vivecraft$availableExtensions;
 
+    @Unique
+    private int vivecraft$apiVersion;
+
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vulkan/VulkanDebug;create(IZLjava/util/Set;Ljava/util/Set;)Lcom/mojang/blaze3d/vulkan/VulkanDebug;"), index = 3)
     private Set<String> vivecraft$vrInstanceExtensions(
         Set<String> enabledExtensions, @Local Set<String> availableExtensions)
@@ -44,8 +47,25 @@ public class VulkanInstanceVRMixin implements VulkanInstanceExtension {
         return enabledExtensions;
     }
 
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/vulkan/VkApplicationInfo;apiVersion(I)Lorg/lwjgl/vulkan/VkApplicationInfo;"))
+    private int vivecraft$captureApiVersion(int apiVersion) {
+        if (!ClientDataHolderVR.getInstance().vrSettings.requiredVulkanMinAPIVersion.isEmpty()) {
+
+            apiVersion = Math.max(apiVersion,
+                Integer.parseInt(ClientDataHolderVR.getInstance().vrSettings.requiredVulkanMinAPIVersion));
+        }
+
+        this.vivecraft$apiVersion = apiVersion;
+        return apiVersion;
+    }
+
     @Override
     public Set<String> vivecraft$getAvailableExtensions() {
         return this.vivecraft$availableExtensions;
+    }
+
+    @Override
+    public int vivecraft$getApiVersion() {
+        return this.vivecraft$apiVersion;
     }
 }

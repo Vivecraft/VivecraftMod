@@ -9,8 +9,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HapticScheduler;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 
 import java.util.ArrayList;
 import java.util.List;

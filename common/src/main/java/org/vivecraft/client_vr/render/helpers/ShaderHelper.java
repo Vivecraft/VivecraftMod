@@ -463,23 +463,23 @@ public class ShaderHelper {
             (float) MC.gameRenderer.mainRenderTarget.width / (float) MC.gameRenderer.mainRenderTarget.height;
         float guiAspect = (float) GuiHandler.GUI_FRAMEBUFFER.width / (float) GuiHandler.GUI_FRAMEBUFFER.height;
 
-        float xMin = 0;
-        float yMin = 0;
+        float xMin = -1.0F;
+        float yMin = -1.0F;
         float xMax = 1.0F;
         float yMax = 1.0F;
 
         if (mirrorAspect > guiAspect) {
             // mirror is wider than the gui
             // limit the width, so the complete height is filled
-            float aspect = (guiAspect / mirrorAspect) * 0.5F;
+            float aspect = guiAspect / mirrorAspect;
 
-            xMin = 0.5F - aspect;
-            xMax = 0.5F + aspect;
+            xMin = -aspect;
+            xMax = aspect;
         } else {
             // mirror is taller than the gui
             // limit the height, so the complete width is filled
             // and shift the gui to the bottom
-            yMax = (mirrorAspect / guiAspect);
+            yMax = (mirrorAspect / guiAspect) * 2F - 1F;
         }
 
         int x = (int) (xMin * MC.gameRenderer.mainRenderTarget.width);

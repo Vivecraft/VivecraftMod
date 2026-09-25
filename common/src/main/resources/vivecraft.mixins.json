@@ -51,6 +51,7 @@
     "client_vr.blaze3d.vulkan.VulkanDeviceVRMixin",
     "client_vr.blaze3d.vulkan.VulkanInstanceVRMixin",
     "client_vr.blaze3d.vulkan.VulkanPhysicalDeviceVRMixin",
+    "client_vr.blaze3d.vulkan.VulkanQueueVRMixin",
     "client_vr.gui.EditBoxVRMixin",
     "client_vr.gui.GuiVRMixin",
     "client_vr.gui.HudVRMixin",

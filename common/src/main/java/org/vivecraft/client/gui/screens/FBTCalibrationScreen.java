@@ -15,7 +15,7 @@ import org.vivecraft.client.gui.pip.state.GuiFBTPlayerState;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mixin.client.gui.GuiGraphicsExtractorAccessor;

@@ -10,7 +10,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.interact_modules.DebugRenderModule;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 import java.util.ArrayList;

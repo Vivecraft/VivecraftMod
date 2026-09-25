@@ -21,6 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.api.client.data.CloseKeyboardContext;
+import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -28,10 +29,10 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.control.ControllerType;
+import org.vivecraft.client_vr.provider.control.HandedKeyBinding;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.renderstates.ScreenRenderState;
 import org.vivecraft.client_vr.settings.AutoCalibration;
@@ -548,7 +549,7 @@ public class GuiHandler {
                         direction = DH.vrPlayer.vrdata_world_render.getController(0).getDirection();
                         guirot = guirot.mul(DH.vr.getAimRotation(0), guirot);
                     } else {
-                        guirot = guirot.mul(DH.vr.hmdRotation, guirot);
+                        guirot = guirot.mul(DH.vr.getEyeRotation(RenderPass.CENTER), guirot);
                     }
 
                     guipos = new Vec3(
