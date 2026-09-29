@@ -318,9 +318,17 @@ public class MenuWorldRenderer {
             GpuBufferSlice terrainTransformUbo = RenderSystem.getDynamicUniforms()
                 .writeTerrainTransform(RenderSystem.getModelViewMatrixCopy(), blockAtlas.getWidth(0),
                     blockAtlas.getHeight(0));
-            GpuBufferSlice chunkSection = RenderSystem.getDynamicUniforms()
-                .writeChunkSections(new DynamicGpuData.ChunkSectionInfo(0, 0, 0, 1.0F))[0];
 
+            boolean multiDraw = this.mc.levelRenderer.isChunkRenderingUsingMultiDrawIndirect();
+
+            GpuBufferSlice chunkSection;
+            if (multiDraw) {
+                chunkSection = RenderSystem.getDynamicUniforms()
+                    .writeChunkSectionsInstanced(List.of(new DynamicGpuData.ChunkSectionInfo(0, 0, 0, 1.0F)));
+            } else {
+                chunkSection = RenderSystem.getDynamicUniforms()
+                    .writeChunkSections(new DynamicGpuData.ChunkSectionInfo(0, 0, 0, 1.0F))[0];
+            }
 
             for (Pair<Integer, GpuBuffer> buffer : buffers) {
                 RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(
@@ -333,9 +341,13 @@ public class MenuWorldRenderer {
                     this.mc.gameRenderer.mainRenderTarget.getDepthTextureView(), OptionalDouble.empty()))
                 {
                     renderPass.setUniform("TerrainUniform", terrainTransformUbo);
-                    renderPass.setUniform("ChunkSection", chunkSection);
+                    if (multiDraw) {
+                        renderPass.setVertexBuffer(1, chunkSection);
+                    } else {
+                        renderPass.setUniform("ChunkSection", chunkSection);
+                    }
                     RenderSystem.bindDefaultUniforms(renderPass);
-                    renderPass.setPipeline(RenderSystem.getCompiledPipeline(layer.pipeline(false)));
+                    renderPass.setPipeline(RenderSystem.getCompiledPipeline(layer.pipeline(multiDraw)));
                     renderPass.setUniform("Sampler2", this.lightMapView,
                         RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
                     renderPass.setUniform("Sampler0",
