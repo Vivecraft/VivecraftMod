@@ -227,7 +227,7 @@ public class VivecraftItemRendering {
                 poseStack.translate(up.x(), up.y(), up.z());
 
                 // align with controller
-                preRotation = new Quaternionf().lookAlong(aim, forward).conjugate();
+                preRotation = new Quaternionf().lookAlong(aim.mul(-1f, new Vector3f()), forward).conjugate();
 
                 // bow model adjustment
                 rotation = Axis.YP.rotationDegrees(180.0F);
