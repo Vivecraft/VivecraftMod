@@ -33,6 +33,7 @@ import org.vivecraft.common.network.packet.s2c.*;
 import org.vivecraft.data.ViveItems;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.mixin.server.TrackedEntityAccessor;
+import org.vivecraft.mixin.server.level.ServerPlayerGameModeAccessor;
 import org.vivecraft.mod_compat_vr.ReplayHelper;
 import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
@@ -290,7 +291,9 @@ public class ServerNetworking {
             case ROOMSCALE_ATTACK -> {
                 RoomscaleAttackPayloadC2S roomscaleAttack = (RoomscaleAttackPayloadC2S) c2sPayload;
                 vivePlayer.isHitRoomscale = roomscaleAttack.isRoomscaleAttack();
-                if (!vivePlayer.isHitRoomscale) {
+                if (!vivePlayer.isHitRoomscale &&
+                    ((ServerPlayerGameModeAccessor) player.gameMode).getIsDestroyingBlock())
+                {
                     vivePlayer.roomscaleHitCount += roomscaleAttack.hitsMade();
                 }
             }

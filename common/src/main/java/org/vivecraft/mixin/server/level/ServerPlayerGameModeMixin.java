@@ -59,8 +59,9 @@ public abstract class ServerPlayerGameModeMixin {
             ticksSpentDestroying = vivePlayer.roomscaleHitCount;
             // make sure this doesn't go over 1, or the progress will disappear
             float prog = blockState.getDestroyProgress(this.player, this.player.level(), delayedDestroyPos);
-            // -2, because incrementDestroyProgress checks +1
-            ticksSpentDestroying = Math.clamp(ticksSpentDestroying, 1, (int) (1.0F / prog) - 2);
+            // max -2, because incrementDestroyProgress checks +1
+            // -1 since we want to use he actual client sent progress, not "next" tick
+            ticksSpentDestroying = Math.clamp(ticksSpentDestroying - 1, 1, (int) (1.0F / prog) - 2);
         }
 
         return original.call(instance, blockState, delayedDestroyPos, ticksSpentDestroying);
@@ -86,7 +87,7 @@ public abstract class ServerPlayerGameModeMixin {
         }
     }
 
-    @Inject(method = "abortDestroyBlock", at = @At("TAIL"))
+    @Inject(method = "abortDestroyBlock", at = @At("RETURN"))
     private void vivecraft$resetProgressAbort(CallbackInfo ci) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         if (vivePlayer != null) {
@@ -94,7 +95,7 @@ public abstract class ServerPlayerGameModeMixin {
         }
     }
 
-    @Inject(method = "destroyBlock", at = @At("TAIL"))
+    @Inject(method = "destroyBlock", at = @At("RETURN"))
     private void vivecraft$resetProgressDestroy(CallbackInfoReturnable<Boolean> cir) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         if (vivePlayer != null) {
@@ -102,7 +103,7 @@ public abstract class ServerPlayerGameModeMixin {
         }
     }
 
-    @Inject(method = "handleBlockBreakAction", at = @At("TAIL"))
+    @Inject(method = "handleBlockBreakAction", at = @At("RETURN"))
     private void vivecraft$setRoomscaleHit(CallbackInfo ci) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         if (vivePlayer != null) {

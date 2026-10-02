@@ -133,6 +133,7 @@
     "server.ServerGamePacketListenerImplMixin",
     "server.ServerPlayerMixin",
     "server.TrackedEntityAccessor",
+    "server.level.ServerPlayerGameModeAccessor",
     "server.level.ServerPlayerGameModeMixin",
     "server.players.PlayerListMixin",
     "world.entity.InventoryMixin",
