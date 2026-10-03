@@ -39,7 +39,7 @@ public abstract class ServerPlayerGameModeMixin {
     private boolean isDestroyingBlock;
 
     @Unique
-    private int vivecraft$lastRoomscaleAttackHitUpdate = 0;
+    private float vivecraft$lastRoomscaleHitProgress = 0F;
 
     @Unique
     private int vivecraft$lastRoomscaleAttackParticlesRemaining = 0;
@@ -56,12 +56,12 @@ public abstract class ServerPlayerGameModeMixin {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         // doesn't matter if they are currently in vr, if they hit roomscale do not update on tick
         if (vivePlayer != null && this.vivecraft$lastHitRoomscale) {
-            ticksSpentDestroying = vivePlayer.roomscaleHitCount;
             // make sure this doesn't go over 1, or the progress will disappear
             float prog = blockState.getDestroyProgress(this.player, this.player.level(), delayedDestroyPos);
             // max -2, because incrementDestroyProgress checks +1
             // -1 since we want to use he actual client sent progress, not "next" tick
-            ticksSpentDestroying = Math.clamp(ticksSpentDestroying - 1, 1, (int) (1.0F / prog) - 2);
+            ticksSpentDestroying = Math.clamp((int) (vivePlayer.roomscaleHitProgress / prog) - 1, 1,
+                (int) (1.0F / prog) - 2);
         }
 
         return original.call(instance, blockState, delayedDestroyPos, ticksSpentDestroying);
@@ -75,8 +75,8 @@ public abstract class ServerPlayerGameModeMixin {
         // doesn't matter if they are currently in vr, if they hit roomscale do not send updates on tick
         if (vivePlayer == null || !this.vivecraft$lastHitRoomscale) {
             original.call(instance, source, event, pos, direction);
-        } else if (vivePlayer.roomscaleHitCount != this.vivecraft$lastRoomscaleAttackHitUpdate) {
-            this.vivecraft$lastRoomscaleAttackHitUpdate = vivePlayer.roomscaleHitCount;
+        } else if (vivePlayer.roomscaleHitProgress != this.vivecraft$lastRoomscaleHitProgress) {
+            this.vivecraft$lastRoomscaleHitProgress = vivePlayer.roomscaleHitProgress;
             // send the sound on first tick after hit
             original.call(instance, source, LevelEvent.PARTICLES_AND_SOUND_DESTROY_PROGRESS, pos, direction);
             this.vivecraft$lastRoomscaleAttackParticlesRemaining = 3;
@@ -91,7 +91,7 @@ public abstract class ServerPlayerGameModeMixin {
     private void vivecraft$resetProgressAbort(CallbackInfo ci) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         if (vivePlayer != null) {
-            vivePlayer.roomscaleHitCount = 0;
+            vivePlayer.roomscaleHitProgress = 0F;
         }
     }
 
@@ -99,7 +99,7 @@ public abstract class ServerPlayerGameModeMixin {
     private void vivecraft$resetProgressDestroy(CallbackInfoReturnable<Boolean> cir) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         if (vivePlayer != null) {
-            vivePlayer.roomscaleHitCount = 0;
+            vivePlayer.roomscaleHitProgress = 0F;
         }
     }
 
@@ -109,7 +109,7 @@ public abstract class ServerPlayerGameModeMixin {
         if (vivePlayer != null) {
             this.vivecraft$lastHitRoomscale = this.isDestroyingBlock && vivePlayer.isVR() && vivePlayer.isHitRoomscale;
             if (!this.vivecraft$lastHitRoomscale) {
-                vivePlayer.roomscaleHitCount = 0;
+                vivePlayer.roomscaleHitProgress = 0F;
             }
         }
     }

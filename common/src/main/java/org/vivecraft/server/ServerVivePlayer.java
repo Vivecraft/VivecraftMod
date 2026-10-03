@@ -40,8 +40,8 @@ public class ServerVivePlayer {
     public VRBodyPart delayedDestroyBodyPart = null;
     // any block break action that happens while this is true, is treated as a roomscale hit
     public boolean isHitRoomscale = false;
-    // keeps track of ticks worth of attacks made in this roomscale hit streak
-    public int roomscaleHitCount = 0;
+    // keeps track of block breaking progress made in this roomscale hit streak
+    public float roomscaleHitProgress = 0F;
     public boolean useBodyPartForAim = false;
     public boolean crawling;
     // if the player has VR active

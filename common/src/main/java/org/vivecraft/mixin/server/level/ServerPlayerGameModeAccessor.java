@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.server.level;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -8,4 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface ServerPlayerGameModeAccessor {
     @Accessor
     boolean getIsDestroyingBlock();
+
+    @Accessor
+    BlockPos getDestroyPos();
 }

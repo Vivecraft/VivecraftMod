@@ -1,6 +1,7 @@
 package org.vivecraft.server;
 
 import net.minecraft.IdentifierException;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vivecraft.Xplat;
@@ -294,7 +296,10 @@ public class ServerNetworking {
                 if (!vivePlayer.isHitRoomscale &&
                     ((ServerPlayerGameModeAccessor) player.gameMode).getIsDestroyingBlock())
                 {
-                    vivePlayer.roomscaleHitCount += roomscaleAttack.hitsMade();
+                    BlockPos hitPos = ((ServerPlayerGameModeAccessor) player.gameMode).getDestroyPos();
+                    BlockState hitBlock = player.level().getBlockState(hitPos);
+                    vivePlayer.roomscaleHitProgress +=
+                        roomscaleAttack.hitsMade() * hitBlock.getDestroyProgress(player, player.level(), hitPos);
                 }
             }
             // legacy support
