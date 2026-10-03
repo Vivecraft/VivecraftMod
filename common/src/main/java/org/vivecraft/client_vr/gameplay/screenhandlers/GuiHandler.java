@@ -621,7 +621,7 @@ public class GuiHandler {
                         guirot.rotateY(Mth.HALF_PI * side);
                     }
                 }
-                if (forceGuiToHUD) {
+                if (forceGuiToHUD && MC.gui.screen() != null) {
                     // convert previously calculated coords to world coords
                     GUI_POS_ROOM = VRPlayer.worldToRoomPos(
                         guipos.add(new Vec3(guirot.transformDirection(guilocal, new Vector3f()))),
