@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.profiling.Profiler;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -143,12 +144,19 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     {
         if (RenderPassType.isVanilla()) return;
 
-        Profiler.get().popPush("interact outline");
+        Profiler.get().push("interact outline");
+
+        Vec3 cameraPos = levelRenderState.cameraRenderState.pos;
 
         BlockOutlineRenderState[] outlines = ((LevelRenderStateExtension) levelRenderState).vivecraft$getInteractOutlineStates();
 
         for (int c = 0; c < 2; c++) {
             if (outlines[c] != null) {
+                poseStack.pushPose();
+                poseStack.translate(
+                    outlines[c].pos().getX() - cameraPos.x,
+                    outlines[c].pos().getY() - cameraPos.y,
+                    outlines[c].pos().getZ() - cameraPos.z);
                 this.submitHitOutline(poseStack,
                     output,
                     RenderTypes.lines(),
@@ -156,8 +164,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
                     0x66FFFFFF,
                     this.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth,
                     outlines[c].isTranslucent());
+                poseStack.popPose();
             }
         }
+        Profiler.get().pop();
     }
 
     @Inject(method = "lambda$addMainPass$0*", at = @At(value = "CONSTANT", args = "stringValue=renderSolidFeatures"))
