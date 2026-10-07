@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.data.VRBodyPart;
@@ -48,23 +49,15 @@ public abstract class ServerPlayerGameModeMixin {
     // remember if the last block break action was done with roomscale, to send break updates correctly to clients
     private boolean vivecraft$lastHitRoomscale;
 
-    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;incrementDestroyProgress(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;I)F", ordinal = 1))
-    private float vivecraft$noUpdateForRoomscaleProgress(
-        ServerPlayerGameMode instance, BlockState blockState, BlockPos delayedDestroyPos, int ticksSpentDestroying,
-        Operation<Float> original)
-    {
+    @ModifyVariable(method = "incrementDestroyProgress", at = @At(value = "STORE", ordinal = 0), ordinal = 1)
+    private int vivecraft$roomscaleProgress(int state) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
-        // doesn't matter if they are currently in vr, if they hit roomscale do not update on tick
+        // doesn't matter if they are currently in vr, if they hit roomscale send that progress
         if (vivePlayer != null && this.vivecraft$lastHitRoomscale) {
-            // make sure this doesn't go over 1, or the progress will disappear
-            float prog = blockState.getDestroyProgress(this.player, this.player.level(), delayedDestroyPos);
-            // max -2, because incrementDestroyProgress checks +1
-            // -1 since we want to use he actual client sent progress, not "next" tick
-            ticksSpentDestroying = Math.clamp((int) (vivePlayer.roomscaleHitProgress / prog) - 1, 1,
-                (int) (1.0F / prog) - 2);
+            return (int) (vivePlayer.roomscaleHitProgress * 10F);
+        } else {
+            return state;
         }
-
-        return original.call(instance, blockState, delayedDestroyPos, ticksSpentDestroying);
     }
 
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;levelEvent(Lnet/minecraft/world/entity/Entity;ILnet/minecraft/core/BlockPos;I)V"))
