@@ -13,8 +13,14 @@ import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.provider.*;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
+import org.vivecraft.client_vr.provider.ControllerTransform;
+import org.vivecraft.client_vr.provider.DeviceSource;
+import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.VRRenderer;
+import org.vivecraft.client_vr.provider.control.ActionType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
+import org.vivecraft.client_vr.provider.control.InputAction;
+import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
@@ -25,7 +31,7 @@ import java.util.List;
 /**
  * MCVR implementation that does not interact with any runtime.
  */
-public class NullVR extends MCVR {
+public class NullVR extends MCVR<InputAction> {
 
     protected static NullVR OME;
 
@@ -87,6 +93,13 @@ public class NullVR extends MCVR {
     }
 
     @Override
+    public InputAction createAction(
+        KeyMapping keyMapping, String requirement, ActionType type, VRInputActionSet actionSetOverride)
+    {
+        return new InputAction(keyMapping, requirement, type, actionSetOverride);
+    }
+
+    @Override
     public String getName() {
         return "nullDriver";
     }
@@ -110,7 +123,10 @@ public class NullVR extends MCVR {
             this.hmdPose.m31(1.62F);
 
             // eye offset, half in each direction
+            this.hmdPoseLeftEye.set(this.hmdPose);
             this.hmdPoseLeftEye.m30(-this.dh.vrSettings.nullvrIPD * 0.5F);
+
+            this.hmdPoseRightEye.set(this.hmdPose);
             this.hmdPoseRightEye.m30(this.dh.vrSettings.nullvrIPD * 0.5F);
 
             this.populateInputActions();
@@ -121,6 +137,9 @@ public class NullVR extends MCVR {
 
         return this.initialized;
     }
+
+    @Override
+    public void handleEvents() {}
 
     @Override
     public void poll(long frameIndex) {
@@ -263,7 +282,7 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public List<Long> getOrigins(VRInputAction action) {
+    public List<Long> getOrigins(InputAction action) {
         return List.of();
     }
 
@@ -275,6 +294,11 @@ public class NullVR extends MCVR {
     @Override
     public boolean isActive() {
         return this.vrActive;
+    }
+
+    @Override
+    public ControllerType getOriginControllerType(long i) {
+        return ControllerType.LEFT;
     }
 
     @Override

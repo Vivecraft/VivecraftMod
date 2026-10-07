@@ -121,6 +121,17 @@ public class VRShaders {
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .build();
 
+    public static final RenderPipeline GAMMA_CORRECTION_PIPELINE = RenderPipeline.builder()
+        .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_gamma"))
+        .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/passthrough_vr"))
+        .withFragmentShader(Identifier.fromNamespaceAndPath("vivecraft", "core/gamma"))
+        .withBindGroupLayout(BLIT_VR_BIND_GROUP)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(
+            new ColorTargetState(Optional.empty(), GpuFormat.RGBA16_UNORM, ColorTargetState.WRITE_COLOR))
+        .build();
+
     public static final RenderPipeline SOLID_ALPHA_PIPELINE = RenderPipeline.builder()
         .withLocation(Identifier.fromNamespaceAndPath("vivecraft", "pipeline/vivecraft_solid_alpha"))
         .withVertexShader(Identifier.fromNamespaceAndPath("vivecraft", "core/black_vr"))

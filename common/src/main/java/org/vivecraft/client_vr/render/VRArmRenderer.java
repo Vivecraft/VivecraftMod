@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.control.ControllerType;
 import org.vivecraft.client_vr.render.rendertypes.VRRenderTypes;
 
 public class VRArmRenderer extends AvatarRenderer<AbstractClientPlayer> {
