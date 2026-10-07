@@ -54,7 +54,8 @@ public abstract class ServerPlayerGameModeMixin {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
         // doesn't matter if they are currently in vr, if they hit roomscale send that progress
         if (vivePlayer != null && this.vivecraft$lastHitRoomscale) {
-            return (int) (vivePlayer.roomscaleHitProgress * 10F);
+            // max of 9, since 1.0 progress removes the break overlay again
+            return Math.min(9, (int) (vivePlayer.roomscaleHitProgress * 10F));
         } else {
             return state;
         }
