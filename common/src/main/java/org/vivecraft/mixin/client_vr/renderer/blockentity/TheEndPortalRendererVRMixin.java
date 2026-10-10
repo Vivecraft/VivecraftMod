@@ -12,6 +12,6 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 public class TheEndPortalRendererVRMixin {
     @ModifyExpressionValue(method = "submit(Lnet/minecraft/client/renderer/blockentity/state/EndPortalRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;endPortal()Lnet/minecraft/client/renderer/rendertype/RenderType;"))
     private RenderType vivecraft$VRShaderOverride(RenderType renderType) {
-        return RenderPassType.isVanilla() ? renderType : VRRenderTypes.endGateWayVR();
+        return RenderPassType.isVanilla() ? renderType : VRRenderTypes.endPortalVR();
     }
 }
