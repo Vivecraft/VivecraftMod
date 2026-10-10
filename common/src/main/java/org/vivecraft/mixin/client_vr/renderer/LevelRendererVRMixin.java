@@ -118,7 +118,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
                     outlines[c].pos().getZ() - cameraPos.z);
                 this.submitHitOutline(poseStack,
                     output,
-                    RenderTypes.lines(),
+                    this.gameRenderer.useImprovedTransparency() ? RenderTypes.linesTranslucentNoDepthWrite() :
+                        RenderTypes.linesTranslucent(),
                     outlines[c],
                     0x66FFFFFF,
                     this.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth,
