@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import org.vivecraft.client.gui.framework.screens.TwoHandedScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -42,6 +43,22 @@ public class GuiRadial extends TwoHandedScreen {
                 .ifPresent(keymapping -> {
                     VRInputAction vrinputaction = MCVR.get().getInputAction(this.arr[index]);
                     String label = I18n.get(keymapping.getName());
+					// show the item in hotbar slot keybinds instead of "Hotbar Slot N"
+					String name = keymapping.getName();
+					if (this.dh.vrSettings.radialShowItems && name.startsWith("key.hotbar.") &&
+						this.minecraft.player != null)
+					{
+						try {
+							int slot = Integer.parseInt(name.substring("key.hotbar.".length())) - 1;
+							if (slot < 0 || slot > 8) throw new NumberFormatException();
+							ItemStack stack = this.minecraft.player.getInventory().getItem(slot);
+							label = (slot + 1) + ": " + (stack.isEmpty() ? I18n.get("vivecraft.gui.radial.empty") :
+								stack.getHoverName().getString() +
+									(stack.getCount() > 1 ? " x" + stack.getCount() : ""));
+						} catch (NumberFormatException ignored) {
+							// not a numbered hotbar key, keep the default label
+						}
+					}
                     if (vrinputaction != null &&
                         (vrinputaction.keyBinding.isDown() || MethodHolder.isKeyDown(vrinputaction.keyBinding.key)))
                     {

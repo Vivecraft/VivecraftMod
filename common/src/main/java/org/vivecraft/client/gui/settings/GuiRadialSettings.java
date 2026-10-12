@@ -8,7 +8,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 public class GuiRadialSettings extends GuiVROptionsBase {
     private static final VROptionEntry[] SETTINGS = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.RADIAL_MODE_HOLD),
-        new VROptionEntry(VRSettings.VrOptions.RADIAL_REPEAT)
+        new VROptionEntry(VRSettings.VrOptions.RADIAL_REPEAT),
+        new VROptionEntry(VRSettings.VrOptions.RADIAL_SHOW_ITEMS)
     };
 
     public GuiRadialSettings(Screen lastScreen) {
