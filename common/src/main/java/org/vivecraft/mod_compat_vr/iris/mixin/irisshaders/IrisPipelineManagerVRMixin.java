@@ -32,9 +32,6 @@ import java.util.function.Function;
 public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Shadow
-    private void resetTextureState() {}
-
-    @Shadow
     private WorldRenderingPipeline pipeline;
 
     @Final
@@ -176,7 +173,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
         this.vivecraft$vrPipelinesPerDimension.forEach((dimID, map) -> {
             map.forEach((renderPass, pipeline) -> {
                 VRSettings.LOGGER.info("Vivecraft: Destroying VR pipeline {}", renderPass);
-                resetTextureState();
+                IrisHelper.resetTextureState(this);
                 pipeline.destroy();
             });
             map.clear();

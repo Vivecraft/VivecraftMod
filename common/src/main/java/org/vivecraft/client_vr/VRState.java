@@ -185,10 +185,8 @@ public class VRState {
             dh.vrSettings.vrEnabled = false;
             dh.vrSettings.saveOptions();
 
-            // fixes an issue with DH shaders where the depth texture gets stuck
-            if (Xloader.INSTANCE.isModLoaded("distanthorizons")) {
-                ShadersHelper.maybeReloadShaders();
-            }
+            // reload shaders when disabling, to free the vr pipelines
+            ShadersHelper.maybeReloadShaders();
 
             if (ClientDataHolderVR.getInstance().vrSettings.fullReloadOnInit) {
                 // do a full reload

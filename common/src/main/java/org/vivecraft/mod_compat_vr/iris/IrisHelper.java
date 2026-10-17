@@ -24,6 +24,9 @@ public class IrisHelper {
     private static boolean INITIALIZED = false;
     private static boolean INIT_FAILED = false;
 
+    private static boolean CHECKED_FOR_VULKAN = false;
+    private static boolean SUPPORTS_VULKAN = false;
+
     private static Method Iris_reload;
     private static Method Iris_getPipelineManager;
     private static Method PipelineManager_getPipeline;
@@ -45,6 +48,13 @@ public class IrisHelper {
     private static Object ShaderKey_TEXTURED_COLOR;
     private static Object ShaderKey_BASIC_COLOR;
 
+    // Iris vulkan resets the texture state differently
+    // pre vulkan support
+    private static Method PipelineManager_resetTextureState;
+    // post vulkan support
+    private static Method Iris_getRenderBackend;
+    private static Method RenderBackend_resetBindings;
+
     // for iris/dh compat
     private static boolean DH_PRESENT = false;
     private static Object dhOverrideInjector;
@@ -64,8 +74,13 @@ public class IrisHelper {
 
     public static boolean isLoaded() {
         return (Xloader.INSTANCE.isModLoaded("iris") || Xloader.INSTANCE.isModLoaded("oculus")) &&
-            // iris disables itself with vulkan
-            GraphicsHelper.INSTANCE instanceof OpenGLHelper;
+            supportsDevice();
+    }
+
+
+    private static boolean supportsDevice() {
+        // iris pre 1.12.0 disables itself with vulkan
+        return GraphicsHelper.INSTANCE instanceof OpenGLHelper || supportsVulkan();
     }
 
     /**
@@ -270,6 +285,31 @@ public class IrisHelper {
         return false;
     }
 
+    public static void resetTextureState(Object pipelineManager) {
+        if (init()) {
+            try {
+                if (PipelineManager_resetTextureState != null) {
+                    PipelineManager_resetTextureState.invoke(pipelineManager);
+                } else {
+                    RenderBackend_resetBindings.invoke(Iris_getRenderBackend.invoke(null));
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                VRSettings.LOGGER.error("Vivecraft: couldn't reset iris textureState:", e);
+            }
+        }
+    }
+
+    private static boolean supportsVulkan() {
+        if (!CHECKED_FOR_VULKAN) {
+            try {
+                Class.forName("net.irisshaders.iris.vulkan.VulkanImage");
+                SUPPORTS_VULKAN = true;
+            } catch (ClassNotFoundException ignore) {}
+            CHECKED_FOR_VULKAN = true;
+        }
+        return SUPPORTS_VULKAN;
+    }
+
     /**
      * initializes all Reflections
      *
@@ -374,6 +414,21 @@ public class IrisHelper {
                 VRSettings.LOGGER.error("Vivecraft: Failed to init iris pipeline compat, falling back to official API.",
                     e);
                 IrisPipelines_assignPipeline = null;
+            }
+
+            try {
+                // pre vulkan support
+                PipelineManager_resetTextureState = pipelineManager.getDeclaredMethod("resetTextureState");
+                PipelineManager_resetTextureState.setAccessible(true);
+            } catch (NoSuchMethodException ignored) {
+                try {
+                    // post vulkan support
+                    Iris_getRenderBackend = iris.getMethod("getRenderBackend");
+                    Class<?> renderBackend = Class.forName("net.irisshaders.iris.backend.RenderBackend");
+                    RenderBackend_resetBindings = renderBackend.getMethod("resetBindings");
+                } catch (ClassNotFoundException | NoSuchMethodException e) {
+                    VRSettings.LOGGER.error("Vivecraft: Failed to initialize Iris vulkan combat", e);
+                }
             }
         } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e) {
             INIT_FAILED = true;
