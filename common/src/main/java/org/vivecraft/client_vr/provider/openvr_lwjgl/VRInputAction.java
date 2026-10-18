@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
@@ -467,6 +468,13 @@ public class VRInputAction {
     private void pressKey() {
         InputConstants.Key key = this.keyBinding.key;
 
+        if (this.keyBinding.getCategory() == KeyMapping.Category.DEBUG) {
+            if (this.keyBinding != Minecraft.getInstance().options.keyDebugModifier) {
+                // also press the debug modifier
+                MCVR.get().getInputAction(Minecraft.getInstance().options.keyDebugModifier).pressBinding();
+            }
+        }
+
         // need to simulate the modifier or the binding wouldn't be pressed
         if (key.getValue() != -1 &&
             (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.INSTANCE.hasKeyModifier(this.keyBinding)))
@@ -494,6 +502,13 @@ public class VRInputAction {
      */
     public void unpressKey() {
         InputConstants.Key key = this.keyBinding.key;
+
+        if (this.keyBinding.getCategory() == KeyMapping.Category.DEBUG) {
+            if (this.keyBinding != Minecraft.getInstance().options.keyDebugModifier) {
+                // also unpress the debug modifier
+                MCVR.get().getInputAction(Minecraft.getInstance().options.keyDebugModifier).unpressBinding(2);
+            }
+        }
 
         if (key.getValue() != -1 &&
             (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.INSTANCE.hasKeyModifier(this.keyBinding)))
