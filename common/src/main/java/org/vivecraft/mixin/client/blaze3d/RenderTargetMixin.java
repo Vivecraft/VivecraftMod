@@ -53,7 +53,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         Supplier<String> labelSupplier, int usageFlags, GpuFormat textureFormat, int width, int height,
         int depthLayers, int mipLevels)
     {
-        return this.vivecraft$mipmaps && !textureFormat.hasDepthAspect() ?
-            Math.max(Mth.log2(this.width), Mth.log2(this.height)) : mipLevels;
+        return this.vivecraft$mipmaps ? Math.max(Mth.log2(this.width), Mth.log2(this.height)) : mipLevels;
     }
 }
