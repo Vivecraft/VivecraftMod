@@ -1,11 +1,10 @@
 package org.vivecraft.client.gui.framework.screens;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.vivecraft.client.VivecraftVRMod;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class KeymappingSelectionScreen extends GuiSelectionListScreen<KeyMapping> {
@@ -18,7 +17,7 @@ public class KeymappingSelectionScreen extends GuiSelectionListScreen<KeyMapping
         Component title, Screen lastScreen, Consumer<KeyMapping> consumer)
     {
         super(title, lastScreen,
-            () -> Arrays.stream(Minecraft.getInstance().options.keyMappings).sorted().toList(),
+            () -> VivecraftVRMod.INSTANCE.getNonHiddenKeybinds().stream().sorted().toList(),
             key -> Component.translatable(key.getName()),
             key -> key.getCategory().id().toLanguageKey("key.category"),
             consumer,

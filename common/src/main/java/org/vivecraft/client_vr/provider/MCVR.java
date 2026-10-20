@@ -511,7 +511,7 @@ public abstract class MCVR {
      * @return found KeyMapping or null if none was found
      */
     protected KeyMapping findKeyBinding(String name) {
-        return Stream.concat(Arrays.stream(this.mc.options.keyMappings), MOD.getHiddenKeyBindings().stream())
+        return Stream.concat(MOD.getNonHiddenKeybinds().stream(), MOD.getHiddenKeyBindings().stream())
             .filter((kb) -> name.equals(kb.getName())).findFirst().orElse(null);
     }
 
@@ -1155,7 +1155,7 @@ public abstract class MCVR {
         Map<String, ActionParams> actionParams = this.getSpecialActionParams();
 
         // iterate over all minecraft keys, and our hidden keys
-        for (KeyMapping keyMapping : Stream.concat(Arrays.stream(this.mc.options.keyMappings),
+        for (KeyMapping keyMapping : Stream.concat(MOD.getNonHiddenKeybinds().stream(),
             MOD.getHiddenKeyBindings().stream()).toList()) {
             ActionParams params = actionParams.getOrDefault(keyMapping.getName(), ActionParams.DEFAULT);
             VRInputAction action = new VRInputAction(keyMapping, params.requirement(), params.type(),

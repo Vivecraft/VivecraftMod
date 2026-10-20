@@ -5,13 +5,12 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.framework.screens.TwoHandedScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
-
-import java.util.Arrays;
 
 public class GuiRadial extends TwoHandedScreen {
     private boolean isShift = false;
@@ -36,7 +35,7 @@ public class GuiRadial extends TwoHandedScreen {
 
             String current = this.arr[i];
             int index = i;
-            Arrays.stream(this.minecraft.options.keyMappings)
+            VivecraftVRMod.INSTANCE.getNonHiddenKeybinds().stream()
                 .filter(keymapping -> keymapping.getName().equalsIgnoreCase(current))
                 .findFirst()
                 .ifPresent(keymapping -> {

@@ -1,5 +1,6 @@
 package org.vivecraft.client;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
@@ -26,6 +27,9 @@ public class VivecraftVRMod {
 
     // key binds that are needed internally, but are not required to be set by the user
     private Set<KeyMapping> hiddenKeyBindingSet;
+
+    // dummy keybinds that activate hardcoded vanilla debug features
+    private Set<KeyMapping> vanillaDebugBindingSet;
 
     private Set<KeyMapping> vanillaBindingSet;
 
@@ -129,8 +133,27 @@ public class VivecraftVRMod {
         SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MISC);
     public final HandedKeyBinding keyVRInteract = new HandedKeyBinding("vivecraft.key.vrInteract",
         SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.GAMEPLAY);
-    public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", SDLScancode.SDL_SCANCODE_UNKNOWN,
-        KeyMapping.Category.MOVEMENT);
+    public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout",
+        SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
+
+    // vanilla debug keys that are not rebindable
+    public final KeyMapping keyChunkSectionPaths = new KeyMapping("vivecraft.key.vanillaChunkSectionPaths",
+        SDLScancode.SDL_SCANCODE_E, KeyMapping.Category.DEBUG);
+    public final KeyMapping keyToggleFog = new KeyMapping("vivecraft.key.vanillaDebugToggleFog",
+        SDLScancode.SDL_SCANCODE_F, KeyMapping.Category.DEBUG);
+    public final KeyMapping keySmartCull = new KeyMapping("vivecraft.key.vanillaDebugSmartCull",
+        SDLScancode.SDL_SCANCODE_L, KeyMapping.Category.DEBUG);
+    public final KeyMapping keyMultiDraw = new KeyMapping("vivecraft.key.vanillaDebugMultiDraw",
+        SDLScancode.SDL_SCANCODE_M, KeyMapping.Category.DEBUG);
+    public final KeyMapping keyChunkSectionOctree = new KeyMapping("vivecraft.key.vanillaDebugChunkSectionOctree",
+        SDLScancode.SDL_SCANCODE_O, KeyMapping.Category.DEBUG);
+    public final KeyMapping keyCaptureFrustum = new KeyMapping("vivecraft.key.vanillaDebugCaptureFrustum",
+        SDLScancode.SDL_SCANCODE_U, KeyMapping.Category.DEBUG);
+    public final KeyMapping keyChunkSectionVisibility = new KeyMapping(
+        "vivecraft.key.vanillaDebugChunkSectionVisibility",
+        SDLScancode.SDL_SCANCODE_V, KeyMapping.Category.DEBUG);
+    public final KeyMapping keyWireFrame = new KeyMapping("vivecraft.key.vanillaDebugWireFrame",
+        SDLScancode.SDL_SCANCODE_W, KeyMapping.Category.DEBUG);
 
     /**
      * initializes the Vivecraft KeyMapping sets, if they aren't set yet
@@ -140,6 +163,7 @@ public class VivecraftVRMod {
             this.userKeyBindingSet = new LinkedHashSet<>();
             this.hiddenKeyBindingSet = new LinkedHashSet<>();
             this.allKeyBindingSet = new LinkedHashSet<>();
+            this.vanillaDebugBindingSet = new HashSet<>();
 
             this.userKeyBindingSet.add(this.keyRotateLeft);
             this.userKeyBindingSet.add(this.keyRotateRight);
@@ -199,6 +223,18 @@ public class VivecraftVRMod {
             this.hiddenKeyBindingSet.add(this.keyVRInteract);
             this.hiddenKeyBindingSet.add(this.keyWalkabout);
 
+            if (SharedConstants.DEBUG_HOTKEYS) {
+                // add keybinds for the vanilla debug keys
+                this.vanillaDebugBindingSet.add(this.keyChunkSectionPaths);
+                this.vanillaDebugBindingSet.add(this.keyToggleFog);
+                this.vanillaDebugBindingSet.add(this.keySmartCull);
+                this.vanillaDebugBindingSet.add(this.keyMultiDraw);
+                this.vanillaDebugBindingSet.add(this.keyChunkSectionOctree);
+                this.vanillaDebugBindingSet.add(this.keyCaptureFrustum);
+                this.vanillaDebugBindingSet.add(this.keyChunkSectionVisibility);
+                this.vanillaDebugBindingSet.add(this.keyWireFrame);
+            }
+
             this.allKeyBindingSet.addAll(this.userKeyBindingSet);
             this.allKeyBindingSet.addAll(this.hiddenKeyBindingSet);
         }
@@ -218,6 +254,16 @@ public class VivecraftVRMod {
     public Set<KeyMapping> getHiddenKeyBindings() {
         setupKeybindingSets();
         return this.hiddenKeyBindingSet;
+    }
+
+    /**
+     * @return a set with containing user changeable keybinds and the hardcoded debug keybinds
+     */
+    public Set<KeyMapping> getNonHiddenKeybinds() {
+        setupKeybindingSets();
+        Set<KeyMapping> combindSet = new HashSet<>(this.vanillaDebugBindingSet);
+        combindSet.addAll(Arrays.asList(Minecraft.getInstance().options.keyMappings));
+        return combindSet;
     }
 
     /**

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.ArrayUtils;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.framework.VROptionLayout;
 import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.screens.KeymappingSelectionScreen;
@@ -14,7 +15,6 @@ import org.vivecraft.client.gui.framework.widgets.GuiVROptionButton;
 import org.vivecraft.client_vr.gui.GuiRadial;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 public class GuiRadialConfiguration extends GuiVROptionsBase {
@@ -83,7 +83,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
 
             String current = this.arr[i];
             int index = i;
-            Optional<KeyMapping> keyMapping = Arrays.stream(this.minecraft.options.keyMappings)
+            Optional<KeyMapping> keyMapping = VivecraftVRMod.INSTANCE.getNonHiddenKeybinds().stream()
                 .filter(keymapping -> keymapping.getName().equalsIgnoreCase(current))
                 .findFirst();
 

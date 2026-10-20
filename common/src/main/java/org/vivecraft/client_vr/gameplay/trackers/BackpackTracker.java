@@ -13,8 +13,6 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.common.utils.MathUtils;
 
-import java.util.Arrays;
-
 public class BackpackTracker implements Tracker {
     public boolean[] wasIn = new boolean[2];
     private final Minecraft mc;
@@ -90,7 +88,7 @@ public class BackpackTracker implements Tracker {
     private void pressKeybind(int c) {
         String keybind =
             c == 0 ? this.dh.vrSettings.backpackMainHandKeybind : this.dh.vrSettings.backpackOffhandKeybind;
-        Arrays.stream(this.mc.options.keyMappings)
+        VivecraftVRMod.INSTANCE.getNonHiddenKeybinds().stream()
             .filter(keymapping -> keymapping.getName().equalsIgnoreCase(keybind))
             .findFirst()
             .ifPresent(keymapping -> {

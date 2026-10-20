@@ -7,6 +7,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.lwjgl.sdl.SDLScancode;
 import org.vivecraft.Xplat;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -476,7 +477,7 @@ public class VRInputAction {
         }
 
         // need to simulate the modifier or the binding wouldn't be pressed
-        if (key.getValue() != -1 &&
+        if (key.getValue() != SDLScancode.SDL_SCANCODE_UNKNOWN &&
             (!VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding) || Xplat.INSTANCE.hasKeyModifier(this.keyBinding)))
         {
             if (key.getType() == InputConstants.Type.KEYBOARD) {
