@@ -137,7 +137,7 @@ public class VivecraftVRMod {
         SDLScancode.SDL_SCANCODE_UNKNOWN, KeyMapping.Category.MOVEMENT);
 
     // vanilla debug keys that are not rebindable
-    public final KeyMapping keyChunkSectionPaths = new KeyMapping("vivecraft.key.vanillaChunkSectionPaths",
+    public final KeyMapping keyChunkSectionPaths = new KeyMapping("vivecraft.key.vanillaDebugChunkSectionPaths",
         SDLScancode.SDL_SCANCODE_E, KeyMapping.Category.DEBUG);
     public final KeyMapping keyToggleFog = new KeyMapping("vivecraft.key.vanillaDebugToggleFog",
         SDLScancode.SDL_SCANCODE_F, KeyMapping.Category.DEBUG);
