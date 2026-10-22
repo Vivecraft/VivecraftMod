@@ -735,7 +735,7 @@ public class MCOpenVR extends MCVR {
         }
 
         // write defaults to disk
-        String rev = this.dh.vrSettings.reverseHands ? "_reversed" : "";
+        String rev = this.dh.vrSettings.reverseHands && this.dh.vrSettings.swapControls ? "_reversed" : "";
         // controllers
         FileUtils.unpackAsset("input/vive_defaults" + rev + ".json", "openvr/input/vive_defaults.json", false);
         FileUtils.unpackAsset("input/oculus_defaults" + rev + ".json", "openvr/input/oculus_defaults.json", false);

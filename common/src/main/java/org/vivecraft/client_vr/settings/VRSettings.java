@@ -273,6 +273,8 @@ public class VRSettings {
     // Control
     @SettingField(VrOptions.REVERSE_HANDS)
     public boolean reverseHands = false;
+    @SettingField(VrOptions.SWAP_CONTROLS)
+    public boolean swapControls = true;
     @SettingField(VrOptions.REVERSE_BOW)
     public boolean reverseShootingEye = false;
     @SettingField(VrOptions.AIM_DEVICE)
@@ -2032,6 +2034,7 @@ public class VRSettings {
         ALLOW_CRAWLING(OptionType.BOOLEAN), // Roomscale Crawling
         LIMIT_TELEPORT(OptionType.BOOLEAN), // Limit in Survival
         REVERSE_HANDS(OptionType.BOOLEAN), // Reverse Hands
+        SWAP_CONTROLS(OptionType.BOOLEAN),
         REVERSE_BOW(OptionType.BOOLEAN), // Reverses Roomscale Bow Aiming
         AIM_DEVICE, // what device to use, to aim the crosshair with
         STENCIL_ON(OptionType.BOOLEAN) { // Use Eye Stencil
